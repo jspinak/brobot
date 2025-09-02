@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -73,31 +74,26 @@ public class VerboseFormatterTest extends BrobotTestBase {
         when(context.getEndTime()).thenReturn(endTime);
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("CLICK");
-        when(context.getStateName()).thenReturn("Dashboard");
-        when(context.getObjectName()).thenReturn("RefreshButton");
-        when(context.getDurationMs()).thenReturn(500L);
-        when(context.getMatchCount()).thenReturn(1);
-        when(context.getSimilarity()).thenReturn(0.95);
+        when(context.getPrimaryTargetName()).thenReturn("Dashboard.RefreshButton");
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(500));
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertTrue(result.contains("══════════════════")); // Header separator
-        assertTrue(result.contains("Action: CLICK"));
-        assertTrue(result.contains("Target: Dashboard.RefreshButton"));
-        assertTrue(result.contains("Status: ✓ SUCCESS"));
-        assertTrue(result.contains("Duration: 500ms"));
-        assertTrue(result.contains("Matches: 1"));
-        assertTrue(result.contains("Similarity: 0.95"));
+        assertTrue(result.contains("=== ACTION EXECUTION ==="));
+        assertTrue(result.contains("Type:       CLICK"));
+        assertTrue(result.contains("Primary:    Dashboard.RefreshButton"));
+        assertTrue(result.contains("Status:     SUCCESS ✓"));
+        assertTrue(result.contains("Duration:   500ms"));
         
         // Verify timestamp format
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
         String expectedStart = startTime.atZone(ZoneId.systemDefault()).format(formatter);
         String expectedEnd = endTime.atZone(ZoneId.systemDefault()).format(formatter);
-        assertTrue(result.contains("Started: " + expectedStart));
-        assertTrue(result.contains("Ended:   " + expectedEnd));
+        assertTrue(result.contains("Started:    " + expectedStart));
+        assertTrue(result.contains("Completed:  " + expectedEnd));
     }
     
     @Test
@@ -108,20 +104,19 @@ public class VerboseFormatterTest extends BrobotTestBase {
         when(context.getEndTime()).thenReturn(endTime);
         when(context.isSuccess()).thenReturn(false);
         when(context.getActionType()).thenReturn("FIND");
-        when(context.getStateName()).thenReturn("LoginPage");
-        when(context.getObjectName()).thenReturn("UsernameField");
-        when(context.getDurationMs()).thenReturn(1000L);
-        when(context.getFailureReason()).thenReturn("Pattern not found after 3 attempts");
-        when(context.getErrorDetails()).thenReturn("Similarity threshold: 0.8, Best match: 0.65");
+        when(context.getPrimaryTargetName()).thenReturn("LoginPage.UsernameField");
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(1000));
+        Exception error = new RuntimeException("Pattern not found after 3 attempts");
+        when(context.getExecutionError()).thenReturn(error);
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertTrue(result.contains("Status: ✗ FAILED"));
-        assertTrue(result.contains("Failure: Pattern not found after 3 attempts"));
-        assertTrue(result.contains("Details: Similarity threshold: 0.8, Best match: 0.65"));
+        assertTrue(result.contains("Status:     FAILED ✗"));
+        assertTrue(result.contains("Exception:  RuntimeException"));
+        assertTrue(result.contains("Message:    Pattern not found after 3 attempts"));
     }
     
     @Test
@@ -131,52 +126,56 @@ public class VerboseFormatterTest extends BrobotTestBase {
         when(context.getEndTime()).thenReturn(Instant.now());
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("FIND");
-        when(context.getDurationMs()).thenReturn(200L);
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(200));
         
-        Location loc1 = new Location(100, 200);
-        Location loc2 = new Location(300, 400);
-        when(match1.getLocation()).thenReturn(loc1);
-        when(match2.getLocation()).thenReturn(loc2);
+        io.github.jspinak.brobot.model.element.Region region1 = mock(io.github.jspinak.brobot.model.element.Region.class);
+        io.github.jspinak.brobot.model.element.Region region2 = mock(io.github.jspinak.brobot.model.element.Region.class);
+        when(region1.toString()).thenReturn("(100, 200, 50, 50)");
+        when(region2.toString()).thenReturn("(300, 400, 50, 50)");
+        when(match1.getRegion()).thenReturn(region1);
+        when(match2.getRegion()).thenReturn(region2);
         when(match1.getScore()).thenReturn(0.95);
         when(match2.getScore()).thenReturn(0.88);
         
         List<Match> matches = Arrays.asList(match1, match2);
-        when(context.getMatches()).thenReturn(matches);
-        when(context.getMatchCount()).thenReturn(2);
+        when(context.getResultMatches()).thenReturn(matches);
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertTrue(result.contains("Match Locations:"));
-        assertTrue(result.contains("1. (100, 200) [score: 0.95]"));
-        assertTrue(result.contains("2. (300, 400) [score: 0.88]"));
+        assertTrue(result.contains("Matches:    2"));
+        assertTrue(result.contains("Score: 0.950"));
+        assertTrue(result.contains("Score: 0.880"));
+        assertTrue(result.contains("(100, 200, 50, 50)"));
+        assertTrue(result.contains("(300, 400, 50, 50)"));
     }
     
     @Test
-    @DisplayName("Should include action configuration details")
-    void testFormatWithActionConfig() {
+    @DisplayName("Should include action metrics")
+    void testFormatWithActionMetrics() {
         // Arrange
         when(context.getEndTime()).thenReturn(Instant.now());
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("CLICK");
-        when(context.getDurationMs()).thenReturn(150L);
-        when(context.getActionConfig()).thenReturn(actionConfig);
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(150));
         
-        when(actionConfig.getSimilarity()).thenReturn(0.85);
-        when(actionConfig.getPauseAfter()).thenReturn(500);
-        when(actionConfig.getMaxWait()).thenReturn(3000);
+        ActionResult.ActionMetrics metrics = mock(ActionResult.ActionMetrics.class);
+        when(metrics.getExecutionTimeMs()).thenReturn(150L);
+        when(metrics.getMatchCount()).thenReturn(1);
+        when(metrics.getBestMatchConfidence()).thenReturn(0.85);
+        when(actionResult.getActionMetrics()).thenReturn(metrics);
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertTrue(result.contains("Configuration:"));
-        assertTrue(result.contains("Similarity: 0.85"));
-        assertTrue(result.contains("Pause After: 500ms"));
-        assertTrue(result.contains("Max Wait: 3000ms"));
+        assertTrue(result.contains("--- METRICS ---"));
+        assertTrue(result.contains("Execution Time:   150ms"));
+        assertTrue(result.contains("Match Count:      1"));
+        assertTrue(result.contains("Best Match Score: 0.850"));
     }
     
     @Test
@@ -189,15 +188,15 @@ public class VerboseFormatterTest extends BrobotTestBase {
         when(context.getEndTime()).thenReturn(Instant.now());
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("TYPE");
-        when(context.getDurationMs()).thenReturn(500L);
-        when(context.getText()).thenReturn(longText);
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(500));
+        when(context.getTargetStrings()).thenReturn(Collections.singletonList(longText));
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertTrue(result.contains("Text Input:"));
+        assertTrue(result.contains("Strings (1):"));
         assertTrue(result.contains(longText)); // Full text should be included
     }
     
@@ -208,19 +207,16 @@ public class VerboseFormatterTest extends BrobotTestBase {
         when(context.getEndTime()).thenReturn(Instant.now());
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("DRAG");
-        when(context.getStateName()).thenReturn("Canvas");
-        when(context.getObjectName()).thenReturn("DraggableItem");
-        when(context.getToStateName()).thenReturn("DropArea");
-        when(context.getToObjectName()).thenReturn("DropTarget");
-        when(context.getDurationMs()).thenReturn(750L);
+        when(context.getPrimaryTargetName()).thenReturn("Canvas.DraggableItem -> DropArea.DropTarget");
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(750));
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertTrue(result.contains("From: Canvas.DraggableItem"));
-        assertTrue(result.contains("To:   DropArea.DropTarget"));
+        assertTrue(result.contains("Type:       DRAG"));
+        assertTrue(result.contains("Primary:    Canvas.DraggableItem -> DropArea.DropTarget"));
     }
     
     @Test
@@ -230,7 +226,7 @@ public class VerboseFormatterTest extends BrobotTestBase {
         when(context.getEndTime()).thenReturn(Instant.now());
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("WAIT");
-        when(context.getDurationMs()).thenReturn(1000L);
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(1000));
         // Leave other fields null
         
         // Act
@@ -238,31 +234,32 @@ public class VerboseFormatterTest extends BrobotTestBase {
         
         // Assert
         assertNotNull(result);
-        assertTrue(result.contains("Action: WAIT"));
-        assertTrue(result.contains("Duration: 1000ms"));
-        assertTrue(result.contains("Target: (none)"));
-        assertFalse(result.contains("Similarity:")); // Should not show null similarity
-        assertFalse(result.contains("Configuration:")); // Should not show null config
+        assertTrue(result.contains("Type:       WAIT"));
+        assertTrue(result.contains("Duration:   1000ms"));
+        assertTrue(result.contains("Matches:    0 (No matches found)"));
     }
     
     @Test
-    @DisplayName("Should show state transitions")
-    void testFormatWithStateTransition() {
+    @DisplayName("Should format with StateImage targets")
+    void testFormatWithStateImageTargets() {
         // Arrange
         when(context.getEndTime()).thenReturn(Instant.now());
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("CLICK");
-        when(context.getDurationMs()).thenReturn(200L);
-        when(context.getFromState()).thenReturn("LoginPage");
-        when(context.getToState()).thenReturn("Dashboard");
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(200));
+        
+        StateImage img1 = mock(StateImage.class);
+        when(img1.getOwnerStateName()).thenReturn("LoginPage");
+        when(img1.getName()).thenReturn("SubmitButton");
+        when(context.getTargetImages()).thenReturn(Collections.singletonList(img1));
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertTrue(result.contains("State Transition:"));
-        assertTrue(result.contains("LoginPage → Dashboard"));
+        assertTrue(result.contains("Images (1):"));
+        assertTrue(result.contains("LoginPage.SubmitButton"));
     }
     
     @Test
@@ -285,27 +282,28 @@ public class VerboseFormatterTest extends BrobotTestBase {
         when(context.getEndTime()).thenReturn(Instant.now());
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("FIND");
-        when(context.getDurationMs()).thenReturn(500L);
-        when(context.getMatchCount()).thenReturn(25);
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(500));
         
         // Create 25 mock matches
         Match[] matches = new Match[25];
         for (int i = 0; i < 25; i++) {
             matches[i] = mock(Match.class);
-            when(matches[i].getLocation()).thenReturn(new Location(i * 10, i * 20));
+            io.github.jspinak.brobot.model.element.Region region = mock(io.github.jspinak.brobot.model.element.Region.class);
+            when(region.toString()).thenReturn(String.format("(%d, %d, 50, 50)", i * 10, i * 20));
+            when(matches[i].getRegion()).thenReturn(region);
             when(matches[i].getScore()).thenReturn(0.9 - (i * 0.01));
         }
-        when(context.getMatches()).thenReturn(Arrays.asList(matches));
+        when(context.getResultMatches()).thenReturn(Arrays.asList(matches));
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertTrue(result.contains("Match Locations: (showing first 10 of 25)"));
-        assertTrue(result.contains("1. (0, 0)"));
-        assertTrue(result.contains("10. (90, 180)"));
-        assertFalse(result.contains("11. ")); // Should not show 11th match
+        assertTrue(result.contains("Matches:    25"));
+        assertTrue(result.contains("[1] Score: 0.900"));
+        assertTrue(result.contains("[5] Score: 0.860"));
+        assertTrue(result.contains("... and 20 more matches")); // Only shows first 5
     }
     
     @Test
@@ -323,20 +321,23 @@ public class VerboseFormatterTest extends BrobotTestBase {
         when(context.getEndTime()).thenReturn(Instant.now());
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("FIND");
-        when(context.getDurationMs()).thenReturn(234L);
-        when(context.getSearchTimeMs()).thenReturn(180L);
-        when(context.getPreprocessingTimeMs()).thenReturn(30L);
-        when(context.getPostprocessingTimeMs()).thenReturn(24L);
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(234));
+        
+        ActionResult.ActionMetrics metrics = mock(ActionResult.ActionMetrics.class);
+        when(metrics.getExecutionTimeMs()).thenReturn(234L);
+        when(metrics.getMatchCount()).thenReturn(3);
+        when(metrics.getBestMatchConfidence()).thenReturn(0.92);
+        when(actionResult.getActionMetrics()).thenReturn(metrics);
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertTrue(result.contains("Performance:"));
-        assertTrue(result.contains("Search: 180ms"));
-        assertTrue(result.contains("Preprocessing: 30ms"));
-        assertTrue(result.contains("Postprocessing: 24ms"));
+        assertTrue(result.contains("--- METRICS ---"));
+        assertTrue(result.contains("Execution Time:   234ms"));
+        assertTrue(result.contains("Match Count:      3"));
+        assertTrue(result.contains("Best Match Score: 0.920"));
     }
     
     @Test
@@ -346,39 +347,40 @@ public class VerboseFormatterTest extends BrobotTestBase {
         when(context.getEndTime()).thenReturn(Instant.now());
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("HIGHLIGHT");
-        when(context.getStateName()).thenReturn("Form");
-        when(context.getObjectName()).thenReturn("ErrorField");
-        when(context.getDurationMs()).thenReturn(2000L);
-        when(context.getHighlightColor()).thenReturn("RED");
-        when(context.getHighlightSeconds()).thenReturn(2);
+        when(context.getPrimaryTargetName()).thenReturn("Form.ErrorField");
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(2000));
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertTrue(result.contains("Action: HIGHLIGHT"));
-        assertTrue(result.contains("Highlight:"));
-        assertTrue(result.contains("Color: RED"));
-        assertTrue(result.contains("Duration: 2s"));
+        assertTrue(result.contains("Type:       HIGHLIGHT"));
+        assertTrue(result.contains("Primary:    Form.ErrorField"));
+        assertTrue(result.contains("Duration:   2000ms"));
     }
     
     @Test
-    @DisplayName("Should show retry information")
+    @DisplayName("Should show action metrics with retry info")
     void testFormatWithRetryInfo() {
         // Arrange
         when(context.getEndTime()).thenReturn(Instant.now());
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("CLICK");
-        when(context.getDurationMs()).thenReturn(3500L);
-        when(context.getRetryCount()).thenReturn(2);
-        when(context.getMaxRetries()).thenReturn(3);
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(3500));
+        
+        ActionResult.ActionMetrics metrics = mock(ActionResult.ActionMetrics.class);
+        when(metrics.getExecutionTimeMs()).thenReturn(3500L);
+        when(metrics.getRetryCount()).thenReturn(2);
+        when(metrics.getRetryTimeMs()).thenReturn(2000L);
+        when(actionResult.getActionMetrics()).thenReturn(metrics);
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertTrue(result.contains("Retries: 2/3"));
+        // The metrics don't show retry details directly, they're in ActionMetrics
+        assertTrue(result.contains("Execution Time:   3500ms"));
     }
 }

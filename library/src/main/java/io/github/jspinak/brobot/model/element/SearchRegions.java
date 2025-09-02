@@ -174,11 +174,12 @@ public class SearchRegions {
 
     public void addSearchRegions(List<Region> searchRegions) {
         for (Region region : searchRegions) {
-            if (region != null) {
+            if (region != null && !isDuplicateOrContained(region)) {
                 regions.addAll(trimRegion(region));
             }
         }
         regions = RegionUtils.mergeAdjacent(regions);
+        removeDuplicatesAndContained();
     }
 
     /**
@@ -245,6 +246,69 @@ public class SearchRegions {
         this.fixedRegion = other.fixedRegion != null ? new Region(other.fixedRegion) : null;
     }
 
+    /**
+     * Checks if a region is a duplicate of or contained within an existing region.
+     * @param newRegion the region to check
+     * @return true if the region is a duplicate or contained within an existing region
+     */
+    private boolean isDuplicateOrContained(Region newRegion) {
+        for (Region existing : regions) {
+            // Check for exact duplicate
+            if (existing.x() == newRegion.x() && 
+                existing.y() == newRegion.y() && 
+                existing.w() == newRegion.w() && 
+                existing.h() == newRegion.h()) {
+                return true;
+            }
+            // Check if new region is completely contained within existing region
+            if (existing.contains(newRegion)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Removes duplicate regions and regions that are completely contained within other regions.
+     * This ensures that the search regions list contains only unique, non-nested regions.
+     */
+    private void removeDuplicatesAndContained() {
+        List<Region> uniqueRegions = new ArrayList<>();
+        
+        for (int i = 0; i < regions.size(); i++) {
+            Region current = regions.get(i);
+            boolean shouldAdd = true;
+            
+            // Check against all other regions
+            for (int j = 0; j < regions.size(); j++) {
+                if (i == j) continue;
+                Region other = regions.get(j);
+                
+                // If current is contained in another region, don't add it
+                if (other.contains(current)) {
+                    shouldAdd = false;
+                    break;
+                }
+                
+                // If current and other are duplicates, only add the first one
+                if (i > j && 
+                    current.x() == other.x() && 
+                    current.y() == other.y() && 
+                    current.w() == other.w() && 
+                    current.h() == other.h()) {
+                    shouldAdd = false;
+                    break;
+                }
+            }
+            
+            if (shouldAdd) {
+                uniqueRegions.add(current);
+            }
+        }
+        
+        regions = uniqueRegions;
+    }
+    
     /**
      * Newly added regions may overlap with existing regions. To make sure duplicated matches are not returned
      * due to overlapping regions, a newly added region should be trimmed if it overlaps with an existing region.
