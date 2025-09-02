@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.tools.logging.visual;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -12,6 +13,7 @@ import java.awt.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled("Integration test - should be in library-test module. Uses ApplicationContextRunner which creates Spring context.")
 @ExtendWith(MockitoExtension.class)
 public class VisualFeedbackConfigTest extends BrobotTestBase {
     

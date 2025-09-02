@@ -104,7 +104,18 @@ artifacts {
 
 test {
     // Standard Spring Boot test setup
-    useJUnitPlatform()
+    useJUnitPlatform {
+        // Enable tag filtering via command line
+        // Examples:
+        // ./gradlew test -PincludeTags=unit
+        // ./gradlew test -PexcludeTags=slow,e2e
+        if (project.hasProperty('includeTags')) {
+            includeTags project.property('includeTags').split(',')
+        }
+        if (project.hasProperty('excludeTags')) {
+            excludeTags project.property('excludeTags').split(',')
+        }
+    }
     
     // Minimal excludes
     exclude '**/MotionDetectorTest.class'
@@ -113,6 +124,14 @@ test {
     // Enhanced memory and forking settings for 5000+ tests
     maxHeapSize = '4g'
     minHeapSize = '1g'
+    
+    // Parallel execution configuration
+    systemProperty 'junit.jupiter.execution.parallel.enabled', 'true'
+    systemProperty 'junit.jupiter.execution.parallel.mode.default', 'concurrent'
+    systemProperty 'junit.jupiter.execution.parallel.mode.classes.default', 'concurrent'
+    // Dynamic strategy uses available CPU cores
+    systemProperty 'junit.jupiter.execution.parallel.config.strategy', 'dynamic'
+    systemProperty 'junit.jupiter.execution.parallel.config.dynamic.factor', '0.5'
     
     // Fork settings to prevent resource conflicts
     forkEvery = 100  // Create new JVM every 100 tests
@@ -147,6 +166,86 @@ test {
         'brobot.mock': 'true',
         'sikuli.Debug': '0'
     ]
+}
+
+// Custom test task for unit tests only
+task unitTest(type: Test) {
+    description = 'Runs only unit tests'
+    group = 'verification'
+    
+    useJUnitPlatform {
+        includeTags 'unit'
+    }
+    
+    // Unit tests should run faster with more parallelism
+    maxParallelForks = Runtime.runtime.availableProcessors()
+    forkEvery = 50
+    
+    testLogging {
+        events "passed", "skipped", "failed"
+        showStandardStreams = false
+    }
+}
+
+// Custom test task for integration tests only
+task integrationTest(type: Test) {
+    description = 'Runs only integration tests'
+    group = 'verification'
+    
+    useJUnitPlatform {
+        includeTags 'integration'
+    }
+    
+    // Integration tests need more resources
+    maxHeapSize = '2g'
+    maxParallelForks = 2
+    forkEvery = 20
+    
+    testLogging {
+        events "passed", "skipped", "failed"
+        showStandardStreams = true
+    }
+}
+
+// Custom test task for E2E tests only
+task e2eTest(type: Test) {
+    description = 'Runs only E2E tests'
+    group = 'verification'
+    
+    useJUnitPlatform {
+        includeTags 'e2e'
+    }
+    
+    // E2E tests should run sequentially
+    maxParallelForks = 1
+    forkEvery = 0
+    
+    // E2E tests may need display
+    systemProperty 'java.awt.headless', 'false'
+    systemProperty 'brobot.mock', 'false'
+    
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+        showStandardStreams = true
+    }
+}
+
+// Custom test task for fast tests (excludes slow and E2E)
+task fastTest(type: Test) {
+    description = 'Runs all tests except slow and E2E tests'
+    group = 'verification'
+    
+    useJUnitPlatform {
+        excludeTags 'slow', 'e2e'
+    }
+    
+    maxParallelForks = Runtime.runtime.availableProcessors()
+    forkEvery = 100
+    
+    testLogging {
+        events "failed"
+        showStandardStreams = false
+    }
 }
 
 jacocoTestReport {

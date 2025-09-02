@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.tools.logging.console;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -10,6 +11,7 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled("Integration test - should be in library-test module. Uses ApplicationContextRunner which creates Spring context.")
 @ExtendWith(MockitoExtension.class)
 public class ConsoleActionConfigTest extends BrobotTestBase {
     
