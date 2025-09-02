@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // Test task configurations for running categorized tests
 
 // Fast tests - for quick feedback
@@ -209,5 +210,13 @@ Available test categories:
 Run with: ./gradlew test -Dtest.tags="tag1,tag2"
 Or use predefined tasks: fastTests, cvTests, integrationTests, etc.
 """
+=======
+// Test tasks configuration
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+>>>>>>> coverage/agent-2
     }
 }
