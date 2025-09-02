@@ -215,10 +215,7 @@ public class AnnotationProcessorTest extends BrobotTestBase {
             
             io.github.jspinak.brobot.model.state.State mockState1 = mock(io.github.jspinak.brobot.model.state.State.class);
             when(mockState1.getName()).thenReturn("TestState");
-<<<<<<< HEAD
-=======
             when(mockState1.getId()).thenReturn(1L);
->>>>>>> coverage/agent-3
             io.github.jspinak.brobot.model.state.State mockState2 = mock(io.github.jspinak.brobot.model.state.State.class);
             when(mockState2.getName()).thenReturn("SimpleState");
             when(mockState2.getId()).thenReturn(2L);
