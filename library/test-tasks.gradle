@@ -1,0 +1,32 @@
+// Test-related tasks for the library module
+
+task testCore(type: Test) {
+    description = 'Run core service and location tests'
+    group = 'verification'
+    
+    useJUnitPlatform {
+        includeEngines 'junit-jupiter'
+    }
+    
+    filter {
+        includeTestsMatching 'io.github.jspinak.brobot.core.services.*'
+        includeTestsMatching 'io.github.jspinak.brobot.core.location.*'
+    }
+    
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
+}
+
+task testAll(type: Test) {
+    description = 'Run all tests'
+    group = 'verification'
+    
+    useJUnitPlatform()
+    
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
+}
