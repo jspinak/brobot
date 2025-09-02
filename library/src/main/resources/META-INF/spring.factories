@@ -1,9 +1,3 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-io.github.jspinak.brobot.config.BrobotAutoConfiguration,\
-io.github.jspinak.brobot.startup.BrobotStartup,\
-io.github.jspinak.brobot.config.BrobotPhysicalResolutionConfig,\
-io.github.jspinak.brobot.config.WindowsAutoScaleConfig
-
-# Application Context Initializer - runs very early in startup
+# Spring Boot Application Context Initializers
 org.springframework.context.ApplicationContextInitializer=\
-io.github.jspinak.brobot.startup.BrobotApplicationContextInitializer
+  io.github.jspinak.brobot.startup.BrobotApplicationContextInitializer

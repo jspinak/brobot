@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.config;
 
 import org.sikuli.basics.Settings;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import jakarta.annotation.PostConstruct;
 import java.awt.*;
@@ -19,9 +20,22 @@ import java.awt.*;
 @Configuration
 public class BrobotDPIConfiguration {
     
+    @Value("${brobot.dpi.disable-scaling:false}")
+    private boolean disableScaling;
+    
+    @Value("${brobot.dpi.resize-factor:0}")
+    private float configuredResizeFactor;
+    
     @PostConstruct
     public void configureDPIScaling() {
         System.out.println("=== Brobot DPI Configuration ===");
+        
+        // Check if scaling has been disabled in early initialization
+        if (disableScaling || "true".equals(System.getProperty("brobot.dpi.scaling.disabled"))) {
+            System.out.println("DPI scaling is disabled - patterns will match at 1:1");
+            System.out.println("Settings.AlwaysResize: " + Settings.AlwaysResize);
+            return;
+        }
         
         // Check Java version for cross-version compatibility
         configureJavaVersionCompatibility();
@@ -45,8 +59,13 @@ public class BrobotDPIConfiguration {
             System.out.println("Physical resolution: " + physicalWidth + "x" + physicalHeight);
             System.out.println("Logical resolution: " + logicalWidth + "x" + logicalHeight);
             
+            // Check if a resize factor was explicitly configured
+            if (configuredResizeFactor > 0) {
+                Settings.AlwaysResize = configuredResizeFactor;
+                System.out.println("Using configured resize factor: " + configuredResizeFactor);
+            }
             // Check if DPI scaling is active
-            if (physicalWidth > 0 && logicalWidth > 0 && physicalWidth != logicalWidth) {
+            else if (physicalWidth > 0 && logicalWidth > 0 && physicalWidth != logicalWidth) {
                 // Calculate the scaling factor
                 float widthScale = (float) logicalWidth / physicalWidth;
                 float heightScale = (float) logicalHeight / physicalHeight;
@@ -88,15 +107,16 @@ public class BrobotDPIConfiguration {
                     // 150% scaling -> 0.667 resize factor
                     // 175% scaling -> 0.571 resize factor
                     
-                    System.out.println("Running on Windows/WSL - applying default compensation");
-                    System.out.println("If pattern matching is poor, try these values:");
-                    System.out.println("  125% display scaling: Settings.AlwaysResize = 0.8f");
-                    System.out.println("  150% display scaling: Settings.AlwaysResize = 0.667f");
-                    System.out.println("  175% display scaling: Settings.AlwaysResize = 0.571f");
+                    System.out.println("Running on Windows/WSL");
+                    System.out.println("If pattern matching is poor, try setting brobot.dpi.resize-factor:");
+                    System.out.println("  125% display scaling: brobot.dpi.resize-factor=0.8");
+                    System.out.println("  150% display scaling: brobot.dpi.resize-factor=0.667");
+                    System.out.println("  175% display scaling: brobot.dpi.resize-factor=0.571");
+                    System.out.println("  Or disable scaling: brobot.dpi.disable-scaling=true");
                     
-                    // Default to 125% scaling compensation (most common)
-                    Settings.AlwaysResize = 0.8f;
-                    System.out.println("Applied default: Settings.AlwaysResize = 0.8f");
+                    // Don't apply default scaling - let user configure if needed
+                    Settings.AlwaysResize = 1.0f;
+                    System.out.println("No automatic scaling applied: Settings.AlwaysResize = 1.0f");
                 }
             }
             
@@ -110,10 +130,10 @@ public class BrobotDPIConfiguration {
             System.err.println("Error configuring DPI scaling: " + e.getMessage());
             e.printStackTrace();
             
-            // Apply safe default for Windows with common 125% scaling
+            // Don't apply automatic scaling on error
             System.out.println("Applying fallback configuration...");
-            Settings.AlwaysResize = 0.8f;
-            System.out.println("Fallback: Settings.AlwaysResize = 0.8f");
+            Settings.AlwaysResize = 1.0f;
+            System.out.println("Fallback: Settings.AlwaysResize = 1.0f (no scaling)");
         }
     }
     

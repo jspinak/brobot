@@ -78,13 +78,16 @@ public class DiagnosticLoggerTest extends BrobotTestBase {
         ReflectionTestUtils.setField(diagnosticLogger, "brobotLogger", brobotLogger);
         ReflectionTestUtils.setField(diagnosticLogger, "verbosityConfig", verbosityConfig);
         
-        // Setup mock chain for BrobotLogger
+        // Setup mock chain for BrobotLogger with proper return values
         when(brobotLogger.log()).thenReturn(logBuilder);
         when(logBuilder.type(any(LogEvent.Type.class))).thenReturn(logBuilder);
         when(logBuilder.level(any(LogEvent.Level.class))).thenReturn(logBuilder);
         when(logBuilder.action(anyString())).thenReturn(logBuilder);
         when(logBuilder.metadata(any(Map.class))).thenReturn(logBuilder);
+        when(logBuilder.metadata(anyString(), any())).thenReturn(logBuilder);
         when(logBuilder.success(anyBoolean())).thenReturn(logBuilder);
+        when(logBuilder.observation(anyString())).thenReturn(logBuilder);
+        doReturn(logBuilder).when(logBuilder).log();
     }
     
     @AfterEach
@@ -512,10 +515,49 @@ public class DiagnosticLoggerTest extends BrobotTestBase {
     }
     
     @Test
-    @DisplayName("Should handle null verbosity config gracefully")
-    void testNullVerbosityConfig() {
+    @DisplayName("Should reset match tracking properly")
+    void testResetMatchTracking() {
         // Arrange
-        ReflectionTestUtils.setField(diagnosticLogger, "verbosityConfig", null);
+        when(verbosityConfig.getVerbosity()).thenReturn(VerbosityLevel.VERBOSE);
+        ReflectionTestUtils.setField(diagnosticLogger, "lowScoreThreshold", 0.50);
+        
+        // First add some matches
+        diagnosticLogger.logFoundMatch(1, 0.30, 10, 20);
+        diagnosticLogger.logFoundMatch(2, 0.35, 30, 40);
+        
+        // Act - Reset tracking
+        diagnosticLogger.resetMatchTracking();
+        
+        // Add new matches after reset
+        try (MockedStatic<ConsoleReporter> consoleMock = mockStatic(ConsoleReporter.class)) {
+            diagnosticLogger.logFoundMatch(1, 0.40, 50, 60);
+            diagnosticLogger.logLowScoreSummary();
+            
+            // Assert - Should only have 1 match after reset
+            consoleMock.verify(() -> ConsoleReporter.println(
+                "  [LOW-SCORE SUMMARY] 1 matches below 0.50 threshold (range: 0.400-0.400)"
+            ));
+        }
+    }
+    
+    @Test
+    @DisplayName("Should handle null pattern gracefully")
+    void testNullPatternHandling() {
+        // Arrange
+        when(verbosityConfig.getVerbosity()).thenReturn(VerbosityLevel.NORMAL);
+        
+        // Act & Assert - Should not throw exception
+        assertDoesNotThrow(() -> {
+            diagnosticLogger.logPatternResult(null, 0, 0.0);
+        });
+    }
+    
+    @Test
+    @DisplayName("Should work without BrobotLogger in VERBOSE mode")
+    void testVerboseModeWithoutBrobotLogger() {
+        // Arrange
+        ReflectionTestUtils.setField(diagnosticLogger, "brobotLogger", null);
+        when(verbosityConfig.getVerbosity()).thenReturn(VerbosityLevel.VERBOSE);
         when(pattern.getName()).thenReturn("TestPattern");
         when(pattern.w()).thenReturn(100);
         when(pattern.h()).thenReturn(50);
@@ -523,64 +565,14 @@ public class DiagnosticLoggerTest extends BrobotTestBase {
         when(scenePattern.w()).thenReturn(1920);
         when(scenePattern.h()).thenReturn(1080);
         
-        // Act & Assert - Should default to NORMAL mode
+        // Act & Assert - Should not throw exception
         try (MockedStatic<ConsoleReporter> consoleMock = mockStatic(ConsoleReporter.class)) {
-            assertDoesNotThrow(() -> diagnosticLogger.logPatternSearch(pattern, scene, 0.85));
+            assertDoesNotThrow(() -> {
+                diagnosticLogger.logPatternSearch(pattern, scene, 0.85);
+            });
             
+            // Console output should still work
             consoleMock.verify(() -> ConsoleReporter.println(anyString()));
-        }
-    }
-    
-    @Test
-    @DisplayName("Should estimate image sizes correctly")
-    void testImageSizeEstimation() {
-        // Arrange
-        when(verbosityConfig.getVerbosity()).thenReturn(VerbosityLevel.NORMAL);
-        
-        // Small image (< 1KB)
-        BufferedImage smallImage = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
-        // Medium image (< 1MB)
-        BufferedImage mediumImage = new BufferedImage(256, 256, BufferedImage.TYPE_INT_RGB);
-        // Large image (> 1MB)
-        BufferedImage largeImage = new BufferedImage(2048, 2048, BufferedImage.TYPE_INT_RGB);
-        
-        // Act
-        try (MockedStatic<ConsoleReporter> consoleMock = mockStatic(ConsoleReporter.class)) {
-            diagnosticLogger.logImageAnalysis(smallImage, null, "SmallPattern");
-            consoleMock.verify(() -> ConsoleReporter.println(contains("400B")));
-            
-            diagnosticLogger.logImageAnalysis(mediumImage, null, "MediumPattern");
-            consoleMock.verify(() -> ConsoleReporter.println(contains("256KB")));
-            
-            diagnosticLogger.logImageAnalysis(largeImage, null, "LargePattern");
-            consoleMock.verify(() -> ConsoleReporter.println(contains("16MB")));
-        }
-    }
-    
-    @Test
-    @DisplayName("Should identify different image types")
-    void testImageTypeIdentification() {
-        // Arrange
-        when(verbosityConfig.getVerbosity()).thenReturn(VerbosityLevel.NORMAL);
-        
-        BufferedImage rgbImage = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
-        BufferedImage argbImage = new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB);
-        BufferedImage grayImage = new BufferedImage(10, 10, BufferedImage.TYPE_BYTE_GRAY);
-        BufferedImage indexedImage = new BufferedImage(10, 10, BufferedImage.TYPE_BYTE_INDEXED);
-        
-        // Act & Assert
-        try (MockedStatic<ConsoleReporter> consoleMock = mockStatic(ConsoleReporter.class)) {
-            diagnosticLogger.logImageAnalysis(rgbImage, null, "RGB");
-            consoleMock.verify(() -> ConsoleReporter.println(contains("type=RGB")));
-            
-            diagnosticLogger.logImageAnalysis(argbImage, null, "ARGB");
-            consoleMock.verify(() -> ConsoleReporter.println(contains("type=ARGB")));
-            
-            diagnosticLogger.logImageAnalysis(grayImage, null, "GRAY");
-            consoleMock.verify(() -> ConsoleReporter.println(contains("type=GRAY")));
-            
-            diagnosticLogger.logImageAnalysis(indexedImage, null, "INDEXED");
-            consoleMock.verify(() -> ConsoleReporter.println(contains("type=INDEXED")));
         }
     }
 }

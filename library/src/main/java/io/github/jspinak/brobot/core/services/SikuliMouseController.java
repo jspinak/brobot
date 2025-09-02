@@ -7,7 +7,6 @@ import org.sikuli.script.Region;
 import org.sikuli.script.Button;
 import org.springframework.stereotype.Component;
 
-import java.awt.*;
 import java.awt.event.InputEvent;
 
 /**
@@ -70,16 +69,23 @@ public class SikuliMouseController implements MouseController {
                 return false;
             }
             
-            // Use Robot to perform the click
-            try {
-                Robot robot = new Robot();
-                int mask = getButtonMask(button);
-                robot.mousePress(mask);
-                robot.mouseRelease(mask);
-            } catch (AWTException e) {
-                return false;
+            // Use Sikuli's click method
+            Location location = new Location(x, y);
+            boolean success = false;
+            
+            if (button == MouseButton.LEFT) {
+                location.click();
+                success = true;
+            } else if (button == MouseButton.RIGHT) {
+                location.rightClick();
+                success = true;
+            } else if (button == MouseButton.MIDDLE) {
+                // Sikuli doesn't have a built-in middle click, use Mouse class
+                Mouse.move(location);
+                Mouse.down(Button.MIDDLE);
+                Mouse.up(Button.MIDDLE);
+                success = true;
             }
-            boolean success = true;
             
             if (success) {
                 ConsoleReporter.println("[SikuliMouseController] Clicked " + button + " at: " + x + ", " + y);
@@ -105,17 +111,9 @@ public class SikuliMouseController implements MouseController {
             // Sikuli's doubleClick only supports left button
             // For other buttons, simulate with two clicks
             if (button == MouseButton.LEFT) {
-                // Use Robot for double-click
-                try {
-                    Robot robot = new Robot();
-                    int mask = getButtonMask(button);
-                    robot.mousePress(mask);
-                    robot.mouseRelease(mask);
-                    robot.mousePress(mask);
-                    robot.mouseRelease(mask);
-                } catch (AWTException e) {
-                    return false;
-                }
+                // Use Sikuli's double-click
+                Location location = new Location(x, y);
+                location.doubleClick();
                 return true;
             } else {
                 // Simulate double-click for other buttons
@@ -209,14 +207,20 @@ public class SikuliMouseController implements MouseController {
                 return false;
             }
             
-            // Use Robot for scrolling
-            try {
-                Robot robot = new Robot();
-                robot.mouseWheel(-wheelAmt);
-            } catch (AWTException e) {
-                return false;
+            // Use Sikuli's wheel method for scrolling
+            Location location = Mouse.at();
+            if (location == null) {
+                location = new Location(0, 0);
             }
-            int result = 1; // scrolling succeeded
+            
+            // Sikuli wheel method: positive = down, negative = up
+            // Robot's mouseWheel: positive = down, negative = up
+            // So we negate to match Robot's behavior
+            int result = location.wheel(Button.WHEEL_DOWN, -wheelAmt);
+            if (result == 0) {
+                // Try alternative if wheel failed
+                result = Mouse.wheel(Button.WHEEL_DOWN, -wheelAmt);
+            }
             
             ConsoleReporter.println("[SikuliMouseController] Scrolled " + wheelAmt + " units");
             return result != 0;

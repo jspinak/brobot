@@ -2,6 +2,9 @@ package io.github.jspinak.brobot.util.image.capture;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.sikuli.script.Screen;
+import org.sikuli.script.ScreenImage;
+import org.sikuli.script.Region;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -115,11 +118,13 @@ public class DPIAwareCapture {
         double scaleFactor = getDisplayScaleFactor();
         
         try {
-            Robot robot = new Robot();
+            Screen screen = new Screen();
             
             if (Math.abs(scaleFactor - 1.0) < 0.01) {
                 // No scaling, capture directly
-                return robot.createScreenCapture(new Rectangle(x, y, width, height));
+                Region region = new Region(x, y, width, height);
+                ScreenImage screenImage = screen.capture(region);
+                return screenImage.getImage();
             }
             
             // Scale coordinates for physical pixel capture
@@ -132,15 +137,15 @@ public class DPIAwareCapture {
                 width, height, x, y, physicalWidth, physicalHeight, physicalX, physicalY);
             
             // Capture at physical resolution
-            BufferedImage physicalCapture = robot.createScreenCapture(
-                new Rectangle(physicalX, physicalY, physicalWidth, physicalHeight)
-            );
+            Region physicalRegion = new Region(physicalX, physicalY, physicalWidth, physicalHeight);
+            ScreenImage screenImage = screen.capture(physicalRegion);
+            BufferedImage physicalCapture = screenImage.getImage();
             
             // Scale back to logical resolution for consistent matching
             return scaleToLogicalResolution(physicalCapture, width, height);
             
-        } catch (AWTException e) {
-            log.error("Failed to create Robot for screen capture", e);
+        } catch (Exception e) {
+            log.error("Failed to capture screen using SikuliX", e);
             throw new RuntimeException("Screen capture failed", e);
         }
     }
@@ -169,17 +174,23 @@ public class DPIAwareCapture {
         
         Graphics2D g = logicalImage.createGraphics();
         
-        // Use high-quality scaling
-        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, 
-                          RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-        g.setRenderingHint(RenderingHints.KEY_RENDERING, 
-                          RenderingHints.VALUE_RENDER_QUALITY);
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
-                          RenderingHints.VALUE_ANTIALIAS_ON);
-        
-        // Draw scaled image
-        g.drawImage(physicalImage, 0, 0, logicalWidth, logicalHeight, null);
-        g.dispose();
+        if (g != null) {
+            // Use high-quality scaling
+            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, 
+                              RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+            g.setRenderingHint(RenderingHints.KEY_RENDERING, 
+                              RenderingHints.VALUE_RENDER_QUALITY);
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
+                              RenderingHints.VALUE_ANTIALIAS_ON);
+            
+            // Draw scaled image
+            g.drawImage(physicalImage, 0, 0, logicalWidth, logicalHeight, null);
+            g.dispose();
+        } else {
+            // If we can't get a graphics context, return the original image
+            log.warn("Could not create graphics context for scaling. Returning original image.");
+            return physicalImage;
+        }
         
         log.debug("Scaled image from {}x{} to {}x{} (logical resolution)",
             physicalImage.getWidth(), physicalImage.getHeight(),

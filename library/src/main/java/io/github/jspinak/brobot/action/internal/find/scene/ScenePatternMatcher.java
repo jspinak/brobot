@@ -6,6 +6,8 @@ import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.logging.DiagnosticLogger;
+import io.github.jspinak.brobot.config.LoggingVerbosityConfig;
+import io.github.jspinak.brobot.config.LoggingVerbosityConfig.VerbosityLevel;
 
 import org.sikuli.script.Finder;
 import org.sikuli.script.OCR;
@@ -48,6 +50,9 @@ public class ScenePatternMatcher {
 
     @Autowired(required = false)
     private DiagnosticLogger diagnosticLogger;
+    
+    @Autowired(required = false)
+    private LoggingVerbosityConfig verbosityConfig;
     
     @Autowired(required = false)
     private BestMatchCapture bestMatchCapture;
@@ -104,13 +109,13 @@ public class ScenePatternMatcher {
             return new ArrayList<>();
         }
         
-        // Debug: log what regions the pattern thinks it should search
-        ConsoleReporter.println("[REGION DEBUG] Pattern '" + pattern.getName() + "' search configuration:");
-        ConsoleReporter.println("  - Is fixed: " + pattern.isFixed());
-        ConsoleReporter.println("  - Search regions: " + pattern.getSearchRegions().getRegions());
-        ConsoleReporter.println("  - Fixed region: " + pattern.getSearchRegions().getFixedRegion());
-        ConsoleReporter.println("  - getRegions(fixed): " + pattern.getRegions());
-        ConsoleReporter.println("  - Scene size: " + scene.getPattern().w() + "x" + scene.getPattern().h());
+        // Concise region debug in verbose mode only
+        if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
+            List<io.github.jspinak.brobot.model.element.Region> regions = pattern.getRegions();
+            String regionInfo = regions.size() == 1 ? regions.get(0).toString() : regions.size() + " regions";
+            ConsoleReporter.println("[REGION] '" + pattern.getName() + "': " + 
+                (pattern.isFixed() ? "fixed @ " : "search in ") + regionInfo);
+        }
         
         // Check size constraints first
         if (pattern.w()>scene.getPattern().w() || pattern.h()>scene.getPattern().h()) {
@@ -124,11 +129,13 @@ public class ScenePatternMatcher {
         
         // Ensure the pattern has the correct similarity threshold
         double globalSimilarity = org.sikuli.basics.Settings.MinSimilarity;
-        ConsoleReporter.println("[SIMILARITY] Global MinSimilarity: " + globalSimilarity);
-        ConsoleReporter.println("[SIMILARITY] Pattern current similarity: " + sikuliPattern.getSimilar());
         if (Math.abs(sikuliPattern.getSimilar() - globalSimilarity) > 0.01) {
             sikuliPattern = sikuliPattern.similar(globalSimilarity);
-            ConsoleReporter.println("[SIMILARITY] Updated pattern similarity to: " + sikuliPattern.getSimilar());
+            // Only log similarity changes in verbose mode
+            if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
+                ConsoleReporter.println("[SIMILARITY] Updated '" + pattern.getName() + "' to " + 
+                    String.format("%.2f", globalSimilarity));
+            }
         }
         
         // Log the search attempt using DiagnosticLogger if available

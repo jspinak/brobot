@@ -31,6 +31,41 @@ public class BrobotPatternCapture {
     
     private static final Logger log = LoggerFactory.getLogger(BrobotPatternCapture.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private Screen screen;
+    private String outputDirectory = "src/test/resources/patterns";
+    
+    /**
+     * Get or initialize the Screen instance.
+     */
+    private Screen getScreen() {
+        if (screen == null) {
+            screen = new Screen();
+        }
+        return screen;
+    }
+    
+    /**
+     * Set the Screen instance (for testing).
+     */
+    public void setScreen(Screen screen) {
+        this.screen = screen;
+    }
+    
+    /**
+     * Set the output directory for captured patterns.
+     * @param outputDirectory the directory path relative to project root
+     */
+    public void setOutputDirectory(String outputDirectory) {
+        this.outputDirectory = outputDirectory;
+    }
+    
+    /**
+     * Get the output directory for captured patterns.
+     * @return the output directory path
+     */
+    public String getOutputDirectory() {
+        return outputDirectory;
+    }
     
     /**
      * Capture a pattern from screen with metadata.
@@ -38,7 +73,7 @@ public class BrobotPatternCapture {
     public void capturePattern(String name, Rectangle region) {
         try {
             // Capture the region
-            Screen screen = new Screen();
+            Screen screen = getScreen();
             ScreenImage capture = screen.capture(region);
             BufferedImage image = capture.getImage();
             
@@ -97,9 +132,9 @@ public class BrobotPatternCapture {
         metadata.setPhysicalWidth(screenSize.width);
         metadata.setPhysicalHeight(screenSize.height);
         
-        Screen screen = new Screen();
-        metadata.setLogicalWidth(screen.w);
-        metadata.setLogicalHeight(screen.h);
+        Screen currentScreen = getScreen();
+        metadata.setLogicalWidth(currentScreen.w);
+        metadata.setLogicalHeight(currentScreen.h);
         
         // Java version
         metadata.setJavaVersion(System.getProperty("java.version"));
@@ -119,7 +154,7 @@ public class BrobotPatternCapture {
      */
     private void savePatternWithMetadata(BufferedImage image, String name, 
                                         PatternMetadata metadata) throws IOException {
-        File outputDir = new File("patterns");
+        File outputDir = new File(outputDirectory);
         outputDir.mkdirs();
         
         // Save the image with metadata in PNG tEXt chunk
@@ -193,7 +228,7 @@ public class BrobotPatternCapture {
                                      PatternMetadata metadata) {
         double[] scales = {0.75, 0.8, 1.0, 1.25, 1.33, 1.5};
         
-        File outputDir = new File("patterns/scaled");
+        File outputDir = new File(outputDirectory + "/scaled");
         outputDir.mkdirs();
         
         for (double scale : scales) {

@@ -3,16 +3,18 @@ package io.github.jspinak.brobot.util.image.capture;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+import io.github.jspinak.brobot.core.services.SikuliScreenCapture;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
 /**
- * Direct screen capture using Java Robot, bypassing SikuliX.
- * This ensures NO scaling or transformations are applied.
+ * Direct screen capture using SikuliX Screen API.
+ * This ensures proper Brobot-compliant screen capture without using Robot.
  * 
- * <p>This class is for testing whether SikuliX is applying
- * unwanted scaling during screen capture.</p>
+ * <p>This class wraps SikuliX screen capture functionality to provide
+ * direct screen capture without additional transformations.</p>
  * 
  * @since 1.1.0
  */
@@ -20,21 +22,23 @@ import java.awt.image.BufferedImage;
 @Component
 public class DirectRobotCapture {
     
-    private Robot robot;
+    private final SikuliScreenCapture screenCapture;
     
+    @Autowired
+    public DirectRobotCapture(SikuliScreenCapture screenCapture) {
+        this.screenCapture = screenCapture;
+        ConsoleReporter.println("[DIRECT CAPTURE] SikuliX screen capture initialized successfully");
+    }
+    
+    // For backward compatibility with tests that use no-arg constructor
     public DirectRobotCapture() {
-        try {
-            this.robot = new Robot();
-            ConsoleReporter.println("[DIRECT CAPTURE] Robot initialized successfully");
-        } catch (AWTException e) {
-            log.error("Failed to initialize Robot for direct capture", e);
-            ConsoleReporter.println("[DIRECT CAPTURE] ERROR: Failed to initialize Robot: " + e.getMessage());
-        }
+        this.screenCapture = new SikuliScreenCapture();
+        ConsoleReporter.println("[DIRECT CAPTURE] SikuliX screen capture initialized successfully");
     }
     
     /**
-     * Captures a screen region using Java Robot directly.
-     * NO scaling, NO DPI adjustments, NO transformations.
+     * Captures a screen region using SikuliX Screen API.
+     * NO additional scaling, NO DPI adjustments, NO transformations.
      * 
      * @param x X coordinate in actual screen pixels
      * @param y Y coordinate in actual screen pixels
@@ -43,8 +47,14 @@ public class DirectRobotCapture {
      * @return Raw captured image at actual pixel resolution
      */
     public BufferedImage captureRegion(int x, int y, int width, int height) {
-        if (robot == null) {
-            ConsoleReporter.println("[DIRECT CAPTURE] Robot not initialized!");
+        if (screenCapture == null) {
+            ConsoleReporter.println("[DIRECT CAPTURE] Screen capture not initialized!");
+            return null;
+        }
+        
+        // Validate dimensions
+        if (width <= 0 || height <= 0) {
+            ConsoleReporter.println("[DIRECT CAPTURE] Invalid dimensions: " + width + "x" + height);
             return null;
         }
         
@@ -52,20 +62,23 @@ public class DirectRobotCapture {
             ConsoleReporter.println("[DIRECT CAPTURE] Capturing region: " + 
                 x + "," + y + " " + width + "x" + height);
             
-            Rectangle captureRect = new Rectangle(x, y, width, height);
-            BufferedImage captured = robot.createScreenCapture(captureRect);
+            BufferedImage captured = screenCapture.captureRegion(x, y, width, height);
             
-            ConsoleReporter.println("[DIRECT CAPTURE] Success: " + 
-                captured.getWidth() + "x" + captured.getHeight() + 
-                " type=" + getImageType(captured.getType()));
-            
-            // Log pixel sample to verify content
-            if (captured.getWidth() > 0 && captured.getHeight() > 0) {
-                int centerX = captured.getWidth() / 2;
-                int centerY = captured.getHeight() / 2;
-                int rgb = captured.getRGB(centerX, centerY);
-                ConsoleReporter.println("[DIRECT CAPTURE] Center pixel RGB: " + 
-                    String.format("#%06X", rgb & 0xFFFFFF));
+            if (captured != null) {
+                ConsoleReporter.println("[DIRECT CAPTURE] Success: " + 
+                    captured.getWidth() + "x" + captured.getHeight() + 
+                    " type=" + getImageType(captured.getType()));
+                
+                // Log pixel sample to verify content
+                if (captured.getWidth() > 0 && captured.getHeight() > 0) {
+                    int centerX = captured.getWidth() / 2;
+                    int centerY = captured.getHeight() / 2;
+                    int rgb = captured.getRGB(centerX, centerY);
+                    ConsoleReporter.println("[DIRECT CAPTURE] Center pixel RGB: " + 
+                        String.format("#%06X", rgb & 0xFFFFFF));
+                }
+            } else {
+                ConsoleReporter.println("[DIRECT CAPTURE] Capture returned null");
             }
             
             return captured;
@@ -78,21 +91,29 @@ public class DirectRobotCapture {
     }
     
     /**
-     * Captures the full screen using Java Robot.
+     * Captures the full screen using SikuliX Screen API.
      * 
      * @return Full screen capture at actual resolution
      */
     public BufferedImage captureFullScreen() {
-        if (robot == null) {
+        if (screenCapture == null) {
+            ConsoleReporter.println("[DIRECT CAPTURE] Screen capture not initialized!");
             return null;
         }
         
         try {
-            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-            ConsoleReporter.println("[DIRECT CAPTURE] Screen size: " + 
-                screenSize.width + "x" + screenSize.height);
+            ConsoleReporter.println("[DIRECT CAPTURE] Capturing full screen");
             
-            return captureRegion(0, 0, screenSize.width, screenSize.height);
+            BufferedImage captured = screenCapture.captureScreen();
+            
+            if (captured != null) {
+                ConsoleReporter.println("[DIRECT CAPTURE] Full screen captured: " + 
+                    captured.getWidth() + "x" + captured.getHeight());
+            } else {
+                ConsoleReporter.println("[DIRECT CAPTURE] Full screen capture returned null");
+            }
+            
+            return captured;
             
         } catch (Exception e) {
             log.error("Full screen capture failed", e);

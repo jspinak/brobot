@@ -12,11 +12,16 @@ import io.github.jspinak.brobot.model.element.Position;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.tools.testing.mock.action.ExecutionModeController;
+import io.github.jspinak.brobot.config.LoggingVerbosityConfig;
+import io.github.jspinak.brobot.config.LoggingVerbosityConfig.VerbosityLevel;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Finds all matches for all patterns within StateImages on the screen.
@@ -43,6 +48,9 @@ public class FindAll {
     private final SearchRegionResolver selectRegions;
     private final MatchProofer matchProofer;
     private final ExecutionModeController mockOrLive;
+    
+    @Autowired(required = false)
+    private LoggingVerbosityConfig verbosityConfig;
 
     /**
      * Creates a new FindAll instance with required dependencies.
@@ -144,19 +152,31 @@ public class FindAll {
                 pattern.getName() : scene.getPattern().getName();
         List<Region> regionsAllowedForMatch = selectRegions.getRegions(actionConfig, stateImage);
         
-        // Debug logging
-        System.out.println("[FILTER DEBUG] Pattern '" + name + "' has " + matchList.size() + " raw matches");
-        System.out.println("[FILTER DEBUG] Allowed regions (" + regionsAllowedForMatch.size() + "): " + regionsAllowedForMatch);
-        if (!regionsAllowedForMatch.isEmpty()) {
-            Region first = regionsAllowedForMatch.get(0);
-            System.out.println("[FILTER DEBUG] First region details: x=" + first.x() + " y=" + first.y() + 
-                              " w=" + first.w() + " h=" + first.h());
+        // Compact debug logging - only log if there are matches or in verbose mode
+        boolean hasMatches = !matchList.isEmpty();
+        boolean isVerbose = verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE;
+        
+        if (hasMatches || isVerbose) {
+            // Deduplicate regions for cleaner output
+            Set<String> uniqueRegions = new LinkedHashSet<>();
+            for (Region r : regionsAllowedForMatch) {
+                uniqueRegions.add(r.toString());
+            }
+            
+            // Single-line summary
+            if (isVerbose || hasMatches) {
+                System.out.println("[FILTER] '" + name + "': " + matchList.size() + " matches → " + 
+                    uniqueRegions.size() + " region(s) " + 
+                    (uniqueRegions.size() > 0 ? uniqueRegions.iterator().next() : "[]"));
+            }
         }
         
         for (Match match : matchList) {
             boolean inRegion = matchProofer.isInSearchRegions(match, regionsAllowedForMatch);
-            System.out.println("[FILTER DEBUG] Match at " + match.getRegion() + " score=" + 
-                String.format("%.3f", match.getScore()) + " in region? " + inRegion);
+            // Only log mismatches in verbose mode
+            if (!inRegion && isVerbose) {
+                System.out.println("  [FILTER] Excluded match at " + match.getRegion() + " (outside search region)");
+            }
             
             if (inRegion) {
                 Match newMatch = new Match.Builder()
@@ -174,7 +194,10 @@ public class FindAll {
             }
         }
         
-        System.out.println("[FILTER DEBUG] After filtering: " + i + " matches remain");
+        // Only log final count if matches were filtered
+        if (isVerbose && i != matchList.size()) {
+            System.out.println("  [FILTER] After filtering: " + i + " matches remain");
+        }
         
         // Set fixed region for the pattern if it's marked as fixed and we have valid matches
         if (pattern.isFixed() && !allMatchObjects.isEmpty()) {
@@ -195,9 +218,10 @@ public class FindAll {
             }
             
             if (bestMatch != null && bestScore >= minSimilarity) {
-                System.out.println("[FIXED REGION] Setting fixed region for pattern '" + name + 
-                    "' to best match at " + bestMatch.getRegion() + " with score " + 
-                    String.format("%.3f", bestScore));
+                if (isVerbose) {
+                    System.out.println("[FIXED] Pattern '" + name + "' → " + bestMatch.getRegion() + 
+                        " (score: " + String.format("%.3f", bestScore) + ")");
+                }
                 pattern.getSearchRegions().setFixedRegion(bestMatch.getRegion());
             } else {
                 System.out.println("[FIXED REGION] Not setting fixed region - best score " + 
@@ -217,6 +241,7 @@ public class FindAll {
         String name = pattern.getName() != null && !pattern.getName().isEmpty() ?
                 pattern.getName() : scene.getPattern().getName();
         List<Match> validMatches = new ArrayList<>();
+        boolean isVerbose = verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE;
         
         for (Match match : matchList) {
             List<Region> regionsAllowedForMatch = selectRegions.getRegions(findOptions, stateImage);
@@ -253,9 +278,10 @@ public class FindAll {
             double minSimilarity = findOptions.getSimilarity();
             
             if (bestMatch != null && bestScore >= minSimilarity) {
-                System.out.println("[FIXED REGION] Setting fixed region for pattern '" + name + 
-                    "' to best match at " + bestMatch.getRegion() + " with score " + 
-                    String.format("%.3f", bestScore));
+                if (isVerbose) {
+                    System.out.println("[FIXED] Pattern '" + name + "' → " + bestMatch.getRegion() + 
+                        " (score: " + String.format("%.3f", bestScore) + ")");
+                }
                 pattern.getSearchRegions().setFixedRegion(bestMatch.getRegion());
             }
         }
