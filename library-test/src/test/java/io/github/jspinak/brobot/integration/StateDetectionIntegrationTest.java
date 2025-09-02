@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.integration;
 
-import io.github.jspinak.brobot.BrobotTestApplication;
+import io.github.jspinak.brobot.test.config.profile.IntegrationTestMinimalConfig;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.annotations.State;
 import io.github.jspinak.brobot.navigation.service.StateService;
@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Integration test for state detection and probability management.
  * Tests how Brobot detects active states and manages state probabilities.
  */
-@SpringBootTest(classes = BrobotTestApplication.class)
+@SpringBootTest(classes = IntegrationTestMinimalConfig.class)
 @Import({
     StateDetectionIntegrationTest.LoginState.class,
     StateDetectionIntegrationTest.DashboardState.class,
@@ -40,7 +40,9 @@ import static org.junit.jupiter.api.Assertions.*;
 })
 @TestPropertySource(properties = {
     "brobot.core.mock=true",
-    "logging.level.io.github.jspinak.brobot=DEBUG"
+    "brobot.mock.enabled=true",
+    "logging.level.io.github.jspinak.brobot=DEBUG",
+    "spring.main.allow-bean-definition-overriding=true"
 })
 @Slf4j
 public class StateDetectionIntegrationTest extends BrobotTestBase {

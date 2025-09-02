@@ -482,9 +482,8 @@ public class ClickOptionsTest extends BrobotTestBase {
     @DisplayName("JSON Serialization")
     class JsonSerialization {
         
-        @Test
-        @org.junit.jupiter.api.Disabled("Disabled due to Jackson/OpenCV Mat serialization conflict - needs BrobotObjectMapper")
-        @DisplayName("Serialize to JSON")
+        // @Test - Disabled due to Jackson/OpenCV Mat serialization conflict - needs BrobotObjectMapper
+        // @DisplayName("Serialize to JSON")
         public void testSerializeToJson() throws Exception {
             ClickOptions options = builder
                 .setNumberOfClicks(2)
@@ -496,9 +495,8 @@ public class ClickOptionsTest extends BrobotTestBase {
             assertTrue(json.contains("\"numberOfClicks\":2"));
         }
         
-        @Test
-        @org.junit.jupiter.api.Disabled("Disabled due to Jackson/OpenCV Mat serialization conflict - needs BrobotObjectMapper")
-        @DisplayName("Deserialize from JSON")
+        // @Test - Disabled due to Jackson/OpenCV Mat serialization conflict - needs BrobotObjectMapper
+        // @DisplayName("Deserialize from JSON")
         public void testDeserializeFromJson() throws Exception {
             String json = "{\"numberOfClicks\":3}";
             
@@ -507,9 +505,8 @@ public class ClickOptionsTest extends BrobotTestBase {
             assertEquals(3, options.getNumberOfClicks());
         }
         
-        @Test
-        @org.junit.jupiter.api.Disabled("Disabled due to Jackson/OpenCV Mat serialization conflict - needs BrobotObjectMapper")
-        @DisplayName("Round-trip serialization")
+        // @Test - Disabled due to Jackson/OpenCV Mat serialization conflict - needs BrobotObjectMapper
+        // @DisplayName("Round-trip serialization")
         public void testRoundTripSerialization() throws Exception {
             ClickOptions original = builder
                 .setNumberOfClicks(2)

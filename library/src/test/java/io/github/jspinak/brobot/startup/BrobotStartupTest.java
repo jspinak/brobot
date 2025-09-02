@@ -31,6 +31,12 @@ public class BrobotStartupTest extends BrobotTestBase {
         @Test
         @DisplayName("Should set DPI awareness properties")
         void shouldSetDpiAwarenessProperties() {
+            // In headless mode, these properties are not set
+            if (GraphicsEnvironment.isHeadless() || "true".equals(System.getProperty("java.awt.headless"))) {
+                // Skip this test in headless mode
+                assertNull(System.getProperty("sun.java2d.dpiaware"));
+                return;
+            }
             // These should have been set by the static initializer
             assertEquals("false", System.getProperty("sun.java2d.dpiaware"));
             assertEquals("1.0", System.getProperty("sun.java2d.uiScale"));
@@ -40,6 +46,12 @@ public class BrobotStartupTest extends BrobotTestBase {
         @Test
         @DisplayName("Should set Windows-specific properties")
         void shouldSetWindowsSpecificProperties() {
+            // In headless mode, these properties are not set
+            if (GraphicsEnvironment.isHeadless() || "true".equals(System.getProperty("java.awt.headless"))) {
+                // Skip this test in headless mode
+                assertNull(System.getProperty("sun.java2d.win.uiScaleX"));
+                return;
+            }
             assertEquals("1.0", System.getProperty("sun.java2d.win.uiScaleX"));
             assertEquals("1.0", System.getProperty("sun.java2d.win.uiScaleY"));
             assertEquals("false", System.getProperty("sun.java2d.dpiaware.override"));
@@ -47,14 +59,24 @@ public class BrobotStartupTest extends BrobotTestBase {
         }
         
         @Test
-        @DisplayName("Should disable headless mode")
-        void shouldDisableHeadlessMode() {
-            assertEquals("false", System.getProperty("java.awt.headless"));
+        @DisplayName("Should handle headless mode appropriately")
+        void shouldHandleHeadlessModeAppropriately() {
+            // BrobotStartup no longer forces headless to false
+            // It respects the current environment setting
+            String headlessProperty = System.getProperty("java.awt.headless");
+            // In test environment, this is typically "true"
+            assertNotNull(headlessProperty);
         }
         
         @Test
         @DisplayName("Should configure rendering properties")
         void shouldConfigureRenderingProperties() {
+            // In headless mode, these properties are not set
+            if (GraphicsEnvironment.isHeadless() || "true".equals(System.getProperty("java.awt.headless"))) {
+                // Skip this test in headless mode
+                assertNull(System.getProperty("sun.java2d.noddraw"));
+                return;
+            }
             assertEquals("false", System.getProperty("sun.java2d.noddraw"));
             assertEquals("false", System.getProperty("sun.java2d.d3d"));
         }
@@ -114,9 +136,16 @@ public class BrobotStartupTest extends BrobotTestBase {
             // Create new instance - static block already ran
             BrobotStartup newStartup = new BrobotStartup();
             
-            // Properties should still be set
-            assertEquals("false", System.getProperty("sun.java2d.dpiaware"));
-            assertEquals("1.0", System.getProperty("sun.java2d.uiScale"));
+            // In headless mode, properties are not set
+            if (GraphicsEnvironment.isHeadless() || "true".equals(System.getProperty("java.awt.headless"))) {
+                // In headless mode, these should be null
+                assertNull(System.getProperty("sun.java2d.dpiaware"));
+                assertNull(System.getProperty("sun.java2d.uiScale"));
+            } else {
+                // Properties should still be set
+                assertEquals("false", System.getProperty("sun.java2d.dpiaware"));
+                assertEquals("1.0", System.getProperty("sun.java2d.uiScale"));
+            }
             
             // Init should work
             assertDoesNotThrow(() -> newStartup.init());

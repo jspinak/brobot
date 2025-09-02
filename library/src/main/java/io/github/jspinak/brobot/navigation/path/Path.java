@@ -142,7 +142,10 @@ public class Path {
             if (activeStates.contains(stateName)) addState = true;
             if (addState) {
                 trimmedPath.add(stateName);
-                trimmedPath.add(transitions.get(i));
+                // Only add transition if it exists (transitions list might be shorter than states)
+                if (i < transitions.size()) {
+                    trimmedPath.add(transitions.get(i));
+                }
             }
             i++;
         }

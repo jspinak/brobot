@@ -404,11 +404,11 @@ public class MatchesJsonUtilsTest extends BrobotTestBase {
             Map<String, Object> map = matchesJsonUtils.matchesToMap(result);
             
             // Then
-            assertNull(map.get("actionDescription"));
-            assertNull(map.get("text"));
-            assertNull(map.get("selectedText"));
-            assertNull(map.get("startTime"));
-            assertNull(map.get("endTime"));
+            assertFalse(map.containsKey("actionDescription"));
+            assertFalse(map.containsKey("text"));
+            assertFalse(map.containsKey("selectedText"));
+            assertFalse(map.containsKey("startTime"));
+            assertFalse(map.containsKey("endTime"));
             assertNotNull(map.get("matchList")); // Should still have empty list
         }
         

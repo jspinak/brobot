@@ -1,7 +1,10 @@
 package io.github.jspinak.brobot.runner.json.utils;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
@@ -55,15 +58,56 @@ public class ActionConfigJsonUtils {
     private final JsonUtils jsonUtils;
     private final ConfigurationParser jsonParser;
 
+    /**
+     * Custom serializer for OpenCV Mat that serializes it as null.
+     * This prevents issues with Mat's conflicting setter methods.
+     */
+    static class MatSerializer extends JsonSerializer<org.bytedeco.opencv.opencv_core.Mat> {
+        @Override
+        public void serialize(org.bytedeco.opencv.opencv_core.Mat value, JsonGenerator gen, 
+                              SerializerProvider serializers) throws IOException {
+            gen.writeNull();
+        }
+    }
+    
+    /**
+     * Custom deserializer for OpenCV Mat that always returns null.
+     * This prevents issues with Mat's conflicting setter methods.
+     */
+    static class MatDeserializer extends JsonDeserializer<org.bytedeco.opencv.opencv_core.Mat> {
+        @Override
+        public org.bytedeco.opencv.opencv_core.Mat deserialize(JsonParser p, DeserializationContext ctxt) 
+                throws IOException {
+            p.skipChildren();
+            return null;
+        }
+    }
+
     public ActionConfigJsonUtils(JsonUtils jsonUtils, ConfigurationParser jsonParser) {
         this.jsonUtils = jsonUtils;
         this.jsonParser = jsonParser;
         
         // Create a custom ObjectMapper with ActionConfig support
         this.objectMapper = new ObjectMapper();
+        this.objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        
+        // Configure to ignore Mat serialization issues
+        this.objectMapper.configure(com.fasterxml.jackson.databind.MapperFeature.IGNORE_DUPLICATE_MODULE_REGISTRATIONS, true);
+        this.objectMapper.configure(com.fasterxml.jackson.databind.SerializationFeature.FAIL_ON_SELF_REFERENCES, false);
+        
         SimpleModule module = new SimpleModule();
         module.addDeserializer(ActionConfig.class, new ActionConfigDeserializer());
+        
+        // Add custom serializer/deserializer for OpenCV Mat to prevent conflicts
+        try {
+            module.addSerializer(org.bytedeco.opencv.opencv_core.Mat.class, new MatSerializer());
+            module.addDeserializer(org.bytedeco.opencv.opencv_core.Mat.class, new MatDeserializer());
+        } catch (Exception e) {
+            log.debug("Could not add Mat serializers: " + e.getMessage());
+        }
+        
         this.objectMapper.registerModule(module);
+        this.objectMapper.findAndRegisterModules();
     }
 
     /**

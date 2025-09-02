@@ -3,6 +3,9 @@ package io.github.jspinak.brobot.action;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import lombok.Builder;
 import lombok.Getter;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * Configuration for action verification and termination conditions.
@@ -15,6 +18,8 @@ import lombok.Getter;
  */
 @Getter
 @Builder(toBuilder = true, builderClassName = "VerificationOptionsBuilder", setterPrefix = "set")
+@JsonDeserialize(builder = VerificationOptions.VerificationOptionsBuilder.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public final class VerificationOptions {
 
     /**
@@ -54,4 +59,10 @@ public final class VerificationOptions {
     
     @Builder.Default
     private final ObjectCollection objectCollection = new ObjectCollection.Builder().build(); // For OBJECTS_APPEAR/VANISH
+
+    @JsonPOJOBuilder(withPrefix = "set")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class VerificationOptionsBuilder {
+        // Lombok generates the implementation
+    }
 }

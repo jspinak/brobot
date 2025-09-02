@@ -1,11 +1,13 @@
 package io.github.jspinak.brobot.model.state;
 
 import io.github.jspinak.brobot.analysis.color.kmeans.KmeansProfilesAllSchemas;
+import io.github.jspinak.brobot.config.MockModeManager;
 import io.github.jspinak.brobot.model.action.ActionHistory;
 import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.model.element.*;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -24,6 +26,12 @@ import static org.mockito.Mockito.*;
 
 @DisplayName("StateImage Tests")
 public class StateImageTest extends BrobotTestBase {
+    
+    @BeforeAll
+    public static void setUpClass() {
+        // Enable mock mode at the class level to ensure all Pattern creations work
+        MockModeManager.setMockMode(true);
+    }
     
     @Mock
     private Pattern mockPattern;

@@ -475,7 +475,7 @@ public class ActionResult {
      * @param text Text object to set
      */
     public void setText(Text text) {
-        textResult.setAccumulatedText(text != null ? text : new Text());
+        textResult.setAccumulatedText(text);
     }
     
     /**
