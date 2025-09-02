@@ -67,7 +67,6 @@ public class BrobotObjectMapperTest extends BrobotTestBase {
             
             // Verify module registration by attempting to serialize a Brobot object
             PatternFindOptions options = new PatternFindOptions.Builder()
-                    .setDoOnEach(PatternFindOptions.DoOnEach.FIRST)
                     .build();
             
             assertDoesNotThrow(() -> {
@@ -250,8 +249,6 @@ public class BrobotObjectMapperTest extends BrobotTestBase {
         @DisplayName("Should serialize PatternFindOptions with type discriminator")
         void shouldSerializePatternFindOptionsWithType() throws JsonProcessingException {
             PatternFindOptions options = new PatternFindOptions.Builder()
-                    .setDoOnEach(PatternFindOptions.DoOnEach.FIRST)
-                    .setStrategy(PatternFindOptions.Strategy.FIRST)
                     .build();
             
             String json = brobotObjectMapper.writeValueAsString(options);
@@ -278,14 +275,13 @@ public class BrobotObjectMapperTest extends BrobotTestBase {
         void shouldSerializeTypeOptionsWithType() throws JsonProcessingException {
             TypeOptions options = new TypeOptions.Builder()
                     .setTypeDelay(0.1)
-                    .setModifiers("CTRL")
                     .build();
             
             String json = brobotObjectMapper.writeValueAsString(options);
             assertNotNull(json);
             assertTrue(json.contains("\"@type\""));
             assertTrue(json.contains("TypeOptions") || json.contains("TYPE"));
-            assertTrue(json.contains("0.1") || json.contains("CTRL"));
+            assertTrue(json.contains("0.1"));
         }
 
         @ParameterizedTest

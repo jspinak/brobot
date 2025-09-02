@@ -9,6 +9,7 @@ import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -86,11 +87,10 @@ public class DiagnosticLoggerTest extends BrobotTestBase {
         when(logBuilder.success(anyBoolean())).thenReturn(logBuilder);
     }
     
-    @Override
-    protected void tearDown() {
+    @AfterEach
+    public void tearDown() {
         // Restore original System.out
         System.setOut(originalOut);
-        super.tearDown();
     }
     
     @Test
@@ -498,8 +498,9 @@ public class DiagnosticLoggerTest extends BrobotTestBase {
             
             // Verify first 5 are shown
             for (int i = 1; i <= 5; i++) {
+                final int index = i; // Make variable final for lambda
                 consoleMock.verify(() -> ConsoleReporter.println(
-                    String.format("  [FOUND #%d] Score: 0.800 at (%d, %d)", i, i * 10, i * 20)
+                    String.format("  [FOUND #%d] Score: 0.800 at (%d, %d)", index, index * 10, index * 20)
                 ));
             }
             

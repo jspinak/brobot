@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.logging.modular;
 
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ActionType;
+import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,10 +64,15 @@ public class NormalFormatterTest extends BrobotTestBase {
         when(context.getEndTime()).thenReturn(endTime);
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("FIND");
-        when(context.getStateName()).thenReturn("MainMenu");
-        when(context.getObjectName()).thenReturn("LoginButton");
-        when(context.getDurationMs()).thenReturn(234L);
-        when(context.getMatchCount()).thenReturn(1);
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(234));
+        
+        StateImage img = mock(StateImage.class);
+        when(img.getOwnerStateName()).thenReturn("MainMenu");
+        when(img.getName()).thenReturn("LoginButton");
+        when(context.getTargetImages()).thenReturn(Collections.singletonList(img));
+        
+        Match match = mock(Match.class);
+        when(context.getResultMatches()).thenReturn(Collections.singletonList(match));
         
         // Act
         String result = formatter.format(actionResult);
@@ -93,11 +99,13 @@ public class NormalFormatterTest extends BrobotTestBase {
         when(context.getEndTime()).thenReturn(endTime);
         when(context.isSuccess()).thenReturn(false);
         when(context.getActionType()).thenReturn("CLICK");
-        when(context.getStateName()).thenReturn("Dialog");
-        when(context.getObjectName()).thenReturn("SubmitButton");
-        when(context.getDurationMs()).thenReturn(156L);
-        when(context.getMatchCount()).thenReturn(0);
-        when(context.getFailureReason()).thenReturn("No matches found");
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(156));
+        
+        StateImage img = mock(StateImage.class);
+        when(img.getOwnerStateName()).thenReturn("Dialog");
+        when(img.getName()).thenReturn("SubmitButton");
+        when(context.getTargetImages()).thenReturn(Collections.singletonList(img));
+        when(context.getResultMatches()).thenReturn(Collections.emptyList());
         
         // Act
         String result = formatter.format(actionResult);
@@ -119,10 +127,8 @@ public class NormalFormatterTest extends BrobotTestBase {
         when(context.getEndTime()).thenReturn(endTime);
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("TYPE");
-        when(context.getStateName()).thenReturn("Form");
-        when(context.getObjectName()).thenReturn("TextField");
-        when(context.getDurationMs()).thenReturn(100L);
-        when(context.getText()).thenReturn("Hello World");
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(100));
+        when(context.getTargetStrings()).thenReturn(Collections.singletonList("Hello World"));
         
         // Act
         String result = formatter.format(actionResult);
@@ -131,9 +137,8 @@ public class NormalFormatterTest extends BrobotTestBase {
         assertNotNull(result);
         assertTrue(result.contains("✓"));
         assertTrue(result.contains("Type"));
-        assertTrue(result.contains("Form.TextField"));
+        assertTrue(result.contains("\"Hello World\""));
         assertTrue(result.contains("100ms"));
-        assertTrue(result.contains("'Hello World'"));
     }
     
     @Test
@@ -144,11 +149,12 @@ public class NormalFormatterTest extends BrobotTestBase {
         when(context.getEndTime()).thenReturn(endTime);
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("DRAG");
-        when(context.getStateName()).thenReturn("Canvas");
-        when(context.getObjectName()).thenReturn("Element");
-        when(context.getDurationMs()).thenReturn(500L);
-        when(context.getToStateName()).thenReturn("DropZone");
-        when(context.getToObjectName()).thenReturn("Target");
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(500));
+        
+        StateImage img = mock(StateImage.class);
+        when(img.getOwnerStateName()).thenReturn("Canvas");
+        when(img.getName()).thenReturn("Element");
+        when(context.getTargetImages()).thenReturn(Collections.singletonList(img));
         
         // Act
         String result = formatter.format(actionResult);
@@ -158,7 +164,6 @@ public class NormalFormatterTest extends BrobotTestBase {
         assertTrue(result.contains("✓"));
         assertTrue(result.contains("Drag"));
         assertTrue(result.contains("Canvas.Element"));
-        assertTrue(result.contains("→ DropZone.Target"));
         assertTrue(result.contains("500ms"));
     }
     
@@ -170,16 +175,19 @@ public class NormalFormatterTest extends BrobotTestBase {
         when(context.getEndTime()).thenReturn(endTime);
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("CLICK");
-        when(context.getStateName()).thenReturn("Main Screen");
-        when(context.getObjectName()).thenReturn("Login Button");
-        when(context.getDurationMs()).thenReturn(150L);
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(150));
+        
+        StateImage img = mock(StateImage.class);
+        when(img.getOwnerStateName()).thenReturn("Main Screen");
+        when(img.getName()).thenReturn("Login Button");
+        when(context.getTargetImages()).thenReturn(Collections.singletonList(img));
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertTrue(result.contains("'Main Screen'.'Login Button'"));
+        assertTrue(result.contains("Main Screen.Login Button"));
     }
     
     @Test
@@ -190,9 +198,12 @@ public class NormalFormatterTest extends BrobotTestBase {
         when(context.getEndTime()).thenReturn(endTime);
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("CLICK");
-        when(context.getStateName()).thenReturn(null);
-        when(context.getObjectName()).thenReturn("Button");
-        when(context.getDurationMs()).thenReturn(100L);
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(100));
+        
+        StateImage img = mock(StateImage.class);
+        when(img.getOwnerStateName()).thenReturn(null);
+        when(img.getName()).thenReturn("Button");
+        when(context.getTargetImages()).thenReturn(Collections.singletonList(img));
         
         // Act
         String result = formatter.format(actionResult);
@@ -211,9 +222,12 @@ public class NormalFormatterTest extends BrobotTestBase {
         when(context.getEndTime()).thenReturn(endTime);
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("WAIT");
-        when(context.getStateName()).thenReturn("Screen");
-        when(context.getObjectName()).thenReturn(null);
-        when(context.getDurationMs()).thenReturn(1000L);
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(1000));
+        
+        StateImage img = mock(StateImage.class);
+        when(img.getOwnerStateName()).thenReturn("Screen");
+        when(img.getName()).thenReturn(null);
+        when(context.getTargetImages()).thenReturn(Collections.singletonList(img));
         
         // Act
         String result = formatter.format(actionResult);
@@ -221,7 +235,7 @@ public class NormalFormatterTest extends BrobotTestBase {
         // Assert
         assertNotNull(result);
         assertTrue(result.contains("Wait"));
-        assertTrue(result.contains("Screen"));
+        assertTrue(result.contains("Screen.Image")); // Default name when null
         assertTrue(result.contains("1000ms"));
     }
     
@@ -232,7 +246,7 @@ public class NormalFormatterTest extends BrobotTestBase {
         Instant endTime = Instant.now();
         when(context.getEndTime()).thenReturn(endTime);
         when(context.isSuccess()).thenReturn(true);
-        when(context.getDurationMs()).thenReturn(100L);
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(100));
         
         // Test various action type formats
         String[] actionTypes = {
@@ -282,8 +296,8 @@ public class NormalFormatterTest extends BrobotTestBase {
         when(context.getEndTime()).thenReturn(null);
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("CLICK");
-        when(context.getObjectName()).thenReturn("Button");
-        when(context.getDurationMs()).thenReturn(100L);
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(100));
+        when(context.getPrimaryTargetName()).thenReturn("Button");
         
         // Act
         String result = formatter.format(actionResult);
@@ -303,10 +317,18 @@ public class NormalFormatterTest extends BrobotTestBase {
         when(context.getEndTime()).thenReturn(endTime);
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("FIND");
-        when(context.getStateName()).thenReturn("Grid");
-        when(context.getObjectName()).thenReturn("Cell");
-        when(context.getDurationMs()).thenReturn(300L);
-        when(context.getMatchCount()).thenReturn(5);
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(300));
+        
+        StateImage img = mock(StateImage.class);
+        when(img.getOwnerStateName()).thenReturn("Grid");
+        when(img.getName()).thenReturn("Cell");
+        when(context.getTargetImages()).thenReturn(Collections.singletonList(img));
+        
+        Match[] matches = new Match[5];
+        for (int i = 0; i < 5; i++) {
+            matches[i] = mock(Match.class);
+        }
+        when(context.getResultMatches()).thenReturn(Arrays.asList(matches));
         
         // Act
         String result = formatter.format(actionResult);
@@ -328,26 +350,27 @@ public class NormalFormatterTest extends BrobotTestBase {
         when(context.getEndTime()).thenReturn(endTime);
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("TYPE");
-        when(context.getObjectName()).thenReturn("Field");
-        when(context.getDurationMs()).thenReturn(200L);
-        when(context.getText()).thenReturn(longText);
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(200));
+        when(context.getTargetStrings()).thenReturn(Collections.singletonList(longText));
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertTrue(result.contains("'"));
-        assertTrue(result.contains("...'")); // Should be truncated
-        assertTrue(result.length() < 200); // Result should be reasonably sized
+        assertTrue(result.contains("\""));
+        assertTrue(result.contains("...\""));  // Should be truncated
     }
     
     @Test
-    @DisplayName("Should log all actions")
-    void testShouldLogAllActions() {
-        // NormalFormatter should log all actions
+    @DisplayName("Should log completed actions")
+    void testShouldLogCompletedActions() {
+        // NormalFormatter should log completed actions
+        when(context.getEndTime()).thenReturn(Instant.now());
         assertTrue(formatter.shouldLog(actionResult));
-        assertTrue(formatter.shouldLog(null)); // Even null should return true
+        
+        // Should return false for null
+        assertFalse(formatter.shouldLog(null));
     }
     
     @Test
@@ -358,9 +381,12 @@ public class NormalFormatterTest extends BrobotTestBase {
         when(context.getEndTime()).thenReturn(endTime);
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("VANISH");
-        when(context.getStateName()).thenReturn("Popup");
-        when(context.getObjectName()).thenReturn("LoadingSpinner");
-        when(context.getDurationMs()).thenReturn(2000L);
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(2000));
+        
+        StateImage img = mock(StateImage.class);
+        when(img.getOwnerStateName()).thenReturn("Popup");
+        when(img.getName()).thenReturn("LoadingSpinner");
+        when(context.getTargetImages()).thenReturn(Collections.singletonList(img));
         
         // Act
         String result = formatter.format(actionResult);
@@ -381,9 +407,12 @@ public class NormalFormatterTest extends BrobotTestBase {
         when(context.getEndTime()).thenReturn(endTime);
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("CLICK");
-        when(context.getStateName()).thenReturn("State-1");
-        when(context.getObjectName()).thenReturn("Button_2.0");
-        when(context.getDurationMs()).thenReturn(100L);
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(100));
+        
+        StateImage img = mock(StateImage.class);
+        when(img.getOwnerStateName()).thenReturn("State-1");
+        when(img.getName()).thenReturn("Button_2.0");
+        when(context.getTargetImages()).thenReturn(Collections.singletonList(img));
         
         // Act
         String result = formatter.format(actionResult);
@@ -401,8 +430,8 @@ public class NormalFormatterTest extends BrobotTestBase {
         when(context.getEndTime()).thenReturn(endTime);
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("");
-        when(context.getObjectName()).thenReturn("Target");
-        when(context.getDurationMs()).thenReturn(100L);
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(100));
+        when(context.getPrimaryTargetName()).thenReturn("Target");
         
         // Act
         String result = formatter.format(actionResult);

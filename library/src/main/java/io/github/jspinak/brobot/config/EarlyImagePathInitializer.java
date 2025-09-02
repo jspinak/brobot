@@ -78,27 +78,9 @@ public class EarlyImagePathInitializer {
             // Log the actual paths being used
             log.info("SikuliX ImagePath configured:");
             log.info("  Bundle path: {}", ImagePath.getBundlePath());
-            // Note: ImagePath.getPaths() returns a List of PathEntry objects in newer SikuliX versions
-            // We'll just log the bundle path for now
-            
-            // Also check for common subdirectories
-            checkAndAddSubdirectory(imagePath, "working");
-            checkAndAddSubdirectory(imagePath, "prompt");
             
         } catch (Exception e) {
             log.error("Failed to initialize SikuliX ImagePath: {}", e.getMessage(), e);
-        }
-    }
-    
-    /**
-     * Check if a subdirectory exists and add it to the image path if it does.
-     */
-    private void checkAndAddSubdirectory(String basePath, String subdir) {
-        File subdirFile = new File(basePath, subdir);
-        if (subdirFile.exists() && subdirFile.isDirectory()) {
-            String subdirPath = subdirFile.getPath();
-            log.info("Adding subdirectory to ImagePath: {}", subdirPath);
-            ImagePath.add(subdirPath);
         }
     }
     
