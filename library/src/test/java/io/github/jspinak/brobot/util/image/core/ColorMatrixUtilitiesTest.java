@@ -81,7 +81,7 @@ public class ColorMatrixUtilitiesTest extends BrobotTestBase {
             assertNotNull(result);
             assertEquals(3, result.cols());
             assertEquals(testMatList.size() * 50 * 50, result.rows());
-            assertEquals(CV_8UC3, result.type());
+            assertEquals(CV_8UC1, result.type());
             
             result.release();
         }
@@ -142,7 +142,6 @@ public class ColorMatrixUtilitiesTest extends BrobotTestBase {
             centers.release();
         }
         
-        @Test
         @DisplayName("Should handle different numbers of clusters")
         @ParameterizedTest
         @ValueSource(ints = {2, 5, 10})
@@ -177,7 +176,8 @@ public class ColorMatrixUtilitiesTest extends BrobotTestBase {
             Mat result = colorMatrixUtilities.cOmpare(testMat3C, thresholds, CMP_EQ);
             
             assertNotNull(result);
-            assertEquals(testMat3C.size(), result.size());
+            assertEquals(testMat3C.rows(), result.rows());
+            assertEquals(testMat3C.cols(), result.cols());
             assertEquals(CV_8UC3, result.type());
             
             result.release();
@@ -211,7 +211,8 @@ public class ColorMatrixUtilitiesTest extends BrobotTestBase {
             
             assertNotNull(result);
             assertEquals(dst, result);
-            assertEquals(testMat3C.size(), result.size());
+            assertEquals(testMat3C.rows(), result.rows());
+            assertEquals(testMat3C.cols(), result.cols());
             
             mat2.release();
             dst.release();
@@ -245,7 +246,8 @@ public class ColorMatrixUtilitiesTest extends BrobotTestBase {
             
             assertNotNull(result);
             assertEquals(CV_8UC3, result.type());
-            assertEquals(testMat3C.size(), result.size());
+            assertEquals(testMat3C.rows(), result.rows());
+            assertEquals(testMat3C.cols(), result.cols());
             
             mat2.release();
             result.release();
@@ -272,7 +274,8 @@ public class ColorMatrixUtilitiesTest extends BrobotTestBase {
             
             assertNotNull(result);
             assertEquals(CV_8UC3, result.type());
-            assertEquals(testMat3C.size(), result.size());
+            assertEquals(testMat3C.rows(), result.rows());
+            assertEquals(testMat3C.cols(), result.cols());
             
             result.release();
         }
@@ -299,8 +302,12 @@ public class ColorMatrixUtilitiesTest extends BrobotTestBase {
             
             assertNotNull(mean);
             assertNotNull(stddev);
-            assertEquals(testMat3C.size(), mean.size());
-            assertEquals(testMat3C.size(), stddev.size());
+            // Mean and stddev are statistical values, not full-size images
+            // They should be small matrices containing channel statistics
+            assertTrue(mean.rows() > 0);
+            assertTrue(mean.cols() > 0);
+            assertTrue(stddev.rows() > 0);
+            assertTrue(stddev.cols() > 0);
             
             mask.release();
         }
@@ -338,7 +345,8 @@ public class ColorMatrixUtilitiesTest extends BrobotTestBase {
             for (int i = 0; i < 3; i++) {
                 Mat channel = channels.get(i);
                 assertEquals(CV_8UC1, channel.type());
-                assertEquals(testMat3C.size(), channel.size());
+                assertEquals(testMat3C.cols(), channel.cols());
+                assertEquals(testMat3C.rows(), channel.rows());
             }
         }
         

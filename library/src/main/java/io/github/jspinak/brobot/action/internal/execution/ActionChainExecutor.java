@@ -266,7 +266,7 @@ public class ActionChainExecutor {
         record.setActionSuccess(result.isSuccess());
         record.setResultSuccess(result.isSuccess());
         record.setDuration(result.getDuration().toMillis() / 1000.0); // Convert to seconds
-        record.setText(result.getText().toString());
+        record.setText(result.getText() != null ? result.getText().toString() : "");
         record.setTimeStamp(result.getStartTime());
         
         // Extract state name from matches if available

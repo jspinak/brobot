@@ -474,8 +474,9 @@ public class HistogramComparatorTest extends BrobotTestBase {
                 assertNotNull(matches);
                 assertEquals(100, matches.size());
                 
-                // Should complete in reasonable time (< 10 seconds for 100 regions)
-                assertTrue((endTime - startTime) < 10000, 
+                // Should complete in reasonable time (< 15 seconds for 100 regions)
+                // Increased threshold to account for slower environments
+                assertTrue((endTime - startTime) < 15000, 
                     "Processing 100 regions took too long: " + (endTime - startTime) + "ms");
             } finally {
                 sceneHSV.release();

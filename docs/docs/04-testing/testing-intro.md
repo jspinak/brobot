@@ -206,6 +206,20 @@ void validateResults() {
 ## Framework Integration
 
 ### Spring Boot Integration
+
+#### Profile-Based Configuration (Recommended)
+For conflict-free test configuration, use [Profile-Based Testing](/docs/testing/profile-based-testing):
+
+```java
+@SpringBootTest(classes = IntegrationTestMinimalConfig.class)
+@ActiveProfiles("integration-minimal")
+@TestPropertySource(locations = "classpath:application-integration.properties")
+class IntegrationTest extends IntegrationTestBase {
+    // Isolated test configuration without bean conflicts
+}
+```
+
+#### Standard Configuration
 ```java
 @SpringBootTest
 @ActiveProfiles("test")

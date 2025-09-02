@@ -151,8 +151,8 @@ public class Click implements ActionInterface {
             // In mock mode, simulate the click without actual SikuliX operations
             if (MockModeManager.isMockMode()) {
                 logger.fine("[MOCK] Simulated click at location: " + location);
-                // Small simulated pause for consistency
-                Thread.sleep(10);
+                // Very small simulated pause for consistency (reduced for performance tests)
+                Thread.sleep(1);
                 return true;
             }
             

@@ -43,7 +43,14 @@ public class ClickComprehensiveTest extends BrobotTestBase {
     @Override
     public void setupTest() {
         super.setupTest();
-        // Mock Click for testing since it requires Spring dependencies
+        // Use real Click class instead of mock to test actual behavior
+        click = new Click();
+        
+        actionResult = new ActionResult();
+    }
+    
+    // Helper method to create mock behavior when needed for specific tests
+    private void setupMockClick() {
         click = org.mockito.Mockito.mock(Click.class);
         
         // Configure mock to simulate successful clicks
@@ -52,11 +59,24 @@ public class ClickComprehensiveTest extends BrobotTestBase {
             if (result == null) {
                 return null; // Handle null ActionResult gracefully
             }
-            result.setSuccess(true);
+            
             ObjectCollection collection = invocation.getArgument(1);
             if (collection == null) {
-                return null; // Handle null collection gracefully
+                result.setSuccess(false); // Fail for null collection
+                return null;
             }
+            
+            // Check if collection is empty
+            boolean hasItems = !collection.getStateLocations().isEmpty() || 
+                             !collection.getStateRegions().isEmpty() ||
+                             !collection.getStateImages().isEmpty();
+            
+            if (!hasItems) {
+                result.setSuccess(false); // Fail for empty collection
+                return null;
+            }
+            
+            result.setSuccess(true);
             
             // Add matches for locations
             for (StateLocation stateLoc : collection.getStateLocations()) {
@@ -580,6 +600,7 @@ public class ClickComprehensiveTest extends BrobotTestBase {
         @Test
         @DisplayName("Should preserve state information")
         void testStatePreservation() {
+            setupMockClick(); // Use mock to test state preservation
             // Arrange
             String stateName = "TestState";
             Location location = new Location(250, 250);
@@ -609,6 +630,7 @@ public class ClickComprehensiveTest extends BrobotTestBase {
         @Test
         @DisplayName("Should handle locations from multiple states")
         void testMultiStateLocations() {
+            setupMockClick(); // Use mock to test multiple state handling
             // Arrange
             List<StateLocation> locations = new ArrayList<>();
             String[] stateNames = {"State1", "State2", "State3"};

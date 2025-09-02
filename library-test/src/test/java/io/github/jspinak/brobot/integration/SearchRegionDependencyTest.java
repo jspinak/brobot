@@ -1,7 +1,8 @@
 package io.github.jspinak.brobot.integration;
 
-import io.github.jspinak.brobot.BrobotTestApplication;
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.config.profile.IntegrationTestMinimalConfig;
+import io.github.jspinak.brobot.test.IntegrationTestBase;
+import org.springframework.test.context.ActiveProfiles;
 import io.github.jspinak.brobot.annotations.State;
 import io.github.jspinak.brobot.action.internal.region.SearchRegionDependencyRegistry;
 import io.github.jspinak.brobot.action.internal.region.DynamicRegionResolver;
@@ -38,17 +39,15 @@ import static org.junit.jupiter.api.Assertions.*;
  * Integration test for search region dependencies.
  * Tests how Brobot resolves dynamic search regions based on other objects.
  */
-@SpringBootTest(classes = BrobotTestApplication.class)
+@SpringBootTest(classes = IntegrationTestMinimalConfig.class)
 @Import({
     SearchRegionDependencyTest.MenuState.class,
     SearchRegionDependencyTest.DialogState.class
 })
-@TestPropertySource(properties = {
-    "brobot.core.mock=true",
-    "logging.level.io.github.jspinak.brobot=DEBUG"
-})
+@ActiveProfiles("integration-minimal")
+@TestPropertySource(locations = "classpath:application-integration.properties")
 @Slf4j
-public class SearchRegionDependencyTest extends BrobotTestBase {
+public class SearchRegionDependencyTest extends IntegrationTestBase {
 
     @Autowired
     private StateService stateService;
@@ -169,19 +168,6 @@ public class SearchRegionDependencyTest extends BrobotTestBase {
         // Get the menu dropdown which depends on menu button
         MenuState menu = applicationContext.getBean(MenuState.class);
         
-<<<<<<< HEAD
-        // Verify dependency is registered - check if MenuButton has MenuDropdown as dependent
-        Set<SearchRegionDependencyRegistry.DependentObject> dependents = 
-            dependencyRegistry.getDependents("Menu", "MenuButton");
-        
-        assertFalse(dependents.isEmpty(), "MenuButton should have dependent objects");
-        
-        // Find the MenuDropdown dependent
-        boolean foundDropdown = dependents.stream()
-            .anyMatch(dep -> dep.getStateObject().getName().equals("MenuDropdown"));
-        
-        assertTrue(foundDropdown, "MenuDropdown should be dependent on MenuButton");
-=======
         // Verify dependency is registered by checking dependents
         Set<SearchRegionDependencyRegistry.DependentObject> dependents = 
             dependencyRegistry.getDependents("Menu", "MenuButton");
@@ -193,7 +179,6 @@ public class SearchRegionDependencyTest extends BrobotTestBase {
             .anyMatch(dep -> "MenuDropdown".equals(dep.getStateObject().getName()));
         
         assertTrue(foundMenuDropdown, "MenuDropdown should be a dependent of MenuButton");
->>>>>>> coverage/agent-3
         
         log.info("Dependency registered: MenuDropdown depends on Menu.MenuButton");
     }
@@ -206,22 +191,6 @@ public class SearchRegionDependencyTest extends BrobotTestBase {
         io.github.jspinak.brobot.model.state.State dialogState = 
             stateService.getState("Dialog").orElseThrow();
         
-<<<<<<< HEAD
-        // Check that DialogTitle has multiple dependents
-        Set<SearchRegionDependencyRegistry.DependentObject> titleDependents = 
-            dependencyRegistry.getDependents("Dialog", "DialogTitle");
-        
-        assertFalse(titleDependents.isEmpty(), "DialogTitle should have dependent objects");
-        
-        // Check for both close button and content dependencies
-        boolean foundCloseButton = titleDependents.stream()
-            .anyMatch(dep -> dep.getStateObject().getName().equals("DialogCloseButton"));
-        boolean foundContent = titleDependents.stream()
-            .anyMatch(dep -> dep.getStateObject().getName().equals("DialogContent"));
-        
-        assertTrue(foundCloseButton, "DialogCloseButton should depend on DialogTitle");
-        assertTrue(foundContent, "DialogContent should depend on DialogTitle");
-=======
         // Check that multiple elements have dependencies on DialogTitle
         Set<SearchRegionDependencyRegistry.DependentObject> titleDependents = 
             dependencyRegistry.getDependents("Dialog", "DialogTitle");
@@ -237,7 +206,6 @@ public class SearchRegionDependencyTest extends BrobotTestBase {
                   "DialogCloseButton should depend on DialogTitle");
         assertTrue(dependentNames.contains("DialogContent"),
                   "DialogContent should depend on DialogTitle");
->>>>>>> coverage/agent-3
         
         log.info("Multiple dependencies on same target verified");
     }
