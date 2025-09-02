@@ -25,6 +25,15 @@ public abstract class BrobotTestBase {
      */
     @BeforeAll
     public static void setUpBrobotEnvironment() {
+        // Set test profile to use test-specific configuration
+        System.setProperty("spring.profiles.active", "test");
+        
+        // Disable blocking @PostConstruct operations during tests
+        System.setProperty("brobot.test.type", "unit");
+        System.setProperty("brobot.diagnostics.image-loading.enabled", "false");
+        System.setProperty("brobot.logging.capture.enabled", "false");
+        System.setProperty("brobot.startup.verification.enabled", "false");
+        
         // Ensure headless mode for all tests
         System.setProperty("java.awt.headless", "true");
         System.setProperty("sikuli.Debug", "0");
