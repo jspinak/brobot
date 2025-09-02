@@ -8,9 +8,9 @@ import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
-import io.github.jspinak.brobot.action.basic.drag.DragOptions;
-import io.github.jspinak.brobot.action.basic.scroll.ScrollOptions;
-import io.github.jspinak.brobot.action.basic.move.MoveOptions;
+import io.github.jspinak.brobot.action.composite.drag.DragOptions;
+import io.github.jspinak.brobot.action.basic.mouse.ScrollOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -96,7 +96,6 @@ public class ActionConfigSerializerTest extends BrobotTestBase {
         @DisplayName("Should add @type field for TypeOptions")
         void shouldAddTypeFieldForTypeOptions() throws Exception {
             TypeOptions options = new TypeOptions.Builder()
-                    .setText("test text")
                     .build();
             
             String json = objectMapper.writeValueAsString(options);
@@ -127,10 +126,10 @@ public class ActionConfigSerializerTest extends BrobotTestBase {
             return Stream.of(
                 Arguments.of(new PatternFindOptions.Builder().build(), "FIND"),
                 Arguments.of(new ClickOptions.Builder().build(), "CLICK"),
-                Arguments.of(new TypeOptions.Builder().setText("test").build(), "TYPE"),
+                Arguments.of(new TypeOptions.Builder().build(), "TYPE"),
                 Arguments.of(new DragOptions.Builder().build(), "DRAG"),
                 Arguments.of(new ScrollOptions.Builder().build(), "SCROLL"),
-                Arguments.of(new MoveOptions.Builder().build(), "MOVE")
+                Arguments.of(new MouseMoveOptions.Builder().build(), "MOVE")
             );
         }
     }
@@ -160,9 +159,7 @@ public class ActionConfigSerializerTest extends BrobotTestBase {
         @DisplayName("Should serialize ClickOptions fields")
         void shouldSerializeClickOptionsFields() throws Exception {
             ClickOptions options = new ClickOptions.Builder()
-                    .setDoubleClick(true)
-                    .setRightClick(false)
-                    .setClickCount(2)
+                    .setNumberOfClicks(2)
                     .build();
             
             String json = objectMapper.writeValueAsString(options);
@@ -176,8 +173,8 @@ public class ActionConfigSerializerTest extends BrobotTestBase {
         @DisplayName("Should serialize TypeOptions fields")
         void shouldSerializeTypeOptionsFields() throws Exception {
             TypeOptions options = new TypeOptions.Builder()
-                    .setText("Hello World")
-                    .setClearField(true)
+                    .setTypeDelay(0.5)
+                    .setModifiers("CTRL")
                     .build();
             
             String json = objectMapper.writeValueAsString(options);
@@ -218,7 +215,7 @@ public class ActionConfigSerializerTest extends BrobotTestBase {
         @DisplayName("Should handle ActionConfig with null fields")
         void shouldHandleActionConfigWithNullFields() throws Exception {
             TypeOptions options = new TypeOptions.Builder()
-                    .setText(null) // Explicitly null text
+                    .setTypeDelay(0.0) // Default delay
                     .build();
             
             String json = objectMapper.writeValueAsString(options);
@@ -236,7 +233,9 @@ public class ActionConfigSerializerTest extends BrobotTestBase {
         @Test
         @DisplayName("Should handle custom ActionConfig implementation")
         void shouldHandleCustomActionConfigImplementation() throws Exception {
-            ActionConfig customConfig = new CustomActionConfig();
+            ActionConfig customConfig = new CustomActionConfig.Builder()
+                    .setCustomField("testValue")
+                    .build();
             
             String json = objectMapper.writeValueAsString(customConfig);
             
@@ -246,16 +245,34 @@ public class ActionConfigSerializerTest extends BrobotTestBase {
         }
 
         // Custom implementation for testing
-        private static class CustomActionConfig implements ActionConfig {
-            private String customField = "customValue";
+        private static class CustomActionConfig extends ActionConfig {
+            private final String customField;
+            
+            private CustomActionConfig(Builder builder) {
+                super(builder);
+                this.customField = builder.customField;
+            }
             
             public String getCustomField() {
                 return customField;
             }
             
-            @Override
-            public String getName() {
-                return "CUSTOM";
+            public static class Builder extends ActionConfig.Builder<Builder> {
+                private String customField = "customValue";
+                
+                public Builder setCustomField(String customField) {
+                    this.customField = customField;
+                    return this;
+                }
+                
+                @Override
+                protected Builder self() {
+                    return this;
+                }
+                
+                public CustomActionConfig build() {
+                    return new CustomActionConfig(this);
+                }
             }
         }
     }
@@ -356,8 +373,8 @@ public class ActionConfigSerializerTest extends BrobotTestBase {
     @DisplayName("Should maintain field order in serialization")
     void shouldMaintainFieldOrderInSerialization() throws Exception {
         PatternFindOptions options = new PatternFindOptions.Builder()
-                .setDoOnEach(PatternFindOptions.DoOnEach.ALL)
-                .setStrategy(PatternFindOptions.Strategy.EACH)
+                .setDoOnEach(PatternFindOptions.DoOnEach.BEST)
+                .setStrategy(PatternFindOptions.Strategy.ALL)
                 .setSimilarity(0.75)
                 .build();
         

@@ -75,7 +75,7 @@ public class TextExtractionResult {
      * @return Combined text with space separation
      */
     public String getCombinedText() {
-        if (accumulatedText.isEmpty()) {
+        if (accumulatedText == null || accumulatedText.isEmpty()) {
             return "";
         }
         return String.join(" ", accumulatedText.getAll());
@@ -87,6 +87,9 @@ public class TextExtractionResult {
      * @return Text as list of strings
      */
     public java.util.List<String> getTextLines() {
+        if (accumulatedText == null) {
+            return new java.util.ArrayList<>();
+        }
         return accumulatedText.getAll();
     }
     
@@ -107,8 +110,19 @@ public class TextExtractionResult {
      */
     public void merge(TextExtractionResult other) {
         if (other != null) {
-            accumulatedText.addAll(other.accumulatedText);
-            matchTextMap.putAll(other.matchTextMap);
+            // Initialize accumulatedText if null
+            if (accumulatedText == null) {
+                accumulatedText = new Text();
+            }
+            // Only merge if other has accumulated text
+            if (other.accumulatedText != null) {
+                accumulatedText.addAll(other.accumulatedText);
+            }
+            
+            // Merge match text maps
+            if (other.matchTextMap != null) {
+                matchTextMap.putAll(other.matchTextMap);
+            }
             
             // If this has no selected text but other does, use other's
             if ((selectedText == null || selectedText.isEmpty()) && 
@@ -124,7 +138,9 @@ public class TextExtractionResult {
      * @return true if text exists
      */
     public boolean hasText() {
-        return !accumulatedText.isEmpty() || !selectedText.isEmpty() || !matchTextMap.isEmpty();
+        return (accumulatedText != null && !accumulatedText.isEmpty()) || 
+               (selectedText != null && !selectedText.isEmpty()) || 
+               !matchTextMap.isEmpty();
     }
     
     /**
@@ -133,7 +149,7 @@ public class TextExtractionResult {
      * @return true if selected text is not empty
      */
     public boolean hasSelectedText() {
-        return !selectedText.isEmpty();
+        return selectedText != null && !selectedText.isEmpty();
     }
     
     /**
@@ -142,7 +158,7 @@ public class TextExtractionResult {
      * @return Count of text segments
      */
     public int getTextCount() {
-        return accumulatedText.size();
+        return accumulatedText != null ? accumulatedText.size() : 0;
     }
     
     /**
@@ -177,7 +193,7 @@ public class TextExtractionResult {
             sb.append("Selected: \"").append(selectedText).append("\"");
         }
         
-        if (!accumulatedText.isEmpty()) {
+        if (accumulatedText != null && !accumulatedText.isEmpty()) {
             if (sb.length() > 0) sb.append(", ");
             sb.append("Extracted: ").append(getTextCount()).append(" segments");
             
