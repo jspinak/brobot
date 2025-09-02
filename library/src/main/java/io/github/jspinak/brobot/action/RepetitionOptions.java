@@ -2,6 +2,9 @@ package io.github.jspinak.brobot.action;
 
 import lombok.Builder;
 import lombok.Getter;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * Configuration for action repetition and pausing behavior.
@@ -17,6 +20,8 @@ import lombok.Getter;
  */
 @Getter
 @Builder(toBuilder = true, builderClassName = "RepetitionOptionsBuilder", setterPrefix = "set")
+@JsonDeserialize(builder = RepetitionOptions.RepetitionOptionsBuilder.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public final class RepetitionOptions {
 
     /**
@@ -50,4 +55,10 @@ public final class RepetitionOptions {
      */
     @Builder.Default
     private final double pauseBetweenActionSequences = 0;
+
+    @JsonPOJOBuilder(withPrefix = "set")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class RepetitionOptionsBuilder {
+        // Lombok generates the implementation
+    }
 }

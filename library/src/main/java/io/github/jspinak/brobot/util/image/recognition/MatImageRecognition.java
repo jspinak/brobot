@@ -1,9 +1,9 @@
 package io.github.jspinak.brobot.util.image.recognition;
 
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.match.Match;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
-import org.sikuli.script.Match;
-import org.sikuli.script.Region;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -149,7 +149,9 @@ public class MatImageRecognition {
         if (maxVal[0] >= threshold) {
             // Create a Match object at the found location
             // maxLoc contains the top-left corner of the best match
-            Match match = new Match(new Region((int) maxLoc.x(), (int) maxLoc.y(), template.cols(), template.rows()), maxVal[0]);
+            Region region = new Region((int) maxLoc.x(), (int) maxLoc.y(), template.cols(), template.rows());
+            Match match = new Match(region);
+            match.setScore(maxVal[0]);
 
             // Return the Match object wrapped in an Optional
             return Optional.of(match);

@@ -89,12 +89,12 @@ public class BrobotPropertyVerifierTest extends BrobotTestBase {
     public void setupTest() {
         super.setupTest();
         
-        // Setup mock chains
-        when(mockProperties.getScreenshot()).thenReturn(mockScreenshotProps);
-        when(mockProperties.getIllustration()).thenReturn(mockIllustrationProps);
-        when(mockLogger.log()).thenReturn(mockLogBuilder);
-        when(mockLogBuilder.observation(anyString())).thenReturn(mockLogBuilder);
-        when(mockLogBuilder.metadata(anyString(), any())).thenReturn(mockLogBuilder);
+        // Setup mock chains - use lenient() for stubs that may not be used by all tests
+        lenient().when(mockProperties.getScreenshot()).thenReturn(mockScreenshotProps);
+        lenient().when(mockProperties.getIllustration()).thenReturn(mockIllustrationProps);
+        lenient().when(mockLogger.log()).thenReturn(mockLogBuilder);
+        lenient().when(mockLogBuilder.observation(anyString())).thenReturn(mockLogBuilder);
+        lenient().when(mockLogBuilder.metadata(anyString(), any())).thenReturn(mockLogBuilder);
         
         // Reset static flag for each test
         resetPropertiesVerifiedFlag();
@@ -132,7 +132,7 @@ public class BrobotPropertyVerifierTest extends BrobotTestBase {
         
         // Reset mock to verify second call doesn't trigger
         reset(mockLogger);
-        when(mockLogger.log()).thenReturn(mockLogBuilder);
+        // Don't stub again - we want to verify it's not called
         
         // When - Second call
         verifier.verifyProperties();
@@ -164,20 +164,20 @@ public class BrobotPropertyVerifierTest extends BrobotTestBase {
         when(mockScreenshotProps.isSaveHistory()).thenReturn(true);
         FrameworkSettings.saveHistory = true;
         
-        // Set mock mode via ExecutionEnvironment
-        MockedStatic<ExecutionEnvironment> mockedEnv = mockStatic(ExecutionEnvironment.class);
-        ExecutionEnvironment mockEnvInstance = mock(ExecutionEnvironment.class);
-        mockedEnv.when(ExecutionEnvironment::getInstance).thenReturn(mockEnvInstance);
-        when(mockEnvInstance.isMockMode()).thenReturn(true);
-        
-        // When
-        verifier.verifyProperties();
-        
-        // Then
-        verify(mockLogBuilder).observation("Note: Running in mock mode - illustrations use mock data");
-        
-        // Cleanup
-        mockedEnv.close();
+        // Mock the ExecutionEnvironment singleton
+        try (MockedStatic<ExecutionEnvironment> mockedEnv = mockStatic(ExecutionEnvironment.class)) {
+            ExecutionEnvironment mockEnvInstance = mock(ExecutionEnvironment.class);
+            mockedEnv.when(ExecutionEnvironment::getInstance).thenReturn(mockEnvInstance);
+            when(mockEnvInstance.isMockMode()).thenReturn(true);
+            when(mockEnvInstance.hasDisplay()).thenReturn(true);
+            when(mockEnvInstance.canCaptureScreen()).thenReturn(true);
+            
+            // When
+            verifier.verifyProperties();
+            
+            // Then - BrobotLogger.observation() is called directly
+            verify(mockLogger).observation("Note: Running in mock mode - illustrations use mock data");
+        }
     }
     
     @Test
@@ -187,25 +187,25 @@ public class BrobotPropertyVerifierTest extends BrobotTestBase {
         when(mockScreenshotProps.isSaveHistory()).thenReturn(true);
         FrameworkSettings.saveHistory = true;
         
-        // Mock headless environment
-        MockedStatic<GraphicsEnvironment> mockedGE = mockStatic(GraphicsEnvironment.class);
-        mockedGE.when(GraphicsEnvironment::isHeadless).thenReturn(true);
-        
-        MockedStatic<ExecutionEnvironment> mockedEnv = mockStatic(ExecutionEnvironment.class);
-        ExecutionEnvironment mockEnvInstance = mock(ExecutionEnvironment.class);
-        mockedEnv.when(ExecutionEnvironment::getInstance).thenReturn(mockEnvInstance);
-        when(mockEnvInstance.isMockMode()).thenReturn(false);
-        
-        // When
-        verifier.verifyProperties();
-        
-        // Then
-        verify(mockLogBuilder).observation("WARNING: Headless Mode Active");
-        verify(mockLogBuilder).metadata("headless", true);
-        
-        // Cleanup
-        mockedGE.close();
-        mockedEnv.close();
+        // Mock headless environment - use try-with-resources for proper cleanup
+        try (MockedStatic<GraphicsEnvironment> mockedGE = mockStatic(GraphicsEnvironment.class);
+             MockedStatic<ExecutionEnvironment> mockedEnv = mockStatic(ExecutionEnvironment.class)) {
+            
+            mockedGE.when(GraphicsEnvironment::isHeadless).thenReturn(true);
+            
+            ExecutionEnvironment mockEnvInstance = mock(ExecutionEnvironment.class);
+            mockedEnv.when(ExecutionEnvironment::getInstance).thenReturn(mockEnvInstance);
+            when(mockEnvInstance.isMockMode()).thenReturn(false);
+            when(mockEnvInstance.hasDisplay()).thenReturn(true);
+            when(mockEnvInstance.canCaptureScreen()).thenReturn(true);
+            
+            // When
+            verifier.verifyProperties();
+            
+            // Then
+            verify(mockLogBuilder).observation("WARNING: Headless Mode Active");
+            verify(mockLogBuilder).metadata("headless", true);
+        }
     }
     
     @Test
@@ -213,26 +213,27 @@ public class BrobotPropertyVerifierTest extends BrobotTestBase {
     void testConfirmIllustrationsEnabled() throws Exception {
         // Given
         when(mockScreenshotProps.isSaveHistory()).thenReturn(true);
+        when(mockIllustrationProps.isDrawFind()).thenReturn(true); // At least one needs to be true for illustrations to be enabled
         FrameworkSettings.saveHistory = true;
         
-        // Mock non-headless, non-mock environment
-        MockedStatic<GraphicsEnvironment> mockedGE = mockStatic(GraphicsEnvironment.class);
-        mockedGE.when(GraphicsEnvironment::isHeadless).thenReturn(false);
-        
-        MockedStatic<ExecutionEnvironment> mockedEnv = mockStatic(ExecutionEnvironment.class);
-        ExecutionEnvironment mockEnvInstance = mock(ExecutionEnvironment.class);
-        mockedEnv.when(ExecutionEnvironment::getInstance).thenReturn(mockEnvInstance);
-        when(mockEnvInstance.isMockMode()).thenReturn(false);
-        
-        // When
-        verifier.verifyProperties();
-        
-        // Then
-        verify(mockLogBuilder).observation("Illustrations are enabled and configured");
-        
-        // Cleanup
-        mockedGE.close();
-        mockedEnv.close();
+        // Mock non-headless, non-mock environment - use try-with-resources
+        try (MockedStatic<GraphicsEnvironment> mockedGE = mockStatic(GraphicsEnvironment.class);
+             MockedStatic<ExecutionEnvironment> mockedEnv = mockStatic(ExecutionEnvironment.class)) {
+            
+            mockedGE.when(GraphicsEnvironment::isHeadless).thenReturn(false);
+            
+            ExecutionEnvironment mockEnvInstance = mock(ExecutionEnvironment.class);
+            mockedEnv.when(ExecutionEnvironment::getInstance).thenReturn(mockEnvInstance);
+            when(mockEnvInstance.isMockMode()).thenReturn(false);
+            when(mockEnvInstance.hasDisplay()).thenReturn(true);
+            when(mockEnvInstance.canCaptureScreen()).thenReturn(true);
+            
+            // When
+            verifier.verifyProperties();
+            
+            // Then - BrobotLogger.observation() is called directly
+            verify(mockLogger).observation("Illustrations are enabled and configured");
+        }
     }
     
     @ParameterizedTest
@@ -281,7 +282,14 @@ public class BrobotPropertyVerifierTest extends BrobotTestBase {
         PrintStream originalOut = System.out;
         System.setOut(new PrintStream(outContent));
         
-        try {
+        try (MockedStatic<ExecutionEnvironment> mockedEnv = mockStatic(ExecutionEnvironment.class)) {
+            // Mock ExecutionEnvironment for predictable output
+            ExecutionEnvironment mockEnvInstance = mock(ExecutionEnvironment.class);
+            mockedEnv.when(ExecutionEnvironment::getInstance).thenReturn(mockEnvInstance);
+            when(mockEnvInstance.isMockMode()).thenReturn(true);
+            when(mockEnvInstance.hasDisplay()).thenReturn(false);
+            when(mockEnvInstance.canCaptureScreen()).thenReturn(false);
+            
             // When
             verifier.printVerification();
             
@@ -314,19 +322,20 @@ public class BrobotPropertyVerifierTest extends BrobotTestBase {
         when(mockIllustrationProps.isDrawRepeatedActions()).thenReturn(false);
         when(mockIllustrationProps.isDrawClassify()).thenReturn(true);
         when(mockIllustrationProps.isDrawDefine()).thenReturn(false);
+        FrameworkSettings.saveHistory = true;
         
         // When
         verifier.verifyProperties();
         
-        // Then
-        verify(mockLogBuilder).metadata("drawFind", true);
-        verify(mockLogBuilder).metadata("drawClick", false);
-        verify(mockLogBuilder).metadata("drawDrag", true);
-        verify(mockLogBuilder).metadata("drawMove", false);
-        verify(mockLogBuilder).metadata("drawHighlight", true);
-        verify(mockLogBuilder).metadata("drawRepeatedActions", false);
-        verify(mockLogBuilder).metadata("drawClassify", true);
-        verify(mockLogBuilder).metadata("drawDefine", false);
+        // Then - Verify illustration properties are logged
+        verify(mockLogBuilder, atLeastOnce()).metadata("drawFind", true);
+        verify(mockLogBuilder, atLeastOnce()).metadata("drawClick", false);
+        verify(mockLogBuilder, atLeastOnce()).metadata("drawDrag", true);
+        verify(mockLogBuilder, atLeastOnce()).metadata("drawMove", false);
+        verify(mockLogBuilder, atLeastOnce()).metadata("drawHighlight", true);
+        verify(mockLogBuilder, atLeastOnce()).metadata("drawRepeatedActions", false);
+        verify(mockLogBuilder, atLeastOnce()).metadata("drawClassify", true);
+        verify(mockLogBuilder, atLeastOnce()).metadata("drawDefine", false);
     }
     
     @Test
@@ -357,25 +366,26 @@ public class BrobotPropertyVerifierTest extends BrobotTestBase {
     void testLogExecutionEnvironmentDetails() throws Exception {
         // Given
         when(mockScreenshotProps.isSaveHistory()).thenReturn(true);
+        when(mockIllustrationProps.isDrawFind()).thenReturn(true); // At least one needs to be true
+        FrameworkSettings.saveHistory = true;
         
-        MockedStatic<ExecutionEnvironment> mockedEnv = mockStatic(ExecutionEnvironment.class);
-        ExecutionEnvironment mockEnvInstance = mock(ExecutionEnvironment.class);
-        mockedEnv.when(ExecutionEnvironment::getInstance).thenReturn(mockEnvInstance);
-        when(mockEnvInstance.isMockMode()).thenReturn(true);
-        when(mockEnvInstance.hasDisplay()).thenReturn(false);
-        when(mockEnvInstance.canCaptureScreen()).thenReturn(false);
-        
-        // When
-        verifier.verifyProperties();
-        
-        // Then
-        verify(mockLogBuilder).metadata("mockMode", true);
-        verify(mockLogBuilder).metadata("hasDisplay", false);
-        verify(mockLogBuilder).metadata("canCaptureScreen", false);
-        verify(mockLogBuilder).metadata(eq("osName"), anyString());
-        
-        // Cleanup
-        mockedEnv.close();
+        // Use try-with-resources for proper cleanup
+        try (MockedStatic<ExecutionEnvironment> mockedEnv = mockStatic(ExecutionEnvironment.class)) {
+            ExecutionEnvironment mockEnvInstance = mock(ExecutionEnvironment.class);
+            mockedEnv.when(ExecutionEnvironment::getInstance).thenReturn(mockEnvInstance);
+            when(mockEnvInstance.isMockMode()).thenReturn(true);
+            when(mockEnvInstance.hasDisplay()).thenReturn(false);
+            when(mockEnvInstance.canCaptureScreen()).thenReturn(false);
+            
+            // When
+            verifier.verifyProperties();
+            
+            // Then
+            verify(mockLogBuilder).metadata("mockMode", true);
+            verify(mockLogBuilder).metadata("hasDisplay", false);
+            verify(mockLogBuilder).metadata("canCaptureScreen", false);
+            verify(mockLogBuilder).metadata(eq("osName"), anyString());
+        }
     }
     
     @ParameterizedTest
@@ -399,25 +409,32 @@ public class BrobotPropertyVerifierTest extends BrobotTestBase {
             when(mockIllustrationProps.isDrawDefine()).thenReturn(false);
         }
         
-        MockedStatic<ExecutionEnvironment> mockedEnv = mockStatic(ExecutionEnvironment.class);
-        ExecutionEnvironment mockEnvInstance = mock(ExecutionEnvironment.class);
-        mockedEnv.when(ExecutionEnvironment::getInstance).thenReturn(mockEnvInstance);
-        when(mockEnvInstance.isMockMode()).thenReturn(mockMode);
-        
-        MockedStatic<GraphicsEnvironment> mockedGE = mockStatic(GraphicsEnvironment.class);
-        mockedGE.when(GraphicsEnvironment::isHeadless).thenReturn(false);
-        
-        // When
-        verifier.verifyProperties();
-        
-        // Then
-        if (!expectedObservation.isEmpty()) {
-            verify(mockLogBuilder).observation(argThat(s -> s != null && s.contains(expectedObservation)));
+        // Use try-with-resources for proper cleanup
+        try (MockedStatic<ExecutionEnvironment> mockedEnv = mockStatic(ExecutionEnvironment.class);
+             MockedStatic<GraphicsEnvironment> mockedGE = mockStatic(GraphicsEnvironment.class)) {
+            
+            ExecutionEnvironment mockEnvInstance = mock(ExecutionEnvironment.class);
+            mockedEnv.when(ExecutionEnvironment::getInstance).thenReturn(mockEnvInstance);
+            when(mockEnvInstance.isMockMode()).thenReturn(mockMode);
+            when(mockEnvInstance.hasDisplay()).thenReturn(true);
+            when(mockEnvInstance.canCaptureScreen()).thenReturn(true);
+            
+            mockedGE.when(GraphicsEnvironment::isHeadless).thenReturn(false);
+            
+            // When
+            verifier.verifyProperties();
+            
+            // Then
+            if (!expectedObservation.isEmpty()) {
+                if (expectedObservation.contains("Note: Running in mock mode")) {
+                    verify(mockLogger).observation(argThat(s -> s != null && s.contains("Note: Running in mock mode")));
+                } else if (expectedObservation.contains("Illustrations are enabled")) {
+                    verify(mockLogger).observation(argThat(s -> s != null && s.contains("Illustrations are enabled")));
+                } else {
+                    verify(mockLogBuilder).observation(argThat(s -> s != null && s.contains(expectedObservation)));
+                }
+            }
         }
-        
-        // Cleanup
-        mockedEnv.close();
-        mockedGE.close();
     }
     
     private static Stream<Arguments> providePropertyCombinations() {

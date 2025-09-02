@@ -12,6 +12,9 @@ import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,7 +29,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Tests for HighlightManager - manages visual feedback and highlighting.
+ * These tests verify the logic for highlighting matches, regions, clicks, and errors.
+ * The actual GUI rendering is mocked, so tests can run in headless environments.
+ * All visual operations are mocked through HighlightWrapper, making these tests safe for CI/CD.
+ */
 @ExtendWith(MockitoExtension.class)
+@DisplayName("HighlightManager Tests")
 public class HighlightManagerTest extends BrobotTestBase {
 
     private HighlightManager highlightManager;
@@ -54,6 +64,9 @@ public class HighlightManagerTest extends BrobotTestBase {
     
     @Mock
     private VisualFeedbackConfig.ClickHighlightConfig clickConfig;
+    
+    @Mock
+    private io.github.jspinak.brobot.statemanagement.StateMemory stateMemory;
     
     @BeforeEach
     @Override
@@ -100,7 +113,7 @@ public class HighlightManagerTest extends BrobotTestBase {
         lenient().when(clickConfig.getRadius()).thenReturn(20);
         lenient().when(clickConfig.isRippleEffect()).thenReturn(false);
         
-        highlightManager = new HighlightManager(config, brobotLogger, highlightWrapper);
+        highlightManager = new HighlightManager(config, brobotLogger, highlightWrapper, stateMemory);
         
         // Set up default wrapper behavior
         // lenient().when(highlightWrapper.isAvailable()).thenReturn(true); // COMMENTED OUT - isAvailable() method doesn't exist
@@ -509,7 +522,7 @@ public class HighlightManagerTest extends BrobotTestBase {
     @Test
     public void testGetColorName_CommonColors() {
         // Use reflection to test private method
-        HighlightManager manager = new HighlightManager(config, brobotLogger, highlightWrapper);
+        HighlightManager manager = new HighlightManager(config, brobotLogger, highlightWrapper, stateMemory);
         
         assertEquals("red", invokeGetColorName(manager, Color.RED));
         assertEquals("green", invokeGetColorName(manager, Color.GREEN));
@@ -525,7 +538,7 @@ public class HighlightManagerTest extends BrobotTestBase {
     
     @Test
     public void testGetColorName_CustomColors() {
-        HighlightManager manager = new HighlightManager(config, brobotLogger, highlightWrapper);
+        HighlightManager manager = new HighlightManager(config, brobotLogger, highlightWrapper, stateMemory);
         
         // Test color approximation
         assertEquals("red", invokeGetColorName(manager, new Color(220, 50, 50)));

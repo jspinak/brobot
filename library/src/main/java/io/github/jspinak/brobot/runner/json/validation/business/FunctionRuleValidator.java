@@ -744,7 +744,8 @@ public class FunctionRuleValidator {
                 String method = statement.containsKey("method") ?
                         (String) statement.get("method") : "";
 
-                if (object.equals("stateTransitionsManagement") && method.equals("isStateActive")) {
+                if (object.equals("stateTransitionsManagement") && 
+                    (method.equals("isStateActive") || method.equals("getCurrentState"))) {
                     return true;
                 }
             }
@@ -948,7 +949,7 @@ public class FunctionRuleValidator {
 
         // Check for known heavy operations
         if (object.equals("action")) {
-            List<String> heavyMethods = Arrays.asList("findAll", "findColor", "findMotion");
+            List<String> heavyMethods = Arrays.asList("findAll", "findColor", "findMotion", "findText");
             return heavyMethods.contains(method);
         }
 
@@ -1010,8 +1011,19 @@ public class FunctionRuleValidator {
      * Determines if a statement is a fixed wait.
      */
     private boolean isFixedWait(Map<String, Object> statement) {
-        if (!statement.containsKey("statementType") ||
-                !statement.get("statementType").equals("methodCall")) {
+        if (!statement.containsKey("statementType")) {
+            return false;
+        }
+        
+        String statementType = (String) statement.get("statementType");
+        
+        // Direct wait statement
+        if (statementType.equals("wait")) {
+            return true;
+        }
+        
+        // Method call wait
+        if (!statementType.equals("methodCall")) {
             return false;
         }
 

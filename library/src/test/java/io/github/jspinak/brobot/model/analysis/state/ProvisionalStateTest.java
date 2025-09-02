@@ -4,6 +4,9 @@ import io.github.jspinak.brobot.model.analysis.state.discovery.ProvisionalState;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -18,7 +21,7 @@ public class ProvisionalStateTest extends BrobotTestBase {
     @Override
     public void setupTest() {
         super.setupTest();
-        provisionalState = new ProvisionalState();
+        provisionalState = new ProvisionalState("TestState");
     }
     
     @Nested
@@ -32,17 +35,18 @@ public class ProvisionalStateTest extends BrobotTestBase {
         }
         
         @Test
-        @DisplayName("Should identify state patterns")
-        void shouldIdentifyStatePatterns() {
-            // Test state pattern identification
-            assertDoesNotThrow(() -> provisionalState.identifyPatterns());
+        @DisplayName("Should check if scene is contained")
+        void shouldCheckSceneContainment() {
+            // Test scene containment
+            assertFalse(provisionalState.contains(1));
         }
         
         @Test
-        @DisplayName("Should calculate confidence score")
-        void shouldCalculateConfidenceScore() {
-            double confidence = provisionalState.getConfidence();
-            assertTrue(confidence >= 0.0 && confidence <= 1.0);
+        @DisplayName("Should check equal scene sets")
+        void shouldCheckEqualSceneSets() {
+            Set<Integer> scenes = new HashSet<>();
+            scenes.add(1);
+            assertFalse(provisionalState.hasEqualSceneSets(scenes));
         }
     }
 }

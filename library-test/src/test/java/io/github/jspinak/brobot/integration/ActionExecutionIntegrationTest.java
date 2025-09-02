@@ -1,15 +1,18 @@
 package io.github.jspinak.brobot.integration;
 
-import io.github.jspinak.brobot.BrobotTestApplication;
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.config.profile.IntegrationTestMinimalConfig;
+import io.github.jspinak.brobot.test.IntegrationTestBase;
+import org.springframework.test.context.ActiveProfiles;
 import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.action.basic.find.FindStrategy;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
 import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
+import io.github.jspinak.brobot.model.action.MouseButton;
+import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Position;
@@ -36,13 +39,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * Integration test for Action execution with various options and configurations.
  * Tests the complete action flow including pattern finding, clicking, typing, and dragging.
  */
-@SpringBootTest(classes = BrobotTestApplication.class)
-@TestPropertySource(properties = {
-    "brobot.core.mock=true",
-    "logging.level.io.github.jspinak.brobot=DEBUG"
-})
+@SpringBootTest(classes = IntegrationTestMinimalConfig.class)
+@ActiveProfiles("integration-minimal")
+@TestPropertySource(locations = "classpath:application-integration.properties")
 @Slf4j
-public class ActionExecutionIntegrationTest extends BrobotTestBase {
+public class ActionExecutionIntegrationTest extends IntegrationTestBase {
 
     @Autowired
     private Action action;
@@ -74,7 +75,7 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
             
         iconImage = new StateImage.Builder()
             .setName("TestIcon")
-            .setDefinedRegion(Region.builder()
+            .setSearchRegionForAllPatterns(Region.builder()
                 .withRegion(100, 100, 50, 50)
                 .build())
             .build();
@@ -86,9 +87,8 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
         
         // Create and register test state
         testState = new State.Builder("TestActionState")
-            .addImage(buttonImage)
-            .addImage(iconImage)
-            .addString(textField)
+            .withImages(buttonImage, iconImage)
+            .withStrings(textField)
             .build();
             
         stateService.save(testState);
@@ -100,10 +100,13 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
         log.info("=== TESTING BASIC FIND ACTION ===");
         
         PatternFindOptions findOptions = new PatternFindOptions.Builder()
-            .setFind(Type.BEST)
+            .setStrategy(PatternFindOptions.Strategy.BEST)
             .build();
             
-        ActionResult result = action.perform(findOptions, buttonImage);
+        ObjectCollection objects = new ObjectCollection.Builder()
+            .withImages(buttonImage)
+            .build();
+        ActionResult result = action.perform(findOptions, objects);
         
         assertNotNull(result, "ActionResult should not be null");
         assertTrue(result.isSuccess(), "Find action should succeed in mock mode");
@@ -118,13 +121,20 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
     public void testClickWithOptions() {
         log.info("=== TESTING CLICK WITH OPTIONS ===");
         
+        MousePressOptions mouseOptions = MousePressOptions.builder()
+            .setButton(MouseButton.LEFT)
+            .setPauseAfterMouseUp(0.5)
+            .build();
+        
         ClickOptions clickOptions = new ClickOptions.Builder()
-            .setClickType(ClickOptions.ClickType.LEFT)
-            .setMultiClick(2)  // Double-click
-            .setPauseAfterClick(.5)
+            .setNumberOfClicks(2)  // Double-click
+            .setPressOptions(mouseOptions)
             .build();
             
-        ActionResult result = action.perform(clickOptions, iconImage);
+        ObjectCollection objects = new ObjectCollection.Builder()
+            .withImages(iconImage)
+            .build();
+        ActionResult result = action.perform(clickOptions, objects);
         
         assertTrue(result.isSuccess(), "Click action should succeed");
         assertEquals(1, result.getMatchList().size(), "Should have one match for defined region");
@@ -143,12 +153,15 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
         String textToType = "Hello Brobot!";
         
         TypeOptions typeOptions = new TypeOptions.Builder()
-            .setText(textToType)
-            .setPauseBeforeTyping(0.1)
-            .setPauseAfterTyping(0.1)
+            .setTypeDelay(0.1)
+            .setPauseBeforeBegin(0.1)
+            .setPauseAfterEnd(0.1)
             .build();
             
-        ActionResult result = action.perform(typeOptions, textField);
+        ObjectCollection objects = new ObjectCollection.Builder()
+            .withStrings(textToType)
+            .build();
+        ActionResult result = action.perform(typeOptions, objects);
         
         assertTrue(result.isSuccess(), "Type action should succeed");
         assertEquals(textToType, result.getText(), "Typed text should match input");
@@ -163,12 +176,13 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
         Location toLocation = new Location(200, 200);
         
         DragOptions dragOptions = new DragOptions.Builder()
-            .setFromLocation(fromLocation)
-            .setToLocation(toLocation)
-            .setPauseDuringDrag(0.5)
+            .setDelayBetweenMouseDownAndMove(0.5)
             .build();
             
-        ActionResult result = action.perform(dragOptions);
+        ObjectCollection objects = new ObjectCollection.Builder()
+            .withLocations(fromLocation, toLocation)
+            .build();
+        ActionResult result = action.perform(dragOptions, objects);
         
         assertTrue(result.isSuccess(), "Drag action should succeed");
         log.info("Dragged from {} to {}", fromLocation, toLocation);
@@ -181,17 +195,22 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
         Location targetLocation = new Location(Positions.Name.MIDDLEMIDDLE);
         
         MouseMoveOptions moveOptions = new MouseMoveOptions.Builder()
-            .setLocation(targetLocation)
+            .setMoveMouseDelay(0.1f)
             .build();
             
-        ActionResult result = action.perform(moveOptions);
+        ObjectCollection objects = new ObjectCollection.Builder()
+            .withLocations(targetLocation)
+            .build();
+        ActionResult result = action.perform(moveOptions, objects);
         
         assertTrue(result.isSuccess(), "Move action should succeed");
         assertFalse(result.getMatchList().isEmpty(), "Should have a match for move location");
         
         Match moveMatch = result.getMatchList().get(0);
         assertNotNull(moveMatch.getRegion(), "Move should have a target region");
-        log.info("Moved to: {}", moveMatch.getRegion().getCenter());
+        log.info("Moved to: X={}, Y={}", 
+                moveMatch.getRegion().getX() + moveMatch.getRegion().getW()/2,
+                moveMatch.getRegion().getY() + moveMatch.getRegion().getH()/2);
     }
     
     @Test
@@ -204,11 +223,14 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
             .build();
             
         PatternFindOptions findAllOptions = new PatternFindOptions.Builder()
-            .setFind(Type.ALL)
-            .setMaxMatches(5)
+            .setStrategy(PatternFindOptions.Strategy.ALL)
+            .setMaxMatchesToActOn(5)
             .build();
             
-        ActionResult result = action.perform(findAllOptions, repeatingPattern);
+        ObjectCollection objects = new ObjectCollection.Builder()
+            .withImages(repeatingPattern)
+            .build();
+        ActionResult result = action.perform(findAllOptions, objects);
         
         assertTrue(result.isSuccess(), "Find all should succeed");
         assertFalse(result.getMatchList().isEmpty(), "Should find at least one match");
@@ -218,7 +240,7 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
         if (result.getMatchList().size() > 1) {
             Match first = result.getMatchList().get(0);
             Match second = result.getMatchList().get(1);
-            assertNotEquals(first.getRegion().getCenter(), second.getRegion().getCenter(),
+            assertNotEquals(first.getRegion().getX(), second.getRegion().getX(),
                           "Multiple matches should have different locations");
         }
     }
@@ -231,11 +253,18 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
             .withRegion(50, 50, 200, 200)
             .build();
         
+        StateImage imageWithSearchRegion = new StateImage.Builder()
+            .setName("ButtonInRegion")
+            .setSearchRegionForAllPatterns(searchRegion)
+            .build();
+        
         PatternFindOptions findInRegion = new PatternFindOptions.Builder()
-            .setSearchRegions(searchRegion)
             .build();
             
-        ActionResult result = action.perform(findInRegion, buttonImage);
+        ObjectCollection objects = new ObjectCollection.Builder()
+            .withImages(imageWithSearchRegion)
+            .build();
+        ActionResult result = action.perform(findInRegion, objects);
         
         assertTrue(result.isSuccess(), "Find in region should succeed");
         if (!result.getMatchList().isEmpty()) {
@@ -256,12 +285,14 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
         log.info("=== TESTING HIGHLIGHT ACTION ===");
         
         HighlightOptions highlightOptions = new HighlightOptions.Builder()
-            .setHighlight(true)
             .setHighlightSeconds(1.0)
             .setHighlightColor("RED")
             .build();
             
-        ActionResult result = action.perform(highlightOptions, iconImage);
+        ObjectCollection objects = new ObjectCollection.Builder()
+            .withImages(iconImage)
+            .build();
+        ActionResult result = action.perform(highlightOptions, objects);
         
         assertTrue(result.isSuccess(), "Highlight action should succeed");
         log.info("Highlighted {} for 1 second", iconImage.getName());
@@ -273,24 +304,36 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
         
         // Find, then click, then type
         PatternFindOptions findOptions = new PatternFindOptions.Builder()
-            .setFind(Type.FIRST)
+            .setStrategy(PatternFindOptions.Strategy.FIRST)
             .build();
             
-        ActionResult findResult = action.perform(findOptions, textField);
+        ObjectCollection findObjects = new ObjectCollection.Builder()
+            .withStrings(textField)
+            .build();
+        ActionResult findResult = action.perform(findOptions, findObjects);
         assertTrue(findResult.isSuccess(), "Find should succeed");
         
+        MousePressOptions pressOptions = MousePressOptions.builder()
+            .setButton(MouseButton.LEFT)
+            .build();
         ClickOptions clickOptions = new ClickOptions.Builder()
-            .setClickType(ClickOptions.ClickType.LEFT)
+            .setPressOptions(pressOptions)
             .build();
             
-        ActionResult clickResult = action.perform(clickOptions, textField);
+        ObjectCollection clickObjects = new ObjectCollection.Builder()
+            .withStrings(textField)
+            .build();
+        ActionResult clickResult = action.perform(clickOptions, clickObjects);
         assertTrue(clickResult.isSuccess(), "Click should succeed");
         
         TypeOptions typeOptions = new TypeOptions.Builder()
-            .setText("Composite action test")
+            .setTypeDelay(0.01)
             .build();
             
-        ActionResult typeResult = action.perform(typeOptions);
+        ObjectCollection typeObjects = new ObjectCollection.Builder()
+            .withStrings("Composite action test")
+            .build();
+        ActionResult typeResult = action.perform(typeOptions, typeObjects);
         assertTrue(typeResult.isSuccess(), "Type should succeed");
         
         log.info("Composite action sequence completed successfully");
@@ -301,11 +344,14 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
         log.info("=== TESTING ACTION WITH TIMEOUT ===");
         
         PatternFindOptions timeoutOptions = new PatternFindOptions.Builder()
-            .setMaxWait(2.0)  // 2 seconds timeout
+            .setSearchDuration(2.0)  // 2 seconds timeout
             .build();
             
         long startTime = System.currentTimeMillis();
-        ActionResult result = action.perform(timeoutOptions, buttonImage);
+        ObjectCollection objects = new ObjectCollection.Builder()
+            .withImages(buttonImage)
+            .build();
+        ActionResult result = action.perform(timeoutOptions, objects);
         long duration = System.currentTimeMillis() - startTime;
         
         assertTrue(result.isSuccess(), "Action should complete within timeout");

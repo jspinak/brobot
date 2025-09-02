@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.screen;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.api.condition.DisabledIf;
@@ -26,6 +27,9 @@ import static org.mockito.Mockito.*;
  * Note: Many tests require a graphics environment and will be skipped in headless mode.
  */
 @DisplayName("PhysicalScreen Tests")
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Requires real display")
+@DisabledIfEnvironmentVariable(named = "WSL_DISTRO_NAME", matches = ".+", disabledReason = "WSL environment detected")
+@DisabledIfSystemProperty(named = "java.awt.headless", matches = "true", disabledReason = "Headless environment")
 public class PhysicalScreenTest extends BrobotTestBase {
     
     @Nested

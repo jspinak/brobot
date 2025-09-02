@@ -1,0 +1,213 @@
+// Test suite configuration for running 5000+ tests efficiently
+
+// Define test categories
+def testCategories = [
+    'unit': [
+        'io.github.jspinak.brobot.exception.*',
+        'io.github.jspinak.brobot.model.*',
+        'io.github.jspinak.brobot.runner.json.*',
+        'io.github.jspinak.brobot.runner.dsl.*'
+    ],
+    'integration': [
+        'io.github.jspinak.brobot.action.*',
+        'io.github.jspinak.brobot.navigation.*',
+        'io.github.jspinak.brobot.statemanagement.*',
+        'io.github.jspinak.brobot.config.*'
+    ],
+    'analysis': [
+        'io.github.jspinak.brobot.analysis.*',
+        'io.github.jspinak.brobot.tools.*',
+        'io.github.jspinak.brobot.util.*'
+    ],
+    'aspects': [
+        'io.github.jspinak.brobot.aspects.*',
+        'io.github.jspinak.brobot.logging.*',
+        'io.github.jspinak.brobot.monitor.*'
+    ]
+]
+
+// Task to run unit tests only
+task unitTests(type: Test) {
+    group = 'verification'
+    description = 'Run unit tests only'
+    
+    useJUnitPlatform {
+        includeTags 'unit', 'fast'
+        excludeTags 'integration', 'slow'
+    }
+    
+    filter {
+        testCategories['unit'].each { pattern ->
+            includeTestsMatching pattern
+        }
+    }
+    
+    maxHeapSize = '2g'
+    forkEvery = 200
+    maxParallelForks = 4
+}
+
+// Task to run integration tests only
+task integrationTests(type: Test) {
+    group = 'verification'
+    description = 'Run integration tests only'
+    
+    useJUnitPlatform {
+        includeTags 'integration'
+        excludeTags 'unit'
+    }
+    
+    filter {
+        testCategories['integration'].each { pattern ->
+            includeTestsMatching pattern
+        }
+    }
+    
+    maxHeapSize = '3g'
+    forkEvery = 50
+    maxParallelForks = 2
+    timeout = Duration.ofMinutes(15)
+}
+
+// Task to run analysis and utility tests
+task analysisTests(type: Test) {
+    group = 'verification'
+    description = 'Run analysis and utility tests'
+    
+    filter {
+        testCategories['analysis'].each { pattern ->
+            includeTestsMatching pattern
+        }
+    }
+    
+    maxHeapSize = '2g'
+    forkEvery = 150
+}
+
+// Task to run aspect and logging tests
+task aspectTests(type: Test) {
+    group = 'verification'
+    description = 'Run aspect and logging tests'
+    
+    filter {
+        testCategories['aspects'].each { pattern ->
+            includeTestsMatching pattern
+        }
+    }
+    
+    maxHeapSize = '2g'
+    forkEvery = 150
+}
+
+// Task to run all tests sequentially by category
+task testAll {
+    group = 'verification'
+    description = 'Run all tests sequentially by category'
+    
+    dependsOn unitTests
+    unitTests.finalizedBy integrationTests
+    integrationTests.finalizedBy analysisTests
+    analysisTests.finalizedBy aspectTests
+    
+    doLast {
+        println "All test suites completed"
+        println "Check build/reports/tests/ for detailed results"
+    }
+}
+
+// Task to run tests by package pattern
+task testPackage {
+    group = 'verification'
+    description = 'Run tests for a specific package (use -Ppackage=...)'
+    
+    doLast {
+        if (!project.hasProperty('package')) {
+            throw new GradleException('Please specify package with -Ppackage=io.github.jspinak.brobot.xxx')
+        }
+        
+        def packagePattern = project.property('package') + '.*'
+        
+        tasks.create('dynamicPackageTest', Test) {
+            filter {
+                includeTestsMatching packagePattern
+            }
+            maxHeapSize = '2g'
+            forkEvery = 100
+        }.execute()
+    }
+}
+
+// Task to list all test counts by package
+task countTests {
+    group = 'verification'
+    description = 'Count tests by package'
+    
+    doLast {
+        def testDir = file('src/test/java')
+        def packages = [:]
+        
+        testDir.eachFileRecurse { file ->
+            if (file.name.endsWith('Test.java')) {
+                def content = file.text
+                def testCount = content.count('@Test')
+                def packageName = content.find(/package\s+([\w.]+);/) { match, pkg -> pkg }
+                
+                if (packageName) {
+                    packages[packageName] = (packages[packageName] ?: 0) + testCount
+                }
+            }
+        }
+        
+        println "\nTest Count by Package:"
+        println "=" * 60
+        
+        def total = 0
+        packages.sort().each { pkg, count ->
+            println String.format("%-50s %5d tests", pkg, count)
+            total += count
+        }
+        
+        println "=" * 60
+        println String.format("%-50s %5d tests", "TOTAL", total)
+    }
+}
+
+// Configure all test tasks with common settings
+tasks.withType(Test).configureEach {
+    // Common test configuration
+    useJUnitPlatform()
+    
+    // JVM settings for headless execution
+    jvmArgs = [
+        '-XX:+UseG1GC',
+        '-Djava.awt.headless=true',
+        '-Dbrobot.mock=true',
+        '-Dsikuli.Debug=0'
+    ]
+    
+    // System properties
+    systemProperties = [
+        'java.awt.headless': 'true',
+        'brobot.mock': 'true',
+        'sikuli.Debug': '0',
+        'test.suite': name
+    ]
+    
+    // Logging
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+        showStackTraces = true
+        
+        afterSuite { desc, result ->
+            if (!desc.parent) {
+                println "\nTest Suite: ${desc.name}"
+                println "Results: ${result.resultType} " +
+                        "(${result.testCount} tests, " +
+                        "${result.successfulTestCount} successes, " +
+                        "${result.failedTestCount} failures, " +
+                        "${result.skippedTestCount} skipped)"
+            }
+        }
+    }
+}

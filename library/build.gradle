@@ -110,18 +110,43 @@ test {
     exclude '**/MotionDetectorTest.class'
     exclude '**/GridBasedClustererTest.class'
     
-    // Simple memory settings
-    maxHeapSize = '2g'
+    // Enhanced memory and forking settings for 5000+ tests
+    maxHeapSize = '4g'
+    minHeapSize = '1g'
+    
+    // Fork settings to prevent resource conflicts
+    forkEvery = 100  // Create new JVM every 100 tests
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+    
+    // JVM args for better performance
+    jvmArgs = [
+        '-XX:+UseG1GC',
+        '-XX:MaxGCPauseMillis=200',
+        '-XX:+ParallelRefProcEnabled',
+        '-Djava.awt.headless=true',
+        '-Dbrobot.mock=true'
+    ]
+    
+    // Timeout to prevent hanging tests
+    timeout = Duration.ofMinutes(10)
     
     // Standard test logging
     testLogging {
         events "passed", "skipped", "failed"
         exceptionFormat "full"
         showStandardStreams = false
+        showStackTraces = true
     }
     
     // Ensure test classes can access main classes
     classpath = sourceSets.test.runtimeClasspath
+    
+    // System properties for tests
+    systemProperties = [
+        'java.awt.headless': 'true',
+        'brobot.mock': 'true',
+        'sikuli.Debug': '0'
+    ]
 }
 
 jacocoTestReport {
@@ -270,4 +295,4 @@ jreleaser {
 
 // Apply coverage tasks
 // apply from: 'gradle-coverage-tasks.gradle'  // Temporarily disabled for testing
-apply from: 'test-tasks.gradle'
+apply from: 'test-suites.gradle'  // Test suite configuration for 5000+ tests

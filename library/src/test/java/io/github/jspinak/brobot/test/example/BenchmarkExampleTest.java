@@ -7,6 +7,8 @@ import io.github.jspinak.brobot.test.TestCategories;
 import io.github.jspinak.brobot.test.benchmark.BenchmarkExtension;
 import io.github.jspinak.brobot.test.benchmark.PerformanceBenchmark;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.ArrayList;
@@ -23,14 +25,16 @@ import static org.junit.jupiter.api.Assertions.*;
 @Tag(TestCategories.UNIT)
 @Tag("benchmark")
 @Tag(TestCategories.CI_SAFE)
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Benchmark tests not suitable for CI")
+@EnabledIfSystemProperty(named = "run.benchmarks", matches = "true", disabledReason = "Enable with -Drun.benchmarks=true")
 public class BenchmarkExampleTest extends BrobotTestBase {
     
     private ExecutionMode executionMode;
     
     @BeforeEach
     @Override
-    public void setupTest(TestInfo testInfo) {
-        super.setupTest(testInfo);
+    public void setupTest() {
+        super.setupTest();
         executionMode = new ExecutionMode();
         
         // Set performance thresholds

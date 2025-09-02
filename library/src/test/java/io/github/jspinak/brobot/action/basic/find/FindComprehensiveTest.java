@@ -188,8 +188,9 @@ public class FindComprehensiveTest extends BrobotTestBase {
         @DisplayName("Should create SearchRegions")
         void testSearchRegionsCreation() {
             // Arrange
-            Region region1 = new Region(0, 0, 500, 300);
-            Region region2 = new Region(500, 0, 500, 300);
+            // Use non-adjacent regions to avoid automatic merging
+            Region region1 = new Region(0, 0, 400, 300);
+            Region region2 = new Region(600, 0, 400, 300);  // Gap of 200 pixels prevents merging
             
             // Act
             SearchRegions searchRegions = new SearchRegions();
