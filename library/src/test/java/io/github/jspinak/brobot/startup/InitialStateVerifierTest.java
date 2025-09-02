@@ -123,6 +123,12 @@ public class InitialStateVerifierTest extends BrobotTestBase {
     @DisplayName("State Verification with StateEnums")
     class StateEnumVerification {
         
+        @BeforeEach
+        public void setupRealMode() {
+            // These tests need real mode behavior, not mock mode
+            FrameworkSettings.mock = false;
+        }
+        
         @Test
         @DisplayName("Verify with single state enum")
         public void testVerifySingleState() {
@@ -190,7 +196,11 @@ public class InitialStateVerifierTest extends BrobotTestBase {
             when(stateService.getState("UNKNOWN")).thenReturn(Optional.empty());
             
             // Execute
-            boolean result = verifier.verify(new StateEnum() { public String getName() { return "UNKNOWN"; }});
+            boolean result = verifier.verify(new StateEnum() { 
+                public String getName() { return "UNKNOWN"; }
+                @Override
+                public String toString() { return "UNKNOWN"; }
+            });
             
             // Verify
             assertFalse(result);
@@ -242,6 +252,12 @@ public class InitialStateVerifierTest extends BrobotTestBase {
     @DisplayName("Verification Builder")
     class VerificationBuilderTests {
         
+        @BeforeEach
+        public void setupRealMode() {
+            // These tests need real mode behavior, not mock mode
+            FrameworkSettings.mock = false;
+        }
+        
         @Test
         @DisplayName("Builder with states verifies successfully")
         public void testBuilderWithStates() {
@@ -287,7 +303,7 @@ public class InitialStateVerifierTest extends BrobotTestBase {
             
             // Verify
             assertTrue(result);
-            verify(stateDetector).findState(1L);
+            verify(stateDetector, times(2)).findState(1L); // Called once in verifyReal, once in searchAllStates
             verify(stateDetector).findState(2L);
             verify(stateMemory).addActiveState(2L);
         }
@@ -342,6 +358,12 @@ public class InitialStateVerifierTest extends BrobotTestBase {
     @Nested
     @DisplayName("Edge Cases")
     class EdgeCases {
+        
+        @BeforeEach
+        public void setupRealMode() {
+            // These tests need real mode behavior, not mock mode
+            FrameworkSettings.mock = false;
+        }
         
         @Test
         @DisplayName("Handle null state enum")

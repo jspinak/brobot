@@ -134,7 +134,9 @@ public class Pattern {
 
     public Pattern(Image image) {
         this.image = image;
-        setName(image.getName());
+        if (image != null) {
+            setName(image.getName());
+        }
     }
 
     public Pattern(Match match) {

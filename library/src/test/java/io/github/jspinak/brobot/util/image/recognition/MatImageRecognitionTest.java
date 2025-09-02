@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.util.image.recognition;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.model.match.Match;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
@@ -11,7 +12,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.sikuli.script.Match;
 
 import java.util.Optional;
 
@@ -74,10 +74,10 @@ public class MatImageRecognitionTest extends BrobotTestBase {
             Match match = result.get();
             
             // Should find the template at position (50, 50)
-            assertEquals(50, match.getX(), 2); // Allow small tolerance
-            assertEquals(50, match.getY(), 2);
-            assertEquals(40, match.getW());
-            assertEquals(30, match.getH());
+            assertEquals(50, match.getRegion().x(), 2); // Allow small tolerance
+            assertEquals(50, match.getRegion().y(), 2);
+            assertEquals(40, match.getRegion().w());
+            assertEquals(30, match.getRegion().h());
             assertTrue(match.getScore() > 0.99); // Should be near perfect match
         }
         
@@ -176,8 +176,8 @@ public class MatImageRecognitionTest extends BrobotTestBase {
             Optional<Match> result = matImageRecognition.findTemplateMatch(sameSizeTemplate, searchImage, 0.99);
             
             assertTrue(result.isPresent());
-            assertEquals(0, result.get().getX());
-            assertEquals(0, result.get().getY());
+            assertEquals(0, result.get().getRegion().x());
+            assertEquals(0, result.get().getRegion().y());
             // Should be a perfect match
             assertTrue(result.get().getScore() > 0.99);
             
@@ -262,8 +262,8 @@ public class MatImageRecognitionTest extends BrobotTestBase {
             
             assertTrue(result.isPresent());
             Match match = result.get();
-            assertEquals(70, match.getX(), 2);
-            assertEquals(70, match.getY(), 2);
+            assertEquals(70, match.getRegion().x(), 2);
+            assertEquals(70, match.getRegion().y(), 2);
             
             graySearch.release();
             grayTemplate.release();
@@ -295,8 +295,8 @@ public class MatImageRecognitionTest extends BrobotTestBase {
             
             assertTrue(result.isPresent());
             Match match = result.get();
-            assertEquals(30, match.getX(), 2);
-            assertEquals(30, match.getY(), 2);
+            assertEquals(30, match.getRegion().x(), 2);
+            assertEquals(30, match.getRegion().y(), 2);
             
             bgraSearch.release();
             bgraTemplate.release();
@@ -331,8 +331,8 @@ public class MatImageRecognitionTest extends BrobotTestBase {
             Optional<Match> result = matImageRecognition.findTemplateMatch(template, positionedSearch, 0.9);
             
             assertTrue(result.isPresent());
-            assertEquals(actualX, result.get().getX(), 2);
-            assertEquals(actualY, result.get().getY(), 2);
+            assertEquals(actualX, result.get().getRegion().x(), 2);
+            assertEquals(actualY, result.get().getRegion().y(), 2);
             
             positionedSearch.release();
         }
@@ -354,8 +354,8 @@ public class MatImageRecognitionTest extends BrobotTestBase {
             
             assertTrue(result.isPresent());
             // Should find the exact match at (50, 50)
-            assertEquals(50, result.get().getX(), 2);
-            assertEquals(50, result.get().getY(), 2);
+            assertEquals(50, result.get().getRegion().x(), 2);
+            assertEquals(50, result.get().getRegion().y(), 2);
             assertTrue(result.get().getScore() > 0.99);
             
             multiSearch.release();
@@ -413,8 +413,8 @@ public class MatImageRecognitionTest extends BrobotTestBase {
             long endTime = System.currentTimeMillis();
             
             assertTrue(result.isPresent());
-            assertEquals(100, result.get().getX(), 2);
-            assertEquals(100, result.get().getY(), 2);
+            assertEquals(100, result.get().getRegion().x(), 2);
+            assertEquals(100, result.get().getRegion().y(), 2);
             assertTrue(endTime - startTime < 500, "Complex pattern matching should be efficient");
             
             complexSearch.release();

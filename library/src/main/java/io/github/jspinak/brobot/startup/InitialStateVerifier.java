@@ -173,6 +173,9 @@ public class InitialStateVerifier {
          * @return This builder for chaining
          */
         public VerificationBuilder withState(StateEnum stateEnum, int probability) {
+            if (stateEnum == null) {
+                return this;
+            }
             return withState(stateEnum.toString(), probability);
         }
         

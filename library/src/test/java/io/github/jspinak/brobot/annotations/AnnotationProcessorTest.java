@@ -67,7 +67,7 @@ public class AnnotationProcessorTest extends BrobotTestBase {
     private AutoCloseable mocks;
     
     // Test state classes
-    @io.github.jspinak.brobot.annotations.State(name = "TestState", initial = true)
+    @io.github.jspinak.brobot.annotations.State(name = "TestState", initial = true, priority = 200)
     static class TestState {}
     
     @io.github.jspinak.brobot.annotations.State

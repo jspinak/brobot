@@ -1,7 +1,8 @@
 package io.github.jspinak.brobot.integration;
 
-import io.github.jspinak.brobot.BrobotTestApplication;
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.config.profile.IntegrationTestMinimalConfig;
+import io.github.jspinak.brobot.test.IntegrationTestBase;
+import org.springframework.test.context.ActiveProfiles;
 import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
@@ -11,6 +12,7 @@ import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
 import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Positions;
+import io.github.jspinak.brobot.model.element.Text;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
@@ -31,13 +33,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * Integration test for Action execution in Brobot.
  * Tests various action types and configurations in mock mode.
  */
-@SpringBootTest(classes = BrobotTestApplication.class)
-@TestPropertySource(properties = {
-    "brobot.core.mock=true",
-    "logging.level.io.github.jspinak.brobot=DEBUG"
-})
+@SpringBootTest(classes = IntegrationTestMinimalConfig.class)
+@ActiveProfiles("integration-minimal")
+@TestPropertySource(locations = "classpath:application-integration.properties")
 @Slf4j
-public class ActionExecutionTest extends BrobotTestBase {
+public class ActionExecutionTest extends IntegrationTestBase {
 
     @Autowired
     private Action action;
@@ -109,14 +109,6 @@ public class ActionExecutionTest extends BrobotTestBase {
     public void testClickAction() {
         log.info("=== TESTING CLICK ACTION ===");
         
-<<<<<<< HEAD
-        ClickOptions clickOptions = new ClickOptions.Builder()
-            .setNumberOfClicks(2)  // Double-click
-            .setPressOptions(MousePressOptions.builder()
-                .setButton(MouseButton.LEFT)
-                .setPauseAfterMouseDown(0.5)
-                .build())
-=======
         MousePressOptions mouseOptions = MousePressOptions.builder()
             .setButton(MouseButton.LEFT)
             .setPauseAfterMouseUp(0.5)
@@ -125,7 +117,6 @@ public class ActionExecutionTest extends BrobotTestBase {
         ClickOptions clickOptions = new ClickOptions.Builder()
             .setNumberOfClicks(2)  // Double-click
             .setPressOptions(mouseOptions)
->>>>>>> coverage/agent-3
             .build();
         
         ObjectCollection objects = new ObjectCollection.Builder()
@@ -151,15 +142,6 @@ public class ActionExecutionTest extends BrobotTestBase {
         String textToType = "Hello Brobot!";
         
         TypeOptions typeOptions = new TypeOptions.Builder()
-<<<<<<< HEAD
-            .build();
-        
-        // Create ObjectCollection for type action
-        ObjectCollection typeObjects = new ObjectCollection.Builder().build();
-        ActionResult result = action.perform(typeOptions, typeObjects);
-        // Mock the typed text in result (would be done by framework)
-        // result.setText(textToType);
-=======
             .setTypeDelay(0.1)
             .setPauseBeforeBegin(0.1)
             .setPauseAfterEnd(0.1)
@@ -170,11 +152,12 @@ public class ActionExecutionTest extends BrobotTestBase {
             .build();
         
         ActionResult result = action.perform(typeOptions, objects);
->>>>>>> coverage/agent-3
         
         assertTrue(result.isSuccess(), "Type action should succeed");
-        assertEquals(textToType, result.getText(), "Typed text should match input");
-        log.info("Successfully typed: {}", result.getText());
+        assertNotNull(result.getText(), "Should have text result");
+        assertFalse(result.getText().getStrings().isEmpty(), "Should have typed text");
+        assertEquals(textToType, result.getText().getStrings().get(0), "Typed text should match input");
+        log.info("Successfully typed: {}", result.getText().getStrings().get(0));
     }
     
     @Test
@@ -264,14 +247,6 @@ public class ActionExecutionTest extends BrobotTestBase {
         
         // Step 3: Type
         TypeOptions typeOptions = new TypeOptions.Builder()
-<<<<<<< HEAD
-            .build();
-            
-        ObjectCollection typeObjects = new ObjectCollection.Builder().build();
-        ActionResult typeResult = action.perform(typeOptions, typeObjects);
-        // Mock the typed text (would be handled by framework)
-        // typeResult.setText("Composite action test");
-=======
             .setTypeDelay(0.01)
             .build();
             
@@ -280,7 +255,6 @@ public class ActionExecutionTest extends BrobotTestBase {
             .build();
             
         ActionResult typeResult = action.perform(typeOptions, typeObjects);
->>>>>>> coverage/agent-3
         assertTrue(typeResult.isSuccess(), "Type should succeed");
         
         log.info("Composite action sequence completed successfully");
@@ -292,10 +266,7 @@ public class ActionExecutionTest extends BrobotTestBase {
         
         PatternFindOptions timeoutOptions = new PatternFindOptions.Builder()
             .setStrategy(PatternFindOptions.Strategy.BEST)
-<<<<<<< HEAD
-=======
             .setSearchDuration(2.0)  // 2 seconds timeout
->>>>>>> coverage/agent-3
             .build();
         
         ObjectCollection objects = new ObjectCollection.Builder()
@@ -322,12 +293,7 @@ public class ActionExecutionTest extends BrobotTestBase {
         StateImage imageAtCenter = new StateImage.Builder()
             .setName("CenterImage")
             .setSearchRegionForAllPatterns(Region.builder()
-<<<<<<< HEAD
-                .withRegion((int)centerScreen.getX() - 25, 
-                           (int)centerScreen.getY() - 25, 50, 50)
-=======
                 .withRegion((int)centerScreen.getX() - 25, (int)centerScreen.getY() - 25, 50, 50)
->>>>>>> coverage/agent-3
                 .build())
             .build();
         

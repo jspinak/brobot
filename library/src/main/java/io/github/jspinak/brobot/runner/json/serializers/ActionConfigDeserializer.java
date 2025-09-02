@@ -119,8 +119,18 @@ public class ActionConfigDeserializer extends JsonDeserializer<ActionConfig> {
             ((com.fasterxml.jackson.databind.node.ObjectNode) node).remove("type");
         }
         
-        // Deserialize to the concrete type
-        return mapper.treeToValue(node, targetClass);
+        // Use the context's deserializer but bypass this custom deserializer to avoid recursion
+        // Convert the node directly to the target class
+        try {
+            // Use reflection to create the builder or instance
+            return ctxt.readTreeAsValue(node, targetClass);
+        } catch (Exception e) {
+            // Fallback to a simple mapper if context fails
+            ObjectMapper plainMapper = new ObjectMapper();
+            plainMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            plainMapper.findAndRegisterModules();
+            return plainMapper.treeToValue(node, targetClass);
+        }
     }
     
     /**

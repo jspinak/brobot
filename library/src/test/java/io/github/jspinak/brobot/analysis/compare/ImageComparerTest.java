@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
 
 /**
  * Comprehensive test suite for ImageComparer.
@@ -86,19 +87,19 @@ public class ImageComparerTest extends BrobotTestBase {
     public void setupTest() {
         super.setupTest();
         
-        // Setup default mock behaviors
-        when(pattern1.getBImage()).thenReturn(bufferedImage1);
-        when(pattern2.getBImage()).thenReturn(bufferedImage2);
-        when(pattern1.getName()).thenReturn("Pattern1");
-        when(pattern2.getName()).thenReturn("Pattern2");
-        when(pattern1.getImage()).thenReturn(image1);
-        when(pattern2.getImage()).thenReturn(image2);
+        // Setup default mock behaviors with lenient() to avoid unnecessary stubbing errors
+        lenient().when(pattern1.getBImage()).thenReturn(bufferedImage1);
+        lenient().when(pattern2.getBImage()).thenReturn(bufferedImage2);
+        lenient().when(pattern1.getName()).thenReturn("Pattern1");
+        lenient().when(pattern2.getName()).thenReturn("Pattern2");
+        lenient().when(pattern1.getImage()).thenReturn(image1);
+        lenient().when(pattern2.getImage()).thenReturn(image2);
         
-        when(stateImage1.getPatterns()).thenReturn(Collections.singletonList(pattern1));
-        when(stateImage2.getPatterns()).thenReturn(Collections.singletonList(pattern2));
+        lenient().when(stateImage1.getPatterns()).thenReturn(Collections.singletonList(pattern1));
+        lenient().when(stateImage2.getPatterns()).thenReturn(Collections.singletonList(pattern2));
         
-        when(match1.getScore()).thenReturn(0.8);
-        when(match2.getScore()).thenReturn(0.9);
+        lenient().when(match1.getScore()).thenReturn(0.8);
+        lenient().when(match2.getScore()).thenReturn(0.9);
     }
     
     @Nested
@@ -227,12 +228,6 @@ public class ImageComparerTest extends BrobotTestBase {
             Pattern pattern4 = mock(Pattern.class);
             when(pattern3.getBImage()).thenReturn(bufferedImage1);
             when(pattern4.getBImage()).thenReturn(bufferedImage2);
-            when(pattern3.getName()).thenReturn("Pattern3");
-            when(pattern4.getName()).thenReturn("Pattern4");
-            Image image3 = mock(Image.class);
-            Image image4 = mock(Image.class);
-            when(pattern3.getImage()).thenReturn(image3);
-            when(pattern4.getImage()).thenReturn(image4);
             
             when(stateImage1.getPatterns()).thenReturn(Arrays.asList(pattern1, pattern3));
             when(stateImage2.getPatterns()).thenReturn(Arrays.asList(pattern2, pattern4));
@@ -333,9 +328,6 @@ public class ImageComparerTest extends BrobotTestBase {
                 StateImage img = mock(StateImage.class);
                 Pattern p = mock(Pattern.class);
                 when(p.getBImage()).thenReturn(bufferedImage1);
-                when(p.getName()).thenReturn("Pattern" + i);
-                Image pImage = mock(Image.class);
-                when(p.getImage()).thenReturn(pImage);
                 when(img.getPatterns()).thenReturn(Collections.singletonList(p));
                 stateImages.add(img);
             }
@@ -374,6 +366,11 @@ public class ImageComparerTest extends BrobotTestBase {
         @Test
         @DisplayName("Should handle complex nested comparison scenario")
         void shouldHandleComplexNestedComparison() {
+            // Use lenient mode for complex test with many mocks
+            lenient().when(compareSize.getEnvelopedFirstOrNone(any(Pattern.class), any(Pattern.class)))
+                .thenReturn(Arrays.asList(pattern1, pattern2));
+            lenient().when(mockOrLive.findAll(any(Pattern.class), any(Scene.class)))
+                .thenReturn(Collections.singletonList(match1));
             // Create multiple patterns for each StateImage
             List<Pattern> patterns1 = new ArrayList<>();
             List<Pattern> patterns2 = new ArrayList<>();
@@ -384,28 +381,22 @@ public class ImageComparerTest extends BrobotTestBase {
                 BufferedImage img1 = mock(BufferedImage.class);
                 BufferedImage img2 = mock(BufferedImage.class);
                 
-                when(p1.getBImage()).thenReturn(img1);
-                when(p1.getName()).thenReturn("P1-" + i);
+                lenient().when(p1.getBImage()).thenReturn(img1);
+                lenient().when(p1.getName()).thenReturn("P1-" + i);
                 Image pImage1 = mock(Image.class);
                 Image pImage2 = mock(Image.class);
-                when(p1.getImage()).thenReturn(pImage1);
+                lenient().when(p1.getImage()).thenReturn(pImage1);
                 
-                when(p2.getBImage()).thenReturn(img2);
-                when(p2.getName()).thenReturn("P2-" + i);
-                when(p2.getImage()).thenReturn(pImage2);
+                lenient().when(p2.getBImage()).thenReturn(img2);
+                lenient().when(p2.getName()).thenReturn("P2-" + i);
+                lenient().when(p2.getImage()).thenReturn(pImage2);
                 
                 patterns1.add(p1);
                 patterns2.add(p2);
             }
             
-            when(stateImage1.getPatterns()).thenReturn(patterns1);
-            when(stateImage2.getPatterns()).thenReturn(patterns2);
-            
-            when(compareSize.getEnvelopedFirstOrNone(any(Pattern.class), any(Pattern.class)))
-                .thenReturn(Arrays.asList(patterns1.get(0), patterns2.get(0)));
-            
-            when(mockOrLive.findAll(any(Pattern.class), any(Scene.class)))
-                .thenReturn(Collections.singletonList(match1));
+            lenient().when(stateImage1.getPatterns()).thenReturn(patterns1);
+            lenient().when(stateImage2.getPatterns()).thenReturn(patterns2);
             
             Match result = imageComparer.compare(stateImage1, stateImage2);
             
@@ -444,12 +435,6 @@ public class ImageComparerTest extends BrobotTestBase {
                 Pattern p2 = mock(Pattern.class);
                 when(p1.getBImage()).thenReturn(bufferedImage1);
                 when(p2.getBImage()).thenReturn(bufferedImage2);
-                when(p1.getName()).thenReturn("ManyP1-" + i);
-                when(p2.getName()).thenReturn("ManyP2-" + i);
-                Image mpImage1 = mock(Image.class);
-                Image mpImage2 = mock(Image.class);
-                when(p1.getImage()).thenReturn(mpImage1);
-                when(p2.getImage()).thenReturn(mpImage2);
                 manyPatterns1.add(p1);
                 manyPatterns2.add(p2);
             }

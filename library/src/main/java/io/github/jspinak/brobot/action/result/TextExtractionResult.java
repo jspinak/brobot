@@ -20,8 +20,8 @@ import java.util.stream.Collectors;
  */
 @Data
 public class TextExtractionResult {
-    private Text accumulatedText = new Text();
-    private String selectedText = "";
+    private Text accumulatedText;
+    private String selectedText;
     
     // Map<Match, String> cannot be properly serialized by Jackson since Match 
     // doesn't have a suitable key serializer. Mark as ignored for JSON.
@@ -40,6 +40,9 @@ public class TextExtractionResult {
      */
     public void addText(String text) {
         if (text != null && !text.isEmpty()) {
+            if (accumulatedText == null) {
+                accumulatedText = new Text();
+            }
             accumulatedText.add(text);
         }
     }
@@ -63,7 +66,7 @@ public class TextExtractionResult {
      * @param text The selected text
      */
     public void setSelectedText(String text) {
-        this.selectedText = text != null ? text : "";
+        this.selectedText = text;
     }
     
     /**
@@ -108,7 +111,8 @@ public class TextExtractionResult {
             matchTextMap.putAll(other.matchTextMap);
             
             // If this has no selected text but other does, use other's
-            if (selectedText.isEmpty() && !other.selectedText.isEmpty()) {
+            if ((selectedText == null || selectedText.isEmpty()) && 
+                other.selectedText != null && !other.selectedText.isEmpty()) {
                 selectedText = other.selectedText;
             }
         }
@@ -145,8 +149,8 @@ public class TextExtractionResult {
      * Clears all text data.
      */
     public void clear() {
-        accumulatedText = new Text();
-        selectedText = "";
+        accumulatedText = null;
+        selectedText = null;
         matchTextMap.clear();
     }
     

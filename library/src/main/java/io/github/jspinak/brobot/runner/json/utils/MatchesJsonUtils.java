@@ -105,16 +105,26 @@ public class MatchesJsonUtils {
     public Map<String, Object> matchesToMap(ActionResult matches) {
         Map<String, Object> map = new HashMap<>();
 
-        // Add basic fields
-        map.put("actionDescription", matches.getActionDescription());
+        // Add basic fields - only put non-null values
+        if (matches.getActionDescription() != null) {
+            map.put("actionDescription", matches.getActionDescription());
+        }
         map.put("success", matches.isSuccess());
         map.put("duration", matches.getDuration());
-        map.put("startTime", matches.getStartTime());
-        map.put("endTime", matches.getEndTime());
-        map.put("selectedText", matches.getSelectedText());
+        if (matches.getStartTime() != null) {
+            map.put("startTime", matches.getStartTime());
+        }
+        if (matches.getEndTime() != null) {
+            map.put("endTime", matches.getEndTime());
+        }
+        if (matches.getSelectedText() != null && !matches.getSelectedText().isEmpty()) {
+            map.put("selectedText", matches.getSelectedText());
+        }
         map.put("activeStates", matches.getActiveStates());
         map.put("definedRegions", matches.getDefinedRegions());
-        map.put("text", matches.getText());
+        if (matches.getText() != null) {
+            map.put("text", matches.getText());
+        }
 
         // Handle match list - copy to avoid circular references
         List<Map<String, Object>> matchesList = new ArrayList<>();

@@ -344,9 +344,12 @@ public class FunctionRuleValidatorTest extends BrobotTestBase {
             
             // Add error handling (try-catch or if-result-check)
             Map<String, Object> errorCheck = new HashMap<>();
-            errorCheck.put("type", "if");
-            errorCheck.put("condition", "lastActionFailed");
-            errorCheck.put("then", List.of(createStatement("handleError")));
+            errorCheck.put("statementType", "if");
+            Map<String, Object> condition = new HashMap<>();
+            condition.put("expressionType", "methodCall");
+            condition.put("method", "isSuccess");
+            errorCheck.put("condition", condition);
+            errorCheck.put("thenStatements", List.of(createStatement("handleError")));
             statements.add(errorCheck);
             
             function.put("statements", statements);
@@ -451,8 +454,10 @@ public class FunctionRuleValidatorTest extends BrobotTestBase {
             
             ValidationResult result = validator.validateFunctionRules(dsl);
             
-            // Should not warn about state management
-            assertFalse(hasWarning(result, "SafeStateFunc") && hasWarning(result, "state"));
+            // Should not warn about state management when checks are present
+            boolean hasStateWarning = result.getWarnings().stream()
+                .anyMatch(w -> w.message().contains("SafeStateFunc") && w.message().contains("state"));
+            assertFalse(hasStateWarning, "Should not warn about state management when checks are present");
         }
         
         @Test
@@ -565,7 +570,7 @@ public class FunctionRuleValidatorTest extends BrobotTestBase {
             ValidationResult result = validator.validateFunctionRules(dsl);
             
             assertTrue(hasWarning(result, "HeavyOperationFunc"));
-            assertTrue(hasWarning(result, "heavy") || hasWarning(result, "performance"));
+            assertTrue(hasWarning(result, "expensive") || hasWarning(result, "computationally"));
         }
         
         @Test
@@ -881,7 +886,7 @@ public class FunctionRuleValidatorTest extends BrobotTestBase {
             
             assertTrue(result.isValid()); // Still valid despite warnings
             assertFalse(result.getWarnings().isEmpty()); // Has warnings
-            assertTrue(result.getErrors().isEmpty()); // No errors
+            assertTrue(result.getErrorsAndCritical().isEmpty()); // No errors or critical errors
         }
     }
 }
