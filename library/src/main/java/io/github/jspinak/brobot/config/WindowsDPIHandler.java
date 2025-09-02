@@ -74,13 +74,13 @@ public class WindowsDPIHandler {
                 
             } else {
                 System.out.println("No DPI scaling detected");
-                Settings.AlwaysResize = 0;
+                Settings.AlwaysResize = 1.0f;
             }
             
         } catch (Exception e) {
             System.err.println("Error detecting DPI scaling: " + e.getMessage());
             // Default to no scaling
-            Settings.AlwaysResize = 0;
+            Settings.AlwaysResize = 1.0f;
         }
         
         initialized = true;

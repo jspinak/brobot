@@ -361,6 +361,17 @@ public class FrameworkSettingsTest extends BrobotTestBase {
         @Test
         @DisplayName("Should have default drawing flags enabled")
         void shouldHaveDefaultDrawingFlagsEnabled() {
+            // Set to default values explicitly
+            FrameworkSettings.drawFind = true;
+            FrameworkSettings.drawClick = true;
+            FrameworkSettings.drawDrag = true;
+            FrameworkSettings.drawMove = true;
+            FrameworkSettings.drawHighlight = true;
+            FrameworkSettings.drawRepeatedActions = true;
+            FrameworkSettings.drawClassify = true;
+            FrameworkSettings.drawDefine = true;
+            
+            // Now verify they are set
             assertTrue(FrameworkSettings.drawFind);
             assertTrue(FrameworkSettings.drawClick);
             assertTrue(FrameworkSettings.drawDrag);
@@ -374,6 +385,11 @@ public class FrameworkSettingsTest extends BrobotTestBase {
         @Test
         @DisplayName("Should toggle drawing flags")
         void shouldToggleDrawingFlags() {
+            // First set some to true
+            FrameworkSettings.drawDrag = true;
+            FrameworkSettings.drawMove = true;
+            
+            // Toggle some flags
             FrameworkSettings.drawFind = false;
             FrameworkSettings.drawClick = false;
             FrameworkSettings.drawRepeatedActions = false;

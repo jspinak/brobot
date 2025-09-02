@@ -197,7 +197,7 @@ public class DPIAwareCaptureTest extends BrobotTestBase {
                 assertEquals(200, result.getHeight());
                 
                 Screen screen = screenMock.constructed().get(0);
-                verify(screen).capture(argThat((Region region) -> 
+                verify(screen).capture(argThat((org.sikuli.script.Region region) -> 
                     region.x == 10 && region.y == 20 && 
                     region.w == 200 && region.h == 200));
             }

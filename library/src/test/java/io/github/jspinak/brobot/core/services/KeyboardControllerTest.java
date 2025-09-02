@@ -455,7 +455,7 @@ public class KeyboardControllerTest extends BrobotTestBase {
     void testTypeWithVariousDelays() {
         // Arrange
         String text = "Test";
-        when(keyboardController.type(text, anyInt())).thenReturn(true);
+        when(keyboardController.type(eq(text), anyInt())).thenReturn(true);
 
         // Act & Assert
         assertTrue(keyboardController.type(text, 0));    // No delay
@@ -463,10 +463,10 @@ public class KeyboardControllerTest extends BrobotTestBase {
         assertTrue(keyboardController.type(text, 100));  // Medium delay
         assertTrue(keyboardController.type(text, 1000)); // Large delay
 
-        verify(keyboardController).type(text, 0);
-        verify(keyboardController).type(text, 10);
-        verify(keyboardController).type(text, 100);
-        verify(keyboardController).type(text, 1000);
+        verify(keyboardController).type(eq(text), eq(0));
+        verify(keyboardController).type(eq(text), eq(10));
+        verify(keyboardController).type(eq(text), eq(100));
+        verify(keyboardController).type(eq(text), eq(1000));
     }
 
     @Test

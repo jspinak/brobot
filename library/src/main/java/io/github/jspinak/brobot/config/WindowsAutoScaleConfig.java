@@ -23,11 +23,19 @@ public class WindowsAutoScaleConfig {
     public void configureWindowsScaling() {
         System.out.println("\n=== Windows Auto-Scale Configuration ===");
         
+        // Check if scaling was already disabled
+        if ("true".equals(System.getProperty("brobot.dpi.scaling.disabled"))) {
+            System.out.println("DPI scaling already configured - skipping auto-scale");
+            System.out.println("Current Settings.AlwaysResize = " + Settings.AlwaysResize);
+            System.out.println("=========================================\n");
+            return;
+        }
+        
         // Only apply on Windows
         String os = System.getProperty("os.name").toLowerCase();
         if (!os.contains("windows")) {
-            System.out.println("Not Windows - Settings.AlwaysResize = 0");
-            Settings.AlwaysResize = 0;
+            System.out.println("Not Windows - Settings.AlwaysResize = 1.0 (no scaling)");
+            Settings.AlwaysResize = 1.0f;
             System.out.println("=========================================\n");
             return;
         }
@@ -71,14 +79,14 @@ public class WindowsAutoScaleConfig {
                 
             } else {
                 System.out.println("No DPI scaling detected");
-                Settings.AlwaysResize = 0;
-                System.out.println("Settings.AlwaysResize = 0 (no scaling needed)");
+                Settings.AlwaysResize = 1.0f;
+                System.out.println("Settings.AlwaysResize = 1.0 (no scaling needed)");
             }
             
         } catch (Exception e) {
             System.err.println("Error detecting DPI scaling: " + e.getMessage());
-            System.out.println("Defaulting to no scaling (Settings.AlwaysResize = 0)");
-            Settings.AlwaysResize = 0;
+            System.out.println("Defaulting to no scaling (Settings.AlwaysResize = 1.0)");
+            Settings.AlwaysResize = 1.0f;
         }
         
         System.out.println("=========================================\n");
