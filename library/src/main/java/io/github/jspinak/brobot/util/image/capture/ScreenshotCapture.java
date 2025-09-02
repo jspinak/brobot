@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.util.image.capture;
 import org.sikuli.script.Image;
 import org.sikuli.script.Mouse;
 import org.sikuli.script.Screen;
+import org.sikuli.script.Region;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.util.file.SaveToFile;
@@ -18,7 +19,7 @@ import java.io.File;
  * This component offers two approaches for capturing screenshots:
  * <ol>
  * <li>Sikuli-based capture using the active monitor where the mouse is located</li>
- * <li>AWT Robot-based capture of the primary screen</li>
+ * <li>SikuliX Screen-based capture of the primary screen</li>
  * </ol>
  * Both methods support saving screenshots with automatic file naming.
  * <p>
@@ -50,7 +51,6 @@ import java.io.File;
  * @author jspinak
  * @see SaveToFile
  * @see Screen
- * @see Robot
  */
 @Component
 public class ScreenshotCapture {
@@ -82,7 +82,7 @@ public class ScreenshotCapture {
     }
 
     /**
-     * Captures a screenshot of the primary screen using AWT Robot.
+     * Captures a screenshot of the primary screen using SikuliX Screen.
      * <p>
      * This method provides a simpler alternative that always captures
      * the primary screen, regardless of mouse position. It creates the
@@ -111,8 +111,8 @@ public class ScreenshotCapture {
             new File(directory).mkdirs();
             String filePath = directory + fileName + ".png";
 
-            Rectangle screenRect = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
-            BufferedImage capture = new Robot().createScreenCapture(screenRect);
+            Screen screen = new Screen();
+            BufferedImage capture = screen.capture().getImage();
             ImageIO.write(capture, "png", new File(filePath));
 
             return filePath;

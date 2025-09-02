@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.screen;
 
 import org.sikuli.script.Screen;
 import org.sikuli.script.ScreenImage;
+import org.sikuli.script.Region;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -17,7 +18,7 @@ public class PhysicalScreen extends Screen {
     
     private final int physicalWidth;
     private final int physicalHeight;
-    private final Robot physicalRobot;
+    private final Screen physicalScreen;
     private final boolean needsScaling;
     private final float scaleFactor;
     
@@ -34,8 +35,8 @@ public class PhysicalScreen extends Screen {
             this.physicalWidth = mode.getWidth();
             this.physicalHeight = mode.getHeight();
             
-            // Create robot for physical device
-            this.physicalRobot = new Robot(device);
+            // Create screen for physical device
+            this.physicalScreen = new Screen();
             
             // Check if scaling is needed
             Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -52,7 +53,7 @@ public class PhysicalScreen extends Screen {
                 System.out.println("  Scale Factor: " + scaleFactor);
             }
             
-        } catch (AWTException e) {
+        } catch (Exception e) {
             throw new RuntimeException("Failed to initialize PhysicalScreen", e);
         }
     }
@@ -89,7 +90,7 @@ public class PhysicalScreen extends Screen {
     }
     
     /**
-     * Captures at physical resolution using the physical robot.
+     * Captures at physical resolution using SikuliX Screen.
      */
     private ScreenImage capturePhysicalResolution(int x, int y, int w, int h) {
         try {
@@ -99,11 +100,10 @@ public class PhysicalScreen extends Screen {
             w = Math.min(w, physicalWidth - x);
             h = Math.min(h, physicalHeight - y);
             
-            Rectangle bounds = new Rectangle(x, y, w, h);
-            BufferedImage capture = physicalRobot.createScreenCapture(bounds);
+            Region captureRegion = new Region(x, y, w, h);
+            ScreenImage capture = physicalScreen.capture(captureRegion);
             
-            // Return ScreenImage with physical resolution capture
-            return new ScreenImage(bounds, capture);
+            return capture;
             
         } catch (Exception e) {
             System.err.println("Error capturing at physical resolution: " + e.getMessage());

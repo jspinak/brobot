@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.config;
 
+import org.sikuli.script.Screen;
 import org.springframework.context.annotation.Configuration;
 import jakarta.annotation.PostConstruct;
 import java.awt.*;
@@ -83,10 +84,10 @@ public class PhysicalResolutionCapture {
     }
     
     /**
-     * Alternative method: Create a Robot that captures at physical resolution.
+     * Alternative method: Use SikuliX Screen to capture at physical resolution.
      * This can be used if the global configuration doesn't work.
      */
-    public static BufferedImage capturePhysicalResolution() throws AWTException {
+    public static BufferedImage capturePhysicalResolution() throws Exception {
         // Get the physical screen bounds
         GraphicsDevice device = GraphicsEnvironment
             .getLocalGraphicsEnvironment()
@@ -96,12 +97,9 @@ public class PhysicalResolutionCapture {
         int physicalWidth = mode.getWidth();
         int physicalHeight = mode.getHeight();
         
-        // Create robot with the graphics device
-        Robot robot = new Robot(device);
-        
-        // Capture using physical dimensions
-        Rectangle physicalBounds = new Rectangle(0, 0, physicalWidth, physicalHeight);
-        BufferedImage capture = robot.createScreenCapture(physicalBounds);
+        // Create screen and capture
+        Screen screen = new Screen();
+        BufferedImage capture = screen.capture().getImage();
         
         // Verify we got the right resolution
         if (capture.getWidth() != physicalWidth || capture.getHeight() != physicalHeight) {

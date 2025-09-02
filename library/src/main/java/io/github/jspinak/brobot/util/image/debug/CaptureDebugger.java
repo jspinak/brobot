@@ -59,8 +59,8 @@ public class CaptureDebugger {
         ConsoleReporter.println("-".repeat(40));
         
         compareImages(capture1, capture2, "New Screen vs Default Screen");
-        compareImages(capture1, capture3, "New Screen vs Robot");
-        compareImages(capture2, capture3, "Default Screen vs Robot");
+        compareImages(capture1, capture3, "New Screen vs SikuliX Region");
+        compareImages(capture2, capture3, "Default Screen vs SikuliX Region");
         
         // 3. Test pattern matching with each capture
         if (patternPath != null && new File(patternPath).exists()) {
@@ -75,7 +75,7 @@ public class CaptureDebugger {
                 
                 testPatternMatch(capture1, pattern, "New Screen");
                 testPatternMatch(capture2, pattern, "Default Screen");
-                testPatternMatch(capture3, pattern, "Robot");
+                testPatternMatch(capture3, pattern, "SikuliX Region");
                 
                 // Analyze pattern
                 analyzeImage(patternImg, "PATTERN");
@@ -137,15 +137,15 @@ public class CaptureDebugger {
     
     private BufferedImage captureWithRobot(Region region, String filename) {
         try {
-            ConsoleReporter.println("\nMethod: Java Robot");
-            Robot robot = new Robot();
+            ConsoleReporter.println("\nMethod: SikuliX Screen with region");
+            Screen screen = new Screen();
             
-            Rectangle rect = new Rectangle(region.x(), region.y(), region.w(), region.h());
-            BufferedImage captured = robot.createScreenCapture(rect);
+            org.sikuli.script.Region sikuliRegion = new org.sikuli.script.Region(region.x(), region.y(), region.w(), region.h());
+            BufferedImage captured = screen.capture(sikuliRegion).getImage();
             ConsoleReporter.println("  Captured: " + captured.getWidth() + "x" + captured.getHeight());
             
             saveImage(captured, filename);
-            analyzeImage(captured, "ROBOT");
+            analyzeImage(captured, "SIKULI_REGION");
             return captured;
             
         } catch (Exception e) {

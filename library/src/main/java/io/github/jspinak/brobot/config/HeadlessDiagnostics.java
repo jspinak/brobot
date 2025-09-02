@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.config;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.sikuli.script.Screen;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -75,24 +76,19 @@ public class HeadlessDiagnostics {
         log.info("Testing screen capture capability...");
         
         try {
-            Robot robot = new Robot();
+            Screen screen = new Screen();
             
-            // Try to capture a 1x1 pixel region
-            BufferedImage testCapture = robot.createScreenCapture(new Rectangle(0, 0, 1, 1));
+            // Try to capture a small region
+            org.sikuli.script.Region testRegion = new org.sikuli.script.Region(0, 0, 1, 1);
+            BufferedImage testCapture = screen.capture(testRegion).getImage();
             
             if (testCapture != null) {
-                log.info("✓ Screen capture test PASSED - Robot can capture screen");
+                log.info("✓ Screen capture test PASSED - SikuliX can capture screen");
                 brobotLogger.observation("Screen capture test passed");
             } else {
                 log.warn("✗ Screen capture returned null");
                 brobotLogger.observation("Screen capture returned null");
             }
-        } catch (AWTException e) {
-            log.error("✗ Screen capture test FAILED - AWTException: {}", e.getMessage());
-            brobotLogger.error("Screen capture failed with AWTException", e);
-        } catch (SecurityException e) {
-            log.error("✗ Screen capture test FAILED - SecurityException (missing permissions): {}", e.getMessage());
-            brobotLogger.error("Screen capture failed - missing permissions", e);
         } catch (Exception e) {
             log.error("✗ Screen capture test FAILED - {}: {}", e.getClass().getSimpleName(), e.getMessage());
             brobotLogger.error("Screen capture failed", e);
