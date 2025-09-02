@@ -180,7 +180,7 @@ public class ImageLoadingDiagnosticsRunnerTest extends BrobotTestBase {
         SmartImageLoader.LoadResult successResult = mock(SmartImageLoader.LoadResult.class);
         when(successResult.isSuccess()).thenReturn(true);
         when(successResult.getLoadedFrom()).thenReturn("cache");
-        when(successResult.getLoadTimeMs()).thenReturn(15L);
+        // Don't mock getLoadTimeMs() as it's not used in testSpecificImages()
         
         SmartImageLoader.LoadResult failureResult = mock(SmartImageLoader.LoadResult.class);
         when(failureResult.isSuccess()).thenReturn(false);
@@ -244,7 +244,7 @@ public class ImageLoadingDiagnosticsRunnerTest extends BrobotTestBase {
             
             SmartImageLoader.LoadResult failureResult = mock(SmartImageLoader.LoadResult.class);
             when(failureResult.isSuccess()).thenReturn(false);
-            when(failureResult.getFailureReason()).thenReturn("Load error");
+            // Don't mock getFailureReason() as verbose is false, so it won't be used
             
             when(smartImageLoader.loadImage(endsWith("img1.png"))).thenReturn(successResult);
             when(smartImageLoader.loadImage(endsWith("img2.jpg"))).thenReturn(failureResult);
@@ -331,6 +331,7 @@ public class ImageLoadingDiagnosticsRunnerTest extends BrobotTestBase {
             SmartImageLoader.LoadResult result = mock(SmartImageLoader.LoadResult.class);
             if (i < 5) {
                 when(result.isSuccess()).thenReturn(false);
+                // Don't stub getLoadedFrom() for failed loads - it's not used
             } else {
                 when(result.isSuccess()).thenReturn(true);
                 when(result.getLoadedFrom()).thenReturn(i < 8 ? "file" : "cache");

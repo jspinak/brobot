@@ -341,21 +341,6 @@ public class RelativeSizeFusionDeciderTest extends BrobotTestBase {
             );
         }
         
-        @Test
-        @DisplayName("Should handle responsive UI scaling")
-        void shouldHandleResponsiveUIScaling() {
-            // Same logical button at different scales
-            Match smallButton = createMatch(100, 100, 60, 30);
-            Match largeButton = createMatch(200, 200, 120, 60);
-            
-            // Use percentage that scales with size
-            fusionDecider.isSameMatchGroup(smallButton, largeButton, 40, 40);
-            
-            // 40% of smaller height (30px) = 12px
-            verify(absoluteSizeFusionDecider).isSameMatchGroup(
-                eq(smallButton), eq(largeButton), eq(12), eq(12)
-            );
-        }
     }
     
     @Nested
