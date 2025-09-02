@@ -1,262 +1,454 @@
 package io.github.jspinak.brobot.util.image.capture;
 
+import io.github.jspinak.brobot.config.FrameworkSettings;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
- * Test class for DPIAwareCapture functionality.
- * Tests DPI-aware screen capture operations in mock mode.
+ * Comprehensive test class for DPIAwareCapture functionality.
+ * Tests DPI-aware screen capture with proper scaling handling.
  */
-@DisplayName("DPIAwareCapture Tests")
+@ExtendWith(MockitoExtension.class)
 public class DPIAwareCaptureTest extends BrobotTestBase {
-    
+
     private DPIAwareCapture dpiAwareCapture;
+    private BufferedImage testImage;
     
     @BeforeEach
     @Override
     public void setupTest() {
         super.setupTest();
         dpiAwareCapture = new DPIAwareCapture();
+        
+        // Create test image
+        testImage = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = testImage.createGraphics();
+        g.setColor(Color.BLUE);
+        g.fillRect(0, 0, 200, 200);
+        g.setColor(Color.YELLOW);
+        g.fillRect(50, 50, 100, 100);
+        g.dispose();
     }
     
-    @Nested
-    @DisplayName("DPI Scale Detection")
-    class DPIScaleDetection {
-        
-        @Test
-        @DisplayName("Should detect display scale factor")
-        void shouldDetectDisplayScaleFactor() {
-            double scale = dpiAwareCapture.getDisplayScaleFactor();
+    @Test
+    @DisplayName("Should detect 100% display scale factor")
+    void shouldDetect100PercentScaleFactor() {
+        try (MockedStatic<GraphicsEnvironment> geMock = mockStatic(GraphicsEnvironment.class)) {
+            GraphicsEnvironment mockEnv = mock(GraphicsEnvironment.class);
+            GraphicsDevice mockDevice = mock(GraphicsDevice.class);
+            GraphicsConfiguration mockConfig = mock(GraphicsConfiguration.class);
+            AffineTransform mockTransform = mock(AffineTransform.class);
             
-            // Should return a valid scale factor
-            assertTrue(scale > 0);
-            assertTrue(scale <= 4.0); // Reasonable max scale
-        }
-        
-        @Test
-        @DisplayName("Should detect if scaling is active")
-        void shouldDetectScalingActive() {
-            boolean isActive = dpiAwareCapture.isScalingActive();
+            geMock.when(GraphicsEnvironment::getLocalGraphicsEnvironment).thenReturn(mockEnv);
+            when(mockEnv.getDefaultScreenDevice()).thenReturn(mockDevice);
+            when(mockDevice.getDefaultConfiguration()).thenReturn(mockConfig);
+            when(mockConfig.getDefaultTransform()).thenReturn(mockTransform);
+            when(mockTransform.getScaleX()).thenReturn(1.0);
+            when(mockTransform.getScaleY()).thenReturn(1.0);
             
-            // Should return valid boolean
-            assertNotNull(isActive);
+            double scaleFactor = dpiAwareCapture.getDisplayScaleFactor();
+            assertEquals(1.0, scaleFactor, 0.01);
+            assertFalse(dpiAwareCapture.isScalingActive());
         }
-        
-        @Test
-        @DisplayName("Should cache scale factor")
-        void shouldCacheScaleFactor() {
+    }
+    
+    @Test
+    @DisplayName("Should detect 150% display scale factor")
+    void shouldDetect150PercentScaleFactor() {
+        try (MockedStatic<GraphicsEnvironment> geMock = mockStatic(GraphicsEnvironment.class)) {
+            GraphicsEnvironment mockEnv = mock(GraphicsEnvironment.class);
+            GraphicsDevice mockDevice = mock(GraphicsDevice.class);
+            GraphicsConfiguration mockConfig = mock(GraphicsConfiguration.class);
+            AffineTransform mockTransform = mock(AffineTransform.class);
+            
+            geMock.when(GraphicsEnvironment::getLocalGraphicsEnvironment).thenReturn(mockEnv);
+            when(mockEnv.getDefaultScreenDevice()).thenReturn(mockDevice);
+            when(mockDevice.getDefaultConfiguration()).thenReturn(mockConfig);
+            when(mockConfig.getDefaultTransform()).thenReturn(mockTransform);
+            when(mockTransform.getScaleX()).thenReturn(1.5);
+            when(mockTransform.getScaleY()).thenReturn(1.5);
+            
+            double scaleFactor = dpiAwareCapture.getDisplayScaleFactor();
+            assertEquals(1.5, scaleFactor, 0.01);
+            assertTrue(dpiAwareCapture.isScalingActive());
+        }
+    }
+    
+    @Test
+    @DisplayName("Should handle asymmetric scaling")
+    void shouldHandleAsymmetricScaling() {
+        try (MockedStatic<GraphicsEnvironment> geMock = mockStatic(GraphicsEnvironment.class)) {
+            GraphicsEnvironment mockEnv = mock(GraphicsEnvironment.class);
+            GraphicsDevice mockDevice = mock(GraphicsDevice.class);
+            GraphicsConfiguration mockConfig = mock(GraphicsConfiguration.class);
+            AffineTransform mockTransform = mock(AffineTransform.class);
+            
+            geMock.when(GraphicsEnvironment::getLocalGraphicsEnvironment).thenReturn(mockEnv);
+            when(mockEnv.getDefaultScreenDevice()).thenReturn(mockDevice);
+            when(mockDevice.getDefaultConfiguration()).thenReturn(mockConfig);
+            when(mockConfig.getDefaultTransform()).thenReturn(mockTransform);
+            when(mockTransform.getScaleX()).thenReturn(1.25);
+            when(mockTransform.getScaleY()).thenReturn(1.5);
+            
+            // Should use maximum scale factor
+            double scaleFactor = dpiAwareCapture.getDisplayScaleFactor();
+            assertEquals(1.5, scaleFactor, 0.01);
+        }
+    }
+    
+    @Test
+    @DisplayName("Should cache scale factor")
+    void shouldCacheScaleFactor() {
+        try (MockedStatic<GraphicsEnvironment> geMock = mockStatic(GraphicsEnvironment.class)) {
+            GraphicsEnvironment mockEnv = mock(GraphicsEnvironment.class);
+            GraphicsDevice mockDevice = mock(GraphicsDevice.class);
+            GraphicsConfiguration mockConfig = mock(GraphicsConfiguration.class);
+            AffineTransform mockTransform = mock(AffineTransform.class);
+            
+            geMock.when(GraphicsEnvironment::getLocalGraphicsEnvironment).thenReturn(mockEnv);
+            when(mockEnv.getDefaultScreenDevice()).thenReturn(mockDevice);
+            when(mockDevice.getDefaultConfiguration()).thenReturn(mockConfig);
+            when(mockConfig.getDefaultTransform()).thenReturn(mockTransform);
+            when(mockTransform.getScaleX()).thenReturn(1.25);
+            when(mockTransform.getScaleY()).thenReturn(1.25);
+            
             // First call
-            double scale1 = dpiAwareCapture.getDisplayScaleFactor();
+            double scaleFactor1 = dpiAwareCapture.getDisplayScaleFactor();
+            assertEquals(1.25, scaleFactor1, 0.01);
             
-            // Second call should use cache
-            double scale2 = dpiAwareCapture.getDisplayScaleFactor();
+            // Second call (should use cache)
+            double scaleFactor2 = dpiAwareCapture.getDisplayScaleFactor();
+            assertEquals(1.25, scaleFactor2, 0.01);
             
-            assertEquals(scale1, scale2);
+            // Verify GraphicsEnvironment was called only once due to caching
+            geMock.verify(GraphicsEnvironment::getLocalGraphicsEnvironment, times(1));
         }
     }
     
-    @Nested
-    @DisplayName("DPI-Aware Capture Operations")
-    class DPIAwareCaptureOperations {
-        
-        @Test
-        @DisplayName("Should capture with DPI awareness")
-        void shouldCaptureDPIAware() {
-            BufferedImage result = dpiAwareCapture.captureDPIAware(0, 0, 100, 100);
+    @Test
+    @DisplayName("Should handle scale detection exception")
+    void shouldHandleScaleDetectionException() {
+        try (MockedStatic<GraphicsEnvironment> geMock = mockStatic(GraphicsEnvironment.class)) {
+            geMock.when(GraphicsEnvironment::getLocalGraphicsEnvironment)
+                .thenThrow(new RuntimeException("Graphics error"));
             
-            assertNotNull(result);
-            // In mock mode, returns a dummy image
-            assertTrue(result.getWidth() > 0);
-            assertTrue(result.getHeight() > 0);
-        }
-        
-        @Test
-        @DisplayName("Should handle zero-sized capture")
-        void shouldHandleZeroSizedCapture() {
-            // Zero-sized capture throws IllegalArgumentException
-            assertThrows(IllegalArgumentException.class, () -> {
-                dpiAwareCapture.captureDPIAware(0, 0, 0, 0);
-            });
-        }
-        
-        @Test
-        @DisplayName("Should handle negative coordinates")
-        void shouldHandleNegativeCoordinates() {
-            assertDoesNotThrow(() -> 
-                dpiAwareCapture.captureDPIAware(-10, -20, 100, 100)
-            );
-        }
-        
-        @Test
-        @DisplayName("Should capture large area")
-        void shouldCaptureLargeArea() {
-            assertDoesNotThrow(() -> 
-                dpiAwareCapture.captureDPIAware(0, 0, 3840, 2160)
-            );
+            double scaleFactor = dpiAwareCapture.getDisplayScaleFactor();
+            assertEquals(1.0, scaleFactor, 0.01); // Should default to 1.0
         }
     }
     
-    @Nested
-    @DisplayName("Coordinate Transformations")
-    class CoordinateTransformations {
+    @Test
+    @DisplayName("Should capture with DPI awareness in mock mode")
+    void shouldCaptureWithDPIAwarenessInMockMode() {
+        // Mock mode is already enabled in BrobotTestBase
+        BufferedImage result = dpiAwareCapture.captureDPIAware(10, 20, 100, 100);
         
-        @Test
-        @DisplayName("Should convert logical to physical coordinates")
-        void shouldConvertLogicalToPhysical() {
-            Rectangle logical = new Rectangle(100, 200, 300, 400);
+        assertNotNull(result);
+        assertEquals(100, result.getWidth());
+        assertEquals(100, result.getHeight());
+    }
+    
+    @Test
+    @DisplayName("Should capture without scaling (100% DPI)")
+    void shouldCaptureWithoutScaling() {
+        // Disable mock mode temporarily
+        FrameworkSettings.mock = false;
+        
+        try (MockedStatic<GraphicsEnvironment> geMock = mockStatic(GraphicsEnvironment.class)) {
+            GraphicsEnvironment mockEnv = mock(GraphicsEnvironment.class);
+            GraphicsDevice mockDevice = mock(GraphicsDevice.class);
+            GraphicsConfiguration mockConfig = mock(GraphicsConfiguration.class);
+            AffineTransform mockTransform = mock(AffineTransform.class);
             
+            geMock.when(GraphicsEnvironment::getLocalGraphicsEnvironment).thenReturn(mockEnv);
+            when(mockEnv.getDefaultScreenDevice()).thenReturn(mockDevice);
+            when(mockDevice.getDefaultConfiguration()).thenReturn(mockConfig);
+            when(mockConfig.getDefaultTransform()).thenReturn(mockTransform);
+            when(mockTransform.getScaleX()).thenReturn(1.0);
+            when(mockTransform.getScaleY()).thenReturn(1.0);
+            
+            try (MockedConstruction<Robot> robotMock = mockConstruction(Robot.class, (mock, context) -> {
+                when(mock.createScreenCapture(any(Rectangle.class))).thenReturn(testImage);
+            })) {
+                BufferedImage result = dpiAwareCapture.captureDPIAware(10, 20, 200, 200);
+                
+                assertNotNull(result);
+                assertEquals(200, result.getWidth());
+                assertEquals(200, result.getHeight());
+                
+                Robot robot = robotMock.constructed().get(0);
+                verify(robot).createScreenCapture(new Rectangle(10, 20, 200, 200));
+            }
+        } finally {
+            FrameworkSettings.mock = true;
+        }
+    }
+    
+    @Test
+    @DisplayName("Should capture with 150% scaling")
+    void shouldCaptureWith150PercentScaling() {
+        // Disable mock mode temporarily
+        FrameworkSettings.mock = false;
+        
+        try (MockedStatic<GraphicsEnvironment> geMock = mockStatic(GraphicsEnvironment.class)) {
+            GraphicsEnvironment mockEnv = mock(GraphicsEnvironment.class);
+            GraphicsDevice mockDevice = mock(GraphicsDevice.class);
+            GraphicsConfiguration mockConfig = mock(GraphicsConfiguration.class);
+            AffineTransform mockTransform = mock(AffineTransform.class);
+            
+            geMock.when(GraphicsEnvironment::getLocalGraphicsEnvironment).thenReturn(mockEnv);
+            when(mockEnv.getDefaultScreenDevice()).thenReturn(mockDevice);
+            when(mockDevice.getDefaultConfiguration()).thenReturn(mockConfig);
+            when(mockConfig.getDefaultTransform()).thenReturn(mockTransform);
+            when(mockTransform.getScaleX()).thenReturn(1.5);
+            when(mockTransform.getScaleY()).thenReturn(1.5);
+            
+            // Create scaled image (300x300 physical pixels for 200x200 logical)
+            BufferedImage scaledImage = new BufferedImage(300, 300, BufferedImage.TYPE_INT_RGB);
+            
+            try (MockedConstruction<Robot> robotMock = mockConstruction(Robot.class, (mock, context) -> {
+                when(mock.createScreenCapture(any(Rectangle.class))).thenReturn(scaledImage);
+            })) {
+                BufferedImage result = dpiAwareCapture.captureDPIAware(10, 20, 200, 200);
+                
+                assertNotNull(result);
+                assertEquals(200, result.getWidth()); // Should be scaled back to logical size
+                assertEquals(200, result.getHeight());
+                
+                Robot robot = robotMock.constructed().get(0);
+                verify(robot).createScreenCapture(new Rectangle(15, 30, 300, 300)); // 1.5x scaling
+            }
+        } finally {
+            FrameworkSettings.mock = true;
+        }
+    }
+    
+    @Test
+    @DisplayName("Should handle invalid dimensions")
+    void shouldHandleInvalidDimensions() {
+        assertThrows(IllegalArgumentException.class, () -> 
+            dpiAwareCapture.captureDPIAware(0, 0, 0, 100)
+        );
+        
+        assertThrows(IllegalArgumentException.class, () -> 
+            dpiAwareCapture.captureDPIAware(0, 0, 100, 0)
+        );
+        
+        assertThrows(IllegalArgumentException.class, () -> 
+            dpiAwareCapture.captureDPIAware(0, 0, -100, 100)
+        );
+    }
+    
+    @Test
+    @DisplayName("Should handle AWTException during capture")
+    void shouldHandleAWTExceptionDuringCapture() {
+        // Disable mock mode temporarily
+        FrameworkSettings.mock = false;
+        
+        try (MockedConstruction<Robot> robotMock = mockConstruction(Robot.class, (mock, context) -> {
+            throw new AWTException("Robot creation failed");
+        })) {
+            assertThrows(RuntimeException.class, () -> 
+                dpiAwareCapture.captureDPIAware(0, 0, 100, 100)
+            );
+        } finally {
+            FrameworkSettings.mock = true;
+        }
+    }
+    
+    @Test
+    @DisplayName("Should convert logical to physical coordinates")
+    void shouldConvertLogicalToPhysicalCoordinates() {
+        try (MockedStatic<GraphicsEnvironment> geMock = mockStatic(GraphicsEnvironment.class)) {
+            GraphicsEnvironment mockEnv = mock(GraphicsEnvironment.class);
+            GraphicsDevice mockDevice = mock(GraphicsDevice.class);
+            GraphicsConfiguration mockConfig = mock(GraphicsConfiguration.class);
+            AffineTransform mockTransform = mock(AffineTransform.class);
+            
+            geMock.when(GraphicsEnvironment::getLocalGraphicsEnvironment).thenReturn(mockEnv);
+            when(mockEnv.getDefaultScreenDevice()).thenReturn(mockDevice);
+            when(mockDevice.getDefaultConfiguration()).thenReturn(mockConfig);
+            when(mockConfig.getDefaultTransform()).thenReturn(mockTransform);
+            when(mockTransform.getScaleX()).thenReturn(1.25);
+            when(mockTransform.getScaleY()).thenReturn(1.25);
+            
+            Rectangle logical = new Rectangle(100, 100, 200, 200);
             Rectangle physical = dpiAwareCapture.toPhysicalCoordinates(logical);
             
-            assertNotNull(physical);
-            // Physical coordinates should be scaled based on DPI
-            assertTrue(physical.width >= logical.width);
-            assertTrue(physical.height >= logical.height);
+            assertEquals(125, physical.x);
+            assertEquals(125, physical.y);
+            assertEquals(250, physical.width);
+            assertEquals(250, physical.height);
         }
-        
-        @Test
-        @DisplayName("Should convert physical to logical coordinates")
-        void shouldConvertPhysicalToLogical() {
-            Rectangle physical = new Rectangle(200, 400, 600, 800);
+    }
+    
+    @Test
+    @DisplayName("Should convert physical to logical coordinates")
+    void shouldConvertPhysicalToLogicalCoordinates() {
+        try (MockedStatic<GraphicsEnvironment> geMock = mockStatic(GraphicsEnvironment.class)) {
+            GraphicsEnvironment mockEnv = mock(GraphicsEnvironment.class);
+            GraphicsDevice mockDevice = mock(GraphicsDevice.class);
+            GraphicsConfiguration mockConfig = mock(GraphicsConfiguration.class);
+            AffineTransform mockTransform = mock(AffineTransform.class);
             
+            geMock.when(GraphicsEnvironment::getLocalGraphicsEnvironment).thenReturn(mockEnv);
+            when(mockEnv.getDefaultScreenDevice()).thenReturn(mockDevice);
+            when(mockDevice.getDefaultConfiguration()).thenReturn(mockConfig);
+            when(mockConfig.getDefaultTransform()).thenReturn(mockTransform);
+            when(mockTransform.getScaleX()).thenReturn(2.0);
+            when(mockTransform.getScaleY()).thenReturn(2.0);
+            
+            Rectangle physical = new Rectangle(200, 200, 400, 400);
             Rectangle logical = dpiAwareCapture.toLogicalCoordinates(physical);
             
-            assertNotNull(logical);
-            // Logical coordinates should be scaled down based on DPI
-            assertTrue(logical.width <= physical.width);
-            assertTrue(logical.height <= physical.height);
+            assertEquals(100, logical.x);
+            assertEquals(100, logical.y);
+            assertEquals(200, logical.width);
+            assertEquals(200, logical.height);
         }
-        
-        @Test
-        @DisplayName("Should handle null rectangle in conversions")
-        void shouldHandleNullRectangle() {
-            // The methods may handle null gracefully or return null
-            Rectangle physicalResult = null;
-            Rectangle logicalResult = null;
+    }
+    
+    @Test
+    @DisplayName("Should not convert coordinates when scale is 1.0")
+    void shouldNotConvertCoordinatesWhenScaleIs1() {
+        try (MockedStatic<GraphicsEnvironment> geMock = mockStatic(GraphicsEnvironment.class)) {
+            GraphicsEnvironment mockEnv = mock(GraphicsEnvironment.class);
+            GraphicsDevice mockDevice = mock(GraphicsDevice.class);
+            GraphicsConfiguration mockConfig = mock(GraphicsConfiguration.class);
+            AffineTransform mockTransform = mock(AffineTransform.class);
             
-            try {
-                physicalResult = dpiAwareCapture.toPhysicalCoordinates(null);
-            } catch (NullPointerException e) {
-                // Expected - null input causes NPE when accessing fields
-            }
+            geMock.when(GraphicsEnvironment::getLocalGraphicsEnvironment).thenReturn(mockEnv);
+            when(mockEnv.getDefaultScreenDevice()).thenReturn(mockDevice);
+            when(mockDevice.getDefaultConfiguration()).thenReturn(mockConfig);
+            when(mockConfig.getDefaultTransform()).thenReturn(mockTransform);
+            when(mockTransform.getScaleX()).thenReturn(1.0);
+            when(mockTransform.getScaleY()).thenReturn(1.0);
             
-            try {
-                logicalResult = dpiAwareCapture.toLogicalCoordinates(null);
-            } catch (NullPointerException e) {
-                // Expected - null input causes NPE when accessing fields
-            }
+            Rectangle rect = new Rectangle(100, 100, 200, 200);
+            Rectangle physical = dpiAwareCapture.toPhysicalCoordinates(rect);
+            Rectangle logical = dpiAwareCapture.toLogicalCoordinates(rect);
             
-            // Either it handles null gracefully and returns null, or throws NPE
-            // Both are acceptable behaviors for null input
-            assertTrue(physicalResult == null || physicalResult != null, "Should handle null input");
-            assertTrue(logicalResult == null || logicalResult != null, "Should handle null input");
+            assertEquals(rect, physical);
+            assertEquals(rect, logical);
         }
+    }
+    
+    @Test
+    @DisplayName("Should normalize image to logical resolution")
+    void shouldNormalizeImageToLogicalResolution() {
+        // Image at 150% scale (300x300) should be normalized to 200x200
+        BufferedImage scaledImage = new BufferedImage(300, 300, BufferedImage.TYPE_INT_RGB);
         
-        @Test
-        @DisplayName("Should handle empty rectangle")
-        void shouldHandleEmptyRectangle() {
-            Rectangle empty = new Rectangle(0, 0, 0, 0);
-            
-            Rectangle physical = dpiAwareCapture.toPhysicalCoordinates(empty);
-            Rectangle logical = dpiAwareCapture.toLogicalCoordinates(empty);
-            
-            if (physical != null) {
-                assertEquals(0, physical.width);
-                assertEquals(0, physical.height);
-            }
-            
-            if (logical != null) {
-                assertEquals(0, logical.width);
-                assertEquals(0, logical.height);
+        BufferedImage normalized = dpiAwareCapture.normalizeToLogicalResolution(
+            scaledImage, 200, 200
+        );
+        
+        assertNotNull(normalized);
+        assertEquals(200, normalized.getWidth());
+        assertEquals(200, normalized.getHeight());
+    }
+    
+    @Test
+    @DisplayName("Should not normalize if dimensions match")
+    void shouldNotNormalizeIfDimensionsMatch() {
+        BufferedImage image = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
+        
+        BufferedImage normalized = dpiAwareCapture.normalizeToLogicalResolution(
+            image, 200, 200
+        );
+        
+        assertSame(image, normalized); // Should return same instance
+    }
+    
+    @Test
+    @DisplayName("Should handle inconsistent scaling in normalization")
+    void shouldHandleInconsistentScalingInNormalization() {
+        // Image with inconsistent aspect ratio
+        BufferedImage image = new BufferedImage(300, 400, BufferedImage.TYPE_INT_RGB);
+        
+        BufferedImage normalized = dpiAwareCapture.normalizeToLogicalResolution(
+            image, 200, 200
+        );
+        
+        assertNotNull(normalized);
+        assertEquals(200, normalized.getWidth());
+        assertEquals(200, normalized.getHeight());
+    }
+    
+    @Test
+    @DisplayName("Should handle various scale factors")
+    void shouldHandleVariousScaleFactors() {
+        double[] scaleFactors = {0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0};
+        
+        for (double scale : scaleFactors) {
+            try (MockedStatic<GraphicsEnvironment> geMock = mockStatic(GraphicsEnvironment.class)) {
+                GraphicsEnvironment mockEnv = mock(GraphicsEnvironment.class);
+                GraphicsDevice mockDevice = mock(GraphicsDevice.class);
+                GraphicsConfiguration mockConfig = mock(GraphicsConfiguration.class);
+                AffineTransform mockTransform = mock(AffineTransform.class);
+                
+                geMock.when(GraphicsEnvironment::getLocalGraphicsEnvironment).thenReturn(mockEnv);
+                when(mockEnv.getDefaultScreenDevice()).thenReturn(mockDevice);
+                when(mockDevice.getDefaultConfiguration()).thenReturn(mockConfig);
+                when(mockConfig.getDefaultTransform()).thenReturn(mockTransform);
+                when(mockTransform.getScaleX()).thenReturn(scale);
+                when(mockTransform.getScaleY()).thenReturn(scale);
+                
+                // Clear cache to force recalculation
+                dpiAwareCapture = new DPIAwareCapture();
+                
+                double detectedScale = dpiAwareCapture.getDisplayScaleFactor();
+                assertEquals(scale, detectedScale, 0.01);
+                
+                if (Math.abs(scale - 1.0) > 0.01) {
+                    assertTrue(dpiAwareCapture.isScalingActive());
+                } else {
+                    assertFalse(dpiAwareCapture.isScalingActive());
+                }
             }
         }
     }
     
-    @Nested
-    @DisplayName("Image Normalization")
-    class ImageNormalization {
+    @Test
+    @DisplayName("Should scale image to logical resolution")
+    void shouldScaleImageToLogicalResolution() {
+        // Create a 300x300 image
+        BufferedImage physicalImage = new BufferedImage(300, 300, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = physicalImage.createGraphics();
+        g.setColor(Color.RED);
+        g.fillRect(0, 0, 300, 300);
+        g.dispose();
         
-        @Test
-        @DisplayName("Should normalize image to logical resolution")
-        void shouldNormalizeToLogicalResolution() {
-            BufferedImage image = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
+        // Use reflection to test private method
+        try {
+            var method = DPIAwareCapture.class.getDeclaredMethod(
+                "scaleToLogicalResolution", BufferedImage.class, int.class, int.class
+            );
+            method.setAccessible(true);
             
-            BufferedImage normalized = dpiAwareCapture.normalizeToLogicalResolution(
-                image, 100, 100
+            BufferedImage scaled = (BufferedImage) method.invoke(
+                dpiAwareCapture, physicalImage, 200, 200
             );
             
-            if (normalized != null) {
-                assertEquals(100, normalized.getWidth());
-                assertEquals(100, normalized.getHeight());
-            }
-        }
-        
-        @Test
-        @DisplayName("Should handle null image normalization")
-        void shouldHandleNullImageNormalization() {
-            // Normalization with null image throws NullPointerException
-            assertThrows(NullPointerException.class, () -> {
-                dpiAwareCapture.normalizeToLogicalResolution(null, 100, 100);
-            });
-        }
-        
-        @Test
-        @DisplayName("Should handle zero target dimensions")
-        void shouldHandleZeroTargetDimensions() {
-            BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
-            
-            // Zero dimensions throw IllegalArgumentException
-            assertThrows(IllegalArgumentException.class, () -> {
-                dpiAwareCapture.normalizeToLogicalResolution(image, 0, 0);
-            });
-        }
-    }
-    
-    @Nested
-    @DisplayName("Edge Cases")
-    class EdgeCases {
-        
-        @Test
-        @DisplayName("Should handle very small capture area")
-        void shouldHandleVerySmallArea() {
-            BufferedImage result = dpiAwareCapture.captureDPIAware(0, 0, 1, 1);
-            
-            if (result != null) {
-                assertTrue(result.getWidth() >= 1);
-                assertTrue(result.getHeight() >= 1);
-            }
-        }
-        
-        @Test
-        @DisplayName("Should handle capture at screen boundaries")
-        void shouldHandleScreenBoundaries() {
-            // Try to capture at typical screen edge
-            assertDoesNotThrow(() -> 
-                dpiAwareCapture.captureDPIAware(1920, 1080, 100, 100)
-            );
-        }
-        
-        @Test
-        @DisplayName("Should handle fractional scaling")
-        void shouldHandleFractionalScaling() {
-            // Get scale factor to verify it handles fractional values
-            double scale = dpiAwareCapture.getDisplayScaleFactor();
-            
-            // Test capture with potential fractional scaling
-            BufferedImage result = dpiAwareCapture.captureDPIAware(10, 10, 100, 100);
-            
-            if (result != null && scale != 1.0) {
-                // Dimensions might be adjusted for fractional scaling
-                assertTrue(result.getWidth() > 0);
-                assertTrue(result.getHeight() > 0);
-            }
+            assertNotNull(scaled);
+            assertEquals(200, scaled.getWidth());
+            assertEquals(200, scaled.getHeight());
+        } catch (Exception e) {
+            fail("Failed to test scaleToLogicalResolution: " + e.getMessage());
         }
     }
 }
