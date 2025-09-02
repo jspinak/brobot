@@ -81,12 +81,6 @@ public class BrobotInitializationOrchestrator {
     @Autowired(required = false)
     private EarlyImagePathInitializer imagePathInitializer;
     
-    @Autowired(required = false)
-    private BrobotDPIConfiguration dpiConfiguration;
-    
-    @Autowired(required = false)
-    private WindowsAutoScaleConfig windowsAutoScaleConfig;
-    
     // Component initialization
     @Autowired(required = false)
     private SearchRegionDependencyInitializer searchRegionInitializer;
@@ -179,16 +173,9 @@ public class BrobotInitializationOrchestrator {
             }
             
             // Configure DPI scaling early
-            if (dpiConfiguration != null) {
-                dpiConfiguration.configureDPIScaling();
-                phase.addCompletedStep("DPI scaling configured");
-            }
+            // DPI configuration removed - now handled differently
             
-            // Windows-specific scaling
-            if (windowsAutoScaleConfig != null && isWindows()) {
-                windowsAutoScaleConfig.configureWindowsScaling();
-                phase.addCompletedStep("Windows auto-scaling configured");
-            }
+            // Windows scaling configuration removed - now handled differently
             
             phase.markCompleted(true, Duration.between(startTime, Instant.now()));
             log.info("✅ Phase 0: Early Core Initialization - COMPLETED");

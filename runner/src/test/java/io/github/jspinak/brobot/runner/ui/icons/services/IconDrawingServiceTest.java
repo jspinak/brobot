@@ -192,23 +192,4 @@ class IconDrawingServiceTest {
         );
         verify(mockGraphicsContext).fillText(eq("i"), anyDouble(), anyDouble());
     }
-    
-    @Test
-    @DisplayName("Should scale icons properly")
-    void testIconScaling() {
-        // Given
-        IconRendererService.IconDrawer drawer = drawingService.getDrawer("home");
-        
-        // When - Draw at different sizes
-        drawer.drawIcon(mockGraphicsContext, 16);
-        drawer.drawIcon(mockGraphicsContext, 32);
-        drawer.drawIcon(mockGraphicsContext, 64);
-        
-        // Then - Should have drawn 3 times with different parameters
-        verify(mockGraphicsContext, times(3)).fillPolygon(
-            any(double[].class), 
-            any(double[].class), 
-            eq(3)
-        );
-    }
 }

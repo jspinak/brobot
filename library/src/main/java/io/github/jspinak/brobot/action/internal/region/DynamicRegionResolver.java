@@ -18,7 +18,9 @@ import io.github.jspinak.brobot.util.region.RegionUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -242,31 +244,46 @@ public class DynamicRegionResolver {
      */
     public void updateDependentSearchRegions(ActionResult actionResult) {
         List<Match> matches = actionResult.getMatchList();
-        log.info("[DYNAMIC DEBUG] updateDependentSearchRegions: Processing {} matches", matches.size());
+        if (matches.isEmpty()) return;
+        
+        // Group updates by source for concise logging
+        Map<String, Integer> updateCounts = new HashMap<>();
+        int totalUpdates = 0;
         
         for (Match match : matches) {
             if (match.getStateObjectData() == null) {
-                log.info("[DYNAMIC DEBUG] Match '{}' has no StateObjectData, skipping", match.getName());
                 continue;
             }
             
             String sourceName = match.getStateObjectData().getOwnerStateName();
             String sourceObject = match.getStateObjectData().getStateObjectName();
-            log.info("[DYNAMIC DEBUG] Looking for dependents of {}:{} (match at {})", 
-                sourceName, sourceObject, match.getRegion());
+            String sourceKey = sourceName + ":" + sourceObject;
             
             // Get all objects that depend on this match
             Set<SearchRegionDependencyRegistry.DependentObject> dependents = 
                 dependencyRegistry.getDependents(sourceName, sourceObject);
             
-            log.info("[DYNAMIC DEBUG] Found {} dependents for {}:{}", 
-                dependents.size(), sourceName, sourceObject);
-            
-            for (SearchRegionDependencyRegistry.DependentObject dependent : dependents) {
-                log.info("[DYNAMIC DEBUG] Updating dependent: {}:{}", 
-                    dependent.getStateObject().getOwnerStateName(), 
-                    dependent.getStateObject().getName());
-                updateDependentSearchRegion(dependent, match);
+            if (!dependents.isEmpty()) {
+                updateCounts.merge(sourceKey, dependents.size(), Integer::sum);
+                totalUpdates += dependents.size();
+                
+                for (SearchRegionDependencyRegistry.DependentObject dependent : dependents) {
+                    updateDependentSearchRegion(dependent, match);
+                }
+            }
+        }
+        
+        // Log summary once
+        if (totalUpdates > 0) {
+            if (updateCounts.size() == 1) {
+                Map.Entry<String, Integer> entry = updateCounts.entrySet().iterator().next();
+                log.info("[DYNAMIC] Updated {} dependent regions for {}", entry.getValue(), entry.getKey());
+            } else {
+                log.info("[DYNAMIC] Updated {} dependent regions across {} sources", totalUpdates, updateCounts.size());
+                if (log.isDebugEnabled()) {
+                    updateCounts.forEach((source, count) -> 
+                        log.debug("  {} → {} updates", source, count));
+                }
             }
         }
     }

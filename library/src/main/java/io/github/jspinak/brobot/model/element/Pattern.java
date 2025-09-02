@@ -352,17 +352,10 @@ public class Pattern {
         // Get the BufferedImage - this is what SikuliX uses internally anyway
         BufferedImage buffImg = image.getBufferedImage();
         
-        if (name != null && (name.contains("prompt") || name.contains("claude") || name.contains("debug"))) {
-            System.out.println("[PATTERN] Creating SikuliX pattern for '" + name + "'");
-            System.out.println("[PATTERN] Image: " + buffImg.getWidth() + "x" + buffImg.getHeight() + 
-                             " type: " + getImageTypeString(buffImg.getType()));
-            
-            // Note: DPI scaling should be handled at a higher level (e.g., in ScenePatternMatcher)
-            // by detecting system scaling and setting Settings.AlwaysResize appropriately
-            float currentResize = org.sikuli.basics.Settings.AlwaysResize;
-            if (Math.abs(currentResize) > 0.01) {
-                System.out.println("[PATTERN] AlwaysResize is set to: " + currentResize);
-            }
+        // Only log pattern creation in debug/verbose mode
+        if (log.isDebugEnabled() && name != null && (name.contains("prompt") || name.contains("claude") || name.contains("debug"))) {
+            log.debug("[PATTERN] Creating SikuliX pattern '{}' {}x{} type={}", 
+                name, buffImg.getWidth(), buffImg.getHeight(), getImageTypeString(buffImg.getType()));
         }
         
         // Create the SikuliX pattern from BufferedImage

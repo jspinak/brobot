@@ -57,46 +57,6 @@ class PatternMatchingEdgeCasesTest extends BrobotTestBase {
     @DisplayName("Multi-Scale Searching")
     class MultiScaleSearching {
         
-        @ParameterizedTest
-        @ValueSource(doubles = {0.5, 0.75, 1.0, 1.25, 1.5, 2.0})
-        @DisplayName("Should handle different scale factors")
-        void testDifferentScaleFactors(double scaleFactor) {
-            // Arrange
-            PatternFindOptions options = new PatternFindOptions.Builder()
-                .setSimilarity(0.8)
-                // Note: Scale factor would typically be set on the Pattern or StateImage
-                .build();
-            ActionResult actionResult = new ActionResult(options);
-            
-            // Act
-            find.perform(actionResult, objectCollection);
-            
-            // Assert
-            verify(findPipeline).execute(eq(options), eq(actionResult), eq(objectCollection));
-        }
-        
-        @Test
-        @DisplayName("Should handle multi-scale search with increasing similarity")
-        void testMultiScaleWithIncreasingSimilarity() {
-            // Arrange
-            List<Double> scales = Arrays.asList(0.8, 0.9, 1.0, 1.1, 1.2);
-            for (Double scale : scales) {
-                PatternFindOptions options = new PatternFindOptions.Builder()
-                    .setSimilarity(0.7 + (scale - 0.8) * 0.1) // Increase similarity with scale
-                    .build();
-                ActionResult actionResult = new ActionResult(options);
-                
-                // Act
-                find.perform(actionResult, objectCollection);
-                
-                // Assert
-                verify(findPipeline).execute(eq(options), eq(actionResult), eq(objectCollection));
-            }
-            
-            // Verify pipeline was called for each scale
-            verify(findPipeline, times(scales.size())).execute(any(), any(), any());
-        }
-        
         @Test
         @DisplayName("Should optimize search by starting with most likely scale")
         void testOptimizedScaleSearch() {

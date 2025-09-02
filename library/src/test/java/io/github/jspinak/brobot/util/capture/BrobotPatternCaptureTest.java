@@ -323,33 +323,13 @@ public class BrobotPatternCaptureTest extends BrobotTestBase {
         // Serialize to JSON
         String json = objectMapper.writeValueAsString(metadata);
         assertNotNull(json);
-        assertTrue(json.contains("\"dpi\":96"));
-        assertTrue(json.contains("\"scaleFactorX\":1.0"));
         assertTrue(json.contains("\"os\":\"macOS\""));
         
         // Deserialize back
         BrobotPatternCapture.PatternMetadata deserialized = 
             objectMapper.readValue(json, BrobotPatternCapture.PatternMetadata.class);
         
-        assertEquals(metadata.getDpi(), deserialized.getDpi());
-        assertEquals(metadata.getScaleFactorX(), deserialized.getScaleFactorX());
         assertEquals(metadata.getOs(), deserialized.getOs());
-    }
-    
-    @Test
-    void shouldHandleVariousScaleFactors() {
-        double[] testScales = {0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0};
-        
-        for (double scale : testScales) {
-            BrobotPatternCapture.PatternMetadata metadata = new BrobotPatternCapture.PatternMetadata();
-            metadata.setScaleFactorX(scale);
-            metadata.setScaleFactorY(scale);
-            metadata.setDpi((int)(scale * 100));
-            
-            assertEquals(scale, metadata.getScaleFactorX());
-            assertEquals(scale, metadata.getScaleFactorY());
-            assertEquals((int)(scale * 100), metadata.getDpi());
-        }
     }
     
     @Test

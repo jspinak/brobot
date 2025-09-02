@@ -28,14 +28,7 @@ import io.github.jspinak.brobot.annotations.AnnotationProcessor;
                 ConsoleOutputCapture.class,
                 BrobotStartup.class,
                 AutoStartupVerifier.class,
-                PhysicalResolutionCapture.class,
-                HeadlessDiagnostics.class,
                 ImageLoadingDiagnosticsRunner.class,
-                FrameworkInitializer.class,
-                WindowsAutoScaleConfig.class,
-                BrobotDPIConfig.class,
-                BrobotDPIConfiguration.class,
-                AutoScalingConfiguration.class,
                 AnnotationProcessor.class
             }
         ),

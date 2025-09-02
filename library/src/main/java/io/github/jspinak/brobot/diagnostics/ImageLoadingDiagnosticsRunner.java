@@ -107,7 +107,11 @@ public class ImageLoadingDiagnosticsRunner {
         List<ImagePath.PathEntry> sikuliPaths = ImagePath.getPaths();
         log.info("  Configured Paths: {} total", sikuliPaths.size());
         if (verbose) {
-            sikuliPaths.forEach(entry -> log.info("    - {}", entry.getPath()));
+            sikuliPaths.forEach(entry -> {
+                if (entry != null) {
+                    log.info("    - {}", entry.getPath());
+                }
+            });
         }
     }
     
@@ -261,7 +265,7 @@ public class ImageLoadingDiagnosticsRunner {
         Map<String, SmartImageLoader.LoadResult> loadHistory = 
             (Map<String, SmartImageLoader.LoadResult>) diagnostics.get("loadHistory");
         
-        if (loadHistory.isEmpty()) {
+        if (loadHistory == null || loadHistory.isEmpty()) {
             log.info("No images loaded yet");
             return;
         }
@@ -272,7 +276,8 @@ public class ImageLoadingDiagnosticsRunner {
         long fileLoads = 0;
         long failures = 0;
         
-        for (SmartImageLoader.LoadResult result : loadHistory.values()) {
+        if (loadHistory != null) {
+            for (SmartImageLoader.LoadResult result : loadHistory.values()) {
             if (result.getLoadTimeMs() != null) {
                 totalLoadTime += result.getLoadTimeMs();
             }
@@ -292,15 +297,17 @@ public class ImageLoadingDiagnosticsRunner {
             } else {
                 failures++;
             }
+            }
         }
         
-        log.info("Total Load Attempts: {}", loadHistory.size());
-        log.info("Successful Loads: {}", loadHistory.size() - failures);
+        int totalAttempts = loadHistory != null ? loadHistory.size() : 0;
+        log.info("Total Load Attempts: {}", totalAttempts);
+        log.info("Successful Loads: {}", totalAttempts - failures);
         log.info("Failed Loads: {}", failures);
         log.info("Cache Hits: {}", cacheHits);
         log.info("File/Resource Loads: {}", fileLoads);
         
-        if (loadHistory.size() > 0) {
+        if (loadHistory != null && loadHistory.size() > 0) {
             double avgLoadTime = (double) totalLoadTime / loadHistory.size();
             log.info("Average Load Time: {:.2f}ms", avgLoadTime);
         }
@@ -316,9 +323,9 @@ public class ImageLoadingDiagnosticsRunner {
             (Map<String, SmartImageLoader.LoadResult>) diagnostics.get("loadHistory");
         
         // Count failures
-        long failureCount = loadHistory.values().stream()
+        long failureCount = loadHistory != null ? loadHistory.values().stream()
             .filter(r -> !r.isSuccess())
-            .count();
+            .count() : 0;
         
         if (failureCount > 0) {
             log.info("⚠ {} image load failures detected", failureCount);
@@ -328,27 +335,27 @@ public class ImageLoadingDiagnosticsRunner {
         }
         
         // Check cache efficiency
-        long cacheHits = loadHistory.values().stream()
+        long cacheHits = loadHistory != null ? loadHistory.values().stream()
             .filter(r -> r.isSuccess() && "cache".equals(r.getLoadedFrom()))
-            .count();
+            .count() : 0;
         
-        if (loadHistory.size() > 10 && cacheHits < loadHistory.size() / 2) {
+        if (loadHistory != null && loadHistory.size() > 10 && cacheHits < loadHistory.size() / 2.0) {
             log.info("⚠ Low cache hit rate detected");
             log.info("  - Consider preloading frequently used images");
             log.info("  - Check if cache is being cleared too frequently");
         }
         
         // Check for mock mode
-        long mockLoads = loadHistory.values().stream()
+        long mockLoads = loadHistory != null ? loadHistory.values().stream()
             .filter(r -> r.isSuccess() && "mock".equals(r.getLoadedFrom()))
-            .count();
+            .count() : 0;
         
         if (mockLoads > 0) {
             log.info("ℹ Mock mode detected ({} mock images)", mockLoads);
             log.info("  - Set brobot.mock=false for production use");
         }
         
-        if (failureCount == 0 && loadHistory.size() > 0) {
+        if (failureCount == 0 && loadHistory != null && loadHistory.size() > 0) {
             log.info("✓ All image loads successful!");
         }
     }

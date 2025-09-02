@@ -213,21 +213,17 @@ public class ScenePatternMatcher {
         // Get the minimum similarity threshold
         double minSimilarity = org.sikuli.basics.Settings.MinSimilarity;
         
+        // Track accepted and rejected matches for summary logging
+        int acceptedMatches = 0;
+        int rejectedMatches = 0;
+        
         while (f.hasNext()) {
             org.sikuli.script.Match sikuliMatch = f.next();
             
-            // Debug: Log raw match coordinates before adjustment
-            ConsoleReporter.println("[COORD DEBUG] Raw match from finder: x=" + sikuliMatch.x + 
-                " y=" + sikuliMatch.y + " w=" + sikuliMatch.w + " h=" + sikuliMatch.h);
-            
             // If we searched a sub-region, adjust coordinates back to scene coordinates
             if (hasConstrainedRegion) {
-                ConsoleReporter.println("[COORD DEBUG] Applying offsets: regionOffsetX=" + regionOffsetX + 
-                    " regionOffsetY=" + regionOffsetY);
                 sikuliMatch.x += regionOffsetX;
                 sikuliMatch.y += regionOffsetY;
-                ConsoleReporter.println("[COORD DEBUG] Adjusted match: x=" + sikuliMatch.x + 
-                    " y=" + sikuliMatch.y + " w=" + sikuliMatch.w + " h=" + sikuliMatch.h);
             }
             
             // FILTER: Only process matches that meet the minimum similarity threshold
@@ -237,10 +233,13 @@ public class ScenePatternMatcher {
                         .setName(pattern.getName())
                         .build();
                 
-                // Debug: Log final Match coordinates
-                ConsoleReporter.println("[COORD DEBUG] Final Match region: " + nextMatch.getRegion());
-                ConsoleReporter.println("[MATCH ACCEPTED] Score: " + String.format("%.3f", sikuliMatch.getScore()) + 
-                    " >= threshold: " + String.format("%.3f", minSimilarity));
+                // Only log coordinate details in verbose mode
+                if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
+                    ConsoleReporter.println("[MATCH] Accepted at " + nextMatch.getRegion() + 
+                        " score=" + String.format("%.3f", sikuliMatch.getScore()));
+                }
+                
+                acceptedMatches++;
                 
                 matchList.add(nextMatch);
                 
@@ -249,10 +248,13 @@ public class ScenePatternMatcher {
                     bestMatch = nextMatch;
                 }
             } else {
-                // Log rejected matches for debugging
-                ConsoleReporter.println("[MATCH REJECTED] Score: " + String.format("%.3f", sikuliMatch.getScore()) + 
-                    " < threshold: " + String.format("%.3f", minSimilarity) + " at (" + 
-                    sikuliMatch.x + ", " + sikuliMatch.y + ")");
+                rejectedMatches++;
+                // Only log rejected matches in verbose mode
+                if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
+                    ConsoleReporter.println("[MATCH] Rejected at (" + sikuliMatch.x + ", " + sikuliMatch.y + 
+                        ") score=" + String.format("%.3f", sikuliMatch.getScore()) + " < " + 
+                        String.format("%.3f", minSimilarity));
+                }
             }
             
             matchCount++;
@@ -269,6 +271,14 @@ public class ScenePatternMatcher {
         }
         
         f.destroy();
+        
+        // Log match summary if there were multiple candidates
+        if (matchCount > 1 || rejectedMatches > 0) {
+            if (acceptedMatches > 0) {
+                ConsoleReporter.println("  [MATCHES] " + acceptedMatches + " accepted, " + 
+                    rejectedMatches + " rejected (threshold=" + String.format("%.2f", minSimilarity) + ")");
+            }
+        }
         
         // Log low-score summary if applicable
         if (diagnosticLogger != null) {
