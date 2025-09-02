@@ -411,7 +411,7 @@ public class JsonPathUtilsTest extends BrobotTestBase {
 
         @Test
         @DisplayName("Should handle very deep nesting")
-        void shouldHandleVeryDeepNesting() {
+        void shouldHandleVeryDeepNesting() throws Exception {
             ObjectNode root = objectMapper.createObjectNode();
             ObjectNode current = root;
             

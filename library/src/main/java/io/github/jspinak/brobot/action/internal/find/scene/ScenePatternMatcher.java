@@ -203,6 +203,9 @@ public class ScenePatternMatcher {
             diagnosticLogger.resetMatchTracking();
         }
         
+        // Get the minimum similarity threshold
+        double minSimilarity = org.sikuli.basics.Settings.MinSimilarity;
+        
         while (f.hasNext()) {
             org.sikuli.script.Match sikuliMatch = f.next();
             
@@ -220,19 +223,29 @@ public class ScenePatternMatcher {
                     " y=" + sikuliMatch.y + " w=" + sikuliMatch.w + " h=" + sikuliMatch.h);
             }
             
-            Match nextMatch = new Match.Builder()
-                    .setSikuliMatch(sikuliMatch)
-                    .setName(pattern.getName())
-                    .build();
-            
-            // Debug: Log final Match coordinates
-            ConsoleReporter.println("[COORD DEBUG] Final Match region: " + nextMatch.getRegion());
-            
-            matchList.add(nextMatch);
-            
-            if (sikuliMatch.getScore() > bestScore) {
-                bestScore = sikuliMatch.getScore();
-                bestMatch = nextMatch;
+            // FILTER: Only process matches that meet the minimum similarity threshold
+            if (sikuliMatch.getScore() >= minSimilarity) {
+                Match nextMatch = new Match.Builder()
+                        .setSikuliMatch(sikuliMatch)
+                        .setName(pattern.getName())
+                        .build();
+                
+                // Debug: Log final Match coordinates
+                ConsoleReporter.println("[COORD DEBUG] Final Match region: " + nextMatch.getRegion());
+                ConsoleReporter.println("[MATCH ACCEPTED] Score: " + String.format("%.3f", sikuliMatch.getScore()) + 
+                    " >= threshold: " + String.format("%.3f", minSimilarity));
+                
+                matchList.add(nextMatch);
+                
+                if (sikuliMatch.getScore() > bestScore) {
+                    bestScore = sikuliMatch.getScore();
+                    bestMatch = nextMatch;
+                }
+            } else {
+                // Log rejected matches for debugging
+                ConsoleReporter.println("[MATCH REJECTED] Score: " + String.format("%.3f", sikuliMatch.getScore()) + 
+                    " < threshold: " + String.format("%.3f", minSimilarity) + " at (" + 
+                    sikuliMatch.x + ", " + sikuliMatch.y + ")");
             }
             
             matchCount++;
@@ -257,14 +270,17 @@ public class ScenePatternMatcher {
         
         // Log results using DiagnosticLogger
         if (diagnosticLogger != null) {
-            diagnosticLogger.logPatternResult(pattern, matchCount, bestScore);
+            diagnosticLogger.logPatternResult(pattern, matchList.size(), bestScore);
         } else {
             // Fallback to ConsoleReporter
             if (matchList.isEmpty()) {
-                ConsoleReporter.println("  [RESULT] NO MATCHES for '" + pattern.getName() + "'");
+                ConsoleReporter.println("  [RESULT] NO MATCHES for '" + pattern.getName() + 
+                    "' (examined " + matchCount + " candidates, none met threshold " + 
+                    String.format("%.3f", minSimilarity) + ")");
             } else {
-                ConsoleReporter.println("  [RESULT] " + matchCount + " matches for '" + pattern.getName() + 
-                    "' | Best score: " + String.format("%.3f", bestScore));
+                ConsoleReporter.println("  [RESULT] " + matchList.size() + " matches accepted for '" + pattern.getName() + 
+                    "' (from " + matchCount + " candidates) | Best score: " + String.format("%.3f", bestScore) +
+                    " | Threshold: " + String.format("%.3f", minSimilarity));
             }
         }
         

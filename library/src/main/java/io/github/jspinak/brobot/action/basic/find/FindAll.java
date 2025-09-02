@@ -188,14 +188,21 @@ public class FindAll {
                 }
             }
             
-            if (bestMatch != null && bestScore >= 0.7) { // Use default similarity threshold
+            // Get the minimum similarity threshold from actionConfig or use default
+            double minSimilarity = 0.7; // default
+            if (actionConfig instanceof BaseFindOptions) {
+                minSimilarity = ((BaseFindOptions) actionConfig).getSimilarity();
+            }
+            
+            if (bestMatch != null && bestScore >= minSimilarity) {
                 System.out.println("[FIXED REGION] Setting fixed region for pattern '" + name + 
                     "' to best match at " + bestMatch.getRegion() + " with score " + 
                     String.format("%.3f", bestScore));
                 pattern.getSearchRegions().setFixedRegion(bestMatch.getRegion());
             } else {
                 System.out.println("[FIXED REGION] Not setting fixed region - best score " + 
-                    String.format("%.3f", bestScore) + " below threshold");
+                    String.format("%.3f", bestScore) + " below threshold " + 
+                    String.format("%.3f", minSimilarity));
             }
         }
     }
