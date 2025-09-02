@@ -108,11 +108,15 @@ public class BrobotLogger {
                 .action(action)
                 .target(target.getName())
                 .success(result.isSuccess())
-                .duration(result.getDuration().toMillis())
                 .sessionId(context.getSessionId())
                 .stateId(context.getCurrentState() != null ? context.getCurrentState().getName() : null)
                 .timestamp(System.currentTimeMillis())
                 .metadata("matchCount", result.getMatchList().size());
+        
+        // Add duration if available
+        if (result.getDuration() != null) {
+            eventBuilder.duration(result.getDuration().toMillis());
+        }
         
         // Add match coordinates if available
         if (!result.getMatchList().isEmpty()) {

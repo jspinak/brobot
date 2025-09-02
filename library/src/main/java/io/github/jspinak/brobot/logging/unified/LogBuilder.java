@@ -164,7 +164,9 @@ public class LogBuilder {
      * @return This builder for chaining
      */
     public LogBuilder metadata(Map<String, Object> metadata) {
-        this.metadata.putAll(metadata);
+        if (metadata != null) {
+            this.metadata.putAll(metadata);
+        }
         return this;
     }
     
@@ -314,7 +316,15 @@ public class LogBuilder {
             // Store colors in metadata for the router to use
             Map<String, Object> colorMetadata = new HashMap<>();
             colorMetadata.put("_consoleColors", colors);
-            event = LogEvent.builder()
+            
+            // Combine existing metadata with color metadata
+            Map<String, Object> combinedMetadata = new HashMap<>();
+            if (event.getMetadata() != null) {
+                combinedMetadata.putAll(event.getMetadata());
+            }
+            combinedMetadata.putAll(colorMetadata);
+            
+            LogEvent.Builder rebuilder = LogEvent.builder()
                     .type(event.getType())
                     .level(event.getLevel())
                     .message(event.getMessage())
@@ -326,11 +336,15 @@ public class LogBuilder {
                     .fromState(event.getFromState())
                     .toState(event.getToState())
                     .success(event.isSuccess())
-                    .duration(event.getDuration())
                     .error(event.getError())
-                    .metadata(event.getMetadata())
-                    .metadata(colorMetadata)
-                    .build();
+                    .metadata(combinedMetadata);
+            
+            // Only set duration if not null
+            if (event.getDuration() != null) {
+                rebuilder.duration(event.getDuration());
+            }
+            
+            event = rebuilder.build();
         }
         
         logger.routeEvent(event);

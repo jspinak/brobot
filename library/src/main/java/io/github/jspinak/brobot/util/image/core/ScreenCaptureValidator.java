@@ -4,6 +4,8 @@ import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import io.github.jspinak.brobot.logging.unified.LogEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.sikuli.script.Screen;
+import org.sikuli.script.ScreenImage;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -180,10 +182,19 @@ public class ScreenCaptureValidator {
     /**
      * Capture a screen image
      */
-    protected BufferedImage captureScreen() throws AWTException {
-        Robot robot = new Robot();
-        Rectangle screenRect = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
-        return robot.createScreenCapture(screenRect);
+    protected BufferedImage captureScreen() {
+        try {
+            Screen screen = new Screen();
+            ScreenImage screenImage = screen.capture();
+            return screenImage.getImage();
+        } catch (Exception e) {
+            // Log error and return null
+            if (logger != null) {
+                logger.logEvent(LogEvent.ERROR("Failed to capture screen using SikuliX")
+                    .setError(e));
+            }
+            return null;
+        }
     }
     
     /**
