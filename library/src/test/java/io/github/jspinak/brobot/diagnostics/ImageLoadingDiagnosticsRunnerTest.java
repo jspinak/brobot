@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.diagnostics;
 import io.github.jspinak.brobot.config.ImagePathManager;
 import io.github.jspinak.brobot.config.SmartImageLoader;
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -62,11 +63,10 @@ public class ImageLoadingDiagnosticsRunnerTest extends BrobotTestBase {
         diagnosticsRunner = new ImageLoadingDiagnosticsRunner(smartImageLoader, imagePathManager);
     }
     
-    @Override
-    protected void tearDown() {
+    @AfterEach
+    public void tearDown() {
         // Restore original System.out
         System.setOut(originalOut);
-        super.tearDown();
     }
     
     @Test

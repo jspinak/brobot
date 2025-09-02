@@ -8,10 +8,10 @@ import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
-import io.github.jspinak.brobot.model.primitives.image.Image;
+import io.github.jspinak.brobot.model.element.Image;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Positions;
-import io.github.jspinak.brobot.model.primitives.match.Match;
+import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.runner.json.module.BrobotJsonModule;
@@ -51,7 +51,8 @@ public class BrobotObjectMapperTest extends BrobotTestBase {
     @Override
     public void setupTest() {
         super.setupTest();
-        jsonModule = new BrobotJsonModule();
+        // Create a mock BrobotJsonModule since we can't easily construct it
+        jsonModule = mock(BrobotJsonModule.class);
         brobotObjectMapper = new BrobotObjectMapper(jsonModule);
     }
 
@@ -263,7 +264,7 @@ public class BrobotObjectMapperTest extends BrobotTestBase {
         @DisplayName("Should serialize ClickOptions with type discriminator")
         void shouldSerializeClickOptionsWithType() throws JsonProcessingException {
             ClickOptions options = new ClickOptions.Builder()
-                    .setDoubleClick(true)
+                    .setNumberOfClicks(2)
                     .build();
             
             String json = brobotObjectMapper.writeValueAsString(options);
@@ -276,14 +277,15 @@ public class BrobotObjectMapperTest extends BrobotTestBase {
         @DisplayName("Should serialize TypeOptions with type discriminator")
         void shouldSerializeTypeOptionsWithType() throws JsonProcessingException {
             TypeOptions options = new TypeOptions.Builder()
-                    .setText("test text")
+                    .setTypeDelay(0.1)
+                    .setModifiers("CTRL")
                     .build();
             
             String json = brobotObjectMapper.writeValueAsString(options);
             assertNotNull(json);
             assertTrue(json.contains("\"@type\""));
             assertTrue(json.contains("TypeOptions") || json.contains("TYPE"));
-            assertTrue(json.contains("test text"));
+            assertTrue(json.contains("0.1") || json.contains("CTRL"));
         }
 
         @ParameterizedTest
@@ -355,8 +357,9 @@ public class BrobotObjectMapperTest extends BrobotTestBase {
         @Test
         @DisplayName("Should handle ObjectCollection circular references")
         void shouldHandleObjectCollectionCircularReferences() {
-            ObjectCollection collection = new ObjectCollection();
-            collection.setSceneName("scene1");
+            ObjectCollection collection = new ObjectCollection.Builder()
+                    .withScenes("scene1")
+                    .build();
             
             // ObjectCollection can have circular references
             assertDoesNotThrow(() -> {

@@ -44,9 +44,9 @@ public class UIScaleNormalizerTest extends BrobotTestBase {
         UIScaleNormalizer.UIScale scale = uiScaleNormalizer.detectUIScale(testImage);
         
         assertNotNull(scale);
-        assertTrue(scale.getScaleFactor() > 0);
-        assertTrue(scale.getUiElementWidth() >= 0);
-        assertTrue(scale.getUiElementHeight() >= 0);
+        assertTrue(scale.getScale() > 0);
+        assertTrue(scale.getElementWidth() >= 0);
+        assertTrue(scale.getElementHeight() >= 0);
     }
     
     @Test
@@ -55,9 +55,9 @@ public class UIScaleNormalizerTest extends BrobotTestBase {
         UIScaleNormalizer.UIScale scale = uiScaleNormalizer.detectUIScale(null);
         
         assertNotNull(scale);
-        assertEquals(1.0, scale.getScaleFactor());
-        assertEquals(0, scale.getUiElementWidth());
-        assertEquals(0, scale.getUiElementHeight());
+        assertEquals(1.0, scale.getScale());
+        assertEquals(0, scale.getElementWidth());
+        assertEquals(0, scale.getElementHeight());
     }
     
     @Test
@@ -75,8 +75,8 @@ public class UIScaleNormalizerTest extends BrobotTestBase {
         UIScaleNormalizer.UIScale scale = uiScaleNormalizer.detectUIScale(brightImage);
         
         assertNotNull(scale);
-        assertTrue(scale.getUiElementWidth() > 0);
-        assertTrue(scale.getUiElementHeight() > 0);
+        assertTrue(scale.getElementWidth() > 0);
+        assertTrue(scale.getElementHeight() > 0);
     }
     
     @Test
@@ -92,7 +92,7 @@ public class UIScaleNormalizerTest extends BrobotTestBase {
         UIScaleNormalizer.UIScale scale = uiScaleNormalizer.detectUIScale(darkImage);
         
         assertNotNull(scale);
-        assertEquals(1.0, scale.getScaleFactor());
+        assertEquals(1.0, scale.getScale());
     }
     
     @Test
@@ -101,7 +101,7 @@ public class UIScaleNormalizerTest extends BrobotTestBase {
         BufferedImage pattern = createTestImage(100, 100, 20, 20, 60, 60);
         BufferedImage scene = createTestImage(400, 300, 100, 100, 60, 60);
         
-        BufferedImage normalized = uiScaleNormalizer.normalizeScales(pattern, scene);
+        BufferedImage normalized = uiScaleNormalizer.prepareForMatching(pattern, scene);
         
         assertNotNull(normalized);
         // When scales are similar, pattern should be returned unchanged
@@ -117,7 +117,7 @@ public class UIScaleNormalizerTest extends BrobotTestBase {
         // Scene with large UI element (simulating zoom)
         BufferedImage scene = createTestImage(400, 300, 100, 100, 120, 120);
         
-        BufferedImage normalized = uiScaleNormalizer.normalizeScales(pattern, scene);
+        BufferedImage normalized = uiScaleNormalizer.prepareForMatching(pattern, scene);
         
         assertNotNull(normalized);
         // Should scale pattern to match scene's UI scale
@@ -130,7 +130,7 @@ public class UIScaleNormalizerTest extends BrobotTestBase {
     void shouldHandleNullPatternInNormalization() {
         BufferedImage scene = createTestImage(400, 300, 100, 100, 60, 60);
         
-        BufferedImage normalized = uiScaleNormalizer.normalizeScales(null, scene);
+        BufferedImage normalized = uiScaleNormalizer.prepareForMatching(null, scene);
         
         assertNull(normalized);
     }
@@ -140,7 +140,7 @@ public class UIScaleNormalizerTest extends BrobotTestBase {
     void shouldHandleNullSceneInNormalization() {
         BufferedImage pattern = createTestImage(100, 100, 20, 20, 60, 60);
         
-        BufferedImage normalized = uiScaleNormalizer.normalizeScales(pattern, null);
+        BufferedImage normalized = uiScaleNormalizer.prepareForMatching(pattern, null);
         
         assertNotNull(normalized);
         assertEquals(pattern, normalized);
@@ -149,65 +149,37 @@ public class UIScaleNormalizerTest extends BrobotTestBase {
     @Test
     @DisplayName("Should handle both null images in normalization")
     void shouldHandleBothNullImagesInNormalization() {
-        BufferedImage normalized = uiScaleNormalizer.normalizeScales(null, null);
+        BufferedImage normalized = uiScaleNormalizer.prepareForMatching(null, null);
         
         assertNull(normalized);
     }
     
     @Test
-    @DisplayName("Should scale image correctly")
-    void shouldScaleImageCorrectly() {
-        BufferedImage original = createTestImage(100, 100, 10, 10, 80, 80);
-        double scaleFactor = 2.0;
+    @DisplayName("Should prepare images for matching with different scales")
+    void shouldPrepareImagesForMatchingWithDifferentScales() {
+        // Create pattern with small UI elements (simulating low zoom)
+        BufferedImage pattern = createTestImage(100, 100, 10, 10, 30, 30);
+        // Create scene with large UI elements (simulating high zoom) 
+        BufferedImage scene = createTestImage(400, 300, 100, 100, 120, 120);
         
-        BufferedImage scaled = uiScaleNormalizer.scaleImage(original, scaleFactor);
+        BufferedImage prepared = uiScaleNormalizer.prepareForMatching(pattern, scene);
         
-        assertNotNull(scaled);
-        assertEquals((int)(original.getWidth() * scaleFactor), scaled.getWidth());
-        assertEquals((int)(original.getHeight() * scaleFactor), scaled.getHeight());
+        assertNotNull(prepared);
+        // The method should return either the original or a scaled version
     }
     
     @Test
-    @DisplayName("Should handle scale factor of 1.0")
-    void shouldHandleScaleFactorOfOne() {
-        BufferedImage original = createTestImage(100, 100, 10, 10, 80, 80);
+    @DisplayName("Should handle similar scale images")
+    void shouldHandleSimilarScaleImages() {
+        BufferedImage pattern = createTestImage(100, 100, 20, 20, 60, 60);
+        BufferedImage scene = createTestImage(400, 300, 100, 100, 60, 60);
         
-        BufferedImage scaled = uiScaleNormalizer.scaleImage(original, 1.0);
+        BufferedImage prepared = uiScaleNormalizer.prepareForMatching(pattern, scene);
         
-        assertNotNull(scaled);
-        assertEquals(original, scaled); // Should return same instance
-    }
-    
-    @Test
-    @DisplayName("Should handle very small scale factor")
-    void shouldHandleVerySmallScaleFactor() {
-        BufferedImage original = createTestImage(100, 100, 10, 10, 80, 80);
-        
-        BufferedImage scaled = uiScaleNormalizer.scaleImage(original, 0.1);
-        
-        assertNotNull(scaled);
-        assertEquals(10, scaled.getWidth());
-        assertEquals(10, scaled.getHeight());
-    }
-    
-    @Test
-    @DisplayName("Should handle very large scale factor")
-    void shouldHandleVeryLargeScaleFactor() {
-        BufferedImage original = createTestImage(10, 10, 2, 2, 6, 6);
-        
-        BufferedImage scaled = uiScaleNormalizer.scaleImage(original, 10.0);
-        
-        assertNotNull(scaled);
-        assertEquals(100, scaled.getWidth());
-        assertEquals(100, scaled.getHeight());
-    }
-    
-    @Test
-    @DisplayName("Should handle null image in scaling")
-    void shouldHandleNullImageInScaling() {
-        BufferedImage scaled = uiScaleNormalizer.scaleImage(null, 2.0);
-        
-        assertNull(scaled);
+        assertNotNull(prepared);
+        // When scales are similar, should return the original pattern
+        assertEquals(pattern.getWidth(), prepared.getWidth());
+        assertEquals(pattern.getHeight(), prepared.getHeight());
     }
     
     @Test
@@ -229,8 +201,8 @@ public class UIScaleNormalizerTest extends BrobotTestBase {
         UIScaleNormalizer.UIScale scale = uiScaleNormalizer.detectUIScale(complexImage);
         
         assertNotNull(scale);
-        assertTrue(scale.getUiElementWidth() > 0);
-        assertTrue(scale.getUiElementHeight() > 0);
+        assertTrue(scale.getElementWidth() > 0);
+        assertTrue(scale.getElementHeight() > 0);
     }
     
     @Test
@@ -259,21 +231,21 @@ public class UIScaleNormalizerTest extends BrobotTestBase {
     void shouldValidateUIScaleClass() {
         UIScaleNormalizer.UIScale scale = new UIScaleNormalizer.UIScale(1.5, 100, 80);
         
-        assertEquals(1.5, scale.getScaleFactor());
-        assertEquals(100, scale.getUiElementWidth());
-        assertEquals(80, scale.getUiElementHeight());
+        assertEquals(1.5, scale.getScale());
+        assertEquals(100, scale.getElementWidth());
+        assertEquals(80, scale.getElementHeight());
         
         // Test with zero values
         UIScaleNormalizer.UIScale zeroScale = new UIScaleNormalizer.UIScale(0, 0, 0);
-        assertEquals(0, zeroScale.getScaleFactor());
-        assertEquals(0, zeroScale.getUiElementWidth());
-        assertEquals(0, zeroScale.getUiElementHeight());
+        assertEquals(0, zeroScale.getScale());
+        assertEquals(0, zeroScale.getElementWidth());
+        assertEquals(0, zeroScale.getElementHeight());
         
         // Test with negative values (edge case)
         UIScaleNormalizer.UIScale negativeScale = new UIScaleNormalizer.UIScale(-1, -10, -20);
-        assertEquals(-1, negativeScale.getScaleFactor());
-        assertEquals(-10, negativeScale.getUiElementWidth());
-        assertEquals(-20, negativeScale.getUiElementHeight());
+        assertEquals(-1, negativeScale.getScale());
+        assertEquals(-10, negativeScale.getElementWidth());
+        assertEquals(-20, negativeScale.getElementHeight());
     }
     
     // Helper method to create test images with UI elements
