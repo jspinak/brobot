@@ -1,19 +1,22 @@
-// Temporary test exclusions for refactoring
-// Remove these exclusions as tests are fixed
+// ALL TEST EXCLUSIONS REMOVED - 2025-08-29
+// This file is kept for reference but no tests are excluded anymore
+// 
+// All previously excluded tests have been fixed:
+// - StateVisualizationServiceTest - Re-enabled (uses TestFX)
+// - RefactoredExecutionDashboardPanelTest - FIXED (uses ImprovedJavaFXTestBase)
+// - RefactoredConfigDetailsPanelTest - FIXED (uses ImprovedJavaFXTestBase)
+// - AtlantaConfigUIFactoryTest - FIXED (uses ImprovedJavaFXTestBase)
+// - ConfigFileOperationsServiceTest - FIXED (uses ImprovedJavaFXTestBase)
+// - ConfigOperationsServiceTest - FIXED (no JavaFX needed)
+// - TaskManagementServiceTest - FIXED (uses ImprovedJavaFXTestBase)
+// - AutomationButtonServiceTest - FIXED (uses ImprovedJavaFXTestBase)
+// - EnhancedButtonServiceTest - FIXED (uses ImprovedJavaFXTestBase)
+// - EnhancedHotkeyServiceTest - FIXED (uses ImprovedJavaFXTestBase)
+// - RefactoredAutomationPanelTest - Test doesn't exist (removed)
+// - PanelVisualRegressionTest - Re-enabled and FIXED (uses ImprovedJavaFXTestBase)
+// - IntegrationTest - FIXED (uses ImprovedJavaFXTestBase)
+// - PerformanceBenchmarkTest - FIXED (uses ImprovedJavaFXTestBase)
 
 test {
-    exclude '**/StateVisualizationServiceTest.class'
-    exclude '**/RefactoredExecutionDashboardPanelTest.class'
-    exclude '**/RefactoredConfigDetailsPanelTest.class'
-    exclude '**/AtlantaConfigUIFactoryTest.class'
-    exclude '**/ConfigFileOperationsServiceTest.class'
-    exclude '**/ConfigOperationsServiceTest.class'
-    exclude '**/TaskManagementServiceTest.class'
-    exclude '**/AutomationButtonServiceTest.class'
-    exclude '**/EnhancedButtonServiceTest.class'
-    exclude '**/EnhancedHotkeyServiceTest.class'
-    exclude '**/RefactoredAutomationPanelTest.class'
-    exclude '**/PanelVisualRegressionTest.class'
-    exclude '**/IntegrationTest.class'
-    exclude '**/PerformanceBenchmarkTest.class'
+    // No exclusions - all tests are enabled!
 }

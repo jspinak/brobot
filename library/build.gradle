@@ -270,4 +270,4 @@ jreleaser {
 
 // Apply coverage tasks
 // apply from: 'gradle-coverage-tasks.gradle'  // Temporarily disabled for testing
-apply from: 'test-tasks.gradle'
+// apply from: 'test-tasks.gradle'  // Temporarily disabled - file doesn't exist

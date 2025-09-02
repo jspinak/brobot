@@ -1,0 +1,13 @@
+{
+  "dpi" : 100,
+  "scaleFactorX" : 1.0,
+  "scaleFactorY" : 1.0,
+  "physicalWidth" : 1920,
+  "physicalHeight" : 1080,
+  "logicalWidth" : 0,
+  "logicalHeight" : 0,
+  "javaVersion" : "21.0.6",
+  "captureTimestamp" : "2025-09-02T12:54:22.078420391Z",
+  "os" : "Linux",
+  "osVersion" : "6.6.87.2-microsoft-standard-WSL2"
+}
