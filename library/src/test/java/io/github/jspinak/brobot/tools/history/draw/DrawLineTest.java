@@ -53,10 +53,10 @@ public class DrawLineTest extends BrobotTestBase {
         try (MockedStatic<org.bytedeco.opencv.global.opencv_imgproc> imgprocMock = 
                 mockStatic(org.bytedeco.opencv.global.opencv_imgproc.class)) {
             
-            drawLine.drawLine(mockMat, start, end, testColor);
+            drawLine.draw(mockMat, start, end, testColor, 1, 8, 0);
             
             imgprocMock.verify(() -> 
-                line(eq(mockMat), eq(start), eq(end), eq(testColor), anyInt(), anyInt(), anyInt())
+                line(eq(mockMat), eq(start), eq(end), eq(testColor), eq(1), eq(8), eq(0))
             );
         }
     }
@@ -71,10 +71,10 @@ public class DrawLineTest extends BrobotTestBase {
         try (MockedStatic<org.bytedeco.opencv.global.opencv_imgproc> imgprocMock = 
                 mockStatic(org.bytedeco.opencv.global.opencv_imgproc.class)) {
             
-            drawLine.drawLine(mockMat, start, end, testColor, thickness);
+            drawLine.draw(mockMat, start, end, testColor, thickness, 8, 0);
             
             imgprocMock.verify(() -> 
-                line(eq(mockMat), eq(start), eq(end), eq(testColor), eq(thickness), anyInt(), anyInt())
+                line(eq(mockMat), eq(start), eq(end), eq(testColor), eq(thickness), eq(8), eq(0))
             );
         }
     }
@@ -90,10 +90,10 @@ public class DrawLineTest extends BrobotTestBase {
         try (MockedStatic<org.bytedeco.opencv.global.opencv_imgproc> imgprocMock = 
                 mockStatic(org.bytedeco.opencv.global.opencv_imgproc.class)) {
             
-            drawLine.drawLine(mockMat, start, end, testColor, thickness, lineType);
+            drawLine.draw(mockMat, start, end, testColor, thickness, lineType, 0);
             
             imgprocMock.verify(() -> 
-                line(eq(mockMat), eq(start), eq(end), eq(testColor), eq(thickness), eq(lineType), anyInt())
+                line(eq(mockMat), eq(start), eq(end), eq(testColor), eq(thickness), eq(lineType), eq(0))
             );
         }
     }
@@ -110,7 +110,7 @@ public class DrawLineTest extends BrobotTestBase {
         try (MockedStatic<org.bytedeco.opencv.global.opencv_imgproc> imgprocMock = 
                 mockStatic(org.bytedeco.opencv.global.opencv_imgproc.class)) {
             
-            drawLine.drawLine(mockMat, start, end, testColor, thickness, lineType, shift);
+            drawLine.draw(mockMat, start, end, testColor, thickness, lineType, shift);
             
             imgprocMock.verify(() -> 
                 line(mockMat, start, end, testColor, thickness, lineType, shift)
@@ -127,10 +127,10 @@ public class DrawLineTest extends BrobotTestBase {
         try (MockedStatic<org.bytedeco.opencv.global.opencv_imgproc> imgprocMock = 
                 mockStatic(org.bytedeco.opencv.global.opencv_imgproc.class)) {
             
-            drawLine.drawLine(mockMat, startLoc, endLoc, testColor);
+            drawLine.draw(mockMat, startLoc, endLoc, testColor, 1, 8, 0);
             
             imgprocMock.verify(() -> 
-                line(eq(mockMat), any(Point.class), any(Point.class), eq(testColor), anyInt(), anyInt(), anyInt())
+                line(eq(mockMat), any(Point.class), any(Point.class), eq(testColor), eq(1), eq(8), eq(0))
             );
         }
     }
@@ -144,10 +144,10 @@ public class DrawLineTest extends BrobotTestBase {
         try (MockedStatic<org.bytedeco.opencv.global.opencv_imgproc> imgprocMock = 
                 mockStatic(org.bytedeco.opencv.global.opencv_imgproc.class)) {
             
-            drawLine.drawLine(mockMat, start, end, testColor, 0);
+            drawLine.draw(mockMat, start, end, testColor, 0, 8, 0);
             
             imgprocMock.verify(() -> 
-                line(eq(mockMat), eq(start), eq(end), eq(testColor), eq(0), anyInt(), anyInt())
+                line(eq(mockMat), eq(start), eq(end), eq(testColor), eq(0), eq(8), eq(0))
             );
         }
     }
@@ -162,10 +162,10 @@ public class DrawLineTest extends BrobotTestBase {
         try (MockedStatic<org.bytedeco.opencv.global.opencv_imgproc> imgprocMock = 
                 mockStatic(org.bytedeco.opencv.global.opencv_imgproc.class)) {
             
-            drawLine.drawLine(mockMat, start, end, testColor, thickness);
+            drawLine.draw(mockMat, start, end, testColor, thickness, 8, 0);
             
             imgprocMock.verify(() -> 
-                line(eq(mockMat), eq(start), eq(end), eq(testColor), eq(thickness), anyInt(), anyInt())
+                line(eq(mockMat), eq(start), eq(end), eq(testColor), eq(thickness), eq(8), eq(0))
             );
         }
     }
@@ -179,10 +179,10 @@ public class DrawLineTest extends BrobotTestBase {
         try (MockedStatic<org.bytedeco.opencv.global.opencv_imgproc> imgprocMock = 
                 mockStatic(org.bytedeco.opencv.global.opencv_imgproc.class)) {
             
-            drawLine.drawLine(mockMat, start, end, testColor);
+            drawLine.draw(mockMat, start, end, testColor, 1, 8, 0);
             
             imgprocMock.verify(() -> 
-                line(eq(mockMat), eq(start), eq(end), eq(testColor), anyInt(), anyInt(), anyInt())
+                line(eq(mockMat), eq(start), eq(end), eq(testColor), eq(1), eq(8), eq(0))
             );
         }
     }
@@ -196,10 +196,10 @@ public class DrawLineTest extends BrobotTestBase {
         try (MockedStatic<org.bytedeco.opencv.global.opencv_imgproc> imgprocMock = 
                 mockStatic(org.bytedeco.opencv.global.opencv_imgproc.class)) {
             
-            drawLine.drawLine(mockMat, start, end, testColor);
+            drawLine.draw(mockMat, start, end, testColor, 1, 8, 0);
             
             imgprocMock.verify(() -> 
-                line(eq(mockMat), eq(start), eq(end), eq(testColor), anyInt(), anyInt(), anyInt())
+                line(eq(mockMat), eq(start), eq(end), eq(testColor), eq(1), eq(8), eq(0))
             );
         }
     }
@@ -213,10 +213,10 @@ public class DrawLineTest extends BrobotTestBase {
         try (MockedStatic<org.bytedeco.opencv.global.opencv_imgproc> imgprocMock = 
                 mockStatic(org.bytedeco.opencv.global.opencv_imgproc.class)) {
             
-            drawLine.drawLine(mockMat, start, end, testColor);
+            drawLine.draw(mockMat, start, end, testColor, 1, 8, 0);
             
             imgprocMock.verify(() -> 
-                line(eq(mockMat), eq(start), eq(end), eq(testColor), anyInt(), anyInt(), anyInt())
+                line(eq(mockMat), eq(start), eq(end), eq(testColor), eq(1), eq(8), eq(0))
             );
         }
     }
@@ -229,11 +229,11 @@ public class DrawLineTest extends BrobotTestBase {
         try (MockedStatic<org.bytedeco.opencv.global.opencv_imgproc> imgprocMock = 
                 mockStatic(org.bytedeco.opencv.global.opencv_imgproc.class)) {
             
-            drawLine.drawLine(mockMat, point, point, testColor);
+            drawLine.draw(mockMat, point, point, testColor, 1, 8, 0);
             
             // Should still call line even if points are same (will draw a point)
             imgprocMock.verify(() -> 
-                line(eq(mockMat), eq(point), eq(point), eq(testColor), anyInt(), anyInt(), anyInt())
+                line(eq(mockMat), eq(point), eq(point), eq(testColor), eq(1), eq(8), eq(0))
             );
         }
     }
@@ -247,10 +247,10 @@ public class DrawLineTest extends BrobotTestBase {
         try (MockedStatic<org.bytedeco.opencv.global.opencv_imgproc> imgprocMock = 
                 mockStatic(org.bytedeco.opencv.global.opencv_imgproc.class)) {
             
-            drawLine.drawLine(mockMat, start, end, testColor);
+            drawLine.draw(mockMat, start, end, testColor, 1, 8, 0);
             
             imgprocMock.verify(() -> 
-                line(eq(mockMat), eq(start), eq(end), eq(testColor), anyInt(), anyInt(), anyInt())
+                line(eq(mockMat), eq(start), eq(end), eq(testColor), eq(1), eq(8), eq(0))
             );
         }
     }
@@ -264,10 +264,10 @@ public class DrawLineTest extends BrobotTestBase {
         try (MockedStatic<org.bytedeco.opencv.global.opencv_imgproc> imgprocMock = 
                 mockStatic(org.bytedeco.opencv.global.opencv_imgproc.class)) {
             
-            drawLine.drawLine(mockMat, start, end, testColor);
+            drawLine.draw(mockMat, start, end, testColor, 1, 8, 0);
             
             imgprocMock.verify(() -> 
-                line(eq(mockMat), eq(start), eq(end), eq(testColor), anyInt(), anyInt(), anyInt())
+                line(eq(mockMat), eq(start), eq(end), eq(testColor), eq(1), eq(8), eq(0))
             );
         }
     }
@@ -293,11 +293,11 @@ public class DrawLineTest extends BrobotTestBase {
                 mockStatic(org.bytedeco.opencv.global.opencv_imgproc.class)) {
             
             for (Scalar color : colors) {
-                drawLine.drawLine(mockMat, start, end, color);
+                drawLine.draw(mockMat, start, end, color, 1, 8, 0);
             }
             
             imgprocMock.verify(() -> 
-                line(eq(mockMat), any(Point.class), any(Point.class), any(Scalar.class), anyInt(), anyInt(), anyInt()),
+                line(eq(mockMat), any(Point.class), any(Point.class), any(Scalar.class), eq(1), eq(8), eq(0)),
                 times(colors.length)
             );
         }
@@ -319,11 +319,11 @@ public class DrawLineTest extends BrobotTestBase {
             
             // Draw connected lines
             for (int i = 0; i < points.length - 1; i++) {
-                drawLine.drawLine(mockMat, points[i], points[i + 1], testColor);
+                drawLine.draw(mockMat, points[i], points[i + 1], testColor, 1, 8, 0);
             }
             
             imgprocMock.verify(() -> 
-                line(eq(mockMat), any(Point.class), any(Point.class), eq(testColor), anyInt(), anyInt(), anyInt()),
+                line(eq(mockMat), any(Point.class), any(Point.class), eq(testColor), eq(1), eq(8), eq(0)),
                 times(points.length - 1)
             );
         }
@@ -341,17 +341,17 @@ public class DrawLineTest extends BrobotTestBase {
             
             // Draw vertical lines
             for (int x = 0; x <= 1920; x += gridSize) {
-                drawLine.drawLine(mockMat, new Point(x, 0), new Point(x, 1080), testColor);
+                drawLine.draw(mockMat, new Point(x, 0), new Point(x, 1080), testColor, 1, 8, 0);
             }
             
             // Draw horizontal lines
             for (int y = 0; y <= 1080; y += gridSize) {
-                drawLine.drawLine(mockMat, new Point(0, y), new Point(1920, y), testColor);
+                drawLine.draw(mockMat, new Point(0, y), new Point(1920, y), testColor, 1, 8, 0);
             }
             
             // Verify appropriate number of lines were drawn
             imgprocMock.verify(() -> 
-                line(eq(mockMat), any(Point.class), any(Point.class), eq(testColor), anyInt(), anyInt(), anyInt()),
+                line(eq(mockMat), any(Point.class), any(Point.class), eq(testColor), eq(1), eq(8), eq(0)),
                 atLeast(cols + rows)
             );
         }

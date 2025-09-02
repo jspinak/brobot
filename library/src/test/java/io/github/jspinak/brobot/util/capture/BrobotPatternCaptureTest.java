@@ -256,7 +256,7 @@ public class BrobotPatternCaptureTest extends BrobotTestBase {
         try (MockedStatic<GraphicsEnvironment> geMock = mockStatic(GraphicsEnvironment.class)) {
             GraphicsEnvironment mockEnv = mock(GraphicsEnvironment.class);
             geMock.when(GraphicsEnvironment::getLocalGraphicsEnvironment).thenReturn(mockEnv);
-            when(mockEnv.isHeadlessInstance()).thenReturn(true);
+            when(mockEnv.isHeadless()).thenReturn(true);
             
             // Should handle headless gracefully
             assertDoesNotThrow(() -> 

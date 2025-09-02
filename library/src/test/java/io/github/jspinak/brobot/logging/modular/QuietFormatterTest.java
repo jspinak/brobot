@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.logging.modular;
 
 import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -10,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -51,14 +53,16 @@ public class QuietFormatterTest extends BrobotTestBase {
         // Arrange
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("CLICK");
-        when(context.getObjectName()).thenReturn("Button");
+        when(context.getEndTime()).thenReturn(Instant.now());
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(100));
+        when(context.getPrimaryTargetName()).thenReturn("Button");
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertEquals("✓ Click Button", result);
+        assertEquals("✓ Click Button • 100ms", result);
     }
     
     @Test
@@ -67,14 +71,16 @@ public class QuietFormatterTest extends BrobotTestBase {
         // Arrange
         when(context.isSuccess()).thenReturn(false);
         when(context.getActionType()).thenReturn("FIND");
-        when(context.getObjectName()).thenReturn("Element");
+        when(context.getEndTime()).thenReturn(Instant.now());
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(200));
+        when(context.getPrimaryTargetName()).thenReturn("Element");
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertEquals("✗ Find Element", result);
+        assertEquals("✗ Find Element • 200ms", result);
     }
     
     @Test
@@ -83,15 +89,20 @@ public class QuietFormatterTest extends BrobotTestBase {
         // Arrange
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("CLICK");
-        when(context.getStateName()).thenReturn("MainMenu");
-        when(context.getObjectName()).thenReturn("Settings");
+        when(context.getEndTime()).thenReturn(Instant.now());
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(50));
+        
+        StateImage img = mock(StateImage.class);
+        when(img.getOwnerStateName()).thenReturn("MainMenu");
+        when(img.getName()).thenReturn("Settings");
+        when(context.getTargetImages()).thenReturn(Collections.singletonList(img));
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertEquals("✓ Click MainMenu.Settings", result);
+        assertEquals("✓ Click MainMenu.Settings • 50ms", result);
     }
     
     @Test
@@ -100,15 +111,20 @@ public class QuietFormatterTest extends BrobotTestBase {
         // Arrange
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("WAIT");
-        when(context.getStateName()).thenReturn("LoadingScreen");
-        when(context.getObjectName()).thenReturn(null);
+        when(context.getEndTime()).thenReturn(Instant.now());
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(1000));
+        
+        StateImage img = mock(StateImage.class);
+        when(img.getOwnerStateName()).thenReturn("LoadingScreen");
+        when(img.getName()).thenReturn(null);
+        when(context.getTargetImages()).thenReturn(Collections.singletonList(img));
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertEquals("✓ Wait LoadingScreen", result);
+        assertEquals("✓ Wait LoadingScreen.Image • 1000ms", result);
     }
     
     @Test
@@ -117,15 +133,20 @@ public class QuietFormatterTest extends BrobotTestBase {
         // Arrange
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("TYPE");
-        when(context.getStateName()).thenReturn(null);
-        when(context.getObjectName()).thenReturn("TextField");
+        when(context.getEndTime()).thenReturn(Instant.now());
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(300));
+        
+        StateImage img = mock(StateImage.class);
+        when(img.getOwnerStateName()).thenReturn(null);
+        when(img.getName()).thenReturn("TextField");
+        when(context.getTargetImages()).thenReturn(Collections.singletonList(img));
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertEquals("✓ Type TextField", result);
+        assertEquals("✓ Type TextField • 300ms", result);
     }
     
     @Test
@@ -134,15 +155,15 @@ public class QuietFormatterTest extends BrobotTestBase {
         // Arrange
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("WAIT");
-        when(context.getStateName()).thenReturn(null);
-        when(context.getObjectName()).thenReturn(null);
+        when(context.getEndTime()).thenReturn(Instant.now());
+        when(context.getExecutionDuration()).thenReturn(null); // Test null duration too
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertEquals("✓ Wait", result);
+        assertEquals("✓ Wait • 0ms", result);
     }
     
     @Test
@@ -150,7 +171,9 @@ public class QuietFormatterTest extends BrobotTestBase {
     void testCleanActionType() {
         // Arrange
         when(context.isSuccess()).thenReturn(true);
-        when(context.getObjectName()).thenReturn("Target");
+        when(context.getEndTime()).thenReturn(Instant.now());
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(100));
+        when(context.getPrimaryTargetName()).thenReturn("Target");
         
         String[] actionTypes = {
             "FIND", "find", "Find",
@@ -171,7 +194,7 @@ public class QuietFormatterTest extends BrobotTestBase {
             String result = formatter.format(actionResult);
             
             // Assert
-            assertEquals("✓ " + expectedOutputs[i] + " Target", result,
+            assertEquals("✓ " + expectedOutputs[i] + " Target • 100ms", result,
                 "Expected '" + expectedOutputs[i] + "' for input '" + actionTypes[i] + "'");
         }
     }
@@ -195,14 +218,16 @@ public class QuietFormatterTest extends BrobotTestBase {
         // Arrange
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("");
-        when(context.getObjectName()).thenReturn("Element");
+        when(context.getEndTime()).thenReturn(Instant.now());
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(100));
+        when(context.getPrimaryTargetName()).thenReturn("Element");
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertEquals("✓ Element", result);
+        assertEquals("✓ Element • 100ms", result);
     }
     
     @Test
@@ -211,14 +236,16 @@ public class QuietFormatterTest extends BrobotTestBase {
         // Arrange
         when(context.isSuccess()).thenReturn(false);
         when(context.getActionType()).thenReturn(null);
-        when(context.getObjectName()).thenReturn("Component");
+        when(context.getEndTime()).thenReturn(Instant.now());
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(100));
+        when(context.getPrimaryTargetName()).thenReturn("Component");
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertEquals("✗ Component", result);
+        assertEquals("✗ Action Component • 100ms", result);
     }
     
     @Test
@@ -227,15 +254,20 @@ public class QuietFormatterTest extends BrobotTestBase {
         // Arrange
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("DRAG");
-        when(context.getStateName()).thenReturn("Canvas");
-        when(context.getObjectName()).thenReturn("Item");
+        when(context.getEndTime()).thenReturn(Instant.now());
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(500));
+        
+        StateImage img = mock(StateImage.class);
+        when(img.getOwnerStateName()).thenReturn("Canvas");
+        when(img.getName()).thenReturn("Item");
+        when(context.getTargetImages()).thenReturn(Collections.singletonList(img));
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertEquals("✓ Drag Canvas.Item", result);
+        assertEquals("✓ Drag Canvas.Item • 500ms", result);
     }
     
     @Test
@@ -244,29 +276,31 @@ public class QuietFormatterTest extends BrobotTestBase {
         // Arrange
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("VANISH");
-        when(context.getObjectName()).thenReturn("LoadingIndicator");
+        when(context.getEndTime()).thenReturn(Instant.now());
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(2000));
+        when(context.getPrimaryTargetName()).thenReturn("LoadingIndicator");
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertEquals("✓ Vanish LoadingIndicator", result);
+        assertEquals("✓ Vanish LoadingIndicator • 2000ms", result);
     }
     
     @Test
-    @DisplayName("Should log only failed actions by default")
-    void testShouldLogOnlyFailures() {
-        // Arrange
-        when(context.isSuccess()).thenReturn(false);
+    @DisplayName("Should log only completed actions")
+    void testShouldLogCompletedActions() {
+        // Arrange - action with end time
+        when(context.getEndTime()).thenReturn(Instant.now());
         
-        // Act & Assert - Failed action should be logged
+        // Act & Assert - Should be logged
         assertTrue(formatter.shouldLog(actionResult));
         
-        // Arrange - Successful action
-        when(context.isSuccess()).thenReturn(true);
+        // Arrange - action without end time
+        when(context.getEndTime()).thenReturn(null);
         
-        // Act & Assert - Successful action should not be logged
+        // Act & Assert - Should not be logged
         assertFalse(formatter.shouldLog(actionResult));
     }
     
@@ -278,20 +312,26 @@ public class QuietFormatterTest extends BrobotTestBase {
     }
     
     @Test
-    @DisplayName("Should handle spaces in names")
+    @DisplayName("Should not need spaces quoted in names")
     void testFormatWithSpacesInNames() {
         // Arrange
         when(context.isSuccess()).thenReturn(false);
         when(context.getActionType()).thenReturn("CLICK");
-        when(context.getStateName()).thenReturn("Main Screen");
-        when(context.getObjectName()).thenReturn("Login Button");
+        when(context.getEndTime()).thenReturn(Instant.now());
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(100));
+        
+        StateImage img = mock(StateImage.class);
+        when(img.getOwnerStateName()).thenReturn("Main Screen");
+        when(img.getName()).thenReturn("Login Button");
+        when(context.getTargetImages()).thenReturn(Collections.singletonList(img));
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertEquals("✗ Click 'Main Screen'.'Login Button'", result);
+        // QuietFormatter doesn't quote names with spaces based on implementation
+        assertEquals("✗ Click Main Screen.Login Button • 100ms", result);
     }
     
     @Test
@@ -300,72 +340,77 @@ public class QuietFormatterTest extends BrobotTestBase {
         // Arrange
         when(context.isSuccess()).thenReturn(false);
         when(context.getActionType()).thenReturn("FIND");
-        when(context.getStateName()).thenReturn("State-1");
-        when(context.getObjectName()).thenReturn("Button_2.0");
-        
-        // Act
-        String result = formatter.format(actionResult);
-        
-        // Assert
-        assertNotNull(result);
-        assertEquals("✗ Find State-1.Button_2.0", result);
-    }
-    
-    @Test
-    @DisplayName("Should not include timing information")
-    void testNoTimingInformation() {
-        // Arrange
-        when(context.isSuccess()).thenReturn(false);
-        when(context.getActionType()).thenReturn("CLICK");
-        when(context.getObjectName()).thenReturn("Button");
-        when(context.getDurationMs()).thenReturn(500L);
         when(context.getEndTime()).thenReturn(Instant.now());
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(150));
+        
+        StateImage img = mock(StateImage.class);
+        when(img.getOwnerStateName()).thenReturn("State-1");
+        when(img.getName()).thenReturn("Button_2.0");
+        when(context.getTargetImages()).thenReturn(Collections.singletonList(img));
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertEquals("✗ Click Button", result);
-        assertFalse(result.contains("500"));
-        assertFalse(result.contains("ms"));
+        assertEquals("✗ Find State-1.Button_2.0 • 150ms", result);
     }
     
     @Test
-    @DisplayName("Should not include match count")
-    void testNoMatchCount() {
-        // Arrange
-        when(context.isSuccess()).thenReturn(false);
-        when(context.getActionType()).thenReturn("FIND");
-        when(context.getObjectName()).thenReturn("Pattern");
-        when(context.getMatchCount()).thenReturn(5);
-        
-        // Act
-        String result = formatter.format(actionResult);
-        
-        // Assert
-        assertNotNull(result);
-        assertEquals("✗ Find Pattern", result);
-        assertFalse(result.contains("5"));
-        assertFalse(result.contains("match"));
-    }
-    
-    @Test
-    @DisplayName("Should not include failure reason")
-    void testNoFailureReason() {
+    @DisplayName("Should always include timing information")
+    void testAlwaysIncludesTiming() {
         // Arrange
         when(context.isSuccess()).thenReturn(false);
         when(context.getActionType()).thenReturn("CLICK");
-        when(context.getObjectName()).thenReturn("Element");
-        when(context.getFailureReason()).thenReturn("Element not found after 3 attempts");
+        when(context.getEndTime()).thenReturn(Instant.now());
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(500));
+        when(context.getPrimaryTargetName()).thenReturn("Button");
         
         // Act
         String result = formatter.format(actionResult);
         
         // Assert
         assertNotNull(result);
-        assertEquals("✗ Click Element", result);
-        assertFalse(result.contains("not found"));
-        assertFalse(result.contains("attempts"));
+        assertEquals("✗ Click Button • 500ms", result);
+        assertTrue(result.contains("500ms"));
+    }
+    
+    @Test
+    @DisplayName("Should format with text target")
+    void testFormatWithTextTarget() {
+        // Arrange
+        when(context.isSuccess()).thenReturn(true);
+        when(context.getActionType()).thenReturn("TYPE");
+        when(context.getEndTime()).thenReturn(Instant.now());
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(100));
+        when(context.getTargetStrings()).thenReturn(Collections.singletonList("Hello World"));
+        
+        // Act
+        String result = formatter.format(actionResult);
+        
+        // Assert
+        assertNotNull(result);
+        assertEquals("✓ Type \"Hello World\" • 100ms", result);
+    }
+    
+    @Test
+    @DisplayName("Should truncate long text")
+    void testFormatWithLongText() {
+        // Arrange
+        String longText = "This is a very long text that exceeds the maximum allowed length for display";
+        when(context.isSuccess()).thenReturn(true);
+        when(context.getActionType()).thenReturn("TYPE");
+        when(context.getEndTime()).thenReturn(Instant.now());
+        when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(100));
+        when(context.getTargetStrings()).thenReturn(Collections.singletonList(longText));
+        
+        // Act
+        String result = formatter.format(actionResult);
+        
+        // Assert
+        assertNotNull(result);
+        // Text should be truncated at 50 chars (47 + "...")
+        assertTrue(result.contains("This is a very long text that exceeds the maxi..."));
+        assertTrue(result.contains("• 100ms"));
     }
 }

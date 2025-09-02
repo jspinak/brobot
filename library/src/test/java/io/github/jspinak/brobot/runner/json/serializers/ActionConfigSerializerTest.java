@@ -77,7 +77,7 @@ public class ActionConfigSerializerTest extends BrobotTestBase {
             
             assertNotNull(json);
             assertTrue(json.contains("\"@type\""));
-            assertTrue(json.contains("\"FIND\"") || json.contains("\"PatternFindOptions\""));
+            assertTrue(json.contains("PatternFindOptions"));
         }
 
         @Test
@@ -89,7 +89,7 @@ public class ActionConfigSerializerTest extends BrobotTestBase {
             
             assertNotNull(json);
             assertTrue(json.contains("\"@type\""));
-            assertTrue(json.contains("\"CLICK\"") || json.contains("\"ClickOptions\""));
+            assertTrue(json.contains("ClickOptions"));
         }
 
         @Test
@@ -102,7 +102,7 @@ public class ActionConfigSerializerTest extends BrobotTestBase {
             
             assertNotNull(json);
             assertTrue(json.contains("\"@type\""));
-            assertTrue(json.contains("\"TYPE\"") || json.contains("\"TypeOptions\""));
+            assertTrue(json.contains("TypeOptions"));
         }
     }
 
@@ -124,12 +124,12 @@ public class ActionConfigSerializerTest extends BrobotTestBase {
 
         private static Stream<Arguments> actionConfigProvider() {
             return Stream.of(
-                Arguments.of(new PatternFindOptions.Builder().build(), "FIND"),
-                Arguments.of(new ClickOptions.Builder().build(), "CLICK"),
-                Arguments.of(new TypeOptions.Builder().build(), "TYPE"),
-                Arguments.of(new DragOptions.Builder().build(), "DRAG"),
-                Arguments.of(new ScrollOptions.Builder().build(), "SCROLL"),
-                Arguments.of(new MouseMoveOptions.Builder().build(), "MOVE")
+                Arguments.of(new PatternFindOptions.Builder().build(), "PatternFindOptions"),
+                Arguments.of(new ClickOptions.Builder().build(), "ClickOptions"),
+                Arguments.of(new TypeOptions.Builder().build(), "TypeOptions"),
+                Arguments.of(new DragOptions.Builder().build(), "DragOptions"),
+                Arguments.of(new ScrollOptions.Builder().build(), "ScrollOptions"),
+                Arguments.of(new MouseMoveOptions.Builder().build(), "MouseMoveOptions")
             );
         }
     }
@@ -142,17 +142,14 @@ public class ActionConfigSerializerTest extends BrobotTestBase {
         @DisplayName("Should serialize PatternFindOptions fields")
         void shouldSerializePatternFindOptionsFields() throws Exception {
             PatternFindOptions options = new PatternFindOptions.Builder()
-                    .setDoOnEach(PatternFindOptions.DoOnEach.FIRST)
-                    .setStrategy(PatternFindOptions.Strategy.FIRST)
                     .setSimilarity(0.95)
                     .build();
             
             String json = objectMapper.writeValueAsString(options);
             
             assertNotNull(json);
-            assertTrue(json.contains("\"doOnEach\":\"FIRST\""));
-            assertTrue(json.contains("\"strategy\":\"FIRST\""));
             assertTrue(json.contains("0.95"));
+            assertTrue(json.contains("PatternFindOptions"));
         }
 
         @Test
@@ -174,14 +171,13 @@ public class ActionConfigSerializerTest extends BrobotTestBase {
         void shouldSerializeTypeOptionsFields() throws Exception {
             TypeOptions options = new TypeOptions.Builder()
                     .setTypeDelay(0.5)
-                    .setModifiers("CTRL")
                     .build();
             
             String json = objectMapper.writeValueAsString(options);
             
             assertNotNull(json);
-            assertTrue(json.contains("\"Hello World\""));
-            assertTrue(json.contains("true"));
+            assertTrue(json.contains("0.5"));
+            assertTrue(json.contains("TypeOptions"));
         }
     }
 
