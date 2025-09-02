@@ -51,7 +51,7 @@ import static org.mockito.Mockito.when;
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, 
             classes = {
                 io.github.jspinak.brobot.annotations.AnnotationProcessor.class,
-                io.github.jspinak.brobot.startup.BrobotStartup.class
+                io.github.jspinak.brobot.startup.BrobotStartupRunner.class
             }
         ),
     }

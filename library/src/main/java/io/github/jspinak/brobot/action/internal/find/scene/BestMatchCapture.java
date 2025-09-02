@@ -92,10 +92,12 @@ public class BestMatchCapture {
         
         // Save original threshold
         double originalSimilarity = org.sikuli.basics.Settings.MinSimilarity;
+        log.debug("BestMatchCapture: Saving original MinSimilarity: {}", originalSimilarity);
         
         try {
             // Search at very low threshold to find any match
             org.sikuli.basics.Settings.MinSimilarity = 0.1;
+            log.debug("BestMatchCapture: Temporarily setting MinSimilarity to 0.1 for best match search");
             
             Finder finder = new Finder(scene.getPattern().getBImage());
             org.sikuli.script.Pattern sikuliPattern = pattern.sikuli().similar(0.1);
@@ -121,6 +123,7 @@ public class BestMatchCapture {
         } finally {
             // Restore original threshold
             org.sikuli.basics.Settings.MinSimilarity = originalSimilarity;
+            log.debug("BestMatchCapture: Restored MinSimilarity to: {}", originalSimilarity);
         }
         
         return null;

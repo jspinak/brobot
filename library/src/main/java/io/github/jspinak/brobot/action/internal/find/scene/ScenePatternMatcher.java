@@ -213,9 +213,20 @@ public class ScenePatternMatcher {
         // Get the minimum similarity threshold
         double minSimilarity = org.sikuli.basics.Settings.MinSimilarity;
         
+        // Safeguard: If MinSimilarity is unexpectedly low, reset it to default
+        if (minSimilarity < 0.5) {
+            System.err.println("[WARNING] MinSimilarity was unexpectedly low (" + minSimilarity + ")! Resetting to 0.7");
+            org.sikuli.basics.Settings.MinSimilarity = 0.7;
+            minSimilarity = 0.7;
+        }
+        
         // Track accepted and rejected matches for summary logging
         int acceptedMatches = 0;
         int rejectedMatches = 0;
+        
+        // For tracking top matches to show in verbose mode
+        List<Match> topMatches = new ArrayList<>();
+        final int MAX_VERBOSE_MATCHES = 3;
         
         while (f.hasNext()) {
             org.sikuli.script.Match sikuliMatch = f.next();
@@ -233,15 +244,19 @@ public class ScenePatternMatcher {
                         .setName(pattern.getName())
                         .build();
                 
-                // Only log coordinate details in verbose mode
-                if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
-                    ConsoleReporter.println("[MATCH] Accepted at " + nextMatch.getRegion() + 
-                        " score=" + String.format("%.3f", sikuliMatch.getScore()));
-                }
-                
                 acceptedMatches++;
-                
                 matchList.add(nextMatch);
+                
+                // Track top matches for verbose summary (but don't log them individually)
+                if (topMatches.size() < MAX_VERBOSE_MATCHES || 
+                    sikuliMatch.getScore() > topMatches.get(topMatches.size() - 1).getScore()) {
+                    topMatches.add(nextMatch);
+                    // Keep only top N matches sorted by score
+                    topMatches.sort((a, b) -> Double.compare(b.getScore(), a.getScore()));
+                    if (topMatches.size() > MAX_VERBOSE_MATCHES) {
+                        topMatches = new ArrayList<>(topMatches.subList(0, MAX_VERBOSE_MATCHES));
+                    }
+                }
                 
                 if (sikuliMatch.getScore() > bestScore) {
                     bestScore = sikuliMatch.getScore();
@@ -272,8 +287,28 @@ public class ScenePatternMatcher {
         
         f.destroy();
         
-        // Log match summary if there were multiple candidates
-        if (matchCount > 1 || rejectedMatches > 0) {
+        // Log match summary with top matches in verbose mode
+        if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
+            if (acceptedMatches > 0) {
+                ConsoleReporter.println("  [MATCH SUMMARY] " + acceptedMatches + " matches found" + 
+                    (rejectedMatches > 0 ? ", " + rejectedMatches + " rejected" : "") + 
+                    " (threshold=" + String.format("%.3f", minSimilarity) + ")");
+                
+                // Show only top 3 matches
+                ConsoleReporter.println("  [TOP MATCHES]");
+                for (int i = 0; i < Math.min(topMatches.size(), MAX_VERBOSE_MATCHES); i++) {
+                    Match m = topMatches.get(i);
+                    ConsoleReporter.println(String.format("    #%d: Score %.3f at %s", 
+                        i + 1, m.getScore(), m.getRegion()));
+                }
+                
+                if (acceptedMatches > MAX_VERBOSE_MATCHES) {
+                    ConsoleReporter.println("    ... and " + (acceptedMatches - MAX_VERBOSE_MATCHES) + 
+                        " more matches");
+                }
+            }
+        } else if (matchCount > 1 || rejectedMatches > 0) {
+            // Normal mode - simpler summary
             if (acceptedMatches > 0) {
                 ConsoleReporter.println("  [MATCHES] " + acceptedMatches + " accepted, " + 
                     rejectedMatches + " rejected (threshold=" + String.format("%.2f", minSimilarity) + ")");
