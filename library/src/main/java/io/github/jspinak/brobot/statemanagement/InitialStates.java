@@ -14,80 +14,104 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.model.state.State;
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
 /**
- * Manages probabilistic initial state discovery for automation startup and recovery.
+ * Manages probabilistic initial state discovery for automation startup and
+ * recovery.
  * 
- * <p>InitialStates implements a sophisticated probabilistic approach to establishing the 
- * starting position in the GUI state space. Rather than assuming a fixed starting point, 
- * it maintains a weighted set of possible initial state configurations and uses intelligent 
- * search strategies to determine which states are actually active when automation begins.</p>
+ * <p>
+ * InitialStates implements a sophisticated probabilistic approach to
+ * establishing the
+ * starting position in the GUI state space. Rather than assuming a fixed
+ * starting point,
+ * it maintains a weighted set of possible initial state configurations and uses
+ * intelligent
+ * search strategies to determine which states are actually active when
+ * automation begins.
+ * </p>
  * 
- * <p>Key features:
+ * <p>
+ * Key features:
  * <ul>
- *   <li><b>Probabilistic State Sets</b>: Associates probability weights with potential state combinations</li>
- *   <li><b>Intelligent Search</b>: Searches only for likely states, avoiding costly full scans</li>
- *   <li><b>Mock Support</b>: Simulates initial state selection for testing without GUI interaction</li>
- *   <li><b>Fallback Strategy</b>: Searches all states if no predefined sets are found</li>
- *   <li><b>Recovery Capability</b>: Can re-establish position when automation gets lost</li>
+ * <li><b>Probabilistic State Sets</b>: Associates probability weights with
+ * potential state combinations</li>
+ * <li><b>Intelligent Search</b>: Searches only for likely states, avoiding
+ * costly full scans</li>
+ * <li><b>Mock Support</b>: Simulates initial state selection for testing
+ * without GUI interaction</li>
+ * <li><b>Fallback Strategy</b>: Searches all states if no predefined sets are
+ * found</li>
+ * <li><b>Recovery Capability</b>: Can re-establish position when automation
+ * gets lost</li>
  * </ul>
  * </p>
  * 
- * <p>State selection process:
+ * <p>
+ * State selection process:
  * <ol>
- *   <li>Define potential initial state sets with probability weights</li>
- *   <li>In mock mode: Randomly select based on probability distribution</li>
- *   <li>In normal mode: Search for states in order of likelihood</li>
- *   <li>If no states found: Fall back to searching all known states</li>
- *   <li>Update StateMemory with discovered active states</li>
+ * <li>Define potential initial state sets with probability weights</li>
+ * <li>In mock mode: Randomly select based on probability distribution</li>
+ * <li>In normal mode: Search for states in order of likelihood</li>
+ * <li>If no states found: Fall back to searching all known states</li>
+ * <li>Update StateMemory with discovered active states</li>
  * </ol>
  * </p>
  * 
- * <p>Probability management:
+ * <p>
+ * Probability management:
  * <ul>
- *   <li>Each state set has an integer probability weight (not percentage)</li>
- *   <li>Weights are cumulative for random selection algorithm</li>
- *   <li>Higher weights indicate more likely initial configurations</li>
- *   <li>Sum can exceed 100 as these are relative weights, not percentages</li>
+ * <li>Each state set has an integer probability weight (not percentage)</li>
+ * <li>Weights are cumulative for random selection algorithm</li>
+ * <li>Higher weights indicate more likely initial configurations</li>
+ * <li>Sum can exceed 100 as these are relative weights, not percentages</li>
  * </ul>
  * </p>
  * 
- * <p>Use cases:
+ * <p>
+ * Use cases:
  * <ul>
- *   <li>Starting automation from unknown GUI position</li>
- *   <li>Handling multiple possible application entry points</li>
- *   <li>Recovering from navigation failures or unexpected states</li>
- *   <li>Testing automation logic with simulated state configurations</li>
- *   <li>Supporting applications with variable startup sequences</li>
+ * <li>Starting automation from unknown GUI position</li>
+ * <li>Handling multiple possible application entry points</li>
+ * <li>Recovering from navigation failures or unexpected states</li>
+ * <li>Testing automation logic with simulated state configurations</li>
+ * <li>Supporting applications with variable startup sequences</li>
  * </ul>
  * </p>
  * 
- * <p>Example usage:
+ * <p>
+ * Example usage:
+ * 
  * <pre>
  * // Define possible initial states with probabilities
- * initialStates.addStateSet(70, "LoginPage");       // 70% chance
- * initialStates.addStateSet(20, "Dashboard");       // 20% chance  
- * initialStates.addStateSet(10, "MainMenu");        // 10% chance
+ * initialStates.addStateSet(70, "LoginPage"); // 70% chance
+ * initialStates.addStateSet(20, "Dashboard"); // 20% chance
+ * initialStates.addStateSet(10, "MainMenu"); // 10% chance
  * 
  * // Find which states are actually active
  * initialStates.findInitialStates();
  * </pre>
  * </p>
  * 
- * <p>In the model-based approach, InitialStates embodies the framework's adaptability to 
- * uncertain starting conditions. Unlike rigid scripts that assume fixed entry points, 
- * this component enables automation that can begin from various GUI positions and 
- * intelligently determine its location before proceeding with tasks.</p>
+ * <p>
+ * In the model-based approach, InitialStates embodies the framework's
+ * adaptability to
+ * uncertain starting conditions. Unlike rigid scripts that assume fixed entry
+ * points,
+ * this component enables automation that can begin from various GUI positions
+ * and
+ * intelligently determine its location before proceeding with tasks.
+ * </p>
  * 
- * <p>This probabilistic approach is essential for:
+ * <p>
+ * This probabilistic approach is essential for:
  * <ul>
- *   <li>Web applications with session-based navigation</li>
- *   <li>Desktop applications with persistent state</li>
- *   <li>Mobile apps with deep linking or notifications</li>
- *   <li>Any GUI where the starting position varies</li>
+ * <li>Web applications with session-based navigation</li>
+ * <li>Desktop applications with persistent state</li>
+ * <li>Mobile apps with deep linking or notifications</li>
+ * <li>Any GUI where the starting position varies</li>
  * </ul>
  * </p>
  * 
@@ -109,7 +133,7 @@ public class InitialStates {
      * Used in random selection to map random values to state sets.
      */
     int sumOfProbabilities = 0;
-    
+
     /**
      * Maps potential state sets to their cumulative probability thresholds.
      * <p>
@@ -120,9 +144,9 @@ public class InitialStates {
      * <p>
      * Example: If three sets have weights 50, 30, 20:
      * <ul>
-     *   <li>Set 1: threshold = 50 (range 1-50)</li>
-     *   <li>Set 2: threshold = 80 (range 51-80)</li>
-     *   <li>Set 3: threshold = 100 (range 81-100)</li>
+     * <li>Set 1: threshold = 50 (range 1-50)</li>
+     * <li>Set 2: threshold = 80 (range 51-80)</li>
+     * <li>Set 3: threshold = 100 (range 81-100)</li>
      * </ul>
      */
     private final Map<Set<Long>, Integer> potentialActiveStates = new HashMap<>();
@@ -142,10 +166,11 @@ public class InitialStates {
      * mode or searched first in normal mode.
      *
      * @param probability Weight for this state set (must be positive)
-     * @param states Variable number of State objects forming the set
+     * @param states      Variable number of State objects forming the set
      */
     public void addStateSet(int probability, State... states) {
-        if (probability <= 0) return;
+        if (probability <= 0)
+            return;
         sumOfProbabilities += probability;
         Set<Long> stateIds = Arrays.stream(states).map(State::getId).collect(Collectors.toSet());
         potentialActiveStates.put(stateIds, sumOfProbabilities);
@@ -159,11 +184,12 @@ public class InitialStates {
      * silently ignored, allowing flexible configuration.
      *
      * @param probability Weight for this state set (must be positive)
-     * @param stateNames Variable number of state names forming the set
+     * @param stateNames  Variable number of state names forming the set
      * @see StateService#getState(String)
      */
     public void addStateSet(int probability, String... stateNames) {
-        if (probability <= 0) return;
+        if (probability <= 0)
+            return;
         sumOfProbabilities += probability;
         Set<Long> stateIds = new HashSet<>();
         for (String name : stateNames) {
@@ -178,15 +204,15 @@ public class InitialStates {
      * Main entry point that determines which states are currently active.
      * Behavior depends on BrobotSettings.mock:
      * <ul>
-     *   <li>Mock mode: Randomly selects from defined state sets</li>
-     *   <li>Normal mode: Searches screen for actual states</li>
+     * <li>Mock mode: Randomly selects from defined state sets</li>
+     * <li>Normal mode: Searches screen for actual states</li>
      * </ul>
      * <p>
      * Side effects:
      * <ul>
-     *   <li>Updates StateMemory with discovered active states</li>
-     *   <li>Resets state probabilities to base values</li>
-     *   <li>Prints results to Report for debugging</li>
+     * <li>Updates StateMemory with discovered active states</li>
+     * <li>Resets state probabilities to base values</li>
+     * <li>Prints results to Report for debugging</li>
      * </ul>
      *
      * @see #mockInitialStates()
@@ -210,10 +236,10 @@ public class InitialStates {
      * <p>
      * Selection algorithm:
      * <ol>
-     *   <li>Generate random number between 1 and sumOfProbabilities</li>
-     *   <li>Find first state set with threshold >= random value</li>
-     *   <li>Activate all states in the selected set</li>
-     *   <li>Reset their probabilities to base values</li>
+     * <li>Generate random number between 1 and sumOfProbabilities</li>
+     * <li>Find first state set with threshold >= random value</li>
+     * <li>Activate all states in the selected set</li>
+     * <li>Reset their probabilities to base values</li>
      * </ol>
      */
     private void mockInitialStates() {
@@ -221,16 +247,16 @@ public class InitialStates {
             ConsoleReporter.println("No potential active states defined");
             return;
         }
-        
+
         // Generate a random number between 1 and sumOfProbabilities
         int randomValue = new Random().nextInt(sumOfProbabilities) + 1;
         ConsoleReporter.println("Randomly selected value: " + randomValue + " out of " + sumOfProbabilities);
-        
+
         // Find the state set whose probability range contains the random value
         for (Map.Entry<Set<Long>, Integer> entry : potentialActiveStates.entrySet()) {
             if (randomValue <= entry.getValue()) {
                 Set<Long> selectedStates = entry.getKey();
-                
+
                 // Activate the selected states
                 ConsoleReporter.println("Selected " + selectedStates.size() + " initial states");
                 selectedStates.forEach(stateId -> {
@@ -245,7 +271,7 @@ public class InitialStates {
                 return;
             }
         }
-        
+
         // This should never happen if potentialActiveStates is properly populated
         ConsoleReporter.println("Failed to select any initial states");
     }
@@ -282,7 +308,7 @@ public class InitialStates {
         potentialActiveStatesAndProbabilities.forEach((pot, prob) -> allPotentialStates.addAll(pot));
         allPotentialStates.forEach(stateFinder::findState);
     }
-    
+
     /**
      * Gets the names of all states that have been registered as initial states.
      * This includes states added via @State(initial = true) annotations.
@@ -291,15 +317,15 @@ public class InitialStates {
      */
     public List<String> getRegisteredInitialStates() {
         return potentialActiveStates.keySet().stream()
-            .flatMap(Set::stream)
-            .map(allStatesInProjectService::getState)
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .map(io.github.jspinak.brobot.model.state.State::getName)
-            .distinct()
-            .collect(Collectors.toList());
+                .flatMap(Set::stream)
+                .map(allStatesInProjectService::getState)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(io.github.jspinak.brobot.model.state.State::getName)
+                .distinct()
+                .collect(Collectors.toList());
     }
-    
+
     /**
      * Checks if any initial states have been registered.
      *

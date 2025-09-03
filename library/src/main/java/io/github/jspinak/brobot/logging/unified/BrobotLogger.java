@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.logging.unified;
 
 import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.config.LoggingVerbosityConfig;
+import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.state.StateObject;

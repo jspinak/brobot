@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.test;
 
-import io.github.jspinak.brobot.config.ExecutionEnvironment;
+import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;

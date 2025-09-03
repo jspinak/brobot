@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.test.config;
 
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -34,7 +34,7 @@ public class OptimizedTestConfig implements BeforeAllCallback {
     private void optimizeTestSettings() {
         // Enable mock mode for faster execution
         FrameworkSettings.mock = true;
-        
+
         // Reduce wait times for mock operations
         FrameworkSettings.mockTimeFindFirst = 0.01;
         FrameworkSettings.mockTimeFindAll = 0.02;
@@ -44,10 +44,10 @@ public class OptimizedTestConfig implements BeforeAllCallback {
         FrameworkSettings.mockTimeFindHistogram = 0.02;
         FrameworkSettings.mockTimeFindColor = 0.02;
         FrameworkSettings.mockTimeClassify = 0.03;
-        
+
         // Configure thread pools for optimal test performance
-        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", 
-            String.valueOf(Runtime.getRuntime().availableProcessors()));
+        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
+                String.valueOf(Runtime.getRuntime().availableProcessors()));
     }
 
     /**

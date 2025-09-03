@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.analysis.color.profiles;
 
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.util.image.core.ColorMatrixUtilities;
 import io.github.jspinak.brobot.model.analysis.color.ColorSchema;
@@ -21,27 +21,36 @@ import static org.bytedeco.opencv.global.opencv_core.CMP_EQ;
 import static org.bytedeco.opencv.global.opencv_core.countNonZero;
 
 /**
- * Generates and manages K-means clustering profiles for state images across multiple color schemas.
+ * Generates and manages K-means clustering profiles for state images across
+ * multiple color schemas.
  * 
- * <p>This class is responsible for creating comprehensive K-means clustering analyses of images
- * in the Brobot framework. It performs K-means clustering on image color data to identify dominant
- * color patterns, which are essential for color-based image matching and state recognition.</p>
+ * <p>
+ * This class is responsible for creating comprehensive K-means clustering
+ * analyses of images
+ * in the Brobot framework. It performs K-means clustering on image color data
+ * to identify dominant
+ * color patterns, which are essential for color-based image matching and state
+ * recognition.
+ * </p>
  * 
- * <p>Key functionality includes:
+ * <p>
+ * Key functionality includes:
  * <ul>
- *   <li>Running K-means clustering with various numbers of centers (k values)</li>
- *   <li>Processing images in both BGR and HSV color spaces</li>
- *   <li>Generating statistical profiles for each color cluster</li>
- *   <li>Managing pre-computed profiles for performance optimization</li>
+ * <li>Running K-means clustering with various numbers of centers (k
+ * values)</li>
+ * <li>Processing images in both BGR and HSV color spaces</li>
+ * <li>Generating statistical profiles for each color cluster</li>
+ * <li>Managing pre-computed profiles for performance optimization</li>
  * </ul>
  * </p>
  * 
- * <p>The K-means profiles are used throughout the framework for:
+ * <p>
+ * The K-means profiles are used throughout the framework for:
  * <ul>
- *   <li>Dynamic image matching based on color similarity</li>
- *   <li>Identifying state transitions through color changes</li>
- *   <li>Filtering false matches based on color expectations</li>
- *   <li>Optimizing search algorithms by pre-filtering color regions</li>
+ * <li>Dynamic image matching based on color similarity</li>
+ * <li>Identifying state transitions through color changes</li>
+ * <li>Filtering false matches based on color expectations</li>
+ * <li>Optimizing search algorithms by pre-filtering color regions</li>
  * </ul>
  * </p>
  * 
@@ -61,39 +70,48 @@ public class KmeansProfileBuilder {
      * Constructs a KmeansProfileBuilder instance with required dependencies.
      * 
      * @param setColorCluster Component for creating color clusters from image data
-     * @param matOps3d Utility for 3D matrix operations on multi-channel images
-     * @param setAllProfiles Component for comprehensive profile initialization
+     * @param matOps3d        Utility for 3D matrix operations on multi-channel
+     *                        images
+     * @param setAllProfiles  Component for comprehensive profile initialization
      */
-    public KmeansProfileBuilder(ColorClusterFactory setColorCluster, ColorMatrixUtilities matOps3d, ProfileSetBuilder setAllProfiles) {
+    public KmeansProfileBuilder(ColorClusterFactory setColorCluster, ColorMatrixUtilities matOps3d,
+            ProfileSetBuilder setAllProfiles) {
         this.setColorCluster = setColorCluster;
         this.matOps3d = matOps3d;
         this.setAllProfiles = setAllProfiles;
     }
 
     /**
-     * Sets the kmeans profiles for the given image, for means from 1 to the max means as specified in the settings.
+     * Sets the kmeans profiles for the given image, for means from 1 to the max
+     * means as specified in the settings.
+     * 
      * @param img the image to set the profiles for
      */
     public void setProfiles(StateImage img) {
         KmeansProfilesAllSchemas kmeansProfilesAllSchemas = new KmeansProfilesAllSchemas();
-        for (int i=1; i<=FrameworkSettings.maxKMeansToStoreInProfile; i++) {
+        for (int i = 1; i <= FrameworkSettings.maxKMeansToStoreInProfile; i++) {
             addNewProfiles(kmeansProfilesAllSchemas, img, i);
         }
         img.setKmeansProfilesAllSchemas(kmeansProfilesAllSchemas);
     }
 
     /**
-     * Adds new K-means profiles for both BGR and HSV color schemas to an existing collection.
+     * Adds new K-means profiles for both BGR and HSV color schemas to an existing
+     * collection.
      * 
-     * <p>Note: This method contains a bug - it iterates up to maxKMeansToStoreInProfile
-     * but should only create profiles for the specified 'means' parameter.</p>
+     * <p>
+     * Note: This method contains a bug - it iterates up to
+     * maxKMeansToStoreInProfile
+     * but should only create profiles for the specified 'means' parameter.
+     * </p>
      * 
      * @param kmeansProfiles The collection to add new profiles to
-     * @param img The state image to analyze
-     * @param means The number of cluster centers to use for K-means clustering
+     * @param img            The state image to analyze
+     * @param means          The number of cluster centers to use for K-means
+     *                       clustering
      */
     public void addNewProfiles(KmeansProfilesAllSchemas kmeansProfiles, StateImage img, int means) {
-        for (int i=1; i<=FrameworkSettings.maxKMeansToStoreInProfile; i++) {
+        for (int i = 1; i <= FrameworkSettings.maxKMeansToStoreInProfile; i++) {
             KmeansProfile kmeansProfilesForBGR = getProfile(
                     img.getOneColumnBGRMat(), means, ColorCluster.ColorSchemaName.BGR);
             kmeansProfiles.addKmeansProfile(ColorCluster.ColorSchemaName.BGR, kmeansProfilesForBGR);
@@ -104,10 +122,12 @@ public class KmeansProfileBuilder {
     }
 
     /**
-     * Produces a KmeansProfile given a one-column Mat, the number of means, and the color schema.
+     * Produces a KmeansProfile given a one-column Mat, the number of means, and the
+     * color schema.
+     * 
      * @param oneColumnMat the images to set the profile for, as a one-column Mat
-     * @param kmeans the number of means to use
-     * @param schema the color schema to use
+     * @param kmeans       the number of means to use
+     * @param schema       the color schema to use
      * @return the kmeans profile
      */
     public KmeansProfile getProfile(Mat oneColumnMat, int kmeans, ColorCluster.ColorSchemaName schema) {
@@ -121,30 +141,34 @@ public class KmeansProfileBuilder {
     /**
      * Creates K-means cluster objects from clustering results.
      * 
-     * <p>This method processes the raw K-means output to create structured cluster objects
-     * that contain color statistics, center values, and pixel distribution information
-     * for each identified cluster.</p>
+     * <p>
+     * This method processes the raw K-means output to create structured cluster
+     * objects
+     * that contain color statistics, center values, and pixel distribution
+     * information
+     * for each identified cluster.
+     * </p>
      * 
      * @param oneColumnMat The original one-column image matrix
-     * @param labels Matrix containing cluster assignments for each pixel
-     * @param centers Matrix containing the center values for each cluster
-     * @param kmeans The number of clusters
-     * @param schema The color schema being processed (BGR or HSV)
+     * @param labels       Matrix containing cluster assignments for each pixel
+     * @param centers      Matrix containing the center values for each cluster
+     * @param kmeans       The number of clusters
+     * @param schema       The color schema being processed (BGR or HSV)
      * @return List of {@link KmeansCluster} objects representing each color cluster
      */
     private List<KmeansCluster> getKmeansClusters(Mat oneColumnMat, Mat labels, Mat centers,
-                                                  int kmeans, ColorCluster.ColorSchemaName schema) {
+            int kmeans, ColorCluster.ColorSchemaName schema) {
         List<KmeansCluster> clusters = new ArrayList<>();
-        for (int k=0; k<kmeans; k++) { // for each kmeans cluster
+        for (int k = 0; k < kmeans; k++) { // for each kmeans cluster
             Mat center = centers.row(k);
             // get the masks for this cluster for each channel
-            Mat masks = matOps3d.cOmpare(labels, new double[]{k, k, k}, CMP_EQ);
+            Mat masks = matOps3d.cOmpare(labels, new double[] { k, k, k }, CMP_EQ);
             // get the color profiles for this cluster (one for each channel)
             ColorSchema colorSchema = setColorCluster.getColorSchema(oneColumnMat, masks, schema);
             double[] percentOfPointsInChannel = new double[3];
-            for (int c=0; c<3; c++) {
+            for (int c = 0; c < 3; c++) {
                 Mat mask = matOps3d.sPlit(masks).get(c);
-                percentOfPointsInChannel[c] = countNonZero(mask) / (double)(labels.total());
+                percentOfPointsInChannel[c] = countNonZero(mask) / (double) (labels.total());
             }
             clusters.add(new KmeansCluster(colorSchema, center, matOps3d.sPlit(masks), percentOfPointsInChannel));
         }
@@ -152,23 +176,32 @@ public class KmeansProfileBuilder {
     }
 
     /**
-     * Ensures all images in a set have K-means profiles for the specified number of clusters.
+     * Ensures all images in a set have K-means profiles for the specified number of
+     * clusters.
      * 
-     * <p>This method performs lazy initialization of K-means profiles, only computing them
-     * when they don't already exist. It also ensures that prerequisite data (one-column
-     * matrices and color profiles) are initialized if necessary.</p>
+     * <p>
+     * This method performs lazy initialization of K-means profiles, only computing
+     * them
+     * when they don't already exist. It also ensures that prerequisite data
+     * (one-column
+     * matrices and color profiles) are initialized if necessary.
+     * </p>
      * 
-     * <p>This is particularly useful when the framework needs to perform color-based
-     * operations with a specific number of clusters that wasn't pre-computed.</p>
+     * <p>
+     * This is particularly useful when the framework needs to perform color-based
+     * operations with a specific number of clusters that wasn't pre-computed.
+     * </p>
      * 
      * @param allImages Set of state images to process
-     * @param kMeans The number of cluster centers to ensure profiles exist for
+     * @param kMeans    The number of cluster centers to ensure profiles exist for
      */
     public void addKMeansIfNeeded(Set<StateImage> allImages, int kMeans) {
         allImages.forEach(img -> {
             KmeansProfilesAllSchemas profiles = img.getKmeansProfilesAllSchemas();
-            if (profiles == null) profiles = new KmeansProfilesAllSchemas();
-            if (img.getOneColumnBGRMat() == null) setAllProfiles.setMatsAndColorProfiles(img); //initProfileMats.setOneColumnMats(img);
+            if (profiles == null)
+                profiles = new KmeansProfilesAllSchemas();
+            if (img.getOneColumnBGRMat() == null)
+                setAllProfiles.setMatsAndColorProfiles(img); // initProfileMats.setOneColumnMats(img);
             if (!profiles.containsAll(kMeans)) {
                 addNewProfiles(profiles, img, kMeans);
             }

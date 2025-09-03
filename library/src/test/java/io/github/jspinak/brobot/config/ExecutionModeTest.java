@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.config;
 
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.environment.ExecutionMode;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.test.TestCategories;
 import org.junit.jupiter.api.*;

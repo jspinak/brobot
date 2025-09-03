@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.tools.logging;
 
-import io.github.jspinak.brobot.config.LoggingVerbosityConfig;
+import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

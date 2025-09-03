@@ -9,7 +9,7 @@ import io.github.jspinak.brobot.runner.json.validation.model.ValidationError;
 import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
 import io.github.jspinak.brobot.runner.json.validation.model.ValidationSeverity;
 import io.github.jspinak.brobot.runner.resources.ImageResourceManager;
-import io.github.jspinak.brobot.config.FrameworkInitializer;
+import io.github.jspinak.brobot.config.core.FrameworkInitializer;
 import io.github.jspinak.brobot.navigation.service.StateService;
 
 import org.junit.jupiter.api.BeforeEach;

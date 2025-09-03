@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.internal.mouse;
 
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 
@@ -8,7 +8,8 @@ import org.sikuli.script.Mouse;
 import org.springframework.stereotype.Component;
 
 /**
- * Provides mouse button release functionality with timing control and mock support.
+ * Provides mouse button release functionality with timing control and mock
+ * support.
  * <p>
  * This wrapper abstracts Sikuli's mouse release operations, allowing controlled
  * release of mouse buttons that were previously pressed with MouseDownWrapper.
@@ -16,7 +17,8 @@ import org.springframework.stereotype.Component;
  * configurable timing delays before and after the release action.
  * <p>
  * In mock mode, the action is logged for testing purposes without performing
- * actual mouse operations. The class works in conjunction with {@link MouseDownWrapper}
+ * actual mouse operations. The class works in conjunction with
+ * {@link MouseDownWrapper}
  * to enable drag-and-drop and other complex mouse interactions.
  * 
  * @see MouseDownWrapper
@@ -46,14 +48,17 @@ public class MouseUpWrapper {
      * In mock mode, the operation is logged with special notation for non-left
      * button releases. The actual mouse operation is skipped in mock mode.
      * <p>
-     * Note: The method name "press" is misleading as it actually releases the button.
-     * This appears to be a legacy naming issue that should be addressed in future versions.
+     * Note: The method name "press" is misleading as it actually releases the
+     * button.
+     * This appears to be a legacy naming issue that should be addressed in future
+     * versions.
      * 
      * @param pauseBefore Delay in seconds before releasing the button. Useful for
-     *                    ensuring the target application is ready to receive the event.
-     * @param pauseAfter Delay in seconds after releasing the button. Allows the
-     *                   application time to process the release event.
-     * @param type The mouse button to release (LEFT, RIGHT, or MIDDLE).
+     *                    ensuring the target application is ready to receive the
+     *                    event.
+     * @param pauseAfter  Delay in seconds after releasing the button. Allows the
+     *                    application time to process the release event.
+     * @param type        The mouse button to release (LEFT, RIGHT, or MIDDLE).
      * @return Always returns {@code true} to indicate the operation was attempted.
      *         Does not indicate whether the release was successful in real mode.
      * 
@@ -63,7 +68,8 @@ public class MouseUpWrapper {
     public boolean press(double pauseBefore, double pauseAfter, ClickType.Type type) {
         if (FrameworkSettings.mock) {
             ConsoleReporter.print("<mouse-up>"); // this could be expanded if object clicks are given mock actions
-            if (type != ClickType.Type.LEFT) System.out.print(type);
+            if (type != ClickType.Type.LEFT)
+                System.out.print(type);
             System.out.print(" ");
             return true;
         }

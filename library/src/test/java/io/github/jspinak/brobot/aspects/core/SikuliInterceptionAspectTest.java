@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.aspects.core;
 
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.exception.ActionFailedException;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import io.github.jspinak.brobot.logging.unified.LogBuilder;
@@ -45,7 +45,7 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
         super.setupTest();
         aspect = new SikuliInterceptionAspect();
         ReflectionTestUtils.setField(aspect, "brobotLogger", brobotLogger);
-        
+
         // Setup log builder chain - use lenient() to avoid UnnecessaryStubbingException
         lenient().when(brobotLogger.log()).thenReturn(logBuilder);
         lenient().when(logBuilder.type(any())).thenReturn(logBuilder);
@@ -55,7 +55,7 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
         lenient().when(logBuilder.success(anyBoolean())).thenReturn(logBuilder);
         lenient().when(logBuilder.duration(anyLong())).thenReturn(logBuilder);
         lenient().when(logBuilder.error(any())).thenReturn(logBuilder);
-        
+
         // Mock the void log() method
         lenient().doNothing().when(logBuilder).log();
     }
@@ -67,7 +67,7 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toShortString()).thenReturn("find()");
         when(signature.getName()).thenReturn("find");
-        when(joinPoint.getArgs()).thenReturn(new Object[]{"image.png"});
+        when(joinPoint.getArgs()).thenReturn(new Object[] { "image.png" });
         Object expectedResult = new Object();
         when(joinPoint.proceed()).thenReturn(expectedResult);
 
@@ -77,7 +77,7 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
         // Assert
         assertEquals(expectedResult, result);
         verify(logBuilder, atLeastOnce()).log();
-        
+
         // Verify metrics were updated
         ConcurrentHashMap<String, SikuliInterceptionAspect.OperationMetrics> metrics = aspect.getMetrics();
         assertTrue(metrics.containsKey("find()"));
@@ -94,7 +94,7 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toShortString()).thenReturn("find()");
         when(signature.getName()).thenReturn("find");
-        when(joinPoint.getArgs()).thenReturn(new Object[]{"image.png"});
+        when(joinPoint.getArgs()).thenReturn(new Object[] { "image.png" });
 
         // Act
         Object result = aspect.interceptSikuliCall(joinPoint);
@@ -113,22 +113,21 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toShortString()).thenReturn("find()");
         when(signature.getName()).thenReturn("find");
-        when(joinPoint.getArgs()).thenReturn(new Object[]{"missing.png"});
+        when(joinPoint.getArgs()).thenReturn(new Object[] { "missing.png" });
         FindFailed exception = new FindFailed("Image not found");
         when(joinPoint.proceed()).thenThrow(exception);
 
         // Act & Assert
-        ActionFailedException thrown = assertThrows(ActionFailedException.class, () -> 
-            aspect.interceptSikuliCall(joinPoint)
-        );
+        ActionFailedException thrown = assertThrows(ActionFailedException.class,
+                () -> aspect.interceptSikuliCall(joinPoint));
         assertTrue(thrown.getMessage().contains("Sikuli find operation failed"));
         assertEquals(exception, thrown.getCause());
-        
+
         // Verify error logging
         verify(logBuilder, atLeastOnce()).error(exception);
         verify(logBuilder, atLeastOnce()).success(false);
         verify(logBuilder, atLeastOnce()).log();
-        
+
         // Verify metrics were updated
         ConcurrentHashMap<String, SikuliInterceptionAspect.OperationMetrics> metrics = aspect.getMetrics();
         assertTrue(metrics.containsKey("find()"));
@@ -145,17 +144,16 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toShortString()).thenReturn("click()");
         when(signature.getName()).thenReturn("click");
-        when(joinPoint.getArgs()).thenReturn(new Object[]{100, 200});
+        when(joinPoint.getArgs()).thenReturn(new Object[] { 100, 200 });
         RuntimeException exception = new RuntimeException("Unexpected error");
         when(joinPoint.proceed()).thenThrow(exception);
 
         // Act & Assert
-        ActionFailedException thrown = assertThrows(ActionFailedException.class, () -> 
-            aspect.interceptSikuliCall(joinPoint)
-        );
+        ActionFailedException thrown = assertThrows(ActionFailedException.class,
+                () -> aspect.interceptSikuliCall(joinPoint));
         assertTrue(thrown.getMessage().contains("Sikuli operation failed"));
         assertEquals(exception, thrown.getCause());
-        
+
         // Verify error logging
         verify(logBuilder, atLeastOnce()).error(exception);
         verify(logBuilder, atLeastOnce()).success(false);
@@ -167,12 +165,12 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
     public void testMockProvider_FindOperations() throws Throwable {
         // Arrange
         FrameworkSettings.mock = true;
-        
+
         // Test find
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toShortString()).thenReturn("find()");
         when(signature.getName()).thenReturn("find");
-        when(joinPoint.getArgs()).thenReturn(new Object[]{"image.png"});
+        when(joinPoint.getArgs()).thenReturn(new Object[] { "image.png" });
 
         // Act
         Object result = aspect.interceptSikuliCall(joinPoint);
@@ -186,12 +184,12 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
     public void testMockProvider_ClickOperations() throws Throwable {
         // Arrange
         FrameworkSettings.mock = true;
-        
+
         // Test click
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toShortString()).thenReturn("click()");
         when(signature.getName()).thenReturn("click");
-        when(joinPoint.getArgs()).thenReturn(new Object[]{100, 200});
+        when(joinPoint.getArgs()).thenReturn(new Object[] { 100, 200 });
 
         // Act
         Object result = aspect.interceptSikuliCall(joinPoint);
@@ -205,12 +203,12 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
     public void testMockProvider_TypeOperations() throws Throwable {
         // Arrange
         FrameworkSettings.mock = true;
-        
+
         // Test type
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toShortString()).thenReturn("type()");
         when(signature.getName()).thenReturn("type");
-        when(joinPoint.getArgs()).thenReturn(new Object[]{"Hello World"});
+        when(joinPoint.getArgs()).thenReturn(new Object[] { "Hello World" });
 
         // Act
         Object result = aspect.interceptSikuliCall(joinPoint);
@@ -224,7 +222,7 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
     public void testMockProvider_GetScreen() throws Throwable {
         // Arrange
         FrameworkSettings.mock = true;
-        
+
         // Test getScreen
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toShortString()).thenReturn("getScreen()");
@@ -242,11 +240,11 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
     @Test
     public void testSanitizeArgs_WithImagePath() {
         // Arrange
-        Object[] args = new Object[]{"/path/to/image.png", 100, null};
-        
+        Object[] args = new Object[] { "/path/to/image.png", 100, null };
+
         // Act - Pass the array as a single parameter
         String sanitized = (String) ReflectionTestUtils.invokeMethod(
-            aspect, "sanitizeArgs", (Object) args);
+                aspect, "sanitizeArgs", (Object) args);
 
         // Assert
         assertNotNull(sanitized);
@@ -259,24 +257,23 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
     @Test
     public void testExtractImagePath() {
         // Arrange
-        Object[] argsWithPng = new Object[]{"test.png", 100};
-        Object[] argsWithJpg = new Object[]{100, "photo.jpg"};
-        Object[] argsWithoutImage = new Object[]{100, 200};
-        
+        Object[] argsWithPng = new Object[] { "test.png", 100 };
+        Object[] argsWithJpg = new Object[] { 100, "photo.jpg" };
+        Object[] argsWithoutImage = new Object[] { 100, 200 };
+
         // Act & Assert
         assertEquals("test.png", ReflectionTestUtils.invokeMethod(
-            aspect, "extractImagePath", (Object) argsWithPng));
+                aspect, "extractImagePath", (Object) argsWithPng));
         assertEquals("photo.jpg", ReflectionTestUtils.invokeMethod(
-            aspect, "extractImagePath", (Object) argsWithJpg));
+                aspect, "extractImagePath", (Object) argsWithJpg));
         assertNull(ReflectionTestUtils.invokeMethod(
-            aspect, "extractImagePath", (Object) argsWithoutImage));
+                aspect, "extractImagePath", (Object) argsWithoutImage));
     }
 
     @Test
     public void testOperationMetrics() {
         // Arrange
-        SikuliInterceptionAspect.OperationMetrics metrics = 
-            new SikuliInterceptionAspect.OperationMetrics("testOp");
+        SikuliInterceptionAspect.OperationMetrics metrics = new SikuliInterceptionAspect.OperationMetrics("testOp");
 
         // Act
         metrics.recordOperation(true, 100);
@@ -303,19 +300,19 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toShortString()).thenReturn("find()");
         when(signature.getName()).thenReturn("find");
-        when(joinPoint.getArgs()).thenReturn(new Object[]{"image.png"});
+        when(joinPoint.getArgs()).thenReturn(new Object[] { "image.png" });
         when(joinPoint.proceed()).thenReturn(new Object());
 
         // Act - Record some operations
         aspect.interceptSikuliCall(joinPoint);
         aspect.interceptSikuliCall(joinPoint);
-        
+
         // Verify metrics exist
         assertFalse(aspect.getMetrics().isEmpty());
-        
+
         // Reset metrics
         aspect.resetMetrics();
-        
+
         // Assert
         assertTrue(aspect.getMetrics().isEmpty());
     }
@@ -327,7 +324,7 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toShortString()).thenReturn("exists()");
         when(signature.getName()).thenReturn("exists");
-        when(joinPoint.getArgs()).thenReturn(new Object[]{"button.png", 5.0});
+        when(joinPoint.getArgs()).thenReturn(new Object[] { "button.png", 5.0 });
         when(joinPoint.proceed()).thenReturn(new Object());
 
         // Act
@@ -336,11 +333,11 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
         // Assert - Verify logging calls
         ArgumentCaptor<String> actionCaptor = ArgumentCaptor.forClass(String.class);
         verify(logBuilder, atLeastOnce()).action(actionCaptor.capture());
-        
+
         boolean hasStartLog = actionCaptor.getAllValues().stream()
-            .anyMatch(action -> action.equals("SIKULI_EXISTS"));
+                .anyMatch(action -> action.equals("SIKULI_EXISTS"));
         assertTrue(hasStartLog);
-        
+
         verify(logBuilder, atLeastOnce()).metadata("thread", Thread.currentThread().getName());
     }
 
@@ -351,7 +348,7 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toShortString()).thenReturn("click()");
         when(signature.getName()).thenReturn("click");
-        when(joinPoint.getArgs()).thenReturn(new Object[]{100, 200});
+        when(joinPoint.getArgs()).thenReturn(new Object[] { 100, 200 });
         String mockResult = "ClickResult";
         when(joinPoint.proceed()).thenReturn(mockResult);
 
@@ -361,11 +358,11 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
         // Assert
         ArgumentCaptor<String> actionCaptor = ArgumentCaptor.forClass(String.class);
         verify(logBuilder, atLeastOnce()).action(actionCaptor.capture());
-        
+
         boolean hasSuccessLog = actionCaptor.getAllValues().stream()
-            .anyMatch(action -> action.equals("SIKULI_CLICK_SUCCESS"));
+                .anyMatch(action -> action.equals("SIKULI_CLICK_SUCCESS"));
         assertTrue(hasSuccessLog);
-        
+
         verify(logBuilder, atLeastOnce()).success(true);
         verify(logBuilder, atLeastOnce()).metadata("resultType", "String");
     }
@@ -373,8 +370,7 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
     @Test
     public void testOperationMetrics_EmptyInitialState() {
         // Arrange
-        SikuliInterceptionAspect.OperationMetrics metrics = 
-            new SikuliInterceptionAspect.OperationMetrics("emptyOp");
+        SikuliInterceptionAspect.OperationMetrics metrics = new SikuliInterceptionAspect.OperationMetrics("emptyOp");
 
         // Assert - Test edge cases for empty metrics
         assertEquals(0, metrics.getTotalCalls());

@@ -7,7 +7,7 @@ import io.github.jspinak.brobot.runner.json.validation.model.ValidationError;
 import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
 import io.github.jspinak.brobot.runner.json.validation.model.ValidationSeverity;
 import io.github.jspinak.brobot.runner.resources.ImageResourceManager;
-import io.github.jspinak.brobot.config.FrameworkInitializer;
+import io.github.jspinak.brobot.config.core.FrameworkInitializer;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import lombok.Getter;
 import lombok.Setter;
@@ -142,7 +142,8 @@ public class BrobotLibraryInitializer {
 
             // Build the project model from the configuration
             try {
-                projectConfigLoader.loadAndValidate(projectConfigPath, dslConfigPath, Paths.get(properties.getImagePath()));
+                projectConfigLoader.loadAndValidate(projectConfigPath, dslConfigPath,
+                        Paths.get(properties.getImagePath()));
                 allStatesInProjectService.getAllStates().forEach(state -> {
                     state.getStateImages().forEach(imageResourceManager::updateStateImageCache);
                 });
@@ -228,8 +229,7 @@ public class BrobotLibraryInitializer {
             result.addError(new ValidationError(
                     "File read error",
                     "Could not read configuration files: " + e.getMessage(),
-                    ValidationSeverity.CRITICAL
-            ));
+                    ValidationSeverity.CRITICAL));
             return result;
         }
     }

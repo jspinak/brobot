@@ -1,4 +1,5 @@
 package io.github.jspinak.brobot.manageStates;
+
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
@@ -8,7 +9,7 @@ import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.config.FrameworkInitializer;
+import io.github.jspinak.brobot.config.core.FrameworkInitializer;
 import io.github.jspinak.brobot.navigation.service.StateTransitionService;
 import io.github.jspinak.brobot.model.transition.StateTransitionStore;
 import io.github.jspinak.brobot.navigation.path.PathFinder;
@@ -122,7 +123,7 @@ public class PathFindingWithActionDefinitionTestsUpdated {
 
         assertTrue(paths.isEmpty());
     }
-    
+
     @Test
     void testComplexPathWithMultipleTransitions() {
         State stateA = createState("StateA");
@@ -146,9 +147,8 @@ public class PathFindingWithActionDefinitionTestsUpdated {
         assertFalse(paths.isEmpty());
         assertEquals(2, paths.getPaths().size());
         assertTrue(paths.getPaths().stream().allMatch(path -> path.getStates().size() == 4));
-        assertTrue(paths.getPaths().stream().allMatch(path -> 
-            path.getStates().get(0).equals(stateA.getId()) && 
-            path.getStates().get(3).equals(stateE.getId())));
+        assertTrue(paths.getPaths().stream().allMatch(path -> path.getStates().get(0).equals(stateA.getId()) &&
+                path.getStates().get(3).equals(stateE.getId())));
     }
 
     private State createState(String stateName) {
@@ -165,7 +165,7 @@ public class PathFindingWithActionDefinitionTestsUpdated {
 
     private void createTransition(State fromState, State toState, StateImage stateImage, String actionDescription) {
         TaskSequence actionDefinition = new TaskSequence();
-        
+
         // NEW API: Use ClickOptions instead of ActionOptions
         ClickOptions clickOptions = new ClickOptions.Builder()
                 .setPressOptions(MousePressOptions.builder()
@@ -174,65 +174,65 @@ public class PathFindingWithActionDefinitionTestsUpdated {
                 .setNumberOfClicks(1)
                 .setPauseAfterEnd(0.5)
                 .build();
-                
+
         ObjectCollection objects = new ObjectCollection.Builder()
                 .withImages(stateImage)
                 .build();
-                
+
         // TaskSequence now accepts ActionConfig
         actionDefinition.addStep(clickOptions, objects);
 
         TaskSequenceStateTransition transition = new TaskSequenceStateTransition();
         transition.setActionDefinition(actionDefinition);
         transition.setActivate(Collections.singleton(toState.getId()));
-        
+
         StateTransitions stateTransitions = new StateTransitions();
         stateTransitions.setStateId(fromState.getId());
         stateTransitions.addTransition(transition);
         stateTransitionsRepository.add(stateTransitions);
     }
-    
+
     /**
      * Create a more complex transition with multiple steps
      */
     private void createMultiStepTransition(State fromState, State toState, String transitionName) {
         TaskSequence actionDefinition = new TaskSequence();
-        
+
         // Step 1: Find the button
         PatternFindOptions findOptions = new PatternFindOptions.Builder()
                 .setStrategy(PatternFindOptions.Strategy.FIRST)
                 .setSimilarity(0.9)
                 .build();
-                
+
         ObjectCollection findObjects = new ObjectCollection.Builder()
                 .withImages(createStateImage(transitionName + "_Button", transitionName + ".png"))
                 .build();
-                
+
         actionDefinition.addStep(findOptions, findObjects);
-        
+
         // Step 2: Click the found button
         ClickOptions clickOptions = new ClickOptions.Builder()
                 .setPressOptions(MousePressOptions.builder()
                         .setButton(MouseButton.LEFT)
                         .build())
                 .build();
-                
+
         ObjectCollection clickObjects = new ObjectCollection.Builder()
                 // No direct method to use matches from previous action
                 .build();
-                
+
         actionDefinition.addStep(clickOptions, clickObjects);
 
         TaskSequenceStateTransition transition = new TaskSequenceStateTransition();
         transition.setActionDefinition(actionDefinition);
         transition.setActivate(Collections.singleton(toState.getId()));
-        
+
         StateTransitions stateTransitions = new StateTransitions();
         stateTransitions.setStateId(fromState.getId());
         stateTransitions.addTransition(transition);
         stateTransitionsRepository.add(stateTransitions);
     }
-    
+
     @Test
     void testPathFindingWithMultiStepTransitions() {
         State stateA = createState("StateA");

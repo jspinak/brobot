@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.util.image.io;
 
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 
@@ -22,17 +22,21 @@ import java.util.Map;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.imwrite;
 
 /**
- * Utility component for saving images to disk with automatic filename generation.
+ * Utility component for saving images to disk with automatic filename
+ * generation.
  * <p>
- * This class provides functionality for saving screenshots, regions, and OpenCV Mat
- * objects to disk with intelligent filename management. It automatically generates
+ * This class provides functionality for saving screenshots, regions, and OpenCV
+ * Mat
+ * objects to disk with intelligent filename management. It automatically
+ * generates
  * unique filenames to prevent overwrites and maintains counters for efficient
  * sequential naming.
  * <p>
  * Key features:
  * <ul>
  * <li>Automatic unique filename generation with sequential numbering</li>
- * <li>Support for saving regions, screenshots, BufferedImages, and Mat objects</li>
+ * <li>Support for saving regions, screenshots, BufferedImages, and Mat
+ * objects</li>
  * <li>Configurable base paths with automatic number suffixes</li>
  * <li>Mock mode support for testing without actual file writes</li>
  * <li>Batch saving operations for multiple images</li>
@@ -53,8 +57,10 @@ import static org.bytedeco.opencv.global.opencv_imgcodecs.imwrite;
  * <li>Building image libraries for pattern matching</li>
  * </ul>
  * <p>
- * Thread safety: This class is NOT thread-safe due to the mutable lastFilenumber map.
- * Concurrent access may result in filename collisions or inconsistent numbering.
+ * Thread safety: This class is NOT thread-safe due to the mutable
+ * lastFilenumber map.
+ * Concurrent access may result in filename collisions or inconsistent
+ * numbering.
  *
  * @see BufferedImageUtilities
  * @see FrameworkSettings
@@ -92,9 +98,12 @@ public class ImageFileUtilities {
      * <p>
      * Error handling: Returns null if IOException occurs during save.
      *
-     * @param region the screen region to capture and save; empty region captures full screen
-     * @param path the base path name without extension (e.g., "screenshots/capture")
-     * @return the actual path used to save the file including number suffix and .png extension,
+     * @param region the screen region to capture and save; empty region captures
+     *               full screen
+     * @param path   the base path name without extension (e.g.,
+     *               "screenshots/capture")
+     * @return the actual path used to save the file including number suffix and
+     *         .png extension,
      *         or null if save failed
      */
     public String saveRegionToFile(Region region, String path) {
@@ -122,14 +131,14 @@ public class ImageFileUtilities {
      * or images loaded from other sources.
      *
      * @param bufferedImage the image to save
-     * @param path the base path name without extension
+     * @param path          the base path name without extension
      * @return the actual path used to save the file including suffix and extension,
      *         or null if save failed
      */
     public String saveBuffImgToFile(BufferedImage bufferedImage, String path) {
         try {
             String newPath = getFreePath(path) + ".png";
-            ImageIO.write(bufferedImage,"png", new File(newPath));
+            ImageIO.write(bufferedImage, "png", new File(newPath));
             return newPath;
         } catch (IOException e) {
             e.printStackTrace();
@@ -174,11 +183,12 @@ public class ImageFileUtilities {
      */
     public String getFreePath(String path) {
         int i = lastFilenumber.containsKey(path) ? lastFilenumber.get(path) + 1 : 0;
-        String addToEnd = i==0 ? "" : " -" + i;
-        // there may be files existing before the program was run, check to make sure it's unique
+        String addToEnd = i == 0 ? "" : " -" + i;
+        // there may be files existing before the program was run, check to make sure
+        // it's unique
         while (fileExists(path + addToEnd + ".png")) {
             i++;
-            addToEnd = i==0 ? "" : " -" + i;
+            addToEnd = i == 0 ? "" : " -" + i;
         }
         lastFilenumber.put(path, i);
         return path + addToEnd;
@@ -274,8 +284,9 @@ public class ImageFileUtilities {
      * <p>
      * Warning: This method will overwrite existing files with the same name.
      *
-     * @param mat the OpenCV Mat to save
-     * @param name filename without extension (e.g., "template" saves as "template.png")
+     * @param mat  the OpenCV Mat to save
+     * @param name filename without extension (e.g., "template" saves as
+     *             "template.png")
      * @return a Pattern object referencing the saved file
      */
     public Pattern matToPattern(Mat mat, String name) {
@@ -291,7 +302,7 @@ public class ImageFileUtilities {
      * appending number suffixes as needed. Useful for saving multiple
      * variations or iterations of processed images.
      *
-     * @param mat the OpenCV Mat to save
+     * @param mat                 the OpenCV Mat to save
      * @param nameWithoutFiletype base filename without extension
      * @return true if save successful, false otherwise
      */
@@ -306,7 +317,7 @@ public class ImageFileUtilities {
         }
         nameWithoutFiletype = getFreePath(nameWithoutFiletype) + ".png";
         log.debug("[IMAGE_WRITE] Attempting to write Mat to: {}", nameWithoutFiletype);
-        
+
         try {
             boolean result = imwrite(nameWithoutFiletype, mat);
             if (result) {
@@ -350,39 +361,42 @@ public class ImageFileUtilities {
      * </ul>
      * <p>
      * Example usage:
+     * 
      * <pre>
      * List&lt;Mat&gt; processedImages = processImages();
      * List&lt;String&gt; names = Arrays.asList("edge", "blur", "threshold");
      * imageUtils.writeAllWithUniqueFilename(processedImages, names);
-     * // Saves as: edge.png, blur.png, threshold.png (or with numbers if needed)
+     * // Saves as: edge.png, blur.png, threshold.png (or with numbers if
+     * // needed)
      * </pre>
      *
-     * @param mats list of OpenCV Mat objects to save (may contain nulls)
+     * @param mats      list of OpenCV Mat objects to save (may contain nulls)
      * @param filenames corresponding base filenames without extensions
-     * @return true if all non-null mats saved successfully, false if any save failed
+     * @return true if all non-null mats saved successfully, false if any save
+     *         failed
      *         or lists have different sizes
      */
     public boolean writeAllWithUniqueFilename(List<Mat> mats, List<String> filenames) {
-        log.debug("[IMAGE_WRITE] writeAllWithUniqueFilename called with {} mats and {} filenames", 
+        log.debug("[IMAGE_WRITE] writeAllWithUniqueFilename called with {} mats and {} filenames",
                 mats.size(), filenames.size());
-        
+
         if (mats.size() != filenames.size()) {
             ConsoleReporter.println("Error: number of mats and filenames must be equal.");
             log.error("[IMAGE_WRITE] Size mismatch: {} mats vs {} filenames", mats.size(), filenames.size());
             return false;
         }
-        
+
         // Log all filenames for debugging
         for (int i = 0; i < filenames.size(); i++) {
             log.debug("[IMAGE_WRITE] Filename[{}]: {}", i, filenames.get(i));
         }
-        
+
         List<Mat> nonNullMats = new ArrayList<>();
         List<String> nonNullFilenames = new ArrayList<>();
         int nullCount = 0;
         int emptyCount = 0;
-        
-        for (int i=0; i<mats.size(); i++) {
+
+        for (int i = 0; i < mats.size(); i++) {
             Mat mat = mats.get(i);
             if (mat == null) {
                 nullCount++;
@@ -396,30 +410,30 @@ public class ImageFileUtilities {
                 log.debug("[IMAGE_WRITE] Mat at index {} is valid ({}x{})", i, mat.cols(), mat.rows());
             }
         }
-        
-        log.info("[IMAGE_WRITE] Mat summary: {} total, {} null, {} empty, {} valid", 
+
+        log.info("[IMAGE_WRITE] Mat summary: {} total, {} null, {} empty, {} valid",
                 mats.size(), nullCount, emptyCount, nonNullMats.size());
-        
+
         if (nonNullMats.isEmpty()) {
             log.warn("[IMAGE_WRITE] No valid mats to write");
             return true; // Return true since there's no error, just nothing to write
         }
-        
+
         log.debug("[IMAGE_WRITE] Processing {} non-null mats", nonNullMats.size());
-        
+
         int successCount = 0;
-        for (int i=0; i<nonNullMats.size(); i++) {
+        for (int i = 0; i < nonNullMats.size(); i++) {
             String filename = nonNullFilenames.get(i);
             log.debug("[IMAGE_WRITE] Writing image {}: {}", i, filename);
-            
+
             if (writeWithUniqueFilename(nonNullMats.get(i), filename)) {
                 successCount++;
             } else {
                 log.error("[IMAGE_WRITE] Failed to write image: {}", filename);
             }
         }
-        
-        log.info("[IMAGE_WRITE] Write complete: {} of {} images written successfully", 
+
+        log.info("[IMAGE_WRITE] Write complete: {} of {} images written successfully",
                 successCount, nonNullMats.size());
         return successCount == nonNullMats.size();
     }

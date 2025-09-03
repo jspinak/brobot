@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.logging;
 
-import io.github.jspinak.brobot.config.LoggingVerbosityConfig;
-import io.github.jspinak.brobot.config.LoggingVerbosityConfig.VerbosityLevel;
+import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
+import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig.VerbosityLevel;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;

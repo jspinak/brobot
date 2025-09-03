@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.analysis;
 
 import io.github.jspinak.brobot.analysis.color.ColorAnalysis;
 import io.github.jspinak.brobot.model.analysis.color.ColorStatistics;
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.analysis.histogram.HistogramComparator;
 import io.github.jspinak.brobot.analysis.histogram.HistogramExtractor;
 import io.github.jspinak.brobot.analysis.motion.MotionDetector;

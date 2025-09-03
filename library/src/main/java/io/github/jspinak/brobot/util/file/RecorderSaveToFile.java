@@ -6,7 +6,7 @@ import org.sikuli.script.Image;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 
 import javax.imageio.ImageIO;
 import javax.xml.transform.OutputKeys;
@@ -80,8 +80,10 @@ public class RecorderSaveToFile implements SaveToFile {
     /**
      * Creates a folder at the specified location.
      * <p>
-     * Creates the directory and all necessary parent directories if they don't exist.
-     * This replaces the original Sikuli Commons.asFolder method that is not available 
+     * Creates the directory and all necessary parent directories if they don't
+     * exist.
+     * This replaces the original Sikuli Commons.asFolder method that is not
+     * available
      * in version 2.0.5.
      * <p>
      * If the folder already exists, returns the existing folder.
@@ -117,7 +119,7 @@ public class RecorderSaveToFile implements SaveToFile {
      * <li>Returns null if save operation fails</li>
      * </ul>
      *
-     * @param img the Sikuli Image to save
+     * @param img          the Sikuli Image to save
      * @param baseFileName base name without extension (e.g., "screenshot")
      * @return absolute path of saved image, or null on failure
      */
@@ -147,12 +149,13 @@ public class RecorderSaveToFile implements SaveToFile {
      * <li>No automatic parent directory creation</li>
      * </ul>
      *
-     * @param doc the DOM Document to save; ignored if null
+     * @param doc      the DOM Document to save; ignored if null
      * @param fileName target filename including .xml extension
      * @throws RuntimeException if file cannot be created or written
      */
     public void saveXML(Document doc, String fileName) {
-        if (doc == null) return;
+        if (doc == null)
+            return;
         FileOutputStream output;
         try {
             output = new FileOutputStream(new File(createFolder(), fileName));
@@ -176,7 +179,7 @@ public class RecorderSaveToFile implements SaveToFile {
      * <li>Standard XML 1.0 output</li>
      * </ul>
      *
-     * @param doc the document to transform
+     * @param doc    the document to transform
      * @param output target stream for XML output
      * @throws RuntimeException if transformation fails
      */

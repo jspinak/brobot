@@ -1,10 +1,10 @@
 package io.github.jspinak.brobot.test;
 
-import io.github.jspinak.brobot.config.LoggingVerbosityConfig;
-import io.github.jspinak.brobot.config.LoggingVerbosityConfig.NormalModeConfig;
-import io.github.jspinak.brobot.config.LoggingVerbosityConfig.VerboseModeConfig;
 import io.github.jspinak.brobot.tools.logging.gui.GuiAccessConfig;
 import io.github.jspinak.brobot.tools.logging.gui.GuiAccessMonitor;
+import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
+import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig.NormalModeConfig;
+import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig.VerboseModeConfig;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;

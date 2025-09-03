@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.state.unit;
 
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.state.StateStore;
 import io.github.jspinak.brobot.model.state.StateImage;

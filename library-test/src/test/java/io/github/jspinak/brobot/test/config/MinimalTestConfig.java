@@ -8,8 +8,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 
 import io.github.jspinak.brobot.logging.unified.ConsoleOutputCapture;
-import io.github.jspinak.brobot.startup.BrobotStartupRunner;
-import io.github.jspinak.brobot.startup.AutoStartupVerifier;
+import io.github.jspinak.brobot.startup.orchestration.StartupRunner;
+import io.github.jspinak.brobot.startup.verification.AutoStartupVerifier;
 import io.github.jspinak.brobot.config.*;
 import io.github.jspinak.brobot.diagnostics.ImageLoadingDiagnosticsRunner;
 import io.github.jspinak.brobot.annotations.AnnotationProcessor;
@@ -26,7 +26,7 @@ import io.github.jspinak.brobot.annotations.AnnotationProcessor;
             type = FilterType.ASSIGNABLE_TYPE,
             classes = {
                 ConsoleOutputCapture.class,
-                BrobotStartupRunner.class,
+                StartupRunner.class,
                 AutoStartupVerifier.class,
                 ImageLoadingDiagnosticsRunner.class,
                 AnnotationProcessor.class

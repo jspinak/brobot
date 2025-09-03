@@ -85,18 +85,21 @@ public class ConfigurationParser {
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         mapper.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        
+        // Handle circular references by using identity information
+        mapper.configure(SerializationFeature.USE_EQUALITY_FOR_OBJECT_ID, true);
 
         // Add JavaTimeModule for handling LocalDateTime, Duration, etc.
         mapper.registerModule(new JavaTimeModule());
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
-        // Exclude common problematic fields
+        // Exclude common problematic fields including "self" for circular refs and "error" for throwing getters
         mapper.setFilterProvider(new SimpleFilterProvider()
                 .setDefaultFilter(SimpleBeanPropertyFilter.serializeAllExcept(
                         "image", "bufferedImage", "patterns", "mat", "raster", "data",
                         "colorModel", "sikuli", "screen", "matBGR", "matHSV", "source",
                         "refcount", "allocator", "graphics", "properties", "propertyNames",
-                        "accelerationPriority", "u", "step", "dims", "size"))
+                        "accelerationPriority", "u", "step", "dims", "size", "self", "error"))
                 .setFailOnUnknownId(false));
 
         return mapper;

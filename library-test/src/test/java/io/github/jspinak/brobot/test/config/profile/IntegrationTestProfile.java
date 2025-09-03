@@ -9,7 +9,7 @@ import io.github.jspinak.brobot.action.basic.find.Find;
 import io.github.jspinak.brobot.action.basic.type.TypeText;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.config.BrobotConfig;
-import io.github.jspinak.brobot.config.MockModeManager;
+import io.github.jspinak.brobot.config.mock.MockModeManager;
 import io.github.jspinak.brobot.core.services.ScreenCaptureService;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
@@ -51,7 +51,7 @@ import static org.mockito.Mockito.when;
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, 
             classes = {
                 io.github.jspinak.brobot.annotations.AnnotationProcessor.class,
-                io.github.jspinak.brobot.startup.BrobotStartupRunner.class
+                io.github.jspinak.brobot.startup.orchestration.StartupRunner.class
             }
         ),
     }

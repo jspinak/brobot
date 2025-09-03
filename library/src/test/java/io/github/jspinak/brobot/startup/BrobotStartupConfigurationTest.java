@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.startup;
 
+import io.github.jspinak.brobot.startup.orchestration.StartupConfiguration;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,13 +18,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("BrobotStartupConfiguration Tests")
 public class BrobotStartupConfigurationTest extends BrobotTestBase {
     
-    private BrobotStartupConfiguration configuration;
+    private StartupConfiguration configuration;
     
     @BeforeEach
     @Override
     public void setupTest() {
         super.setupTest();
-        configuration = new BrobotStartupConfiguration();
+        configuration = new StartupConfiguration();
     }
     
     @Nested

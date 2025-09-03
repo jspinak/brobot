@@ -6,7 +6,7 @@ import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
-import io.github.jspinak.brobot.config.ExecutionEnvironment;
+import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
@@ -28,19 +28,19 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests for MultipleActions and MultipleBasicActions with ActionConfig API.
  * Verifies that composite action sequences work correctly with the new API.
  * 
- * NOTE: MultipleActions and MultipleBasicActions classes have been removed/renamed
+ * NOTE: MultipleActions and MultipleBasicActions classes have been
+ * removed/renamed
  * This test is disabled until replacement classes are available.
  */
-@SpringBootTest(classes = BrobotTestApplication.class,
-    properties = {
+@SpringBootTest(classes = BrobotTestApplication.class, properties = {
         "brobot.gui-access.continue-on-error=true",
         "brobot.gui-access.check-on-startup=false",
         "java.awt.headless=true",
         "spring.main.allow-bean-definition-overriding=true",
         "brobot.test.type=unit",
         "brobot.capture.physical-resolution=false"
-    })
-@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class})
+})
+@Import({ MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class })
 @ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 public class MultipleActionsTestUpdated extends BrobotIntegrationTestBase {
 

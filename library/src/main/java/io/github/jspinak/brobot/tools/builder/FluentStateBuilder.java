@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.tools.builder;
 
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.config.FrameworkInitializer;
+import io.github.jspinak.brobot.config.core.FrameworkInitializer;
 import io.github.jspinak.brobot.statemanagement.InitialStates;
 
 @Component

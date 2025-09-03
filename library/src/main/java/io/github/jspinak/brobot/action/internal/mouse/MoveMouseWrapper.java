@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.action.internal.mouse;
 
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.action.internal.utility.DragCoordinateCalculator;
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
 import org.springframework.stereotype.Component;
@@ -26,8 +26,10 @@ import org.springframework.stereotype.Component;
  * <p>
  * <strong>Technical considerations:</strong>
  * <p>
- * The implementation uses SikuliX's hover() method instead of mouseMove() due to
- * stability issues where mouseMove() can cause the script to freeze under certain
+ * The implementation uses SikuliX's hover() method instead of mouseMove() due
+ * to
+ * stability issues where mouseMove() can cause the script to freeze under
+ * certain
  * conditions. The hover() method provides equivalent functionality with better
  * reliability.
  * <p>
@@ -65,8 +67,9 @@ public class MoveMouseWrapper {
      */
     private boolean sikuliMove(Location location) {
         org.sikuli.script.Location sikuliLocation = location.sikuli();
-        ConsoleReporter.print("move mouse to "+sikuliLocation+" ");
-        //return new Region().mouseMove(location.getSikuliLocation()) != 0; // this can cause the script to freeze for unknown reasons
+        ConsoleReporter.print("move mouse to " + sikuliLocation + " ");
+        // return new Region().mouseMove(location.getSikuliLocation()) != 0; // this can
+        // cause the script to freeze for unknown reasons
         // Directly use hover() which is more stable than mouseMove()
         return sikuliLocation.hover() != null;
     }
@@ -101,8 +104,9 @@ public class MoveMouseWrapper {
             return true;
         }
         boolean success = sikuliMove(location);
-        if (!success) ConsoleReporter.print("move failed. ");
-        //else ConsoleReporter.print("move succeeded. ");
+        if (!success)
+            ConsoleReporter.print("move failed. ");
+        // else ConsoleReporter.print("move succeeded. ");
         return success;
     }
 

@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.internal.mouse;
 
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 
@@ -8,10 +8,12 @@ import org.sikuli.script.Mouse;
 import org.springframework.stereotype.Component;
 
 /**
- * Provides mouse button press-and-hold functionality with timing control and mock support.
+ * Provides mouse button press-and-hold functionality with timing control and
+ * mock support.
  * <p>
  * This wrapper abstracts Sikuli's mouse press operations, allowing controlled
- * pressing of mouse buttons that remain held until released with {@link MouseUpWrapper}.
+ * pressing of mouse buttons that remain held until released with
+ * {@link MouseUpWrapper}.
  * It supports all three mouse buttons (left, right, middle) and includes
  * configurable timing delays for precise control over the press duration.
  * <p>
@@ -60,9 +62,11 @@ public class MouseDownWrapper {
      * 
      * @param pauseBeforeBegin Delay in seconds before pressing the button. Useful
      *                         for ensuring the UI is ready to receive the event.
-     * @param totalPause Duration in seconds to keep the button pressed. After this
-     *                   time, the method returns but the button remains pressed.
-     * @param type The mouse button to press (LEFT, RIGHT, or MIDDLE).
+     * @param totalPause       Duration in seconds to keep the button pressed. After
+     *                         this
+     *                         time, the method returns but the button remains
+     *                         pressed.
+     * @param type             The mouse button to press (LEFT, RIGHT, or MIDDLE).
      * @return Always returns {@code true} to indicate the operation was attempted.
      *         Does not indicate whether the press was successful in real mode.
      * 
@@ -73,7 +77,8 @@ public class MouseDownWrapper {
     public boolean press(double pauseBeforeBegin, double totalPause, ClickType.Type type) {
         if (FrameworkSettings.mock) {
             ConsoleReporter.print("<mouse-down>"); // this could be expanded if object clicks are given mock actions
-            if (type != ClickType.Type.LEFT) ConsoleReporter.print(type.name());
+            if (type != ClickType.Type.LEFT)
+                ConsoleReporter.print(type.name());
             ConsoleReporter.print(" ");
             return true;
         }

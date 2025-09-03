@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.tools.testing.wrapper;
 
-import io.github.jspinak.brobot.config.ExecutionMode;
-import io.github.jspinak.brobot.config.ExecutionEnvironment;
 import io.github.jspinak.brobot.tools.testing.mock.time.MockTime;
+import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
+import io.github.jspinak.brobot.config.environment.ExecutionMode;
 import io.github.jspinak.brobot.model.element.Region;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

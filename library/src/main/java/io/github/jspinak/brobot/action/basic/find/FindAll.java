@@ -4,6 +4,8 @@ import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.internal.find.SearchRegionResolver;
 import io.github.jspinak.brobot.analysis.match.MatchProofer;
+import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
+import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig.VerbosityLevel;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.match.Match;
@@ -12,8 +14,6 @@ import io.github.jspinak.brobot.model.element.Position;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.tools.testing.mock.action.ExecutionModeController;
-import io.github.jspinak.brobot.config.LoggingVerbosityConfig;
-import io.github.jspinak.brobot.config.LoggingVerbosityConfig.VerbosityLevel;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

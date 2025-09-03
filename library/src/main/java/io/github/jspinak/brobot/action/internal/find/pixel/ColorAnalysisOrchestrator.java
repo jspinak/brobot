@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.action.internal.find.pixel;
 
 import io.github.jspinak.brobot.action.ActionConfig;
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.action.basic.find.color.GetPixelAnalysisCollectionScores;
 import io.github.jspinak.brobot.analysis.color.profiles.KmeansProfileBuilder;
@@ -28,31 +28,42 @@ import static io.github.jspinak.brobot.model.analysis.color.PixelProfile.Analysi
 import static io.github.jspinak.brobot.model.analysis.color.PixelProfiles.Analysis.SCENE;
 
 /**
- * Central orchestrator for pixel-level color analysis in Brobot's vision system.
+ * Central orchestrator for pixel-level color analysis in Brobot's vision
+ * system.
  * 
- * <p>ColorAnalysisOrchestrator coordinates the complete color analysis pipeline, from extracting
- * color profiles to generating pixel-level similarity scores. It serves as the primary
- * entry point for all color-based matching strategies in the framework.</p>
+ * <p>
+ * ColorAnalysisOrchestrator coordinates the complete color analysis pipeline,
+ * from extracting
+ * color profiles to generating pixel-level similarity scores. It serves as the
+ * primary
+ * entry point for all color-based matching strategies in the framework.
+ * </p>
  * 
- * <p>Key responsibilities:</p>
+ * <p>
+ * Key responsibilities:
+ * </p>
  * <ul>
- *   <li>Extracting appropriate color profiles (k-means or mean-based)</li>
- *   <li>Performing pixel-level distance calculations</li>
- *   <li>Generating similarity scores for pattern matching</li>
- *   <li>Managing scene-wide analysis for multiple state images</li>
+ * <li>Extracting appropriate color profiles (k-means or mean-based)</li>
+ * <li>Performing pixel-level distance calculations</li>
+ * <li>Generating similarity scores for pattern matching</li>
+ * <li>Managing scene-wide analysis for multiple state images</li>
  * </ul>
  * 
- * <p>Analysis workflow:</p>
+ * <p>
+ * Analysis workflow:
+ * </p>
  * <ol>
- *   <li>Extract color profiles from state images</li>
- *   <li>Calculate pixel distances in BGR and HSV spaces</li>
- *   <li>Generate similarity scores based on distances</li>
- *   <li>Aggregate results for scene-wide classification</li>
+ * <li>Extract color profiles from state images</li>
+ * <li>Calculate pixel distances in BGR and HSV spaces</li>
+ * <li>Generate similarity scores based on distances</li>
+ * <li>Aggregate results for scene-wide classification</li>
  * </ol>
  * 
- * <p>This class supports both individual image matching and multi-class
+ * <p>
+ * This class supports both individual image matching and multi-class
  * classification scenarios, making it versatile for various computer
- * vision tasks in GUI automation.</p>
+ * vision tasks in GUI automation.
+ * </p>
  * 
  * @see PixelProfiles
  * @see SceneAnalysis
@@ -67,8 +78,9 @@ public class ColorAnalysisOrchestrator {
     private KmeansProfileBuilder setKMeansProfiles;
     private SceneScoreCalculator getSceneAnalysisScores;
 
-    public ColorAnalysisOrchestrator(DistanceMatrixCalculator getDistanceMatrix, GetPixelAnalysisCollectionScores getPixelAnalysisCollectionScores,
-                         KmeansProfileBuilder setKMeansProfiles, SceneScoreCalculator getSceneAnalysisScores) {
+    public ColorAnalysisOrchestrator(DistanceMatrixCalculator getDistanceMatrix,
+            GetPixelAnalysisCollectionScores getPixelAnalysisCollectionScores,
+            KmeansProfileBuilder setKMeansProfiles, SceneScoreCalculator getSceneAnalysisScores) {
         this.getDistanceMatrix = getDistanceMatrix;
         this.getPixelAnalysisCollectionScores = getPixelAnalysisCollectionScores;
         this.setKMeansProfiles = setKMeansProfiles;
@@ -78,24 +90,28 @@ public class ColorAnalysisOrchestrator {
     /**
      * Analyzes a scene against a state image's color profiles.
      * 
-     * <p>Performs comprehensive pixel-level analysis by:</p>
+     * <p>
+     * Performs comprehensive pixel-level analysis by:
+     * </p>
      * <ol>
-     *   <li>Extracting appropriate color profiles based on action options</li>
-     *   <li>Calculating pixel distances to each color profile</li>
-     *   <li>Generating similarity scores for pattern matching</li>
+     * <li>Extracting appropriate color profiles based on action options</li>
+     * <li>Calculating pixel distances to each color profile</li>
+     * <li>Generating similarity scores for pattern matching</li>
      * </ol>
      * 
-     * <p>The analysis covers the entire scene without region restrictions,
+     * <p>
+     * The analysis covers the entire scene without region restrictions,
      * allowing results to be reused for multiple searches with different
-     * search regions.</p>
+     * search regions.
+     * </p>
      *
-     * @param scene the scene containing pixels to analyze
-     * @param stateImage the target state image with color profiles
+     * @param scene        the scene containing pixels to analyze
+     * @param stateImage   the target state image with color profiles
      * @param actionConfig configuration determining analysis type (k-means or mean)
      * @return PixelAnalysisCollection containing similarity scores for all pixels
      */
     public PixelProfiles getPixelAnalysisCollection(Scene scene, StateImage stateImage,
-                                                              ActionConfig actionConfig) {
+            ActionConfig actionConfig) {
         List<ColorCluster> colorClusters = getColorProfiles(stateImage, actionConfig);
         PixelProfiles pixelAnalysisCollection = setPixelAnalyses(scene, colorClusters);
         pixelAnalysisCollection.setStateImage(stateImage);
@@ -106,17 +122,21 @@ public class ColorAnalysisOrchestrator {
     /**
      * Extracts color profiles based on the analysis strategy.
      * 
-     * <p>Selects between two profile extraction methods:
+     * <p>
+     * Selects between two profile extraction methods:
      * <ul>
-     *   <li><b>K-means</b>: Returns multiple profiles from k-means clustering</li>
-     *   <li><b>Mean</b>: Returns single profile based on overall color statistics</li>
+     * <li><b>K-means</b>: Returns multiple profiles from k-means clustering</li>
+     * <li><b>Mean</b>: Returns single profile based on overall color
+     * statistics</li>
      * </ul>
      * </p>
      * 
-     * <p>For k-means analysis, profiles contain both BGR and HSV schemas
-     * derived from separate clustering operations in each color space.</p>
+     * <p>
+     * For k-means analysis, profiles contain both BGR and HSV schemas
+     * derived from separate clustering operations in each color space.
+     * </p>
      * 
-     * @param img state image containing pre-computed color profiles
+     * @param img          state image containing pre-computed color profiles
      * @param actionConfig determines profile extraction method
      * @return list of color profiles (multiple for k-means, single for mean)
      */
@@ -126,8 +146,7 @@ public class ColorAnalysisOrchestrator {
         if (configType.contains("Classify") || configType.contains("Color")) {
             int kMeans = FrameworkSettings.kMeansInProfile; // Use default k-means value
             return img.getKmeansProfilesAllSchemas().getColorProfiles(kMeans);
-        }
-        else { // Default to mean color profile
+        } else { // Default to mean color profile
             return Collections.singletonList(img.getColorCluster());
         }
     }
@@ -135,23 +154,25 @@ public class ColorAnalysisOrchestrator {
     /**
      * Creates pixel-level analysis for multiple color profiles.
      * 
-     * <p>Generates a {@link PixelProfile} object for each color profile,
+     * <p>
+     * Generates a {@link PixelProfile} object for each color profile,
      * recording pixel-by-pixel similarity measurements. This enables
-     * multi-profile matching strategies like k-means clustering.</p>
+     * multi-profile matching strategies like k-means clustering.
+     * </p>
      * 
-     * @param scene the scene containing pixels to analyze
+     * @param scene         the scene containing pixels to analyze
      * @param colorClusters list of color profiles to match against
      * @return PixelAnalysisCollection aggregating all individual analyses
      */
     public PixelProfiles setPixelAnalyses(Scene scene, List<ColorCluster> colorClusters) {
         PixelProfiles pixelAnalysisCollection = new PixelProfiles(scene);
-        colorClusters.forEach(colorProfile ->
-                setPixelAnalysisForOneColorProfile(pixelAnalysisCollection, colorProfile));
+        colorClusters
+                .forEach(colorProfile -> setPixelAnalysisForOneColorProfile(pixelAnalysisCollection, colorProfile));
         return pixelAnalysisCollection;
     }
 
     private void setPixelAnalysisForOneColorProfile(PixelProfiles pixelAnalysisCollection,
-                                                    ColorCluster colorCluster) {
+            ColorCluster colorCluster) {
         Mat sceneBGR = pixelAnalysisCollection.getAnalysis(SCENE, BGR);
         Mat sceneHSV = pixelAnalysisCollection.getAnalysis(SCENE, HSV);
         PixelProfile pixelAnalysis = new PixelProfile();
@@ -169,35 +190,41 @@ public class ColorAnalysisOrchestrator {
     /**
      * Performs comprehensive scene analysis for multi-class classification.
      * 
-     * <p>Creates a complete analysis of a scene against multiple state images,
+     * <p>
+     * Creates a complete analysis of a scene against multiple state images,
      * enabling pixel-level classification. Each pixel can be assigned to the
-     * state image it most closely matches based on color similarity.</p>
+     * state image it most closely matches based on color similarity.
+     * </p>
      * 
-     * <p>The analysis process:
+     * <p>
+     * The analysis process:
      * <ol>
-     *   <li>Ensures required k-means profiles exist for all images</li>
-     *   <li>Creates PixelAnalysisCollection for each state image</li>
-     *   <li>Calculates classification indices for pixel assignment</li>
-     *   <li>Generates visualization matrices for debugging</li>
+     * <li>Ensures required k-means profiles exist for all images</li>
+     * <li>Creates PixelAnalysisCollection for each state image</li>
+     * <li>Calculates classification indices for pixel assignment</li>
+     * <li>Generates visualization matrices for debugging</li>
      * </ol>
      * </p>
      * 
-     * <p>Side effects: May trigger k-means profile generation if needed</p>
+     * <p>
+     * Side effects: May trigger k-means profile generation if needed
+     * </p>
      * 
-     * @param scene the scene to analyze
-     * @param targetImgs primary images for focused analysis
-     * @param allImgs complete set of images for classification
+     * @param scene        the scene to analyze
+     * @param targetImgs   primary images for focused analysis
+     * @param allImgs      complete set of images for classification
      * @param actionConfig configuration including k-means settings
      * @return SceneAnalysis containing analyses for all state images
      */
     public SceneAnalysis getAnalysisForOneScene(Scene scene, Set<StateImage> targetImgs, Set<StateImage> allImgs,
-                                                ActionConfig actionConfig) {
+            ActionConfig actionConfig) {
         setKMeansProfiles.addKMeansIfNeeded(allImgs, FrameworkSettings.kMeansInProfile);
         List<PixelProfiles> pixelAnalysisCollections = new ArrayList<>();
         allImgs.forEach(img -> pixelAnalysisCollections.add(getPixelAnalysisCollection(scene, img, actionConfig)));
         SceneAnalysis sceneAnalysis = new SceneAnalysis(pixelAnalysisCollections, scene);
         getSceneAnalysisScores.setSceneAnalysisIndices(sceneAnalysis);
-        if (!targetImgs.isEmpty()) getSceneAnalysisScores.setSceneAnalysisIndicesTargetsOnly(sceneAnalysis, targetImgs);
+        if (!targetImgs.isEmpty())
+            getSceneAnalysisScores.setSceneAnalysisIndicesTargetsOnly(sceneAnalysis, targetImgs);
         getSceneAnalysisScores.setBGRVisualizationMats(sceneAnalysis);
         return sceneAnalysis;
     }

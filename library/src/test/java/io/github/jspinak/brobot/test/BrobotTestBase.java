@@ -1,9 +1,10 @@
 package io.github.jspinak.brobot.test;
 
-import io.github.jspinak.brobot.config.MockModeManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInfo;
+
+import io.github.jspinak.brobot.config.mock.MockModeManager;
 
 /**
  * Base test class for all Brobot tests.

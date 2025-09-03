@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.analysis;
 
 import io.github.jspinak.brobot.analysis.color.ColorAnalysis;
 import io.github.jspinak.brobot.model.analysis.color.ColorStatistics;
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.analysis.histogram.HistogramComparator;
 import io.github.jspinak.brobot.analysis.histogram.HistogramExtractor;
 import io.github.jspinak.brobot.analysis.motion.MotionDetector;
@@ -39,51 +39,51 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @SpringBootTest(classes = BrobotTestApplication.class)
 @TestPropertySource(properties = {
-    "spring.main.lazy-initialization=true",
-    "brobot.opencv.headless=true"
+        "spring.main.lazy-initialization=true",
+        "brobot.opencv.headless=true"
 })
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ImageAnalysisIntegrationTest extends BrobotIntegrationTestBase {
 
     @Autowired
     private ColorAnalysis colorAnalysis;
-    
+
     @Autowired
     private HistogramExtractor histogramExtractor;
-    
+
     @Autowired
     private HistogramComparator histogramComparator;
-    
+
     @Autowired
     private MotionDetector motionDetector;
-    
+
     @Autowired
     private MatBuilder matBuilder;
-    
+
     private Mat testMat;
     private Image testImage;
-    
+
     @BeforeEach
     void setUp() {
         // Enable mock mode for testing
         FrameworkSettings.mock = true;
-        
+
         // Create test Mat and Image
         createTestData();
     }
-    
+
     private void createTestData() {
         // Create a simple test Mat using MatBuilder
         // MatBuilder creates CV_8UC3 (3 channel) matrices by default
         testMat = new MatBuilder()
-            .setName("TestMat")
-            .setWH(100, 100)  // Width and height
-            .build();
-        
+                .setName("TestMat")
+                .setWH(100, 100) // Width and height
+                .build();
+
         // Create test Image from Mat
         testImage = new Image(testMat);
     }
-    
+
     @Test
     @Order(1)
     void testSpringContextLoads() {
@@ -93,13 +93,13 @@ class ImageAnalysisIntegrationTest extends BrobotIntegrationTestBase {
         assertNotNull(motionDetector, "MotionDetector should be autowired");
         assertNotNull(matBuilder, "MatBuilder should be autowired");
     }
-    
+
     @Test
     @Order(2)
     void testColorAnalysis() {
         // Test color extraction functionality
         assertNotNull(colorAnalysis);
-        
+
         // Create a test image for color analysis
         BufferedImage buffImage = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
         // Fill with a solid color
@@ -109,115 +109,115 @@ class ImageAnalysisIntegrationTest extends BrobotIntegrationTestBase {
             }
         }
         Image colorTestImage = new Image(buffImage);
-        
+
         // The actual color analysis methods depend on ColorAnalysis API
         // This is a placeholder test
         assertNotNull(colorTestImage);
     }
-    
+
     @Test
     @Order(3)
     void testHistogramExtraction() {
         // Test histogram extraction
         assertNotNull(histogramExtractor);
-        
+
         // The actual extraction depends on the HistogramExtractor API
         // Check if we can create histograms from images
         assertNotNull(testImage);
-        
+
         // HistogramExtractor might have different methods
         // This is a basic test to verify the service is available
     }
-    
+
     @Test
     @Order(4)
     void testHistogramComparison() {
         // Create two test images with different colors
         Mat mat1 = new MatBuilder()
-            .setName("Mat1")
-            .setWH(100, 100)
-            .build();
-            
+                .setName("Mat1")
+                .setWH(100, 100)
+                .build();
+
         Mat mat2 = new MatBuilder()
-            .setName("Mat2")
-            .setWH(100, 100)
-            .build();
-        
+                .setName("Mat2")
+                .setWH(100, 100)
+                .build();
+
         Image image1 = new Image(mat1);
         Image image2 = new Image(mat2);
-        
+
         // Test histogram comparison
         assertNotNull(histogramComparator);
         assertNotNull(image1);
         assertNotNull(image2);
-        
+
         // The actual comparison methods depend on HistogramComparator API
         // This verifies that the images are created properly
     }
-    
+
     @Test
     @Order(5)
     void testMotionDetection() {
         // Test motion detection capability
         assertNotNull(motionDetector);
-        
+
         // Motion detection typically requires multiple frames
         // Create a sequence of slightly different images
         Mat frame1 = new MatBuilder()
-            .setName("Frame1")
-            .setWH(100, 100)
-            .build();
-            
+                .setName("Frame1")
+                .setWH(100, 100)
+                .build();
+
         Mat frame2 = new MatBuilder()
-            .setName("Frame2")
-            .setWH(100, 100)
-            .build();
-        
+                .setName("Frame2")
+                .setWH(100, 100)
+                .build();
+
         Image motionImage1 = new Image(frame1);
         Image motionImage2 = new Image(frame2);
-        
+
         assertNotNull(motionImage1);
         assertNotNull(motionImage2);
-        
+
         // The actual motion detection depends on MotionDetector API
     }
-    
+
     @Test
     @Order(6)
     void testMatBuilderComposition() {
         // Test creating composite images with MatBuilder
         Mat submat1 = new MatBuilder()
-            .setName("Submat1")
-            .setWH(50, 50)
-            .build();
-            
+                .setName("Submat1")
+                .setWH(50, 50)
+                .build();
+
         Mat submat2 = new MatBuilder()
-            .setName("Submat2")
-            .setWH(50, 50)
-            .build();
-        
+                .setName("Submat2")
+                .setWH(50, 50)
+                .build();
+
         // Create a composite image
         Mat composite = new MatBuilder()
-            .setName("Composite")
-            .setWH(200, 100)
-            .setSpaceBetween(10)
-            .addHorizontalSubmats(submat1, submat2)
-            .build();
-        
+                .setName("Composite")
+                .setWH(200, 100)
+                .setSpaceBetween(10)
+                .addHorizontalSubmats(submat1, submat2)
+                .build();
+
         assertNotNull(composite);
         assertEquals(200, composite.cols());
         assertEquals(100, composite.rows());
-        
+
         Image compositeImage = new Image(composite);
         assertNotNull(compositeImage);
     }
-    
+
     @Test
     @Order(7)
     void testImageFromBufferedImage() {
         // Test creating Image from BufferedImage
         BufferedImage buffImage = new BufferedImage(200, 150, BufferedImage.TYPE_INT_RGB);
-        
+
         // Fill with gradient
         for (int x = 0; x < 200; x++) {
             for (int y = 0; y < 150; y++) {
@@ -228,7 +228,7 @@ class ImageAnalysisIntegrationTest extends BrobotIntegrationTestBase {
                 buffImage.setRGB(x, y, rgb);
             }
         }
-        
+
         Image gradientImage = new Image(buffImage, "GradientImage");
         assertNotNull(gradientImage);
         assertEquals("GradientImage", gradientImage.getName());
@@ -236,16 +236,16 @@ class ImageAnalysisIntegrationTest extends BrobotIntegrationTestBase {
         assertEquals(200, gradientImage.getBufferedImage().getWidth());
         assertEquals(150, gradientImage.getBufferedImage().getHeight());
     }
-    
+
     @Test
     @Order(8)
     void testRegionAnalysis() {
         // Test analyzing specific regions of an image
         Region testRegion = new Region(10, 10, 80, 80);
-        
+
         // Create an image with distinct regions
         BufferedImage regionImage = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
-        
+
         // Fill center region with different color
         for (int x = 0; x < 100; x++) {
             for (int y = 0; y < 100; y++) {
@@ -256,20 +256,20 @@ class ImageAnalysisIntegrationTest extends BrobotIntegrationTestBase {
                 }
             }
         }
-        
+
         Image imageWithRegions = new Image(regionImage, "RegionTest");
         assertNotNull(imageWithRegions);
         assertNotNull(testRegion);
-        
+
         // Region-based analysis would depend on the specific APIs available
     }
-    
+
     @Test
     @Order(9)
     void testColorStatistics() {
         // Test that ColorStatistics can be used (it's a model class)
         // ColorStatistics might be a data holder class
-        
+
         // Create a test image
         BufferedImage statsImage = new BufferedImage(50, 50, BufferedImage.TYPE_INT_RGB);
         for (int x = 0; x < 50; x++) {
@@ -280,10 +280,10 @@ class ImageAnalysisIntegrationTest extends BrobotIntegrationTestBase {
                 statsImage.setRGB(x, y, rgb);
             }
         }
-        
+
         Image testStatsImage = new Image(statsImage);
         assertNotNull(testStatsImage);
-        
+
         // ColorStatistics usage would depend on its API
         // It might be returned from ColorAnalysis methods
     }

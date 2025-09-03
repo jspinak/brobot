@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.config;
 
+import io.github.jspinak.brobot.config.logging.ActionLoggingConfig;
+import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import io.github.jspinak.brobot.tools.logging.console.ConsoleActionConfig;
 import io.github.jspinak.brobot.tools.logging.console.ConsoleActionReporter;

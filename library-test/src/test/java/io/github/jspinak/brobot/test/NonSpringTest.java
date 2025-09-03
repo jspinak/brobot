@@ -1,7 +1,9 @@
 package io.github.jspinak.brobot.test;
 
-import io.github.jspinak.brobot.config.MockModeManager;
 import org.junit.jupiter.api.Test;
+
+import io.github.jspinak.brobot.config.mock.MockModeManager;
+
 import org.junit.jupiter.api.BeforeEach;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;

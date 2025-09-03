@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.diagnostics;
 
-import io.github.jspinak.brobot.config.ImagePathManager;
-import io.github.jspinak.brobot.config.SmartImageLoader;
+import io.github.jspinak.brobot.config.core.ImagePathManager;
+import io.github.jspinak.brobot.config.core.SmartImageLoader;
 import io.github.jspinak.brobot.model.element.Image;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

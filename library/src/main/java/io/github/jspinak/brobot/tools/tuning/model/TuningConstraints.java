@@ -4,7 +4,8 @@ package io.github.jspinak.brobot.tools.tuning.model;
  * Defines maximum threshold values for action timing parameters.
  * <p>
  * TuningConstraints establishes upper bounds for various timing parameters used
- * throughout the Brobot framework. These thresholds ensure that automated parameter
+ * throughout the Brobot framework. These thresholds ensure that automated
+ * parameter
  * tuning and user configurations remain within reasonable limits, preventing
  * excessively long delays that could make automation impractical.
  * <p>
@@ -37,7 +38,7 @@ package io.github.jspinak.brobot.tools.tuning.model;
  * for most GUI automation scenarios.
  *
  * @see TuningExperiment
- * @see io.github.jspinak.brobot.config.FrameworkSettings
+ * @see io.github.jspinak.brobot.config.core.FrameworkSettings
  */
 public class TuningConstraints {
 
@@ -49,7 +50,7 @@ public class TuningConstraints {
      * excessive delays.
      */
     public static double pauseBeforeMouseDown = 3.0;
-    
+
     /**
      * Maximum pause duration in seconds after mouse down events.
      * <p>
@@ -57,7 +58,7 @@ public class TuningConstraints {
      * 1.0 second is sufficient for most drag initiation scenarios.
      */
     public static double pauseAfterMouseDown = 1.0;
-    
+
     /**
      * Maximum pause duration in seconds after mouse up events.
      * <p>
@@ -65,7 +66,7 @@ public class TuningConstraints {
      * 2.5 seconds allows for UI animations and state transitions.
      */
     public static double pauseAfterMouseUp = 2.5;
-    
+
     /**
      * Maximum delay in seconds for mouse movement operations.
      * <p>
@@ -73,7 +74,7 @@ public class TuningConstraints {
      * 1.0 second per movement ensures visible, human-like motion.
      */
     public static float moveMouseDelay = 1.0F;
-    
+
     /**
      * Maximum wait time in seconds for find operations.
      * <p>

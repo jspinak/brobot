@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.capture;
 
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
@@ -51,8 +51,10 @@ public class WriteXmlDomScenes {
         addSceneAndObjects(sceneNumber, time, sceneObjects.getObjectsNames(), sceneObjects.getObjectsLocations());
     }
 
-    public void addSceneAndObjects(int sceneNumber, int timelapseFromStart, List<String> objectNames, List<Location> objectLocations) {
-        if (doc == null || rootElement == null) return;
+    public void addSceneAndObjects(int sceneNumber, int timelapseFromStart, List<String> objectNames,
+            List<Location> objectLocations) {
+        if (doc == null || rootElement == null)
+            return;
 
         Element child = doc.createElement("scene");
         rootElement.appendChild(child);
@@ -79,7 +81,8 @@ public class WriteXmlDomScenes {
     }
 
     public void writeXmlToFile(String filename) throws TransformerException { // ParserConfigurationException,
-        if (doc == null) return;
+        if (doc == null)
+            return;
         // write dom document to a file
         String path = FileSystems.getDefault().getPath(".") + "\\" + filename;
         ConsoleReporter.println("Writing XML to file: " + path);
@@ -92,7 +95,7 @@ public class WriteXmlDomScenes {
 
     // write doc to output stream
     private static void writeXml(Document doc,
-                                 OutputStream output)
+            OutputStream output)
             throws TransformerException {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();

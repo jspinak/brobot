@@ -12,7 +12,7 @@ import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
-import io.github.jspinak.brobot.config.ExecutionEnvironment;
+import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 
 /**
  * Base class for integration tests that need to work with real image files

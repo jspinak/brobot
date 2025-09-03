@@ -2,14 +2,14 @@ package io.github.jspinak.brobot.tools.logging.illustration;
 
 import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.config.ExecutionEnvironment;
+import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.testutils.TestPaths;
 import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 import org.junit.jupiter.api.BeforeAll;

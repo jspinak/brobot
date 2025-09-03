@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.test.context.ContextConfiguration;
 
-import io.github.jspinak.brobot.config.ExecutionEnvironment;
+import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 
 /**
  * Base class for unit tests that use mock data and don't require real files

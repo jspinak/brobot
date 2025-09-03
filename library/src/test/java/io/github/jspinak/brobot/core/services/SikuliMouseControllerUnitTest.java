@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.core.services;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -10,7 +10,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * Unit tests for SikuliMouseController.
  * Tests basic functionality in mock mode without mocking Sikuli internals.
  * 
- * For integration testing with Spring context, see SikuliMouseControllerIT in library-test module.
+ * For integration testing with Spring context, see SikuliMouseControllerIT in
+ * library-test module.
  */
 @DisplayName("SikuliMouseController Unit Tests")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -51,15 +52,15 @@ public class SikuliMouseControllerUnitTest extends BrobotTestBase {
         // This tests the internal button conversion logic
         // We can't directly test the private method, but we can verify
         // that click operations with different buttons don't throw exceptions
-        
+
         assertDoesNotThrow(() -> {
             controller.click(100, 100, MouseController.MouseButton.LEFT);
         });
-        
+
         assertDoesNotThrow(() -> {
             controller.click(100, 100, MouseController.MouseButton.RIGHT);
         });
-        
+
         assertDoesNotThrow(() -> {
             controller.click(100, 100, MouseController.MouseButton.MIDDLE);
         });
@@ -70,27 +71,27 @@ public class SikuliMouseControllerUnitTest extends BrobotTestBase {
     void testBasicOperationsInMockMode() {
         // In mock mode, operations should complete without throwing exceptions
         // The actual success depends on the Sikuli mock implementation
-        
+
         // Test move
         assertDoesNotThrow(() -> {
             controller.moveTo(100, 200);
         });
-        
+
         // Test click
         assertDoesNotThrow(() -> {
             controller.click(150, 250, MouseController.MouseButton.LEFT);
         });
-        
+
         // Test double-click
         assertDoesNotThrow(() -> {
             controller.doubleClick(200, 300, MouseController.MouseButton.LEFT);
         });
-        
+
         // Test drag
         assertDoesNotThrow(() -> {
             controller.drag(100, 100, 200, 200);
         });
-        
+
         // Test scroll
         assertDoesNotThrow(() -> {
             controller.scroll(5);
@@ -104,18 +105,18 @@ public class SikuliMouseControllerUnitTest extends BrobotTestBase {
         assertDoesNotThrow(() -> {
             controller.mouseDown(MouseController.MouseButton.LEFT);
         });
-        
+
         // Test button up
         assertDoesNotThrow(() -> {
             controller.mouseUp(MouseController.MouseButton.LEFT);
         });
-        
+
         // Test with different buttons
         assertDoesNotThrow(() -> {
             controller.mouseDown(MouseController.MouseButton.RIGHT);
             controller.mouseUp(MouseController.MouseButton.RIGHT);
         });
-        
+
         assertDoesNotThrow(() -> {
             controller.mouseDown(MouseController.MouseButton.MIDDLE);
             controller.mouseUp(MouseController.MouseButton.MIDDLE);
@@ -144,22 +145,22 @@ public class SikuliMouseControllerUnitTest extends BrobotTestBase {
             controller.moveTo(0, 0);
             controller.click(0, 0, MouseController.MouseButton.LEFT);
         });
-        
+
         // Test negative coordinates (implementation should handle gracefully)
         assertDoesNotThrow(() -> {
             controller.moveTo(-10, -10);
         });
-        
+
         // Test large coordinates
         assertDoesNotThrow(() -> {
             controller.moveTo(Integer.MAX_VALUE, Integer.MAX_VALUE);
         });
-        
+
         // Test scroll with zero
         assertDoesNotThrow(() -> {
             controller.scroll(0);
         });
-        
+
         // Test scroll with negative (scroll up)
         assertDoesNotThrow(() -> {
             controller.scroll(-10);
@@ -171,11 +172,11 @@ public class SikuliMouseControllerUnitTest extends BrobotTestBase {
     void testThreadSafety() {
         // The controller uses synchronized methods, so it should be thread-safe
         // In mock mode, we just verify operations don't throw exceptions
-        
+
         assertDoesNotThrow(() -> {
             int threadCount = 5; // Reduced for stability in mock mode
             Thread[] threads = new Thread[threadCount];
-            
+
             for (int i = 0; i < threadCount; i++) {
                 final int index = i;
                 threads[i] = new Thread(() -> {
@@ -186,10 +187,10 @@ public class SikuliMouseControllerUnitTest extends BrobotTestBase {
                 });
                 threads[i].start();
             }
-            
+
             // Give threads reasonable time to complete
             Thread.sleep(1000);
-            
+
             // In mock mode, threads should complete quickly
             // We're mainly checking that no exceptions were thrown
         });
@@ -202,12 +203,12 @@ public class SikuliMouseControllerUnitTest extends BrobotTestBase {
         assertDoesNotThrow(() -> {
             controller.doubleClick(100, 100, MouseController.MouseButton.LEFT);
         });
-        
+
         // Right and middle buttons simulate double-click with two clicks
         assertDoesNotThrow(() -> {
             controller.doubleClick(100, 100, MouseController.MouseButton.RIGHT);
         });
-        
+
         assertDoesNotThrow(() -> {
             controller.doubleClick(100, 100, MouseController.MouseButton.MIDDLE);
         });

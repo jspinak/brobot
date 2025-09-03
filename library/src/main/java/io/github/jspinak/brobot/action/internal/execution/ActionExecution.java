@@ -1,7 +1,8 @@
 package io.github.jspinak.brobot.action.internal.execution;
+
 import io.github.jspinak.brobot.action.ActionType;
 
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
@@ -30,21 +31,31 @@ import java.time.Duration;
 import java.util.List;
 
 /**
- * Central orchestrator for executing GUI automation actions with full lifecycle management.
+ * Central orchestrator for executing GUI automation actions with full lifecycle
+ * management.
  * <p>
- * This class implements the action execution layer of the model-based GUI automation framework,
- * handling the complete lifecycle of an action from initialization through completion. It provides
- * a consistent execution environment for both {@link BasicActionRegistry} and {@link CompositeActionRegistry}
+ * This class implements the action execution layer of the model-based GUI
+ * automation framework,
+ * handling the complete lifecycle of an action from initialization through
+ * completion. It provides
+ * a consistent execution environment for both {@link BasicActionRegistry} and
+ * {@link CompositeActionRegistry}
  * operations while managing critical cross-cutting concerns.
  * <p>
  * <strong>Key responsibilities:</strong>
  * <ul>
- * <li>Action timing: Records start time, duration, and enforces configured pauses</li>
- * <li>Lifecycle management: Controls action sequences, repetitions, and termination conditions</li>
- * <li>Success determination: Evaluates action outcomes based on configured criteria</li>
- * <li>Logging and reporting: Captures execution details for debugging and analysis</li>
- * <li>Screenshot illustration: Documents visual state before/after actions when enabled</li>
- * <li>Dataset collection: Captures training data for machine learning when enabled</li>
+ * <li>Action timing: Records start time, duration, and enforces configured
+ * pauses</li>
+ * <li>Lifecycle management: Controls action sequences, repetitions, and
+ * termination conditions</li>
+ * <li>Success determination: Evaluates action outcomes based on configured
+ * criteria</li>
+ * <li>Logging and reporting: Captures execution details for debugging and
+ * analysis</li>
+ * <li>Screenshot illustration: Documents visual state before/after actions when
+ * enabled</li>
+ * <li>Dataset collection: Captures training data for machine learning when
+ * enabled</li>
  * </ul>
  * <p>
  * The execution flow follows these steps:
@@ -58,8 +69,10 @@ import java.util.List;
  * <li>Log results and collect training data if applicable</li>
  * </ol>
  * <p>
- * <strong>Design note:</strong> Any action executed outside this class must implement
- * equivalent lifecycle management to ensure consistent behavior across the framework.
+ * <strong>Design note:</strong> Any action executed outside this class must
+ * implement
+ * equivalent lifecycle management to ensure consistent behavior across the
+ * framework.
  *
  * @see ActionInterface
  * @see ActionLifecycleManagement
@@ -86,28 +99,41 @@ public class ActionExecution {
     /**
      * Constructs an ActionExecution instance with all required dependencies.
      * <p>
-     * This constructor uses dependency injection to wire together the various components
-     * needed for comprehensive action execution. Each dependency handles a specific aspect
+     * This constructor uses dependency injection to wire together the various
+     * components
+     * needed for comprehensive action execution. Each dependency handles a specific
+     * aspect
      * of the execution lifecycle.
      *
-     * @param time Provides timing services including wait operations and duration tracking
-     * @param illustrateScreenshot Captures and annotates screenshots for visual documentation
-     * @param selectRegions Identifies screen regions relevant to the action
-     * @param actionLifecycleManagement Controls action repetition, sequences, and termination
-     * @param datasetManager Collects training data when machine learning mode is enabled
-     * @param success Evaluates and sets success criteria for completed actions
-     * @param matchesInitializer Creates and configures ActionResult instances
-     * @param actionLogger Records action execution details for analysis and debugging
-     * @param captureScreenshot Captures raw screenshots for error documentation
-     * @param automationSession Manages session context and identifiers
-     * @param executionController Controls execution flow with pause/resume/stop functionality
+     * @param time                      Provides timing services including wait
+     *                                  operations and duration tracking
+     * @param illustrateScreenshot      Captures and annotates screenshots for
+     *                                  visual documentation
+     * @param selectRegions             Identifies screen regions relevant to the
+     *                                  action
+     * @param actionLifecycleManagement Controls action repetition, sequences, and
+     *                                  termination
+     * @param datasetManager            Collects training data when machine learning
+     *                                  mode is enabled
+     * @param success                   Evaluates and sets success criteria for
+     *                                  completed actions
+     * @param matchesInitializer        Creates and configures ActionResult
+     *                                  instances
+     * @param actionLogger              Records action execution details for
+     *                                  analysis and debugging
+     * @param captureScreenshot         Captures raw screenshots for error
+     *                                  documentation
+     * @param automationSession         Manages session context and identifiers
+     * @param executionController       Controls execution flow with
+     *                                  pause/resume/stop functionality
      */
-    public ActionExecution(TimeProvider time, IllustrationController illustrateScreenshot, SearchRegionResolver selectRegions,
-                           ActionLifecycleManagement actionLifecycleManagement, DatasetManager datasetManager,
-                           ActionSuccessCriteria success, ActionResultFactory matchesInitializer, ActionLogger actionLogger,
-                           ScreenshotCapture captureScreenshot, ExecutionSession automationSession,
-                           @Autowired(required = false) ExecutionController executionController,
-                           BrobotLogger brobotLogger, StateMemory stateMemory) {
+    public ActionExecution(TimeProvider time, IllustrationController illustrateScreenshot,
+            SearchRegionResolver selectRegions,
+            ActionLifecycleManagement actionLifecycleManagement, DatasetManager datasetManager,
+            ActionSuccessCriteria success, ActionResultFactory matchesInitializer, ActionLogger actionLogger,
+            ScreenshotCapture captureScreenshot, ExecutionSession automationSession,
+            @Autowired(required = false) ExecutionController executionController,
+            BrobotLogger brobotLogger, StateMemory stateMemory) {
         this.time = time;
         this.illustrateScreenshot = illustrateScreenshot;
         this.selectRegions = selectRegions;
@@ -124,23 +150,30 @@ public class ActionExecution {
     }
 
     /**
-     * Executes an action with complete lifecycle management and maintenance operations.
+     * Executes an action with complete lifecycle management and maintenance
+     * operations.
      * <p>
-     * This method serves as the primary entry point for all action execution in the framework.
-     * It orchestrates the entire action lifecycle, from initialization through completion,
-     * while handling cross-cutting concerns like timing, logging, and data collection.
+     * This method serves as the primary entry point for all action execution in the
+     * framework.
+     * It orchestrates the entire action lifecycle, from initialization through
+     * completion,
+     * while handling cross-cutting concerns like timing, logging, and data
+     * collection.
      * <p>
      * <strong>Execution sequence:</strong>
      * <ol>
      * <li>Logs action initiation and target objects</li>
      * <li>Initializes {@link ActionResult} with action parameters</li>
      * <li>Applies pre-action pause (if configured)</li>
-     * <li>Executes action sequences via {@link ActionLifecycleManagement#isMoreSequencesAllowed}</li>
-     * <li>Determines success based on results and {@link ActionConfig} criteria</li>
+     * <li>Executes action sequences via
+     * {@link ActionLifecycleManagement#isMoreSequencesAllowed}</li>
+     * <li>Determines success based on results and {@link ActionConfig}
+     * criteria</li>
      * <li>Captures illustrated screenshots (if enabled)</li>
      * <li>Applies post-action pause (if configured)</li>
      * <li>Records duration and logs results</li>
-     * <li>Collects training data (if {@link FrameworkSettings#buildDataset} is enabled)</li>
+     * <li>Collects training data (if {@link FrameworkSettings#buildDataset} is
+     * enabled)</li>
      * </ol>
      * <p>
      * <strong>Side effects:</strong>
@@ -153,12 +186,18 @@ public class ActionExecution {
      * <li>Prints action results to the report output</li>
      * </ul>
      *
-     * @param actionMethod The {@link ActionInterface} implementation containing action-specific logic
-     * @param actionDescription Human-readable description of the action for logging and ML training
-     * @param actionConfig Configuration parameters controlling action behavior and success criteria
-     * @param objectCollections Variable number of {@link ObjectCollection} containing target GUI elements.
-     *                         The first collection (if present) is used for primary logging.
-     * @return {@link ActionResult} containing matches found, success status, duration, and execution details
+     * @param actionMethod      The {@link ActionInterface} implementation
+     *                          containing action-specific logic
+     * @param actionDescription Human-readable description of the action for logging
+     *                          and ML training
+     * @param actionConfig      Configuration parameters controlling action behavior
+     *                          and success criteria
+     * @param objectCollections Variable number of {@link ObjectCollection}
+     *                          containing target GUI elements.
+     *                          The first collection (if present) is used for
+     *                          primary logging.
+     * @return {@link ActionResult} containing matches found, success status,
+     *         duration, and execution details
      *
      * @see ActionInterface#perform
      * @see ActionLifecycleManagement
@@ -167,156 +206,180 @@ public class ActionExecution {
     // Removed ActionOptions-based perform method - use ActionConfig version instead
     // The ActionConfig version is available below
     /*
-    public ActionResult perform(ActionInterface actionMethod, String actionDescription, ActionConfig actionConfig,
-                           ObjectCollection... objectCollections) {
-        String sessionId = automationSession.getCurrentSessionId();
-        printAction(actionConfig, objectCollections);
-        ActionResult matches = matchesInitializer.init(actionConfig, actionDescription, objectCollections);
-        
-        try {
-            // Check pause point before starting
-            checkPausePointSafely();
-            
-            time.wait(actionConfig.getPauseBeforeBegin());
-            
-            while (actionLifecycleManagement.isMoreSequencesAllowed(matches)) {
-                // Check pause point before each sequence
-                checkPausePointSafely();
-                
-                actionMethod.perform(matches, objectCollections);
-                actionLifecycleManagement.incrementCompletedSequences(matches);
-            }
-            
-            success.set(actionConfig, matches);
-            illustrateScreenshot.illustrateWhenAllowed(matches,
-                    selectRegions.getRegionsForAllImages(actionConfig, objectCollections),
-                    actionConfig, objectCollections);
-            time.wait(actionConfig.getPauseAfterEnd());
-            
-        } catch (ExecutionStoppedException e) {
-            log.info("Action execution stopped: {}", actionDescription);
-            matches.setSuccess(false);
-            // Rethrow to propagate the stop signal
-            throw e;
-        }
-        
-        Duration duration = actionLifecycleManagement.getCurrentDuration(matches);
-        matches.setDuration(duration);
-        if (FrameworkSettings.buildDataset) datasetManager.addSetOfData(matches);
-        // Removed direct console output - logging is handled by ActionLifecycleAspect which respects QUIET mode
-        // ConsoleReporter.println(actionConfig.getAction() + " " + matches.getOutputText() + " " + matches.getSuccessSymbol());
-        if (objectCollections.length > 0) {
-            LogData logData = actionLogger.logAction(sessionId, matches, objectCollections[0]);
-        }
-        if (!matches.isSuccess()) {
-            //String screenshotPath = captureScreenshot.captureScreenshot("action_failed_" + sessionId);
-            //actionLogger.logError(sessionId, "Action failed: " + actionConfig.getAction(), screenshotPath);
-        }
-        
-        // Automatically update state memory when patterns are found
-        // This ensures states are activated when their patterns are detected
-        if (matches.isSuccess() && !matches.getMatchList().isEmpty()) {
-            stateMemory.adjustActiveStatesWithMatches(matches);
-        }
-        
-        return matches;
-    }
-    */
+     * public ActionResult perform(ActionInterface actionMethod, String
+     * actionDescription, ActionConfig actionConfig,
+     * ObjectCollection... objectCollections) {
+     * String sessionId = automationSession.getCurrentSessionId();
+     * printAction(actionConfig, objectCollections);
+     * ActionResult matches = matchesInitializer.init(actionConfig,
+     * actionDescription, objectCollections);
+     * 
+     * try {
+     * // Check pause point before starting
+     * checkPausePointSafely();
+     * 
+     * time.wait(actionConfig.getPauseBeforeBegin());
+     * 
+     * while (actionLifecycleManagement.isMoreSequencesAllowed(matches)) {
+     * // Check pause point before each sequence
+     * checkPausePointSafely();
+     * 
+     * actionMethod.perform(matches, objectCollections);
+     * actionLifecycleManagement.incrementCompletedSequences(matches);
+     * }
+     * 
+     * success.set(actionConfig, matches);
+     * illustrateScreenshot.illustrateWhenAllowed(matches,
+     * selectRegions.getRegionsForAllImages(actionConfig, objectCollections),
+     * actionConfig, objectCollections);
+     * time.wait(actionConfig.getPauseAfterEnd());
+     * 
+     * } catch (ExecutionStoppedException e) {
+     * log.info("Action execution stopped: {}", actionDescription);
+     * matches.setSuccess(false);
+     * // Rethrow to propagate the stop signal
+     * throw e;
+     * }
+     * 
+     * Duration duration = actionLifecycleManagement.getCurrentDuration(matches);
+     * matches.setDuration(duration);
+     * if (FrameworkSettings.buildDataset) datasetManager.addSetOfData(matches);
+     * // Removed direct console output - logging is handled by
+     * ActionLifecycleAspect which respects QUIET mode
+     * // ConsoleReporter.println(actionConfig.getAction() + " " +
+     * matches.getOutputText() + " " + matches.getSuccessSymbol());
+     * if (objectCollections.length > 0) {
+     * LogData logData = actionLogger.logAction(sessionId, matches,
+     * objectCollections[0]);
+     * }
+     * if (!matches.isSuccess()) {
+     * //String screenshotPath =
+     * captureScreenshot.captureScreenshot("action_failed_" + sessionId);
+     * //actionLogger.logError(sessionId, "Action failed: " +
+     * actionConfig.getAction(), screenshotPath);
+     * }
+     * 
+     * // Automatically update state memory when patterns are found
+     * // This ensures states are activated when their patterns are detected
+     * if (matches.isSuccess() && !matches.getMatchList().isEmpty()) {
+     * stateMemory.adjustActiveStatesWithMatches(matches);
+     * }
+     * 
+     * return matches;
+     * }
+     */
 
     /**
      * Prints action details to the report output for debugging and monitoring.
      * <p>
-     * This method formats and outputs a concise representation of the action being executed,
-     * including the action type and target state images. Output is only generated when the
+     * This method formats and outputs a concise representation of the action being
+     * executed,
+     * including the action type and target state images. Output is only generated
+     * when the
      * reporting level is set to {@link ConsoleReporter.OutputLevel#LOW} or higher.
      * <p>
-     * The output format is: {@code |ACTION_TYPE stateName.imageName, stateName.imageName|}
+     * The output format is:
+     * {@code |ACTION_TYPE stateName.imageName, stateName.imageName|}
      * <p>
      * Example output: {@code |CLICK MainMenu.fileButton, MainMenu.editButton|}
      *
-     * @param actionConfig Contains the action type to be printed
+     * @param actionConfig      Contains the action type to be printed
      * @param objectCollections Contains state images to be included in the output.
-     *                         Only the first collection is processed if multiple are provided.
+     *                          Only the first collection is processed if multiple
+     *                          are provided.
      */
     // Removed ActionOptions-based printAction method
     /*
-    private void printAction(ActionConfig actionConfig, ObjectCollection... objectCollections) {
-        // Disabled direct console output - logging is handled by ActionLifecycleAspect which respects QUIET mode
-        // Legacy direct console printing interferes with structured logging and QUIET mode
-    }
-    */
+     * private void printAction(ActionConfig actionConfig, ObjectCollection...
+     * objectCollections) {
+     * // Disabled direct console output - logging is handled by
+     * ActionLifecycleAspect which respects QUIET mode
+     * // Legacy direct console printing interferes with structured logging and
+     * QUIET mode
+     * }
+     */
 
     /**
      * Executes an action with complete lifecycle management using ActionConfig.
      * <p>
-     * This method is the new primary entry point that accepts ActionConfig instead of ActionOptions.
-     * It provides the same comprehensive lifecycle management as the legacy method but uses the
+     * This method is the new primary entry point that accepts ActionConfig instead
+     * of ActionOptions.
+     * It provides the same comprehensive lifecycle management as the legacy method
+     * but uses the
      * modern configuration approach.
      *
-     * @param actionMethod The {@link ActionInterface} implementation containing action-specific logic
-     * @param actionDescription Human-readable description of the action for logging and ML training
-     * @param actionConfig Configuration parameters controlling action behavior and success criteria
-     * @param objectCollections Variable number of {@link ObjectCollection} containing target GUI elements
-     * @return {@link ActionResult} containing matches found, success status, duration, and execution details
+     * @param actionMethod      The {@link ActionInterface} implementation
+     *                          containing action-specific logic
+     * @param actionDescription Human-readable description of the action for logging
+     *                          and ML training
+     * @param actionConfig      Configuration parameters controlling action behavior
+     *                          and success criteria
+     * @param objectCollections Variable number of {@link ObjectCollection}
+     *                          containing target GUI elements
+     * @return {@link ActionResult} containing matches found, success status,
+     *         duration, and execution details
      */
     public ActionResult perform(ActionInterface actionMethod, String actionDescription, ActionConfig actionConfig,
-                               ObjectCollection... objectCollections) {
+            ObjectCollection... objectCollections) {
         String sessionId = automationSession.getCurrentSessionId();
         printActionConfig(actionConfig, objectCollections);
         ActionResult matches = matchesInitializer.init(actionConfig, actionDescription, objectCollections);
-        
+
         try {
             // Check pause point before starting
             checkPausePointSafely();
-            
+
             // Handle before action logging
             handleBeforeActionLogging(actionConfig, objectCollections);
-            
+
             time.wait(actionConfig.getPauseBeforeBegin());
-            
+
             while (actionLifecycleManagement.isMoreSequencesAllowed(matches)) {
                 // Check pause point before each sequence
                 checkPausePointSafely();
-                
+
                 actionMethod.perform(matches, objectCollections);
                 actionLifecycleManagement.incrementCompletedSequences(matches);
             }
-            
+
             success.set(actionConfig, matches);
-            
+
             // Handle automatic logging based on ActionConfig logging options
             handleAutomaticLogging(actionConfig, matches, objectCollections);
-            
+
             illustrateScreenshot.illustrateWhenAllowed(matches,
                     selectRegions.getRegionsForAllImages(actionConfig, objectCollections),
                     actionConfig, objectCollections);
             time.wait(actionConfig.getPauseAfterEnd());
-            
+
             // Handle after action logging
             handleAfterActionLogging(actionConfig, matches, objectCollections);
-            
+
         } catch (ExecutionStoppedException e) {
             log.info("Action execution stopped: {}", actionDescription);
             matches.setSuccess(false);
             // Rethrow to propagate the stop signal
             throw e;
         }
-        
+
         Duration duration = actionLifecycleManagement.getCurrentDuration(matches);
         matches.setDuration(duration);
-        if (FrameworkSettings.buildDataset) datasetManager.addSetOfData(matches);
-        // Removed direct console output - logging is handled by ActionLifecycleAspect which respects QUIET mode
-        // ConsoleReporter.println(actionConfig.getClass().getSimpleName() + " " + matches.getOutputText() + " " + matches.getSuccessSymbol());
+        if (FrameworkSettings.buildDataset)
+            datasetManager.addSetOfData(matches);
+        // Removed direct console output - logging is handled by ActionLifecycleAspect
+        // which respects QUIET mode
+        // ConsoleReporter.println(actionConfig.getClass().getSimpleName() + " " +
+        // matches.getOutputText() + " " + matches.getSuccessSymbol());
         if (objectCollections.length > 0) {
             LogData logData = actionLogger.logAction(sessionId, matches, objectCollections[0]);
         }
-        
+
         // Automatically update state memory when patterns are found
         // This ensures states are activated when their patterns are detected
         if (matches.isSuccess() && !matches.getMatchList().isEmpty()) {
             stateMemory.adjustActiveStatesWithMatches(matches);
         }
-        
+
         return matches;
     }
 
@@ -324,10 +387,12 @@ public class ActionExecution {
      * Prints action details for ActionConfig-based actions.
      */
     private void printActionConfig(ActionConfig actionConfig, ObjectCollection... objectCollections) {
-        // Disabled direct console output - logging is handled by ActionLifecycleAspect which respects QUIET mode
-        // Legacy direct console printing interferes with structured logging and QUIET mode
+        // Disabled direct console output - logging is handled by ActionLifecycleAspect
+        // which respects QUIET mode
+        // Legacy direct console printing interferes with structured logging and QUIET
+        // mode
     }
-    
+
     /**
      * Safely checks for pause points when an ExecutionController is available.
      * <p>
@@ -352,41 +417,41 @@ public class ActionExecution {
     /**
      * Handles logging before action execution begins.
      * 
-     * @param actionConfig The action configuration containing logging options
+     * @param actionConfig      The action configuration containing logging options
      * @param objectCollections The object collections involved in the action
      */
     private void handleBeforeActionLogging(ActionConfig actionConfig, ObjectCollection... objectCollections) {
-        if (actionConfig.getLoggingOptions() == null || 
-            !actionConfig.getLoggingOptions().isLogBeforeAction() ||
-            actionConfig.getLoggingOptions().getBeforeActionMessage() == null) {
+        if (actionConfig.getLoggingOptions() == null ||
+                !actionConfig.getLoggingOptions().isLogBeforeAction() ||
+                actionConfig.getLoggingOptions().getBeforeActionMessage() == null) {
             return;
         }
-        
-        String message = formatLogMessage(actionConfig.getLoggingOptions().getBeforeActionMessage(), 
-                                        null, objectCollections);
-        logMessage(message, actionConfig.getLoggingOptions().getBeforeActionLevel(), 
-                  actionConfig, null, objectCollections);
+
+        String message = formatLogMessage(actionConfig.getLoggingOptions().getBeforeActionMessage(),
+                null, objectCollections);
+        logMessage(message, actionConfig.getLoggingOptions().getBeforeActionLevel(),
+                actionConfig, null, objectCollections);
     }
-    
+
     /**
      * Handles logging after action execution completes.
      * 
-     * @param actionConfig The action configuration containing logging options
-     * @param actionResult The result of the action execution
+     * @param actionConfig      The action configuration containing logging options
+     * @param actionResult      The result of the action execution
      * @param objectCollections The object collections involved in the action
      */
     private void handleAfterActionLogging(ActionConfig actionConfig, ActionResult actionResult,
-                                         ObjectCollection... objectCollections) {
-        if (actionConfig.getLoggingOptions() == null || 
-            !actionConfig.getLoggingOptions().isLogAfterAction() ||
-            actionConfig.getLoggingOptions().getAfterActionMessage() == null) {
+            ObjectCollection... objectCollections) {
+        if (actionConfig.getLoggingOptions() == null ||
+                !actionConfig.getLoggingOptions().isLogAfterAction() ||
+                actionConfig.getLoggingOptions().getAfterActionMessage() == null) {
             return;
         }
-        
-        String message = formatLogMessage(actionConfig.getLoggingOptions().getAfterActionMessage(), 
-                                        actionResult, objectCollections);
-        logMessage(message, actionConfig.getLoggingOptions().getAfterActionLevel(), 
-                  actionConfig, actionResult, objectCollections);
+
+        String message = formatLogMessage(actionConfig.getLoggingOptions().getAfterActionMessage(),
+                actionResult, objectCollections);
+        logMessage(message, actionConfig.getLoggingOptions().getAfterActionLevel(),
+                actionConfig, actionResult, objectCollections);
     }
 
     /**
@@ -396,43 +461,43 @@ public class ActionExecution {
      * messages automatically, reducing boilerplate in application code.
      * </p>
      * 
-     * @param actionConfig The action configuration containing logging options
-     * @param actionResult The result of the action execution
+     * @param actionConfig      The action configuration containing logging options
+     * @param actionResult      The result of the action execution
      * @param objectCollections The object collections involved in the action
      */
-    private void handleAutomaticLogging(ActionConfig actionConfig, ActionResult actionResult, 
-                                       ObjectCollection... objectCollections) {
+    private void handleAutomaticLogging(ActionConfig actionConfig, ActionResult actionResult,
+            ObjectCollection... objectCollections) {
         if (actionConfig.getLoggingOptions() == null) {
             return; // No logging configured
         }
-        
+
         ActionConfig.LoggingOptions loggingOptions = actionConfig.getLoggingOptions();
-        
-        if (actionResult.isSuccess() && loggingOptions.isLogOnSuccess() && 
-            loggingOptions.getSuccessMessage() != null) {
+
+        if (actionResult.isSuccess() && loggingOptions.isLogOnSuccess() &&
+                loggingOptions.getSuccessMessage() != null) {
             // Log success message
-            String message = formatLogMessage(loggingOptions.getSuccessMessage(), 
-                                            actionResult, objectCollections);
-            logMessage(message, loggingOptions.getSuccessLevel(), actionConfig, 
-                      actionResult, objectCollections);
-        } else if (!actionResult.isSuccess() && loggingOptions.isLogOnFailure() && 
-                   loggingOptions.getFailureMessage() != null) {
+            String message = formatLogMessage(loggingOptions.getSuccessMessage(),
+                    actionResult, objectCollections);
+            logMessage(message, loggingOptions.getSuccessLevel(), actionConfig,
+                    actionResult, objectCollections);
+        } else if (!actionResult.isSuccess() && loggingOptions.isLogOnFailure() &&
+                loggingOptions.getFailureMessage() != null) {
             // Log failure message
-            String message = formatLogMessage(loggingOptions.getFailureMessage(), 
-                                            actionResult, objectCollections);
-            logMessage(message, loggingOptions.getFailureLevel(), actionConfig, 
-                      actionResult, objectCollections);
+            String message = formatLogMessage(loggingOptions.getFailureMessage(),
+                    actionResult, objectCollections);
+            logMessage(message, loggingOptions.getFailureLevel(), actionConfig,
+                    actionResult, objectCollections);
         }
     }
-    
+
     /**
      * Formats a log message with placeholders replaced by actual values.
      * Supports placeholders like {matchCount}, {duration}, {target}, etc.
      */
-    private String formatLogMessage(String template, ActionResult actionResult, 
-                                   ObjectCollection... objectCollections) {
+    private String formatLogMessage(String template, ActionResult actionResult,
+            ObjectCollection... objectCollections) {
         String message = template;
-        
+
         // Replace action result placeholders if result is available
         if (actionResult != null) {
             message = message.replace("{matchCount}", String.valueOf(actionResult.getMatchList().size()));
@@ -441,46 +506,47 @@ public class ActionExecution {
             }
             message = message.replace("{success}", String.valueOf(actionResult.isSuccess()));
         }
-        
+
         // Add target name if available
         if (objectCollections.length > 0 && !objectCollections[0].getStateImages().isEmpty()) {
             String targetName = objectCollections[0].getStateImages().get(0).getName();
             message = message.replace("{target}", targetName);
         }
-        
+
         // Add action type
         message = message.replace("{action}", getActionType(template));
-        
+
         return message;
     }
-    
+
     /**
      * Extracts action type from the class name or template.
      */
     private String getActionType(String template) {
-        // This is a placeholder - in practice, you'd extract from the ActionConfig class name
+        // This is a placeholder - in practice, you'd extract from the ActionConfig
+        // class name
         return "action";
     }
-    
+
     /**
      * Logs a message through the unified logging system.
      */
     private void logMessage(String message, io.github.jspinak.brobot.tools.logging.model.LogEventType logType,
-                           ActionConfig actionConfig, ActionResult actionResult, 
-                           ObjectCollection... objectCollections) {
+            ActionConfig actionConfig, ActionResult actionResult,
+            ObjectCollection... objectCollections) {
         // Determine the primary target for logging
         String targetName = "unknown";
         if (objectCollections.length > 0 && !objectCollections[0].getStateImages().isEmpty()) {
             targetName = objectCollections[0].getStateImages().get(0).getName();
         }
-        
+
         // Build log entry
         var logBuilder = brobotLogger.log()
-            .type(mapLogEventType(logType))
-            .action(actionConfig.getClass().getSimpleName().replace("Options", ""))
-            .target(targetName)
-            .observation(message);
-            
+                .type(mapLogEventType(logType))
+                .action(actionConfig.getClass().getSimpleName().replace("Options", ""))
+                .target(targetName)
+                .observation(message);
+
         // Add result-specific data if available
         if (actionResult != null) {
             logBuilder.success(actionResult.isSuccess());
@@ -489,10 +555,10 @@ public class ActionExecution {
             }
             logBuilder.metadata("matchCount", actionResult.getMatchList().size());
         }
-        
+
         logBuilder.log();
     }
-    
+
     /**
      * Maps LogEventType to unified LogEvent.Type
      */

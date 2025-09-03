@@ -1,10 +1,10 @@
 package io.github.jspinak.brobot.test.mock;
 
-import io.github.jspinak.brobot.config.FrameworkInitializer;
-import io.github.jspinak.brobot.config.BrobotProperties;
+import io.github.jspinak.brobot.config.core.FrameworkInitializer;
+import io.github.jspinak.brobot.startup.orchestration.FrameworkLifecycleManager;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
-import io.github.jspinak.brobot.config.FrameworkLifecycleManager;
 
 /**
  * Mock implementation of BrobotStartupLifecycle for tests.
@@ -14,25 +14,25 @@ import io.github.jspinak.brobot.config.FrameworkLifecycleManager;
 @Component
 @Primary
 public class MockBrobotStartupLifecycle extends FrameworkLifecycleManager {
-    
+
     private boolean running = false;
-    
+
     public MockBrobotStartupLifecycle(FrameworkInitializer initService) {
         super(initService, new BrobotProperties());
     }
-    
+
     @Override
     public void start() {
         // Skip SikuliX initialization in tests
         System.out.println("Mock Brobot startup lifecycle - skipping SikuliX initialization");
         running = true;
     }
-    
+
     @Override
     public void stop() {
         running = false;
     }
-    
+
     @Override
     public boolean isRunning() {
         return running;

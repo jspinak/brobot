@@ -1,14 +1,14 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Position;
 import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.config.ExecutionEnvironment;
+import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;

@@ -3,9 +3,10 @@ package io.github.jspinak.brobot.tools.testing.wrapper;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.config.ExecutionMode;
 import io.github.jspinak.brobot.tools.testing.mock.action.MockFind;
 import io.github.jspinak.brobot.action.internal.find.scene.ScenePatternMatcher;
+import io.github.jspinak.brobot.config.environment.ExecutionMode;
+
 import org.springframework.stereotype.Component;
 
 import java.util.List;
