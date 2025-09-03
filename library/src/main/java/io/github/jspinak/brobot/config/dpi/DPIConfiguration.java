@@ -45,7 +45,26 @@ public class DPIConfiguration {
         // Additional optimizations for DPI environments
         Settings.CheckLastSeen = true; // Performance optimization
         
+        // Log detailed settings for debugging
         System.out.println("Pattern resize factor: " + resizeFactor);
+        System.out.println("Settings.AlwaysResize applied: " + Settings.AlwaysResize);
+        System.out.println("Settings.MinSimilarity: " + Settings.MinSimilarity);
+        System.out.println("Settings.CheckLastSeen: " + Settings.CheckLastSeen);
+        
+        // Log what this means for pattern matching
+        if (resizeFactor != 1.0f) {
+            System.out.println("");
+            System.out.println("IMPORTANT: Patterns will be scaled during matching:");
+            System.out.println("  - Original pattern size will be multiplied by " + resizeFactor);
+            System.out.println("  - A 100x100 pattern will be matched as " + 
+                             (int)(100 * resizeFactor) + "x" + (int)(100 * resizeFactor));
+            if (resizeFactor < 1.0f) {
+                System.out.println("  - Patterns are being DOWNSCALED (display has higher DPI than pattern source)");
+            } else {
+                System.out.println("  - Patterns are being UPSCALED (display has lower DPI than pattern source)");
+            }
+        }
+        
         System.out.println("Configuration complete\n");
     }
     

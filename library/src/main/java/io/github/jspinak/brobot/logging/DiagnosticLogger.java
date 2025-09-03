@@ -134,41 +134,28 @@ public class DiagnosticLogger {
     public void logImageAnalysis(BufferedImage patternImg, BufferedImage sceneImg, String patternName) {
         VerbosityLevel level = getVerbosity();
         
-        // Only log in NORMAL and VERBOSE modes
-        if (level == VerbosityLevel.QUIET) {
+        // Only log in VERBOSE mode to reduce clutter
+        if (level != VerbosityLevel.VERBOSE) {
             return;
         }
         
-        ConsoleReporter.println("    [IMAGE ANALYSIS]");
-        
-        if (patternImg != null) {
-            String imageInfo = String.format("      Pattern: %dx%d type=%s bytes=%s",
+        if (patternImg != null && sceneImg != null) {
+            // Concise one-line comparison
+            String typeComparison = getImageType(patternImg.getType()).equals(getImageType(sceneImg.getType())) ?
+                getImageType(patternImg.getType()) :
+                getImageType(patternImg.getType()) + " vs " + getImageType(sceneImg.getType());
+            
+            ConsoleReporter.println(String.format("    [IMG] Pattern %dx%d, Scene %dx%d, Types: %s",
                 patternImg.getWidth(), patternImg.getHeight(),
-                getImageType(patternImg.getType()),
-                estimateImageSize(patternImg));
-            ConsoleReporter.println(imageInfo);
-            
-            // Analyze content
-            analyzeAndLogImageContent(patternImg, "Pattern", level);
-        } else {
-            ConsoleReporter.println("      Pattern image is NULL!");
-        }
-        
-        if (sceneImg != null) {
-            String imageInfo = String.format("      Scene: %dx%d type=%s bytes=%s",
                 sceneImg.getWidth(), sceneImg.getHeight(),
-                getImageType(sceneImg.getType()),
-                estimateImageSize(sceneImg));
-            ConsoleReporter.println(imageInfo);
+                typeComparison));
             
-            // Analyze content
-            analyzeAndLogImageContent(sceneImg, "Scene", level);
-        } else {
-            ConsoleReporter.println("      Scene image is NULL!");
+            // Only analyze content if there might be an issue
+            analyzeImageContentIfProblematic(patternImg, sceneImg);
         }
         
-        // Verbose mode adds more details
-        if (level == VerbosityLevel.VERBOSE && brobotLogger != null) {
+        // Still log to BrobotLogger in verbose mode
+        if (brobotLogger != null) {
             Map<String, Object> metadata = new HashMap<>();
             metadata.put("patternName", patternName);
             metadata.put("patternValid", patternImg != null);
@@ -194,30 +181,71 @@ public class DiagnosticLogger {
     }
     
     /**
+     * Only analyze and log image content if there's likely a problem
+     */
+    private void analyzeImageContentIfProblematic(BufferedImage patternImg, BufferedImage sceneImg) {
+        // Sample a few pixels to check for obvious problems
+        boolean patternIsBlack = isImageMostlyColor(patternImg, 0, 0, 0, 10);
+        boolean patternIsWhite = isImageMostlyColor(patternImg, 255, 255, 255, 245);
+        boolean sceneIsBlack = isImageMostlyColor(sceneImg, 0, 0, 0, 10);
+        boolean sceneIsWhite = isImageMostlyColor(sceneImg, 255, 255, 255, 245);
+        
+        if (patternIsBlack || patternIsWhite || sceneIsBlack || sceneIsWhite) {
+            String warning = "    [WARNING] ";
+            if (patternIsBlack) warning += "Pattern is BLACK ";
+            if (patternIsWhite) warning += "Pattern is WHITE ";
+            if (sceneIsBlack) warning += "Scene is BLACK ";
+            if (sceneIsWhite) warning += "Scene is WHITE ";
+            ConsoleReporter.println(warning.trim());
+        }
+    }
+    
+    /**
+     * Quick check if image is mostly a specific color
+     */
+    private boolean isImageMostlyColor(BufferedImage img, int targetR, int targetG, int targetB, int threshold) {
+        int sampleSize = Math.min(20, img.getWidth() * img.getHeight());
+        int matches = 0;
+        
+        for (int i = 0; i < sampleSize; i++) {
+            int x = (i * 7) % img.getWidth();
+            int y = ((i * 13) / img.getWidth()) % img.getHeight();
+            int rgb = img.getRGB(x, y);
+            
+            int r = (rgb >> 16) & 0xFF;
+            int g = (rgb >> 8) & 0xFF;
+            int b = rgb & 0xFF;
+            
+            if (Math.abs(r - targetR) <= threshold && 
+                Math.abs(g - targetG) <= threshold && 
+                Math.abs(b - targetB) <= threshold) {
+                matches++;
+            }
+        }
+        
+        return matches > (sampleSize * 0.8); // 80% threshold
+    }
+    
+    /**
      * Log similarity threshold analysis
      */
     public void logSimilarityAnalysis(String patternName, double[] thresholds, Double foundThreshold, Double foundScore) {
         VerbosityLevel level = getVerbosity();
         
-        if (level == VerbosityLevel.QUIET) {
+        // Only log in verbose mode
+        if (level != VerbosityLevel.VERBOSE) {
             return;
         }
         
-        ConsoleReporter.println("    [SIMILARITY ANALYSIS]");
-        
         if (foundThreshold != null && foundScore != null) {
-            ConsoleReporter.println(String.format("      Threshold %.1f: FOUND with score %.3f", 
+            ConsoleReporter.println(String.format("    [SIM] Found at %.1f with score %.3f", 
                 foundThreshold, foundScore));
         } else {
-            ConsoleReporter.println("      No match found at any threshold tested");
-            if (level == VerbosityLevel.VERBOSE) {
-                ConsoleReporter.println("      Tested thresholds: " + 
-                    java.util.Arrays.toString(thresholds));
-            }
+            ConsoleReporter.println("    [SIM] No match at tested thresholds");
         }
         
-        // Verbose logging
-        if (level == VerbosityLevel.VERBOSE && brobotLogger != null) {
+        // Still log to BrobotLogger
+        if (brobotLogger != null) {
             Map<String, Object> metadata = new HashMap<>();
             metadata.put("patternName", patternName);
             metadata.put("testedThresholds", thresholds);

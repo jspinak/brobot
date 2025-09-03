@@ -30,8 +30,7 @@ public class EventListenerConfiguration {
     
     @PostConstruct
     public void logEventConfiguration() {
-        log.info("[EVENT CONFIG] Event listener configuration initialized");
-        log.info("[EVENT CONFIG] Will create custom ApplicationEventMulticaster bean");
+        log.debug("Event listener configuration initialized");
     }
     
     /**
@@ -45,7 +44,7 @@ public class EventListenerConfiguration {
         // Use synchronous event publishing for initialization
         // This ensures that critical initialization events like StatesRegisteredEvent
         // are processed in order and complete before continuing
-        log.info("[EVENT CONFIG] Created synchronous ApplicationEventMulticaster for reliable initialization");
+        log.debug("Created synchronous ApplicationEventMulticaster");
         return multicaster;
     }
     
@@ -57,24 +56,15 @@ public class EventListenerConfiguration {
         @Override
         public void multicastEvent(org.springframework.context.ApplicationEvent event) {
             ResolvableType eventType = ResolvableType.forInstance(event);
-            log.debug("[EVENT DISPATCH] Broadcasting event: {} to {} listeners", 
-                eventType.getType().getTypeName(), 
-                getApplicationListeners(event, eventType).size());
-            
-            // Log specific details for StatesRegisteredEvent
-            if (event.getClass().getName().contains("StatesRegisteredEvent")) {
-                log.info("[EVENT DISPATCH] StatesRegisteredEvent being dispatched to {} listeners", 
+            // Only log at trace level to reduce noise
+            if (log.isTraceEnabled()) {
+                String eventName = event.getClass().getSimpleName();
+                log.trace("Broadcasting {} to {} listeners", 
+                    eventName, 
                     getApplicationListeners(event, eventType).size());
-                for (ApplicationListener<?> listener : getApplicationListeners(event, eventType)) {
-                    log.info("[EVENT DISPATCH]   -> Listener: {}", listener.getClass().getName());
-                }
             }
             
             super.multicastEvent(event);
-            
-            if (event.getClass().getName().contains("StatesRegisteredEvent")) {
-                log.info("[EVENT DISPATCH] StatesRegisteredEvent dispatch completed");
-            }
         }
         
         @Override
@@ -83,21 +73,19 @@ public class EventListenerConfiguration {
             String listenerName = listener.getClass().getSimpleName();
             String eventName = event.getClass().getSimpleName();
             
-            log.debug("[EVENT INVOKE] Invoking {} with {}", listenerName, eventName);
             long startTime = System.currentTimeMillis();
             
             try {
                 super.invokeListener(listener, event);
                 long duration = System.currentTimeMillis() - startTime;
                 
-                if (duration > 100) {
-                    log.warn("[EVENT INVOKE] Slow listener: {} took {}ms for {}", 
+                // Only warn about slow listeners
+                if (duration > 500) {
+                    log.warn("Slow event listener: {} took {}ms for {}", 
                         listenerName, duration, eventName);
-                } else {
-                    log.debug("[EVENT INVOKE] {} completed in {}ms", listenerName, duration);
                 }
             } catch (Exception e) {
-                log.error("[EVENT INVOKE] Error in listener {} handling {}", 
+                log.error("Error in listener {} handling {}", 
                     listenerName, eventName, e);
                 throw e; // Re-throw to maintain Spring's error handling
             }

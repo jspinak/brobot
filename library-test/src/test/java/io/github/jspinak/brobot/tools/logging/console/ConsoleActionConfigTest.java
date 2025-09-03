@@ -11,7 +11,6 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled("Integration test - should be in library-test module. Uses ApplicationContextRunner which creates Spring context.")
 @ExtendWith(MockitoExtension.class)
 public class ConsoleActionConfigTest extends BrobotTestBase {
     

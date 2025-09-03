@@ -82,69 +82,10 @@ public class AnnotationProcessor {
         log.info("Total states in StateService: {}", stateService.getAllStates().size());
         
         // Publish event to signal that states are registered
-        try {
-            log.info("[EVENT DEBUG] About to publish StatesRegisteredEvent with {} states and {} transitions", 
-                    stateMap.size(), transitionCount);
-            log.info("[EVENT DEBUG] EventPublisher is null? {}", eventPublisher == null);
-            
-            // List all known event listeners
-            log.info("[EVENT DEBUG] All beans with @Component annotation: {}", 
-                applicationContext.getBeansWithAnnotation(Component.class).keySet());
-            
-            StatesRegisteredEvent event = new StatesRegisteredEvent(this, stateMap.size(), transitionCount);
-            log.info("[EVENT DEBUG] Created event: {}", event);
-            
-            // Try a synchronous publish to see what happens
-            log.info("[EVENT DEBUG] Starting publishEvent call...");
-            
-            // Get all listeners for this event type
-            String[] listenerBeans = applicationContext.getBeanNamesForType(Object.class);
-            log.info("[EVENT DEBUG] Checking for StatesRegisteredEvent listeners...");
-            for (String beanName : listenerBeans) {
-                try {
-                    Object bean = applicationContext.getBean(beanName);
-                    java.lang.reflect.Method[] methods = bean.getClass().getDeclaredMethods();
-                    for (java.lang.reflect.Method method : methods) {
-                        if (method.isAnnotationPresent(EventListener.class)) {
-                            EventListener annotation = method.getAnnotation(EventListener.class);
-                            for (Class<?> eventType : annotation.value()) {
-                                if (eventType == StatesRegisteredEvent.class) {
-                                    log.info("[EVENT DEBUG] Found listener: {} in bean: {}", 
-                                        method.getName(), beanName);
-                                }
-                            }
-                        }
-                    }
-                } catch (Exception e) {
-                    // Skip beans that can't be introspected
-                }
-            }
-            
-            eventPublisher.publishEvent(event);
-            log.info("[EVENT DEBUG] publishEvent returned normally - event should have been delivered");
-            
-            // Small delay to ensure event processing
-            Thread.sleep(100);
-            
-            // Verify listeners were called
-            log.info("[EVENT DEBUG] Event publishing completed successfully");
-            
-            // Fallback: Try to call SearchRegionDependencyInitializer directly
-            try {
-                Object initializer = applicationContext.getBean("searchRegionDependencyInitializer");
-                if (initializer != null) {
-                    log.info("[EVENT DEBUG] Found SearchRegionDependencyInitializer bean, calling directly as fallback");
-                    java.lang.reflect.Method method = initializer.getClass().getMethod("onStatesRegistered", StatesRegisteredEvent.class);
-                    method.invoke(initializer, event);
-                    log.info("[EVENT DEBUG] Direct call to SearchRegionDependencyInitializer completed");
-                }
-            } catch (Exception fallbackEx) {
-                log.error("[EVENT DEBUG] Fallback direct call failed", fallbackEx);
-            }
-        } catch (Exception e) {
-            log.error("[EVENT DEBUG] Failed to publish StatesRegisteredEvent", e);
-            e.printStackTrace(); // Full stack trace
-        }
+        StatesRegisteredEvent event = new StatesRegisteredEvent(this, stateMap.size(), transitionCount);
+        eventPublisher.publishEvent(event);
+        log.debug("Published StatesRegisteredEvent with {} states and {} transitions", 
+                stateMap.size(), transitionCount);
     }
     
     private Map<Class<?>, Object> processStates() {
