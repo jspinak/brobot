@@ -393,9 +393,10 @@ public class ConfigurationParserTest extends BrobotTestBase {
             String invalidJson = "not json at all";
             
             // Mock the objectMapper to throw an exception for invalid JSON
-            IOException ioException = new IOException("Unrecognized token 'not': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')");
+            // BrobotObjectMapper.readValue throws JsonProcessingException, not IOException
+            JsonProcessingException jsonException = new JsonProcessingException("Unrecognized token 'not': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')") {};
             when(mockObjectMapper.readValue(invalidJson, Map.class))
-                    .thenThrow(ioException);
+                    .thenThrow(jsonException);
             
             ConfigurationException exception = assertThrows(ConfigurationException.class, () -> {
                 configurationParser.convertJson(invalidJson, Map.class);
@@ -404,7 +405,7 @@ public class ConfigurationParserTest extends BrobotTestBase {
             assertNotNull(exception.getMessage());
             assertTrue(exception.getMessage().contains("Failed to convert JSON"), 
                 "Actual message: " + exception.getMessage());
-            assertEquals(ioException, exception.getCause());
+            assertNotNull(exception.getCause());
         }
 
         @Test

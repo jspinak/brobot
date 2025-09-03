@@ -203,8 +203,8 @@ public class HighlightManagerTest extends BrobotTestBase {
         when(config.isEnabled()).thenReturn(true);
         when(config.isAutoHighlightFinds()).thenReturn(true);
         when(findConfig.isFlash()).thenReturn(true);
-        when(findConfig.getFlashCount()).thenReturn(3);
-        when(findConfig.getFlashInterval()).thenReturn(200L);
+        // Removed unused stubbing: when(findConfig.getFlashCount()).thenReturn(3);
+        // Removed unused stubbing: when(findConfig.getFlashInterval()).thenReturn(200L);
 
         List<Match> matches = Arrays.asList(
                 new Match.Builder()
