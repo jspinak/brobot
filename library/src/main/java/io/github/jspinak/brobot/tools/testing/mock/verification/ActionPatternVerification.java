@@ -38,6 +38,7 @@ public class ActionPatternVerification {
     private final List<ActionAttempt> attempts = new ArrayList<>();
     private VerificationResult result = VerificationResult.IN_PROGRESS;
     private final List<String> errors = new ArrayList<>();
+    private LocalDateTime firstEventTime = null;
     
     private ActionPatternVerification(String verificationId, ActionType targetAction,
                                      int maxAttempts, Duration backoffDuration, 
@@ -61,15 +62,28 @@ public class ActionPatternVerification {
             return; // Verification already completed
         }
         
-        // Check verification window
-        if (verificationWindow != null && 
-            Duration.between(startTime, LocalDateTime.now()).compareTo(verificationWindow) > 0) {
-            completeVerification();
-            return;
-        }
-        
+        // Skip non-matching events before checking window
         if (!event.isActionEvent() || !event.getAction().equals(targetAction)) {
             return; // Not the action we're monitoring
+        }
+        
+        // Track first event time for window calculation
+        if (firstEventTime == null) {
+            firstEventTime = event.getTimestamp();
+            // If this is the first event and we're already expired, complete immediately
+            if (isExpired()) {
+                completeVerification();
+                return;
+            }
+        } else {
+            // Check if verification window has expired based on event timestamps
+            if (verificationWindow != null) {
+                Duration elapsed = Duration.between(firstEventTime, event.getTimestamp());
+                if (elapsed.compareTo(verificationWindow) > 0) {
+                    completeVerification();
+                    return;
+                }
+            }
         }
         
         // Record this attempt
@@ -175,6 +189,21 @@ public class ActionPatternVerification {
      */
     public int getAttemptCount() {
         return attempts.size();
+    }
+    
+    /**
+     * Checks if the verification window has expired based on real time.
+     * This is used for timeout detection when no events are being received.
+     *
+     * @return true if the verification window has expired
+     */
+    public boolean isExpired() {
+        if (verificationWindow == null || result != VerificationResult.IN_PROGRESS) {
+            return false;
+        }
+        
+        Duration realTimeElapsed = Duration.between(startTime, LocalDateTime.now());
+        return realTimeElapsed.compareTo(verificationWindow) > 0;
     }
     
     /**

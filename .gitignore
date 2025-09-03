@@ -137,3 +137,17 @@ library/screenshots/null.png
 *-override.gradle
 coverage-config.gradle
 local-*.gradle
+
+# Test outputs and temporary files
+test_output.txt
+test-results-*.json
+library/TestSceneSerialize.java
+
+# Generated/scaled images (test artifacts)
+library/images-scaled/
+library/match-visualization/
+library/pattern-integrity-test/
+library/images/prompt/
+
+# Python analysis scripts (utility scripts)
+library/scripts/analyze-test-categories.py
