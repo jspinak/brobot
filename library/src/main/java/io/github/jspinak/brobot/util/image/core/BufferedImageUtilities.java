@@ -404,20 +404,17 @@ public class BufferedImageUtilities {
             // Use SikuliX Screen class which handles DPI scaling correctly
             // It captures at logical resolution which matches how patterns were captured
             Screen screen = new Screen();
-            ConsoleReporter.println("[SCREEN CAPTURE] Using SikuliX Screen (handles DPI scaling correctly)");
-
-            ConsoleReporter.println("[SCREEN CAPTURE] Attempting capture of region: " +
-                    region.x() + "," + region.y() + " " + region.w() + "x" + region.h());
-
+            
+            // Capture the screen region
             captured = screen.capture(region.sikuli()).getImage();
-            ConsoleReporter.println("[SCREEN CAPTURE] Captured " + captured.getWidth() + "x" + captured.getHeight() +
-                    " at logical resolution");
-
+            
             // Validate captured image
             if (captured != null) {
-                ConsoleReporter
-                        .println("[SCREEN CAPTURE] Success: " + captured.getWidth() + "x" + captured.getHeight() +
-                                " type=" + getImageTypeName(captured.getType()));
+                // Log capture info concisely on one line
+                ConsoleReporter.println(String.format("[CAPTURE] %dx%d region at (%d,%d) -> %dx%d %s",
+                    region.w(), region.h(), region.x(), region.y(),
+                    captured.getWidth(), captured.getHeight(),
+                    getImageTypeName(captured.getType())));
 
                 // Quick check if captured image is all black
                 int sampleCount = 10;
@@ -431,25 +428,18 @@ public class BufferedImageUtilities {
                 }
 
                 if (blackPixels == sampleCount) {
-                    ConsoleReporter.println("  -> WARNING: Captured image appears to be all black!");
-                    ConsoleReporter.println("  -> This may indicate screen capture is not working properly");
-                    ConsoleReporter.println("  -> Environment: " + System.getProperty("os.name") + " "
-                            + System.getProperty("os.version"));
-                    ConsoleReporter.println("  -> Display: " + System.getenv("DISPLAY"));
-                    ConsoleReporter.println("  -> Running in WSL: " + isRunningInWSL());
+                    ConsoleReporter.println("[CAPTURE WARNING] Black image - possible capture failure");
                     if (isRunningInWSL()) {
-                        ConsoleReporter.println("  -> NOTE: WSL2 cannot directly capture Windows screens");
-                        ConsoleReporter.println("  -> Consider running the application directly on Windows");
+                        ConsoleReporter.println("[CAPTURE NOTE] WSL2 cannot capture Windows screens directly");
                     }
                 }
             } else {
-                ConsoleReporter.println("[SCREEN CAPTURE] ERROR: Captured image is null!");
+                ConsoleReporter.println("[CAPTURE ERROR] null image returned");
             }
 
             return captured;
         } catch (Exception e) {
-            ConsoleReporter.println("[SCREEN CAPTURE] FAILED: " + e.getMessage());
-            e.printStackTrace();
+            ConsoleReporter.println("[CAPTURE FAILED] " + e.getMessage());
             // Return dummy image on capture failure
             BufferedImage dummy = new BufferedImage(region.w() > 0 ? region.w() : 1920,
                     region.h() > 0 ? region.h() : 1080,

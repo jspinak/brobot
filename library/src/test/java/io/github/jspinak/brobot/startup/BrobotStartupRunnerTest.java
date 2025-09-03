@@ -5,13 +5,14 @@ import io.github.jspinak.brobot.startup.orchestration.StartupRunner;
 import io.github.jspinak.brobot.startup.verification.InitialStateVerifier;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Timeout;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.ApplicationArguments;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -21,7 +22,6 @@ import static org.mockito.Mockito.*;
  * Tests application startup state verification.
  */
 @DisplayName("BrobotStartupRunner Tests")
-@Disabled("Test hangs - investigating Spring context initialization issue")
 public class BrobotStartupRunnerTest extends BrobotTestBase {
     
     @Mock
@@ -59,6 +59,7 @@ public class BrobotStartupRunnerTest extends BrobotTestBase {
     class InitialStateVerification {
         
         @Test
+        @Timeout(value = 5, unit = TimeUnit.SECONDS)
         @DisplayName("Should skip verification when no states configured")
         void shouldSkipVerificationWhenNoStatesConfigured() throws Exception {
             when(mockConfiguration.getInitialStates()).thenReturn(Collections.emptyList());
@@ -69,6 +70,7 @@ public class BrobotStartupRunnerTest extends BrobotTestBase {
         }
         
         @Test
+        @Timeout(value = 5, unit = TimeUnit.SECONDS)
         @DisplayName("Should verify configured states")
         void shouldVerifyConfiguredStates() throws Exception {
             when(mockConfiguration.getInitialStates())
@@ -87,6 +89,7 @@ public class BrobotStartupRunnerTest extends BrobotTestBase {
         }
         
         @Test
+        @Timeout(value = 5, unit = TimeUnit.SECONDS)
         @DisplayName("Should handle verification failure")
         void shouldHandleVerificationFailure() throws Exception {
             when(mockConfiguration.getInitialStates())
