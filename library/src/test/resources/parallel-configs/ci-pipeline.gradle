@@ -1,0 +1,102 @@
+/**
+ * Gradle configuration for CI/CD pipeline execution
+ * Optimized for containerized environments with limited resources
+ */
+
+test {
+    useJUnitPlatform {
+        // Focus on unit and fast integration tests in CI
+        includeTags 'unit', 'fast'
+        excludeTags 'slow', 'e2e', 'manual'
+    }
+    
+    // Conservative parallel settings for CI
+    maxParallelForks = Math.min(4, Runtime.runtime.availableProcessors())
+    forkEvery = 200  // New JVM every 200 tests to prevent memory issues
+    
+    // Memory settings for containers
+    minHeapSize = "256m"
+    maxHeapSize = "1536m"
+    jvmArgs = [
+        '-XX:+UseG1GC',
+        '-XX:MaxGCPauseMillis=200',
+        '-XX:+HeapDumpOnOutOfMemoryError',
+        '-XX:HeapDumpPath=build/heap-dumps/',
+        '-Dfile.encoding=UTF-8',
+        '-Duser.timezone=UTC'
+    ]
+    
+    // JUnit Platform configuration
+    systemProperty 'junit.jupiter.execution.parallel.enabled', 'true'
+    systemProperty 'junit.jupiter.execution.parallel.mode.default', 'concurrent'
+    systemProperty 'junit.jupiter.execution.parallel.mode.classes.default', 'same_thread'
+    systemProperty 'junit.jupiter.execution.parallel.config.strategy', 'fixed'
+    systemProperty 'junit.jupiter.execution.parallel.config.fixed.parallelism', '4'
+    systemProperty 'junit.jupiter.execution.parallel.config.fixed.max-pool-size', '8'
+    
+    // Timeouts for CI
+    systemProperty 'junit.jupiter.execution.timeout.default', '30s'
+    systemProperty 'junit.jupiter.execution.timeout.lifecycle.method.default', '2s'
+    systemProperty 'junit.jupiter.execution.timeout.testable.method.default', '30s'
+    
+    // Brobot specific settings for CI
+    systemProperty 'brobot.mock', 'true'
+    systemProperty 'brobot.test.mode', 'ci'
+    systemProperty 'brobot.save.snapshots', 'false'
+    systemProperty 'brobot.save.history', 'false'
+    systemProperty 'java.awt.headless', 'true'
+    
+    // Test reporting
+    testLogging {
+        events "failed", "standardError"
+        showExceptions true
+        showCauses true
+        showStackTraces true
+        exceptionFormat "full"
+        
+        // Summary at the end
+        afterSuite { desc, result ->
+            if (!desc.parent) {
+                println "\nTest Results:"
+                println "Tests run: ${result.testCount}"
+                println "Failures: ${result.failedTestCount}"
+                println "Skipped: ${result.skippedTestCount}"
+                println "Success rate: ${result.successRate * 100}%"
+                println "Time: ${result.endTime - result.startTime}ms"
+            }
+        }
+    }
+    
+    // Fail fast in CI
+    failFast = true
+    
+    // Test reports
+    reports {
+        junitXml.required = true
+        html.required = true
+    }
+}
+
+// Separate task for smoke tests
+task smokeTest(type: Test) {
+    useJUnitPlatform {
+        includeTags 'smoke'
+    }
+    maxParallelForks = 1
+    failFast = true
+    
+    testLogging {
+        events "passed", "failed"
+        showStandardStreams = false
+    }
+}
+
+// Task for critical path tests only
+task criticalTest(type: Test) {
+    useJUnitPlatform {
+        includeTags 'critical'
+    }
+    maxParallelForks = 2
+    forkEvery = 100
+    failFast = true
+}

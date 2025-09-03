@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.tools.testing.data;
 
 import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.state.StateString;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.*;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -100,18 +102,33 @@ public class TestDataBuilderTest extends BrobotTestBase {
         void shouldCreateLoginScenario() {
             // Act
             TestScenario.Builder builder = testDataBuilder.loginScenario();
+            TestScenario scenario = builder.build();
 
             // Assert
             assertNotNull(builder);
-            String name = (String) ReflectionTestUtils.getField(builder, "name");
-            assertEquals("login_flow", name);
+            assertNotNull(scenario);
+            assertEquals("login_flow", scenario.getName());
             
-            // Should have pre-configured elements (would need to build to verify)
-            Map<String, Object> images = (Map<String, Object>) 
-                ReflectionTestUtils.getField(builder, "stateImages");
-            if (images != null) {
-                assertTrue(images.size() >= 3); // username, password, login button
-            }
+            // Should have pre-configured elements
+            Map<String, StateImage> images = scenario.getStateImages();
+            assertNotNull(images);
+            assertEquals(3, images.size()); // username, password, login button
+            assertTrue(images.containsKey("username_field"));
+            assertTrue(images.containsKey("password_field"));
+            assertTrue(images.containsKey("login_button"));
+            
+            // Should have state strings
+            Map<String, StateString> strings = scenario.getStateStrings();
+            assertNotNull(strings);
+            assertEquals(2, strings.size());
+            assertTrue(strings.containsKey("username_text"));
+            assertTrue(strings.containsKey("password_text"));
+            
+            // Should have region
+            Map<String, Region> regions = scenario.getRegions();
+            assertNotNull(regions);
+            assertEquals(1, regions.size());
+            assertTrue(regions.containsKey("login_form"));
         }
 
         @Test
@@ -119,18 +136,31 @@ public class TestDataBuilderTest extends BrobotTestBase {
         void shouldCreateNavigationScenario() {
             // Act
             TestScenario.Builder builder = testDataBuilder.navigationScenario();
+            TestScenario scenario = builder.build();
 
             // Assert
             assertNotNull(builder);
-            String name = (String) ReflectionTestUtils.getField(builder, "name");
-            assertEquals("navigation_flow", name);
+            assertNotNull(scenario);
+            assertEquals("navigation_flow", scenario.getName());
             
             // Should have navigation elements
-            Map<String, Object> images = (Map<String, Object>) 
-                ReflectionTestUtils.getField(builder, "stateImages");
-            if (images != null) {
-                assertTrue(images.size() >= 3); // back, forward, menu buttons
-            }
+            Map<String, StateImage> images = scenario.getStateImages();
+            assertNotNull(images);
+            assertEquals(3, images.size()); // back, forward, menu buttons
+            assertTrue(images.containsKey("back_button"));
+            assertTrue(images.containsKey("forward_button"));
+            assertTrue(images.containsKey("menu_button"));
+            
+            // Should have navigation bar region
+            Map<String, Region> regions = scenario.getRegions();
+            assertNotNull(regions);
+            assertEquals(1, regions.size());
+            assertTrue(regions.containsKey("nav_bar"));
+            Region navBar = regions.get("nav_bar");
+            assertEquals(0, navBar.x());
+            assertEquals(0, navBar.y());
+            assertEquals(1200, navBar.w());
+            assertEquals(80, navBar.h());
         }
 
         @Test

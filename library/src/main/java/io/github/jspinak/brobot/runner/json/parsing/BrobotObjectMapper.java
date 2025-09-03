@@ -12,6 +12,7 @@ import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.element.SearchRegions;
+import io.github.jspinak.brobot.json.BrobotJacksonModule;
 import io.github.jspinak.brobot.runner.json.mixins.*;
 import io.github.jspinak.brobot.runner.json.module.BrobotJsonModule;
 
@@ -70,6 +71,7 @@ public class BrobotObjectMapper {
      * <li>Pretty printing - enables indented output</li>
      * <li>Java time support - handles LocalDateTime, Duration, etc.</li>
      * <li>Comment support - allows comments in JSON files</li>
+     * <li>Circular reference handling - prevents StackOverflowError</li>
      * <li>Custom module - registers Brobot-specific serializers/deserializers</li>
      * <li>Mixins - handles problematic third-party classes</li>
      * </ul>
@@ -88,12 +90,17 @@ public class BrobotObjectMapper {
     private com.fasterxml.jackson.databind.ObjectMapper configureObjectMapper(BrobotJsonModule brobotJsonModule) {
         com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        mapper.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false);
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         mapper.registerModule(new JavaTimeModule()); // For Java 8 date/time support
         mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
 
         // Register the BrobotJsonModule for custom serializers
         mapper.registerModule(brobotJsonModule);
+        
+        // Register our custom serializers for BufferedImage and Mat
+        mapper.registerModule(new BrobotJacksonModule());
 
         // Add mixins to handle problematic classes
         mapper.addMixIn(org.bytedeco.opencv.opencv_core.Mat.class, MatMixin.class);
@@ -112,7 +119,7 @@ public class BrobotObjectMapper {
         mapper.addMixIn(WritableRaster.class, WritableRasterMixin.class);
         mapper.addMixIn(ColorModel.class, ColorModelMixin.class);
         mapper.addMixIn(DataBuffer.class, DataBufferMixin.class);
-        mapper.addMixIn(Image.class, BrobotImageMixin.class);
+        mapper.addMixIn(io.github.jspinak.brobot.model.element.Image.class, BrobotImageMixin.class);
 
         return mapper;
     }

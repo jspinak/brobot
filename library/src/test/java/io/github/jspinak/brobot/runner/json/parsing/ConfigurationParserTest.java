@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.runner.json.parsing;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.model.element.Location;
@@ -54,6 +55,7 @@ public class ConfigurationParserTest extends BrobotTestBase {
     public void setupTest() {
         super.setupTest();
         MockitoAnnotations.openMocks(this);
+        // Create a real ConfigurationParser which will initialize fallbackMapper
         configurationParser = new ConfigurationParser(mockSchemaManager, mockObjectMapper);
     }
 
@@ -123,7 +125,8 @@ public class ConfigurationParserTest extends BrobotTestBase {
             when(mockObjectMapper.writeValueAsString(circularRef))
                     .thenThrow(new JsonProcessingException("Circular reference") {});
             
-            String json = configurationParser.toJsonSafe(circularRef);
+            // Use toJson which tries primary mapper first, then falls back
+            String json = configurationParser.toJson(circularRef);
             
             assertNotNull(json);
             // Should have attempted with main mapper first
@@ -140,7 +143,8 @@ public class ConfigurationParserTest extends BrobotTestBase {
             when(mockObjectMapper.writeValueAsString(options))
                     .thenReturn("{\"@type\":\"FIND\",\"doOnEach\":\"FIRST\"}");
             
-            String json = configurationParser.toJsonSafe(options);
+            // Use toJson to test the normal path
+            String json = configurationParser.toJson(options);
             
             assertNotNull(json);
             assertTrue(json.contains("FIRST"));
@@ -160,10 +164,11 @@ public class ConfigurationParserTest extends BrobotTestBase {
             when(mockObjectMapper.writeValueAsString(problematicObject))
                     .thenThrow(new JsonProcessingException("Error") {});
             
-            String json = configurationParser.toJsonSafe(problematicObject);
+            // Use toJson which will try primary mapper first, then fall back
+            String json = configurationParser.toJson(problematicObject);
             
             assertNotNull(json);
-            // Should have attempted serialization
+            // Should have attempted serialization with primary mapper
             verify(mockObjectMapper).writeValueAsString(problematicObject);
         }
     }
@@ -178,7 +183,10 @@ public class ConfigurationParserTest extends BrobotTestBase {
             Map<String, Object> data = new HashMap<>();
             data.put("test", "value");
             
-            when(mockObjectMapper.writeValueAsString(data))
+            ObjectWriter mockWriter = mock(ObjectWriter.class);
+            when(mockObjectMapper.writerWithDefaultPrettyPrinter())
+                    .thenReturn(mockWriter);
+            when(mockWriter.writeValueAsString(data))
                     .thenReturn("{\"test\":\"value\"}");
             
             File outputFile = tempDir.resolve("test.json").toFile();
@@ -227,7 +235,10 @@ public class ConfigurationParserTest extends BrobotTestBase {
             Map<String, Object> data = new HashMap<>();
             data.put("test", "value");
             
-            when(mockObjectMapper.writeValueAsString(data))
+            ObjectWriter mockWriter = mock(ObjectWriter.class);
+            when(mockObjectMapper.writerWithDefaultPrettyPrinter())
+                    .thenReturn(mockWriter);
+            when(mockWriter.writeValueAsString(data))
                     .thenReturn("{\"test\":\"value\"}");
             
             File nestedFile = tempDir.resolve("nested/dir/test.json").toFile();
@@ -403,7 +414,8 @@ public class ConfigurationParserTest extends BrobotTestBase {
             when(mockObjectMapper.writeValueAsString(deeplyNested))
                     .thenThrow(new JsonProcessingException("Deep nested error") {});
             
-            String result = configurationParser.toJsonSafe(deeplyNested);
+            // Use toJson which tries primary mapper first, then falls back
+            String result = configurationParser.toJson(deeplyNested);
             
             assertNotNull(result);
             // Should have attempted and handled the error

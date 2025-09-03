@@ -2,10 +2,9 @@ package io.github.jspinak.brobot.config;
 
 import org.sikuli.basics.Settings;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import jakarta.annotation.PostConstruct;
 
 /**
  * Configures DPI scaling for Brobot applications.
@@ -29,8 +28,10 @@ public class BrobotDPIConfiguration {
         this.dpiDetector = dpiDetector;
     }
     
-    @EventListener(ApplicationReadyEvent.class)
-    public void configureDPIScaling() {
+    @PostConstruct
+    public void configureDPIScalingEarly() {
+        // Configure DPI scaling IMMEDIATELY after bean construction
+        // This ensures Settings.AlwaysResize is set before ANY patterns are loaded
         System.out.println("\n=== Brobot DPI Configuration ===");
         
         // Configure similarity threshold

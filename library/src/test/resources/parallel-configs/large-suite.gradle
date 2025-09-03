@@ -1,0 +1,164 @@
+/**
+ * Gradle configuration for running the full 6000+ test suite
+ * Optimized for maximum throughput with stability
+ */
+
+test {
+    useJUnitPlatform()
+    
+    // Dynamic fork calculation based on test count and available resources
+    def cpuCores = Runtime.runtime.availableProcessors()
+    def testCount = 6000  // Approximate total tests
+    def testsPerFork = 250  // Optimal batch size
+    def optimalForks = Math.min(cpuCores, Math.ceil(testCount / testsPerFork))
+    
+    maxParallelForks = optimalForks
+    forkEvery = testsPerFork
+    
+    // Memory configuration for large test suite
+    def heapPerFork = 512  // MB per fork
+    def totalHeap = heapPerFork * optimalForks
+    minHeapSize = "${heapPerFork}m"
+    maxHeapSize = "${Math.min(totalHeap, 8192)}m"  // Cap at 8GB
+    
+    jvmArgs = [
+        '-XX:+UseG1GC',
+        '-XX:MaxGCPauseMillis=200',
+        '-XX:G1HeapRegionSize=32M',
+        '-XX:+ParallelRefProcEnabled',
+        '-XX:+UnlockExperimentalVMOptions',
+        '-XX:+UseStringDeduplication',
+        '-XX:+AlwaysPreTouch',
+        '-XX:+HeapDumpOnOutOfMemoryError',
+        '-XX:HeapDumpPath=build/heap-dumps/',
+        '-XX:ErrorFile=build/hs_err_pid%p.log',
+        '-Dfile.encoding=UTF-8',
+        '-Djava.awt.headless=true',
+        '-Dbrobot.mock=true'
+    ]
+    
+    // JUnit Platform configuration for large suite
+    systemProperty 'junit.jupiter.execution.parallel.enabled', 'true'
+    systemProperty 'junit.jupiter.execution.parallel.mode.default', 'concurrent'
+    systemProperty 'junit.jupiter.execution.parallel.mode.classes.default', 'concurrent'
+    systemProperty 'junit.jupiter.execution.parallel.config.strategy', 'fixed'
+    systemProperty 'junit.jupiter.execution.parallel.config.fixed.parallelism', "${optimalForks}"
+    systemProperty 'junit.jupiter.execution.parallel.config.fixed.max-pool-size', "${optimalForks * 2}"
+    
+    // Timeouts to prevent hanging
+    systemProperty 'junit.jupiter.execution.timeout.default', '1m'
+    systemProperty 'junit.jupiter.execution.timeout.thread.mode', 'SEPARATE_THREAD'
+    
+    // Test discovery optimization
+    systemProperty 'junit.jupiter.testclass.order.default', 'org.junit.jupiter.api.ClassOrderer$OrderAnnotation'
+    systemProperty 'junit.jupiter.testmethod.order.default', 'org.junit.jupiter.api.MethodOrderer$OrderAnnotation'
+    
+    // Logging configuration for large suite
+    testLogging {
+        events "failed"
+        showExceptions true
+        showCauses false
+        showStackTraces false
+        exceptionFormat "short"
+        
+        // Progress reporting every 100 tests
+        def testCounter = 0
+        afterTest { desc, result ->
+            testCounter++
+            if (testCounter % 100 == 0) {
+                println "Progress: ${testCounter} tests completed"
+            }
+        }
+        
+        // Final summary
+        afterSuite { desc, result ->
+            if (!desc.parent) {
+                def duration = (result.endTime - result.startTime) / 1000
+                println """
+                ===============================================
+                Test Suite Execution Summary
+                ===============================================
+                Total tests:     ${result.testCount}
+                Passed:          ${result.testCount - result.failedTestCount - result.skippedTestCount}
+                Failed:          ${result.failedTestCount}
+                Skipped:         ${result.skippedTestCount}
+                Success rate:    ${String.format("%.2f", result.successRate * 100)}%
+                Execution time:  ${duration}s
+                Throughput:      ${String.format("%.1f", result.testCount / duration)} tests/sec
+                Parallel forks:  ${maxParallelForks}
+                ===============================================
+                """
+            }
+        }
+    }
+    
+    // Don't fail fast - complete the entire suite
+    failFast = false
+    
+    // Test reports
+    reports {
+        junitXml.required = true
+        html.required = true
+    }
+}
+
+// Sharded test execution for distributed systems
+['shard1', 'shard2', 'shard3', 'shard4'].each { shardName ->
+    task "test${shardName.capitalize()}"(type: Test) {
+        useJUnitPlatform()
+        
+        def shardIndex = shardName[-1] as int
+        def totalShards = 4
+        
+        // Filter tests based on hash of class name
+        filter {
+            // Include tests where hash(className) % totalShards == shardIndex - 1
+            includeTest { descriptor ->
+                def hash = descriptor.className.hashCode()
+                (Math.abs(hash) % totalShards) == (shardIndex - 1)
+            }
+        }
+        
+        maxParallelForks = Runtime.runtime.availableProcessors()
+        
+        testLogging {
+            events "failed"
+            afterSuite { desc, result ->
+                if (!desc.parent) {
+                    println "Shard ${shardIndex}: ${result.testCount} tests, ${result.failedTestCount} failed"
+                }
+            }
+        }
+    }
+}
+
+// Task to run all shards in parallel
+task testSharded {
+    dependsOn tasks.findAll { it.name.startsWith('testShard') }
+    
+    doLast {
+        println "All shards completed"
+    }
+}
+
+// Batch execution with categories
+task testBatched {
+    doLast {
+        def batches = [
+            [tag: 'unit', forks: 8, timeout: '30s'],
+            [tag: 'integration', forks: 4, timeout: '2m'],
+            [tag: 'slow', forks: 2, timeout: '5m'],
+            [tag: 'e2e', forks: 1, timeout: '10m']
+        ]
+        
+        batches.each { batch ->
+            exec {
+                commandLine './gradlew', 'test',
+                    "--tests=**/*",
+                    "-Pinclude.tags=${batch.tag}",
+                    "-PmaxParallelForks=${batch.forks}",
+                    "-Pjunit.jupiter.execution.timeout.default=${batch.timeout}"
+            }
+        }
+    }
+}

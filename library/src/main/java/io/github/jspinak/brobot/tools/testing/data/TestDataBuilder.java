@@ -8,6 +8,7 @@ import io.github.jspinak.brobot.model.state.StateObjectMetadata;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Builder for structured test data with versioning and variation support.
@@ -41,7 +42,9 @@ import java.util.*;
 @Component
 public class TestDataBuilder {
     
-    private final Map<String, TestScenario> baselineScenarios = new HashMap<>();
+    private final Map<String, TestScenario> baselineScenarios = new ConcurrentHashMap<>();
+    private static final String NULL_KEY = "__null_key__";
+    private static final TestScenario NULL_SCENARIO = TestScenario.builder().name("__null_scenario__").build();
     
     /**
      * Creates a new test scenario builder with the specified name.
@@ -60,7 +63,9 @@ public class TestDataBuilder {
      * @return the baseline scenario or null if not found
      */
     public TestScenario getBaselineScenario(String name) {
-        return baselineScenarios.get(name);
+        String key = name == null ? NULL_KEY : name;
+        TestScenario scenario = baselineScenarios.get(key);
+        return scenario == NULL_SCENARIO ? null : scenario;
     }
     
     /**
@@ -70,7 +75,9 @@ public class TestDataBuilder {
      * @param scenario the scenario to store
      */
     void storeBaselineScenario(String name, TestScenario scenario) {
-        baselineScenarios.put(name, scenario);
+        String key = name == null ? NULL_KEY : name;
+        TestScenario value = scenario == null ? NULL_SCENARIO : scenario;
+        baselineScenarios.put(key, value);
     }
     
     /**

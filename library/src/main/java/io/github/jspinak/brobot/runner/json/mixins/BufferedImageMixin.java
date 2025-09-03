@@ -24,12 +24,13 @@ import java.awt.image.WritableRaster;
  * <li>propertyNames - Property name array</li>
  * <li>graphics - Graphics context</li>
  * <li>accelerationPriority - Hardware acceleration hint</li>
+ * <li>source - Image source (OffScreenImageSource) that causes serialization issues</li>
  * </ul>
  *
  * @see java.awt.image.BufferedImage
  * @see com.fasterxml.jackson.databind.ObjectMapper#addMixIn(Class, Class)
  */
-@JsonIgnoreProperties({"raster", "colorModel", "data", "properties", "propertyNames", "graphics", "accelerationPriority"})
+@JsonIgnoreProperties({"raster", "colorModel", "data", "properties", "propertyNames", "graphics", "accelerationPriority", "source"})
 public abstract class BufferedImageMixin {
     @JsonIgnore
     abstract public WritableRaster getRaster();

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import com.fasterxml.jackson.databind.ser.BeanSerializerFactory;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
@@ -46,5 +47,13 @@ public class ActionConfigSerializer extends StdSerializer<ActionConfig> {
         }
         
         gen.writeEndObject();
+    }
+    
+    @Override
+    public void serializeWithType(ActionConfig value, JsonGenerator gen, 
+            SerializerProvider provider, TypeSerializer typeSer) throws IOException {
+        // For polymorphic serialization, we handle type information ourselves
+        // by including the @type field in the serialized output
+        serialize(value, gen, provider);
     }
 }
