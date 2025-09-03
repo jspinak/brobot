@@ -1,7 +1,6 @@
 package io.github.jspinak.brobot.startup.orchestration;
 
 import org.sikuli.script.ImagePath;
-import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -17,7 +16,7 @@ import java.io.File;
  * - ImagePath configuration (prevents "not found" errors during State construction)
  */
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class BrobotApplicationContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+public class ApplicationContextInitializer implements org.springframework.context.ApplicationContextInitializer<ConfigurableApplicationContext> {
     
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
