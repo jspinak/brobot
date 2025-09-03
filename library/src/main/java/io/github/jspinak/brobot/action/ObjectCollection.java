@@ -69,7 +69,6 @@ public class ObjectCollection {
     private List<StateRegion> stateRegions = new ArrayList<>();
     private List<StateString> stateStrings = new ArrayList<>();
     
-    @JsonManagedReference("objectcollection-actionresult")
     private List<ActionResult> matches = new ArrayList<>();
     
     private List<Scene> scenes = new ArrayList<>();

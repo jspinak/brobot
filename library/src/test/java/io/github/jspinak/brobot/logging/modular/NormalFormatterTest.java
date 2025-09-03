@@ -360,6 +360,7 @@ public class NormalFormatterTest extends BrobotTestBase {
         assertNotNull(result);
         assertTrue(result.contains("\""));
         assertTrue(result.contains("...\""));  // Should be truncated
+        assertTrue(result.contains("completed"));
     }
     
     @Test
