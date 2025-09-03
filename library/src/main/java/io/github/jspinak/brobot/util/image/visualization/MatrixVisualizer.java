@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.util.image.visualization;
 
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
 import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
@@ -19,24 +19,33 @@ import static org.bytedeco.opencv.global.opencv_imgcodecs.imwrite;
 import static org.bytedeco.opencv.global.opencv_imgproc.*;
 
 /**
- * Visualization utilities for OpenCV Mat objects, primarily for debugging and testing.
+ * Visualization utilities for OpenCV Mat objects, primarily for debugging and
+ * testing.
  * <p>
- * This component provides methods to convert abstract Mat data into visual representations
- * suitable for human interpretation. It specializes in visualizing classification results,
+ * This component provides methods to convert abstract Mat data into visual
+ * representations
+ * suitable for human interpretation. It specializes in visualizing
+ * classification results,
  * score maps, and indexed data using color-coding techniques.
  * <p>
  * Key visualization techniques:
  * <ul>
- * <li><b>Score visualization</b>: Maps numerical scores to color intensity (brightness)</li>
- * <li><b>Index visualization</b>: Assigns unique colors to different class indices</li>
- * <li><b>Hue-based display</b>: Creates color images from single-channel hue data</li>
- * <li><b>Grayscale expansion</b>: Converts single-channel to 3-channel for saving</li>
+ * <li><b>Score visualization</b>: Maps numerical scores to color intensity
+ * (brightness)</li>
+ * <li><b>Index visualization</b>: Assigns unique colors to different class
+ * indices</li>
+ * <li><b>Hue-based display</b>: Creates color images from single-channel hue
+ * data</li>
+ * <li><b>Grayscale expansion</b>: Converts single-channel to 3-channel for
+ * saving</li>
  * </ul>
  * <p>
  * Color mapping strategies:
  * <ul>
- * <li>Scores: Low scores → bright colors, high scores → dark colors (inverted for visibility)</li>
- * <li>Indices: Automatic hue distribution across HSV spectrum (0-160 range)</li>
+ * <li>Scores: Low scores → bright colors, high scores → dark colors (inverted
+ * for visibility)</li>
+ * <li>Indices: Automatic hue distribution across HSV spectrum (0-160
+ * range)</li>
  * <li>Custom: User-provided color maps for specific visualizations</li>
  * </ul>
  * <p>
@@ -106,24 +115,25 @@ public class MatrixVisualizer {
      * <p>
      * Error handling: Returns early with console message if inputs are null/empty.
      *
-     * @param toShow the score matrix to visualize; can be single or multi-channel
-     * @param color the color profile providing hue and saturation values
+     * @param toShow   the score matrix to visualize; can be single or multi-channel
+     * @param color    the color profile providing hue and saturation values
      * @param filename base filename for saving (random number appended)
      */
     public void writeScoresHSV(Mat toShow, ColorStatistics color, String filename) {
         if (toShow == null || toShow.empty()) {
-            ConsoleReporter.println("MatrixVisualizer.writeHSV: toShow is null or empty for "+filename);
+            ConsoleReporter.println("MatrixVisualizer.writeHSV: toShow is null or empty for " + filename);
             return;
         }
         if (color == null) {
-            ConsoleReporter.println("MatrixVisualizer.writeHSV: color is null for "+filename);
+            ConsoleReporter.println("MatrixVisualizer.writeHSV: color is null for " + filename);
             return;
         }
         MatVector toShowChannels = new MatVector(toShow.channels());
         color.print();
         Mat ch1 = new Mat(toShow.size(), CV_8UC1, Scalar.all(color.getStat(HUE)));
         Mat ch2 = new Mat(toShow.size(), CV_8UC1, Scalar.all(color.getStat(SATURATION)));
-        Mat ch3; // this should be a 2d Mat with scores, but could also be 3d; in this case we take just the first channel
+        Mat ch3; // this should be a 2d Mat with scores, but could also be 3d; in this case we
+                 // take just the first channel
         if (toShow.channels() == 1) {
             ch3 = toShow;
         } else {
@@ -197,7 +207,8 @@ public class MatrixVisualizer {
      * message, this method handles grayscale conversion, not hue data.
      *
      * @param toShow single-channel grayscale Mat
-     * @return 3-channel BGR Mat with identical channels, or null if input is null/empty
+     * @return 3-channel BGR Mat with identical channels, or null if input is
+     *         null/empty
      */
     public Mat getBGRfromBW(Mat toShow) {
         if (toShow == null || toShow.empty()) {
@@ -240,10 +251,12 @@ public class MatrixVisualizer {
     }
 
     /**
-     * Creates a color visualization of classification indices with automatic color assignment.
+     * Creates a color visualization of classification indices with automatic color
+     * assignment.
      * <p>
      * Converts a matrix of class indices into a colorful BGR image where each
-     * unique index (except 0) is assigned a distinct color. Colors are automatically
+     * unique index (except 0) is assigned a distinct color. Colors are
+     * automatically
      * distributed across the hue spectrum based on the number of classes.
      * <p>
      * Color assignment:
@@ -271,7 +284,8 @@ public class MatrixVisualizer {
     }
 
     /**
-     * Creates a color visualization of classification indices with custom color mapping.
+     * Creates a color visualization of classification indices with custom color
+     * mapping.
      * <p>
      * Similar to the automatic version but allows precise control over the color
      * assigned to each index. Useful when specific colors have semantic meaning
@@ -289,13 +303,14 @@ public class MatrixVisualizer {
      * Performance note: Uses masking operations for each unique index,
      * which may be slow for images with many classes.
      *
-     * @param indexMat 2D Mat containing classification indices  
-     * @param colors map from index values to HSV color Scalars
+     * @param indexMat 2D Mat containing classification indices
+     * @param colors   map from index values to HSV color Scalars
      * @return BGR Mat with custom color-coded visualization
      */
     public Mat getBGRColorMatFromHSV2dIndexMat(Mat indexMat, Map<Integer, Scalar> colors) {
         Mat indexCh1 = new Mat(indexMat.size(), CV_8UC1);
-        if (indexMat.channels() > 1) indexCh1 = MatrixUtilities.getFirstChannel(indexMat);
+        if (indexMat.channels() > 1)
+            indexCh1 = MatrixUtilities.getFirstChannel(indexMat);
         List<Integer> indices = getIndicesExcluding0(indexCh1);
         Mat colorMat = new Mat(indexCh1.size(), CV_8UC3, new Scalar(0, 0, 0, 0));
         for (int i = 0; i < indices.size(); i++) {
@@ -323,9 +338,9 @@ public class MatrixVisualizer {
      * <p>
      * File naming: history/{filename}{random0-999}.png
      *
-     * @param mat the index matrix to visualize
+     * @param mat      the index matrix to visualize
      * @param filename base filename for the output
-     * @param hues map from index values to HSV colors
+     * @param hues     map from index values to HSV colors
      */
     public void writeIndices(Mat mat, String filename, Map<Integer, Scalar> hues) {
         ConsoleReporter.print("hues = ");
@@ -410,7 +425,7 @@ public class MatrixVisualizer {
             ConsoleReporter.println("MatrixVisualizer getBGRMat...: min or max is null");
             return indices;
         }
-        for (int i=(int)minMax[0]; i<=(int)minMax[1]; i++) {
+        for (int i = (int) minMax[0]; i <= (int) minMax[1]; i++) {
             if (i != 0 && MatrixUtilities.firstChannelContains(indicesMat, i)) {
                 indices.add(i);
             }
@@ -430,7 +445,7 @@ public class MatrixVisualizer {
      * This is the preferred method for saving visualizations as it ensures
      * unique filenames and consistent directory structure.
      *
-     * @param mat the Mat to save (any type/channels)
+     * @param mat      the Mat to save (any type/channels)
      * @param filename base filename without extension
      */
     public void writeMatToHistory(Mat mat, String filename) {

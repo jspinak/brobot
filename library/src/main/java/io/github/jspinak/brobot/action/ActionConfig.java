@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.action;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.LoggingOptions.LoggingOptionsBuilder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -353,8 +354,8 @@ public abstract class ActionConfig {
          * @param configurator A consumer that configures the LoggingOptions
          * @return The builder instance for chaining.
          */
-        public B withLogging(Consumer<LoggingOptions.LoggingOptionsBuilder> configurator) {
-            LoggingOptions.LoggingOptionsBuilder loggingBuilder = LoggingOptions.builder();
+        public B withLogging(Consumer<ActionConfig.LoggingOptions.LoggingOptionsBuilder> configurator) {
+            ActionConfig.LoggingOptions.LoggingOptionsBuilder loggingBuilder = ActionConfig.LoggingOptions.builder();
             // Copy existing values
             loggingBuilder.beforeActionMessage(this.loggingOptions.getBeforeActionMessage())
                     .afterActionMessage(this.loggingOptions.getAfterActionMessage())

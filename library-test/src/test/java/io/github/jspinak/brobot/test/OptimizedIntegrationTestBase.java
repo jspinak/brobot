@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.test;
 
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.test.config.OptimizedTestConfig;
 import io.github.jspinak.brobot.test.config.TestActionConfig;
 import io.github.jspinak.brobot.test.config.TestConfigurationManager;
@@ -28,24 +28,21 @@ import java.util.concurrent.TimeUnit;
  */
 @SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class)
 @ContextConfiguration(initializers = TestConfigurationManager.class)
-@Import({TestActionConfig.class, OptimizedTestConfig.class})
-@TestPropertySource(
-    locations = "classpath:application-test.properties",
-    properties = {
+@Import({ TestActionConfig.class, OptimizedTestConfig.class })
+@TestPropertySource(locations = "classpath:application-test.properties", properties = {
         "spring.main.allow-bean-definition-overriding=true",
         "spring.main.lazy-initialization=true",
         "logging.level.root=WARN",
         "logging.level.io.github.jspinak.brobot=INFO"
-    }
-)
+})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@ExtendWith({SpringExtension.class, OptimizedTestConfig.class})
-@Timeout(value = 5, unit = TimeUnit.MINUTES)  // Default 5-minute timeout per test
+@ExtendWith({ SpringExtension.class, OptimizedTestConfig.class })
+@Timeout(value = 5, unit = TimeUnit.MINUTES) // Default 5-minute timeout per test
 public abstract class OptimizedIntegrationTestBase {
-    
+
     private static boolean globalSetupComplete = false;
     private static final Object SETUP_LOCK = new Object();
-    
+
     @BeforeAll
     protected void globalSetup() {
         synchronized (SETUP_LOCK) {
@@ -56,17 +53,17 @@ public abstract class OptimizedIntegrationTestBase {
             }
         }
     }
-    
+
     @BeforeEach
     protected void testSetup() {
         // Minimal per-test setup
         ensureMockMode();
     }
-    
+
     private void optimizeFrameworkSettings() {
         // Enable mock mode for all tests
         FrameworkSettings.mock = true;
-        
+
         // Optimize timing for tests
         FrameworkSettings.mockTimeFindFirst = 0.005;
         FrameworkSettings.mockTimeFindAll = 0.01;
@@ -76,41 +73,43 @@ public abstract class OptimizedIntegrationTestBase {
         FrameworkSettings.mockTimeFindHistogram = 0.01;
         FrameworkSettings.mockTimeFindColor = 0.01;
         FrameworkSettings.mockTimeClassify = 0.015;
-        
+
         // Set screenshot paths for tests
         FrameworkSettings.screenshotPath = "library-test/screenshots/";
     }
-    
+
     private void ensureMockMode() {
         // Ensure mock mode is always enabled for integration tests
         if (!FrameworkSettings.mock) {
             FrameworkSettings.mock = true;
         }
     }
-    
+
     /**
      * Check if test environment is headless.
      */
     protected boolean isHeadlessEnvironment() {
-        return java.awt.GraphicsEnvironment.isHeadless() || 
-               System.getenv("BROBOT_FORCE_HEADLESS") != null;
+        return java.awt.GraphicsEnvironment.isHeadless() ||
+                System.getenv("BROBOT_FORCE_HEADLESS") != null;
     }
-    
+
     /**
      * Skip test if running in CI/CD environment.
      */
     protected boolean isCI() {
-        return System.getenv("CI") != null || 
-               System.getenv("GITHUB_ACTIONS") != null ||
-               System.getenv("JENKINS_HOME") != null;
+        return System.getenv("CI") != null ||
+                System.getenv("GITHUB_ACTIONS") != null ||
+                System.getenv("JENKINS_HOME") != null;
     }
-    
+
     /**
      * Get timeout multiplier for slower environments.
      */
     protected double getTimeoutMultiplier() {
-        if (isCI()) return 2.0;
-        if (isHeadlessEnvironment()) return 1.5;
+        if (isCI())
+            return 2.0;
+        if (isHeadlessEnvironment())
+            return 1.5;
         return 1.0;
     }
 }

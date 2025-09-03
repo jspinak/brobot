@@ -1,9 +1,10 @@
 package io.github.jspinak.brobot.tools.testing.wrapper;
 
 import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.config.ExecutionMode;
 import io.github.jspinak.brobot.tools.testing.mock.action.MockText;
 import io.github.jspinak.brobot.action.internal.text.GetTextWrapper;
+import io.github.jspinak.brobot.config.environment.ExecutionMode;
+
 import org.springframework.stereotype.Component;
 
 /**

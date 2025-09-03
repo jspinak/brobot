@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.action.basic.mouse;
 
 import io.github.jspinak.brobot.action.ActionConfig;
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import lombok.Getter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
@@ -12,7 +12,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Configuration for Move Mouse actions.
  * <p>
  * This class encapsulates parameters for controlling the mouse movement speed.
- * It is an immutable object and must be constructed using its inner {@link Builder}.
+ * It is an immutable object and must be constructed using its inner
+ * {@link Builder}.
  * <p>
  * This specialized configuration enhances API clarity by only exposing options
  * relevant to mouse movement.
@@ -44,7 +45,8 @@ public final class MouseMoveOptions extends ActionConfig {
          * Default constructor for creating a new MouseMoveOptions configuration.
          */
         @JsonCreator
-        public Builder() {}
+        public Builder() {
+        }
 
         /**
          * Creates a new Builder instance pre-populated with values from an existing

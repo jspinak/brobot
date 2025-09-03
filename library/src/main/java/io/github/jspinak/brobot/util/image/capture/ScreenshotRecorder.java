@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.util.image.capture;
 
 import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 import io.github.jspinak.brobot.util.file.SaveToFile;
 import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
@@ -15,20 +15,26 @@ import java.util.concurrent.TimeUnit;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
- * Manages continuous screenshot capture for various analysis and recording purposes.
+ * Manages continuous screenshot capture for various analysis and recording
+ * purposes.
  * <p>
  * This component provides two capture strategies:
  * <ol>
- * <li>Fixed-count capture: Takes a specific number of screenshots at regular intervals</li>
- * <li>Continuous capture: Runs indefinitely with scheduled intervals until stopped</li>
+ * <li>Fixed-count capture: Takes a specific number of screenshots at regular
+ * intervals</li>
+ * <li>Continuous capture: Runs indefinitely with scheduled intervals until
+ * stopped</li>
  * </ol>
  * <p>
  * Primary use cases:
  * <ul>
- * <li><b>State structure building</b>: Capture UI states for automated model creation</li>
- * <li><b>Remote development</b>: Record UI behavior in different environments</li>
+ * <li><b>State structure building</b>: Capture UI states for automated model
+ * creation</li>
+ * <li><b>Remote development</b>: Record UI behavior in different
+ * environments</li>
  * <li><b>Interaction analysis</b>: Study effects of user inputs over time</li>
- * <li><b>Machine learning</b>: Generate training data with regular time intervals</li>
+ * <li><b>Machine learning</b>: Generate training data with regular time
+ * intervals</li>
  * <li><b>Documentation</b>: Create visual records of application behavior</li>
  * </ul>
  * <p>
@@ -66,7 +72,8 @@ public class ScreenshotRecorder {
     private final TimeProvider time;
 
     /**
-     * Flag indicating capture status (currently unused but available for future enhancements).
+     * Flag indicating capture status (currently unused but available for future
+     * enhancements).
      */
     private volatile boolean isCapturing = false;
 
@@ -100,11 +107,12 @@ public class ScreenshotRecorder {
      * </ul>
      *
      * @param secondsToCapture total duration for capturing screenshots
-     * @param captureFrequency interval between captures in seconds (e.g., 0.5 = twice per second)
+     * @param captureFrequency interval between captures in seconds (e.g., 0.5 =
+     *                         twice per second)
      */
     public void capture(int secondsToCapture, double captureFrequency) {
         int numberOfScreenshots = (int) (secondsToCapture / captureFrequency);
-        for (int i=0; i<numberOfScreenshots; i++) {
+        for (int i = 0; i < numberOfScreenshots; i++) {
             time.wait(captureFrequency);
             // Capture full screen (empty Region = full screen)
             imageUtils.saveRegionToFile(new Region(),
@@ -122,14 +130,14 @@ public class ScreenshotRecorder {
      * Design rationale for time-based capture:
      * <ol>
      * <li><b>Prevents screenshot explosion</b>: Rapid user interactions
-     *     (mouse movements, key presses) could generate excessive screenshots</li>
+     * (mouse movements, key presses) could generate excessive screenshots</li>
      * <li><b>Enables smooth playback</b>: Regular intervals allow consistent
-     *     playback speed, including slow-motion analysis</li>
+     * playback speed, including slow-motion analysis</li>
      * <li><b>ML compatibility</b>: Provides regularized input/output pairs
-     *     where screenshots (inputs) map to user actions (outputs) within
-     *     fixed time windows</li>
+     * where screenshots (inputs) map to user actions (outputs) within
+     * fixed time windows</li>
      * <li><b>Simplifies synchronization</b>: Fixed intervals make it easier
-     *     to correlate screenshots with logged events</li>
+     * to correlate screenshots with logged events</li>
      * </ol>
      * <p>
      * Thread safety: Synchronized to prevent concurrent starts. However,
@@ -138,8 +146,10 @@ public class ScreenshotRecorder {
      * Warning: The SCHEDULER field is final and shutdown is permanent.
      * Multiple start/stop cycles will not work with current implementation.
      *
-     * @param saveToFile file saving implementation for captured screenshots
-     * @param baseFilename base name for screenshot files (timestamp will be appended)
+     * @param saveToFile          file saving implementation for captured
+     *                            screenshots
+     * @param baseFilename        base name for screenshot files (timestamp will be
+     *                            appended)
      * @param delayInMilliseconds interval between captures in milliseconds
      */
     public synchronized void startCapturing(SaveToFile saveToFile, String baseFilename, int delayInMilliseconds) {

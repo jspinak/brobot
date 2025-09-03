@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.startup;
 
+import io.github.jspinak.brobot.startup.orchestration.InitializationOrchestrator;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +23,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * and provides accurate status information.
  */
 @SpringBootTest(classes = {
-    BrobotInitializationOrchestrator.class,
-    BrobotInitializationOrchestrator.PhaseStatus.class
+    InitializationOrchestrator.class,
+    InitializationOrchestrator.PhaseStatus.class
 })
 public class BrobotInitializationOrchestratorTest extends BrobotTestBase {
     
     @Autowired
-    private BrobotInitializationOrchestrator orchestrator;
+    private InitializationOrchestrator orchestrator;
     
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -41,7 +42,7 @@ public class BrobotInitializationOrchestratorTest extends BrobotTestBase {
     @Test
     public void testInitializationPhases() {
         // Get the phase statuses
-        Map<String, BrobotInitializationOrchestrator.PhaseStatus> phases = orchestrator.getPhaseStatuses();
+        Map<String, InitializationOrchestrator.PhaseStatus> phases = orchestrator.getPhaseStatuses();
         
         // Verify that phases are tracked
         assertNotNull(phases, "Phase statuses should not be null");
@@ -50,7 +51,7 @@ public class BrobotInitializationOrchestratorTest extends BrobotTestBase {
         // Check for early core phase (created in @PostConstruct)
         assertTrue(phases.containsKey("early-core"), "Should have early-core phase");
         
-        BrobotInitializationOrchestrator.PhaseStatus earlyCore = phases.get("early-core");
+        InitializationOrchestrator.PhaseStatus earlyCore = phases.get("early-core");
         assertNotNull(earlyCore, "Early core phase should exist");
         assertEquals("Early Core Initialization", earlyCore.getName());
         assertEquals(0, earlyCore.getOrder());
@@ -69,8 +70,8 @@ public class BrobotInitializationOrchestratorTest extends BrobotTestBase {
     @Test
     public void testPhaseStatusTracking() {
         // Create a new phase status
-        BrobotInitializationOrchestrator.PhaseStatus testPhase = 
-            new BrobotInitializationOrchestrator.PhaseStatus("Test Phase", 99);
+        InitializationOrchestrator.PhaseStatus testPhase = 
+            new InitializationOrchestrator.PhaseStatus("Test Phase", 99);
         
         // Verify initial state
         assertFalse(testPhase.isCompleted());
@@ -96,7 +97,7 @@ public class BrobotInitializationOrchestratorTest extends BrobotTestBase {
         orchestrator.resetInitialization();
         
         // Verify reset
-        Map<String, BrobotInitializationOrchestrator.PhaseStatus> phases = orchestrator.getPhaseStatuses();
+        Map<String, InitializationOrchestrator.PhaseStatus> phases = orchestrator.getPhaseStatuses();
         assertTrue(phases.isEmpty(), "Phases should be cleared after reset");
         
         Map<String, Object> status = orchestrator.getInitializationStatus();

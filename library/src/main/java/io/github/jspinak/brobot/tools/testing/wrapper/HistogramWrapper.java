@@ -3,9 +3,10 @@ package io.github.jspinak.brobot.tools.testing.wrapper;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.config.ExecutionMode;
 import io.github.jspinak.brobot.tools.testing.mock.action.MockHistogram;
 import io.github.jspinak.brobot.analysis.histogram.SingleRegionHistogramExtractor;
+import io.github.jspinak.brobot.config.environment.ExecutionMode;
+
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 

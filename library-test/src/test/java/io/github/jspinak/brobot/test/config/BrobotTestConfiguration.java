@@ -10,7 +10,7 @@ import io.github.jspinak.brobot.action.basic.type.TypeText;
 import io.github.jspinak.brobot.action.basic.wait.WaitVanish;
 import io.github.jspinak.brobot.action.composite.drag.Drag;
 import io.github.jspinak.brobot.action.internal.execution.ActionChainExecutor;
-import io.github.jspinak.brobot.config.MockModeManager;
+import io.github.jspinak.brobot.config.mock.MockModeManager;
 import io.github.jspinak.brobot.core.services.ScreenCaptureService;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;

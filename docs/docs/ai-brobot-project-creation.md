@@ -784,7 +784,7 @@
    ```java
    import org.springframework.boot.context.event.ApplicationReadyEvent;
    import org.springframework.context.event.EventListener;
-   import io.github.jspinak.brobot.config.FrameworkInitializer;
+   import io.github.jspinak.brobot.config.core.FrameworkInitializer;
    
    @Component
    @RequiredArgsConstructor

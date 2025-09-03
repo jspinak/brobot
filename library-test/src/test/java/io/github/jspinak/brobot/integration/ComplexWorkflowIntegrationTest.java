@@ -6,7 +6,7 @@ import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
-import io.github.jspinak.brobot.config.MockModeManager;
+import io.github.jspinak.brobot.config.mock.MockModeManager;
 import io.github.jspinak.brobot.model.element.*;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.*;

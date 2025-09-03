@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.model.state;
 
 import io.github.jspinak.brobot.analysis.color.kmeans.KmeansProfilesAllSchemas;
-import io.github.jspinak.brobot.config.MockModeManager;
+import io.github.jspinak.brobot.config.mock.MockModeManager;
 import io.github.jspinak.brobot.model.action.ActionHistory;
 import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.model.element.*;

@@ -1,9 +1,10 @@
 package io.github.jspinak.brobot.test;
 
-import io.github.jspinak.brobot.config.MockModeManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.github.jspinak.brobot.config.mock.MockModeManager;
 
 /**
  * Base class for integration tests.

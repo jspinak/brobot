@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.runner;
 
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.runner.dsl.InstructionSet;
 import io.github.jspinak.brobot.runner.project.AutomationProjectManager;
 import io.github.jspinak.brobot.runner.dsl.BusinessTask;

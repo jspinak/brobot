@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.click;
 
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.basic.find.Find;
 import io.github.jspinak.brobot.action.internal.mouse.MoveMouseWrapper;
@@ -32,8 +32,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class,
-    properties = {
+@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class, properties = {
         "brobot.gui-access.continue-on-error=true",
         "brobot.gui-access.check-on-startup=false",
         "java.awt.headless=true",
@@ -41,9 +40,9 @@ import static org.mockito.Mockito.*;
         "brobot.test.type=unit",
         "brobot.capture.physical-resolution=false",
         "brobot.mock.enabled=true"
-    })
-@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class,
-         io.github.jspinak.brobot.test.config.TestApplicationConfiguration.class})
+})
+@Import({ MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class,
+        io.github.jspinak.brobot.test.config.TestApplicationConfiguration.class })
 @ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 class ClickIntegrationTest {
 
@@ -72,7 +71,8 @@ class ClickIntegrationTest {
     @BeforeEach
     void setUp() {
         originalMockState = FrameworkSettings.mock;
-        // ** FIX: Force the test to run in MOCK mode to avoid SikuliX headless issues **
+        // ** FIX: Force the test to run in MOCK mode to avoid SikuliX headless issues
+        // **
         FrameworkSettings.mock = true;
 
         // Since find.perform is a void method that modifies its arguments,
@@ -87,7 +87,7 @@ class ClickIntegrationTest {
             return null; // void methods must return null
         }).when(find).perform(any(ActionResult.class), any(ObjectCollection[].class));
     }
-    
+
     @AfterEach
     void tearDown() {
         FrameworkSettings.mock = originalMockState;
@@ -105,7 +105,7 @@ class ClickIntegrationTest {
 
         // Verification
         Assertions.assertTrue(result.isSuccess());
-        
+
         // In mock mode, the wrapper methods are not called
         if (!FrameworkSettings.mock) {
             verify(moveMouseWrapper).move(any(Location.class));
@@ -127,7 +127,7 @@ class ClickIntegrationTest {
 
         // Verification
         Assertions.assertTrue(result.isSuccess());
-        
+
         // In mock mode, the wrapper methods are not called
         if (!FrameworkSettings.mock) {
             verify(moveMouseWrapper).move(any(Location.class));
@@ -150,7 +150,7 @@ class ClickIntegrationTest {
 
         // Verification
         Assertions.assertTrue(result.isSuccess());
-        
+
         // In mock mode, only the after-click move is called
         if (FrameworkSettings.mock) {
             ArgumentCaptor<Location> locationCaptor = ArgumentCaptor.forClass(Location.class);
@@ -160,7 +160,7 @@ class ClickIntegrationTest {
             verify(moveMouseWrapper, times(2)).move(any(Location.class));
         }
     }
-    
+
     @Test
     void perform_multipleClicks_shouldCallClickMethodsCorrectly() {
         // Setup - 3 clicks
@@ -174,7 +174,7 @@ class ClickIntegrationTest {
 
         // Verification
         Assertions.assertTrue(result.isSuccess());
-        
+
         // In mock mode, the wrapper methods are not called
         if (!FrameworkSettings.mock) {
             verify(moveMouseWrapper).move(any(Location.class));

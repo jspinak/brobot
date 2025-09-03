@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.util.image.io;
 
 import io.github.jspinak.brobot.model.element.Scene;
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 
 import org.springframework.stereotype.Component;
 
@@ -130,7 +130,7 @@ public class SceneCreator {
      */
     private static boolean isImageFile(Path path) {
         String filename = path.getFileName().toString().toLowerCase();
-        return filename.endsWith(".png") || filename.endsWith(".jpg") || filename.endsWith(".jpeg") || filename.endsWith(".bmp") || filename.endsWith(".gif");
+        return filename.endsWith(".png") || filename.endsWith(".jpg") || filename.endsWith(".jpeg")
+                || filename.endsWith(".bmp") || filename.endsWith(".gif");
     }
 }
-

@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.core.services;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -118,10 +118,10 @@ public class SikuliMouseControllerIT extends BrobotTestBase {
     void testGetPosition() {
         // Move to a known position first
         mouseController.moveTo(300, 400);
-        
+
         // Get position (in mock mode, this might return a default or last set position)
         int[] position = mouseController.getPosition();
-        
+
         // In mock mode, position might be null or a default value
         // We just verify it doesn't throw an exception
         // The actual position verification depends on the mock implementation
@@ -137,7 +137,7 @@ public class SikuliMouseControllerIT extends BrobotTestBase {
         for (int i = 0; i < 10; i++) {
             boolean moveResult = mouseController.moveTo(i * 10, i * 10);
             assertTrue(moveResult, "Move " + i + " should succeed");
-            
+
             boolean clickResult = mouseController.click(i * 10, i * 10, MouseController.MouseButton.LEFT);
             assertTrue(clickResult, "Click " + i + " should succeed");
         }
@@ -149,12 +149,12 @@ public class SikuliMouseControllerIT extends BrobotTestBase {
         // Test zero coordinates
         assertTrue(mouseController.moveTo(0, 0));
         assertTrue(mouseController.click(0, 0, MouseController.MouseButton.LEFT));
-        
+
         // Test negative coordinates (should handle gracefully)
         boolean negativeMove = mouseController.moveTo(-10, -10);
         // Implementation might reject negative coords or handle them
         assertNotNull(negativeMove);
-        
+
         // Test large coordinates
         assertTrue(mouseController.moveTo(10000, 10000));
     }
@@ -166,7 +166,7 @@ public class SikuliMouseControllerIT extends BrobotTestBase {
         int threadCount = 5;
         Thread[] threads = new Thread[threadCount];
         boolean[] results = new boolean[threadCount];
-        
+
         for (int i = 0; i < threadCount; i++) {
             final int index = i;
             threads[i] = new Thread(() -> {
@@ -174,12 +174,12 @@ public class SikuliMouseControllerIT extends BrobotTestBase {
             });
             threads[i].start();
         }
-        
+
         // Wait for all threads to complete
         for (Thread thread : threads) {
             thread.join(1000);
         }
-        
+
         // All operations should succeed in mock mode
         for (boolean result : results) {
             assertTrue(result, "Concurrent operation should succeed");

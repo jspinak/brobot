@@ -1,8 +1,9 @@
 package io.github.jspinak.brobot.logging.unified.console;
 
+import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
+import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig.VerbosityLevel;
 import io.github.jspinak.brobot.logging.unified.LogEvent;
-import io.github.jspinak.brobot.config.LoggingVerbosityConfig;
-import io.github.jspinak.brobot.config.LoggingVerbosityConfig.VerbosityLevel;
+
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;

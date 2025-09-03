@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.manageStates;
 
-import io.github.jspinak.brobot.config.ExecutionEnvironment;
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.navigation.service.StateTransitionService;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 import io.github.jspinak.brobot.test.HeadlessTestConfiguration;
@@ -28,13 +28,13 @@ public class PathTests extends BrobotIntegrationTestBase {
     public static void setupHeadlessMode() {
         System.setProperty("java.awt.headless", "true");
     }
-    
+
     @BeforeEach
     @Override
     protected void setUpBrobotEnvironment() {
         // Configure for mock mode since we don't need real images for path testing
         ExecutionEnvironment env = ExecutionEnvironment.builder()
-                .mockMode(true)  // Use mock mode since we don't need real images
+                .mockMode(true) // Use mock mode since we don't need real images
                 .forceHeadless(true)
                 .allowScreenCapture(false)
                 .verboseLogging(false)

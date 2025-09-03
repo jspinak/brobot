@@ -1,10 +1,9 @@
 package io.github.jspinak.brobot.action.basic.click;
 import io.github.jspinak.brobot.action.ActionType;
-import io.github.jspinak.brobot.config.MockModeManager;
-
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.config.mock.MockModeManager;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;

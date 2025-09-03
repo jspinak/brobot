@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.test.mock;
 
-import io.github.jspinak.brobot.config.LoggingVerbosityConfig;
+import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.logging.unified.*;
 import io.github.jspinak.brobot.logging.unified.console.ConsoleFormatter;
 import io.github.jspinak.brobot.test.logging.TestLoggerFactory;

@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.test;
 
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 // Removed: ObjectActionOptions no longer exists
 import io.github.jspinak.brobot.model.action.ActionRecord;
 import io.github.jspinak.brobot.model.match.Match;

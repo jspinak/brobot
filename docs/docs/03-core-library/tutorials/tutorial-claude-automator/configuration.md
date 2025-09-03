@@ -65,7 +65,7 @@ import com.claude.automator.states.PromptState;
 import com.claude.automator.states.WorkingState;
 import com.claude.automator.transitions.PromptTransitions;
 import com.claude.automator.transitions.WorkingTransitions;
-import io.github.jspinak.brobot.config.FrameworkInitializer;
+import io.github.jspinak.brobot.config.core.FrameworkInitializer;
 import io.github.jspinak.brobot.model.transition.StateTransitionStore;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.statemanagement.StateMemory;

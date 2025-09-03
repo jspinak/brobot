@@ -1,5 +1,10 @@
 package io.github.jspinak.brobot.config;
 
+import io.github.jspinak.brobot.config.core.BrobotConfiguration;
+import io.github.jspinak.brobot.config.core.ImagePathManager;
+import io.github.jspinak.brobot.config.core.SmartImageLoader;
+import io.github.jspinak.brobot.config.environment.ConfigurationDiagnostics;
+import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.*;
 

@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.navigation;
 
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.navigation.transition.StateNavigator;
 import io.github.jspinak.brobot.navigation.transition.StateTransitions;
 import io.github.jspinak.brobot.navigation.transition.JavaStateTransition;

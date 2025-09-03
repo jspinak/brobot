@@ -5,7 +5,7 @@ import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.tools.history.IllustrationController;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.tools.testing.mock.action.MockDrag;
@@ -16,11 +16,14 @@ import org.sikuli.script.FindFailed;
 import org.springframework.stereotype.Component;
 
 /**
- * Provides drag-and-drop functionality between locations with configurable timing and mock support.
+ * Provides drag-and-drop functionality between locations with configurable
+ * timing and mock support.
  * <p>
  * This wrapper abstracts Sikuli's drag-and-drop operations, enabling controlled
- * dragging from one {@link Location} to another. It supports fine-grained timing
- * control at each stage of the drag operation (mouse down, drag movement, mouse up)
+ * dragging from one {@link Location} to another. It supports fine-grained
+ * timing
+ * control at each stage of the drag operation (mouse down, drag movement, mouse
+ * up)
  * to ensure compatibility with various applications that may have different
  * responsiveness requirements.
  * <p>
@@ -65,8 +68,9 @@ public class DragCoordinateCalculator {
      * catches {@link FindFailed} exceptions that may occur during the operation.
      * 
      * @param from The starting location for the drag
-     * @param to The destination location for the drag
-     * @return {@code true} if the drag succeeded, {@code false} if FindFailed occurred
+     * @param to   The destination location for the drag
+     * @return {@code true} if the drag succeeded, {@code false} if FindFailed
+     *         occurred
      */
     private boolean drag(Location from, Location to) {
         try {
@@ -100,26 +104,31 @@ public class DragCoordinateCalculator {
      * <li>Pause after mouse up (post-action delay)</li>
      * </ol>
      * 
-     * @param from The starting location for the drag. Must not be null.
-     * @param to The destination location for the drag. Must not be null.
-     * @param actionConfig Configuration containing all timing parameters for the drag stages.
+     * @param from         The starting location for the drag. Must not be null.
+     * @param to           The destination location for the drag. Must not be null.
+     * @param actionConfig Configuration containing all timing parameters for the
+     *                     drag stages.
      * @return {@code true} if the drag completed successfully (or was mocked),
      *         {@code false} if the drag operation failed.
-     *         
-     * @implNote This method modifies global Sikuli settings. While these are set before
-     *           each drag, be aware that they affect all Sikuli operations until changed.
+     * 
+     * @implNote This method modifies global Sikuli settings. While these are set
+     *           before
+     *           each drag, be aware that they affect all Sikuli operations until
+     *           changed.
      */
-    // Removed duplicate drag(ActionConfig) method - use the one below that properly handles ActionConfig types
-    
+    // Removed duplicate drag(ActionConfig) method - use the one below that properly
+    // handles ActionConfig types
+
     /**
      * Executes a drag-and-drop operation using DragOptions configuration.
      * <p>
-     * This method performs a complete drag-and-drop sequence using the new ActionConfig
+     * This method performs a complete drag-and-drop sequence using the new
+     * ActionConfig
      * API. It extracts timing parameters from the DragOptions and its contained
      * MousePressOptions.
      * 
-     * @param from The starting location for the drag. Must not be null.
-     * @param to The destination location for the drag. Must not be null.
+     * @param from        The starting location for the drag. Must not be null.
+     * @param to          The destination location for the drag. Must not be null.
      * @param dragOptions Configuration containing timing and mouse button settings.
      * @return {@code true} if the drag completed successfully (or was mocked),
      *         {@code false} if the drag operation failed.
@@ -127,35 +136,40 @@ public class DragCoordinateCalculator {
     public boolean drag(Location from, Location to, DragOptions dragOptions) {
         ConsoleReporter.format(ConsoleReporter.OutputLevel.HIGH, "drag %d.%d to %d.%d ",
                 from.getCalculatedX(), from.getCalculatedY(), to.getCalculatedX(), to.getCalculatedY());
-        if (FrameworkSettings.mock) return mock.drag();
-        
+        if (FrameworkSettings.mock)
+            return mock.drag();
+
         // Extract timing from MousePressOptions and DragOptions
         Settings.DelayBeforeMouseDown = dragOptions.getMousePressOptions().getPauseBeforeMouseDown();
         Settings.DelayBeforeDrag = dragOptions.getDelayBetweenMouseDownAndMove();
         Settings.MoveMouseDelay = FrameworkSettings.moveMouseDelay; // Use default as DragOptions doesn't have this
         Settings.DelayBeforeDrop = dragOptions.getMousePressOptions().getPauseBeforeMouseUp();
-        
-        if (!drag(from, to)) return false;
+
+        if (!drag(from, to))
+            return false;
         time.wait(dragOptions.getDelayAfterDrag());
         return true;
     }
-    
+
     /**
      * Executes a drag-and-drop operation using ActionConfig.
      * <p>
-     * This method provides support for ActionConfig types. Currently only DragOptions
+     * This method provides support for ActionConfig types. Currently only
+     * DragOptions
      * is supported as ActionOptions doesn't extend ActionConfig.
      * 
-     * @param from The starting location for the drag.
-     * @param to The destination location for the drag.
+     * @param from         The starting location for the drag.
+     * @param to           The destination location for the drag.
      * @param actionConfig Configuration for the drag operation.
-     * @return {@code true} if the drag completed successfully, {@code false} otherwise.
+     * @return {@code true} if the drag completed successfully, {@code false}
+     *         otherwise.
      */
     public boolean drag(Location from, Location to, ActionConfig actionConfig) {
         if (actionConfig instanceof DragOptions) {
             return drag(from, to, (DragOptions) actionConfig);
         } else {
-            ConsoleReporter.println("Unsupported ActionConfig type for drag: " + actionConfig.getClass().getSimpleName());
+            ConsoleReporter
+                    .println("Unsupported ActionConfig type for drag: " + actionConfig.getClass().getSimpleName());
             return false;
         }
     }

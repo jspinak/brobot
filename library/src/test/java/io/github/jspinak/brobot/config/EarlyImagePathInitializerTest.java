@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.config;
 
+import io.github.jspinak.brobot.config.core.BrobotProperties;
+import io.github.jspinak.brobot.config.core.EarlyImagePathInitializer;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

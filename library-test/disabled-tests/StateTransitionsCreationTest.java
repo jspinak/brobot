@@ -1,4 +1,5 @@
 package io.github.jspinak.brobot.manageStates;
+
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 
 import io.github.jspinak.brobot.action.ActionConfig;
@@ -6,7 +7,7 @@ import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.config.FrameworkInitializer;
+import io.github.jspinak.brobot.config.core.FrameworkInitializer;
 import io.github.jspinak.brobot.navigation.service.StateTransitionService;
 import io.github.jspinak.brobot.model.transition.StateTransitionStore;
 import io.github.jspinak.brobot.navigation.path.PathFinder;

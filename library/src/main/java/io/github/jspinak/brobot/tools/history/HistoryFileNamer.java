@@ -4,7 +4,7 @@ import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalysis;
 import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
@@ -22,15 +22,18 @@ import static io.github.jspinak.brobot.action.ActionType.FIND;
 /**
  * Generates unique filenames for Brobot's visual history illustrations.
  * <p>
- * This component manages the naming convention for all illustration files generated
+ * This component manages the naming convention for all illustration files
+ * generated
  * during action execution. It ensures unique filenames while encoding important
  * metadata like action types, target images, and analysis results. The naming
- * system prevents filename collisions and makes illustrations easily searchable.
+ * system prevents filename collisions and makes illustrations easily
+ * searchable.
  * <p>
  * Filename structure patterns:
  * <ul>
  * <li>Basic: {prefix}_{action}_{imageNames}.png</li>
- * <li>Scene analysis: {prefix}_{action}_in-{sceneName}_{targetImages}_{analysisType}.png</li>
+ * <li>Scene analysis:
+ * {prefix}_{action}_in-{sceneName}_{targetImages}_{analysisType}.png</li>
  * <li>With Find type: {prefix}_FIND_{findType}_{imageNames}.png</li>
  * </ul>
  * <p>
@@ -70,8 +73,10 @@ public class HistoryFileNamer {
     /**
      * Generates a single filename for the primary illustration of an action result.
      * <p>
-     * This method handles cases where matches may contain multiple or no SceneAnalyses.
-     * When SceneAnalyses are present, it uses the first one; otherwise, it falls back
+     * This method handles cases where matches may contain multiple or no
+     * SceneAnalyses.
+     * When SceneAnalyses are present, it uses the first one; otherwise, it falls
+     * back
      * to generating a filename from match objects. This ensures every action gets
      * an illustration filename regardless of analysis availability.
      * <p>
@@ -83,30 +88,35 @@ public class HistoryFileNamer {
      * <li>Analysis type descriptor ("classes" for pixel classification, etc.)</li>
      * </ul>
      * <p>
-     * Usage note: For multiple SceneAnalyses, call {@link #getFilenameFromSceneAnalysis}
+     * Usage note: For multiple SceneAnalyses, call
+     * {@link #getFilenameFromSceneAnalysis}
      * for each analysis to get individual filenames.
      *
-     * @param matches action results containing search targets and analysis data
+     * @param matches      action results containing search targets and analysis
+     *                     data
      * @param actionConfig configuration including the action type
      * @return unique filename path for the illustration
      */
     public String getSingleFilename(ActionResult matches, ActionConfig actionConfig) {
-        if (matches.getSceneAnalysisCollection().isEmpty()) return getFilenameFromMatchObjects(matches, actionConfig);
+        if (matches.getSceneAnalysisCollection().isEmpty())
+            return getFilenameFromMatchObjects(matches, actionConfig);
         SceneAnalysis sceneAnalysis = matches.getSceneAnalysisCollection().getSceneAnalyses().get(0);
         return getFilenameFromSceneAnalysis(sceneAnalysis, actionConfig);
     }
 
     /**
-     * Generates a filename based on match objects when no scene analysis is available.
+     * Generates a filename based on match objects when no scene analysis is
+     * available.
      * <p>
      * Creates filenames by extracting state object names from all matches and
-     * combining them with the action type. This fallback method ensures illustrations
+     * combining them with the action type. This fallback method ensures
+     * illustrations
      * can be saved even when detailed scene analysis isn't performed.
      * <p>
      * The method aggregates unique state object names to avoid duplication in
      * filenames, making them more readable and preventing excessively long names.
      *
-     * @param matches action results containing matched objects
+     * @param matches      action results containing matched objects
      * @param actionConfig configuration with action type information
      * @return unique filename path constructed from match data
      */
@@ -121,7 +131,8 @@ public class HistoryFileNamer {
     }
 
     /**
-     * Generates a detailed filename from scene analysis data with optional descriptors.
+     * Generates a detailed filename from scene analysis data with optional
+     * descriptors.
      * <p>
      * Creates rich filenames that encode the complete context of an analysis:
      * action type, scene name, target images, and any additional descriptors.
@@ -132,18 +143,22 @@ public class HistoryFileNamer {
      * while additional descriptors can specify analysis types like "classes" for
      * classification results or "colorProfile" for color analysis.
      *
-     * @param sceneAnalysis analysis results including scene and target information
-     * @param actionConfig configuration with action type
-     * @param additionalDescription optional descriptors appended to filename (e.g., "classes", "contours")
+     * @param sceneAnalysis         analysis results including scene and target
+     *                              information
+     * @param actionConfig          configuration with action type
+     * @param additionalDescription optional descriptors appended to filename (e.g.,
+     *                              "classes", "contours")
      * @return unique filename path with encoded analysis metadata
      */
-    public String getFilenameFromSceneAnalysis(SceneAnalysis sceneAnalysis, ActionConfig actionConfig, String... additionalDescription) {
+    public String getFilenameFromSceneAnalysis(SceneAnalysis sceneAnalysis, ActionConfig actionConfig,
+            String... additionalDescription) {
         String prefix = FrameworkSettings.historyPath;
         ActionType actionType = getActionTypeFromConfig(actionConfig);
         String sceneName = sceneAnalysis.getScene().getPattern().getName();
         String imageNames = sceneAnalysis.getImageNames();
         String names = String.join("_", imageNames);
-        String suffix = actionType.toString() + "_in-" + sceneName + "_" + names + String.join("_", additionalDescription);
+        String suffix = actionType.toString() + "_in-" + sceneName + "_" + names
+                + String.join("_", additionalDescription);
         ConsoleReporter.println("Filename: " + prefix + suffix);
         return filenameRepo.reserveFreePath(prefix, suffix);
     }
@@ -154,8 +169,8 @@ public class HistoryFileNamer {
      * Helper method that assembles the final filename by appending action type
      * and image names to a base path, ensuring the standard .png extension.
      *
-     * @param freepath base path without extension
-     * @param action action type to include in filename
+     * @param freepath   base path without extension
+     * @param action     action type to include in filename
      * @param imageNames concatenated image names
      * @return complete filename with .png extension
      */
@@ -170,10 +185,10 @@ public class HistoryFileNamer {
      * sequences of related illustrations (e.g., animation frames or
      * multi-step processes).
      *
-     * @param path directory path
-     * @param baseName base filename without number
-     * @param number sequence number to include
-     * @param action action type to include in filename
+     * @param path       directory path
+     * @param baseName   base filename without number
+     * @param number     sequence number to include
+     * @param action     action type to include in filename
      * @param imageNames concatenated image names
      * @return complete numbered filename with .png extension
      */
@@ -193,8 +208,9 @@ public class HistoryFileNamer {
      * for complex operations involving multiple state objects or when comparing
      * results across different object sets.
      *
-     * @param actionConfig configuration including action type and find options
-     * @param objectCollections variable number of collections containing state images
+     * @param actionConfig      configuration including action type and find options
+     * @param objectCollections variable number of collections containing state
+     *                          images
      * @return unique filename incorporating all object collection data
      */
     public String getFilename(ActionConfig actionConfig, ObjectCollection... objectCollections) {
@@ -207,12 +223,13 @@ public class HistoryFileNamer {
         String allNames = String.join("", names);
         String suffix = actionType.toString();
         // Add find strategy if applicable
-        if (actionType == FIND && actionConfig instanceof io.github.jspinak.brobot.action.basic.find.PatternFindOptions) {
-            io.github.jspinak.brobot.action.basic.find.PatternFindOptions findOptions = 
-                (io.github.jspinak.brobot.action.basic.find.PatternFindOptions) actionConfig;
+        if (actionType == FIND
+                && actionConfig instanceof io.github.jspinak.brobot.action.basic.find.PatternFindOptions) {
+            io.github.jspinak.brobot.action.basic.find.PatternFindOptions findOptions = (io.github.jspinak.brobot.action.basic.find.PatternFindOptions) actionConfig;
             suffix += "_" + findOptions.getStrategy();
         }
-        if (!allNames.isEmpty()) suffix += "_" + allNames;
+        if (!allNames.isEmpty())
+            suffix += "_" + allNames;
         return filenameRepo.reserveFreePath(prefix, suffix);
     }
 
@@ -225,7 +242,7 @@ public class HistoryFileNamer {
      * results, or user-specified illustration names.
      *
      * @param action action type to include in filename
-     * @param name custom name component for the filename
+     * @param name   custom name component for the filename
      * @return unique filename with action and custom name
      */
     public String getFilename(ActionType actionType, String name) {
@@ -233,20 +250,28 @@ public class HistoryFileNamer {
         String suffix = actionType.toString() + "_" + name;
         return filenameRepo.reserveFreePath(prefix, suffix);
     }
-    
+
     /**
      * Helper method to extract ActionType from ActionConfig.
      */
     private ActionType getActionTypeFromConfig(ActionConfig actionConfig) {
         String className = actionConfig.getClass().getSimpleName();
-        if (className.contains("Click")) return ActionType.CLICK;
-        if (className.contains("Find") || className.contains("Pattern")) return ActionType.FIND;
-        if (className.contains("Type")) return ActionType.TYPE;
-        if (className.contains("Drag")) return ActionType.DRAG;
-        if (className.contains("Highlight")) return ActionType.HIGHLIGHT;
-        if (className.contains("Scroll")) return ActionType.SCROLL_MOUSE_WHEEL;
-        if (className.contains("Define")) return ActionType.DEFINE;
-        if (className.contains("Move")) return ActionType.MOVE;
+        if (className.contains("Click"))
+            return ActionType.CLICK;
+        if (className.contains("Find") || className.contains("Pattern"))
+            return ActionType.FIND;
+        if (className.contains("Type"))
+            return ActionType.TYPE;
+        if (className.contains("Drag"))
+            return ActionType.DRAG;
+        if (className.contains("Highlight"))
+            return ActionType.HIGHLIGHT;
+        if (className.contains("Scroll"))
+            return ActionType.SCROLL_MOUSE_WHEEL;
+        if (className.contains("Define"))
+            return ActionType.DEFINE;
+        if (className.contains("Move"))
+            return ActionType.MOVE;
         return ActionType.FIND; // default
     }
 }

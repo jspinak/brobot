@@ -19,11 +19,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * automatically creates a Spring bean when used with {@code @EnableConfigurationProperties}.
  * DO NOT add {@code @Component} or {@code @Configuration} annotations to this class as it will
  * create duplicate beans and cause conflicts. The bean is created by the framework when
- * {@link io.github.jspinak.brobot.config.ActionLoggingConfig} includes this class in its
+ * {@link io.github.jspinak.brobot.config.logging.ActionLoggingConfig} includes this class in its
  * {@code @EnableConfigurationProperties} annotation.</p>
  * 
  * @see ConsoleActionReporter for the implementation that uses this config
- * @see io.github.jspinak.brobot.config.ActionLoggingConfig for the configuration that enables this properties class
+ * @see io.github.jspinak.brobot.config.logging.ActionLoggingConfig for the configuration that enables this properties class
  */
 @Data
 @ConfigurationProperties(prefix = "brobot.console.actions")

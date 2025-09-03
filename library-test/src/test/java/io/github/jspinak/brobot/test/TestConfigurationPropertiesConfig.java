@@ -1,9 +1,9 @@
 package io.github.jspinak.brobot.test;
 
-import io.github.jspinak.brobot.config.BrobotConfiguration;
-import io.github.jspinak.brobot.config.BrobotProperties;
-import io.github.jspinak.brobot.config.LoggingVerbosityConfig;
-import io.github.jspinak.brobot.startup.BrobotStartupConfiguration;
+import io.github.jspinak.brobot.config.core.BrobotConfiguration;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
+import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
+import io.github.jspinak.brobot.startup.orchestration.StartupConfiguration;
 import io.github.jspinak.brobot.tools.logging.console.ConsoleActionConfig;
 import io.github.jspinak.brobot.tools.logging.visual.VisualFeedbackConfig;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -20,18 +20,18 @@ import org.springframework.context.annotation.Primary;
  */
 @Configuration
 @EnableConfigurationProperties({
-    // LoggingVerbosityConfig is enabled by ActionLoggingConfig
-    // VisualFeedbackConfig is enabled by ActionLoggingConfig
-    BrobotConfiguration.class,
-    BrobotProperties.class,
-    BrobotStartupConfiguration.class
-    // ConsoleActionConfig is enabled by ActionLoggingConfig
-    // GuiAccessConfig is handled by MockGuiAccessConfig
+        // LoggingVerbosityConfig is enabled by ActionLoggingConfig
+        // VisualFeedbackConfig is enabled by ActionLoggingConfig
+        BrobotConfiguration.class,
+        BrobotProperties.class,
+        StartupConfiguration.class
+// ConsoleActionConfig is enabled by ActionLoggingConfig
+// GuiAccessConfig is handled by MockGuiAccessConfig
 })
 public class TestConfigurationPropertiesConfig {
-    
+
     // LoggingVerbosityConfig is provided by TestLoggingConfig
-    
+
     @Bean
     @Primary
     public VisualFeedbackConfig visualFeedbackConfig() {
@@ -40,25 +40,25 @@ public class TestConfigurationPropertiesConfig {
         config.setAutoHighlightFinds(false);
         return config;
     }
-    
+
     @Bean
-    @Primary 
+    @Primary
     public BrobotConfiguration brobotConfiguration() {
         return new BrobotConfiguration();
     }
-    
+
     @Bean
     @Primary
     public BrobotProperties brobotProperties() {
         return new BrobotProperties();
     }
-    
+
     @Bean
     @Primary
-    public BrobotStartupConfiguration brobotStartupConfiguration() {
-        return new BrobotStartupConfiguration();
+    public StartupConfiguration brobotStartupConfiguration() {
+        return new StartupConfiguration();
     }
-    
+
     @Bean
     @Primary
     public ConsoleActionConfig consoleActionConfig() {
@@ -67,6 +67,6 @@ public class TestConfigurationPropertiesConfig {
         config.setLevel(ConsoleActionConfig.Level.QUIET); // Set explicit level
         return config;
     }
-    
+
     // GuiAccessConfig is provided by MockGuiAccessConfig - don't duplicate it here
 }

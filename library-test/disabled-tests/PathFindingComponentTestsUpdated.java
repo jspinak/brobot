@@ -1,4 +1,5 @@
 package io.github.jspinak.brobot.manageStates;
+
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
@@ -7,7 +8,7 @@ import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.element.Pattern;
-import io.github.jspinak.brobot.config.FrameworkInitializer;
+import io.github.jspinak.brobot.config.core.FrameworkInitializer;
 import io.github.jspinak.brobot.navigation.service.StateTransitionService;
 import io.github.jspinak.brobot.navigation.transition.StateTransitionsJointTable;
 import io.github.jspinak.brobot.navigation.transition.StateTransitions;
@@ -116,39 +117,39 @@ public class PathFindingComponentTestsUpdated {
         assertEquals(1, paths.getPaths().size());
         assertEquals(2, paths.getPaths().get(0).getStates().size());
     }
-    
+
     @Test
     void testComplexTransitionWithMultipleActions() {
         State loginState = createState("LoginState");
         State mainMenuState = createState("MainMenuState");
-        
+
         // Create a complex transition with Find then Click
-        createFindAndClickTransition(loginState, mainMenuState, 
+        createFindAndClickTransition(loginState, mainMenuState,
                 createStateImage("LoginButton", "login.png"), "Find and Click Login");
         init.initializeStateStructure();
 
         Optional<StateTransitions> transitions = stateTransitionsService.getTransitions(loginState.getId());
         assertTrue(transitions.isPresent());
-        
+
         // Verify the transition has multiple steps
         StateTransitions stateTransitions = transitions.get();
         assertEquals(1, stateTransitions.getTransitions().size());
-        
+
         if (stateTransitions.getTransitions().get(0) instanceof TaskSequenceStateTransition) {
-            TaskSequenceStateTransition taskSeqTransition = 
-                (TaskSequenceStateTransition) stateTransitions.getTransitions().get(0);
+            TaskSequenceStateTransition taskSeqTransition = (TaskSequenceStateTransition) stateTransitions
+                    .getTransitions().get(0);
             assertTrue(taskSeqTransition.getTaskSequenceOptional().isPresent());
             TaskSequence taskSeq = taskSeqTransition.getTaskSequenceOptional().get();
             assertEquals(2, taskSeq.getSteps().size()); // Find + Click
         }
     }
-    
+
     @Test
     void testTransitionWithCustomClickOptions() {
         State stateA = createState("StateWithDoubleClick");
         State stateB = createState("StateAfterDoubleClick");
-        
-        createDoubleClickTransition(stateA, stateB, 
+
+        createDoubleClickTransition(stateA, stateB,
                 createStateImage("DoubleClickTarget", "target.png"), "Double Click Target");
         init.initializeStateStructure();
 
@@ -174,110 +175,111 @@ public class PathFindingComponentTestsUpdated {
 
     private void createTransition(State fromState, State toState, StateImage stateImage, String actionDescription) {
         TaskSequence actionDefinition = new TaskSequence();
-        
+
         // NEW API: Use ClickOptions
         ClickOptions clickOptions = new ClickOptions.Builder()
                 // .setClickType(ClickOptions.Type.LEFT) // ClickOptions.Type enum removed
                 .setNumberOfClicks(1)
                 .build();
-                
+
         ObjectCollection objects = new ObjectCollection.Builder()
                 .withImages(stateImage)
                 .build();
-                
+
         actionDefinition.addStep(clickOptions, objects);
 
         TaskSequenceStateTransition transition = new TaskSequenceStateTransition();
         transition.setActionDefinition(actionDefinition);
         transition.setActivate(Collections.singleton(toState.getId()));
-        
+
         StateTransitions stateTransitions = new StateTransitions();
         stateTransitions.setStateId(fromState.getId());
         stateTransitions.addTransition(transition);
         stateTransitionsRepository.add(stateTransitions);
     }
-    
-    private void createFindAndClickTransition(State fromState, State toState, 
-                                            StateImage stateImage, String actionDescription) {
+
+    private void createFindAndClickTransition(State fromState, State toState,
+            StateImage stateImage, String actionDescription) {
         TaskSequence actionDefinition = new TaskSequence();
-        
+
         // Step 1: Find with PatternFindOptions
         PatternFindOptions findOptions = new PatternFindOptions.Builder()
                 .setStrategy(PatternFindOptions.Strategy.FIRST)
                 .setSimilarity(0.9)
                 .setCaptureImage(true)
                 .build();
-                
+
         ObjectCollection findObjects = new ObjectCollection.Builder()
                 .withImages(stateImage)
                 .build();
-                
+
         actionDefinition.addStep(findOptions, findObjects);
-        
+
         // Step 2: Click on the found match
         ClickOptions clickOptions = new ClickOptions.Builder()
                 // .setClickType(ClickOptions.Type.LEFT) // ClickOptions.Type enum removed
                 .setPauseAfterEnd(1.0)
                 .build();
-                
+
         ObjectCollection clickObjects = new ObjectCollection.Builder()
                 // .useMatchesFromPreviousAction() // Method not available in new API
                 .build();
-                
+
         actionDefinition.addStep(clickOptions, clickObjects);
 
         TaskSequenceStateTransition transition = new TaskSequenceStateTransition();
         transition.setActionDefinition(actionDefinition);
         transition.setActivate(Collections.singleton(toState.getId()));
-        
+
         StateTransitions stateTransitions = new StateTransitions();
         stateTransitions.setStateId(fromState.getId());
         stateTransitions.addTransition(transition);
         stateTransitionsRepository.add(stateTransitions);
     }
-    
+
     private void createDoubleClickTransition(State fromState, State toState,
-                                           StateImage stateImage, String actionDescription) {
+            StateImage stateImage, String actionDescription) {
         TaskSequence actionDefinition = new TaskSequence();
-        
+
         // NEW API: Use ClickOptions with DOUBLE type
         ClickOptions doubleClickOptions = new ClickOptions.Builder()
-                // .setClickType(ClickOptions.Type.DOUBLE_LEFT) // ClickOptions.Type enum removed
+                // .setClickType(ClickOptions.Type.DOUBLE_LEFT) // ClickOptions.Type enum
+                // removed
                 .setNumberOfClicks(2)
                 .setPauseAfterEnd(0.5)
                 .build();
-                
+
         ObjectCollection objects = new ObjectCollection.Builder()
                 .withImages(stateImage)
                 .build();
-                
+
         actionDefinition.addStep(doubleClickOptions, objects);
 
         TaskSequenceStateTransition transition = new TaskSequenceStateTransition();
         transition.setActionDefinition(actionDefinition);
         transition.setActivate(Collections.singleton(toState.getId()));
-        
+
         StateTransitions stateTransitions = new StateTransitions();
         stateTransitions.setStateId(fromState.getId());
         stateTransitions.addTransition(transition);
         stateTransitionsRepository.add(stateTransitions);
     }
-    
+
     @Test
     void testPathFindingThroughMultipleTransitionTypes() {
         // Create a path that uses different transition types
         State start = createState("Start");
         State middle = createState("Middle");
         State end = createState("End");
-        
+
         // Start -> Middle: Find and Click
         createFindAndClickTransition(start, middle,
                 createStateImage("MiddleButton", "middle.png"), "Go to Middle");
-                
+
         // Middle -> End: Double Click
         createDoubleClickTransition(middle, end,
                 createStateImage("EndButton", "end.png"), "Go to End");
-                
+
         init.initializeStateStructure();
 
         Set<Long> startStates = new HashSet<>();

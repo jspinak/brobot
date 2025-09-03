@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.navigation.monitoring;
 
+import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.statemanagement.StateDetector;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
-import io.github.jspinak.brobot.config.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

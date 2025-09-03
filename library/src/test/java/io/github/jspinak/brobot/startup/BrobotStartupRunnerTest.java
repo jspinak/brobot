@@ -1,5 +1,8 @@
 package io.github.jspinak.brobot.startup;
 
+import io.github.jspinak.brobot.startup.orchestration.StartupConfiguration;
+import io.github.jspinak.brobot.startup.orchestration.StartupRunner;
+import io.github.jspinak.brobot.startup.verification.InitialStateVerifier;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.Disabled;
@@ -28,12 +31,12 @@ public class BrobotStartupRunnerTest extends BrobotTestBase {
     private InitialStateVerifier.VerificationBuilder mockBuilder;
     
     @Mock
-    private BrobotStartupConfiguration mockConfiguration;
+    private StartupConfiguration mockConfiguration;
     
     @Mock
     private ApplicationArguments mockArguments;
     
-    private BrobotStartupRunner runner;
+    private StartupRunner runner;
     
     @BeforeEach
     @Override
@@ -48,7 +51,7 @@ public class BrobotStartupRunnerTest extends BrobotTestBase {
         when(mockBuilder.activateFirstOnly(anyBoolean())).thenReturn(mockBuilder);
         when(mockBuilder.verify()).thenReturn(true);
         
-        runner = new BrobotStartupRunner(mockStateVerifier, mockConfiguration);
+        runner = new StartupRunner(mockStateVerifier, mockConfiguration);
     }
     
     @Nested

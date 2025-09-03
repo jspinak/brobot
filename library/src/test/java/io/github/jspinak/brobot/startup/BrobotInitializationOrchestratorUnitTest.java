@@ -3,6 +3,8 @@ package io.github.jspinak.brobot.startup;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import io.github.jspinak.brobot.startup.orchestration.InitializationOrchestrator;
+
 import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -15,18 +17,18 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class BrobotInitializationOrchestratorUnitTest {
     
-    private BrobotInitializationOrchestrator orchestrator;
+    private InitializationOrchestrator orchestrator;
     
     @BeforeEach
     public void setUp() {
         // Create orchestrator without Spring injection
-        orchestrator = new BrobotInitializationOrchestrator();
+        orchestrator = new InitializationOrchestrator();
     }
     
     @Test
     public void testPhaseStatusCreation() {
-        BrobotInitializationOrchestrator.PhaseStatus phase = 
-            new BrobotInitializationOrchestrator.PhaseStatus("Test Phase", 1);
+        InitializationOrchestrator.PhaseStatus phase = 
+            new InitializationOrchestrator.PhaseStatus("Test Phase", 1);
         
         assertEquals("Test Phase", phase.getName());
         assertEquals(1, phase.getOrder());
@@ -39,8 +41,8 @@ public class BrobotInitializationOrchestratorUnitTest {
     
     @Test
     public void testPhaseStatusCompletion() {
-        BrobotInitializationOrchestrator.PhaseStatus phase = 
-            new BrobotInitializationOrchestrator.PhaseStatus("Test Phase", 1);
+        InitializationOrchestrator.PhaseStatus phase = 
+            new InitializationOrchestrator.PhaseStatus("Test Phase", 1);
         
         Duration testDuration = Duration.ofMillis(100);
         phase.markCompleted(true, testDuration);
@@ -52,8 +54,8 @@ public class BrobotInitializationOrchestratorUnitTest {
     
     @Test
     public void testPhaseStatusStepTracking() {
-        BrobotInitializationOrchestrator.PhaseStatus phase = 
-            new BrobotInitializationOrchestrator.PhaseStatus("Test Phase", 1);
+        InitializationOrchestrator.PhaseStatus phase = 
+            new InitializationOrchestrator.PhaseStatus("Test Phase", 1);
         
         // Add completed steps
         phase.addCompletedStep("Step 1");
@@ -73,8 +75,8 @@ public class BrobotInitializationOrchestratorUnitTest {
     
     @Test
     public void testPhaseStatusFailure() {
-        BrobotInitializationOrchestrator.PhaseStatus phase = 
-            new BrobotInitializationOrchestrator.PhaseStatus("Test Phase", 1);
+        InitializationOrchestrator.PhaseStatus phase = 
+            new InitializationOrchestrator.PhaseStatus("Test Phase", 1);
         
         Duration testDuration = Duration.ofMillis(50);
         phase.addFailedStep("Failed operation", "Connection timeout");
@@ -99,8 +101,8 @@ public class BrobotInitializationOrchestratorUnitTest {
     @Test
     public void testOrchestratorReset() {
         // Manually add a phase
-        BrobotInitializationOrchestrator.PhaseStatus testPhase = 
-            new BrobotInitializationOrchestrator.PhaseStatus("Manual Phase", 0);
+        InitializationOrchestrator.PhaseStatus testPhase = 
+            new InitializationOrchestrator.PhaseStatus("Manual Phase", 0);
         orchestrator.getPhaseStatuses().put("manual", testPhase);
         
         // Verify phase was added
@@ -145,13 +147,13 @@ public class BrobotInitializationOrchestratorUnitTest {
     @Test
     public void testIsInitializationSuccessfulWithFailedCriticalPhase() {
         // Set up one critical phase as failed
-        BrobotInitializationOrchestrator.PhaseStatus coreConfig = 
-            new BrobotInitializationOrchestrator.PhaseStatus("Core Configuration", 1);
+        InitializationOrchestrator.PhaseStatus coreConfig = 
+            new InitializationOrchestrator.PhaseStatus("Core Configuration", 1);
         coreConfig.markCompleted(false, Duration.ofMillis(100));
         orchestrator.getPhaseStatuses().put("core-config", coreConfig);
         
-        BrobotInitializationOrchestrator.PhaseStatus components = 
-            new BrobotInitializationOrchestrator.PhaseStatus("Component Initialization", 3);
+        InitializationOrchestrator.PhaseStatus components = 
+            new InitializationOrchestrator.PhaseStatus("Component Initialization", 3);
         components.markCompleted(true, Duration.ofMillis(200));
         orchestrator.getPhaseStatuses().put("components", components);
         

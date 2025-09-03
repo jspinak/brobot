@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.tools.testing.wrapper;
 
-import io.github.jspinak.brobot.config.ExecutionMode;
+import io.github.jspinak.brobot.config.environment.ExecutionMode;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.tools.testing.mock.action.MockHighlight;
 import lombok.extern.slf4j.Slf4j;

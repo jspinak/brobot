@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.click;
 
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.basic.find.Find;
 import io.github.jspinak.brobot.action.internal.mouse.MoveMouseWrapper;

@@ -6,9 +6,9 @@ import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.logging.DiagnosticLogger;
+import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
+import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig.VerbosityLevel;
 import io.github.jspinak.brobot.logging.ConciseFindLogger;
-import io.github.jspinak.brobot.config.LoggingVerbosityConfig;
-import io.github.jspinak.brobot.config.LoggingVerbosityConfig.VerbosityLevel;
 
 import org.sikuli.script.Finder;
 import org.sikuli.script.OCR;

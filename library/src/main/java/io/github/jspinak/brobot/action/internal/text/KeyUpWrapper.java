@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.action.internal.text;
 
 import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
 import org.springframework.stereotype.Component;
@@ -9,9 +9,12 @@ import org.springframework.stereotype.Component;
 /**
  * Handles keyboard key release operations in both real and mock modes.
  * <p>
- * KeyUpWrapper provides a unified interface for releasing keyboard keys, supporting
- * both individual key releases and releasing all currently pressed keys. It abstracts
- * the underlying SikuliX key release functionality while adding mock mode support
+ * KeyUpWrapper provides a unified interface for releasing keyboard keys,
+ * supporting
+ * both individual key releases and releasing all currently pressed keys. It
+ * abstracts
+ * the underlying SikuliX key release functionality while adding mock mode
+ * support
  * for testing and logging capabilities.
  * <p>
  * <strong>Key features:</strong>
@@ -64,7 +67,8 @@ public class KeyUpWrapper {
      */
     public void release() {
         ConsoleReporter.format("release all keys| ");
-        if (FrameworkSettings.mock) return;
+        if (FrameworkSettings.mock)
+            return;
         new Region().sikuli().keyUp();
     }
 
@@ -86,7 +90,8 @@ public class KeyUpWrapper {
      */
     public void release(String key) {
         ConsoleReporter.format("release %s| ", key);
-        if (FrameworkSettings.mock) return;
+        if (FrameworkSettings.mock)
+            return;
         new Region().sikuli().keyUp(key);
     }
 

@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.analysis.color.profiles;
 
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.element.Location;
@@ -18,19 +18,27 @@ import java.util.List;
 import static io.github.jspinak.brobot.model.analysis.color.ColorCluster.ColorSchemaName.BGR;
 
 /**
- * Creates and manages visualization matrices for state images and their color profiles.
+ * Creates and manages visualization matrices for state images and their color
+ * profiles.
  * 
- * <p>This class generates visual representations of images and their associated color profiles
- * for display in user interfaces, debugging tools, and documentation. It creates compact
- * matrix layouts that show both the original images and their color analysis results
- * side by side, making it easy to understand the color characteristics of state images.</p>
+ * <p>
+ * This class generates visual representations of images and their associated
+ * color profiles
+ * for display in user interfaces, debugging tools, and documentation. It
+ * creates compact
+ * matrix layouts that show both the original images and their color analysis
+ * results
+ * side by side, making it easy to understand the color characteristics of state
+ * images.
+ * </p>
  * 
- * <p>The visualization matrices are particularly useful for:
+ * <p>
+ * The visualization matrices are particularly useful for:
  * <ul>
- *   <li>Debugging color-based matching algorithms</li>
- *   <li>Displaying state image previews in configuration tools</li>
- *   <li>Generating documentation of color profiles</li>
- *   <li>Validating K-means clustering results</li>
+ * <li>Debugging color-based matching algorithms</li>
+ * <li>Displaying state image previews in configuration tools</li>
+ * <li>Generating documentation of color profiles</li>
+ * <li>Validating K-means clustering results</li>
  * </ul>
  * </p>
  * 
@@ -45,7 +53,7 @@ public class ProfileMatrixBuilder {
 
     /** Default width and height for visualization thumbnails in pixels */
     private int imgsWH = 40;
-    
+
     /** Spacing between visualization elements in pixels */
     private int spaceBetween = 2;
 
@@ -55,6 +63,7 @@ public class ProfileMatrixBuilder {
 
     /**
      * Returns a Mat with the image files shown horizontally.
+     * 
      * @param img the image with the files to be shown
      * @return Mat with the image files shown horizontally
      */
@@ -70,11 +79,14 @@ public class ProfileMatrixBuilder {
     }
 
     /**
-     * Creates a visualization matrix showing the mean color profile of a state image.
+     * Creates a visualization matrix showing the mean color profile of a state
+     * image.
      * 
-     * <p>This method generates a single color swatch representing the average color
+     * <p>
+     * This method generates a single color swatch representing the average color
      * of the entire image, which is useful for quick visual identification of
-     * images based on their dominant color.</p>
+     * images based on their dominant color.
+     * </p>
      * 
      * @param img The state image whose color profile to visualize
      * @return A Mat containing the mean color visualization
@@ -85,20 +97,25 @@ public class ProfileMatrixBuilder {
                 .setName(img.getName() + "_profile")
                 .setSubmatMaxHeight(imgsWH)
                 .setSubmatMaxWidth(imgsWH)
-                .addSubMat(new Location(0,0), profile)
+                .addSubMat(new Location(0, 0), profile)
                 .build();
     }
 
     /**
-     * Creates a visualization matrix showing K-means color clusters for a state image.
+     * Creates a visualization matrix showing K-means color clusters for a state
+     * image.
      * 
-     * <p>This method generates a horizontal array of color swatches, each representing
-     * one of the K-means clusters identified in the image. The swatches are arranged
-     * from most to least dominant, providing a visual color palette for the image.</p>
+     * <p>
+     * This method generates a horizontal array of color swatches, each representing
+     * one of the K-means clusters identified in the image. The swatches are
+     * arranged
+     * from most to least dominant, providing a visual color palette for the image.
+     * </p>
      * 
-     * @param img The state image containing K-means profiles
+     * @param img    The state image containing K-means profiles
      * @param kMeans The number of clusters to visualize
-     * @return A Mat containing the K-means cluster visualizations arranged horizontally
+     * @return A Mat containing the K-means cluster visualizations arranged
+     *         horizontally
      */
     public Mat getKmeansProfilesMat(StateImage img, int kMeans) {
         List<Mat> profiles = img.getKmeansProfilesAllSchemas().getColorProfileMats(
@@ -114,31 +131,40 @@ public class ProfileMatrixBuilder {
     /**
      * Creates a visualization matrix based on the specified action options.
      * 
-     * <p>This method selects between mean color profile or K-means cluster visualization
-     * based on the K-means setting in the action options. It provides flexibility in
-     * choosing the appropriate visualization type for different automation scenarios.</p>
+     * <p>
+     * This method selects between mean color profile or K-means cluster
+     * visualization
+     * based on the K-means setting in the action options. It provides flexibility
+     * in
+     * choosing the appropriate visualization type for different automation
+     * scenarios.
+     * </p>
      * 
-     * @param img The state image to visualize
+     * @param img          The state image to visualize
      * @param actionConfig Options specifying the visualization type:
-     *                      - kmeans < 0: Use default from BrobotSettings
-     *                      - kmeans = 0: Show mean color profile only
-     *                      - kmeans > 0: Show K-means clusters
+     *                     - kmeans < 0: Use default from BrobotSettings
+     *                     - kmeans = 0: Show mean color profile only
+     *                     - kmeans > 0: Show K-means clusters
      * @return A Mat containing the appropriate color profile visualization
      */
     public Mat getProfilesMat(StateImage img, ActionConfig actionConfig) {
         // For now, use default k-means value from framework settings
         // Different ActionConfig implementations could have different k-means settings
         int kMeans = FrameworkSettings.kMeansInProfile;
-        if (kMeans == 0) return getProfilesMat(img);
+        if (kMeans == 0)
+            return getProfilesMat(img);
         return getKmeansProfilesMat(img, kMeans);
     }
 
     /**
-     * Sets visualization matrices on a state image for both images and color profiles.
+     * Sets visualization matrices on a state image for both images and color
+     * profiles.
      * 
-     * <p>This method generates and stores both the image thumbnails matrix and the
+     * <p>
+     * This method generates and stores both the image thumbnails matrix and the
      * color profile matrix in the state image object. These matrices are then
-     * available for display or further processing.</p>
+     * available for display or further processing.
+     * </p>
      * 
      * @param img The state image to update with visualization matrices. This object
      *            is modified by setting its imagesMat and profilesMat fields.

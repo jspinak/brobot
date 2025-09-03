@@ -17,6 +17,10 @@ import lombok.Getter;
 @Getter
 @Builder(toBuilder = true, builderClassName = "LoggingOptionsBuilder")
 public final class LoggingOptions {
+    
+    public static class LoggingOptionsBuilder {
+        // Lombok will generate the implementation
+    }
 
     /**
      * Message to log before the action is executed.
