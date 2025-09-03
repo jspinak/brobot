@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.startup;
 
+import io.github.jspinak.brobot.config.FrameworkSettings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -44,11 +45,16 @@ public class BrobotStartupRunner implements ApplicationRunner {
             return;
         }
         
-        // Apply startup delay if configured
-        if (configuration.getStartupDelay() > 0) {
+        // Apply startup delay if configured (skip in test mode)
+        String testType = System.getProperty("brobot.test.type");
+        boolean isTestMode = "unit".equals(testType) || "true".equals(System.getProperty("brobot.test.mode")) || FrameworkSettings.mock;
+        
+        if (!isTestMode && configuration.getStartupDelay() > 0) {
             log.info("Waiting {} seconds before initial state verification", 
                     configuration.getStartupDelay());
             TimeUnit.SECONDS.sleep(configuration.getStartupDelay());
+        } else if (isTestMode) {
+            log.debug("Test mode detected - skipping startup delay");
         }
         
         // Perform verification
