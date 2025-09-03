@@ -126,17 +126,18 @@ test {
     maxHeapSize = '4g'
     minHeapSize = '1g'
     
-    // Parallel execution configuration
+    // Enhanced parallel execution configuration for 5722+ tests
     systemProperty 'junit.jupiter.execution.parallel.enabled', 'true'
     systemProperty 'junit.jupiter.execution.parallel.mode.default', 'concurrent'
     systemProperty 'junit.jupiter.execution.parallel.mode.classes.default', 'concurrent'
-    // Dynamic strategy uses available CPU cores
+    // Dynamic strategy with increased parallelism factor
     systemProperty 'junit.jupiter.execution.parallel.config.strategy', 'dynamic'
-    systemProperty 'junit.jupiter.execution.parallel.config.dynamic.factor', '0.5'
+    systemProperty 'junit.jupiter.execution.parallel.config.dynamic.factor', '1.0'  // Use all cores
+    systemProperty 'junit.jupiter.execution.parallel.config.dynamic.max-pool-size', '256'
     
-    // Fork settings to prevent resource conflicts
-    forkEvery = 100  // Create new JVM every 100 tests
-    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+    // Fork settings optimized for large test suite
+    forkEvery = 200  // Create new JVM every 200 tests to balance memory vs startup overhead
+    maxParallelForks = Math.min(Runtime.runtime.availableProcessors(), 8)  // Cap at 8 for stability
     
     // JVM args for better performance
     jvmArgs = [
@@ -252,10 +253,73 @@ task fastTest(type: Test) {
 jacocoTestReport {
     dependsOn test // tests are required to run before generating the report
     reports {
-        xml.required = false
-        csv.required = false
+        xml.required = true  // Enable XML for CI/CD integration
+        xml.outputLocation = layout.buildDirectory.file('jacoco/jacoco.xml')
+        csv.required = true  // Enable CSV for detailed analysis
+        csv.outputLocation = layout.buildDirectory.file('jacoco/jacoco.csv')
         html.required = true
         html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+    }
+    
+    // Exclude generated code and test utilities
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                '**/generated/**',
+                '**/test/**',
+                '**/BrobotTestBase.class',
+                '**/TestConfiguration*.class',
+                '**/*Test*.class',
+                '**/mixins/**'  // Exclude Jackson mixins
+            ])
+        }))
+    }
+}
+
+// Add coverage verification task
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.70  // 70% minimum code coverage
+            }
+        }
+        rule {
+            element = 'CLASS'
+            excludes = [
+                'io.github.jspinak.brobot.test.*',
+                'io.github.jspinak.brobot.*.mixins.*',
+                '*.TestConfiguration'
+            ]
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.60  // 60% line coverage per class
+            }
+        }
+    }
+}
+
+// CI/CD task that runs tests and generates coverage report
+task ciTest {
+    description = 'Runs tests with coverage for CI/CD pipeline'
+    group = 'verification'
+    dependsOn test, jacocoTestReport, jacocoTestCoverageVerification
+    
+    doLast {
+        println "Test Results: ${test.reports.html.outputLocation.get()}"
+        println "Coverage Report: ${jacocoTestReport.reports.html.outputLocation.get()}"
+    }
+}
+
+// Task for quick coverage check without enforcement
+task coverageReport {
+    description = 'Generates coverage report without verification'
+    group = 'verification'
+    dependsOn test, jacocoTestReport
+    
+    doLast {
+        println "Coverage report generated at: ${jacocoTestReport.reports.html.outputLocation.get()}"
     }
 }
 
