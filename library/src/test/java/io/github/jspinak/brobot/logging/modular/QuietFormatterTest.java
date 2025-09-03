@@ -55,6 +55,9 @@ public class QuietFormatterTest extends BrobotTestBase {
         when(context.getActionType()).thenReturn("CLICK");
         when(context.getEndTime()).thenReturn(Instant.now());
         when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(100));
+        when(context.getTargetImages()).thenReturn(Collections.emptyList());
+        when(context.getTargetStrings()).thenReturn(Collections.emptyList());
+        when(context.getTargetRegions()).thenReturn(Collections.emptyList());
         when(context.getPrimaryTargetName()).thenReturn("Button");
         
         // Act
@@ -73,6 +76,9 @@ public class QuietFormatterTest extends BrobotTestBase {
         when(context.getActionType()).thenReturn("FIND");
         when(context.getEndTime()).thenReturn(Instant.now());
         when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(200));
+        when(context.getTargetImages()).thenReturn(Collections.emptyList());
+        when(context.getTargetStrings()).thenReturn(Collections.emptyList());
+        when(context.getTargetRegions()).thenReturn(Collections.emptyList());
         when(context.getPrimaryTargetName()).thenReturn("Element");
         
         // Act
@@ -157,6 +163,10 @@ public class QuietFormatterTest extends BrobotTestBase {
         when(context.getActionType()).thenReturn("WAIT");
         when(context.getEndTime()).thenReturn(Instant.now());
         when(context.getExecutionDuration()).thenReturn(null); // Test null duration too
+        when(context.getTargetImages()).thenReturn(Collections.emptyList());
+        when(context.getTargetStrings()).thenReturn(Collections.emptyList());
+        when(context.getTargetRegions()).thenReturn(Collections.emptyList());
+        when(context.getPrimaryTargetName()).thenReturn(null);
         
         // Act
         String result = formatter.format(actionResult);
@@ -173,6 +183,9 @@ public class QuietFormatterTest extends BrobotTestBase {
         when(context.isSuccess()).thenReturn(true);
         when(context.getEndTime()).thenReturn(Instant.now());
         when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(100));
+        when(context.getTargetImages()).thenReturn(Collections.emptyList());
+        when(context.getTargetStrings()).thenReturn(Collections.emptyList());
+        when(context.getTargetRegions()).thenReturn(Collections.emptyList());
         when(context.getPrimaryTargetName()).thenReturn("Target");
         
         String[] actionTypes = {
@@ -220,6 +233,9 @@ public class QuietFormatterTest extends BrobotTestBase {
         when(context.getActionType()).thenReturn("");
         when(context.getEndTime()).thenReturn(Instant.now());
         when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(100));
+        when(context.getTargetImages()).thenReturn(Collections.emptyList());
+        when(context.getTargetStrings()).thenReturn(Collections.emptyList());
+        when(context.getTargetRegions()).thenReturn(Collections.emptyList());
         when(context.getPrimaryTargetName()).thenReturn("Element");
         
         // Act
@@ -238,6 +254,9 @@ public class QuietFormatterTest extends BrobotTestBase {
         when(context.getActionType()).thenReturn(null);
         when(context.getEndTime()).thenReturn(Instant.now());
         when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(100));
+        when(context.getTargetImages()).thenReturn(Collections.emptyList());
+        when(context.getTargetStrings()).thenReturn(Collections.emptyList());
+        when(context.getTargetRegions()).thenReturn(Collections.emptyList());
         when(context.getPrimaryTargetName()).thenReturn("Component");
         
         // Act
@@ -278,6 +297,9 @@ public class QuietFormatterTest extends BrobotTestBase {
         when(context.getActionType()).thenReturn("VANISH");
         when(context.getEndTime()).thenReturn(Instant.now());
         when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(2000));
+        when(context.getTargetImages()).thenReturn(Collections.emptyList());
+        when(context.getTargetStrings()).thenReturn(Collections.emptyList());
+        when(context.getTargetRegions()).thenReturn(Collections.emptyList());
         when(context.getPrimaryTargetName()).thenReturn("LoadingIndicator");
         
         // Act
@@ -364,6 +386,9 @@ public class QuietFormatterTest extends BrobotTestBase {
         when(context.getActionType()).thenReturn("CLICK");
         when(context.getEndTime()).thenReturn(Instant.now());
         when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(500));
+        when(context.getTargetImages()).thenReturn(Collections.emptyList());
+        when(context.getTargetStrings()).thenReturn(Collections.emptyList());
+        when(context.getTargetRegions()).thenReturn(Collections.emptyList());
         when(context.getPrimaryTargetName()).thenReturn("Button");
         
         // Act

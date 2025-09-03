@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -600,8 +601,10 @@ public class DatasetCollectionAspectTest extends BrobotTestBase {
             // Add some data
             aspect.collectDataset(joinPoint, collectData);
 
-            // Act
-            aspect.shutdown();
+            // Act - shutdown with timeout to prevent hanging in headless environments
+            assertTimeoutPreemptively(Duration.ofSeconds(5), () -> {
+                aspect.shutdown();
+            }, "Shutdown should complete within 5 seconds");
 
             // Assert - should flush pending data
             // No exception should be thrown
