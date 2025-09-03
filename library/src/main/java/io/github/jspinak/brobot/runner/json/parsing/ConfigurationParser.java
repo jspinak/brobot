@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.runner.json.parsing;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
@@ -69,16 +70,21 @@ public class ConfigurationParser {
      * Excluded fields include:
      * <ul>
      * <li>Image-related: image, bufferedImage, mat, matBGR, matHSV</li>
-     * <li>Low-level data: raster, data, colorModel</li>
+     * <li>Low-level data: raster, data, colorModel, source</li>
      * <li>Sikuli objects: sikuli, screen</li>
      * <li>Pattern collections: patterns</li>
+     * <li>Native/problematic properties: refcount, allocator, graphics, properties</li>
      * </ul>
      *
      * @return A configured ObjectMapper with safe serialization settings
      */
     private com.fasterxml.jackson.databind.ObjectMapper createFallbackMapper() {
         com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        
+        // Configure for safe serialization
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        mapper.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         // Add JavaTimeModule for handling LocalDateTime, Duration, etc.
         mapper.registerModule(new JavaTimeModule());
@@ -88,7 +94,9 @@ public class ConfigurationParser {
         mapper.setFilterProvider(new SimpleFilterProvider()
                 .setDefaultFilter(SimpleBeanPropertyFilter.serializeAllExcept(
                         "image", "bufferedImage", "patterns", "mat", "raster", "data",
-                        "colorModel", "sikuli", "screen", "matBGR", "matHSV"))
+                        "colorModel", "sikuli", "screen", "matBGR", "matHSV", "source",
+                        "refcount", "allocator", "graphics", "properties", "propertyNames",
+                        "accelerationPriority", "u", "step", "dims", "size"))
                 .setFailOnUnknownId(false));
 
         return mapper;
@@ -258,6 +266,12 @@ public class ConfigurationParser {
      * @throws IOException if file writing fails
      */
     public void writeToFile(Object object, Path filePath) throws ConfigurationException, IOException {
+        // Ensure parent directories exist
+        Path parent = filePath.getParent();
+        if (parent != null) {
+            Files.createDirectories(parent);
+        }
+        
         String json = toPrettyJson(object);
         Files.writeString(filePath, json);
     }
@@ -276,6 +290,12 @@ public class ConfigurationParser {
      * @see #toJsonSafe(Object)
      */
     public void writeToFileSafe(Object object, Path filePath) throws ConfigurationException, IOException {
+        // Ensure parent directories exist
+        Path parent = filePath.getParent();
+        if (parent != null) {
+            Files.createDirectories(parent);
+        }
+        
         String json = toPrettyJsonSafe(object);
         Files.writeString(filePath, json);
     }

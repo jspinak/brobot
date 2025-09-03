@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.action;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.match.Match;
@@ -67,7 +68,10 @@ public class ObjectCollection {
     private List<StateImage> stateImages = new ArrayList<>();
     private List<StateRegion> stateRegions = new ArrayList<>();
     private List<StateString> stateStrings = new ArrayList<>();
+    
+    @JsonManagedReference("objectcollection-actionresult")
     private List<ActionResult> matches = new ArrayList<>();
+    
     private List<Scene> scenes = new ArrayList<>();
 
     public ObjectCollection() {} // public for mapping

@@ -1,0 +1,192 @@
+package io.github.jspinak.brobot.test.runner;
+
+import io.github.jspinak.brobot.test.metrics.ParallelExecutionMonitor;
+import io.github.jspinak.brobot.test.metrics.TestMetricsCollector;
+import org.junit.platform.engine.discovery.DiscoverySelectors;
+import org.junit.platform.launcher.Launcher;
+import org.junit.platform.launcher.LauncherDiscoveryRequest;
+import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
+import org.junit.platform.launcher.core.LauncherFactory;
+import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
+import org.junit.platform.launcher.listeners.TestExecutionSummary;
+
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * Test runner with integrated monitoring and metrics collection.
+ * Use this for running large test suites with performance monitoring.
+ * 
+ * Usage:
+ * java -cp [classpath] io.github.jspinak.brobot.test.runner.MonitoredTestRunner [options]
+ * 
+ * Options:
+ *   --package <name>    : Run tests from specific package
+ *   --tag <name>        : Run tests with specific tag
+ *   --monitor           : Enable resource monitoring
+ *   --report <dir>      : Directory for reports (default: build/test-reports)
+ */
+public class MonitoredTestRunner {
+    
+    private final ParallelExecutionMonitor resourceMonitor;
+    private final TestMetricsCollector metricsCollector;
+    private final Path reportDir;
+    private boolean enableMonitoring = true;
+    
+    public MonitoredTestRunner() {
+        this.resourceMonitor = new ParallelExecutionMonitor();
+        this.metricsCollector = new TestMetricsCollector();
+        this.reportDir = Paths.get("build", "test-reports", 
+            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")));
+    }
+    
+    public static void main(String[] args) {
+        MonitoredTestRunner runner = new MonitoredTestRunner();
+        runner.parseArgs(args);
+        runner.run();
+    }
+    
+    private void parseArgs(String[] args) {
+        List<String> argList = Arrays.asList(args);
+        
+        for (int i = 0; i < argList.size(); i++) {
+            String arg = argList.get(i);
+            
+            switch (arg) {
+                case "--no-monitor":
+                    enableMonitoring = false;
+                    break;
+                case "--help":
+                    printHelp();
+                    System.exit(0);
+                    break;
+            }
+        }
+    }
+    
+    private void printHelp() {
+        System.out.println("Monitored Test Runner for Brobot");
+        System.out.println("\nUsage: java MonitoredTestRunner [options]");
+        System.out.println("\nOptions:");
+        System.out.println("  --no-monitor    : Disable resource monitoring");
+        System.out.println("  --help          : Show this help message");
+    }
+    
+    public void run() {
+        try {
+            // Create report directory
+            Files.createDirectories(reportDir);
+            
+            // Start monitoring if enabled
+            if (enableMonitoring) {
+                resourceMonitor.startMonitoring();
+            }
+            
+            // Setup JUnit launcher
+            LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
+                .selectors(DiscoverySelectors.selectPackage("io.github.jspinak.brobot"))
+                .build();
+            
+            Launcher launcher = LauncherFactory.create();
+            
+            // Add listeners
+            SummaryGeneratingListener summaryListener = new SummaryGeneratingListener();
+            launcher.registerTestExecutionListeners(summaryListener, metricsCollector);
+            
+            // Configure parallel execution
+            configureParallelExecution();
+            
+            // Execute tests
+            System.out.println("Starting test execution...");
+            System.out.println("Report directory: " + reportDir.toAbsolutePath());
+            
+            launcher.execute(request);
+            
+            // Stop monitoring
+            if (enableMonitoring) {
+                resourceMonitor.stopMonitoring();
+            }
+            
+            // Generate reports
+            generateReports(summaryListener.getSummary());
+            
+            // Exit with appropriate code
+            System.exit(summaryListener.getSummary().getTestsFailedCount() > 0 ? 1 : 0);
+            
+        } catch (Exception e) {
+            System.err.println("Error running tests: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(2);
+        }
+    }
+    
+    private void configureParallelExecution() {
+        // Set system properties for parallel execution
+        System.setProperty("junit.jupiter.execution.parallel.enabled", "true");
+        System.setProperty("junit.jupiter.execution.parallel.mode.default", "concurrent");
+        System.setProperty("junit.jupiter.execution.parallel.mode.classes.default", "concurrent");
+        
+        // Dynamic configuration based on available resources
+        int cores = Runtime.getRuntime().availableProcessors();
+        System.setProperty("junit.jupiter.execution.parallel.config.strategy", "fixed");
+        System.setProperty("junit.jupiter.execution.parallel.config.fixed.parallelism", String.valueOf(cores));
+        
+        // Timeouts
+        System.setProperty("junit.jupiter.execution.timeout.default", "1m");
+        
+        // Brobot specific
+        System.setProperty("brobot.mock", "true");
+        System.setProperty("java.awt.headless", "true");
+        
+        System.out.println("Configured parallel execution with " + cores + " threads");
+    }
+    
+    private void generateReports(TestExecutionSummary summary) {
+        try {
+            // Generate summary report
+            Path summaryPath = reportDir.resolve("summary.txt");
+            try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(summaryPath))) {
+                writer.println("TEST EXECUTION SUMMARY");
+                writer.println("=".repeat(50));
+                writer.printf("Total tests:     %d%n", summary.getTestsStartedCount());
+                writer.printf("Successful:      %d%n", summary.getTestsSucceededCount());
+                writer.printf("Failed:          %d%n", summary.getTestsFailedCount());
+                writer.printf("Skipped:         %d%n", summary.getTestsSkippedCount());
+                writer.printf("Aborted:         %d%n", summary.getTestsAbortedCount());
+                writer.printf("Time elapsed:    %.2fs%n", summary.getTimeFinished() / 1000.0);
+                
+                if (summary.getTestsFailedCount() > 0) {
+                    writer.println("\nFailed Tests:");
+                    summary.getFailures().forEach(failure -> {
+                        writer.printf("  - %s%n", failure.getTestIdentifier().getDisplayName());
+                        writer.printf("    %s%n", failure.getException().getMessage());
+                    });
+                }
+            }
+            
+            // Generate metrics report
+            Path metricsPath = reportDir.resolve("metrics.txt");
+            try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(metricsPath))) {
+                writer.println("TEST METRICS REPORT");
+                writer.println("=".repeat(50));
+                
+                // Category breakdown
+                metricsCollector.getCategoryMetrics().forEach((category, metrics) -> {
+                    writer.printf("%s: %d tests, %.1fms avg%n", 
+                        category, metrics.getTestCount(), metrics.getAverageDuration());
+                });
+            }
+            
+            System.out.println("\nReports generated in: " + reportDir.toAbsolutePath());
+            
+        } catch (Exception e) {
+            System.err.println("Error generating reports: " + e.getMessage());
+        }
+    }
+}

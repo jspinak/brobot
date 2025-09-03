@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.logging.DiagnosticLogger;
+import io.github.jspinak.brobot.logging.ConciseFindLogger;
 import io.github.jspinak.brobot.config.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.config.LoggingVerbosityConfig.VerbosityLevel;
 
@@ -50,6 +51,9 @@ public class ScenePatternMatcher {
 
     @Autowired(required = false)
     private DiagnosticLogger diagnosticLogger;
+    
+    @Autowired(required = false)
+    private ConciseFindLogger conciseFindLogger;
     
     @Autowired(required = false)
     private LoggingVerbosityConfig verbosityConfig;
@@ -109,8 +113,10 @@ public class ScenePatternMatcher {
             return new ArrayList<>();
         }
         
-        // Concise region debug in verbose mode only
-        if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
+        // Use concise logger if available for initial pattern info
+        if (conciseFindLogger != null) {
+            conciseFindLogger.logPatternSearch(pattern, scene, org.sikuli.basics.Settings.MinSimilarity);
+        } else if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
             List<io.github.jspinak.brobot.model.element.Region> regions = pattern.getRegions();
             String regionInfo = regions.size() == 1 ? regions.get(0).toString() : regions.size() + " regions";
             ConsoleReporter.println("[REGION] '" + pattern.getName() + "': " + 
@@ -131,20 +137,16 @@ public class ScenePatternMatcher {
         double globalSimilarity = org.sikuli.basics.Settings.MinSimilarity;
         if (Math.abs(sikuliPattern.getSimilar() - globalSimilarity) > 0.01) {
             sikuliPattern = sikuliPattern.similar(globalSimilarity);
-            // Only log similarity changes in verbose mode
-            if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
-                ConsoleReporter.println("[SIMILARITY] Updated '" + pattern.getName() + "' to " + 
-                    String.format("%.2f", globalSimilarity));
-            }
+            // Similarity update is handled by concise logger
         }
         
-        // Log the search attempt using DiagnosticLogger if available
-        if (diagnosticLogger != null) {
+        // Already logged by conciseFindLogger above if available
+        if (conciseFindLogger == null && diagnosticLogger != null) {
             diagnosticLogger.logPatternSearch(pattern, scene, sikuliPattern.getSimilar());
-        } else {
+        } else if (conciseFindLogger == null) {
             // Fallback to ConsoleReporter
             ConsoleReporter.println("[SEARCH] Pattern: '" + pattern.getName() + "' (" + pattern.w() + "x" + pattern.h() + 
-                ") | Similarity: " + sikuliPattern.getSimilar() + "/" + globalSimilarity + " | Scene: " + 
+                ") | Similarity: " + sikuliPattern.getSimilar() + " | Scene: " + 
                 scene.getPattern().w() + "x" + scene.getPattern().h());
         }
         
@@ -161,7 +163,7 @@ public class ScenePatternMatcher {
                   constrainedRegion.w() >= scene.getPattern().w() && 
                   constrainedRegion.h() >= scene.getPattern().h())) {
                 hasConstrainedRegion = true;
-                ConsoleReporter.println("[OPTIMIZED SEARCH] Constraining search to region: " + constrainedRegion);
+                // Region info will be logged when sub-image is created
             }
         }
         
@@ -183,7 +185,9 @@ public class ScenePatternMatcher {
                 f = new Finder(subImage);
                 regionOffsetX = x;
                 regionOffsetY = y;
-                ConsoleReporter.println("[CONSTRAINED] Searching in sub-region: " + x + "," + y + " " + w + "x" + h);
+                if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
+                    ConsoleReporter.println("[SEARCH REGION] Constrained to: " + x + "," + y + " " + w + "x" + h);
+                }
             } else {
                 // Region too small for pattern - impossible to find a match
                 ConsoleReporter.println("[SKIP] Search region (" + w + "x" + h + 
@@ -195,9 +199,13 @@ public class ScenePatternMatcher {
             f = getFinder(scene.getPattern().getImage());
         }
         
-        ConsoleReporter.println("[FINDER] Searching with similarity threshold: " + sikuliPattern.getSimilar());
+        if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
+            ConsoleReporter.println("[FINDER] Similarity: " + sikuliPattern.getSimilar());
+        }
         f.findAll(sikuliPattern);
-        ConsoleReporter.println("[FINDER] Search completed, checking for matches...");
+        if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
+            ConsoleReporter.println("[FINDER] Search complete");
+        }
         
         // Process results
         List<Match> matchList = new ArrayList<>();
@@ -208,6 +216,8 @@ public class ScenePatternMatcher {
         // Reset match tracking for this search
         if (diagnosticLogger != null) {
             diagnosticLogger.resetMatchTracking();
+        } else if (conciseFindLogger != null) {
+            // ConciseFindLogger handles tracking internally
         }
         
         // Get the minimum similarity threshold
@@ -274,44 +284,50 @@ public class ScenePatternMatcher {
             
             matchCount++;
             
-            // Log match details using DiagnosticLogger
-            if (diagnosticLogger != null) {
-                diagnosticLogger.logFoundMatch(matchCount, sikuliMatch.getScore(), sikuliMatch.x, sikuliMatch.y);
-            } else if (matchCount <= 3 && sikuliMatch.getScore() >= 0.50) {
-                // Fallback to ConsoleReporter for first 3 high-score matches only
-                ConsoleReporter.println("  [FOUND #" + matchCount + "] Score: " + 
-                    String.format("%.3f", sikuliMatch.getScore()) + " at (" + 
-                    sikuliMatch.x + ", " + sikuliMatch.y + ")");
+            // Log match details using available logger
+            if (conciseFindLogger == null) {
+                if (diagnosticLogger != null) {
+                    diagnosticLogger.logFoundMatch(matchCount, sikuliMatch.getScore(), sikuliMatch.x, sikuliMatch.y);
+                } else if (matchCount <= 3 && sikuliMatch.getScore() >= 0.50) {
+                    // Fallback to ConsoleReporter for first 3 high-score matches only
+                    ConsoleReporter.println("  [FOUND #" + matchCount + "] Score: " + 
+                        String.format("%.3f", sikuliMatch.getScore()) + " at (" + 
+                        sikuliMatch.x + ", " + sikuliMatch.y + ")");
+                }
             }
+            // ConciseFindLogger will log results summary later
         }
         
         f.destroy();
         
-        // Log match summary with top matches in verbose mode
-        if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
-            if (acceptedMatches > 0) {
-                ConsoleReporter.println("  [MATCH SUMMARY] " + acceptedMatches + " matches found" + 
-                    (rejectedMatches > 0 ? ", " + rejectedMatches + " rejected" : "") + 
-                    " (threshold=" + String.format("%.3f", minSimilarity) + ")");
-                
-                // Show only top 3 matches
-                ConsoleReporter.println("  [TOP MATCHES]");
-                for (int i = 0; i < Math.min(topMatches.size(), MAX_VERBOSE_MATCHES); i++) {
-                    Match m = topMatches.get(i);
-                    ConsoleReporter.println(String.format("    #%d: Score %.3f at %s", 
-                        i + 1, m.getScore(), m.getRegion()));
+        // Log match summary
+        if (conciseFindLogger == null) {
+            // Use legacy verbose logging
+            if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
+                if (acceptedMatches > 0) {
+                    ConsoleReporter.println("  [MATCH SUMMARY] " + acceptedMatches + " matches found" + 
+                        (rejectedMatches > 0 ? ", " + rejectedMatches + " rejected" : "") + 
+                        " (threshold=" + String.format("%.3f", minSimilarity) + ")");
+                    
+                    // Show only top 3 matches
+                    ConsoleReporter.println("  [TOP MATCHES]");
+                    for (int i = 0; i < Math.min(topMatches.size(), MAX_VERBOSE_MATCHES); i++) {
+                        Match m = topMatches.get(i);
+                        ConsoleReporter.println(String.format("    #%d: Score %.3f at %s", 
+                            i + 1, m.getScore(), m.getRegion()));
+                    }
+                    
+                    if (acceptedMatches > MAX_VERBOSE_MATCHES) {
+                        ConsoleReporter.println("    ... and " + (acceptedMatches - MAX_VERBOSE_MATCHES) + 
+                            " more matches");
+                    }
                 }
-                
-                if (acceptedMatches > MAX_VERBOSE_MATCHES) {
-                    ConsoleReporter.println("    ... and " + (acceptedMatches - MAX_VERBOSE_MATCHES) + 
-                        " more matches");
+            } else if (matchCount > 1 || rejectedMatches > 0) {
+                // Normal mode - simpler summary
+                if (acceptedMatches > 0) {
+                    ConsoleReporter.println("  [MATCHES] " + acceptedMatches + " accepted, " + 
+                        rejectedMatches + " rejected (threshold=" + String.format("%.2f", minSimilarity) + ")");
                 }
-            }
-        } else if (matchCount > 1 || rejectedMatches > 0) {
-            // Normal mode - simpler summary
-            if (acceptedMatches > 0) {
-                ConsoleReporter.println("  [MATCHES] " + acceptedMatches + " accepted, " + 
-                    rejectedMatches + " rejected (threshold=" + String.format("%.2f", minSimilarity) + ")");
             }
         }
         
@@ -320,19 +336,20 @@ public class ScenePatternMatcher {
             diagnosticLogger.logLowScoreSummary();
         }
         
-        // Log results using DiagnosticLogger
-        if (diagnosticLogger != null) {
+        // Log results using appropriate logger
+        if (conciseFindLogger != null) {
+            // Use concise logger
+            boolean foundAtLowerThreshold = (matchList.isEmpty() && matchCount > 0 && bestScore > 0);
+            conciseFindLogger.logPatternResult(pattern, matchList.size(), bestScore, foundAtLowerThreshold);
+        } else if (diagnosticLogger != null) {
             diagnosticLogger.logPatternResult(pattern, matchList.size(), bestScore);
         } else {
             // Fallback to ConsoleReporter
             if (matchList.isEmpty()) {
-                ConsoleReporter.println("  [RESULT] NO MATCHES for '" + pattern.getName() + 
-                    "' (examined " + matchCount + " candidates, none met threshold " + 
-                    String.format("%.3f", minSimilarity) + ")");
+                ConsoleReporter.println("  [RESULT] NO MATCHES for '" + pattern.getName() + "'");
             } else {
-                ConsoleReporter.println("  [RESULT] " + matchList.size() + " matches accepted for '" + pattern.getName() + 
-                    "' (from " + matchCount + " candidates) | Best score: " + String.format("%.3f", bestScore) +
-                    " | Threshold: " + String.format("%.3f", minSimilarity));
+                ConsoleReporter.println("  [RESULT] " + matchList.size() + " matches for '" + pattern.getName() + 
+                    "' | Best: " + String.format("%.3f", bestScore));
             }
         }
         

@@ -11,6 +11,7 @@ import io.github.jspinak.brobot.action.internal.region.SearchRegionDependencyReg
 import io.github.jspinak.brobot.action.internal.utility.ActionSuccessCriteria;
 import io.github.jspinak.brobot.analysis.color.profiles.ProfileSetBuilder;
 import io.github.jspinak.brobot.analysis.match.MatchFusion;
+import io.github.jspinak.brobot.logging.ConciseFindLogger;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.element.SearchRegionOnObject;
 import io.github.jspinak.brobot.model.state.StateImage;
@@ -69,6 +70,7 @@ public class FindPipeline {
     private final VisualFeedbackConfig visualFeedbackConfig;
     private final ModernFindStrategyRegistry findStrategyRegistry;
     private final ActionSuccessCriteria actionSuccessCriteria;
+    private final ConciseFindLogger conciseFindLogger;
     
     @Value("${brobot.highlighting.enabled:false}")
     private boolean highlightEnabled;
@@ -86,7 +88,8 @@ public class FindPipeline {
                        HighlightManager highlightManager,
                        VisualFeedbackConfig visualFeedbackConfig,
                        ModernFindStrategyRegistry findStrategyRegistry,
-                       ActionSuccessCriteria actionSuccessCriteria) {
+                       ActionSuccessCriteria actionSuccessCriteria,
+                       @Autowired(required = false) ConciseFindLogger conciseFindLogger) {
         this.profileSetBuilder = profileSetBuilder;
         this.offsetLocationManager = offsetLocationManager;
         this.matchFusion = matchFusion;
@@ -100,6 +103,7 @@ public class FindPipeline {
         this.visualFeedbackConfig = visualFeedbackConfig;
         this.findStrategyRegistry = findStrategyRegistry;
         this.actionSuccessCriteria = actionSuccessCriteria;
+        this.conciseFindLogger = conciseFindLogger;
     }
 
     /**
@@ -181,6 +185,12 @@ public class FindPipeline {
      * @param objectCollections The collections of objects to search for
      */
     public void execute(BaseFindOptions findOptions, ActionResult matches, ObjectCollection... objectCollections) {
+        // Start a new find session for concise logging
+        String sessionId = "find-" + System.currentTimeMillis();
+        if (conciseFindLogger != null) {
+            conciseFindLogger.startSearchSession(sessionId);
+        }
+        
         // CRITICAL: Order StateImages by dependencies BEFORE searching
         // This ensures that images without dependencies are searched first,
         // and their locations can be used to constrain searches for dependent images
@@ -237,6 +247,11 @@ public class FindPipeline {
         // This ensures success is evaluated before the ActionLifecycleAspect logs the result
         if (matches.getActionConfig() != null) {
             actionSuccessCriteria.set(matches.getActionConfig(), matches);
+        }
+        
+        // End the find session for concise logging
+        if (conciseFindLogger != null) {
+            conciseFindLogger.endSearchSession(sessionId, matches.isSuccess(), matches.size());
         }
     }
 

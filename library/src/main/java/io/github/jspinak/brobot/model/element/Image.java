@@ -2,7 +2,11 @@ package io.github.jspinak.brobot.model.element;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import io.github.jspinak.brobot.json.serializers.BufferedImageSerializer;
+import io.github.jspinak.brobot.json.serializers.BufferedImageDeserializer;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 import io.github.jspinak.brobot.util.image.core.ImageConverter;
@@ -59,7 +63,8 @@ public class Image {
 
     private String name;
 
-    @JsonIgnore
+    @JsonSerialize(using = BufferedImageSerializer.class)
+    @JsonDeserialize(using = BufferedImageDeserializer.class)
     private BufferedImage bufferedImage;
 
     public Image(BufferedImage bufferedImage) {

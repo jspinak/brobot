@@ -102,15 +102,28 @@ public class ExecutionEnvironmentTest extends BrobotTestBase {
         @Test
         @DisplayName("Should detect display when not headless")
         void shouldDetectDisplayWhenNotHeadless() {
-            // In test environment with BrobotTestBase, we're in mock mode
-            // But we can test the logic with a non-mock environment
-            ExecutionEnvironment env = ExecutionEnvironment.builder()
-                .mockMode(false)
-                .forceHeadless(false)
-                .build();
+            // In test environment with BrobotTestBase, hasDisplay() returns false due to test mode
+            // We need to temporarily clear test mode to test the actual logic
+            String originalTestMode = System.getProperty("brobot.test.mode");
+            String originalTestType = System.getProperty("brobot.test.type");
             
-            // Should have display when forced not headless
-            assertTrue(env.hasDisplay());
+            try {
+                // Temporarily disable test mode to test actual display logic
+                System.clearProperty("brobot.test.mode");
+                System.clearProperty("brobot.test.type");
+                
+                ExecutionEnvironment env = ExecutionEnvironment.builder()
+                    .mockMode(false)
+                    .forceHeadless(false)
+                    .build();
+                
+                // Should have display when forced not headless
+                assertTrue(env.hasDisplay());
+            } finally {
+                // Restore test mode
+                if (originalTestMode != null) System.setProperty("brobot.test.mode", originalTestMode);
+                if (originalTestType != null) System.setProperty("brobot.test.type", originalTestType);
+            }
         }
         
         @Test
@@ -132,35 +145,61 @@ public class ExecutionEnvironmentTest extends BrobotTestBase {
         @Test
         @DisplayName("Should refresh display cache on demand")
         void shouldRefreshDisplayCacheOnDemand() {
-            ExecutionEnvironment env = ExecutionEnvironment.builder()
-                .forceHeadless(true)
-                .build();
+            // In test mode, hasDisplay() always returns false regardless of forceHeadless
+            // We need to temporarily disable test mode
+            String originalTestMode = System.getProperty("brobot.test.mode");
+            String originalTestType = System.getProperty("brobot.test.type");
             
-            // Initial check
-            assertFalse(env.hasDisplay());
-            
-            // Change configuration
-            env = ExecutionEnvironment.builder()
-                .forceHeadless(false)
-                .build();
-            ExecutionEnvironment.setInstance(env);
-            
-            // Refresh cache
-            env.refreshDisplayCheck();
-            
-            // Should reflect new configuration
-            assertTrue(env.hasDisplay());
+            try {
+                System.clearProperty("brobot.test.mode");
+                System.clearProperty("brobot.test.type");
+                
+                ExecutionEnvironment env = ExecutionEnvironment.builder()
+                    .forceHeadless(true)
+                    .build();
+                
+                // Initial check
+                assertFalse(env.hasDisplay());
+                
+                // Change configuration
+                env = ExecutionEnvironment.builder()
+                    .forceHeadless(false)
+                    .build();
+                ExecutionEnvironment.setInstance(env);
+                
+                // Refresh cache
+                env.refreshDisplayCheck();
+                
+                // Should reflect new configuration
+                assertTrue(env.hasDisplay());
+            } finally {
+                if (originalTestMode != null) System.setProperty("brobot.test.mode", originalTestMode);
+                if (originalTestType != null) System.setProperty("brobot.test.type", originalTestType);
+            }
         }
         
         @ParameterizedTest
         @DisplayName("Should respect forceHeadless setting")
         @ValueSource(booleans = {true, false})
         void shouldRespectForceHeadlessSetting(boolean forceHeadless) {
-            ExecutionEnvironment env = ExecutionEnvironment.builder()
-                .forceHeadless(forceHeadless)
-                .build();
+            // In test mode, hasDisplay() always returns false
+            // We need to temporarily disable test mode to test forceHeadless logic
+            String originalTestMode = System.getProperty("brobot.test.mode");
+            String originalTestType = System.getProperty("brobot.test.type");
             
-            assertEquals(!forceHeadless, env.hasDisplay());
+            try {
+                System.clearProperty("brobot.test.mode");
+                System.clearProperty("brobot.test.type");
+                
+                ExecutionEnvironment env = ExecutionEnvironment.builder()
+                    .forceHeadless(forceHeadless)
+                    .build();
+                
+                assertEquals(!forceHeadless, env.hasDisplay());
+            } finally {
+                if (originalTestMode != null) System.setProperty("brobot.test.mode", originalTestMode);
+                if (originalTestType != null) System.setProperty("brobot.test.type", originalTestType);
+            }
         }
     }
     
@@ -232,12 +271,25 @@ public class ExecutionEnvironmentTest extends BrobotTestBase {
         @Test
         @DisplayName("Should not skip SikuliX with display and no mock")
         void shouldNotSkipSikuliXWithDisplayAndNoMock() {
-            ExecutionEnvironment env = ExecutionEnvironment.builder()
-                .mockMode(false)
-                .forceHeadless(false)
-                .build();
+            // In test mode, hasDisplay() returns false, so shouldSkipSikuliX() returns true
+            // We need to test without test mode
+            String originalTestMode = System.getProperty("brobot.test.mode");
+            String originalTestType = System.getProperty("brobot.test.type");
             
-            assertFalse(env.shouldSkipSikuliX());
+            try {
+                System.clearProperty("brobot.test.mode");
+                System.clearProperty("brobot.test.type");
+                
+                ExecutionEnvironment env = ExecutionEnvironment.builder()
+                    .mockMode(false)
+                    .forceHeadless(false)
+                    .build();
+                
+                assertFalse(env.shouldSkipSikuliX());
+            } finally {
+                if (originalTestMode != null) System.setProperty("brobot.test.mode", originalTestMode);
+                if (originalTestType != null) System.setProperty("brobot.test.type", originalTestType);
+            }
         }
     }
     
@@ -285,18 +337,30 @@ public class ExecutionEnvironmentTest extends BrobotTestBase {
         @Test
         @DisplayName("Should build with all options")
         void shouldBuildWithAllOptions() {
-            ExecutionEnvironment env = ExecutionEnvironment.builder()
-                .mockMode(true)
-                .forceHeadless(false)
-                .allowScreenCapture(true)
-                .verboseLogging(true)
-                .build();
+            // Temporarily disable test mode to test forceHeadless=false
+            String originalTestMode = System.getProperty("brobot.test.mode");
+            String originalTestType = System.getProperty("brobot.test.type");
             
-            assertTrue(env.isMockMode());
-            assertTrue(env.hasDisplay()); // forceHeadless is false
-            // canCaptureScreen is false in mock mode
-            assertFalse(env.canCaptureScreen());
-            // verboseLogging is set but not exposed via getter
+            try {
+                System.clearProperty("brobot.test.mode");
+                System.clearProperty("brobot.test.type");
+                
+                ExecutionEnvironment env = ExecutionEnvironment.builder()
+                    .mockMode(true)
+                    .forceHeadless(false)
+                    .allowScreenCapture(true)
+                    .verboseLogging(true)
+                    .build();
+                
+                assertTrue(env.isMockMode());
+                assertTrue(env.hasDisplay()); // forceHeadless is false
+                // canCaptureScreen is false in mock mode
+                assertFalse(env.canCaptureScreen());
+                // verboseLogging is set but not exposed via getter
+            } finally {
+                if (originalTestMode != null) System.setProperty("brobot.test.mode", originalTestMode);
+                if (originalTestType != null) System.setProperty("brobot.test.type", originalTestType);
+            }
         }
         
         @Test
@@ -377,21 +441,34 @@ public class ExecutionEnvironmentTest extends BrobotTestBase {
         @Test
         @DisplayName("Should handle environment changes")
         void shouldHandleEnvironmentChanges() {
-            ExecutionEnvironment env = ExecutionEnvironment.builder()
-                .mockMode(false)
-                .forceHeadless(true)
-                .build();
+            // In test mode, hasDisplay() always returns false
+            // We need to temporarily disable test mode
+            String originalTestMode = System.getProperty("brobot.test.mode");
+            String originalTestType = System.getProperty("brobot.test.type");
             
-            assertFalse(env.hasDisplay());
-            
-            // Simulate environment change
-            env = ExecutionEnvironment.builder()
-                .mockMode(false)
-                .forceHeadless(false)
-                .build();
-            ExecutionEnvironment.setInstance(env);
-            
-            assertTrue(env.hasDisplay());
+            try {
+                System.clearProperty("brobot.test.mode");
+                System.clearProperty("brobot.test.type");
+                
+                ExecutionEnvironment env = ExecutionEnvironment.builder()
+                    .mockMode(false)
+                    .forceHeadless(true)
+                    .build();
+                
+                assertFalse(env.hasDisplay());
+                
+                // Simulate environment change
+                env = ExecutionEnvironment.builder()
+                    .mockMode(false)
+                    .forceHeadless(false)
+                    .build();
+                ExecutionEnvironment.setInstance(env);
+                
+                assertTrue(env.hasDisplay());
+            } finally {
+                if (originalTestMode != null) System.setProperty("brobot.test.mode", originalTestMode);
+                if (originalTestType != null) System.setProperty("brobot.test.type", originalTestType);
+            }
         }
         
         @Test
