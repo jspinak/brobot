@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.startup;
 
 import io.github.jspinak.brobot.config.ConfigurationDiagnostics;
+import io.github.jspinak.brobot.config.FrameworkSettings;
 import io.github.jspinak.brobot.config.ImagePathManager;
 import io.github.jspinak.brobot.config.SmartImageLoader;
 import io.github.jspinak.brobot.model.state.State;
@@ -416,10 +417,17 @@ public class ApplicationStartupVerifier {
                 log.info("Cleared {} pre-existing active states", previousCount);
             }
             
-            // Wait for UI stabilization if configured
-            if (config.getUiStabilizationDelay() > 0) {
+            // Wait for UI stabilization if configured (skip in test mode)
+            String testType = System.getProperty("brobot.test.type");
+            boolean isTestMode = "unit".equals(testType) || 
+                                "true".equals(System.getProperty("brobot.test.mode")) || 
+                                FrameworkSettings.mock;
+            
+            if (!isTestMode && config.getUiStabilizationDelay() > 0) {
                 log.debug("Waiting {} seconds for UI to stabilize...", config.getUiStabilizationDelay());
                 Thread.sleep((long)(config.getUiStabilizationDelay() * 1000));
+            } else if (isTestMode) {
+                log.debug("Test mode detected - skipping UI stabilization delay");
             }
             
             // Verify expected states

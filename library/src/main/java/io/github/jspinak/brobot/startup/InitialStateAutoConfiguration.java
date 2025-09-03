@@ -139,10 +139,15 @@ public class InitialStateAutoConfiguration {
         log.info("════════════════════════════════════════════════════════");
         
         try {
-            // Apply initial delay in real mode to let GUI stabilize
-            if (!FrameworkSettings.mock && initialDelay > 0) {
+            // Apply initial delay in real mode to let GUI stabilize (skip in test mode)
+            String testType = System.getProperty("brobot.test.type");
+            boolean isTestMode = "unit".equals(testType) || "true".equals(System.getProperty("brobot.test.mode"));
+            
+            if (!FrameworkSettings.mock && !isTestMode && initialDelay > 0) {
                 log.info("Waiting {} seconds before initial state verification (real mode)", initialDelay);
                 TimeUnit.SECONDS.sleep(initialDelay);
+            } else if (isTestMode || FrameworkSettings.mock) {
+                log.debug("Test/Mock mode detected - skipping initial delay");
             }
             
             // Find and activate initial states

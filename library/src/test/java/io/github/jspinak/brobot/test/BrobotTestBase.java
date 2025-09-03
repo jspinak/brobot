@@ -28,11 +28,19 @@ public abstract class BrobotTestBase {
         // Set test profile to use test-specific configuration
         System.setProperty("spring.profiles.active", "test");
         
-        // Disable blocking @PostConstruct operations during tests
+        // Set test mode FIRST to prevent any blocking initialization
+        System.setProperty("brobot.test.mode", "true");
         System.setProperty("brobot.test.type", "unit");
+        
+        // Disable blocking @PostConstruct operations during tests
         System.setProperty("brobot.diagnostics.image-loading.enabled", "false");
         System.setProperty("brobot.logging.capture.enabled", "false");
         System.setProperty("brobot.startup.verification.enabled", "false");
+        
+        // Disable all startup delays
+        System.setProperty("brobot.startup.delay", "0");
+        System.setProperty("brobot.startup.initial.delay", "0");
+        System.setProperty("brobot.startup.ui.stabilization.delay", "0");
         
         // Ensure headless mode for all tests
         System.setProperty("java.awt.headless", "true");

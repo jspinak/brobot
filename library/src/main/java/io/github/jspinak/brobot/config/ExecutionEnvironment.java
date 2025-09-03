@@ -47,21 +47,27 @@ import java.awt.HeadlessException;
 public class ExecutionEnvironment {
     
     static {
-        // Set java.awt.headless=false as the default for GUI automation
-        // Override even if already set, unless explicitly preserved via system property
-        String currentHeadless = System.getProperty("java.awt.headless");
-        String preserveHeadless = System.getProperty("brobot.preserve.headless.setting");
-        
-        if ("true".equals(preserveHeadless)) {
-            log.debug("Preserving existing java.awt.headless setting: {}", currentHeadless);
+        // Skip headless configuration in test mode to prevent blocking
+        String testType = System.getProperty("brobot.test.type");
+        if ("unit".equals(testType) || "true".equals(System.getProperty("brobot.test.mode"))) {
+            log.debug("Test mode detected - skipping headless configuration");
         } else {
-            // Always set to false for GUI automation, unless explicitly preserved
-            System.setProperty("java.awt.headless", "false");
-            if (currentHeadless != null && !"false".equals(currentHeadless)) {
-                log.info("Overrode java.awt.headless from '{}' to 'false' for GUI automation. " +
-                        "Set -Dbrobot.preserve.headless.setting=true to preserve original setting.", currentHeadless);
+            // Set java.awt.headless=false as the default for GUI automation
+            // Override even if already set, unless explicitly preserved via system property
+            String currentHeadless = System.getProperty("java.awt.headless");
+            String preserveHeadless = System.getProperty("brobot.preserve.headless.setting");
+            
+            if ("true".equals(preserveHeadless)) {
+                log.debug("Preserving existing java.awt.headless setting: {}", currentHeadless);
             } else {
-                log.debug("Set java.awt.headless=false for GUI automation");
+                // Always set to false for GUI automation, unless explicitly preserved
+                System.setProperty("java.awt.headless", "false");
+                if (currentHeadless != null && !"false".equals(currentHeadless)) {
+                    log.info("Overrode java.awt.headless from '{}' to 'false' for GUI automation. " +
+                            "Set -Dbrobot.preserve.headless.setting=true to preserve original setting.", currentHeadless);
+                } else {
+                    log.debug("Set java.awt.headless=false for GUI automation");
+                }
             }
         }
     }
@@ -157,6 +163,12 @@ public class ExecutionEnvironment {
      * @return true if display is available
      */
     private boolean performDisplayCheck() {
+        // Fast path for test mode - avoid any display checks
+        String testType = System.getProperty("brobot.test.type");
+        if ("unit".equals(testType) || "true".equals(System.getProperty("brobot.test.mode"))) {
+            return false; // Always return false (no display) in test mode
+        }
+        
         // Check OS type first
         String os = System.getProperty("os.name").toLowerCase();
         boolean isMac = os.contains("mac");
