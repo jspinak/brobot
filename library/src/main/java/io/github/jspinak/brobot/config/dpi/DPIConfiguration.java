@@ -16,6 +16,11 @@ import jakarta.annotation.PostConstruct;
 @Order(1) // Run early in startup sequence
 public class DPIConfiguration {
     
+    static {
+        // Ensure DPI awareness settings are applied before any AWT initialization
+        DPIAwarenessDisabler.ensureInitialized();
+    }
+    
     @Value("${brobot.dpi.resize-factor:auto}")
     private String resizeFactorConfig;
     
@@ -33,6 +38,9 @@ public class DPIConfiguration {
         // Configure DPI scaling IMMEDIATELY after bean construction
         // This ensures Settings.AlwaysResize is set before ANY patterns are loaded
         System.out.println("\n=== Brobot DPI Configuration ===");
+        
+        // Report DPI awareness status
+        System.out.println("DPI Status: " + DPIAwarenessDisabler.getDPIStatus());
         
         // Configure similarity threshold
         Settings.MinSimilarity = similarityThreshold;

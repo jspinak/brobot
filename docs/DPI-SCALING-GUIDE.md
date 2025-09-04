@@ -4,6 +4,8 @@
 
 DPI scaling issues are one of the most common causes of pattern matching failures in Brobot. This guide explains how DPI scaling works and how to configure Brobot for optimal pattern matching.
 
+> **UPDATE (v1.1.0+)**: Brobot now **disables DPI awareness by default** in Java 21+, ensuring captures are at physical resolution for maximum compatibility with SikuliX IDE patterns.
+
 ## Key Concepts
 
 ### Physical vs Logical Pixels
@@ -24,6 +26,24 @@ Different tools capture patterns differently:
 3. **Screenshot tools**: May capture in either, depending on DPI-awareness
 
 ## Configuration
+
+### DPI Awareness Control (New in v1.1.0+)
+
+By default, Brobot disables DPI awareness to capture at physical resolution:
+
+```properties
+# application.properties
+
+# Disable DPI awareness for physical resolution capture (default: true)
+brobot.dpi.disable=true
+
+# To enable DPI awareness (capture at logical resolution)
+brobot.dpi.disable=false
+```
+
+You can also control this via:
+- Environment variable: `BROBOT_DISABLE_DPI=true`
+- JVM argument: `-Dbrobot.dpi.disable=true`
 
 ### Automatic DPI Detection (Recommended)
 

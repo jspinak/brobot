@@ -87,10 +87,7 @@ jobs:
 
       - name: Run tests with Python script
         run: |
-          python3 library/scripts/run-all-tests.py library \
-            --mode sequential \
-            --timeout 60 \
-            --retry-failed
+          python3 library/scripts/run-all-tests.py library --mode sequential --timeout 60 --retry-failed
         env:
           # Activate CI profile
           SPRING_PROFILES_ACTIVE: "ci"
