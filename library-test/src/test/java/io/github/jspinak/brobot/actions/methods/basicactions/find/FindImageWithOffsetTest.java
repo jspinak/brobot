@@ -124,9 +124,9 @@ public class FindImageWithOffsetTest extends BrobotIntegrationTestBase {
                                 + loc2.getCalculatedY());
 
                 // Verify offset is applied correctly
-                assertEquals(loc2.getCalculatedX() + 10, loc1.getCalculatedX(),
+                assertEquals(loc1.getCalculatedX(), loc2.getCalculatedX() + 10,
                                 "X coordinate should be offset by 10");
-                assertEquals(loc2.getCalculatedY() + 10, loc1.getCalculatedY(),
+                assertEquals(loc1.getCalculatedY(), loc2.getCalculatedY() + 10,
                                 "Y coordinate should be offset by 10");
         }
 
