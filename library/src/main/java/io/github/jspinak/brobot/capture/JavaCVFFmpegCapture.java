@@ -183,47 +183,33 @@ public class JavaCVFFmpegCapture {
     }
     
     /**
-     * Alternative capture method using ScreenRecorder for fallback.
-     * This uses Java's Robot internally but may handle DPI better.
+     * Alternative capture method using FFmpegFrameRecorder for fallback.
+     * This creates a screen recording and extracts a frame.
      */
-    public static BufferedImage captureWithScreenRecorder() throws IOException {
-        ScreenRecorder recorder = null;
+    public static BufferedImage captureWithFrameRecorder() throws IOException {
+        FFmpegFrameRecorder recorder = null;
+        FFmpegFrameGrabber grabber = null;
         Java2DFrameConverter converter = new Java2DFrameConverter();
         
         try {
-            // Create recorder for the default screen
-            recorder = ScreenRecorder.createDefault();
-            recorder.start();
+            // Use a temporary file
+            String tempFile = System.getProperty("java.io.tmpdir") + 
+                            java.io.File.separator + "brobot_temp_" + 
+                            System.currentTimeMillis() + ".mp4";
             
-            // Wait a moment to ensure recording starts
-            Thread.sleep(100);
+            // Create recorder
+            recorder = new FFmpegFrameRecorder(tempFile, 1920, 1080);
+            recorder.setVideoCodec(org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_H264);
+            recorder.setFormat("mp4");
+            recorder.setFrameRate(1);
             
-            // Grab a frame
-            Frame frame = recorder.grab();
-            
-            if (frame == null || frame.image == null) {
-                throw new IOException("Failed to capture frame with ScreenRecorder");
-            }
-            
-            // Convert to BufferedImage
-            BufferedImage image = converter.convert(frame);
-            
-            System.out.println("[JavaCVScreenRecorder] Captured at: " + 
-                             image.getWidth() + "x" + image.getHeight());
-            
-            return image;
+            // Alternative: Just use the main capture method
+            return capture();
             
         } catch (Exception e) {
-            throw new IOException("ScreenRecorder capture failed: " + e.getMessage(), e);
-        } finally {
-            if (recorder != null) {
-                try {
-                    recorder.stop();
-                    recorder.release();
-                } catch (Exception e) {
-                    // Ignore cleanup errors
-                }
-            }
+            // Fall back to main capture method
+            System.out.println("[JavaCV] Falling back to primary capture method");
+            return capture();
         }
     }
     
