@@ -5,7 +5,7 @@ import org.sikuli.script.ScreenImage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
