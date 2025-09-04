@@ -31,6 +31,9 @@ public class ScreenshotCaptureTest extends BrobotTestBase {
     private SaveToFile saveToFile;
     
     @Mock
+    private io.github.jspinak.brobot.capture.BrobotCaptureService captureService;
+    
+    @Mock
     private Screen mockScreen;
     
     @Mock
@@ -57,7 +60,7 @@ public class ScreenshotCaptureTest extends BrobotTestBase {
         g.fillRect(100, 100, 200, 200);
         g.dispose();
         
-        screenshotCapture = new ScreenshotCapture(saveToFile);
+        screenshotCapture = new ScreenshotCapture(saveToFile, captureService);
     }
     
     @Test
