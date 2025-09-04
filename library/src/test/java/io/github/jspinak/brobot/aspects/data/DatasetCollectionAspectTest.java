@@ -69,6 +69,9 @@ public class DatasetCollectionAspectTest extends BrobotTestBase {
         ReflectionTestUtils.setField(aspect, "batchSize", 10);
         ReflectionTestUtils.setField(aspect, "maxQueueSize", 100);
         
+        // Mock BrobotLogger to avoid NullPointerException
+        lenient().when(brobotLogger.log()).thenReturn(mock(io.github.jspinak.brobot.logging.unified.LogBuilder.class));
+        
         // Initialize the aspect
         aspect.init();
         

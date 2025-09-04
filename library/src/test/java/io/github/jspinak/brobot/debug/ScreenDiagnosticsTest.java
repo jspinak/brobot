@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.debug;
 
+import io.github.jspinak.brobot.debug.DebugTestBase;
+
 import io.github.jspinak.brobot.test.BrobotTestBase;
 
 import org.junit.jupiter.api.Test;
@@ -8,7 +10,7 @@ import java.awt.*;
 /**
  * Diagnostic test to understand screen configuration and potential offset issues.
  */
-public class ScreenDiagnosticsTest extends BrobotTestBase {
+public class ScreenDiagnosticsTest extends DebugTestBase {
     
     @Test
     public void diagnoseScreenConfiguration() {

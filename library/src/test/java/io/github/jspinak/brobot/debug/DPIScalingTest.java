@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.debug;
 
+import io.github.jspinak.brobot.debug.DebugTestBase;
+
 import io.github.jspinak.brobot.test.BrobotTestBase;
 
 import io.github.jspinak.brobot.config.dpi.DPIAutoDetector;
@@ -19,7 +21,7 @@ import java.io.File;
 /**
  * Tests DPI scaling detection and automatic compensation.
  */
-public class DPIScalingTest extends BrobotTestBase {
+public class DPIScalingTest extends DebugTestBase {
     
     @Test
     public void testDPIScalingDetection() {

@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.debug;
 
+import io.github.jspinak.brobot.debug.DebugTestBase;
+
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
 
@@ -18,7 +20,7 @@ import java.util.List;
  * Test to determine if there's a consistent offset pattern in SikuliX operations.
  * If the offset is consistent, we can create a compensation mechanism.
  */
-public class OffsetPatternAnalysisTest extends BrobotTestBase {
+public class OffsetPatternAnalysisTest extends DebugTestBase {
     
     static class OffsetData {
         int expectedX, expectedY;

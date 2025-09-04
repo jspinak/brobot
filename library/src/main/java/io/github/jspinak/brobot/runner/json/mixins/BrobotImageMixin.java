@@ -2,6 +2,8 @@ package io.github.jspinak.brobot.runner.json.mixins;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.bytedeco.opencv.opencv_core.Mat;
 
 import java.awt.image.BufferedImage;
@@ -28,9 +30,12 @@ import java.awt.image.BufferedImage;
  * @see org.bytedeco.opencv.opencv_core.Mat
  * @see com.fasterxml.jackson.databind.ObjectMapper#addMixIn(Class, Class)
  */
-@JsonIgnoreProperties({"bufferedImage", "matBGR", "matHSV", "sikuli"})
+@JsonIgnoreProperties({"matBGR", "matHSV", "sikuli"})
 public abstract class BrobotImageMixin {
-    @JsonIgnore
+    // Override the @JsonIgnore on the getBufferedImage method to allow serialization
+    // when using BrobotObjectMapper with custom serializers
+    @JsonSerialize(using = io.github.jspinak.brobot.json.serializers.BufferedImageSerializer.class)
+    @JsonDeserialize(using = io.github.jspinak.brobot.json.serializers.BufferedImageDeserializer.class)
     abstract public BufferedImage getBufferedImage();
 
     @JsonIgnore

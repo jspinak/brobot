@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.debug;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.debug.DebugTestBase;
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
 
 import org.junit.jupiter.api.Test;
@@ -17,7 +17,7 @@ import java.io.File;
  * Definitive test to prove that file path vs BufferedImage loading makes no difference,
  * and that Settings.AlwaysResize is the real solution.
  */
-public class DefinitivePatternTest extends BrobotTestBase {
+public class DefinitivePatternTest extends DebugTestBase {
     
     @Test
     public void proveLoadingMethodsAreIdentical() throws Exception {

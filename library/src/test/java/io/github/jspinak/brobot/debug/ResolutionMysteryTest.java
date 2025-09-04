@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.debug;
 
+import io.github.jspinak.brobot.debug.DebugTestBase;
+
 import io.github.jspinak.brobot.test.BrobotTestBase;
 
 import org.junit.jupiter.api.Test;
@@ -14,7 +16,7 @@ import java.io.File;
  * Test to understand why Brobot sometimes captures at 1536x864 and sometimes at 1920x1080.
  * This is the KEY to understanding the pattern matching discrepancy!
  */
-public class ResolutionMysteryTest extends BrobotTestBase {
+public class ResolutionMysteryTest extends DebugTestBase {
     
     @Test
     public void investigateResolutionChanges() throws Exception {

@@ -10,7 +10,8 @@ import io.github.jspinak.brobot.json.serializers.BufferedImageDeserializer;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 import io.github.jspinak.brobot.util.image.core.ImageConverter;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.opencv.opencv_core.Mat;
 import java.awt.*;
@@ -57,14 +58,14 @@ import static java.awt.image.BufferedImage.TYPE_BYTE_BINARY;
  * @see ImageConverter
  */
 @Slf4j
-@Data
+@Getter
+@Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Image {
 
     private String name;
 
-    @JsonSerialize(using = BufferedImageSerializer.class)
-    @JsonDeserialize(using = BufferedImageDeserializer.class)
+    @JsonIgnore  // Ignore by default, mixin can override
     private BufferedImage bufferedImage;
 
     public Image(BufferedImage bufferedImage) {
@@ -97,6 +98,11 @@ public class Image {
 
     public Image(org.sikuli.script.Image image) {
         this.bufferedImage = image.get();
+    }
+
+    // Default constructor for Jackson deserialization
+    public Image() {
+        // Empty constructor - bufferedImage will be set via setter
     }
 
     /**
@@ -162,6 +168,9 @@ public class Image {
     public void setName(String name) {
         this.name = name;
     }
+
+    // Lombok @Getter will generate getBufferedImage()
+    // Add @JsonIgnore to the field to ignore it by default, mixin can override
 
     public void setBufferedImage(BufferedImage bufferedImage) {
         this.bufferedImage = bufferedImage;

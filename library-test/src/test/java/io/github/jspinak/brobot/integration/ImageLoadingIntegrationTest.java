@@ -2,7 +2,8 @@ package io.github.jspinak.brobot.integration;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
-import io.github.jspinak.brobot.config.EarlyImagePathInitializer;io.github.jspinak.brobot.config.core.ImagePathManager;
+import io.github.jspinak.brobot.config.EarlyImagePathInitializer;
+import io.github.jspinak.brobot.config.core.ImagePathManager;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.state.State;

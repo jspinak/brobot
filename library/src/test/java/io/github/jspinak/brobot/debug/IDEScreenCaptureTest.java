@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.debug;
 
+import io.github.jspinak.brobot.debug.DebugTestBase;
+
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
 
@@ -16,7 +18,7 @@ import java.io.IOException;
  * Test that mimics exactly how SikuliX IDE captures screenshots.
  * This will help us understand why IDE patterns are sharp.
  */
-public class IDEScreenCaptureTest extends BrobotTestBase {
+public class IDEScreenCaptureTest extends DebugTestBase {
     
     @Test
     public void testIDEStyleCapture() throws Exception {

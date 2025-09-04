@@ -37,8 +37,8 @@ public class QuietFormatterTest extends BrobotTestBase {
         super.setupTest();
         formatter = new QuietFormatter();
         
-        // Setup default mocks
-        when(actionResult.getExecutionContext()).thenReturn(context);
+        // Setup default mocks with lenient stubbing to avoid unnecessary stubbing exceptions
+        lenient().when(actionResult.getExecutionContext()).thenReturn(context);
     }
     
     @Test
@@ -243,7 +243,7 @@ public class QuietFormatterTest extends BrobotTestBase {
         
         // Assert
         assertNotNull(result);
-        assertEquals("✓ Element • 100ms", result);
+        assertEquals("✓ Action Element • 100ms", result);
     }
     
     @Test
@@ -434,8 +434,9 @@ public class QuietFormatterTest extends BrobotTestBase {
         
         // Assert
         assertNotNull(result);
-        // Text should be truncated at 50 chars (47 + "...")
-        assertTrue(result.contains("This is a very long text that exceeds the maxi..."));
+        // Text should be truncated at 50 chars (47 + "...") and wrapped in quotes
+        assertTrue(result.contains("\"This is a very long text that exceeds the maxim...\""), 
+                  "Result should contain truncated text. Actual: " + result);
         assertTrue(result.contains("• 100ms"));
     }
 }

@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.debug;
 
+import io.github.jspinak.brobot.debug.DebugTestBase;
+
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
 
@@ -15,7 +17,7 @@ import java.util.Scanner;
  * Systematic test to determine how SikuliX is mapping coordinates.
  * This test will help identify the transformation between requested and actual positions.
  */
-public class CoordinateMappingTest extends BrobotTestBase {
+public class CoordinateMappingTest extends DebugTestBase {
     
     @Test
     public void mapCoordinateSystem() throws Exception {
