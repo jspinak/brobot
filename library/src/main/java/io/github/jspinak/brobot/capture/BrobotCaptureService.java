@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.capture;
 
 import io.github.jspinak.brobot.capture.provider.CaptureProvider;
 import io.github.jspinak.brobot.capture.provider.FFmpegCaptureProvider;
+import io.github.jspinak.brobot.capture.provider.RobotCaptureProvider;
 import io.github.jspinak.brobot.capture.provider.SikuliXCaptureProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -130,6 +131,14 @@ public class BrobotCaptureService {
      * Selects the best available provider based on configuration and availability.
      */
     private void selectProvider() {
+        selectProvider(true);
+    }
+    
+    /**
+     * Selects the best available provider based on configuration and availability.
+     * @param allowCreateDefaults if true, will create default providers if none exist
+     */
+    private void selectProvider(boolean allowCreateDefaults) {
         // Try configured provider first
         if (!"AUTO".equalsIgnoreCase(configuredProvider)) {
             CaptureProvider provider = providerMap.get(configuredProvider.toUpperCase());
@@ -142,7 +151,14 @@ public class BrobotCaptureService {
         
         // Auto-select based on preferences
         if (preferPhysicalResolution) {
-            // Prefer FFmpeg for physical resolution
+            // Prefer Robot for physical resolution (through scaling)
+            CaptureProvider robot = providerMap.get("ROBOT");
+            if (robot != null && robot.isAvailable()) {
+                activeProvider = robot;
+                return;
+            }
+            
+            // Then try FFmpeg for true physical resolution
             CaptureProvider ffmpeg = providerMap.get("FFMPEG");
             if (ffmpeg != null && ffmpeg.isAvailable()) {
                 activeProvider = ffmpeg;
@@ -150,18 +166,20 @@ public class BrobotCaptureService {
             }
         }
         
-        // Try any available provider
-        for (CaptureProvider provider : providerMap.values()) {
-            if (provider.isAvailable()) {
+        // Try any available provider (prefer Robot)
+        String[] preferredOrder = {"ROBOT", "SIKULIX", "FFMPEG"};
+        for (String name : preferredOrder) {
+            CaptureProvider provider = providerMap.get(name);
+            if (provider != null && provider.isAvailable()) {
                 activeProvider = provider;
                 return;
             }
         }
         
-        // If no providers in Spring context, create defaults
-        if (activeProvider == null && fallbackEnabled) {
+        // If no providers in Spring context, create defaults (only once)
+        if (activeProvider == null && fallbackEnabled && allowCreateDefaults) {
             createDefaultProviders();
-            selectProvider(); // Retry with defaults
+            selectProvider(false); // Retry without allowing another create
         }
     }
     
@@ -170,13 +188,17 @@ public class BrobotCaptureService {
      */
     private void createDefaultProviders() {
         if (providerMap.isEmpty()) {
-            // Try FFmpeg
+            // Always add Robot as primary provider
+            RobotCaptureProvider robot = new RobotCaptureProvider();
+            providerMap.put("ROBOT", robot);
+            
+            // Try FFmpeg if available
             FFmpegCaptureProvider ffmpeg = new FFmpegCaptureProvider();
             if (ffmpeg.isAvailable()) {
                 providerMap.put("FFMPEG", ffmpeg);
             }
             
-            // Always add SikuliX as fallback
+            // Add SikuliX as fallback
             SikuliXCaptureProvider sikuli = new SikuliXCaptureProvider();
             providerMap.put("SIKULIX", sikuli);
         }

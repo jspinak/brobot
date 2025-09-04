@@ -31,13 +31,16 @@ public class ScreenshotRecorderTest extends BrobotTestBase {
     @Mock
     private TimeProvider timeProvider;
     
+    @Mock
+    private io.github.jspinak.brobot.capture.BrobotCaptureService captureService;
+    
     private ScreenshotRecorder screenshotRecorder;
     
     @BeforeEach
     @Override
     public void setupTest() {
         super.setupTest();
-        screenshotRecorder = new ScreenshotRecorder(imageFileUtilities, timeProvider);
+        screenshotRecorder = new ScreenshotRecorder(imageFileUtilities, timeProvider, captureService);
     }
     
     @Test

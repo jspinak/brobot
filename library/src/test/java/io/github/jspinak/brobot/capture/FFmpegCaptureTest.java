@@ -56,8 +56,9 @@ public class FFmpegCaptureTest extends BrobotTestBase {
     
     @Test
     public void testCaptureComparison() throws IOException {
-        // Skip in mock mode
-        Assumptions.assumeFalse(isInMockMode(), "Skipping in mock mode");
+        // Skip in headless or CI environment
+        Assumptions.assumeFalse(java.awt.GraphicsEnvironment.isHeadless() || System.getenv("CI") != null, 
+                              "Skipping in headless/CI environment");
         
         if (ffmpegProvider == null) {
             ffmpegProvider = new FFmpegCaptureProvider();
@@ -104,7 +105,8 @@ public class FFmpegCaptureTest extends BrobotTestBase {
     
     @Test
     public void testRegionCapture() throws IOException {
-        Assumptions.assumeFalse(isInMockMode(), "Skipping in mock mode");
+        Assumptions.assumeFalse(java.awt.GraphicsEnvironment.isHeadless() || System.getenv("CI") != null, 
+                              "Skipping in headless/CI environment");
         
         if (ffmpegProvider == null) {
             ffmpegProvider = new FFmpegCaptureProvider();
