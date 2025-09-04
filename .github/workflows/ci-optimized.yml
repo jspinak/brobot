@@ -131,9 +131,7 @@ jobs:
         
         # Run integration tests if compilation succeeded
         if [ $? -eq 0 ]; then
-          python3 library/scripts/run-tests-safe.py library-test \
-            --batch-size 10 \
-            --timeout 60
+          python3 library/scripts/run-tests-safe.py library-test --batch-size 10 --timeout 60
         else
           echo "Skipping integration tests due to compilation issues"
         fi
