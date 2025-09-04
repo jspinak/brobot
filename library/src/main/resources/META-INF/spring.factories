@@ -1,3 +1,4 @@
 # Spring Boot Application Context Initializers
 org.springframework.context.ApplicationContextInitializer=\
+  io.github.jspinak.brobot.config.dpi.DPIApplicationContextInitializer,\
   io.github.jspinak.brobot.startup.orchestration.ApplicationContextInitializer

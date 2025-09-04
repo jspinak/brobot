@@ -36,10 +36,7 @@ jobs:
     - name: Compile and quick test
       run: |
         ./gradlew clean :library:compileJava :library:compileTestJava --no-daemon
-        python3 library/scripts/run-tests-safe.py library \
-          --pattern "*FormatterTest" \
-          --batch-size 10 \
-          --timeout 15
+        python3 library/scripts/run-tests-safe.py library --pattern "*FormatterTest" --batch-size 10 --timeout 15
       env:
         SPRING_PROFILES_ACTIVE: ci
     
@@ -85,10 +82,7 @@ jobs:
           5) PATTERN="io.github.jspinak.brobot.*" ;;  # Catch-all
         esac
         
-        python3 library/scripts/run-tests-safe.py library \
-          --pattern "$PATTERN" \
-          --batch-size 20 \
-          --timeout 30
+        python3 library/scripts/run-tests-safe.py library --pattern "$PATTERN" --batch-size 20 --timeout 30
       env:
         SPRING_PROFILES_ACTIVE: ci
         CI: true

@@ -30,11 +30,7 @@ jobs:
     
     - name: Run tests with Python script
       run: |
-        python3 library/scripts/run-all-tests.py library \
-          --mode sequential \
-          --timeout 60 \
-          --retry-failed \
-          --pattern "Fast"
+        python3 library/scripts/run-all-tests.py library --mode sequential --timeout 60 --retry-failed --pattern "Fast"
       env:
         GRADLE_OPTS: -Xmx2048m -XX:MaxMetaspaceSize=512m
     
@@ -69,10 +65,7 @@ jobs:
     
     - name: Run tests with Python script
       run: |
-        python3 library/scripts/run-all-tests.py library \
-          --mode sequential \
-          --timeout 60 \
-          --retry-failed
+        python3 library/scripts/run-all-tests.py library --mode sequential --timeout 60 --retry-failed
       env:
         GRADLE_OPTS: -Xmx2048m -XX:MaxMetaspaceSize=512m
     
@@ -115,11 +108,7 @@ jobs:
     
     - name: Run tests with Python script
       run: |
-        python3 library/scripts/run-all-tests.py library \
-          --mode sequential \
-          --timeout 60 \
-          --retry-failed \
-          --pattern "CV"
+        python3 library/scripts/run-all-tests.py library --mode sequential --timeout 60 --retry-failed --pattern "CV"
       env:
         GRADLE_OPTS: -Xmx3072m -XX:MaxMetaspaceSize=768m
         _JAVA_OPTIONS: -Djava.awt.headless=true
@@ -157,10 +146,7 @@ jobs:
     - name: Run tests with Python script
       run: |
         export DISPLAY=:99
-        python3 library/scripts/run-all-tests.py library-test \
-          --mode sequential \
-          --timeout 60 \
-          --retry-failed
+        python3 library/scripts/run-all-tests.py library-test --mode sequential --timeout 60 --retry-failed
       env:
         GRADLE_OPTS: -Xmx4096m -XX:MaxMetaspaceSize=1024m
     
@@ -189,14 +175,8 @@ jobs:
     
     - name: Run tests with Python script
       run: |
-        python3 library/scripts/run-all-tests.py library \
-          --mode sequential \
-          --timeout 60 \
-          --retry-failed
-        python3 library/scripts/run-all-tests.py library-test \
-          --mode sequential \
-          --timeout 60 \
-          --retry-failed
+        python3 library/scripts/run-all-tests.py library --mode sequential --timeout 60 --retry-failed
+        python3 library/scripts/run-all-tests.py library-test --mode sequential --timeout 60 --retry-failed
       continue-on-error: true
       env:
         GRADLE_OPTS: -Xmx6144m -XX:MaxMetaspaceSize=1536m
@@ -237,22 +217,14 @@ jobs:
     
     - name: Run tests with Python script
       run: |
-        python3 library/scripts/run-all-tests.py library \
-          --mode sequential \
-          --timeout 60 \
-          --retry-failed \
-          --pattern "Benchmark" > baseline-benchmarks.txt
+        python3 library/scripts/run-all-tests.py library --mode sequential --timeout 60 --retry-failed --pattern "Benchmark" > baseline-benchmarks.txt
     
     - name: Checkout PR branch
       run: git checkout ${{ github.sha }}
     
     - name: Run tests with Python script
       run: |
-        python3 library/scripts/run-all-tests.py library \
-          --mode sequential \
-          --timeout 60 \
-          --retry-failed \
-          --pattern "Benchmark" > pr-benchmarks.txt
+        python3 library/scripts/run-all-tests.py library --mode sequential --timeout 60 --retry-failed --pattern "Benchmark" > pr-benchmarks.txt
     
     - name: Compare benchmarks
       run: |
@@ -299,9 +271,6 @@ jobs:
     
     - name: Run tests with Python script
       run: |
-        python3 library/scripts/run-all-tests.py library \
-          --mode sequential \
-          --timeout 60 \
-          --retry-failed
+        python3 library/scripts/run-all-tests.py library --mode sequential --timeout 60 --retry-failed
       env:
         GRADLE_OPTS: -Xmx2048m
