@@ -59,9 +59,9 @@ public class ComprehensiveCaptureTest {
         
         // Test patterns
         String[] patterns = {
-            "claude-prompt-3.png",     // SikuliX capture (195x80)
-            "claude-prompt-win.png",    // Windows capture (103x60)
-            "claude-prompt-3-80.png"    // 80% scaled (156x64)
+            "claude-prompt-3.png",     // SikuliX capture
+            "claude-prompt-from-windows-snipping.png",    // Windows capture
+            "claude-prompt-3-80.png"    // 80% scaled
         };
         
         // First, capture the screen normally and at adjusted resolution
@@ -107,12 +107,25 @@ public class ComprehensiveCaptureTest {
                 BufferedImage patternImage = ImageIO.read(patternFile);
                 System.out.println("   Pattern dimensions: " + patternImage.getWidth() + "x" + patternImage.getHeight());
                 
-                // Test 1: Pattern on normal capture
-                System.out.println("\n   TEST 1: On normal Brobot capture (1536x864):");
-                testPatternOnCapture(screen, patternPath, normalCapture, "Normal", patternName);
+                // For 1536x864 capture, scale patterns down by 0.8
+                // For 1920x1080 capture, use original size
                 
-                // Test 2: Pattern on adjusted 1920x1080 capture
+                // Test 1: Pattern on normal capture (1536x864) - scale down by 0.8
+                System.out.println("\n   TEST 1: On normal Brobot capture (1536x864):");
+                System.out.println("   Strategy: Scale patterns down by 0.8 for 1536x864 capture");
+                BufferedImage scaledForNormal = resizeImage(patternImage, 
+                    (int)(patternImage.getWidth() * 0.8), 
+                    (int)(patternImage.getHeight() * 0.8));
+                File scaledForNormalFile = saveCapture(scaledForNormal, patternName.replace(".png", "_scaled_for_normal"));
+                if (scaledForNormalFile != null) {
+                    testPatternOnCapture(screen, scaledForNormalFile.getAbsolutePath(), normalCapture, "Normal", patternName + " (scaled 0.8)");
+                }
+                // Also test original size for comparison
+                testPatternOnCapture(screen, patternPath, normalCapture, "Normal", patternName + " (original)");
+                
+                // Test 2: Pattern on adjusted 1920x1080 capture - use original size
                 System.out.println("\n   TEST 2: On adjusted 1920x1080 capture:");
+                System.out.println("   Strategy: Use original pattern size for 1920x1080 capture");
                 testPatternOnCapture(screen, patternPath, adjustedCapture, "Adjusted", patternName);
                 
                 // Test 3: Pattern on capture with AlwaysResize=1.25
@@ -137,18 +150,13 @@ public class ComprehensiveCaptureTest {
         // Test 5 & 6: Capture matches and use them as patterns
         System.out.println("\n4. CAPTURING MATCHES AND REVERSE TESTING:");
         System.out.println("=" + "=".repeat(79));
-        
-        // TODO: Implement testCapturedMatches method
-        // testCapturedMatches(screen, normalCapture);
         System.out.println("  [Skipped - Method not yet implemented]");
         
         // Test 7: Create visual comparison
         System.out.println("\n5. CREATING VISUAL COMPARISON:");
         System.out.println("=" + "=".repeat(79));
         
-        // TODO: Implement createVisualComparison method
-        // createVisualComparison(screen);
-        System.out.println("  [Skipped - Method not yet implemented]");
+        createVisualComparison(screen);
         
         // Print summary
         printSummary();
@@ -165,33 +173,66 @@ public class ComprehensiveCaptureTest {
             return;
         }
         
+        System.out.println("     Searching in " + capture.getWidth() + "x" + capture.getHeight() + " capture:");
+        
         // Test with different DPI settings
-        float[] dpiSettings = {1.0f, 0.8f, 1.25f, 0.67f};
+        float[] dpiSettings = {1.0f};  // Simplified - pattern is already scaled appropriately
         
         for (float dpi : dpiSettings) {
             Settings.AlwaysResize = dpi;
             
             try {
+                // Load pattern to check its size
+                File patternFile = new File(patternPath);
+                if (patternFile.exists()) {
+                    BufferedImage patternImg = ImageIO.read(patternFile);
+                    System.out.println("     Pattern size: " + patternImg.getWidth() + "x" + patternImg.getHeight());
+                }
+                
                 // Create a Finder to search within the captured image
                 Finder finder = new Finder(captureFile.getAbsolutePath());
                 Pattern pattern = new Pattern(patternPath).similar(0.3);
                 finder.find(pattern);
                 
-                if (finder.hasNext()) {
+                boolean foundAny = false;
+                Match bestMatch = null;
+                double bestScore = 0;
+                
+                while (finder.hasNext()) {
                     Match match = finder.next();
                     double score = match.getScore();
-                    System.out.printf("     DPI %.2f: %.1f%%", dpi, score * 100);
                     
-                    if (score > 0.90) System.out.println(" ✅ EXCELLENT");
-                    else if (score > 0.80) System.out.println(" ✓ Very Good");
-                    else if (score > 0.70) System.out.println(" ⚠ Good");
-                    else if (score > 0.60) System.out.println(" ⚠ Moderate");
-                    else System.out.println(" ❌ Poor");
+                    if (score > bestScore) {
+                        bestMatch = match;
+                        bestScore = score;
+                    }
                     
-                    results.add(new TestResult(patternName, captureType, capture.getWidth(), 
-                                             capture.getHeight(), dpi, score, true));
-                } else {
-                    System.out.printf("     DPI %.2f: No match\n", dpi);
+                    if (!foundAny) {  // Only report the best match
+                        System.out.printf("     Similarity: %.1f%%", score * 100);
+                        
+                        if (score > 0.90) System.out.println(" ✅ EXCELLENT");
+                        else if (score > 0.80) System.out.println(" ✓ Very Good");
+                        else if (score > 0.70) System.out.println(" ⚠ Good");
+                        else if (score > 0.60) System.out.println(" ⚠ Moderate");
+                        else System.out.println(" ❌ Poor");
+                        
+                        System.out.println("     Match location: " + match.x + "," + match.y);
+                        
+                        results.add(new TestResult(patternName, captureType, capture.getWidth(), 
+                                                 capture.getHeight(), dpi, score, true));
+                        foundAny = true;
+                    }
+                }
+                
+                // Create visualization if we found a match
+                if (bestMatch != null && patternFile.exists()) {
+                    BufferedImage patternImg = ImageIO.read(patternFile);
+                    createMatchVisualization(capture, patternImg, bestMatch, 
+                                           patternName.replace(".png", "") + "_" + captureType);
+                }
+                
+                if (!foundAny) {
+                    System.out.println("     No match found");
                     results.add(new TestResult(patternName, captureType, capture.getWidth(), 
                                              capture.getHeight(), dpi, 0.0, false));
                 }
@@ -199,7 +240,8 @@ public class ComprehensiveCaptureTest {
                 finder.destroy();
                 
             } catch (Exception e) {
-                System.err.printf("     DPI %.2f: Error - %s\n", dpi, e.getMessage());
+                System.err.println("     Error: " + e.getMessage());
+                e.printStackTrace();
             }
         }
     }
@@ -277,128 +319,70 @@ public class ComprehensiveCaptureTest {
             System.err.println("   Error resizing patterns: " + e.getMessage());
         }
     }
-    
-    private static void testCapturedMatches(Screen screen, BufferedImage normalCapture) {
-        System.out.println("\nCapturing matched regions and using them as patterns:");
+    private static void createMatchVisualization(BufferedImage screenshot, BufferedImage pattern, 
+                                                Match match, String outputName) {
+        System.out.println("   Creating match visualization for " + outputName);
         
-        String[] testPatterns = {
-            "claude-prompt-3.png",
-            "claude-prompt-win.png",
-            "claude-prompt-3-80.png"
-        };
-        
-        for (String patternName : testPatterns) {
-            String patternPath = CLAUDE_PATH + patternName;
-            File patternFile = new File(patternPath);
+        try {
+            // Create a new image that shows the screenshot with the match highlighted
+            // and the pattern placed vertically next to it
+            int totalWidth = screenshot.getWidth() + pattern.getWidth() + 60; // 60px for spacing and labels
+            int totalHeight = Math.max(screenshot.getHeight(), pattern.getHeight() + 100);
             
-            if (!patternFile.exists()) continue;
+            BufferedImage visualization = new BufferedImage(totalWidth, totalHeight, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g = visualization.createGraphics();
             
-            System.out.println("\n📷 Capturing match for: " + patternName);
+            // Set rendering hints for quality
+            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             
-            // Try to find the pattern on screen with different DPI settings
-            Match bestMatch = null;
-            float bestDPI = 1.0f;
-            double bestScore = 0;
+            // White background
+            g.setColor(Color.WHITE);
+            g.fillRect(0, 0, visualization.getWidth(), visualization.getHeight());
             
-            float[] dpiSettings = {1.0f, 0.8f, 1.25f};
+            // Draw the screenshot
+            g.drawImage(screenshot, 10, 30, null);
             
-            for (float dpi : dpiSettings) {
-                Settings.AlwaysResize = dpi;
-                try {
-                    Pattern pattern = new Pattern(patternPath).similar(0.3);
-                    Match match = screen.exists(pattern, 0.1);
-                    
-                    if (match != null && match.getScore() > bestScore) {
-                        bestMatch = match;
-                        bestDPI = dpi;
-                        bestScore = match.getScore();
-                    }
-                } catch (Exception e) {
-                    // Continue
-                }
+            // Draw rectangle around match location if match found
+            if (match != null) {
+                g.setColor(Color.RED);
+                g.setStroke(new java.awt.BasicStroke(3));
+                g.drawRect(10 + match.x, 30 + match.y, match.w, match.h);
+                
+                // Draw similarity score
+                g.setColor(Color.RED);
+                g.setFont(new Font("Arial", Font.BOLD, 14));
+                String scoreText = String.format("Match: %.1f%%", match.getScore() * 100);
+                g.drawString(scoreText, 10 + match.x, 30 + match.y - 5);
             }
             
-            if (bestMatch == null) {
-                System.out.println("   ❌ Pattern not found on screen");
-                continue;
+            // Draw the pattern on the right
+            int patternX = screenshot.getWidth() + 30;
+            int patternY = 60;
+            g.drawImage(pattern, patternX, patternY, null);
+            
+            // Draw border around pattern
+            g.setColor(Color.BLUE);
+            g.setStroke(new java.awt.BasicStroke(2));
+            g.drawRect(patternX, patternY, pattern.getWidth(), pattern.getHeight());
+            
+            // Add labels
+            g.setColor(Color.BLACK);
+            g.setFont(new Font("Arial", Font.BOLD, 14));
+            g.drawString("Screenshot (" + screenshot.getWidth() + "x" + screenshot.getHeight() + ")", 10, 20);
+            g.drawString("Pattern (" + pattern.getWidth() + "x" + pattern.getHeight() + ")", patternX, patternY - 10);
+            
+            g.dispose();
+            
+            // Save the visualization
+            File file = saveCapture(visualization, "match_viz_" + outputName);
+            if (file != null) {
+                System.out.println("     ✅ Saved: " + file.getName());
             }
             
-            System.out.println("   ✓ Found with DPI " + bestDPI + ", score: " + 
-                             String.format("%.1f%%", bestScore * 100));
-            
-            // Capture the matched region
-            try {
-                Region matchRegion = new Region(bestMatch);
-                BufferedImage capturedMatch = screen.capture(matchRegion).getImage();
-                
-                System.out.println("   Captured match dimensions: " + 
-                                 capturedMatch.getWidth() + "x" + capturedMatch.getHeight());
-                
-                // Save the captured match
-                String matchName = patternName.replace(".png", "_captured_match");
-                File capturedFile = saveCapture(capturedMatch, matchName);
-                
-                if (capturedFile == null) {
-                    System.out.println("   ❌ Failed to save captured match");
-                    continue;
-                }
-                
-                // Now use this captured match as a pattern on normal capture
-                System.out.println("\n   Using captured match as pattern:");
-                System.out.println("   Testing on normal Brobot capture (1536x864):");
-                
-                Settings.AlwaysResize = 1.0f; // Reset to no scaling
-                
-                try {
-                    // Create a Finder to search within the normal capture
-                    File normalCaptureFile = saveCapture(normalCapture, "test_normal_capture");
-                    if (normalCaptureFile != null) {
-                        Finder finder = new Finder(normalCaptureFile.getAbsolutePath());
-                        Pattern capturedPattern = new Pattern(capturedFile.getAbsolutePath()).similar(0.3);
-                        finder.find(capturedPattern);
-                        
-                        if (finder.hasNext()) {
-                            Match reverseMatch = finder.next();
-                            double reverseScore = reverseMatch.getScore();
-                            System.out.printf("     Match found: %.1f%%", reverseScore * 100);
-                            
-                            if (reverseScore > 0.95) {
-                                System.out.println(" 🎯 PERFECT - Capture methods are identical!");
-                            } else if (reverseScore > 0.90) {
-                                System.out.println(" ✅ Excellent - Methods are compatible");
-                            } else if (reverseScore > 0.80) {
-                                System.out.println(" ✓ Good - Minor differences");
-                            } else {
-                                System.out.println(" ⚠ Moderate - Possible scaling issues");
-                            }
-                        } else {
-                            System.out.println("     ❌ No match found - Methods incompatible!");
-                        }
-                        
-                        finder.destroy();
-                    }
-                } catch (Exception e) {
-                    System.err.println("     Error in reverse matching: " + e.getMessage());
-                }
-                
-                // Also test directly on screen
-                System.out.println("   Testing captured match on live screen:");
-                try {
-                    Pattern capturedPattern = new Pattern(capturedFile.getAbsolutePath()).similar(0.3);
-                    Match screenMatch = screen.exists(capturedPattern, 0.5);
-                    
-                    if (screenMatch != null) {
-                        System.out.printf("     Found on screen: %.1f%%\n", screenMatch.getScore() * 100);
-                    } else {
-                        System.out.println("     Not found on screen");
-                    }
-                } catch (Exception e) {
-                    System.err.println("     Error: " + e.getMessage());
-                }
-                
-            } catch (Exception e) {
-                System.err.println("   Error capturing match: " + e.getMessage());
-            }
+        } catch (Exception e) {
+            System.err.println("     Error creating match visualization: " + e.getMessage());
         }
     }
     
@@ -408,7 +392,7 @@ public class ComprehensiveCaptureTest {
         try {
             // Load the patterns
             File sikuliFile = new File(CLAUDE_PATH + "claude-prompt-3.png");
-            File windowsFile = new File(CLAUDE_PATH + "claude-prompt-win.png");
+            File windowsFile = new File(CLAUDE_PATH + "claude-prompt-from-windows-snipping.png");
             File scaledFile = new File(CLAUDE_PATH + "claude-prompt-3-80.png");
             
             BufferedImage sikuliImg = sikuliFile.exists() ? ImageIO.read(sikuliFile) : null;
@@ -570,7 +554,7 @@ public class ComprehensiveCaptureTest {
         // Analyze by pattern type
         System.out.println("\n📊 ANALYSIS BY PATTERN:");
         
-        for (String pattern : new String[]{"claude-prompt-3.png", "claude-prompt-win.png", "claude-prompt-3-80.png"}) {
+        for (String pattern : new String[]{"claude-prompt-3.png", "claude-prompt-from-windows-snipping.png", "claude-prompt-3-80.png"}) {
             System.out.println("\n   " + pattern + ":");
             
             results.stream()
