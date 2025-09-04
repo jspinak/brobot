@@ -271,16 +271,8 @@ public class CaptureConfiguration {
      * @return recommended CaptureMode for the current environment
      */
     public CaptureMode getRecommendedMode() {
-        // Check if FFmpeg is available
-        try {
-            captureService.setProvider("FFMPEG");
-            // FFmpeg is available, it's often the best choice
-            return CaptureMode.FFMPEG;
-        } catch (Exception e) {
-            // FFmpeg not available
-        }
-        
-        // Default to Robot with physical scaling
-        return CaptureMode.ROBOT_PHYSICAL;
+        // Default to SikuliX for maximum compatibility
+        // SikuliX handles DPI automatically with the auto resize-factor
+        return CaptureMode.SIKULIX;
     }
 }

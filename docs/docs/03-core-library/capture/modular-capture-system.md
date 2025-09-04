@@ -23,27 +23,50 @@ Brobot's screen capture system is designed to be completely modular, allowing yo
 
 ### Basic Configuration
 
-Add to your `application.properties`:
+The default configuration uses SikuliX for maximum compatibility:
 
 ```properties
-# Choose your capture provider
-brobot.capture.provider=ROBOT
+# Default capture provider (already set in brobot-defaults.properties)
+brobot.capture.provider=SIKULIX
+
+# DPI auto-detection is enabled by default
+brobot.dpi.resize-factor=auto
 ```
 
-That's it! Your entire application will now use the Robot capture provider.
+No configuration needed! SikuliX is the default provider with automatic DPI recognition.
 
 ### Available Providers
 
 | Provider | Property Value | Dependencies | Best For |
 |----------|---------------|--------------|----------|
-| Robot | `ROBOT` | None (built-in Java) | General use, no setup required |
-| FFmpeg | `FFMPEG` | JavaCV (included in Brobot) | Maximum accuracy, professional capture |
-| SikuliX | `SIKULIX` | SikuliX library | Legacy compatibility |
+| SikuliX | `SIKULIX` | SikuliX library (included) | **Default** - Maximum compatibility |
+| Robot | `ROBOT` | None (built-in Java) | DPI scaling compensation |
+| FFmpeg | `FFMPEG` | JavaCV (included in Brobot) | True physical capture |
 | Auto | `AUTO` | None | Automatic selection |
 
 ## Provider Details
 
-### Robot Provider (Recommended Default)
+### SikuliX Provider (Default)
+
+SikuliX is the default provider for maximum compatibility with existing patterns and workflows.
+
+**Advantages:**
+- Proven compatibility with existing Brobot patterns
+- Automatic DPI handling with `resize-factor=auto`
+- Consistent behavior across Brobot versions
+- Well-tested pattern matching
+
+**Configuration:**
+```properties
+brobot.capture.provider=SIKULIX
+brobot.dpi.resize-factor=auto  # Automatic DPI recognition
+```
+
+**Resolution Behavior:**
+- Java 8: Captures at physical resolution
+- Java 21+: Captures at logical resolution, handled by auto resize-factor
+
+### Robot Provider
 
 The Robot provider uses Java's built-in `java.awt.Robot` class with intelligent DPI scaling compensation.
 
@@ -91,18 +114,6 @@ brobot.capture.ffmpeg.log-level=error
 - macOS: Uses `avfoundation`
 - Linux: Uses `x11grab`
 
-### SikuliX Provider
-
-Maintains backward compatibility with existing SikuliX-based scripts.
-
-**Configuration:**
-```properties
-brobot.capture.provider=SIKULIX
-```
-
-**Note:** Resolution behavior varies by Java version:
-- Java 8: Physical resolution
-- Java 21+: Logical resolution (DPI-aware)
 
 ## Usage Examples
 
@@ -164,7 +175,8 @@ Map<String, String> props = captureConfig.getAllCaptureProperties();
 # Main Capture Settings
 # ==================================================
 # Provider selection: AUTO, ROBOT, FFMPEG, SIKULIX
-brobot.capture.provider=ROBOT
+# Default is SIKULIX for maximum compatibility
+brobot.capture.provider=SIKULIX
 
 # Prefer physical resolution captures
 brobot.capture.prefer-physical=true

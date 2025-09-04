@@ -1,23 +1,25 @@
 package io.github.jspinak.brobot.integration;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
-
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
+import org.junit.jupiter.api.BeforeEach;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test to verify that mock mode configuration is properly applied.
  */
-@SpringBootTest
-@TestPropertySource(properties = {
-        "brobot.core.mock=true",
-        "brobot.mock.time-find-first=0.01"
-})
 public class MockConfigurationTest extends BrobotTestBase {
+    
+    @BeforeEach
+    @Override
+    public void setupTest() {
+        super.setupTest();
+        // Set mock configuration
+        FrameworkSettings.mock = true;
+        FrameworkSettings.mockTimeFindFirst = 0.01;
+    }
 
     @Test
     public void testMockModeIsEnabled() {
