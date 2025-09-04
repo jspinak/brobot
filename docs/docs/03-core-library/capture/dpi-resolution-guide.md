@@ -44,6 +44,34 @@ The scaled resolution that applications see.
 
 ## Solution: Brobot's Approach
 
+Brobot provides automatic DPI detection and compensation through two key settings:
+
+### Default Configuration (Recommended)
+
+```properties
+# Enable DPI awareness for auto-detection to work
+brobot.dpi.disable=false
+
+# Enable automatic DPI detection and pattern scaling
+brobot.dpi.resize-factor=auto
+
+# Use SikuliX as the capture provider
+brobot.capture.provider=SIKULIX
+```
+
+This configuration:
+1. **Keeps DPI awareness enabled** - Allows detection of Windows scaling
+2. **Auto-detects scaling** - Automatically calculates pattern resize factor
+3. **Adjusts patterns** - Scales patterns to match logical resolution
+
+### How It Works
+
+When DPI awareness is **enabled** (`brobot.dpi.disable=false`):
+- Java captures at **logical resolution** (e.g., 1536×864 with 125% scaling)
+- Auto-detector **detects the scaling** (e.g., 125% = 1.25x)
+- Patterns are **automatically resized** (scaled by 0.8x to match)
+- Pattern matching works correctly! ✅
+
 Brobot provides multiple solutions to handle DPI scaling:
 
 ### 1. Robot Provider with Scaling (Default)
