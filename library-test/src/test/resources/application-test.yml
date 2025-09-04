@@ -1,0 +1,66 @@
+# Test Configuration for Brobot
+# This configuration ensures tests run successfully in CI/CD environments
+
+brobot:
+  # Core configuration
+  core:
+    mock-mode: true
+    force-headless: true
+    allow-screen-capture: false
+    verbose-logging: false
+    find-timeout: 1.0
+    action-pause: 0.01
+    enable-image-cache: false
+    
+  # Disable all initialization that might block
+  startup:
+    enabled: false
+    delay: 0
+    initial-delay: 0
+    ui-stabilization-delay: 0
+    verification:
+      enabled: false
+      
+  # Disable diagnostics
+  diagnostics:
+    enabled: false
+    image-loading:
+      enabled: false
+      
+  # Mock timings for fast test execution
+  mock:
+    time:
+      find-first: 0.01
+      find-all: 0.04
+      click: 0.01
+      type: 0.02
+      move: 0.01
+      drag: 0.03
+      vanish: 0.05
+      wait: 0.01
+      
+  # Disable console output for tests
+  console:
+    enabled: false
+    actions:
+      enabled: false
+      
+  # Logging configuration
+  logging:
+    capture:
+      enabled: false
+    verbosity: QUIET
+
+# Spring configuration
+spring:
+  main:
+    banner-mode: off
+    lazy-initialization: true
+    
+  profiles:
+    active: test
+    
+# Force headless mode for CI/CD
+java:
+  awt:
+    headless: true

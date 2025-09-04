@@ -11,6 +11,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Timeout;
+import java.util.concurrent.TimeUnit;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -25,6 +27,7 @@ import static org.mockito.Mockito.*;
  * Tests the default state handling implementation with various scenarios.
  */
 @DisplayName("DefaultStateHandler Tests")
+@Timeout(value = 10, unit = TimeUnit.SECONDS) // Prevent CI/CD timeout
 class DefaultStateHandlerTest extends BrobotTestBase {
     
     @Mock
@@ -50,6 +53,7 @@ class DefaultStateHandlerTest extends BrobotTestBase {
     
     @Nested
     @DisplayName("Handle State Tests")
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     class HandleStateTests {
         
         @Test
@@ -237,6 +241,7 @@ class DefaultStateHandlerTest extends BrobotTestBase {
     
     @Nested
     @DisplayName("No Transition Found Tests")
+    @Timeout(value = 2, unit = TimeUnit.SECONDS)
     class NoTransitionFoundTests {
         
         @Test
