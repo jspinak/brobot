@@ -4,14 +4,17 @@ import org.sikuli.script.Image;
 import org.sikuli.script.Mouse;
 import org.sikuli.script.Screen;
 import org.sikuli.script.Region;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import io.github.jspinak.brobot.capture.BrobotCaptureService;
 import io.github.jspinak.brobot.util.file.SaveToFile;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Provides screenshot capture functionality with multiple capture strategies.
@@ -56,9 +59,12 @@ import java.io.File;
 public class ScreenshotCapture {
 
     private final SaveToFile saveToFile;
+    private final BrobotCaptureService captureService;
 
-    public ScreenshotCapture(SaveToFile saveToFile) {
+    @Autowired
+    public ScreenshotCapture(SaveToFile saveToFile, BrobotCaptureService captureService) {
         this.saveToFile = saveToFile;
+        this.captureService = captureService;
     }
 
     /**
@@ -76,9 +82,23 @@ public class ScreenshotCapture {
      * @param baseFileName base name for the screenshot file (without extension)
      */
     public void saveScreenshotWithDate(String baseFileName) {
-        Screen activeScreen = Mouse.at().getMonitor();
-        Image screenshot = activeScreen.getImage();
-        saveToFile.saveImageWithDate(screenshot, baseFileName);
+        try {
+            // Get screen ID where mouse is located
+            Screen activeScreen = Mouse.at().getMonitor();
+            int screenId = activeScreen.getID();
+            
+            // Use new capture service for physical resolution capture
+            BufferedImage capture = captureService.captureScreen(screenId);
+            
+            // Convert to SikuliX Image for compatibility with SaveToFile
+            Image screenshot = new Image(capture);
+            saveToFile.saveImageWithDate(screenshot, baseFileName);
+        } catch (IOException e) {
+            // Fallback to SikuliX capture
+            Screen activeScreen = Mouse.at().getMonitor();
+            Image screenshot = activeScreen.getImage();
+            saveToFile.saveImageWithDate(screenshot, baseFileName);
+        }
     }
 
     /**
@@ -111,8 +131,8 @@ public class ScreenshotCapture {
             new File(directory).mkdirs();
             String filePath = directory + fileName + ".png";
 
-            Screen screen = new Screen();
-            BufferedImage capture = screen.capture().getImage();
+            // Use new capture service for physical resolution capture
+            BufferedImage capture = captureService.captureScreen();
             ImageIO.write(capture, "png", new File(filePath));
 
             return filePath;
