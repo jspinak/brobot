@@ -27,6 +27,10 @@ public class PhysicalScreenCapture {
     private static final boolean IS_MAC = OS_NAME.contains("mac");
     private static final boolean IS_LINUX = OS_NAME.contains("nux");
     
+    // GDI32 constants for GetDeviceCaps
+    private static final int HORZRES = 8;  // Horizontal width in pixels
+    private static final int VERTRES = 10; // Vertical height in pixels
+    
     /**
      * Captures the screen at physical resolution, bypassing DPI scaling.
      * 
@@ -67,8 +71,8 @@ public class PhysicalScreenCapture {
         WinDef.HDC hdcMemDC = GDI32.INSTANCE.CreateCompatibleDC(hdcScreen);
         
         // Get PHYSICAL screen dimensions (not DPI-scaled)
-        int width = GDI32.INSTANCE.GetDeviceCaps(hdcScreen, GDI32.HORZRES);
-        int height = GDI32.INSTANCE.GetDeviceCaps(hdcScreen, GDI32.VERTRES);
+        int width = GDI32.INSTANCE.GetDeviceCaps(hdcScreen, HORZRES);
+        int height = GDI32.INSTANCE.GetDeviceCaps(hdcScreen, VERTRES);
         
         // Alternative: use GetSystemMetrics for physical size
         if (width == 0 || height == 0) {

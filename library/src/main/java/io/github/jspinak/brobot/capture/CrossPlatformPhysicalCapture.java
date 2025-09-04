@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.capture;
 
+import io.github.jspinak.brobot.config.dpi.PhysicalResolutionCapture;
 import org.springframework.stereotype.Component;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;

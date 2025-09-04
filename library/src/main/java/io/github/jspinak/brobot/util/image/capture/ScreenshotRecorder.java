@@ -1,11 +1,13 @@
 package io.github.jspinak.brobot.util.image.capture;
 
+import io.github.jspinak.brobot.capture.BrobotCaptureService;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 import io.github.jspinak.brobot.util.file.SaveToFile;
 import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.Executors;
@@ -70,6 +72,7 @@ public class ScreenshotRecorder {
 
     private final ImageFileUtilities imageUtils;
     private final TimeProvider time;
+    private final BrobotCaptureService captureService;
 
     /**
      * Flag indicating capture status (currently unused but available for future
@@ -83,9 +86,11 @@ public class ScreenshotRecorder {
      */
     private final ScheduledExecutorService SCHEDULER = Executors.newSingleThreadScheduledExecutor();
 
-    public ScreenshotRecorder(ImageFileUtilities imageUtils, TimeProvider time) {
+    @Autowired
+    public ScreenshotRecorder(ImageFileUtilities imageUtils, TimeProvider time, BrobotCaptureService captureService) {
         this.imageUtils = imageUtils;
         this.time = time;
+        this.captureService = captureService;
     }
 
     /**
@@ -153,7 +158,7 @@ public class ScreenshotRecorder {
      * @param delayInMilliseconds interval between captures in milliseconds
      */
     public synchronized void startCapturing(SaveToFile saveToFile, String baseFilename, int delayInMilliseconds) {
-        ScreenshotCapture captureScreenshot = new ScreenshotCapture(saveToFile);
+        ScreenshotCapture captureScreenshot = new ScreenshotCapture(saveToFile, captureService);
         SCHEDULER.scheduleAtFixedRate((() -> {
             captureScreenshot.saveScreenshotWithDate(baseFilename);
         }), 0, delayInMilliseconds, MILLISECONDS);
