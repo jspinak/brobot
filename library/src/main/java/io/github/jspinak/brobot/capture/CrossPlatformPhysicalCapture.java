@@ -28,7 +28,8 @@ public class CrossPlatformPhysicalCapture {
     private static CaptureMethod preferredMethod = null;
     
     public enum CaptureMethod {
-        FFMPEG("FFmpeg", true),
+        JAVACV_FFMPEG("JavaCV FFmpeg (bundled)", true),  // No external installation needed!
+        FFMPEG("FFmpeg (external)", true),
         IMAGEMAGICK("ImageMagick", true),
         SCREENCAPTURE("screencapture (macOS)", false),
         SCROT("scrot (Linux)", false),
@@ -65,6 +66,8 @@ public class CrossPlatformPhysicalCapture {
         System.out.println("[PhysicalCapture] Using: " + preferredMethod);
         
         switch (preferredMethod) {
+            case JAVACV_FFMPEG:
+                return captureWithJavaCVFFmpeg();
             case FFMPEG:
                 return captureWithFFmpeg();
             case IMAGEMAGICK:
@@ -89,7 +92,12 @@ public class CrossPlatformPhysicalCapture {
     private static void detectBestMethod() {
         List<CaptureMethod> available = new ArrayList<>();
         
-        // Check FFmpeg
+        // Check JavaCV FFmpeg first (bundled, no external installation needed!)
+        if (JavaCVFFmpegCapture.isAvailable()) {
+            available.add(CaptureMethod.JAVACV_FFMPEG);
+        }
+        
+        // Check external FFmpeg
         if (isCommandAvailable("ffmpeg", "-version")) {
             available.add(CaptureMethod.FFMPEG);
         }
@@ -149,6 +157,10 @@ public class CrossPlatformPhysicalCapture {
         } catch (Exception e) {
             return false;
         }
+    }
+    
+    private static BufferedImage captureWithJavaCVFFmpeg() throws IOException {
+        return JavaCVFFmpegCapture.capture();
     }
     
     private static BufferedImage captureWithFFmpeg() throws IOException {
@@ -245,10 +257,16 @@ public class CrossPlatformPhysicalCapture {
         info.append("Preferred Method: ").append(preferredMethod).append("\n\n");
         
         info.append("Available Tools:\n");
-        if (isCommandAvailable("ffmpeg", "-version")) {
-            info.append("  ✓ FFmpeg (cross-platform, recommended)\n");
+        if (JavaCVFFmpegCapture.isAvailable()) {
+            info.append("  ✓ JavaCV FFmpeg (bundled - no installation needed!)\n");
         } else {
-            info.append("  ✗ FFmpeg not found\n");
+            info.append("  ✗ JavaCV FFmpeg not available\n");
+        }
+        
+        if (isCommandAvailable("ffmpeg", "-version")) {
+            info.append("  ✓ FFmpeg (external installation)\n");
+        } else {
+            info.append("  ✗ FFmpeg (external) not found\n");
         }
         
         String magick = OS.contains("win") ? "magick" : "convert";
