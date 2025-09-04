@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.debug;
 
+import io.github.jspinak.brobot.debug.DebugTestBase;
+
 import io.github.jspinak.brobot.test.BrobotTestBase;
 
 import org.junit.jupiter.api.Test;
@@ -11,7 +13,7 @@ import java.io.File;
 /**
  * Final test to verify DPI scaling solution.
  */
-public class FinalDPITest extends BrobotTestBase {
+public class FinalDPITest extends DebugTestBase {
     
     @Test
     public void testDPIScalingSolution() throws Exception {

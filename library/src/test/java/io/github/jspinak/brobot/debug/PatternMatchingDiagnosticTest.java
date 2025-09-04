@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.debug;
 
+import io.github.jspinak.brobot.debug.DebugTestBase;
+
 import io.github.jspinak.brobot.test.BrobotTestBase;
 
 import org.junit.jupiter.api.Test;
@@ -14,7 +16,7 @@ import java.io.IOException;
  * Comprehensive diagnostic test to understand why patterns don't match
  * despite SikuliX IDE showing 0.99 similarity
  */
-public class PatternMatchingDiagnosticTest extends BrobotTestBase {
+public class PatternMatchingDiagnosticTest extends DebugTestBase {
     
     @Test
     public void diagnosePatternMatching() throws Exception {

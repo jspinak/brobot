@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.debug;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.debug.DebugTestBase;
 
 import org.junit.jupiter.api.Test;
 import org.sikuli.script.*;
@@ -14,7 +14,7 @@ import java.io.File;
 /**
  * Analyze if the scaling/DPI is causing the pattern mismatch
  */
-public class ScalingAnalysisTest extends BrobotTestBase {
+public class ScalingAnalysisTest extends DebugTestBase {
     
     @Test
     public void analyzeScaling() {

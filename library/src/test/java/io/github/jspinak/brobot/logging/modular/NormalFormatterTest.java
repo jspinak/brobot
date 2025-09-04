@@ -46,14 +46,16 @@ public class NormalFormatterTest extends BrobotTestBase {
         super.setupTest();
         formatter = new NormalFormatter();
         
-        // Setup default mocks
-        when(actionResult.getExecutionContext()).thenReturn(context);
+        // Setup default mocks with lenient stubbing to avoid unnecessary stubbing exceptions
+        lenient().when(actionResult.getExecutionContext()).thenReturn(context);
     }
     
     @Test
     @DisplayName("Should return NORMAL verbosity level")
     void testGetVerbosityLevel() {
-        assertEquals(ActionLogFormatter.VerbosityLevel.NORMAL, formatter.getVerbosityLevel());
+        // This test doesn't use mocks, so create a fresh formatter instance
+        NormalFormatter testFormatter = new NormalFormatter();
+        assertEquals(ActionLogFormatter.VerbosityLevel.NORMAL, testFormatter.getVerbosityLevel());
     }
     
     @Test
@@ -293,20 +295,32 @@ public class NormalFormatterTest extends BrobotTestBase {
     @DisplayName("Should handle missing timestamp")
     void testFormatWithoutTimestamp() {
         // Arrange
+        // According to NormalFormatter.shouldLog(), it requires endTime to be non-null
+        // But if we want to test the formatting without a timestamp in the output,
+        // we need to look at the actual implementation - it checks context.getEndTime() != null
+        // If endTime is null, shouldLog() will return false unless it's a significant action
+        // Let's set up a significant action that will log even without endTime
         when(context.getEndTime()).thenReturn(null);
+        when(context.getStartTime()).thenReturn(Instant.now()); 
         when(context.isSuccess()).thenReturn(true);
         when(context.getActionType()).thenReturn("CLICK");
         when(context.getExecutionDuration()).thenReturn(java.time.Duration.ofMillis(100));
-        when(context.getPrimaryTargetName()).thenReturn("Button");
+        
+        StateImage img = mock(StateImage.class);
+        when(img.getName()).thenReturn("Button");
+        when(context.getTargetImages()).thenReturn(Collections.singletonList(img));
         
         // Act
         String result = formatter.format(actionResult);
         
-        // Assert
+        // Assert  
+        // Since shouldLog() checks for endTime != null OR (startTime != null && isSignificantAction),
+        // and CLICK with targets is significant, it should format
         assertNotNull(result);
-        assertFalse(result.startsWith("[")); // No timestamp bracket
+        assertFalse(result.startsWith("[")); // No timestamp bracket since endTime is null
         assertTrue(result.contains("✓"));
         assertTrue(result.contains("Click"));
+        assertTrue(result.contains("Button"));
     }
     
     @Test

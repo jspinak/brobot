@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.debug;
 
+import io.github.jspinak.brobot.debug.DebugTestBase;
+
 import io.github.jspinak.brobot.test.BrobotTestBase;
 
 import org.junit.jupiter.api.Test;
@@ -15,7 +17,7 @@ import java.io.IOException;
  * Diagnostic test to understand why SikuliX IDE finds patterns at 0.99 
  * but our code doesn't find them at all.
  */
-public class DiagnosticPatternTest extends BrobotTestBase {
+public class DiagnosticPatternTest extends DebugTestBase {
     
     @Test
     public void diagnosePatternMatching() throws Exception {

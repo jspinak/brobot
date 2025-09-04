@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.debug;
 
+import io.github.jspinak.brobot.debug.DebugTestBase;
+
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
 
@@ -17,7 +19,7 @@ import java.io.IOException;
  * Replicates EXACTLY how the IDE takes screenshots to compare with Brobot.
  * This mimics the code from PatternWindow.takeScreenshot() in the IDE.
  */
-public class IDEScreenshotReplicationTest extends BrobotTestBase {
+public class IDEScreenshotReplicationTest extends DebugTestBase {
     
     @Test
     public void captureIDEStyleScreenshot() throws Exception {

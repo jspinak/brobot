@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 
 import org.junit.jupiter.api.Test;
 import org.sikuli.basics.Settings;
@@ -11,11 +12,19 @@ import org.sikuli.script.ImagePath;
 
 import java.awt.*;
 
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
+
 public class DPIScalingTest extends BrobotTestBase {
     
     @Test
     public void testScalingSettings() throws Exception {
         System.out.println("=== DPI Scaling Test ===");
+        
+        // Skip this test in mock/headless mode as it requires real display
+        assumeFalse(FrameworkSettings.mock, 
+            "Skipping DPI scaling test in mock mode - requires real display");
+        assumeFalse(GraphicsEnvironment.isHeadless(),
+            "Skipping DPI scaling test in headless environment");
         
         // Check current display settings
         GraphicsDevice device = GraphicsEnvironment

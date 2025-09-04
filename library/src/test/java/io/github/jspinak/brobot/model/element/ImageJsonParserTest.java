@@ -45,6 +45,7 @@ class ImageJsonParserTest extends BrobotTestBase {
         
         String json = objectMapper.writeValueAsString(image);
         
+        
         assertNotNull(json);
         assertTrue(json.contains("\"name\""));
         assertTrue(json.contains("\"TestImage\""));

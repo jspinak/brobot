@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.debug;
 
+import io.github.jspinak.brobot.debug.DebugTestBase;
+
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
 
@@ -19,7 +21,7 @@ import java.io.IOException;
  * Investigates why screenshots are blurry compared to SikuliX IDE patterns.
  * Tests different capture methods and DPI/scaling behavior.
  */
-public class ScreenCaptureInvestigationTest extends BrobotTestBase {
+public class ScreenCaptureInvestigationTest extends DebugTestBase {
     
     @Test
     public void investigateScreenCapture() throws Exception {

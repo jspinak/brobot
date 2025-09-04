@@ -4,7 +4,7 @@ import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 
 /**
  * Base class for debug/diagnostic tests that require actual display.

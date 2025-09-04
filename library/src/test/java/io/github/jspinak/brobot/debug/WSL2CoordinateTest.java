@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.debug;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.debug.DebugTestBase;
 
 import io.github.jspinak.brobot.model.element.Region;
 import org.junit.jupiter.api.Test;
@@ -10,7 +10,7 @@ import java.awt.*;
 /**
  * Test to identify if WSL2/X11 is causing coordinate transformation issues.
  */
-public class WSL2CoordinateTest extends BrobotTestBase {
+public class WSL2CoordinateTest extends DebugTestBase {
     
     @Test
     public void testCoordinateSystemDiscrepancy() {

@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.debug;
 
+import io.github.jspinak.brobot.debug.DebugTestBase;
+
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
 
@@ -14,7 +16,7 @@ import java.awt.*;
  * Test to check if SikuliX is detecting monitors incorrectly,
  * which could cause coordinate offset issues.
  */
-public class MonitorDetectionTest extends BrobotTestBase {
+public class MonitorDetectionTest extends DebugTestBase {
     
     @Test  
     public void detectMonitorConfiguration() {

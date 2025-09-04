@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.debug;
 
+import io.github.jspinak.brobot.debug.DebugTestBase;
+
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
 
@@ -17,7 +19,7 @@ import java.util.Iterator;
  * Test to see if patterns can be found anywhere on screen,
  * even if not at expected locations.
  */
-public class FullScreenSearchTest extends BrobotTestBase {
+public class FullScreenSearchTest extends DebugTestBase {
     
     @Test
     public void findPatternsAnywhere() throws Exception {

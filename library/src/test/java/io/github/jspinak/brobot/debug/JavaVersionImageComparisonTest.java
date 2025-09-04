@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.debug;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.debug.DebugTestBase;
 
 import org.junit.jupiter.api.Test;
 import javax.imageio.ImageIO;
@@ -14,7 +14,7 @@ import java.io.File;
  * Test to identify Java version differences in image processing
  * Java 8 vs Java 21 image handling comparison
  */
-public class JavaVersionImageComparisonTest extends BrobotTestBase {
+public class JavaVersionImageComparisonTest extends DebugTestBase {
     
     @Test
     public void compareJavaImageHandling() {

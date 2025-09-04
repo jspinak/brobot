@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.debug;
 
+import io.github.jspinak.brobot.debug.DebugTestBase;
+
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
 
@@ -18,7 +20,7 @@ import java.io.IOException;
  * Tests methods to capture screenshots at physical resolution (1920x1080)
  * instead of logical resolution (1536x864) on 125% scaled displays.
  */
-public class PhysicalResolutionCaptureTest extends BrobotTestBase {
+public class PhysicalResolutionCaptureTest extends DebugTestBase {
     
     @Test
     public void testPhysicalResolutionCapture() throws Exception {
