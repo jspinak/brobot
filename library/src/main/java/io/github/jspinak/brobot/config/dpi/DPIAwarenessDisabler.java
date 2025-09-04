@@ -45,8 +45,9 @@ public class DPIAwarenessDisabler {
         String disableDPI = System.getProperty("brobot.dpi.disable", 
                            System.getenv("BROBOT_DISABLE_DPI"));
         
-        // Default to true (disable DPI awareness) for compatibility
-        boolean shouldDisable = !"false".equalsIgnoreCase(disableDPI);
+        // Default to false (keep DPI awareness enabled) to allow auto-detection
+        // DPI awareness enabled = captures at logical resolution, auto resize-factor handles scaling
+        boolean shouldDisable = "true".equalsIgnoreCase(disableDPI);
         
         if (shouldDisable) {
             disableDPIAwareness();

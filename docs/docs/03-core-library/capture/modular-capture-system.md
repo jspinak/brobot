@@ -23,17 +23,19 @@ Brobot's screen capture system is designed to be completely modular, allowing yo
 
 ### Basic Configuration
 
-The default configuration uses SikuliX for maximum compatibility:
+The default configuration uses SikuliX with automatic DPI detection:
 
 ```properties
-# Default capture provider (already set in brobot-defaults.properties)
-brobot.capture.provider=SIKULIX
-
-# DPI auto-detection is enabled by default
-brobot.dpi.resize-factor=auto
+# Default settings in brobot-defaults.properties:
+brobot.capture.provider=SIKULIX   # SikuliX for maximum compatibility
+brobot.dpi.disable=false          # Keep DPI awareness enabled for detection
+brobot.dpi.resize-factor=auto     # Automatic DPI detection and compensation
 ```
 
-No configuration needed! SikuliX is the default provider with automatic DPI recognition.
+**No configuration needed!** These defaults provide:
+- Automatic DPI scaling detection
+- Pattern resize compensation
+- Maximum compatibility with existing patterns
 
 ### Available Providers
 
