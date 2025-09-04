@@ -13,7 +13,11 @@ keywords: [capture, configuration, robot, ffmpeg, javacv]
 
 ```properties
 # application.properties
-brobot.capture.provider=ROBOT    # or FFMPEG, SIKULIX, AUTO
+# Default is already SIKULIX, but you can change it:
+brobot.capture.provider=SIKULIX  # Default (or ROBOT, FFMPEG, AUTO)
+
+# DPI auto-detection is enabled by default:
+brobot.dpi.resize-factor=auto
 ```
 
 ### Method 2: Command Line
@@ -35,19 +39,23 @@ config.useSikuliX();  // Switch to SikuliX
 
 ## Provider Comparison
 
-| Provider | Dependencies | Resolution | Performance | Setup |
-|----------|-------------|------------|-------------|-------|
-| **Robot** | None | Physical* | Fast | None |
-| **FFmpeg** | JavaCV (included) | Physical | Good | None |
-| **SikuliX** | SikuliX | Varies | Good | None |
+| Provider | Dependencies | Resolution | Performance | Setup | Default |
+|----------|-------------|------------|-------------|-------|---------|
+| **SikuliX** | SikuliX (included) | Auto-handled | Good | None | ✅ Yes |
+| **Robot** | None | Physical* | Fast | None | No |
+| **FFmpeg** | JavaCV (included) | Physical | Good | None | No |
 
-*Robot scales logical to physical when DPI scaling detected
+*Robot scales logical to physical when DPI scaling detected  
+**SikuliX uses auto resize-factor for DPI handling**
 
 ## Essential Properties
 
 ```properties
-# Choose provider (ROBOT, FFMPEG, SIKULIX, AUTO)
-brobot.capture.provider=ROBOT
+# Choose provider (SIKULIX is default, or ROBOT, FFMPEG, AUTO)
+brobot.capture.provider=SIKULIX
+
+# DPI auto-detection (enabled by default)
+brobot.dpi.resize-factor=auto
 
 # Robot: Enable physical resolution scaling
 brobot.capture.robot.scale-to-physical=true
@@ -98,9 +106,10 @@ config.printConfigurationReport();
 ### Scenario 1: Development Machine
 
 ```properties
-# Use Robot - no dependencies needed
-brobot.capture.provider=ROBOT
-brobot.capture.enable-logging=true
+# Use default SikuliX with auto DPI
+# (No configuration needed - these are defaults)
+brobot.capture.provider=SIKULIX
+brobot.dpi.resize-factor=auto
 ```
 
 ### Scenario 2: CI/CD Pipeline
@@ -142,23 +151,23 @@ brobot.capture.robot.expected-physical-width=1920
 ```
 Which provider should I use?
 
-┌─ Need maximum accuracy?
+┌─ Want maximum compatibility?
+│  └─ Yes → SikuliX (default, with auto DPI)
+│  └─ No ↓
+│
+├─ Need true physical capture?
 │  └─ Yes → FFmpeg (JavaCV)
 │  └─ No ↓
 │
-├─ Have DPI scaling issues?
-│  └─ Yes → Robot (with scaling enabled)
+├─ Want manual DPI control?
+│  └─ Yes → Robot (with scaling settings)
 │  └─ No ↓
 │
 ├─ Need fastest performance?
 │  └─ Yes → Robot
 │  └─ No ↓
 │
-├─ Using legacy SikuliX code?
-│  └─ Yes → SikuliX
-│  └─ No ↓
-│
-└─ Unsure? → AUTO (let system choose)
+└─ Unsure? → Stay with SikuliX (default)
 ```
 
 ## Key Points
@@ -169,12 +178,14 @@ Which provider should I use?
 ✅ **Properties control everything**  
 ✅ **Automatic fallback** for robustness  
 
-## One-Line Setup
+## Default Setup
 
-Just add to `application.properties`:
+No configuration needed! Brobot defaults to:
 
 ```properties
-brobot.capture.provider=ROBOT
+# These are already set in brobot-defaults.properties:
+brobot.capture.provider=SIKULIX
+brobot.dpi.resize-factor=auto
 ```
 
-That's it! Your entire application now uses the selected capture provider.
+Your application automatically uses SikuliX with automatic DPI recognition.

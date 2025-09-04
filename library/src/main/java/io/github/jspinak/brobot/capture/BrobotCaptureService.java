@@ -166,8 +166,8 @@ public class BrobotCaptureService {
             }
         }
         
-        // Try any available provider (prefer Robot)
-        String[] preferredOrder = {"ROBOT", "SIKULIX", "FFMPEG"};
+        // Try any available provider (prefer SikuliX for compatibility)
+        String[] preferredOrder = {"SIKULIX", "ROBOT", "FFMPEG"};
         for (String name : preferredOrder) {
             CaptureProvider provider = providerMap.get(name);
             if (provider != null && provider.isAvailable()) {
@@ -188,7 +188,11 @@ public class BrobotCaptureService {
      */
     private void createDefaultProviders() {
         if (providerMap.isEmpty()) {
-            // Always add Robot as primary provider
+            // Add SikuliX as primary provider for compatibility
+            SikuliXCaptureProvider sikuli = new SikuliXCaptureProvider();
+            providerMap.put("SIKULIX", sikuli);
+            
+            // Add Robot as secondary provider
             RobotCaptureProvider robot = new RobotCaptureProvider();
             providerMap.put("ROBOT", robot);
             
@@ -197,10 +201,6 @@ public class BrobotCaptureService {
             if (ffmpeg.isAvailable()) {
                 providerMap.put("FFMPEG", ffmpeg);
             }
-            
-            // Add SikuliX as fallback
-            SikuliXCaptureProvider sikuli = new SikuliXCaptureProvider();
-            providerMap.put("SIKULIX", sikuli);
         }
     }
     

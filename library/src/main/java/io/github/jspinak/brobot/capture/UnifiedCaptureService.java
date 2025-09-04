@@ -43,7 +43,7 @@ public class UnifiedCaptureService {
     @Autowired
     private BrobotCaptureService delegateService;
     
-    @Value("${brobot.capture.provider:AUTO}")
+    @Value("${brobot.capture.provider:SIKULIX}")
     private String providerConfig;
     
     @Value("${brobot.capture.enable-logging:false}")

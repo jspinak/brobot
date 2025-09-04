@@ -57,9 +57,6 @@ spring:
     banner-mode: off
     lazy-initialization: true
     
-  profiles:
-    active: test
-    
 # Force headless mode for CI/CD
 java:
   awt:

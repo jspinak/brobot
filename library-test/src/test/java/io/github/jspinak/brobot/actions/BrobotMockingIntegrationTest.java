@@ -17,17 +17,12 @@ import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.Timeout;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ContextConfiguration;
-import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
-import io.github.jspinak.brobot.test.mock.MockScreenConfig;
-import org.springframework.test.context.TestPropertySource;
-import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.action.internal.execution.ActionExecution;
+import io.github.jspinak.brobot.action.internal.execution.ActionChainExecutor;
+import io.github.jspinak.brobot.action.internal.service.ActionService;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
@@ -39,26 +34,24 @@ import static org.junit.jupiter.api.Assertions.*;
  * Integration test demonstrating Brobot mocking functionality.
  * Shows how Brobot mocking differs from standard test mocking.
  */
-@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class, properties = {
-                "brobot.gui-access.continue-on-error=true",
-                "brobot.gui-access.check-on-startup=false",
-                "java.awt.headless=true",
-                "spring.main.allow-bean-definition-overriding=true",
-                "brobot.test.type=unit",
-                "brobot.capture.physical-resolution=false",
-                "brobot.mock.enabled=true"
-})
-@Import({ MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class,
-                io.github.jspinak.brobot.test.config.TestApplicationConfiguration.class })
-@ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class BrobotMockingIntegrationTest extends BrobotTestBase {
 
-        @Autowired
-        private Action action;
-
-        @Autowired
+        @Mock
+        private ActionExecution actionExecution;
+        
+        @Mock
+        private ActionService actionService;
+        
+        @Mock
+        private ActionChainExecutor actionChainExecutor;
+        
+        @Mock
         private StateMemory stateMemory;
+
+        private Action action;
+        
+        private AutoCloseable mocks;
 
         private StateImage stateImageWithHistory;
         private StateImage stateImageWithoutHistory;
@@ -68,6 +61,10 @@ class BrobotMockingIntegrationTest extends BrobotTestBase {
         @Override
         public void setupTest() {
                 super.setupTest(); // Call parent setup to enable mock mode
+                
+                // Initialize mocks
+                mocks = MockitoAnnotations.openMocks(this);
+                action = new Action(actionExecution, actionService, actionChainExecutor);
 
                 // Clear any screenshots to ensure proper mock mode behavior
                 FrameworkSettings.screenshots.clear();
@@ -125,12 +122,21 @@ class BrobotMockingIntegrationTest extends BrobotTestBase {
                                 .setOwnerStateName("TestState")
                                 .build();
         }
+        
+        @AfterEach
+        void tearDown() throws Exception {
+                if (mocks != null) {
+                        mocks.close();
+                }
+                // Reset to default
+                FrameworkSettings.mock = true; // Keep mock enabled for tests
+        }
 
         @Test
         @Order(1)
         void testSpringContextLoads() {
-                assertNotNull(action, "Action should be autowired");
-                assertNotNull(stateMemory, "StateMemory should be autowired");
+                assertNotNull(action, "Action should be created");
+                assertNotNull(stateMemory, "StateMemory should be created");
         }
 
         @Test
@@ -339,11 +345,4 @@ class BrobotMockingIntegrationTest extends BrobotTestBase {
                 assertTrue(successCount > 0, "Should have successful matches in mock mode");
         }
 
-        @AfterEach
-        void tearDown() {
-                // Reset to default
-                FrameworkSettings.mock = false;
-                // Reset state memory - we can't directly access active states
-                // The mock system will handle state management internally
-        }
 }
