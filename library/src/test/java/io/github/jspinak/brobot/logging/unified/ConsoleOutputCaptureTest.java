@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.logging.unified;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.utils.TestSynchronization;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -93,8 +94,8 @@ public class ConsoleOutputCaptureTest extends BrobotTestBase {
         System.out.println("Test output line");
         System.out.flush();
         
-        // Give time for async processing if any
-        Thread.sleep(50);
+        // Wait for async processing
+        TestSynchronization.waitForFlush();
         
         capture.stopCapture();
         
