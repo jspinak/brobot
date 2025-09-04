@@ -17,7 +17,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Scanner;
 
-@SpringBootApplication(scanBasePackageClasses = ClaudeAutomatorApplication.class)
+import org.junit.jupiter.api.Disabled;
+
+@SpringBootApplication
 @Component
 @Disabled("Not a JUnit test - has main method instead")
 public class RawConsoleOutputTest extends BrobotTestBase {

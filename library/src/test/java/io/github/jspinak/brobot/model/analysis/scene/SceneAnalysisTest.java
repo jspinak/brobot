@@ -21,9 +21,8 @@ import java.util.Optional;
 
 import static io.github.jspinak.brobot.model.analysis.color.ColorCluster.ColorSchemaName.BGR;
 import static io.github.jspinak.brobot.model.analysis.color.ColorCluster.ColorSchemaName.HSV;
-import static io.github.jspinak.brobot.model.analysis.color.ColorInfo.ColorStat.MEAN;
-import static io.github.jspinak.brobot.model.analysis.color.ColorSchema.ColorValue.HUE;
-import static io.github.jspinak.brobot.model.analysis.color.PixelProfiles.Analysis.SCORE;
+// import static io.github.jspinak.brobot.model.analysis.color.ColorSchema.ColorValue.HUE; // Compilation issue - commented temporarily
+// import static io.github.jspinak.brobot.model.analysis.color.PixelProfiles.Analysis.SCORE; // Visibility issue - using qualified name instead
 import static io.github.jspinak.brobot.model.analysis.scene.SceneAnalysis.Analysis.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -223,16 +222,16 @@ public class SceneAnalysisTest extends BrobotTestBase {
         when(mockStateImage1.getColorCluster()).thenReturn(mockColorCluster);
         when(mockStateImage2.getColorCluster()).thenReturn(mockColorCluster);
         when(mockColorCluster.getSchema(BGR)).thenReturn(mockColorSchema);
-        when(mockColorSchema.getColorStatistics(MEAN)).thenReturn(mockColorStatistics);
+        when(mockColorSchema.getColorStatistics(ColorInfo.ColorStat.MEAN)).thenReturn(mockColorStatistics);
         
         sceneAnalysis = new SceneAnalysis(pixelAnalysisCollections, mockScene);
         
-        List<ColorStatistics> profiles = sceneAnalysis.getColorStatProfiles(BGR, MEAN);
+        List<ColorStatistics> profiles = sceneAnalysis.getColorStatProfiles(BGR, ColorInfo.ColorStat.MEAN);
         
         assertNotNull(profiles);
         assertEquals(2, profiles.size());
         verify(mockColorCluster, times(2)).getSchema(BGR);
-        verify(mockColorSchema, times(2)).getColorStatistics(MEAN);
+        verify(mockColorSchema, times(2)).getColorStatistics(ColorInfo.ColorStat.MEAN);
     }
     
     @Test
@@ -242,12 +241,12 @@ public class SceneAnalysisTest extends BrobotTestBase {
         when(mockStateImage1.getColorCluster()).thenReturn(mockColorCluster);
         when(mockStateImage2.getColorCluster()).thenReturn(mockColorCluster);
         when(mockColorCluster.getSchema(HSV)).thenReturn(mockColorSchema);
-        when(mockColorSchema.getColorStatistics(MEAN)).thenReturn(mockColorStatistics);
-        when(mockColorStatistics.getStat(HUE)).thenReturn(120.5).thenReturn(180.7);
+        when(mockColorSchema.getColorStatistics(ColorInfo.ColorStat.MEAN)).thenReturn(mockColorStatistics);
+        when(mockColorStatistics.getStat(ColorSchema.ColorValue.HUE)).thenReturn(120.5).thenReturn(180.7);
         
         sceneAnalysis = new SceneAnalysis(pixelAnalysisCollections, mockScene);
         
-        List<Integer> colorValues = sceneAnalysis.getColorValues(HSV, MEAN, HUE);
+        List<Integer> colorValues = sceneAnalysis.getColorValues(HSV, ColorInfo.ColorStat.MEAN, ColorSchema.ColorValue.HUE);
         
         assertNotNull(colorValues);
         assertEquals(2, colorValues.size());
@@ -281,7 +280,7 @@ public class SceneAnalysisTest extends BrobotTestBase {
     @DisplayName("Should get scores for state image")
     void shouldGetScoresForStateImage() {
         Mat scoresMat = new Mat(50, 50, CV_32FC1);
-        when(mockPixelProfiles1.getAnalysis(SCORE, BGR)).thenReturn(scoresMat);
+        when(mockPixelProfiles1.getAnalysis(PixelProfiles.Analysis.SCORE, BGR)).thenReturn(scoresMat);
         
         sceneAnalysis = new SceneAnalysis(pixelAnalysisCollections, mockScene);
         

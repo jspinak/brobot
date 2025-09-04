@@ -6,19 +6,30 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.testfx.framework.junit5.ApplicationTest;
 
+import java.awt.GraphicsEnvironment;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
  * JavaFX test that creates a visible window for manual verification
  */
+@DisabledIfSystemProperty(named = "java.awt.headless", matches = "true")
 public class VisibleJavaFxTest extends ApplicationTest {
+    
+    @BeforeAll
+    public static void checkEnvironment() {
+        assumeFalse(GraphicsEnvironment.isHeadless(), 
+            "Skipping JavaFX test in headless environment");
+    }
 
     private Stage stage;
     private Label statusLabel;

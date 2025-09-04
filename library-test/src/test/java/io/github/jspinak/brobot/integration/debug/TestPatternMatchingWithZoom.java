@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * Test pattern matching with different zoom levels.
  */
-@SpringBootTest(classes = ClaudeAutomatorApplication.class)
+@SpringBootTest // (classes = ClaudeAutomatorApplication.class)
 public class TestPatternMatchingWithZoom {
     
     @Autowired

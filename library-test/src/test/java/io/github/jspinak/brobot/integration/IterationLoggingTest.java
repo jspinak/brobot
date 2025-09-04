@@ -15,7 +15,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@SpringBootTest(classes = ClaudeAutomatorApplication.class)
+@SpringBootTest // (classes = ClaudeAutomatorApplication.class not available)
 @TestPropertySource(properties = {
     "claude.automator.monitoring.max-iterations=3"
 })

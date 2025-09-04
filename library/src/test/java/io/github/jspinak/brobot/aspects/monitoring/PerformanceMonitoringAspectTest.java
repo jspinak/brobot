@@ -5,14 +5,20 @@ import io.github.jspinak.brobot.logging.unified.LogBuilder;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
+import io.github.jspinak.brobot.test.annotations.FlakyTest;
+import io.github.jspinak.brobot.test.annotations.FlakyTest.FlakyCause;
+import io.github.jspinak.brobot.test.utils.ConcurrentTestHelper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -64,6 +70,15 @@ public class PerformanceMonitoringAspectTest extends BrobotTestBase {
         lenient().doNothing().when(logBuilder).log();
 
         aspect.init();
+    }
+
+    @AfterEach
+    public void tearDown() {
+        // Cleanup aspect if it has any shutdown logic
+        // Note: PerformanceMonitoringAspect doesn't have a shutdown method
+        // if (aspect != null) {
+        //     aspect.shutdown();
+        // }
     }
 
     @Test
@@ -307,21 +322,23 @@ public class PerformanceMonitoringAspectTest extends BrobotTestBase {
     }
 
     @Test
+    @FlakyTest(reason = "Concurrent performance monitoring", cause = FlakyCause.CONCURRENCY)
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testConcurrentExecution() throws Throwable {
         // Arrange
         int threadCount = 10;
         CountDownLatch latch = new CountDownLatch(threadCount);
-        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toShortString()).thenReturn("TestClass.concurrentMethod()");
         when(signature.getName()).thenReturn("concurrentMethod");
         when(joinPoint.proceed()).thenAnswer(invocation -> {
-            Thread.sleep(10);
+            Thread.sleep(10); // Simple delay instead of waitFor
             return new Object();
         });
 
-        // Act
+        // Act - create executor for this test
+        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         for (int i = 0; i < threadCount; i++) {
             executor.submit(() -> {
                 try {
@@ -335,8 +352,9 @@ public class PerformanceMonitoringAspectTest extends BrobotTestBase {
         }
 
         // Assert
-        assertTrue(latch.await(5, TimeUnit.SECONDS));
+        assertTrue(ConcurrentTestHelper.awaitLatch(latch, Duration.ofSeconds(5), "Concurrent monitoring"));
         executor.shutdown();
+        executor.awaitTermination(5, TimeUnit.SECONDS);
         
         Map<String, PerformanceMonitoringAspect.MethodPerformanceStats> stats = aspect.getPerformanceStats();
         PerformanceMonitoringAspect.MethodPerformanceStats methodStats = stats.get("TestClass.concurrentMethod()");

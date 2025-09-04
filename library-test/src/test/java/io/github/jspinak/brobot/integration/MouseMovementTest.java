@@ -15,7 +15,7 @@ import java.awt.Toolkit;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@SpringBootTest(classes = ClaudeAutomatorApplication.class)
+@SpringBootTest // (classes = ClaudeAutomatorApplication.class not available)
 public class MouseMovementTest extends BrobotTestBase {
 
     @Autowired

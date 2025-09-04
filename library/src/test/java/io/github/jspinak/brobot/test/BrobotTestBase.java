@@ -1,10 +1,13 @@
 package io.github.jspinak.brobot.test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInfo;
 
 import io.github.jspinak.brobot.config.mock.MockModeManager;
+import io.github.jspinak.brobot.test.jackson.BrobotJacksonTestConfig;
+import io.github.jspinak.brobot.test.jackson.BrobotJacksonMixins;
 
 /**
  * Base test class for all Brobot tests.
@@ -19,6 +22,12 @@ import io.github.jspinak.brobot.config.mock.MockModeManager;
  * </ul>
  */
 public abstract class BrobotTestBase {
+    
+    /**
+     * Shared ObjectMapper configured for Brobot serialization tests.
+     * This mapper handles all problematic types (Mat, BufferedImage, SikuliX objects).
+     */
+    protected ObjectMapper testObjectMapper;
     
     /**
      * Global setup for all tests in the class.
@@ -74,6 +83,10 @@ public abstract class BrobotTestBase {
     public void setupTest() {
         // Enable mock mode by default for testing using MockModeManager
         MockModeManager.setMockMode(true);
+        
+        // Initialize properly configured ObjectMapper for serialization tests
+        testObjectMapper = BrobotJacksonTestConfig.createTestObjectMapper();
+        BrobotJacksonMixins.registerMixins(testObjectMapper);
         
         // Reset any static state that might interfere between tests
         resetStaticState();

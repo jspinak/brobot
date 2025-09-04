@@ -19,6 +19,8 @@ import org.springframework.context.annotation.ComponentScan;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
+import org.junit.jupiter.api.Disabled;
+
 @SpringBootApplication
 @ComponentScan(basePackages = {"io.github.jspinak.brobot", "com.claude.automator"})
 @Disabled("Not a JUnit test - has main method instead")

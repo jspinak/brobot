@@ -209,6 +209,29 @@ task integrationTest(type: Test) {
     }
 }
 
+// Task for running diagnostic tools
+task run(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    if (project.hasProperty('mainClass')) {
+        mainClass = project.mainClass
+    } else {
+        mainClass = 'io.github.jspinak.brobot.tools.diagnostics.QuickMatchComparison'
+    }
+    if (project.hasProperty('args')) {
+        args project.args.split(' ')
+    }
+}
+
+// Task for running DPI diagnostic
+task runDPIDiagnostic(type: JavaExec) {
+    description = 'Runs the DPI scaling diagnostic tool'
+    group = 'diagnostics'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'io.github.jspinak.brobot.tools.diagnostics.StandaloneDPIDiagnostic'
+    standardOutput = System.out
+    errorOutput = System.err
+}
+
 // Custom test task for E2E tests only
 task e2eTest(type: Test) {
     description = 'Runs only E2E tests'

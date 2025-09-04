@@ -12,7 +12,7 @@ import org.springframework.test.context.TestPropertySource;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-@SpringBootTest(classes = ClaudeAutomatorApplication.class)
+@SpringBootTest // (classes = ClaudeAutomatorApplication.class)
 @TestPropertySource(properties = {
     "brobot.logging.verbosity=QUIET",
     "brobot.logging.console.capture-enabled=false",

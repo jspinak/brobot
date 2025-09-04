@@ -127,7 +127,10 @@ public class InitialStateVerifierTest extends BrobotTestBase {
         @BeforeEach
         public void setupRealMode() {
             // These tests need real mode behavior, not mock mode
+            // Note: BrobotTestBase sets mock=true, so we override it here
             FrameworkSettings.mock = false;
+            // Re-initialize verifier after changing mode
+            verifier = new InitialStateVerifier(stateDetector, stateMemory, stateService);
         }
 
         @Test
@@ -261,7 +264,10 @@ public class InitialStateVerifierTest extends BrobotTestBase {
         @BeforeEach
         public void setupRealMode() {
             // These tests need real mode behavior, not mock mode
+            // Note: BrobotTestBase sets mock=true, so we override it here
             FrameworkSettings.mock = false;
+            // Re-initialize verifier after changing mode
+            verifier = new InitialStateVerifier(stateDetector, stateMemory, stateService);
         }
 
         @Test
@@ -368,7 +374,10 @@ public class InitialStateVerifierTest extends BrobotTestBase {
         @BeforeEach
         public void setupRealMode() {
             // These tests need real mode behavior, not mock mode
+            // Note: BrobotTestBase sets mock=true, so we override it here
             FrameworkSettings.mock = false;
+            // Re-initialize verifier after changing mode
+            verifier = new InitialStateVerifier(stateDetector, stateMemory, stateService);
         }
 
         @Test

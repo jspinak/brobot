@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.startup;
 
+import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -15,12 +16,14 @@ import static org.junit.jupiter.api.Assertions.*;
  * These tests verify the orchestrator's internal logic without requiring
  * a full Spring context.
  */
-public class BrobotInitializationOrchestratorUnitTest {
+public class BrobotInitializationOrchestratorUnitTest extends BrobotTestBase {
     
     private InitializationOrchestrator orchestrator;
     
     @BeforeEach
-    public void setUp() {
+    @Override
+    public void setupTest() {
+        super.setupTest();
         // Create orchestrator without Spring injection
         orchestrator = new InitializationOrchestrator();
     }

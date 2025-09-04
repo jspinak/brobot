@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.config;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.config.core.ImagePathManager;
 import org.junit.jupiter.api.*;
 import org.sikuli.script.ImagePath;
 

@@ -8,7 +8,7 @@ import io.github.jspinak.brobot.action.basic.click.Click;
 import io.github.jspinak.brobot.action.basic.find.Find;
 import io.github.jspinak.brobot.action.basic.type.TypeText;
 import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.config.BrobotConfig;
+import io.github.jspinak.brobot.config.core.BrobotConfig;
 import io.github.jspinak.brobot.config.mock.MockModeManager;
 import io.github.jspinak.brobot.core.services.ScreenCaptureService;
 import io.github.jspinak.brobot.model.element.Region;
