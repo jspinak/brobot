@@ -30,8 +30,9 @@ jobs:
     - name: Make scripts executable
       run: |
         chmod +x gradlew
-        chmod +x library/scripts/*.py
-        chmod +x library/scripts/*.sh
+        chmod +x library/scripts/*.py || true || true
+        # Make .sh files executable if they exist
+        find library/scripts -name "*.sh" -type f -exec chmod +x {} \; 2>/dev/null || true
     
     - name: Compile and quick test
       run: |
@@ -69,7 +70,7 @@ jobs:
     - name: Make scripts executable
       run: |
         chmod +x gradlew
-        chmod +x library/scripts/*.py
+        chmod +x library/scripts/*.py || true
     
     - name: Run unit test batch ${{ matrix.batch }}
       run: |
@@ -120,7 +121,7 @@ jobs:
     - name: Make scripts executable
       run: |
         chmod +x gradlew
-        chmod +x library/scripts/*.py
+        chmod +x library/scripts/*.py || true
     
     - name: Run integration tests
       run: |
