@@ -75,8 +75,7 @@ public class BrobotTestConfiguration {
     /**
      * Mock Click bean for testing.
      */
-    @Bean
-    @Primary
+    @Bean("mockClick")
     public Click mockClick() {
         Click click = mock(Click.class);
         
