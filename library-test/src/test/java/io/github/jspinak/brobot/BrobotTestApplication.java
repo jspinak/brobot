@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot;
 
-import io.github.jspinak.brobot.config.BrobotConfig;
+import io.github.jspinak.brobot.config.core.BrobotConfig;
 import io.github.jspinak.brobot.test.TestConfigurationPropertiesConfig;
 import io.github.jspinak.brobot.test.TestLoggingConfig;
 import io.github.jspinak.brobot.test.mock.MockBrobotLoggerConfig;

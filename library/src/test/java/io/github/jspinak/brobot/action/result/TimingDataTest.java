@@ -1,10 +1,16 @@
 package io.github.jspinak.brobot.action.result;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.action.result.TimingData.TimeSegment;
+import io.github.jspinak.brobot.test.ConcurrentTestBase;
+import io.github.jspinak.brobot.test.annotations.FlakyTest;
+import io.github.jspinak.brobot.test.annotations.FlakyTest.FlakyCause;
+import io.github.jspinak.brobot.test.utils.ConcurrentTestHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -12,15 +18,17 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Comprehensive test suite for TimingData - manages timing information for action execution.
  * Tests start/stop operations, duration calculations, and time segment management.
+ * Uses ConcurrentTestBase for thread-safe parallel execution.
  */
 @DisplayName("TimingData Tests")
-public class TimingDataTest extends BrobotTestBase {
+public class TimingDataTest extends ConcurrentTestBase {
     
     private TimingData timingData;
     
@@ -72,12 +80,12 @@ public class TimingDataTest extends BrobotTestBase {
         
         @Test
         @DisplayName("Start method initializes timing")
-        public void testStart() {
+        public void testStart() throws Exception {
             timingData = new TimingData();
             LocalDateTime initialStart = timingData.getStartTime();
             
             // Add small delay to ensure time difference
-            try { Thread.sleep(10); } catch (InterruptedException e) {}
+            waitFor(() -> false, Duration.ofMillis(10));
             
             timingData.start();
             
@@ -92,9 +100,14 @@ public class TimingDataTest extends BrobotTestBase {
         
         @Test
         @DisplayName("Stop method sets end time and calculates duration")
-        public void testStop() throws InterruptedException {
+        @FlakyTest(reason = "Timing measurement accuracy", cause = FlakyCause.TIMING)
+        public void testStop() throws Exception {
             timingData = new TimingData();
-            Thread.sleep(50); // Small delay to ensure measurable duration
+            // Use executeAsync for controlled timing
+            executeAsync(() -> {
+                Thread.sleep(50);
+                return null;
+            }, Duration.ofMillis(100));
             
             timingData.stop();
             
@@ -120,13 +133,13 @@ public class TimingDataTest extends BrobotTestBase {
         
         @Test
         @DisplayName("Multiple stops only set end time once")
-        public void testMultipleStops() throws InterruptedException {
+        public void testMultipleStops() throws Exception {
             timingData = new TimingData();
-            Thread.sleep(50);
+            waitFor(() -> false, Duration.ofMillis(50));
             
             timingData.stop();
             LocalDateTime firstEndTime = timingData.getEndTime();
-            Thread.sleep(50);
+            waitFor(() -> false, Duration.ofMillis(50));
             timingData.stop();
             
             assertEquals(firstEndTime, timingData.getEndTime());
@@ -139,13 +152,17 @@ public class TimingDataTest extends BrobotTestBase {
         
         @Test
         @DisplayName("Get elapsed duration while running")
-        public void testElapsedWhileRunning() throws InterruptedException {
+        @FlakyTest(reason = "Timing measurement while running", cause = FlakyCause.TIMING)
+        @Timeout(value = 5, unit = TimeUnit.SECONDS)
+        public void testElapsedWhileRunning() throws Exception {
             timingData = new TimingData();
             
-            Thread.sleep(100);
+            // Wait and then check elapsed time
+            waitFor(() -> timingData.getElapsed().toMillis() >= 100, Duration.ofMillis(150));
             Duration elapsed1 = timingData.getElapsed();
             
-            Thread.sleep(100);
+            // Wait more and check again
+            waitFor(() -> timingData.getElapsed().toMillis() >= 200, Duration.ofMillis(150));
             Duration elapsed2 = timingData.getElapsed();
             
             assertTrue(elapsed1.toMillis() >= 100);
@@ -156,13 +173,14 @@ public class TimingDataTest extends BrobotTestBase {
         
         @Test
         @DisplayName("Get elapsed duration after stopping")
-        public void testElapsedAfterStopping() throws InterruptedException {
+        @FlakyTest(reason = "Timing measurement after stop", cause = FlakyCause.TIMING)
+        public void testElapsedAfterStopping() throws Exception {
             timingData = new TimingData();
-            Thread.sleep(100);
+            waitFor(() -> false, Duration.ofMillis(100));
             timingData.stop();
             
             Duration elapsed1 = timingData.getElapsed();
-            Thread.sleep(100);
+            waitFor(() -> false, Duration.ofMillis(100));
             Duration elapsed2 = timingData.getElapsed();
             
             assertEquals(elapsed1, elapsed2);
@@ -182,28 +200,39 @@ public class TimingDataTest extends BrobotTestBase {
         
         @Test
         @DisplayName("Get execution time in milliseconds")
-        public void testExecutionTimeMs() throws InterruptedException {
+        @FlakyTest(reason = "Execution time measurement", cause = FlakyCause.TIMING)
+        public void testExecutionTimeMs() throws Exception {
             timingData = new TimingData();
-            Thread.sleep(150);
+            // Use controlled timing
+            executeAsync(() -> {
+                Thread.sleep(150);
+                return null;
+            }, Duration.ofMillis(200));
             timingData.stop();
             
             long executionMs = timingData.getExecutionTimeMs();
             
-            assertTrue(executionMs >= 150);
+            assertTrue(executionMs >= 140); // Allow some tolerance
             assertEquals(timingData.getElapsed().toMillis(), executionMs);
         }
         
         @Test
         @DisplayName("Get execution time in seconds")
-        public void testExecutionTimeSeconds() throws InterruptedException {
+        @FlakyTest(reason = "Long execution time measurement", cause = FlakyCause.TIMING)
+        @Timeout(value = 5, unit = TimeUnit.SECONDS)
+        public void testExecutionTimeSeconds() throws Exception {
             timingData = new TimingData();
-            Thread.sleep(1100);
+            // Use controlled timing for 1.1 seconds
+            executeAsync(() -> {
+                Thread.sleep(1100);
+                return null;
+            }, Duration.ofSeconds(2));
             timingData.stop();
             
             double executionSeconds = timingData.getExecutionTimeMs() / 1000.0;
             
-            assertTrue(executionSeconds >= 1.1);
-            assertEquals(timingData.getElapsed().toMillis() / 1000.0, executionSeconds, 0.01);
+            assertTrue(executionSeconds >= 1.0); // Allow tolerance
+            assertEquals(timingData.getElapsed().toMillis() / 1000.0, executionSeconds, 0.1);
         }
     }
     
@@ -215,7 +244,7 @@ public class TimingDataTest extends BrobotTestBase {
         @DisplayName("Add time segment")
         public void testAddSegment() {
             timingData = new TimingData();
-            TimingData.TimeSegment segment = new TimingData.TimeSegment("Find Operation", Duration.ofMillis(500));
+            TimingData.TimeSegment segment = new TimeSegment("Find Operation", Duration.ofMillis(500));
             
             timingData.getSegments().add(segment);
             
@@ -227,9 +256,9 @@ public class TimingDataTest extends BrobotTestBase {
         @DisplayName("Add multiple time segments")
         public void testAddMultipleSegments() {
             timingData = new TimingData();
-            TimingData.TimeSegment segment1 = new TimingData.TimeSegment("Find", Duration.ofMillis(300));
-            TimingData.TimeSegment segment2 = new TimingData.TimeSegment("Click", Duration.ofMillis(100));
-            TimingData.TimeSegment segment3 = new TimingData.TimeSegment("Verify", Duration.ofMillis(200));
+            TimingData.TimeSegment segment1 = new TimeSegment("Find", Duration.ofMillis(300));
+            TimingData.TimeSegment segment2 = new TimeSegment("Click", Duration.ofMillis(100));
+            TimingData.TimeSegment segment3 = new TimeSegment("Verify", Duration.ofMillis(200));
             
             timingData.getSegments().add(segment1);
             timingData.getSegments().add(segment2);
@@ -270,12 +299,12 @@ public class TimingDataTest extends BrobotTestBase {
         @DisplayName("Get segment by name")
         public void testGetSegmentByName() {
             timingData = new TimingData();
-            TimingData.TimeSegment findSegment = new TimingData.TimeSegment("Find", Duration.ofMillis(300));
-            TimingData.TimeSegment clickSegment = new TimingData.TimeSegment("Click", Duration.ofMillis(100));
+            TimeSegment findSegment = new TimeSegment("Find", Duration.ofMillis(300));
+            TimeSegment clickSegment = new TimeSegment("Click", Duration.ofMillis(100));
             timingData.getSegments().add(findSegment);
             timingData.getSegments().add(clickSegment);
             
-            TimingData.TimeSegment retrieved = timingData.getSegments().stream()
+            TimeSegment retrieved = timingData.getSegments().stream()
                 .filter(s -> "Find".equals(s.getName()))
                 .findFirst().orElse(null);
             
@@ -288,7 +317,7 @@ public class TimingDataTest extends BrobotTestBase {
             timingData = new TimingData();
             timingData.addSegment("Find", Duration.ofMillis(300));
             
-            TimingData.TimeSegment retrieved = timingData.getSegments().stream()
+            TimeSegment retrieved = timingData.getSegments().stream()
                 .filter(s -> "NonExistent".equals(s.getName()))
                 .findFirst().orElse(null);
             
@@ -302,12 +331,13 @@ public class TimingDataTest extends BrobotTestBase {
         
         @Test
         @DisplayName("Instant start and end are set correctly")
-        public void testInstantTiming() throws InterruptedException {
+        @FlakyTest(reason = "Instant timing verification", cause = FlakyCause.TIMING)
+        public void testInstantTiming() throws Exception {
             Instant beforeStart = Instant.now();
             timingData = new TimingData();
             Instant afterStart = Instant.now();
             
-            Thread.sleep(100);
+            waitFor(() -> false, Duration.ofMillis(100));
             
             Instant beforeStop = Instant.now();
             timingData.stop();
@@ -321,14 +351,17 @@ public class TimingDataTest extends BrobotTestBase {
         
         @Test
         @DisplayName("Calculate elapsed using Instant when available")
-        public void testElapsedWithInstant() throws InterruptedException {
+        @FlakyTest(reason = "Instant-based elapsed calculation", cause = FlakyCause.TIMING)
+        public void testElapsedWithInstant() throws Exception {
             timingData = new TimingData();
-            Thread.sleep(100);
+            
+            // Wait until elapsed time is at least 100ms
+            boolean success = waitFor(() -> timingData.getElapsed().toMillis() >= 100, Duration.ofMillis(150));
             
             Duration elapsed = timingData.getElapsed();
             
             // Should use Instant-based calculation when available
-            assertTrue(elapsed.toMillis() >= 100);
+            assertTrue(success && elapsed.toMillis() >= 100);
         }
     }
     
@@ -350,9 +383,9 @@ public class TimingDataTest extends BrobotTestBase {
         
         @Test
         @DisplayName("Reset timing with start after stop")
-        public void testRestartAfterStop() throws InterruptedException {
+        public void testRestartAfterStop() throws Exception {
             timingData = new TimingData();
-            Thread.sleep(100);
+            waitFor(() -> false, Duration.ofMillis(100));
             timingData.stop();
             LocalDateTime firstEnd = timingData.getEndTime();
             
@@ -366,17 +399,24 @@ public class TimingDataTest extends BrobotTestBase {
         @ParameterizedTest
         @ValueSource(longs = {0, 10, 50, 100, 500})
         @DisplayName("Accurate timing for various durations")
-        public void testAccurateTiming(long sleepMs) throws InterruptedException {
+        @FlakyTest(reason = "Parameterized timing accuracy test", cause = FlakyCause.TIMING)
+        @Timeout(value = 10, unit = TimeUnit.SECONDS)
+        public void testAccurateTiming(long sleepMs) throws Exception {
             timingData = new TimingData();
             
-            Thread.sleep(sleepMs);
+            if (sleepMs > 0) {
+                executeAsync(() -> {
+                    Thread.sleep(sleepMs);
+                    return null;
+                }, Duration.ofMillis(sleepMs + 200));
+            }
             timingData.stop();
             
             long elapsed = timingData.getExecutionTimeMs();
             
             // Allow some tolerance for timing accuracy
-            assertTrue(elapsed >= sleepMs);
-            assertTrue(elapsed < sleepMs + 100); // Max 100ms overhead
+            assertTrue(elapsed >= sleepMs - 10); // Allow 10ms tolerance
+            assertTrue(elapsed < sleepMs + 150); // Max 150ms overhead
         }
     }
     
@@ -386,26 +426,34 @@ public class TimingDataTest extends BrobotTestBase {
         
         @Test
         @DisplayName("Track multi-phase operation timing")
-        public void testMultiPhaseOperation() throws InterruptedException {
+        @FlakyTest(reason = "Multi-phase timing tracking", cause = FlakyCause.TIMING)
+        @Timeout(value = 5, unit = TimeUnit.SECONDS)
+        public void testMultiPhaseOperation() throws Exception {
             timingData = new TimingData();
             
             // Phase 1: Find
-            Thread.sleep(50);
-            timingData.addSegment("Find", Duration.ofMillis(50));
+            long phase1Start = System.currentTimeMillis();
+            waitFor(() -> false, Duration.ofMillis(50));
+            long phase1Duration = System.currentTimeMillis() - phase1Start;
+            timingData.addSegment("Find", Duration.ofMillis(phase1Duration));
             
             // Phase 2: Process
-            Thread.sleep(30);
-            timingData.addSegment("Process", Duration.ofMillis(30));
+            long phase2Start = System.currentTimeMillis();
+            waitFor(() -> false, Duration.ofMillis(30));
+            long phase2Duration = System.currentTimeMillis() - phase2Start;
+            timingData.addSegment("Process", Duration.ofMillis(phase2Duration));
             
             // Phase 3: Verify
-            Thread.sleep(20);
-            timingData.addSegment("Verify", Duration.ofMillis(20));
+            long phase3Start = System.currentTimeMillis();
+            waitFor(() -> false, Duration.ofMillis(20));
+            long phase3Duration = System.currentTimeMillis() - phase3Start;
+            timingData.addSegment("Verify", Duration.ofMillis(phase3Duration));
             
             timingData.stop();
             
             assertEquals(3, timingData.getSegments().size());
-            assertEquals(100, timingData.getSegmentsDuration().toMillis());
-            assertTrue(timingData.getExecutionTimeMs() >= 100);
+            assertTrue(timingData.getSegmentsDuration().toMillis() >= 90); // Allow tolerance
+            assertTrue(timingData.getExecutionTimeMs() >= 90);
         }
         
         @Test

@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.startup.orchestration;
 
+import io.github.jspinak.brobot.dpi.DPIScalingStrategy;
 import org.sikuli.basics.Settings;
 import org.sikuli.script.ImagePath;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -73,10 +74,12 @@ public class ApplicationContextInitializer implements org.springframework.contex
         
         // Get DPI configuration from properties
         String resizeFactor = env.getProperty("brobot.dpi.resize-factor", "auto");
+        String patternSourceStr = env.getProperty("brobot.dpi.pattern.source", "SIKULI_IDE");
         double similarityThreshold = Double.parseDouble(env.getProperty("brobot.action.similarity", "0.70"));
         
         // Configure similarity threshold
         Settings.MinSimilarity = similarityThreshold;
+        System.out.println("[Brobot] Pattern source: " + patternSourceStr);
         System.out.println("[Brobot] Similarity threshold: " + similarityThreshold);
         
         // Configure DPI scaling
@@ -85,45 +88,49 @@ public class ApplicationContextInitializer implements org.springframework.contex
         if ("auto".equalsIgnoreCase(resizeFactor)) {
             System.out.println("[Brobot] DPI auto-detection enabled");
             
-            // Detect display scaling
-            double scaleX = 1.0;
-            double scaleY = 1.0;
-            
+            // Determine pattern source
+            DPIScalingStrategy.PatternSource patternSource;
             try {
-                GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-                if (ge != null && ge.getDefaultScreenDevice() != null) {
-                    scaleX = ge.getDefaultScreenDevice()
-                        .getDefaultConfiguration()
-                        .getDefaultTransform()
-                        .getScaleX();
-                    scaleY = ge.getDefaultScreenDevice()
-                        .getDefaultConfiguration()
-                        .getDefaultTransform()
-                        .getScaleY();
-                }
-            } catch (Exception e) {
-                System.out.println("[Brobot] Could not detect display scaling: " + e.getMessage());
+                patternSource = DPIScalingStrategy.PatternSource.valueOf(patternSourceStr.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                patternSource = DPIScalingStrategy.PatternSource.SIKULI_IDE;
+                System.out.println("[Brobot] Unknown pattern source '" + patternSourceStr + 
+                                 "', defaulting to SIKULI_IDE");
             }
             
-            System.out.println("[Brobot] Display scaling detected: " + (int)(scaleX * 100) + "% x " + (int)(scaleY * 100) + "%");
+            // Use DPIScalingStrategy for optimal configuration
+            double displayScale = DPIScalingStrategy.detectDisplayScaling();
             
-            // Calculate appropriate resize factor based on scaling
-            if (Math.abs(scaleX - 1.25) < 0.01) {
-                targetResize = 0.8f; // 125% scaling
-                System.out.println("[Brobot] 125% DPI scaling detected - pattern scale factor: 0.8");
-            } else if (Math.abs(scaleX - 1.5) < 0.01) {
-                targetResize = 0.67f; // 150% scaling
-                System.out.println("[Brobot] 150% DPI scaling detected - pattern scale factor: 0.67");
-            } else if (Math.abs(scaleX - 2.0) < 0.01) {
-                targetResize = 0.5f; // 200% scaling
-                System.out.println("[Brobot] 200% DPI scaling detected - pattern scale factor: 0.5");
-            } else if (Math.abs(scaleX - 1.0) < 0.01) {
-                targetResize = 1.0f; // No scaling
-                System.out.println("[Brobot] No DPI scaling detected - pattern scale factor: 1.0");
+            System.out.println("[Brobot] Display scaling detected: " + (int)(displayScale * 100) + "%");
+            
+            // Calculate appropriate resize factor using strategy
+            targetResize = DPIScalingStrategy.getOptimalResizeFactor(patternSource);
+            System.out.println("[Brobot] Calculated pattern scale factor: " + targetResize);
+            
+            // Provide detailed diagnostics based on display scaling
+            if (Math.abs(displayScale - 1.25) < 0.01) {
+                System.out.println("[Brobot] 125% DPI scaling detected");
+                System.out.println("  - Logical 100px → Physical 125px on screen");
+                System.out.println("  - Pattern scale factor 0.8 will compensate");
+            } else if (Math.abs(displayScale - 1.5) < 0.01) {
+                System.out.println("[Brobot] 150% DPI scaling detected");
+                System.out.println("  - Logical 100px → Physical 150px on screen");
+                System.out.println("  - Pattern scale factor 0.67 will compensate");
+            } else if (Math.abs(displayScale - 2.0) < 0.01) {
+                System.out.println("[Brobot] 200% DPI scaling detected");
+                System.out.println("  - Logical 100px → Physical 200px on screen");
+                System.out.println("  - Pattern scale factor 0.5 will compensate");
+            } else if (Math.abs(displayScale - 1.0) < 0.01) {
+                System.out.println("[Brobot] No DPI scaling detected - patterns match directly");
             } else {
-                // Calculate appropriate resize factor for non-standard scaling
-                targetResize = (float)(1.0 / scaleX);
-                System.out.println("[Brobot] Non-standard scaling " + (int)(scaleX * 100) + "% detected - pattern scale factor: " + targetResize);
+                System.out.println("[Brobot] Non-standard " + (int)(displayScale * 100) + "% scaling detected");
+            }
+            
+            // Warn about pattern source implications
+            if (patternSource == DPIScalingStrategy.PatternSource.WINDOWS_TOOL) {
+                System.out.println("[Brobot] ⚠ Windows tool patterns detected:");
+                System.out.println("  - These are in logical pixels");
+                System.out.println("  - May need different handling than SikuliX patterns");
             }
         } else {
             // Manual configuration
@@ -148,6 +155,12 @@ public class ApplicationContextInitializer implements org.springframework.contex
             System.out.println("  Pattern scaling: " + 
                 (Settings.AlwaysResize < 1.0f ? "DOWNSCALE" : "UPSCALE") +
                 " (patterns will be resized by " + Settings.AlwaysResize + "x during matching)");
+        }
+        
+        // Print diagnostic information if debug is enabled
+        String debugEnabled = env.getProperty("brobot.dpi.debug", "false");
+        if ("true".equalsIgnoreCase(debugEnabled)) {
+            DPIScalingStrategy.printDiagnostics();
         }
     }
 }

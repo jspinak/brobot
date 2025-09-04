@@ -144,7 +144,7 @@ public class TransitionExecutorTest extends BrobotTestBase {
             
             // Verify
             assertFalse(result);
-            verify(stateMemory).getActiveStates();
+            verify(stateMemory, atLeastOnce()).getActiveStates(); // Allow multiple calls for debug output
             verify(transitionFetcher, never()).getTransitions(any(), any());
         }
         

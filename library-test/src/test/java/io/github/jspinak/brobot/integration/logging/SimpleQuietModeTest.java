@@ -9,6 +9,7 @@ import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.model.state.StateImage;
 
+import org.junit.jupiter.api.Disabled;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.io.ByteArrayOutputStream;

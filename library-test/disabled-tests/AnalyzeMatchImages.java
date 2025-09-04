@@ -1,7 +1,7 @@
-package io.github.jspinak.brobot.debug;
+package io.github.jspinak.brobot.integration.debug;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
-
+import org.junit.jupiter.api.Disabled;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -22,7 +22,7 @@ public class AnalyzeMatchImages {
     }
     
     @Bean
-    CommandLineRunner runner(Object imageNormalizer // TODO: ImageNormalizer not available) {
+    CommandLineRunner runner(Object imageNormalizer) { // TODO: ImageNormalizer not available
         return args -> {
             System.out.println("\n=== Analyzing Claude Prompt Match Images ===\n");
             

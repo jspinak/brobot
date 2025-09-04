@@ -3,14 +3,21 @@ package io.github.jspinak.brobot.navigation.monitoring;
 import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.statemanagement.StateDetector;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.ConcurrentTestBase;
+import io.github.jspinak.brobot.test.annotations.FlakyTest;
+import io.github.jspinak.brobot.test.annotations.FlakyTest.FlakyCause;
+import io.github.jspinak.brobot.test.utils.ConcurrentTestHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -27,9 +34,11 @@ import static org.mockito.Mockito.*;
 /**
  * Comprehensive test suite for StateAwareScheduler.
  * Tests state-aware scheduling capabilities with various configurations.
+ * Uses ConcurrentTestBase for thread-safe parallel execution.
  */
 @DisplayName("StateAwareScheduler Tests")
-class StateAwareSchedulerTest extends BrobotTestBase {
+@ResourceLock(value = ConcurrentTestBase.ResourceLocks.NETWORK)
+class StateAwareSchedulerTest extends ConcurrentTestBase {
     
     @Mock
     private StateDetector stateDetector;
@@ -123,7 +132,13 @@ class StateAwareSchedulerTest extends BrobotTestBase {
         void testScheduleWithFixedRate() throws InterruptedException {
             // Arrange
             AtomicInteger counter = new AtomicInteger(0);
-            Runnable task = counter::incrementAndGet;
+            CountDownLatch executionLatch = new CountDownLatch(2); // Wait for at least 2 executions
+            Runnable task = () -> {
+                counter.incrementAndGet();
+                if (counter.get() <= 2) {
+                    executionLatch.countDown();
+                }
+            };
             
             var config = new StateAwareScheduler.StateCheckConfiguration.Builder()
                     .withRequiredStates(List.of("TestState"))
@@ -138,11 +153,12 @@ class StateAwareSchedulerTest extends BrobotTestBase {
             ScheduledFuture<?> future = scheduler.scheduleWithStateCheck(
                     executorService, task, config, 0, 50, TimeUnit.MILLISECONDS);
             
-            // Wait for executions
-            Thread.sleep(200);
+            // Wait for executions with timeout
+            boolean executed = executionLatch.await(1, TimeUnit.SECONDS);
             
             // Assert
-            assertTrue(counter.get() > 0);
+            assertTrue(executed, "Task should have executed at least twice");
+            assertTrue(counter.get() >= 2, "Counter should be at least 2, was: " + counter.get());
             future.cancel(true);
         }
         
@@ -151,7 +167,11 @@ class StateAwareSchedulerTest extends BrobotTestBase {
         void testScheduleWithFixedDelay() throws InterruptedException {
             // Arrange
             AtomicInteger counter = new AtomicInteger(0);
-            Runnable task = counter::incrementAndGet;
+            CountDownLatch executionLatch = new CountDownLatch(2); // Wait for at least 2 executions
+            Runnable task = () -> {
+                counter.incrementAndGet();
+                executionLatch.countDown();
+            };
             
             var config = new StateAwareScheduler.StateCheckConfiguration.Builder()
                     .withRequiredStates(List.of("TestState"))
@@ -166,11 +186,12 @@ class StateAwareSchedulerTest extends BrobotTestBase {
             ScheduledFuture<?> future = scheduler.scheduleWithFixedDelayAndStateCheck(
                     executorService, task, config, 0, 50, TimeUnit.MILLISECONDS);
             
-            // Wait for executions
-            Thread.sleep(200);
+            // Wait for executions with timeout to prevent hanging
+            boolean executed = executionLatch.await(1, TimeUnit.SECONDS);
             
             // Assert
-            assertTrue(counter.get() > 0);
+            assertTrue(executed, "Task should have executed at least twice");
+            assertTrue(counter.get() >= 2, "Counter should be at least 2, was: " + counter.get());
             future.cancel(true);
         }
         
@@ -413,15 +434,16 @@ class StateAwareSchedulerTest extends BrobotTestBase {
         }
     }
     
-    @org.junit.jupiter.api.AfterEach
+    @AfterEach
     void tearDown() {
-        if (executorService != null && !executorService.isShutdown()) {
-            executorService.shutdownNow();
-            try {
-                executorService.awaitTermination(1, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+        // Use ConcurrentTestHelper for proper executor shutdown
+        if (executorService != null) {
+            ConcurrentTestHelper.shutdownExecutor(executorService, Duration.ofSeconds(2));
+        }
+        
+        // Also ensure scheduler is properly stopped
+        if (scheduler != null) {
+            // scheduler.shutdown(); // Method doesn't exist
         }
     }
 }

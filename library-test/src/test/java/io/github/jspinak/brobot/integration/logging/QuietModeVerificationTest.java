@@ -19,7 +19,7 @@ import java.io.PrintStream;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest(classes = ClaudeAutomatorApplication.class)
+@SpringBootTest // (classes = ClaudeAutomatorApplication.class)
 @TestPropertySource(properties = {
     "brobot.logging.verbosity=QUIET",
     "brobot.console.actions.level=QUIET",

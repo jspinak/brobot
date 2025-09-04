@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.util.image.capture;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.util.file.SaveToFile;
 import org.junit.jupiter.api.BeforeEach;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
@@ -61,6 +62,9 @@ public class ScreenshotCaptureTest extends BrobotTestBase {
     
     @Test
     void shouldSaveScreenshotWithDate() {
+        // Skip test if running in headless environment
+        assumeFalse(GraphicsEnvironment.isHeadless(), "Test requires display");
+        
         // Setup mock behavior
         when(saveToFile.saveImageWithDate(any(Image.class), anyString()))
             .thenReturn("testScreenshot-20240101.png");
@@ -77,6 +81,8 @@ public class ScreenshotCaptureTest extends BrobotTestBase {
     
     @Test
     void shouldSaveScreenshotWithEmptyName() {
+        // Skip test if running in headless environment
+        assumeFalse(GraphicsEnvironment.isHeadless(), "Test requires display");
         when(saveToFile.saveImageWithDate(any(Image.class), anyString()))
             .thenReturn("-20240101.png");
         
@@ -90,6 +96,8 @@ public class ScreenshotCaptureTest extends BrobotTestBase {
     
     @Test
     void shouldSaveScreenshotWithNullName() {
+        // Skip test if running in headless environment
+        assumeFalse(GraphicsEnvironment.isHeadless(), "Test requires display");
         when(saveToFile.saveImageWithDate(any(Image.class), anyString()))
             .thenReturn("null-20240101.png");
         
@@ -103,6 +111,8 @@ public class ScreenshotCaptureTest extends BrobotTestBase {
     
     @Test
     void shouldHandleSaveFailure() {
+        // Skip test if running in headless environment
+        assumeFalse(GraphicsEnvironment.isHeadless(), "Test requires display");
         // Setup mock to simulate save failure
         when(saveToFile.saveImageWithDate(any(Image.class), anyString()))
             .thenReturn(null);
@@ -174,6 +184,8 @@ public class ScreenshotCaptureTest extends BrobotTestBase {
     
     @Test
     void shouldSaveMultipleScreenshots() {
+        // Skip test if running in headless environment
+        assumeFalse(GraphicsEnvironment.isHeadless(), "Test requires display");
         when(saveToFile.saveImageWithDate(any(Image.class), anyString()))
             .thenReturn("screenshot.png");
         
@@ -191,6 +203,8 @@ public class ScreenshotCaptureTest extends BrobotTestBase {
     
     @Test
     void shouldHandleLongFilenames() {
+        // Skip test if running in headless environment
+        assumeFalse(GraphicsEnvironment.isHeadless(), "Test requires display");
         String longName = "a".repeat(255); // Max filename length on most systems
         
         when(saveToFile.saveImageWithDate(any(Image.class), anyString()))

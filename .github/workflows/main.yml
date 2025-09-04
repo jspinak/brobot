@@ -85,17 +85,12 @@ jobs:
           SPRING_PROFILES_ACTIVE: "ci"
           _JAVA_OPTIONS: "-Djava.awt.headless=true"
 
-      - name: Run tests with path diagnostics
+      - name: Run tests with Python script
         run: |
-          # Start Xvfb
-          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-          export DISPLAY=:99
-          
-          # Skip real tests for now, focus on making CI pass
-          echo "Skipping regular tests for CI pipeline verification"
-          
-          # Run tests with the CI flag to enable headless mode
-          #./gradlew test -DCI=true
+          python3 library/scripts/run-all-tests.py library \
+            --mode sequential \
+            --timeout 60 \
+            --retry-failed
         env:
           # Activate CI profile
           SPRING_PROFILES_ACTIVE: "ci"

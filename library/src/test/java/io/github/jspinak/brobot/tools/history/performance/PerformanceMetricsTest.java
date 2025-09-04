@@ -1,21 +1,27 @@
 package io.github.jspinak.brobot.tools.history.performance;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.ConcurrentTestBase;
+import io.github.jspinak.brobot.test.annotations.FlakyTest;
+import io.github.jspinak.brobot.test.annotations.FlakyTest.FlakyCause;
+import io.github.jspinak.brobot.test.utils.ConcurrentTestHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for PerformanceMetrics class.
  * Verifies performance tracking and metric calculations.
+ * Uses ConcurrentTestBase for thread-safe parallel execution.
  */
-public class PerformanceMetricsTest extends BrobotTestBase {
+public class PerformanceMetricsTest extends ConcurrentTestBase {
     
     private PerformanceMetrics metrics;
     
@@ -70,9 +76,10 @@ public class PerformanceMetricsTest extends BrobotTestBase {
         
         @Test
         @DisplayName("Should update last illustration time")
-        public void testLastIllustrationTime() throws InterruptedException {
+        public void testLastIllustrationTime() throws Exception {
             LocalDateTime beforeRecord = LocalDateTime.now();
-            Thread.sleep(10); // Small delay to ensure time difference
+            // Small delay to ensure time difference
+            waitFor(() -> false, Duration.ofMillis(10));
             
             metrics.recordIllustration(100L, 10L, true);
             LocalDateTime lastTime = metrics.getLastIllustrationTime();
@@ -170,12 +177,14 @@ public class PerformanceMetricsTest extends BrobotTestBase {
         
         @Test
         @DisplayName("Should calculate throughput")
-        public void testThroughputCalculation() throws InterruptedException {
-            // Record some illustrations
+        @FlakyTest(reason = "Throughput calculation timing", cause = FlakyCause.TIMING)
+        @Timeout(value = 5, unit = TimeUnit.SECONDS)
+        public void testThroughputCalculation() throws Exception {
+            // Record some illustrations with controlled timing
             metrics.recordIllustration(100L, 10L, true);
-            Thread.sleep(100);
+            waitFor(() -> false, Duration.ofMillis(100));
             metrics.recordIllustration(100L, 10L, true);
-            Thread.sleep(100);
+            waitFor(() -> false, Duration.ofMillis(100));
             metrics.recordIllustration(100L, 10L, true);
             
             double throughput = metrics.getIllustrationsPerMinute();
@@ -258,23 +267,30 @@ public class PerformanceMetricsTest extends BrobotTestBase {
         
         @Test
         @DisplayName("Should track uptime duration")
-        public void testUptimeDuration() throws InterruptedException {
-            Thread.sleep(100);
+        @FlakyTest(reason = "Uptime duration measurement", cause = FlakyCause.TIMING)
+        public void testUptimeDuration() throws Exception {
+            // Wait until uptime is at least 100ms
+            boolean success = waitFor(() -> metrics.getTotalUptime().toMillis() >= 100, 
+                                     Duration.ofMillis(150));
             
             Duration uptime = metrics.getTotalUptime();
-            assertTrue(uptime.toMillis() >= 100);
+            assertTrue(success && uptime.toMillis() >= 100);
         }
         
         @Test
         @DisplayName("Should track time since last illustration")
-        public void testTimeSinceLastIllustration() throws InterruptedException {
+        @FlakyTest(reason = "Time since last illustration tracking", cause = FlakyCause.TIMING)
+        @Timeout(value = 5, unit = TimeUnit.SECONDS)
+        public void testTimeSinceLastIllustration() throws Exception {
             metrics.recordIllustration(100L, 10L, true);
             LocalDateTime recordTime = metrics.getLastIllustrationTime();
             
-            Thread.sleep(100);
+            // Wait until time since last illustration is at least 100ms
+            boolean success = waitFor(() -> metrics.getTimeSinceLastIllustration().toMillis() >= 100,
+                                     Duration.ofMillis(150));
             
             Duration timeSince = metrics.getTimeSinceLastIllustration();
-            assertTrue(timeSince.toMillis() >= 100);
+            assertTrue(success && timeSince.toMillis() >= 100);
         }
     }
 }

@@ -151,3 +151,18 @@ library/images/prompt/
 
 # Python analysis scripts (utility scripts)
 library/scripts/analyze-test-categories.py
+
+# Test analysis results and generated files
+library/test-analysis-results.json
+**/test-analysis-results.json
+
+# Test pattern files (generated during testing)
+library/src/test/resources/patterns/test_pattern.json
+library/src/test/resources/patterns/test_save.json
+**/test_pattern.json
+**/test_save.json
+**/patterns/test_*.json
+
+# Platform-specific test runner scripts (temporary/utility)
+library/run-tests-windows.ps1
+runner/fix-javafx-tests.sh

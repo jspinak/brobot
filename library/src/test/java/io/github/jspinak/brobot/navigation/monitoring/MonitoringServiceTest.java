@@ -2,16 +2,20 @@ package io.github.jspinak.brobot.navigation.monitoring;
 
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.ConcurrentTestBase;
+import io.github.jspinak.brobot.test.annotations.FlakyTest;
+import io.github.jspinak.brobot.test.annotations.FlakyTest.FlakyCause;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,8 +31,10 @@ import static org.mockito.Mockito.*;
 /**
  * Comprehensive tests for MonitoringService class.
  * Tests continuous task execution, state monitoring, error handling, and lifecycle management.
+ * Uses ConcurrentTestBase for thread-safe parallel execution.
  */
-public class MonitoringServiceTest extends BrobotTestBase {
+@ResourceLock(value = ConcurrentTestBase.ResourceLocks.NETWORK)
+public class MonitoringServiceTest extends ConcurrentTestBase {
     
     @Mock
     private StateMemory mockStateMemory;
@@ -72,9 +78,12 @@ public class MonitoringServiceTest extends BrobotTestBase {
             assertTrue(latch.await(4, TimeUnit.SECONDS));
             assertEquals(3, executionCount.get());
             
-            // Wait a bit to ensure task stops
-            Thread.sleep(1500);
-            assertEquals(3, executionCount.get()); // Should not execute more
+            // Wait with polling to ensure task stops
+            int finalCount = executionCount.get();
+            assertEventually(() -> {
+                assertEquals(finalCount, executionCount.get(), 
+                    "Task continued executing after condition became false");
+            }, Duration.ofSeconds(2));
         }
         
         @Test
@@ -97,8 +106,12 @@ public class MonitoringServiceTest extends BrobotTestBase {
             
             assertTrue(startLatch.await(3, TimeUnit.SECONDS));
             
-            // Wait to ensure task has stopped
-            Thread.sleep(2000);
+            // Wait with polling to ensure task has stopped
+            boolean stopped = waitFor(() -> 
+                !monitoringService.isRunning() && executionCount.get() == 2,
+                Duration.ofSeconds(2)
+            );
+            assertTrue(stopped, "Task should have stopped after condition became false");
             assertEquals(2, executionCount.get());
             assertFalse(monitoringService.isRunning());
         }
@@ -146,8 +159,8 @@ public class MonitoringServiceTest extends BrobotTestBase {
             // Try to start second task
             monitoringService.startContinuousTask(task2, () -> true, 1);
             
-            // Wait a bit
-            Thread.sleep(2000);
+            // Wait with proper timeout
+            waitFor(() -> task1Count.get() >= 2, Duration.ofSeconds(2));
             
             // Only task1 should have executed
             assertTrue(task1Count.get() > 0);
@@ -189,6 +202,7 @@ public class MonitoringServiceTest extends BrobotTestBase {
         @Test
         @DisplayName("Should stop after max consecutive failures")
         @Timeout(value = 10, unit = TimeUnit.SECONDS)
+        @FlakyTest(reason = "Timing-dependent failure accumulation", cause = FlakyCause.TIMING)
         public void testMaxConsecutiveFailures() throws InterruptedException {
             monitoringService.setMaxConsecutiveFailures(3);
             AtomicInteger executionCount = new AtomicInteger(0);
@@ -200,8 +214,8 @@ public class MonitoringServiceTest extends BrobotTestBase {
             
             monitoringService.startContinuousTask(task, () -> true, 1);
             
-            // Wait for failures to accumulate
-            Thread.sleep(5000);
+            // Wait for failures to accumulate with polling
+            waitFor(() -> executionCount.get() >= 3, Duration.ofSeconds(5));
             
             // Should have executed exactly maxConsecutiveFailures times
             assertEquals(3, executionCount.get());
@@ -245,6 +259,7 @@ public class MonitoringServiceTest extends BrobotTestBase {
         @Test
         @DisplayName("Should execute task when target state is active")
         @Timeout(value = 10, unit = TimeUnit.SECONDS)
+        @FlakyTest(reason = "State change timing", cause = FlakyCause.ASYNC)
         public void testStateMonitoring() throws InterruptedException {
             State targetState = new State();
             targetState.setName("TargetState");
@@ -268,11 +283,12 @@ public class MonitoringServiceTest extends BrobotTestBase {
             monitoringService.monitorStateAndExecute(targetState, task, 1);
             
             // Wait a bit to ensure monitoring has started
-            Thread.sleep(500);
+            waitFor(() -> monitoringService.isRunning(), Duration.ofMillis(500));
             
-            // Initially no execution (state not active) - wait up to 2 seconds
-            Thread.sleep(2000);
-            assertEquals(0, executionCount.get(), "Should not execute when state is not active");
+            // Initially no execution (state not active) - verify with timeout
+            assertEventually(() -> {
+                assertEquals(0, executionCount.get(), "Should not execute when state is not active");
+            }, Duration.ofSeconds(2));
             
             // Add target state to active states
             synchronized(activeStates) {

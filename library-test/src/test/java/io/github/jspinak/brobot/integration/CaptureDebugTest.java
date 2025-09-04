@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 /**
  * Test class to debug screen capture issues using CaptureDebugger.
  */
-@SpringBootTest(classes = ClaudeAutomatorApplication.class)
+@SpringBootTest // (classes = ClaudeAutomatorApplication.class not available)
 public class CaptureDebugTest extends BrobotTestBase {
     
     @Autowired

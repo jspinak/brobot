@@ -28,8 +28,13 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     
-    - name: Run fast tests
-      run: ./gradlew test -Dtest.tags="fast & ci-safe"
+    - name: Run tests with Python script
+      run: |
+        python3 library/scripts/run-all-tests.py library \
+          --mode sequential \
+          --timeout 60 \
+          --retry-failed \
+          --pattern "Fast"
       env:
         GRADLE_OPTS: -Xmx2048m -XX:MaxMetaspaceSize=512m
     
@@ -62,8 +67,12 @@ jobs:
         distribution: 'temurin'
         cache: gradle
     
-    - name: Run unit tests
-      run: ./gradlew test -Dtest.tags="unit & ci-safe"
+    - name: Run tests with Python script
+      run: |
+        python3 library/scripts/run-all-tests.py library \
+          --mode sequential \
+          --timeout 60 \
+          --retry-failed
       env:
         GRADLE_OPTS: -Xmx2048m -XX:MaxMetaspaceSize=512m
     
@@ -104,8 +113,13 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y libopencv-dev python3-opencv
     
-    - name: Run CV tests
-      run: ./gradlew test -Dtest.tags="cv & ci-safe"
+    - name: Run tests with Python script
+      run: |
+        python3 library/scripts/run-all-tests.py library \
+          --mode sequential \
+          --timeout 60 \
+          --retry-failed \
+          --pattern "CV"
       env:
         GRADLE_OPTS: -Xmx3072m -XX:MaxMetaspaceSize=768m
         _JAVA_OPTIONS: -Djava.awt.headless=true
@@ -140,10 +154,13 @@ jobs:
         export DISPLAY=:99
         Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
     
-    - name: Run integration tests
+    - name: Run tests with Python script
       run: |
         export DISPLAY=:99
-        ./gradlew test -Dtest.tags="integration"
+        python3 library/scripts/run-all-tests.py library-test \
+          --mode sequential \
+          --timeout 60 \
+          --retry-failed
       env:
         GRADLE_OPTS: -Xmx4096m -XX:MaxMetaspaceSize=1024m
     
@@ -170,8 +187,16 @@ jobs:
         distribution: 'temurin'
         cache: gradle
     
-    - name: Run all tests
-      run: ./gradlew test -Dtest.excludeTags="manual"
+    - name: Run tests with Python script
+      run: |
+        python3 library/scripts/run-all-tests.py library \
+          --mode sequential \
+          --timeout 60 \
+          --retry-failed
+        python3 library/scripts/run-all-tests.py library-test \
+          --mode sequential \
+          --timeout 60 \
+          --retry-failed
       continue-on-error: true
       env:
         GRADLE_OPTS: -Xmx6144m -XX:MaxMetaspaceSize=1536m
@@ -210,14 +235,24 @@ jobs:
         distribution: 'temurin'
         cache: gradle
     
-    - name: Run baseline benchmarks
-      run: ./gradlew test -Dtest.tags="benchmark" > baseline-benchmarks.txt
+    - name: Run tests with Python script
+      run: |
+        python3 library/scripts/run-all-tests.py library \
+          --mode sequential \
+          --timeout 60 \
+          --retry-failed \
+          --pattern "Benchmark" > baseline-benchmarks.txt
     
     - name: Checkout PR branch
       run: git checkout ${{ github.sha }}
     
-    - name: Run PR benchmarks
-      run: ./gradlew test -Dtest.tags="benchmark" > pr-benchmarks.txt
+    - name: Run tests with Python script
+      run: |
+        python3 library/scripts/run-all-tests.py library \
+          --mode sequential \
+          --timeout 60 \
+          --retry-failed \
+          --pattern "Benchmark" > pr-benchmarks.txt
     
     - name: Compare benchmarks
       run: |
@@ -262,7 +297,11 @@ jobs:
         distribution: 'temurin'
         cache: gradle
     
-    - name: Run tests on ${{ matrix.os }} with Java ${{ matrix.java }}
-      run: ./gradlew test -Dtest.tags="ci-safe"
+    - name: Run tests with Python script
+      run: |
+        python3 library/scripts/run-all-tests.py library \
+          --mode sequential \
+          --timeout 60 \
+          --retry-failed
       env:
         GRADLE_OPTS: -Xmx2048m

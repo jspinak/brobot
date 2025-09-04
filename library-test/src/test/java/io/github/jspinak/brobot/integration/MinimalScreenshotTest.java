@@ -17,7 +17,7 @@ import java.io.File;
 /**
  * Minimal test to diagnose black screenshots.
  */
-@SpringBootTest(classes = ClaudeAutomatorApplication.class)
+@SpringBootTest // (classes = ClaudeAutomatorApplication.class not available)
 @ActiveProfiles("linux")
 public class MinimalScreenshotTest extends BrobotTestBase {
 

@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Test to debug why screenshots are not being saved.
  */
-@SpringBootTest(classes = ClaudeAutomatorApplication.class)
+@SpringBootTest // (classes = ClaudeAutomatorApplication.class not available)
 @ActiveProfiles("linux")
 public class ScreenshotSaveDebugTest extends BrobotTestBase {
 

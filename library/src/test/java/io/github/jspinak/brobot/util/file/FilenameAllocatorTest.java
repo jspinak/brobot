@@ -1,18 +1,24 @@
 package io.github.jspinak.brobot.util.file;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.ConcurrentTestBase;
+import io.github.jspinak.brobot.test.annotations.FlakyTest;
+import io.github.jspinak.brobot.test.annotations.FlakyTest.FlakyCause;
+import io.github.jspinak.brobot.test.utils.ConcurrentTestHelper;
 import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,9 +34,11 @@ import static org.mockito.Mockito.*;
 /**
  * Comprehensive test suite for FilenameAllocator - filename reservation system.
  * Tests unique filename generation, reservation tracking, and collision avoidance.
+ * Uses ConcurrentTestBase for thread-safe parallel execution.
  */
 @DisplayName("FilenameAllocator Tests")
-public class FilenameAllocatorTest extends BrobotTestBase {
+@ResourceLock(value = ConcurrentTestBase.ResourceLocks.FILE_SYSTEM)
+public class FilenameAllocatorTest extends ConcurrentTestBase {
     
     private FilenameAllocator allocator;
     
@@ -390,7 +398,9 @@ public class FilenameAllocatorTest extends BrobotTestBase {
         
         @Test
         @DisplayName("Concurrent reservations may cause issues")
-        public void testConcurrentReservations() throws InterruptedException {
+        @FlakyTest(reason = "Race conditions in concurrent filename allocation", cause = FlakyCause.CONCURRENCY)
+        @Timeout(value = 10, unit = TimeUnit.SECONDS)
+        public void testConcurrentReservations() throws Exception {
             when(mockImageUtils.fileExists(anyString())).thenReturn(false);
             
             int threadCount = 10;
@@ -400,10 +410,11 @@ public class FilenameAllocatorTest extends BrobotTestBase {
             Set<String> allReservations = ConcurrentHashMap.newKeySet();
             AtomicInteger duplicates = new AtomicInteger(0);
             
-            ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+            // Use testExecutor from ConcurrentTestBase for automatic cleanup
+            testExecutor = Executors.newFixedThreadPool(threadCount);
             
             for (int t = 0; t < threadCount; t++) {
-                executor.submit(() -> {
+                testExecutor.submit(() -> {
                     try {
                         startLatch.await();
                         for (int i = 0; i < reservationsPerThread; i++) {
@@ -421,8 +432,7 @@ public class FilenameAllocatorTest extends BrobotTestBase {
             }
             
             startLatch.countDown(); // Start all threads
-            assertTrue(endLatch.await(5, TimeUnit.SECONDS));
-            executor.shutdown();
+            assertTrue(ConcurrentTestHelper.awaitLatch(endLatch, Duration.ofSeconds(5), "Concurrent reservation completion"));
             
             // Note: This test demonstrates thread safety issues
             // Duplicates may occur due to lack of synchronization

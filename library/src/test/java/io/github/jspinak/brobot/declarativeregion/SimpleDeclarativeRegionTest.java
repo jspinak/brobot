@@ -7,7 +7,8 @@ import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.element.SearchRegionOnObject;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.state.StateObject;
-import org.junit.jupiter.api.BeforeAll;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
@@ -19,12 +20,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * the image's fixed region should be deleted.
  */
 @DisplayName("Simple Declarative Region Tests")
-public class SimpleDeclarativeRegionTest {
+public class SimpleDeclarativeRegionTest extends BrobotTestBase {
 
-        @BeforeAll
-        static void setup() {
-                // Enable mock mode to avoid needing actual images
-                FrameworkSettings.mock = true;
+        @BeforeEach
+        @Override
+        public void setupTest() {
+                super.setupTest();
+                // Mock mode is already enabled by BrobotTestBase
         }
 
         @Test

@@ -1,13 +1,18 @@
 package io.github.jspinak.brobot.util.file;
 
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.ConcurrentTestBase;
+import io.github.jspinak.brobot.test.annotations.FlakyTest;
+import io.github.jspinak.brobot.test.annotations.FlakyTest.FlakyCause;
+import io.github.jspinak.brobot.test.utils.ConcurrentTestHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -28,6 +33,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -44,9 +50,11 @@ import static org.mockito.Mockito.*;
  * Comprehensive test suite for RecorderSaveToFile - file persistence
  * operations.
  * Tests image saving, XML persistence, and folder management.
+ * Uses ConcurrentTestBase for thread-safe parallel execution.
  */
 @DisplayName("RecorderSaveToFile Tests")
-public class RecorderSaveToFileTest extends BrobotTestBase {
+@ResourceLock(value = ConcurrentTestBase.ResourceLocks.FILE_SYSTEM)
+public class RecorderSaveToFileTest extends ConcurrentTestBase {
 
     private RecorderSaveToFile saveToFile;
 
@@ -474,6 +482,8 @@ public class RecorderSaveToFileTest extends BrobotTestBase {
 
         @Test
         @DisplayName("Concurrent image saves")
+        @FlakyTest(reason = "File I/O timing in concurrent operations", cause = FlakyCause.FILE_SYSTEM)
+        @Timeout(value = 10, unit = TimeUnit.SECONDS)
         public void testConcurrentImageSaves() throws InterruptedException {
             BufferedImage img = new BufferedImage(50, 50, BufferedImage.TYPE_INT_RGB);
             when(mockImage.get()).thenReturn(img);
@@ -484,25 +494,27 @@ public class RecorderSaveToFileTest extends BrobotTestBase {
             Set<String> allPaths = ConcurrentHashMap.newKeySet();
 
             ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+            try {
+                for (int t = 0; t < threadCount; t++) {
+                    final int threadId = t;
+                    executor.submit(() -> {
+                        try {
+                            startLatch.await();
+                            String path = saveToFile.saveImageWithDate(mockImage, "concurrent_" + threadId);
+                            allPaths.add(path);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        } finally {
+                            endLatch.countDown();
+                        }
+                    });
+                }
 
-            for (int t = 0; t < threadCount; t++) {
-                final int threadId = t;
-                executor.submit(() -> {
-                    try {
-                        startLatch.await();
-                        String path = saveToFile.saveImageWithDate(mockImage, "concurrent_" + threadId);
-                        allPaths.add(path);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    } finally {
-                        endLatch.countDown();
-                    }
-                });
+                startLatch.countDown();
+                assertTrue(ConcurrentTestHelper.awaitLatch(endLatch, Duration.ofSeconds(5), "Concurrent save completion"));
+            } finally {
+                ConcurrentTestHelper.shutdownExecutor(executor, Duration.ofSeconds(2));
             }
-
-            startLatch.countDown();
-            assertTrue(endLatch.await(5, TimeUnit.SECONDS));
-            executor.shutdown();
 
             assertEquals(threadCount, allPaths.size());
             for (String path : allPaths) {
@@ -512,25 +524,28 @@ public class RecorderSaveToFileTest extends BrobotTestBase {
 
         @Test
         @DisplayName("Concurrent folder creation")
+        @Timeout(value = 10, unit = TimeUnit.SECONDS)
         public void testConcurrentFolderCreation() throws InterruptedException {
             int threadCount = 5;
             CountDownLatch latch = new CountDownLatch(threadCount);
             File sharedFolder = new File(tempDir.toFile(), "concurrent");
 
             ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+            try {
+                for (int i = 0; i < threadCount; i++) {
+                    executor.submit(() -> {
+                        try {
+                            saveToFile.createFolder(sharedFolder);
+                        } finally {
+                            latch.countDown();
+                        }
+                    });
+                }
 
-            for (int i = 0; i < threadCount; i++) {
-                executor.submit(() -> {
-                    try {
-                        saveToFile.createFolder(sharedFolder);
-                    } finally {
-                        latch.countDown();
-                    }
-                });
+                assertTrue(ConcurrentTestHelper.awaitLatch(latch, Duration.ofSeconds(5), "Folder creation completion"));
+            } finally {
+                ConcurrentTestHelper.shutdownExecutor(executor, Duration.ofSeconds(2));
             }
-
-            assertTrue(latch.await(5, TimeUnit.SECONDS));
-            executor.shutdown();
 
             assertTrue(sharedFolder.exists());
             assertTrue(sharedFolder.isDirectory());
