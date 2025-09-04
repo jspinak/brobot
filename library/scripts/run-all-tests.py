@@ -182,7 +182,14 @@ class TestRunner:
         self.all_tests = self.get_test_classes()
         
         if specific_pattern:
-            self.all_tests = [t for t in self.all_tests if specific_pattern in t]
+            import fnmatch
+            # Support wildcards in pattern matching
+            if '*' in specific_pattern or '?' in specific_pattern:
+                # Use glob-style pattern matching
+                self.all_tests = [t for t in self.all_tests if fnmatch.fnmatch(t, specific_pattern)]
+            else:
+                # Simple substring matching for backward compatibility
+                self.all_tests = [t for t in self.all_tests if specific_pattern in t]
         
         estimated_total = self.estimate_total_tests()
         

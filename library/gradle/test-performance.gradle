@@ -1,0 +1,195 @@
+// Performance-optimized test configuration for Brobot library
+// Target: < 10 minute execution for 5000+ tests
+
+// Fast unit test task - excludes slow integration tests
+// Commented out due to duplicate task definition
+/* tasks.register('fastTest', Test) {
+    group = 'verification'
+    description = 'Runs fast unit tests only (< 100ms per test)'
+    
+    useJUnitPlatform {
+        excludeTags 'slow', 'integration', 'e2e', 'performance'
+        includeTags 'unit', 'fast'
+    }
+    
+    // Aggressive parallel settings for fast tests
+    maxParallelForks = Runtime.runtime.availableProcessors() * 2
+    forkEvery = 100
+    maxHeapSize = '2g'
+    
+    systemProperties = [
+        'junit.jupiter.execution.parallel.enabled': 'true',
+        'junit.jupiter.execution.parallel.mode.default': 'concurrent',
+        'junit.jupiter.execution.parallel.mode.classes.default': 'concurrent',
+        'junit.jupiter.execution.parallel.config.strategy': 'fixed',
+        'junit.jupiter.execution.parallel.config.fixed.parallelism': Runtime.runtime.availableProcessors() * 2,
+        'junit.jupiter.execution.parallel.config.fixed.max-pool-size': '512',
+        'java.awt.headless': 'true',
+        'brobot.mock': 'true'
+    ]
+    
+    // Exclude known slow tests
+    exclude '**/MotionDetectorTest.class'
+    exclude '**/GridBasedClustererTest.class'
+    exclude '**/ImageComparerTest.class'
+    exclude '**/*IntegrationTest.class'
+    exclude '**/*PerformanceTest.class'
+    
+    timeout = Duration.ofMinutes(5)
+    
+    testLogging {
+        events "failed"
+        exceptionFormat "short"
+    }
+} */
+
+// Parallel test suite execution
+tasks.register('parallelTest', Test) {
+    group = 'verification'
+    description = 'Runs tests in parallel with maximum concurrency'
+    
+    useJUnitPlatform()
+    
+    // Maximum parallelization
+    maxParallelForks = Math.min(Runtime.runtime.availableProcessors() * 2, 16)
+    forkEvery = 50  // More frequent forking to prevent memory buildup
+    
+    maxHeapSize = '3g'
+    minHeapSize = '512m'
+    
+    jvmArgs = [
+        '-XX:+UseG1GC',
+        '-XX:MaxGCPauseMillis=100',
+        '-XX:+ParallelRefProcEnabled',
+        '-XX:ConcGCThreads=4',
+        '-Djava.awt.headless=true',
+        '-Dbrobot.mock=true',
+        '-XX:+UnlockExperimentalVMOptions',
+        '-XX:+DisableExplicitGC',
+        '-XX:+AlwaysPreTouch',
+        '-XX:G1NewSizePercent=30',
+        '-XX:G1MaxNewSizePercent=40',
+        '-XX:G1ReservePercent=20'
+    ]
+    
+    systemProperties = [
+        'junit.jupiter.execution.parallel.enabled': 'true',
+        'junit.jupiter.execution.parallel.mode.default': 'concurrent',
+        'junit.jupiter.execution.parallel.mode.classes.default': 'concurrent',
+        'junit.jupiter.execution.parallel.config.strategy': 'dynamic',
+        'junit.jupiter.execution.parallel.config.dynamic.factor': '2.0',
+        'java.awt.headless': 'true',
+        'brobot.mock': 'true',
+        'sikuli.Debug': '0'
+    ]
+    
+    timeout = Duration.ofMinutes(10)
+    
+    testLogging {
+        events "failed", "skipped"
+        exceptionFormat "short"
+        showStandardStreams = false
+    }
+}
+
+// Test categorization based on execution time
+tasks.register('profileTests', Test) {
+    group = 'verification'
+    description = 'Profile test execution times and generate report'
+    
+    useJUnitPlatform()
+    
+    // Single fork for accurate timing
+    maxParallelForks = 1
+    forkEvery = 0
+    
+    systemProperties = [
+        'junit.jupiter.execution.parallel.enabled': 'false',
+        'java.awt.headless': 'true',
+        'brobot.mock': 'true'
+    ]
+    
+    testLogging {
+        events "passed", "failed", "skipped"
+        showDurations = true
+    }
+    
+    // Generate execution time report
+    afterTest { descriptor, result ->
+        def duration = result.endTime - result.startTime
+        if (duration > 1000) { // Log tests taking > 1 second
+            logger.lifecycle("SLOW TEST: ${descriptor.className}.${descriptor.name} - ${duration}ms")
+        }
+    }
+}
+
+// Cached test execution
+tasks.withType(Test).configureEach {
+    // Enable build cache for test results
+    outputs.cacheIf { true }
+    
+    // Cache test results based on inputs
+    inputs.files(sourceSets.main.output)
+    inputs.files(sourceSets.test.output)
+    inputs.property("javaVersion", System.getProperty("java.version"))
+    
+    // Enable test result caching
+    outputs.upToDateWhen {
+        // Check if test sources or main sources have changed
+        def testSources = file("src/test/java").lastModified()
+        def mainSources = file("src/main/java").lastModified()
+        def lastRun = outputs.files.singleFile.lastModified()
+        return lastRun > testSources && lastRun > mainSources
+    }
+}
+
+// Test suite organization
+ext {
+    testCategories = [
+        unit: ['**/model/**/*Test.class', '**/util/**/*Test.class'],
+        integration: ['**/*IntegrationTest.class', '**/*ITTest.class'],
+        action: ['**/action/**/*Test.class'],
+        analysis: ['**/analysis/**/*Test.class'],
+        config: ['**/config/**/*Test.class'],
+        performance: ['**/*PerformanceTest.class', '**/*PerfTest.class']
+    ]
+}
+
+// Create tasks for each test category
+testCategories.each { category, patterns ->
+    tasks.register("test${category.capitalize()}", Test) {
+        group = 'verification'
+        description = "Run ${category} tests"
+        
+        useJUnitPlatform()
+        
+        // Include only specific patterns
+        include patterns
+        
+        // Category-specific settings
+        switch(category) {
+            case 'unit':
+                maxParallelForks = Runtime.runtime.availableProcessors() * 2
+                forkEvery = 100
+                break
+            case 'integration':
+                maxParallelForks = 2
+                forkEvery = 20
+                break
+            case 'performance':
+                maxParallelForks = 1
+                forkEvery = 0
+                break
+            default:
+                maxParallelForks = Runtime.runtime.availableProcessors()
+                forkEvery = 50
+        }
+        
+        systemProperties = [
+            'junit.jupiter.execution.parallel.enabled': category != 'performance' ? 'true' : 'false',
+            'junit.jupiter.execution.parallel.mode.default': 'concurrent',
+            'java.awt.headless': 'true',
+            'brobot.mock': 'true'
+        ]
+    }
+}
