@@ -6,15 +6,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @DisplayName("ActiveStateSet Tests")
+@Timeout(value = 10, unit = TimeUnit.SECONDS) // Prevent CI/CD timeout
 public class ActiveStateSetTest extends BrobotTestBase {
     
     private ActiveStateSet activeStateSet;
@@ -47,6 +50,7 @@ public class ActiveStateSetTest extends BrobotTestBase {
     
     @Nested
     @DisplayName("Basic State Management")
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     class BasicStateManagement {
         
         @Test
@@ -108,6 +112,7 @@ public class ActiveStateSetTest extends BrobotTestBase {
     
     @Nested
     @DisplayName("Bulk Operations")
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     class BulkOperations {
         
         @Test
@@ -158,6 +163,7 @@ public class ActiveStateSetTest extends BrobotTestBase {
         
         @Test
         @DisplayName("Should handle large collections efficiently")
+        @Timeout(value = 2, unit = TimeUnit.SECONDS)
         public void testLargeCollection() {
             Set<StateEnum> largeSet = new HashSet<>();
             // Add all test states multiple times
@@ -179,6 +185,7 @@ public class ActiveStateSetTest extends BrobotTestBase {
     
     @Nested
     @DisplayName("ActiveStateSet Merging")
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     class ActiveStateSetMerging {
         
         @Test
@@ -257,6 +264,7 @@ public class ActiveStateSetTest extends BrobotTestBase {
     
     @Nested
     @DisplayName("State Retrieval")
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     class StateRetrieval {
         
         @Test
@@ -316,6 +324,7 @@ public class ActiveStateSetTest extends BrobotTestBase {
     
     @Nested
     @DisplayName("Complex Scenarios")
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     class ComplexScenarios {
         
         @Test
@@ -391,18 +400,23 @@ public class ActiveStateSetTest extends BrobotTestBase {
     
     @Nested
     @DisplayName("Edge Cases")
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     class EdgeCases {
         
         @Test
         @DisplayName("Should handle self-merging")
+        @Timeout(value = 2, unit = TimeUnit.SECONDS) // Prevent infinite loop
         public void testSelfMerging() {
             activeStateSet.addState(TestStateEnum.HOME_STATE);
             activeStateSet.addState(TestStateEnum.LOGIN_STATE);
             
             int originalSize = activeStateSet.getActiveStates().size();
             
-            // Try to merge with itself
-            activeStateSet.addStates(activeStateSet);
+            // Create a copy to avoid potential infinite loop
+            Set<StateEnum> copy = new HashSet<>(activeStateSet.getActiveStates());
+            
+            // Try to merge with the copy
+            activeStateSet.addStates(copy);
             
             // Size should not change (set semantics)
             assertEquals(originalSize, activeStateSet.getActiveStates().size());

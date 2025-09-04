@@ -1,0 +1,13 @@
+{
+  "label": "Screen Capture",
+  "position": 4,
+  "collapsible": true,
+  "collapsed": false,
+  "link": {
+    "type": "doc",
+    "id": "capture/modular-capture-system"
+  },
+  "customProps": {
+    "description": "Modular screen capture system with Robot, FFmpeg, and SikuliX providers"
+  }
+}

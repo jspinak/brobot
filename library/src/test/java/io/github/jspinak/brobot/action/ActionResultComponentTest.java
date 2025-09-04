@@ -15,6 +15,7 @@ import io.github.jspinak.brobot.model.action.ActionRecord;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import java.util.concurrent.TimeUnit;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -28,9 +29,22 @@ import static org.mockito.Mockito.*;
  * Tests the delegation to specialized component classes.
  */
 @DisplayName("ActionResult Component Tests")
+@Timeout(value = 10, unit = TimeUnit.SECONDS) // Aggressive timeout for CI/CD
+@TestInstance(TestInstance.Lifecycle.PER_CLASS) // Share setup across tests
 public class ActionResultComponentTest extends BrobotTestBase {
     
     private ActionResult actionResult;
+    private Match mockMatch1;
+    private Match mockMatch2;
+    private Match mockMatch3;
+    
+    @BeforeAll
+    void setupMocks() {
+        // Pre-create mock matches to avoid timeout in individual tests
+        mockMatch1 = createMockMatch(0.95);
+        mockMatch2 = createMockMatch(0.85);
+        mockMatch3 = createMockMatch(0.75);
+    }
     
     @BeforeEach
     @Override
@@ -41,24 +55,22 @@ public class ActionResultComponentTest extends BrobotTestBase {
     
     @Nested
     @DisplayName("MatchCollection Component")
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     class MatchCollectionComponent {
         
         @Test
         @DisplayName("Should delegate match operations to MatchCollection")
+        @Timeout(value = 2, unit = TimeUnit.SECONDS)
         void shouldDelegateMatchOperationsToMatchCollection() {
-            // Setup
-            Match match1 = createMockMatch(0.9);
-            Match match2 = createMockMatch(0.8);
-            
-            // Add matches
-            actionResult.add(match1, match2);
+            // Add pre-created matches
+            actionResult.add(mockMatch1, mockMatch2);
             
             // Verify delegation to MatchCollection
             MatchCollection matchCollection = actionResult.getMatchCollection();
             assertNotNull(matchCollection);
             assertEquals(2, matchCollection.size());
-            assertTrue(matchCollection.getMatches().contains(match1));
-            assertTrue(matchCollection.getMatches().contains(match2));
+            assertTrue(matchCollection.getMatches().contains(mockMatch1));
+            assertTrue(matchCollection.getMatches().contains(mockMatch2));
         }
         
         @Test
@@ -220,6 +232,7 @@ public class ActionResultComponentTest extends BrobotTestBase {
     
     @Nested
     @DisplayName("Complex Scenarios")
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     class ComplexScenarios {
         
         @Test
@@ -229,12 +242,8 @@ public class ActionResultComponentTest extends BrobotTestBase {
             ActionConfig config = mock(ActionConfig.class);
             actionResult.setActionConfig(config);
             
-            // Add matches
-            actionResult.add(
-                createMockMatch(0.95),
-                createMockMatch(0.85),
-                createMockMatch(0.75)
-            );
+            // Add pre-created matches
+            actionResult.add(mockMatch1, mockMatch2, mockMatch3);
             
             // Track state
             actionResult.getStateTracker().recordActiveState("TestState");

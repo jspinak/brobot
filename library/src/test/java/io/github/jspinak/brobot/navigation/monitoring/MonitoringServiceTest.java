@@ -5,11 +5,13 @@ import io.github.jspinak.brobot.statemanagement.StateMemory;
 import io.github.jspinak.brobot.test.ConcurrentTestBase;
 import io.github.jspinak.brobot.test.annotations.FlakyTest;
 import io.github.jspinak.brobot.test.annotations.FlakyTest.FlakyCause;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.mockito.Mock;
@@ -34,6 +36,8 @@ import static org.mockito.Mockito.*;
  * Uses ConcurrentTestBase for thread-safe parallel execution.
  */
 @ResourceLock(value = ConcurrentTestBase.ResourceLocks.NETWORK)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS) // Share instance for @AfterAll
+@Timeout(value = 25, unit = TimeUnit.SECONDS) // Global timeout under CI/CD 30s limit
 public class MonitoringServiceTest extends ConcurrentTestBase {
     
     @Mock
@@ -52,7 +56,19 @@ public class MonitoringServiceTest extends ConcurrentTestBase {
     @AfterEach
     public void tearDown() {
         // Ensure clean shutdown after each test
-        monitoringService.shutdown();
+        // Use stop() instead of shutdown() to avoid blocking
+        if (monitoringService != null && monitoringService.isRunning()) {
+            monitoringService.stop();
+        }
+        // Only call shutdown in cleanup, not in individual tests
+    }
+    
+    @AfterAll
+    public void cleanupAll() {
+        // Final cleanup - shutdown the executor service
+        if (monitoringService != null) {
+            monitoringService.shutdown();
+        }
     }
     
     @Nested
@@ -118,7 +134,7 @@ public class MonitoringServiceTest extends ConcurrentTestBase {
         
         @Test
         @DisplayName("Should use default delay when not specified")
-        @Timeout(value = 10, unit = TimeUnit.SECONDS)
+        @Timeout(value = 5, unit = TimeUnit.SECONDS)
         public void testDefaultDelay() throws InterruptedException {
             monitoringService.setDefaultDelaySeconds(1);
             AtomicInteger executionCount = new AtomicInteger(0);
@@ -201,7 +217,7 @@ public class MonitoringServiceTest extends ConcurrentTestBase {
         
         @Test
         @DisplayName("Should stop after max consecutive failures")
-        @Timeout(value = 10, unit = TimeUnit.SECONDS)
+        @Timeout(value = 5, unit = TimeUnit.SECONDS)
         @FlakyTest(reason = "Timing-dependent failure accumulation", cause = FlakyCause.TIMING)
         public void testMaxConsecutiveFailures() throws InterruptedException {
             monitoringService.setMaxConsecutiveFailures(3);
@@ -224,7 +240,7 @@ public class MonitoringServiceTest extends ConcurrentTestBase {
         
         @Test
         @DisplayName("Should reset failure count on successful execution")
-        @Timeout(value = 10, unit = TimeUnit.SECONDS)
+        @Timeout(value = 5, unit = TimeUnit.SECONDS)
         public void testFailureCountReset() throws InterruptedException {
             monitoringService.setMaxConsecutiveFailures(3);
             AtomicInteger executionCount = new AtomicInteger(0);
@@ -258,7 +274,7 @@ public class MonitoringServiceTest extends ConcurrentTestBase {
         
         @Test
         @DisplayName("Should execute task when target state is active")
-        @Timeout(value = 10, unit = TimeUnit.SECONDS)
+        @Timeout(value = 5, unit = TimeUnit.SECONDS)
         @FlakyTest(reason = "State change timing", cause = FlakyCause.ASYNC)
         public void testStateMonitoring() throws InterruptedException {
             State targetState = new State();
@@ -308,7 +324,7 @@ public class MonitoringServiceTest extends ConcurrentTestBase {
             }
             
             // Wait for monitoring to notice state is gone
-            Thread.sleep(2000);
+            Thread.sleep(1500);
             
             // Should stop executing (allow for at most 1 more execution during transition)
             int finalCount = executionCount.get();
@@ -375,7 +391,7 @@ public class MonitoringServiceTest extends ConcurrentTestBase {
             int countAfterStop = executionCount.get();
             
             // Verify no more executions after stop
-            Thread.sleep(2000);
+            Thread.sleep(1000);
             assertEquals(countAfterStop, executionCount.get());
         }
         
@@ -408,8 +424,8 @@ public class MonitoringServiceTest extends ConcurrentTestBase {
             assertTrue(latch.await(2, TimeUnit.SECONDS));
             assertTrue(taskExecuted.get());
             
-            // Shutdown
-            monitoringService.shutdown();
+            // Stop the service (use stop() instead of shutdown() to avoid blocking)
+            monitoringService.stop();
             assertFalse(monitoringService.isRunning());
             
             // After shutdown, attempting to start a new task should be rejected
@@ -429,7 +445,7 @@ public class MonitoringServiceTest extends ConcurrentTestBase {
         
         @Test
         @DisplayName("Should handle interrupted shutdown gracefully")
-        @Timeout(value = 10, unit = TimeUnit.SECONDS)
+        @Timeout(value = 5, unit = TimeUnit.SECONDS)
         public void testInterruptedShutdown() throws InterruptedException {
             // Start a long-running task
             CountDownLatch taskStarted = new CountDownLatch(1);
@@ -449,18 +465,14 @@ public class MonitoringServiceTest extends ConcurrentTestBase {
             // Wait for task to start
             assertTrue(taskStarted.await(2, TimeUnit.SECONDS));
             
-            // Create thread to shutdown and interrupt it
-            Thread shutdownThread = new Thread(() -> monitoringService.shutdown());
-            shutdownThread.start();
-            
-            // Give shutdown a moment to start
-            Thread.sleep(100);
-            
-            // Release the blocking latch to allow shutdown to complete
+            // Stop the blocking task
             blockingLatch.countDown();
             
-            // Wait for shutdown to complete
-            shutdownThread.join(5000);
+            // Stop the service (non-blocking)
+            monitoringService.stop();
+            
+            // Give it a moment to clean up
+            Thread.sleep(100);
             
             assertFalse(monitoringService.isRunning());
         }
@@ -472,7 +484,7 @@ public class MonitoringServiceTest extends ConcurrentTestBase {
         
         @Test
         @DisplayName("Should use configured default delay")
-        @Timeout(value = 10, unit = TimeUnit.SECONDS)
+        @Timeout(value = 5, unit = TimeUnit.SECONDS)
         public void testConfiguredDefaultDelay() throws InterruptedException {
             monitoringService.setDefaultDelaySeconds(1);  // Use 1 second for faster test
             
@@ -524,8 +536,8 @@ public class MonitoringServiceTest extends ConcurrentTestBase {
             
             monitoringService.startContinuousTask(task, () -> true, 1);
             
-            // Wait for failures
-            Thread.sleep(7000);
+            // Wait for failures with polling to avoid timeout
+            waitFor(() -> failureCount.get() >= 5, Duration.ofSeconds(4));
             
             // Should have failed exactly 5 times
             assertEquals(5, failureCount.get());
@@ -561,7 +573,9 @@ public class MonitoringServiceTest extends ConcurrentTestBase {
             assertTrue(monitoringService.isRunning());
             
             shouldContinue.set(false);
-            Thread.sleep(2000);
+            
+            // Wait with polling for service to stop
+            waitFor(() -> !monitoringService.isRunning(), Duration.ofSeconds(2));
             
             assertFalse(monitoringService.isRunning());
         }

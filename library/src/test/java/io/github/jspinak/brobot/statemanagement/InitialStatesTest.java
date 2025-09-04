@@ -9,16 +9,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Timeout;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @DisplayName("InitialStates Tests")
+@Timeout(value = 10, unit = TimeUnit.SECONDS) // Prevent CI/CD timeout
 public class InitialStatesTest extends BrobotTestBase {
 
     @Mock
@@ -42,6 +45,7 @@ public class InitialStatesTest extends BrobotTestBase {
 
     @Nested
     @DisplayName("Adding State Sets")
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     class AddingStateSets {
 
         @Test
@@ -118,6 +122,7 @@ public class InitialStatesTest extends BrobotTestBase {
 
     @Nested
     @DisplayName("Probability Distribution")
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     class ProbabilityDistribution {
 
         @Test
@@ -160,6 +165,7 @@ public class InitialStatesTest extends BrobotTestBase {
 
     @Nested
     @DisplayName("Mock Mode State Selection")
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     class MockModeStateSelection {
 
         @Test
@@ -185,6 +191,7 @@ public class InitialStatesTest extends BrobotTestBase {
 
         @RepeatedTest(10)
         @DisplayName("Should respect probability distribution in mock mode")
+        @Timeout(value = 2, unit = TimeUnit.SECONDS) // Limit time for repeated test
         public void testProbabilityDistributionMock() {
             State highProbState = createMockState(1L, "HighProb");
             State lowProbState = createMockState(2L, "LowProb");
@@ -218,6 +225,7 @@ public class InitialStatesTest extends BrobotTestBase {
 
     @Nested
     @DisplayName("Normal Mode State Search")
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     class NormalModeStateSearch {
 
         @Test
@@ -287,6 +295,7 @@ public class InitialStatesTest extends BrobotTestBase {
 
     @Nested
     @DisplayName("State Memory Updates")
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     class StateMemoryUpdates {
 
         @Test
@@ -324,6 +333,7 @@ public class InitialStatesTest extends BrobotTestBase {
 
     @Nested
     @DisplayName("Complex Scenarios")
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     class ComplexScenarios {
 
         @Test
@@ -418,6 +428,7 @@ public class InitialStatesTest extends BrobotTestBase {
 
     @Nested
     @DisplayName("Edge Cases")
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     class EdgeCases {
 
         @Test
@@ -433,6 +444,7 @@ public class InitialStatesTest extends BrobotTestBase {
 
         @Test
         @DisplayName("Should handle very large number of state sets")
+        @Timeout(value = 2, unit = TimeUnit.SECONDS) // Limit time for loop
         public void testManyStateSets() {
             for (int i = 0; i < 100; i++) {
                 State state = createMockState((long) i, "State" + i);

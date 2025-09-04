@@ -26,6 +26,8 @@ public class PhysicalScreenCapture {
     private static final boolean IS_WINDOWS = OS_NAME.contains("win");
     private static final boolean IS_MAC = OS_NAME.contains("mac");
     private static final boolean IS_LINUX = OS_NAME.contains("nux");
+    private static final boolean IS_WSL = System.getenv("WSL_DISTRO_NAME") != null || 
+                                           System.getenv("WSL_INTEROP") != null;
     
     // GDI32 constants for GetDeviceCaps
     private static final int HORZRES = 8;  // Horizontal width in pixels
@@ -38,7 +40,13 @@ public class PhysicalScreenCapture {
      */
     public static BufferedImage capture() {
         try {
-            // Try platform-specific capture first
+            // Check for WSL first - needs special handling
+            if (IS_WSL) {
+                System.out.println("[PhysicalCapture] WSL detected - using Robot fallback");
+                return captureWithRobotPhysical();
+            }
+            
+            // Try platform-specific capture
             if (IS_WINDOWS) {
                 return captureWindows();
             } else if (IS_MAC) {
@@ -191,6 +199,34 @@ public class PhysicalScreenCapture {
     }
     
     /**
+     * Captures using Robot at true physical resolution.
+     * This works correctly when Robot is configured to capture at physical resolution.
+     */
+    private static BufferedImage captureWithRobotPhysical() throws AWTException {
+        Robot robot = new Robot();
+        
+        // Get the screen dimensions - these should be physical when DPI awareness is disabled
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        Rectangle screenRect = new Rectangle(screenSize);
+        
+        // Capture the screen
+        BufferedImage capture = robot.createScreenCapture(screenRect);
+        
+        System.out.println("[PhysicalCapture] Robot capture: " + 
+                         capture.getWidth() + "x" + capture.getHeight());
+        
+        // Don't scale if we already have the right resolution
+        if (capture.getWidth() == 1920 && capture.getHeight() == 1080) {
+            return capture;
+        }
+        
+        // If we got logical resolution, we might need to handle it differently
+        // But since you said the physical screenshots show the same content,
+        // we should trust what Robot gives us
+        return capture;
+    }
+    
+    /**
      * Fallback: Capture and scale to estimated physical resolution.
      */
     private static BufferedImage captureAndScale() {
@@ -226,10 +262,32 @@ public class PhysicalScreenCapture {
      * Converts Windows HBITMAP to BufferedImage.
      */
     private static BufferedImage convertHBitmapToBufferedImage(WinDef.HBITMAP hBitmap, int width, int height) {
+        WinGDI.BITMAPINFO bmi = new WinGDI.BITMAPINFO();
+        bmi.bmiHeader.biWidth = width;
+        bmi.bmiHeader.biHeight = -height; // Negative for top-down bitmap
+        bmi.bmiHeader.biPlanes = 1;
+        bmi.bmiHeader.biBitCount = 32;
+        bmi.bmiHeader.biCompression = WinGDI.BI_RGB;
+        
+        Memory buffer = new Memory(width * height * 4);
+        GDI32.INSTANCE.GetDIBits(User32.INSTANCE.GetDC(null), hBitmap, 0, height, buffer, bmi, WinGDI.DIB_RGB_COLORS);
+        
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         
-        // This is simplified - actual implementation would need proper bitmap data extraction
-        // Using JNA to get bitmap bits and convert to BufferedImage
+        int[] pixelArray = new int[width * height];
+        buffer.read(0, pixelArray, 0, pixelArray.length);
+        
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int pixel = pixelArray[y * width + x];
+                // Convert from BGRA to ARGB
+                int b = (pixel) & 0xFF;
+                int g = (pixel >> 8) & 0xFF;
+                int r = (pixel >> 16) & 0xFF;
+                int rgb = (r << 16) | (g << 8) | b;
+                image.setRGB(x, y, rgb);
+            }
+        }
         
         return image;
     }
