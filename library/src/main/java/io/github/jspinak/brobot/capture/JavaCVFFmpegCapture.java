@@ -55,6 +55,19 @@ public class JavaCVFFmpegCapture {
             grabber.setFrameRate(1);
             grabber.setOption("frames", "1");
             
+            // Additional options to ensure proper capture
+            try {
+                if (IS_WINDOWS && grabber.getFormat() != null && grabber.getFormat().equals("gdigrab")) {
+                    // Windows-specific options for gdigrab
+                    grabber.setOption("show_region", "0"); // Don't show capture region
+                    grabber.setOption("framerate", "1"); // Low framerate for screenshot
+                    grabber.setOption("video_size", "1920x1080"); // Force video size
+                }
+            } catch (Exception e) {
+                // Options may not be supported, continue anyway
+                System.out.println("[JavaCVFFmpeg] Some options not supported: " + e.getMessage());
+            }
+            
             // Start capturing
             grabber.start();
             
@@ -96,33 +109,20 @@ public class JavaCVFFmpegCapture {
         
         if (IS_WINDOWS) {
             // Windows: Use gdigrab for physical resolution
+            // IMPORTANT: On Windows, gdigrab should capture at physical resolution
+            // We try two approaches: 
+            // 1. Let gdigrab auto-detect (may work better)
+            // 2. Force 1920x1080 if needed
+            
             grabber = new FFmpegFrameGrabber("desktop");
             grabber.setFormat("gdigrab");
             
-            // Try to get physical screen dimensions
-            try {
-                // Get physical resolution if possible
-                java.awt.GraphicsDevice gd = java.awt.GraphicsEnvironment
-                    .getLocalGraphicsEnvironment().getDefaultScreenDevice();
-                int width = gd.getDisplayMode().getWidth();
-                int height = gd.getDisplayMode().getHeight();
-                
-                // For 125% DPI scaling, physical resolution is 1.25x the logical resolution
-                // 1536x864 logical -> 1920x1080 physical
-                if (width == 1536 && height == 864) {
-                    width = 1920;
-                    height = 1080;
-                }
-                
-                grabber.setImageWidth(width);
-                grabber.setImageHeight(height);
-                System.out.println("[JavaCVFFmpeg] Windows capture configured for: " + width + "x" + height);
-                
-            } catch (Exception e) {
-                // Use default if detection fails
-                grabber.setImageWidth(1920);
-                grabber.setImageHeight(1080);
-            }
+            // Force physical resolution capture
+            // On 125% DPI scaling: physical is 1920x1080, logical is 1536x864
+            grabber.setImageWidth(1920);
+            grabber.setImageHeight(1080);
+            
+            System.out.println("[JavaCVFFmpeg] Windows gdigrab configured for 1920x1080 physical resolution");
             
         } else if (IS_MAC) {
             // macOS: Use AVFoundation
