@@ -79,8 +79,8 @@ class BrobotMockingIntegrationTest extends BrobotTestBase {
                                                                 }
                                                         } else if (FrameworkSettings.mock) {
                                                                 // Create a default match for images without history in mock mode
+                                                                // Use empty match to avoid Screen initialization
                                                                 Match match = new Match.Builder()
-                                                                        .setRegion(new Region(50, 50, 100, 100))
                                                                         .setSimScore(0.95)
                                                                         .setName(img != null ? img.getName() : "DefaultMatch")
                                                                         .build();
@@ -116,7 +116,6 @@ class BrobotMockingIntegrationTest extends BrobotTestBase {
                                 .setState("TestState")
                                 .setMatchList(Arrays.asList(
                                                 new Match.Builder()
-                                                                .setRegion(new Region(50, 50, 100, 100))
                                                                 .setSimScore(0.95)
                                                                 .setName("TestMatch")
                                                                 .build()))
