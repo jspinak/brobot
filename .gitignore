@@ -149,6 +149,13 @@ library/match-visualization/
 library/pattern-integrity-test/
 library/images/prompt/
 
+# Python cache files
+library/scripts/__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
 # Python analysis scripts (utility scripts)
 library/scripts/analyze-test-categories.py
 
