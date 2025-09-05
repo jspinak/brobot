@@ -201,8 +201,9 @@ public class CaptureOverlay extends JFrame {
         if (startPoint != null && currentPoint != null) {
             int x = Math.min(startPoint.x, currentPoint.x);
             int y = Math.min(startPoint.y, currentPoint.y);
-            int width = Math.abs(currentPoint.x - startPoint.x);
-            int height = Math.abs(currentPoint.y - startPoint.y);
+            // Add 1 to include both start and end pixels
+            int width = Math.abs(currentPoint.x - startPoint.x) + 1;
+            int height = Math.abs(currentPoint.y - startPoint.y) + 1;
             
             selectionBounds = new Rectangle(x, y, width, height);
         }
