@@ -23,6 +23,6 @@ import org.springframework.boot.test.context.TestConfiguration;
         @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*BrobotRunner.*")
     }
 )
-public class TestApplicationConfiguration {
+public class SimpleTestConfiguration {
     // This class provides test configuration
 }

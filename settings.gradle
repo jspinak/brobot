@@ -1,6 +1,7 @@
 // settings.gradle for the brobot project
 
 rootProject.name = 'brobot'
-include 'library', 'library-features', 'persistence', 'runner', 'library-test'
+include 'library', 'library-features', 'persistence', 'runner', 'library-test', 'pattern-capture-tool'
 // 'library-test' module re-enabled after migration
 // 'persistence' module added for optional persistence providers
+// 'pattern-capture-tool' module added for standalone capture application
