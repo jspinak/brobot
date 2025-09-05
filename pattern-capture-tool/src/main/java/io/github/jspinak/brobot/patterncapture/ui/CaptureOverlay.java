@@ -31,7 +31,9 @@ public class CaptureOverlay extends JFrame {
     private BrobotCaptureService captureService;
     
     private BufferedImage screenshot;
+    private BufferedImage originalScreenshot;  // Original unscaled screenshot
     private BufferedImage darkenedScreenshot;
+    private double captureScale = 1.0;  // Scale factor for coordinate conversion
     private Point startPoint;
     private Point currentPoint;
     private Rectangle selectionBounds;
@@ -219,14 +221,36 @@ public class CaptureOverlay extends JFrame {
     
     private void captureSelection() {
         if (screenshot != null && selectionBounds != null) {
-            // Extract selected region from screenshot
-            BufferedImage selectedImage = screenshot.getSubimage(
-                selectionBounds.x, selectionBounds.y,
-                selectionBounds.width, selectionBounds.height);
+            BufferedImage selectedImage;
+            Rectangle actualBounds;
             
-            // Notify listeners
+            // Use original screenshot if we had to scale for display
+            if (originalScreenshot != null && captureScale != 1.0) {
+                // Convert logical coordinates to physical coordinates
+                int x = (int) (selectionBounds.x * captureScale);
+                int y = (int) (selectionBounds.y * captureScale);
+                int width = (int) (selectionBounds.width * captureScale);
+                int height = (int) (selectionBounds.height * captureScale);
+                
+                // Ensure bounds are within the original image
+                x = Math.min(x, originalScreenshot.getWidth() - 1);
+                y = Math.min(y, originalScreenshot.getHeight() - 1);
+                width = Math.min(width, originalScreenshot.getWidth() - x);
+                height = Math.min(height, originalScreenshot.getHeight() - y);
+                
+                actualBounds = new Rectangle(x, y, width, height);
+                selectedImage = originalScreenshot.getSubimage(x, y, width, height);
+            } else {
+                // No scaling needed, use the screenshot directly
+                actualBounds = selectionBounds;
+                selectedImage = screenshot.getSubimage(
+                    selectionBounds.x, selectionBounds.y,
+                    selectionBounds.width, selectionBounds.height);
+            }
+            
+            // Notify listeners with actual captured image
             for (CaptureListener listener : listeners) {
-                listener.onCaptureComplete(selectedImage, selectionBounds);
+                listener.onCaptureComplete(selectedImage, actualBounds);
             }
             
             // Hide overlay
@@ -248,6 +272,36 @@ public class CaptureOverlay extends JFrame {
         // Take screenshot
         try {
             screenshot = captureService.captureScreen();
+            
+            // Check if we need to scale the image to fit the logical screen
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            if (screenshot.getWidth() > screenSize.width || screenshot.getHeight() > screenSize.height) {
+                // Physical resolution capture needs to be scaled to logical size
+                double scaleX = (double) screenSize.width / screenshot.getWidth();
+                double scaleY = (double) screenSize.height / screenshot.getHeight();
+                double scale = Math.min(scaleX, scaleY);
+                
+                // Scale the screenshot to fit the logical display
+                int scaledWidth = (int) (screenshot.getWidth() * scale);
+                int scaledHeight = (int) (screenshot.getHeight() * scale);
+                
+                BufferedImage scaledImage = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g2d = scaledImage.createGraphics();
+                g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                g2d.drawImage(screenshot, 0, 0, scaledWidth, scaledHeight, null);
+                g2d.dispose();
+                
+                // Store original for capture, use scaled for display
+                this.originalScreenshot = screenshot;
+                screenshot = scaledImage;
+                
+                // Store scaling factor for coordinate conversion
+                this.captureScale = 1.0 / scale;
+            } else {
+                this.originalScreenshot = null;
+                this.captureScale = 1.0;
+            }
+            
             darkenedScreenshot = createDarkenedImage(screenshot);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this,
