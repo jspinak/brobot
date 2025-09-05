@@ -41,7 +41,7 @@ public class SettingsDialog extends JDialog {
         
         JRadioButton sikulixRadio = new JRadioButton("SikuliX (Default - Maximum Compatibility)");
         JRadioButton robotRadio = new JRadioButton("Robot (Java Built-in with DPI Scaling)");
-        JRadioButton ffmpegRadio = new JRadioButton("FFmpeg (True Physical Capture via JavaCV)");
+        JRadioButton ffmpegRadio = new JRadioButton("JavaCV FFmpeg (Physical Resolution - Bundled)");
         JRadioButton autoRadio = new JRadioButton("Auto (System Selects Best Available)");
         
         providerGroup.add(sikulixRadio);
@@ -51,14 +51,15 @@ public class SettingsDialog extends JDialog {
         
         // Select current provider
         String currentProvider = captureConfig.getCurrentProvider();
-        switch (currentProvider) {
-            case "SikuliX":
+        switch (currentProvider.toUpperCase()) {
+            case "SIKULIX":
                 sikulixRadio.setSelected(true);
                 break;
-            case "Robot":
+            case "ROBOT":
                 robotRadio.setSelected(true);
                 break;
-            case "FFmpeg":
+            case "FFMPEG":
+            case "JAVACV_FFMPEG":
                 ffmpegRadio.setSelected(true);
                 break;
             default:
