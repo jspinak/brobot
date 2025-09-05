@@ -102,17 +102,25 @@ public class CaptureConfiguration {
     
     /**
      * Switches to FFmpeg provider for true physical capture.
-     * Requires FFmpeg to be installed on the system.
+     * First tries JavaCV FFmpeg (bundled), then falls back to external FFmpeg.
      * 
-     * @throws IllegalStateException if FFmpeg is not available
+     * @throws IllegalStateException if no FFmpeg provider is available
      */
     public void useFFmpeg() {
         try {
-            captureService.setProvider("FFMPEG");
-            System.out.println("[CaptureConfig] Switched to FFmpeg provider");
-        } catch (IllegalStateException e) {
-            throw new IllegalStateException(
-                "FFmpeg is not available. Please install FFmpeg or use a different provider.", e);
+            // First try JavaCV FFmpeg (bundled, no installation needed)
+            captureService.setProvider("JAVACV_FFMPEG");
+            System.out.println("[CaptureConfig] Switched to JavaCV FFmpeg provider (bundled)");
+        } catch (Exception e1) {
+            try {
+                // Fall back to external FFmpeg if available
+                captureService.setProvider("FFMPEG");
+                System.out.println("[CaptureConfig] Switched to external FFmpeg provider");
+            } catch (Exception e2) {
+                throw new IllegalStateException(
+                    "No FFmpeg provider available. JavaCV FFmpeg failed: " + e1.getMessage() + 
+                    "; External FFmpeg failed: " + e2.getMessage(), e2);
+            }
         }
     }
     
