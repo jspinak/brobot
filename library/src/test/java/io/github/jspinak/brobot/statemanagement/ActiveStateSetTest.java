@@ -14,7 +14,6 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @DisplayName("ActiveStateSet Tests")
 @Timeout(value = 10, unit = TimeUnit.SECONDS) // Prevent CI/CD timeout

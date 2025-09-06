@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.model.element;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.github.jspinak.brobot.capture.ScreenDimensions;
 import io.github.jspinak.brobot.util.region.RegionUtils;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
@@ -60,33 +61,10 @@ public class Region implements Comparable<Region> {
      * If all else fails, defaults to 1920x1080.</p>
      */
     public Region() {
-        int width = 1920;  // fallback default
-        int height = 1080; // fallback default
-        
-        try {
-            // Try to get actual screen dimensions
-            org.sikuli.script.Screen screen = new org.sikuli.script.Screen();
-            if (screen.w > 0 && screen.h > 0) {
-                width = screen.w;
-                height = screen.h;
-            }
-        } catch (Exception e) {
-            // If SikuliX fails, try GraphicsEnvironment
-            try {
-                java.awt.GraphicsEnvironment ge = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
-                java.awt.GraphicsDevice gd = ge.getDefaultScreenDevice();
-                java.awt.DisplayMode dm = gd.getDisplayMode();
-                if (dm.getWidth() > 0 && dm.getHeight() > 0) {
-                    width = dm.getWidth();
-                    height = dm.getHeight();
-                }
-            } catch (Exception e2) {
-                // Fall back to environment variables
-                width = Integer.parseInt(System.getenv().getOrDefault("SCREEN_WIDTH", "1920"));
-                height = Integer.parseInt(System.getenv().getOrDefault("SCREEN_HEIGHT", "1080"));
-            }
-        }
-        
+        // Use the statically initialized screen dimensions
+        // These are set once during startup based on the capture provider
+        int width = ScreenDimensions.getWidth();
+        int height = ScreenDimensions.getHeight();
         setXYWH(0, 0, width, height);
     }
 
