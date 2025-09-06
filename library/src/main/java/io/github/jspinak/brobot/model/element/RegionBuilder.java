@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.model.element;
 
+import io.github.jspinak.brobot.capture.ScreenDimensions;
 import lombok.extern.slf4j.Slf4j;
 import static io.github.jspinak.brobot.model.element.Positions.Name.*;
 
@@ -689,34 +690,14 @@ public class RegionBuilder {
     }
     
     private void detectCurrentScreenSize() {
-        try {
-            // Try to get actual screen dimensions
-            org.sikuli.script.Screen screen = new org.sikuli.script.Screen();
-            if (screen.w > 0 && screen.h > 0) {
-                currentScreenWidth = screen.w;
-                currentScreenHeight = screen.h;
-                return;
-            }
-        } catch (Exception e) {
-            // Fall through to alternative methods
-        }
+        // Use the statically initialized screen dimensions
+        // These are set once during startup based on the capture provider
+        currentScreenWidth = ScreenDimensions.getWidth();
+        currentScreenHeight = ScreenDimensions.getHeight();
         
-        try {
-            // Try GraphicsEnvironment
-            java.awt.GraphicsEnvironment ge = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
-            java.awt.GraphicsDevice gd = ge.getDefaultScreenDevice();
-            java.awt.DisplayMode dm = gd.getDisplayMode();
-            if (dm.getWidth() > 0 && dm.getHeight() > 0) {
-                currentScreenWidth = dm.getWidth();
-                currentScreenHeight = dm.getHeight();
-                return;
-            }
-        } catch (Exception e) {
-            // Fall through to environment variables
+        if (!ScreenDimensions.isInitialized()) {
+            log.debug("ScreenDimensions not yet initialized, using defaults: {}x{}", 
+                     currentScreenWidth, currentScreenHeight);
         }
-        
-        // Fall back to environment variables or defaults
-        currentScreenWidth = Integer.parseInt(System.getenv().getOrDefault("SCREEN_WIDTH", "1920"));
-        currentScreenHeight = Integer.parseInt(System.getenv().getOrDefault("SCREEN_HEIGHT", "1080"));
     }
 }

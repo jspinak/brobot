@@ -220,8 +220,8 @@ public class ScenePatternMatcher {
                 int matchH = sikuliMatch.h;
                 
                 for (io.github.jspinak.brobot.model.element.Region region : searchRegions) {
-                    // Regions should be in the same coordinate space as the image being searched
-                    // If searching a 1920x1080 image, regions should already be in that coordinate space
+                    // Regions are now defined in the same coordinate space as captures
+                    // No scaling needed - ScreenResolutionManager ensures consistency
                     int regionX = region.x();
                     int regionY = region.y();
                     int regionW = region.w();
