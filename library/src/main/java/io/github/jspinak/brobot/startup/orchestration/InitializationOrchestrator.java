@@ -374,6 +374,20 @@ public class InitializationOrchestrator {
                 annotationProcessor.processAnnotations();
                 phase.addCompletedStep("Annotations processed");
             }
+            
+            // Initialize state dependencies and search regions
+            if (stateInitializationOrchestrator != null) {
+                log.info("Initializing state dependencies and search regions");
+                // Manually trigger the state initialization since we're doing it explicitly here
+                io.github.jspinak.brobot.annotations.StatesRegisteredEvent statesEvent = 
+                    new io.github.jspinak.brobot.annotations.StatesRegisteredEvent(
+                        this, 
+                        initialStates != null ? initialStates.getRegisteredInitialStates().size() : 0,
+                        0
+                    );
+                stateInitializationOrchestrator.orchestrateInitialization(statesEvent);
+                phase.addCompletedStep("State dependencies and search regions initialized");
+            }
 
             // Auto-activate initial states if configured
             if (initialStateAutoConfiguration != null &&
