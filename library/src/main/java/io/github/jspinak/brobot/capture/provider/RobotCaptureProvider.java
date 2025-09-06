@@ -69,39 +69,16 @@ public class RobotCaptureProvider implements CaptureProvider {
     
     @Override
     public BufferedImage captureRegion(Rectangle region) throws IOException {
-        return captureRegion(0, region);
+        // Always capture full screen for consistent behavior
+        // Region filtering should happen at a higher level
+        return captureScreen();
     }
     
     @Override
     public BufferedImage captureRegion(int screenId, Rectangle region) throws IOException {
-        if (robot == null) {
-            throw new IOException("Robot not initialized");
-        }
-        
-        // Adjust region for screen offset
-        Rectangle screenBounds = getScreenBounds(screenId);
-        Rectangle adjustedRegion = new Rectangle(
-            screenBounds.x + region.x,
-            screenBounds.y + region.y,
-            region.width,
-            region.height
-        );
-        
-        // Capture
-        BufferedImage capture = robot.createScreenCapture(adjustedRegion);
-        
-        // Scale to physical if needed (scaling the region proportionally)
-        if (scaleToPhysical && needsScaling(capture)) {
-            capture = scaleImage(capture, 
-                (int)(capture.getWidth() * detectedScale),
-                (int)(capture.getHeight() * detectedScale));
-        }
-        
-        logCapture(String.format("Region [%d,%d %dx%d]", 
-            region.x, region.y, region.width, region.height),
-            capture.getWidth(), capture.getHeight());
-        
-        return capture;
+        // Always capture full screen for consistent behavior
+        // Region filtering should happen at a higher level
+        return captureScreen(screenId);
     }
     
     /**

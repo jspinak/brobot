@@ -409,9 +409,24 @@ public class BufferedImageUtilities {
             // (FFmpeg, Robot, or SikuliX) as specified in properties
             if (instance != null && instance.unifiedCaptureService != null) {
                 try {
-                    // Convert Region to Rectangle for capture service
-                    Rectangle rect = new Rectangle(region.x(), region.y(), region.w(), region.h());
-                    captured = instance.unifiedCaptureService.captureRegion(rect);
+                    // Capture full screen using the configured provider
+                    captured = instance.unifiedCaptureService.captureScreen();
+                    
+                    // Crop to the requested region if needed
+                    if (region.w() > 0 && region.h() > 0 && 
+                        (region.x() != 0 || region.y() != 0 || 
+                         region.w() != captured.getWidth() || region.h() != captured.getHeight())) {
+                        
+                        // Ensure region is within bounds
+                        int x = Math.max(0, region.x());
+                        int y = Math.max(0, region.y());
+                        int width = Math.min(region.w(), captured.getWidth() - x);
+                        int height = Math.min(region.h(), captured.getHeight() - y);
+                        
+                        if (width > 0 && height > 0) {
+                            captured = captured.getSubimage(x, y, width, height);
+                        }
+                    }
                 } catch (IOException e) {
                     ConsoleReporter.println("[CAPTURE] Failed to capture with UnifiedCaptureService: " + e.getMessage());
                     // Fall back to SikuliX on IOException
@@ -505,9 +520,24 @@ public class BufferedImageUtilities {
             BufferedImage captured;
             if (instance != null && instance.unifiedCaptureService != null) {
                 try {
-                    // Use UnifiedCaptureService for configurable capture method
-                    Rectangle rect = new Rectangle(region.x(), region.y(), region.w(), region.h());
-                    captured = instance.unifiedCaptureService.captureRegion(rect);
+                    // Capture full screen using the configured provider
+                    captured = instance.unifiedCaptureService.captureScreen();
+                    
+                    // Crop to the requested region if needed
+                    if (region.w() > 0 && region.h() > 0 && 
+                        (region.x() != 0 || region.y() != 0 || 
+                         region.w() != captured.getWidth() || region.h() != captured.getHeight())) {
+                        
+                        // Ensure region is within bounds
+                        int x = Math.max(0, region.x());
+                        int y = Math.max(0, region.y());
+                        int width = Math.min(region.w(), captured.getWidth() - x);
+                        int height = Math.min(region.h(), captured.getHeight() - y);
+                        
+                        if (width > 0 && height > 0) {
+                            captured = captured.getSubimage(x, y, width, height);
+                        }
+                    }
                 } catch (IOException e) {
                     ConsoleReporter.println("[CAPTURE] Failed to capture with UnifiedCaptureService: " + e.getMessage());
                     // Fall back to SikuliX on IOException
