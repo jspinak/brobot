@@ -58,13 +58,26 @@ public class DynamicRegionResolver {
     }
 
     private void updateStateImageSearchRegion(StateImage stateImage, ActionResult actionResult) {
-        if (!shouldUpdateSearchRegion(stateImage)) return;
+        if (!shouldUpdateSearchRegion(stateImage)) {
+            log.debug("Skipping search region update for '{}' - conditions not met", stateImage.getName());
+            return;
+        }
         
         SearchRegionOnObject config = stateImage.getSearchRegionOnObject();
         if (config == null) return;
 
+        log.debug("Attempting to resolve search region for '{}' based on '{}' from '{}'",
+                stateImage.getName(), config.getTargetObjectName(), config.getTargetStateName());
+        
         Optional<Region> newRegion = resolveRegionFromMatch(config, actionResult);
-        newRegion.ifPresent(stateImage::setFixedSearchRegion);
+        if (newRegion.isPresent()) {
+            stateImage.setFixedSearchRegion(newRegion.get());
+            log.info("✓ Resolved search region for '{}' -> {}", 
+                    stateImage.getName(), newRegion.get());
+        } else {
+            log.debug("Could not resolve search region for '{}' - target not found", 
+                    stateImage.getName());
+        }
     }
 
     private void updateStateLocationSearchRegion(StateLocation stateLocation, ActionResult actionResult) {
@@ -89,12 +102,21 @@ public class DynamicRegionResolver {
 
     /**
      * Checks if the search region should be updated based on the conditions:
-     * 1. The object does not have a defined search area
-     * 2. The object was found (has match history)
+     * 1. The object has a SearchRegionOnObject configuration
+     * 2. The object does not already have a fixed search region
+     * 
+     * Note: We don't check if the object itself was found - that's irrelevant.
+     * What matters is whether the TARGET object (referenced in SearchRegionOnObject) was found.
      */
     private boolean shouldUpdateSearchRegion(StateImage stateImage) {
-        return !stateImage.hasDefinedSearchRegion() && 
-               stateImage.getMatchHistory().getTimesFound() > 0;
+        // If there's no SearchRegionOnObject, there's nothing to update
+        if (stateImage.getSearchRegionOnObject() == null) {
+            return false;
+        }
+        
+        // Update if the image doesn't already have a fixed region
+        // The actual resolution will check if the target was found
+        return !stateImage.hasDefinedSearchRegion();
     }
 
     /**

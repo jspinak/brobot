@@ -122,17 +122,34 @@ public class MoveMouseWrapper {
      * @return true if movement succeeded, false if hover() returned null
      */
     private boolean sikuliMove(Location location) {
-        // Scale the location from capture coordinates to logical coordinates if needed
-        org.sikuli.script.Location sikuliLocation = scaleLocationForMouse(location);
-        
-        // Log both original and scaled coordinates for debugging
-        log.info("Mouse move: original={}, scaled={}", location, sikuliLocation);
-        ConsoleReporter.print("move mouse to " + sikuliLocation + " ");
-        
-        // return new Region().mouseMove(location.getSikuliLocation()) != 0; // this can
-        // cause the script to freeze for unknown reasons
-        // Directly use hover() which is more stable than mouseMove()
-        return sikuliLocation.hover() != null;
+        try {
+            // Scale the location from capture coordinates to logical coordinates if needed
+            org.sikuli.script.Location sikuliLocation = scaleLocationForMouse(location);
+            
+            // Log both original and scaled coordinates for debugging
+            log.info("Mouse move: original={}, scaled={}", location, sikuliLocation);
+            ConsoleReporter.print("move mouse to " + sikuliLocation + " ");
+            
+            // return new Region().mouseMove(location.getSikuliLocation()) != 0; // this can
+            // cause the script to freeze for unknown reasons
+            // Directly use hover() which is more stable than mouseMove()
+            log.debug("About to call SikuliX hover() with location: {}", sikuliLocation);
+            org.sikuli.script.Location result = sikuliLocation.hover();
+            log.debug("SikuliX hover() returned: {}", result);
+            
+            if (result == null) {
+                log.error("SikuliX hover() returned null - mouse movement failed");
+                return false;
+            }
+            
+            log.debug("Mouse movement successful to {}", result);
+            return true;
+            
+        } catch (Exception e) {
+            log.error("Exception during mouse movement", e);
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**
