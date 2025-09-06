@@ -9,6 +9,7 @@ import sys
 import time
 import os
 import json
+import platform
 import concurrent.futures
 from pathlib import Path
 from datetime import datetime
@@ -30,6 +31,16 @@ class TestRunner:
         }
         self.start_time = None
         self.lock = threading.Lock()
+        
+        # Determine gradle command based on OS
+        if platform.system() == "Windows":
+            # Check if gradlew.bat exists, otherwise use gradlew
+            if (self.root_dir / "gradlew.bat").exists():
+                self.gradle_cmd = "gradlew.bat"
+            else:
+                self.gradle_cmd = "gradlew"
+        else:
+            self.gradle_cmd = "./gradlew"
         
     def run_command(self, cmd: str, timeout: int = None) -> Tuple[int, str, str]:
         """Run a command with timeout and return result."""
@@ -67,7 +78,7 @@ class TestRunner:
     
     def run_single_test(self, test_class: str) -> Dict:
         """Run a single test class and return results."""
-        cmd = f"./gradlew :{self.module}:test --tests '{test_class}' --no-daemon --no-build-cache"
+        cmd = f"{self.gradle_cmd} :{self.module}:test --tests '{test_class}' --no-daemon --no-build-cache"
         
         start = time.time()
         returncode, stdout, stderr = self.run_command(cmd)
@@ -143,7 +154,7 @@ class TestRunner:
     def compile_tests(self) -> bool:
         """Compile all test classes."""
         print(f"Compiling tests for {self.module}...")
-        cmd = f"./gradlew :{self.module}:compileTestJava --no-daemon"
+        cmd = f"{self.gradle_cmd} :{self.module}:compileTestJava --no-daemon"
         returncode, stdout, stderr = self.run_command(cmd, timeout=120)
         
         if returncode != 0:
@@ -156,7 +167,11 @@ class TestRunner:
     def estimate_total_tests(self) -> int:
         """Estimate total number of test methods (not just classes)."""
         # Run a quick test info task if available
-        cmd = f"./gradlew :{self.module}:test --dry-run 2>/dev/null | grep -c '@Test' || echo '0'"
+        if platform.system() == "Windows":
+            # On Windows, just return an estimate
+            return 120
+        else:
+            cmd = f"{self.gradle_cmd} :{self.module}:test --dry-run 2>/dev/null | grep -c '@Test' || echo '0'"
         returncode, stdout, stderr = self.run_command(cmd, timeout=10)
         
         try:
@@ -242,14 +257,20 @@ class TestRunner:
             print(f"\nTotal Test Methods Executed: {total_test_methods}")
         
         if self.results["failed"]:
-            print(f"\n❌ Failed Tests:")
+            try:
+                print(f"\n❌ Failed Tests:")
+            except UnicodeEncodeError:
+                print(f"\n[FAILED] Failed Tests:")
             for test in self.results["failed"][:10]:  # Show first 10
                 print(f"  - {test}")
             if len(self.results["failed"]) > 10:
                 print(f"  ... and {len(self.results['failed']) - 10} more")
         
         if self.results["timed_out"]:
-            print(f"\n⏱️  Timed Out Tests:")
+            try:
+                print(f"\n⏱️  Timed Out Tests:")
+            except UnicodeEncodeError:
+                print(f"\n[TIMEOUT] Timed Out Tests:")
             for test in self.results["timed_out"][:10]:  # Show first 10
                 print(f"  - {test}")
             if len(self.results["timed_out"]) > 10:
@@ -321,10 +342,16 @@ def main():
         success = len(retry_runner.results['failed']) == 0
     
     if success:
-        print("\n✅ All tests completed successfully!")
+        try:
+            print("\n✅ All tests completed successfully!")
+        except UnicodeEncodeError:
+            print("\n[SUCCESS] All tests completed successfully!")
         sys.exit(0)
     else:
-        print("\n❌ Some tests failed or timed out")
+        try:
+            print("\n❌ Some tests failed or timed out")
+        except UnicodeEncodeError:
+            print("\n[FAILED] Some tests failed or timed out")
         sys.exit(1)
 
 if __name__ == "__main__":

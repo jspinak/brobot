@@ -409,36 +409,21 @@ public class BufferedImageUtilities {
             // (FFmpeg, Robot, or SikuliX) as specified in properties
             if (instance != null && instance.unifiedCaptureService != null) {
                 try {
-                    // Capture full screen using the configured provider
+                    // Always capture full screen - NO CROPPING
+                    // Search regions are used for filtering matches, not for cropping captures
                     captured = instance.unifiedCaptureService.captureScreen();
-                    
-                    // Crop to the requested region if needed
-                    if (region.w() > 0 && region.h() > 0 && 
-                        (region.x() != 0 || region.y() != 0 || 
-                         region.w() != captured.getWidth() || region.h() != captured.getHeight())) {
-                        
-                        // Ensure region is within bounds
-                        int x = Math.max(0, region.x());
-                        int y = Math.max(0, region.y());
-                        int width = Math.min(region.w(), captured.getWidth() - x);
-                        int height = Math.min(region.h(), captured.getHeight() - y);
-                        
-                        if (width > 0 && height > 0) {
-                            captured = captured.getSubimage(x, y, width, height);
-                        }
-                    }
                 } catch (IOException e) {
                     ConsoleReporter.println("[CAPTURE] Failed to capture with UnifiedCaptureService: " + e.getMessage());
-                    // Fall back to SikuliX on IOException
+                    // Fall back to SikuliX on IOException - also full screen capture
                     Screen screen = new Screen();
-                    captured = screen.capture(region.sikuli()).getImage();
+                    captured = screen.capture().getImage();
                 }
             } else {
                 // Fallback to SikuliX Screen if UnifiedCaptureService not available
-                // This captures at logical resolution which may not match patterns
+                // Always capture full screen
                 ConsoleReporter.println("[CAPTURE] Warning: UnifiedCaptureService not available, using SikuliX fallback");
                 Screen screen = new Screen();
-                captured = screen.capture(region.sikuli()).getImage();
+                captured = screen.capture().getImage();
             }
             
             // Validate captured image
@@ -520,33 +505,18 @@ public class BufferedImageUtilities {
             BufferedImage captured;
             if (instance != null && instance.unifiedCaptureService != null) {
                 try {
-                    // Capture full screen using the configured provider
+                    // Always capture full screen - NO CROPPING
+                    // Search regions are used for filtering matches, not for cropping captures
                     captured = instance.unifiedCaptureService.captureScreen();
-                    
-                    // Crop to the requested region if needed
-                    if (region.w() > 0 && region.h() > 0 && 
-                        (region.x() != 0 || region.y() != 0 || 
-                         region.w() != captured.getWidth() || region.h() != captured.getHeight())) {
-                        
-                        // Ensure region is within bounds
-                        int x = Math.max(0, region.x());
-                        int y = Math.max(0, region.y());
-                        int width = Math.min(region.w(), captured.getWidth() - x);
-                        int height = Math.min(region.h(), captured.getHeight() - y);
-                        
-                        if (width > 0 && height > 0) {
-                            captured = captured.getSubimage(x, y, width, height);
-                        }
-                    }
                 } catch (IOException e) {
                     ConsoleReporter.println("[CAPTURE] Failed to capture with UnifiedCaptureService: " + e.getMessage());
-                    // Fall back to SikuliX on IOException
-                    captured = screen.capture(region.sikuli()).getImage();
+                    // Fall back to SikuliX on IOException - also full screen capture
+                    captured = screen.capture().getImage();
                 }
             } else {
-                // Fallback to SikuliX Screen
+                // Fallback to SikuliX Screen - always full screen
                 ConsoleReporter.println("[CAPTURE] Warning: UnifiedCaptureService not available, using SikuliX fallback");
-                captured = screen.capture(region.sikuli()).getImage();
+                captured = screen.capture().getImage();
             }
             // Only log successful capture once
             if (!environmentLogged) {
