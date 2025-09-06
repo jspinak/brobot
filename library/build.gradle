@@ -446,9 +446,10 @@ publishing {
     }
 }
 
-signing {
-    sign publishing.publications.mavenJava
-}
+// Signing disabled for local builds
+// signing {
+//     sign publishing.publications.mavenJava
+// }
 
 // JReleaser configuration
 jreleaser {
