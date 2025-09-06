@@ -257,7 +257,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         java: [17, 21]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: 45
     
     steps:
     - uses: actions/checkout@v4
@@ -269,8 +269,25 @@ jobs:
         distribution: 'temurin'
         cache: gradle
     
-    - name: Run tests with Python script
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+    
+    - name: Grant execute permissions (Unix)
+      if: runner.os != 'Windows'
+      run: chmod +x gradlew
+    
+    - name: Clear Gradle cache (macOS)
+      if: runner.os == 'macOS'
       run: |
-        python3 library/scripts/run-all-tests.py library --mode sequential --timeout 60 --retry-failed
+        rm -rf ~/.gradle/caches/modules-2/modules-2.lock
+        rm -rf ~/.gradle/caches/*/plugin-resolution/
+    
+    - name: Run tests with CI-optimized script
+      run: |
+        python3 library/scripts/run-tests-ci.py library --timeout 30 --batch-size 5
       env:
-        GRADLE_OPTS: -Xmx2048m
+        GRADLE_OPTS: -Xmx2048m -XX:MaxMetaspaceSize=512m -Dorg.gradle.daemon=false
+        JAVA_TOOL_OPTIONS: -Djava.awt.headless=true
+        CI: true

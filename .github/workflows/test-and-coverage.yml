@@ -310,21 +310,22 @@ jobs:
         name: coverage-trend-report
         path: coverage-trend.md
 
-  notify-slack:
-    name: Notify Slack
-    needs: [unit-tests, integration-tests, coverage-aggregation]
-    runs-on: ubuntu-latest
-    if: always() && github.ref == 'refs/heads/main'
-    
-    steps:
-    - name: Notify build status
-      uses: 8398a7/action-slack@v3
-      with:
-        status: ${{ job.status }}
-        text: |
-          Build ${{ github.run_number }} ${{ job.status }}
-          Branch: ${{ github.ref }}
-          Commit: ${{ github.sha }}
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      if: always()
+  # Slack notifications disabled - uncomment and configure SLACK_WEBHOOK_URL secret to enable
+  # notify-slack:
+  #   name: Notify Slack
+  #   needs: [unit-tests, integration-tests, coverage-aggregation]
+  #   runs-on: ubuntu-latest
+  #   if: always() && github.ref == 'refs/heads/main'
+  #   
+  #   steps:
+  #   - name: Notify build status
+  #     uses: 8398a7/action-slack@v3
+  #     with:
+  #       status: ${{ job.status }}
+  #       text: |
+  #         Build ${{ github.run_number }} ${{ job.status }}
+  #         Branch: ${{ github.ref }}
+  #         Commit: ${{ github.sha }}
+  #     env:
+  #       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  #     if: always()
