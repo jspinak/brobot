@@ -408,9 +408,16 @@ public class BufferedImageUtilities {
             // Use UnifiedCaptureService if available, which respects the configured capture provider
             // (FFmpeg, Robot, or SikuliX) as specified in properties
             if (instance != null && instance.unifiedCaptureService != null) {
-                // Convert Region to Rectangle for capture service
-                Rectangle rect = new Rectangle(region.x(), region.y(), region.w(), region.h());
-                captured = instance.unifiedCaptureService.captureRegion(rect);
+                try {
+                    // Convert Region to Rectangle for capture service
+                    Rectangle rect = new Rectangle(region.x(), region.y(), region.w(), region.h());
+                    captured = instance.unifiedCaptureService.captureRegion(rect);
+                } catch (IOException e) {
+                    ConsoleReporter.println("[CAPTURE] Failed to capture with UnifiedCaptureService: " + e.getMessage());
+                    // Fall back to SikuliX on IOException
+                    Screen screen = new Screen();
+                    captured = screen.capture(region.sikuli()).getImage();
+                }
             } else {
                 // Fallback to SikuliX Screen if UnifiedCaptureService not available
                 // This captures at logical resolution which may not match patterns
@@ -497,9 +504,15 @@ public class BufferedImageUtilities {
             }
             BufferedImage captured;
             if (instance != null && instance.unifiedCaptureService != null) {
-                // Use UnifiedCaptureService for configurable capture method
-                Rectangle rect = new Rectangle(region.x(), region.y(), region.w(), region.h());
-                captured = instance.unifiedCaptureService.captureRegion(rect);
+                try {
+                    // Use UnifiedCaptureService for configurable capture method
+                    Rectangle rect = new Rectangle(region.x(), region.y(), region.w(), region.h());
+                    captured = instance.unifiedCaptureService.captureRegion(rect);
+                } catch (IOException e) {
+                    ConsoleReporter.println("[CAPTURE] Failed to capture with UnifiedCaptureService: " + e.getMessage());
+                    // Fall back to SikuliX on IOException
+                    captured = screen.capture(region.sikuli()).getImage();
+                }
             } else {
                 // Fallback to SikuliX Screen
                 ConsoleReporter.println("[CAPTURE] Warning: UnifiedCaptureService not available, using SikuliX fallback");

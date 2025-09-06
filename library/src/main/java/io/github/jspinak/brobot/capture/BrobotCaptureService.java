@@ -166,8 +166,8 @@ public class BrobotCaptureService {
             }
         }
         
-        // Try any available provider (prefer SikuliX for compatibility)
-        String[] preferredOrder = {"SIKULIX", "ROBOT", "FFMPEG"};
+        // Try any available provider (prefer JavaCV FFmpeg for physical resolution)
+        String[] preferredOrder = {"JAVACV_FFMPEG", "ROBOT", "FFMPEG", "SIKULIX"};
         for (String name : preferredOrder) {
             CaptureProvider provider = providerMap.get(name);
             if (provider != null && provider.isAvailable()) {
