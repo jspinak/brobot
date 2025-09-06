@@ -43,8 +43,18 @@ public class ScreenResolutionManager {
     public void initialize() {
         detectResolution();
         
-        // Initialize the static ScreenDimensions for use by Region and other classes
-        ScreenDimensions.initialize(captureProviderName, screenWidth, screenHeight);
+        // Only initialize ScreenDimensions if not already done by EarlyScreenDimensionsInitializer
+        if (!ScreenDimensions.isInitialized()) {
+            ScreenDimensions.initialize(captureProviderName, screenWidth, screenHeight);
+            log.info("ScreenDimensions initialized by ScreenResolutionManager");
+        } else {
+            // Verify the dimensions match what we detected
+            if (ScreenDimensions.getWidth() != screenWidth || ScreenDimensions.getHeight() != screenHeight) {
+                log.warn("ScreenDimensions mismatch! Already initialized as {}x{}, but detected {}x{}",
+                        ScreenDimensions.getWidth(), ScreenDimensions.getHeight(), 
+                        screenWidth, screenHeight);
+            }
+        }
         
         log.info("=== Screen Resolution Manager Initialized ===");
         log.info("Capture Provider: {}", captureProviderName);
