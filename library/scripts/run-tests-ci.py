@@ -35,7 +35,11 @@ class CITestRunner:
         
         # Determine gradle command
         if platform.system() == "Windows":
-            self.gradle_cmd = "gradlew.bat" if (self.root_dir / "gradlew.bat").exists() else "gradlew"
+            # On Windows, use gradlew.bat without ./ prefix
+            if (self.root_dir / "gradlew.bat").exists():
+                self.gradle_cmd = "gradlew.bat"
+            else:
+                self.gradle_cmd = "gradlew"
         else:
             self.gradle_cmd = "./gradlew"
         
@@ -93,8 +97,12 @@ class CITestRunner:
                 if elapsed > timeout:
                     self.print_progress(f"Timeout after {elapsed:.1f}s, killing process...")
                     if platform.system() == "Windows":
-                        subprocess.run(['taskkill', '/F', '/T', '/PID', str(process.pid)], 
-                                     capture_output=True)
+                        try:
+                            subprocess.run(['taskkill', '/F', '/T', '/PID', str(process.pid)], 
+                                         capture_output=True, check=False)
+                        except Exception as e:
+                            self.print_progress(f"Failed to kill process: {e}")
+                            process.terminate()
                     else:
                         os.killpg(os.getpgid(process.pid), signal.SIGTERM)
                     return -1, f"Timeout after {timeout}s"
@@ -129,11 +137,19 @@ class CITestRunner:
     def compile_tests(self) -> bool:
         """Compile tests before running."""
         self.print_progress(f"Compiling tests for {self.module}...")
-        cmd = f"{self.gradle_cmd} :{self.module}:compileTestJava --no-daemon"
+        
+        # On Windows CI, add extra JVM memory settings
+        extra_opts = ""
+        if platform.system() == "Windows" and self.is_ci:
+            extra_opts = " -Dorg.gradle.jvmargs=-Xmx2g"
+        
+        cmd = f"{self.gradle_cmd} :{self.module}:compileTestJava --no-daemon{extra_opts}"
         returncode, output = self.run_command_with_timeout(cmd, timeout=300)
         
         if returncode != 0:
-            self.print_progress(f"Compilation failed: {output[-500:]}")
+            # Show more output for debugging
+            self.print_progress(f"Compilation failed with exit code {returncode}")
+            self.print_progress(f"Last 1000 chars of output: {output[-1000:]}")
             return False
         
         self.print_progress("Compilation successful")
