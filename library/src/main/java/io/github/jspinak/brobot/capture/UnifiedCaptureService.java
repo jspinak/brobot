@@ -229,6 +229,7 @@ public class UnifiedCaptureService {
     private boolean isKnownProvider(String name) {
         return name.equalsIgnoreCase("ROBOT") ||
                name.equalsIgnoreCase("FFMPEG") ||
+               name.equalsIgnoreCase("JAVACV_FFMPEG") ||
                name.equalsIgnoreCase("SIKULIX") ||
                name.equalsIgnoreCase("AUTO");
     }
