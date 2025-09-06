@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.tools.logging.visual;
 
+import io.github.jspinak.brobot.capture.ScreenDimensions;
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.element.Region;
@@ -101,6 +102,9 @@ public class HighlightManager {
             Region region = match.getRegion();
             if (region == null)
                 continue;
+            
+            // Scale region from physical to logical coordinates if needed for SikuliX highlighting
+            region = scaleRegionForHighlight(region);
 
             // Check if the match has a custom highlight color from its StateImage
             Color highlightColor = findConfig.getColorObject();
@@ -646,5 +650,53 @@ public class HighlightManager {
         }
 
         return null;
+    }
+    
+    /**
+     * Scales a region from physical coordinates to logical coordinates if needed.
+     * This is necessary when matches are found in physical resolution (1920x1080)
+     * but SikuliX highlighting works in logical resolution (1536x864).
+     * 
+     * @param region The region to potentially scale
+     * @return The scaled region, or the original if no scaling is needed
+     */
+    private Region scaleRegionForHighlight(Region region) {
+        // Check if we're using physical resolution captures
+        int captureWidth = ScreenDimensions.getWidth();
+        int captureHeight = ScreenDimensions.getHeight();
+        
+        // Get the logical screen dimensions (what SikuliX uses for highlighting)
+        Toolkit toolkit = Toolkit.getDefaultToolkit();
+        Dimension screenSize = toolkit.getScreenSize();
+        int logicalWidth = screenSize.width;
+        int logicalHeight = screenSize.height;
+        
+        // If capture and logical dimensions match, no scaling needed
+        if (captureWidth == logicalWidth && captureHeight == logicalHeight) {
+            return region;
+        }
+        
+        // Calculate scale factors (from physical to logical)
+        double scaleX = (double) logicalWidth / captureWidth;
+        double scaleY = (double) logicalHeight / captureHeight;
+        
+        // Scale the region coordinates
+        int scaledX = (int) Math.round(region.x() * scaleX);
+        int scaledY = (int) Math.round(region.y() * scaleY);
+        int scaledW = (int) Math.round(region.w() * scaleX);
+        int scaledH = (int) Math.round(region.h() * scaleY);
+        
+        // Ensure the scaled region fits within logical screen bounds
+        if (scaledY + scaledH > logicalHeight) {
+            scaledH = logicalHeight - scaledY;
+        }
+        if (scaledX + scaledW > logicalWidth) {
+            scaledW = logicalWidth - scaledX;
+        }
+        
+        log.debug("Scaled highlight region from physical [{}] to logical [{}]",
+                 region, new Region(scaledX, scaledY, scaledW, scaledH));
+        
+        return new Region(scaledX, scaledY, scaledW, scaledH);
     }
 }
