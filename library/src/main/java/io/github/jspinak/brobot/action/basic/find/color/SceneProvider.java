@@ -10,12 +10,15 @@ import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 import io.github.jspinak.brobot.util.image.recognition.ImageLoader;
+import io.github.jspinak.brobot.capture.UnifiedCaptureService;
 
 import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,6 +69,9 @@ import java.util.List;
 public class SceneProvider {
     private final TimeProvider time;
     private final ImageLoader getImage;
+    
+    @Autowired(required = false)
+    private UnifiedCaptureService unifiedCaptureService;
 
     public SceneProvider(TimeProvider time, ImageLoader getImage) {
         this.time = time;
@@ -111,8 +117,22 @@ public class SceneProvider {
 
         if (takeScreenshot) {
             for (int i = 0; i < scenesToCapture; i++) {
-                // Capture the screen once and use it for the Scene
-                BufferedImage screenshot = BufferedImageUtilities.getBufferedImageFromScreen(new Region());
+                // Capture the screen using configured capture method
+                BufferedImage screenshot;
+                if (unifiedCaptureService != null) {
+                    try {
+                        // Use UnifiedCaptureService for configurable capture method
+                        screenshot = unifiedCaptureService.captureScreen();
+                        log.debug("[SCENE_PROVIDER] Captured screen using UnifiedCaptureService: {}x{}", 
+                                screenshot.getWidth(), screenshot.getHeight());
+                    } catch (IOException e) {
+                        log.error("[SCENE_PROVIDER] Failed to capture with UnifiedCaptureService, falling back to BufferedImageUtilities", e);
+                        screenshot = BufferedImageUtilities.getBufferedImageFromScreen(new Region());
+                    }
+                } else {
+                    // Fallback to BufferedImageUtilities (which now also tries UnifiedCaptureService)
+                    screenshot = BufferedImageUtilities.getBufferedImageFromScreen(new Region());
+                }
                 scenes.add(new Scene(new Pattern(new Image(screenshot, "screenshot" + i))));
                 if (i < scenesToCapture - 1)
                     time.wait(secondsBetweenCaptures);

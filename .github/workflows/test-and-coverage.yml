@@ -37,10 +37,7 @@ jobs:
       
     - name: Run tests with Python script
       run: |
-        python3 library/scripts/run-all-tests.py library \
-          --mode sequential \
-          --timeout 60 \
-          --retry-failed
+        python3 library/scripts/run-all-tests.py library --mode sequential --timeout 60 --retry-failed
         ./gradlew :library:jacocoTestReport --continue
       
     - name: Upload unit test results
@@ -83,10 +80,7 @@ jobs:
       
     - name: Run tests with Python script
       run: |
-        python3 library/scripts/run-all-tests.py library-test \
-          --mode sequential \
-          --timeout 60 \
-          --retry-failed
+        python3 library/scripts/run-all-tests.py library-test --mode sequential --timeout 60 --retry-failed
         ./gradlew :library-test:jacocoTestReport --continue
       env:
         TESSDATA_PREFIX: /usr/share/tesseract-ocr/4.00/tessdata
@@ -224,11 +218,7 @@ jobs:
       
     - name: Run tests with Python script
       run: |
-        python3 library/scripts/run-all-tests.py library-test \
-          --mode sequential \
-          --timeout 60 \
-          --retry-failed \
-          --pattern "Performance"
+        python3 library/scripts/run-all-tests.py library-test --mode sequential --timeout 60 --retry-failed --pattern "Performance"
       
     - name: Upload performance results
       uses: actions/upload-artifact@v4
@@ -263,10 +253,7 @@ jobs:
       
     - name: Run tests with Python script
       run: |
-        python3 library/scripts/run-all-tests.py library \
-          --mode sequential \
-          --timeout 60 \
-          --retry-failed
+        python3 library/scripts/run-all-tests.py library --mode sequential --timeout 60 --retry-failed
       
     - name: Upload test results
       if: failure()
@@ -338,5 +325,6 @@ jobs:
           Build ${{ github.run_number }} ${{ job.status }}
           Branch: ${{ github.ref }}
           Commit: ${{ github.sha }}
-        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       if: always()
