@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -150,53 +151,21 @@ public class ScenePatternMatcher {
                 scene.getPattern().w() + "x" + scene.getPattern().h());
         }
         
-        // OPTIMIZATION: If pattern has a single constrained search region, search only that region
+        // Get search regions for filtering (NOT for cropping)
         List<io.github.jspinak.brobot.model.element.Region> searchRegions = pattern.getRegionsForSearch();
-        boolean hasConstrainedRegion = false;
-        io.github.jspinak.brobot.model.element.Region constrainedRegion = null;
         
-        // Check if we have exactly one search region that's not full screen
-        if (searchRegions.size() == 1) {
-            constrainedRegion = searchRegions.get(0);
-            // Check if this is NOT a full-screen region
-            if (!(constrainedRegion.x() == 0 && constrainedRegion.y() == 0 && 
-                  constrainedRegion.w() >= scene.getPattern().w() && 
-                  constrainedRegion.h() >= scene.getPattern().h())) {
-                hasConstrainedRegion = true;
-                // Region info will be logged when sub-image is created
-            }
-        }
+        // ALWAYS search the entire image - NO CROPPING
+        Finder f = getFinder(scene.getPattern().getImage());
         
-        Finder f;
-        int regionOffsetX = 0;
-        int regionOffsetY = 0;
-        
-        if (hasConstrainedRegion && scene.getPattern().getBImage() != null) {
-            // Extract sub-image for the constrained region
-            BufferedImage sceneImage = scene.getPattern().getBImage();
-            int x = Math.max(0, constrainedRegion.x());
-            int y = Math.max(0, constrainedRegion.y());
-            int w = Math.min(constrainedRegion.w(), sceneImage.getWidth() - x);
-            int h = Math.min(constrainedRegion.h(), sceneImage.getHeight() - y);
-            
-            if (w > 0 && h > 0 && w >= pattern.w() && h >= pattern.h()) {
-                // Region is valid and large enough for the pattern
-                BufferedImage subImage = sceneImage.getSubimage(x, y, w, h);
-                f = new Finder(subImage);
-                regionOffsetX = x;
-                regionOffsetY = y;
-                if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
-                    ConsoleReporter.println("[SEARCH REGION] Constrained to: " + x + "," + y + " " + w + "x" + h);
+        if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
+            if (!searchRegions.isEmpty()) {
+                ConsoleReporter.println("[SEARCH] Full image search with " + searchRegions.size() + " region filter(s)");
+                for (io.github.jspinak.brobot.model.element.Region region : searchRegions) {
+                    ConsoleReporter.println("[FILTER REGION] " + region.toString());
                 }
             } else {
-                // Region too small for pattern - impossible to find a match
-                ConsoleReporter.println("[SKIP] Search region (" + w + "x" + h + 
-                    ") is smaller than pattern (" + pattern.w() + "x" + pattern.h() + ") - no matches possible");
-                return new ArrayList<>();  // Return empty list immediately
+                ConsoleReporter.println("[SEARCH] Full image search with no region filtering");
             }
-        } else {
-            // No constrained region or no BufferedImage, search entire scene
-            f = getFinder(scene.getPattern().getImage());
         }
         
         if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
@@ -241,14 +210,46 @@ public class ScenePatternMatcher {
         while (f.hasNext()) {
             org.sikuli.script.Match sikuliMatch = f.next();
             
-            // If we searched a sub-region, adjust coordinates back to scene coordinates
-            if (hasConstrainedRegion) {
-                sikuliMatch.x += regionOffsetX;
-                sikuliMatch.y += regionOffsetY;
+            // FILTER 1: Check if match falls within any search region (if regions are specified)
+            boolean withinSearchRegion = true;
+            if (!searchRegions.isEmpty()) {
+                withinSearchRegion = false;
+                int matchX = sikuliMatch.x;
+                int matchY = sikuliMatch.y;
+                int matchW = sikuliMatch.w;
+                int matchH = sikuliMatch.h;
+                
+                for (io.github.jspinak.brobot.model.element.Region region : searchRegions) {
+                    // Regions should be in the same coordinate space as the image being searched
+                    // If searching a 1920x1080 image, regions should already be in that coordinate space
+                    int regionX = region.x();
+                    int regionY = region.y();
+                    int regionW = region.w();
+                    int regionH = region.h();
+                    
+                    // Check if match center is within this region
+                    int matchCenterX = matchX + matchW / 2;
+                    int matchCenterY = matchY + matchH / 2;
+                    
+                    if (matchCenterX >= regionX && matchCenterX < regionX + regionW &&
+                        matchCenterY >= regionY && matchCenterY < regionY + regionH) {
+                        withinSearchRegion = true;
+                        if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
+                            ConsoleReporter.println("[FILTER] Match at (" + matchX + ", " + matchY + 
+                                ") accepted - within region [" + regionX + "," + regionY + " " + regionW + "x" + regionH + "]");
+                        }
+                        break;
+                    }
+                }
+                
+                if (!withinSearchRegion && verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
+                    ConsoleReporter.println("[FILTER] Match at (" + matchX + ", " + matchY + 
+                        ") filtered out - not within any search regions");
+                }
             }
             
-            // FILTER: Only process matches that meet the minimum similarity threshold
-            if (sikuliMatch.getScore() >= minSimilarity) {
+            // FILTER 2: Only process matches that meet the minimum similarity threshold AND are within search regions
+            if (withinSearchRegion && sikuliMatch.getScore() >= minSimilarity) {
                 Match nextMatch = new Match.Builder()
                         .setSikuliMatch(sikuliMatch)
                         .setName(pattern.getName())
@@ -272,15 +273,16 @@ public class ScenePatternMatcher {
                     bestScore = sikuliMatch.getScore();
                     bestMatch = nextMatch;
                 }
-            } else {
+            } else if (withinSearchRegion) {
+                // Match was within search region but didn't meet similarity threshold
                 rejectedMatches++;
-                // Only log rejected matches in verbose mode
                 if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
                     ConsoleReporter.println("[MATCH] Rejected at (" + sikuliMatch.x + ", " + sikuliMatch.y + 
                         ") score=" + String.format("%.3f", sikuliMatch.getScore()) + " < " + 
                         String.format("%.3f", minSimilarity));
                 }
             }
+            // else: Match was filtered out by region filter (already logged above)
             
             matchCount++;
             
