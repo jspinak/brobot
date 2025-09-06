@@ -8,6 +8,7 @@ import io.github.jspinak.brobot.util.file.FilenameUtils;
 import io.github.jspinak.brobot.monitor.MonitorManager;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.util.image.capture.ScreenUtilities;
+import io.github.jspinak.brobot.capture.UnifiedCaptureService;
 
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -128,6 +129,9 @@ public class BufferedImageUtilities {
 
     @Autowired(required = false)
     private SmartImageLoader smartImageLoader;
+
+    @Autowired(required = false)
+    private UnifiedCaptureService unifiedCaptureService;
 
     private static BufferedImageUtilities instance;
 
@@ -401,12 +405,19 @@ public class BufferedImageUtilities {
         try {
             BufferedImage captured;
 
-            // Use SikuliX Screen class which handles DPI scaling correctly
-            // It captures at logical resolution which matches how patterns were captured
-            Screen screen = new Screen();
-            
-            // Capture the screen region
-            captured = screen.capture(region.sikuli()).getImage();
+            // Use UnifiedCaptureService if available, which respects the configured capture provider
+            // (FFmpeg, Robot, or SikuliX) as specified in properties
+            if (instance != null && instance.unifiedCaptureService != null) {
+                // Convert Region to Rectangle for capture service
+                Rectangle rect = new Rectangle(region.x(), region.y(), region.w(), region.h());
+                captured = instance.unifiedCaptureService.captureRegion(rect);
+            } else {
+                // Fallback to SikuliX Screen if UnifiedCaptureService not available
+                // This captures at logical resolution which may not match patterns
+                ConsoleReporter.println("[CAPTURE] Warning: UnifiedCaptureService not available, using SikuliX fallback");
+                Screen screen = new Screen();
+                captured = screen.capture(region.sikuli()).getImage();
+            }
             
             // Validate captured image
             if (captured != null) {
@@ -484,7 +495,16 @@ public class BufferedImageUtilities {
                 log.debug("[SCREEN_CAPTURE] Using screen {} to capture region {}", screen.getID(), region);
                 lastMonitorLogTime = now;
             }
-            BufferedImage captured = screen.capture(region.sikuli()).getImage();
+            BufferedImage captured;
+            if (instance != null && instance.unifiedCaptureService != null) {
+                // Use UnifiedCaptureService for configurable capture method
+                Rectangle rect = new Rectangle(region.x(), region.y(), region.w(), region.h());
+                captured = instance.unifiedCaptureService.captureRegion(rect);
+            } else {
+                // Fallback to SikuliX Screen
+                ConsoleReporter.println("[CAPTURE] Warning: UnifiedCaptureService not available, using SikuliX fallback");
+                captured = screen.capture(region.sikuli()).getImage();
+            }
             // Only log successful capture once
             if (!environmentLogged) {
                 log.debug("[SCREEN_CAPTURE] Successfully captured screen: {}x{}",
