@@ -67,27 +67,16 @@ public class FFmpegCaptureProvider implements CaptureProvider {
     
     @Override
     public BufferedImage captureRegion(Rectangle region) throws IOException {
-        return captureRegion(0, region);
+        // Always capture full screen for consistent behavior
+        // Region filtering should happen at a higher level
+        return captureScreen();
     }
     
     @Override
     public BufferedImage captureRegion(int screenId, Rectangle region) throws IOException {
-        String tmpFile = getTempFilePath();
-        
-        try {
-            List<String> command = buildCaptureCommand(screenId, region, tmpFile);
-            executeFFmpeg(command);
-            
-            BufferedImage image = loadImage(tmpFile);
-            logCapture(String.format("Region [%d,%d %dx%d]", 
-                region.x, region.y, region.width, region.height),
-                image.getWidth(), image.getHeight());
-            
-            return image;
-            
-        } finally {
-            deleteTempFile(tmpFile);
-        }
+        // Always capture full screen for consistent behavior
+        // Region filtering should happen at a higher level
+        return captureScreen(screenId);
     }
     
     /**

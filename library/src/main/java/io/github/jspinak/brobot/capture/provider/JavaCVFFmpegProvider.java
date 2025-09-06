@@ -42,19 +42,9 @@ public class JavaCVFFmpegProvider implements CaptureProvider {
     
     @Override
     public BufferedImage captureRegion(Rectangle region) throws IOException {
-        // Capture full screen and crop
-        BufferedImage fullScreen = captureScreen();
-        if (fullScreen == null) {
-            return null;
-        }
-        
-        // Ensure region is within bounds
-        int x = Math.max(0, region.x);
-        int y = Math.max(0, region.y);
-        int width = Math.min(region.width, fullScreen.getWidth() - x);
-        int height = Math.min(region.height, fullScreen.getHeight() - y);
-        
-        return fullScreen.getSubimage(x, y, width, height);
+        // Always capture full screen for physical resolution providers
+        // Region filtering should happen at a higher level after capture
+        return captureScreen();
     }
     
     @Override

@@ -41,25 +41,16 @@ public class SikuliXCaptureProvider implements CaptureProvider {
     
     @Override
     public BufferedImage captureRegion(Rectangle region) throws IOException {
-        return captureRegion(0, region);
+        // Always capture full screen for consistent behavior
+        // Region filtering should happen at a higher level
+        return captureScreen();
     }
     
     @Override
     public BufferedImage captureRegion(int screenId, Rectangle region) throws IOException {
-        try {
-            Screen screen = new Screen(screenId);
-            ScreenImage screenImage = screen.capture(region);
-            BufferedImage image = screenImage.getImage();
-            
-            logCapture(String.format("Region [%d,%d %dx%d]", 
-                region.x, region.y, region.width, region.height),
-                image.getWidth(), image.getHeight());
-            
-            return image;
-            
-        } catch (Exception e) {
-            throw new IOException("SikuliX region capture failed", e);
-        }
+        // Always capture full screen for consistent behavior
+        // Region filtering should happen at a higher level
+        return captureScreen(screenId);
     }
     
     @Override

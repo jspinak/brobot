@@ -53,7 +53,10 @@ public class DPIAwarenessDisabler {
             disableDPIAwareness();
         } else {
             System.out.println("[Brobot DPI] DPI awareness is ENABLED (Java 21 default behavior)");
-            System.out.println("[Brobot DPI] Screen captures will be at logical resolution");
+            System.out.println("[Brobot DPI] Capture resolution depends on provider:");
+            System.out.println("[Brobot DPI]   - FFmpeg/JavaCV: Physical resolution");
+            System.out.println("[Brobot DPI]   - Robot: Physical resolution (with scaling)");
+            System.out.println("[Brobot DPI]   - SikuliX: Logical resolution");
             System.out.println("[Brobot DPI] Set BROBOT_DISABLE_DPI=true or -Dbrobot.dpi.disable=true to disable");
         }
     }
@@ -117,7 +120,7 @@ public class DPIAwarenessDisabler {
         if (dpiAwarenessDisabled) {
             return "DPI awareness DISABLED - physical resolution capture (compatible with SikuliX IDE)";
         } else {
-            return "DPI awareness ENABLED - logical resolution capture (Java 21 default)";
+            return "DPI awareness ENABLED - resolution depends on capture provider (FFmpeg/Robot: Physical, SikuliX: Logical)";
         }
     }
     
