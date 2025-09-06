@@ -99,6 +99,35 @@ public class InitializationOrchestrator {
 
     @Autowired(required = false)
     private EarlyImagePathInitializer imagePathInitializer;
+    
+    // Capture services
+    @Autowired(required = false)
+    private io.github.jspinak.brobot.capture.ScreenResolutionManager screenResolutionManager;
+    
+    @Autowired(required = false)
+    private io.github.jspinak.brobot.capture.UnifiedCaptureService unifiedCaptureService;
+    
+    @Autowired(required = false)
+    private io.github.jspinak.brobot.capture.BrobotCaptureService brobotCaptureService;
+    
+    @Autowired(required = false)
+    private io.github.jspinak.brobot.capture.BrobotScreenCapture brobotScreenCapture;
+    
+    // DPI Configuration
+    @Autowired(required = false)
+    private io.github.jspinak.brobot.config.dpi.DPIConfiguration dpiConfiguration;
+    
+    // Utilities
+    @Autowired(required = false)
+    private io.github.jspinak.brobot.util.image.core.BufferedImageUtilities bufferedImageUtilities;
+    
+    // Property verification
+    @Autowired(required = false)
+    private io.github.jspinak.brobot.config.core.BrobotPropertyVerifier propertyVerifier;
+    
+    // Diagnostics
+    @Autowired(required = false)
+    private io.github.jspinak.brobot.config.environment.HeadlessDiagnostics headlessDiagnostics;
 
     // Component initialization
     @Autowired(required = false)
@@ -294,6 +323,28 @@ public class InitializationOrchestrator {
                 phase.addCompletedStep("Image paths configured");
                 log.debug("Image paths initialized");
             }
+            
+            // Initialize DPI Configuration
+            if (dpiConfiguration != null) {
+                try {
+                    dpiConfiguration.configureDPIScalingEarly();
+                    phase.addCompletedStep("DPI configuration initialized");
+                    log.debug("DPI configuration completed");
+                } catch (Exception e) {
+                    log.warn("DPI configuration failed (non-critical): {}", e.getMessage());
+                    phase.addCompletedStep("DPI configuration skipped");
+                }
+            }
+            
+            // Initialize Capture Services
+            initializeCaptureServices(phase);
+            
+            // Image Utilities are initialized via @PostConstruct (empty method)
+            // Just verify the bean is available
+            if (bufferedImageUtilities != null) {
+                phase.addCompletedStep("Image utilities available");
+                log.debug("BufferedImage utilities ready");
+            }
 
             phase.markCompleted(true, Duration.between(phaseStart, Instant.now()));
             log.info("✅ Phase 2: Environment Setup - COMPLETED in {}ms",
@@ -341,6 +392,32 @@ public class InitializationOrchestrator {
 
                 // Verify listener registration
                 verifyListenerRegistration(phase);
+            }
+            
+            // Run headless diagnostics if in headless environment
+            if (java.awt.GraphicsEnvironment.isHeadless()) {
+                if (headlessDiagnostics != null) {
+                    try {
+                        log.info("Running headless environment diagnostics...");
+                        headlessDiagnostics.diagnoseHeadlessMode();
+                        phase.addCompletedStep("Headless diagnostics completed");
+                    } catch (Exception e) {
+                        log.warn("Headless diagnostics failed: {}", e.getMessage());
+                        phase.addCompletedStep("Headless diagnostics failed");
+                    }
+                }
+            }
+            
+            // Verify properties configuration
+            if (propertyVerifier != null) {
+                try {
+                    propertyVerifier.verifyProperties();
+                    phase.addCompletedStep("Properties verified");
+                    log.debug("Property verification completed");
+                } catch (Exception e) {
+                    log.warn("Property verification failed: {}", e.getMessage());
+                    phase.addCompletedStep("Property verification failed");
+                }
             }
 
             phase.markCompleted(true, Duration.between(phaseStart, Instant.now()));
@@ -415,6 +492,12 @@ public class InitializationOrchestrator {
 
         // Final summary
         finalizeInitialization();
+        
+        // Generate and log detailed initialization report
+        if (log.isInfoEnabled()) {
+            String report = generateInitializationReport();
+            log.info(report);
+        }
     }
 
     /**
@@ -496,6 +579,140 @@ public class InitializationOrchestrator {
         }
     }
 
+    /**
+     * Generate a detailed initialization report.
+     * This can be called via JMX or a health endpoint.
+     */
+    public String generateInitializationReport() {
+        StringBuilder report = new StringBuilder();
+        report.append("\n╔════════════════════════════════════════════════════════════════════╗\n");
+        report.append("║                    BROBOT INITIALIZATION REPORT                    ║\n");
+        report.append("╚════════════════════════════════════════════════════════════════════╝\n\n");
+        
+        // Overall Status
+        boolean allPhasesSuccessful = phaseStatuses.values().stream()
+            .allMatch(PhaseStatus::isSuccessful);
+        String overallStatus = allPhasesSuccessful ? "✅ SUCCESS" : "⚠️ PARTIAL SUCCESS";
+        report.append("Overall Status: ").append(overallStatus).append("\n");
+        
+        if (startTime != null) {
+            Duration totalTime = Duration.between(startTime, Instant.now());
+            report.append("Total Initialization Time: ").append(totalTime.toMillis()).append("ms\n");
+        }
+        
+        // Configuration Summary
+        report.append("\n📋 Configuration Summary:\n");
+        report.append("  • Mock Mode: ").append(FrameworkSettings.mock ? "ENABLED" : "DISABLED").append("\n");
+        if (brobotProperties != null && brobotProperties.getCore() != null) {
+            report.append("  • Headless: ").append(brobotProperties.getCore().isHeadless()).append("\n");
+        }
+        report.append("  • Environment: ").append(java.awt.GraphicsEnvironment.isHeadless() ? "HEADLESS" : "DISPLAY").append("\n");
+        
+        // Phase Details
+        report.append("\n📊 Initialization Phases:\n");
+        phaseStatuses.values().stream()
+            .sorted(Comparator.comparingInt(PhaseStatus::getOrder))
+            .forEach(phase -> {
+                String icon = phase.isSuccessful() ? "✅" : "❌";
+                report.append("\n").append(icon).append(" Phase ").append(phase.getOrder())
+                      .append(": ").append(phase.getName()).append("\n");
+                
+                if (phase.getDuration() != null) {
+                    report.append("   Duration: ").append(phase.getDuration().toMillis()).append("ms\n");
+                }
+                
+                // Completed steps
+                if (!phase.getCompletedSteps().isEmpty()) {
+                    report.append("   Completed:\n");
+                    phase.getCompletedSteps().forEach(step -> 
+                        report.append("     • ").append(step).append("\n"));
+                }
+                
+                // Failed steps
+                if (!phase.getFailedSteps().isEmpty()) {
+                    report.append("   Failed:\n");
+                    phase.getFailedSteps().forEach(step -> 
+                        report.append("     ✗ ").append(step).append("\n"));
+                }
+            });
+        
+        // Critical Services Status
+        report.append("\n🔧 Critical Services:\n");
+        report.append("  • Capture Services: ").append(
+            unifiedCaptureService != null ? "✅ Available" : "❌ Not Available").append("\n");
+        report.append("  • State Management: ").append(
+            stateInitializationOrchestrator != null ? "✅ Available" : "❌ Not Available").append("\n");
+        report.append("  • Console Reporter: ").append(
+            consoleReporterInitializer != null ? "✅ Available" : "❌ Not Available").append("\n");
+        
+        // Warnings and Recommendations
+        if (!allPhasesSuccessful) {
+            report.append("\n⚠️ Warnings:\n");
+            phaseStatuses.values().stream()
+                .filter(phase -> !phase.isSuccessful())
+                .forEach(phase -> {
+                    report.append("  • Phase '").append(phase.getName())
+                          .append("' failed");
+                    if (phase.getErrorMessage() != null) {
+                        report.append(": ").append(phase.getErrorMessage());
+                    }
+                    report.append("\n");
+                });
+        }
+        
+        report.append("\n════════════════════════════════════════════════════════════════════\n");
+        return report.toString();
+    }
+    
+    /**
+     * Initialize capture services in the correct order.
+     * This replaces the individual @PostConstruct methods for better control.
+     */
+    private void initializeCaptureServices(PhaseStatus phase) {
+        log.debug("Initializing capture services stack...");
+        
+        try {
+            // 1. Screen Resolution Manager (foundation)
+            if (screenResolutionManager != null) {
+                screenResolutionManager.initialize();
+                phase.addCompletedStep("Screen resolution manager initialized");
+                log.debug("Screen resolution detection ready");
+            }
+            
+            // 2. Brobot Screen Capture (core capture)
+            if (brobotScreenCapture != null) {
+                brobotScreenCapture.init();
+                phase.addCompletedStep("Screen capture service initialized");
+                log.debug("Core screen capture ready");
+            }
+            
+            // 3. Brobot Capture Service (provider management)
+            if (brobotCaptureService != null) {
+                brobotCaptureService.init();
+                phase.addCompletedStep("Capture provider service initialized");
+                io.github.jspinak.brobot.capture.provider.CaptureProvider provider = brobotCaptureService.getActiveProvider();
+                log.debug("Capture provider selected: {}", provider.getClass().getSimpleName());
+            }
+            
+            // 4. Unified Capture Service (top-level API)
+            if (unifiedCaptureService != null) {
+                unifiedCaptureService.init();
+                phase.addCompletedStep("Unified capture service initialized");
+                log.debug("Capture service stack ready");
+            }
+            
+            log.info("Capture services initialized successfully");
+            
+        } catch (Exception e) {
+            log.error("Failed to initialize capture services", e);
+            phase.addFailedStep("Capture services", e.getMessage());
+            // Capture services are critical - but we'll continue to allow mock mode
+            if (!FrameworkSettings.mock) {
+                log.warn("Capture services failed in non-mock mode - functionality may be limited");
+            }
+        }
+    }
+    
     /**
      * Health check endpoint data.
      * 

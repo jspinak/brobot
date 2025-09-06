@@ -93,7 +93,8 @@ public class MoveMouseWrapper {
         int scaledX = (int) Math.round(x * scaleX);
         int scaledY = (int) Math.round(y * scaleY);
         
-        log.debug("Scaling mouse location from physical ({},{}) to logical ({},{}) - scale factors: {}x{}",
+        log.info("COORDINATE SCALING: Physical {}x{} -> Logical {}x{} | Mouse ({},{}) -> ({},{}) | Scale: {}x{}",
+                 captureWidth, captureHeight, logicalWidth, logicalHeight,
                  x, y, scaledX, scaledY, 
                  String.format("%.3f", scaleX), String.format("%.3f", scaleY));
         
@@ -123,7 +124,11 @@ public class MoveMouseWrapper {
     private boolean sikuliMove(Location location) {
         // Scale the location from capture coordinates to logical coordinates if needed
         org.sikuli.script.Location sikuliLocation = scaleLocationForMouse(location);
+        
+        // Log both original and scaled coordinates for debugging
+        log.info("Mouse move: original={}, scaled={}", location, sikuliLocation);
         ConsoleReporter.print("move mouse to " + sikuliLocation + " ");
+        
         // return new Region().mouseMove(location.getSikuliLocation()) != 0; // this can
         // cause the script to freeze for unknown reasons
         // Directly use hover() which is more stable than mouseMove()
