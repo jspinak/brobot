@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.analysis.color.profiles;
 import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.analysis.color.ColorClusterFactory;
 import io.github.jspinak.brobot.model.state.StateImage;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 
 /**
@@ -91,7 +92,14 @@ public class ProfileSetBuilder {
      * @param stateImage StateImage to be processed.
      */
     public void setColorProfile(StateImage stateImage) {
-        ColorCluster colorCluster = setColorCluster.getColorProfile(stateImage.getOneColumnBGRMat());
+        // Check if the BGR mat is empty before processing
+        Mat bgrMat = stateImage.getOneColumnBGRMat();
+        if (bgrMat == null || bgrMat.empty()) {
+            // Skip color profile generation for empty mats
+            return;
+        }
+        
+        ColorCluster colorCluster = setColorCluster.getColorProfile(bgrMat);
         stateImage.setColorCluster(colorCluster);
         setProfileMats.setMats(stateImage);
     }

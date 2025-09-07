@@ -77,6 +77,15 @@ public class ProfileMatrixInitializer {
     public void setOneColumnMats(StateImage stateImage) {
         List<Mat> imgMatsBGR = getImage.getMats(stateImage, BGR);
         Mat oneColumnBGRMat = matOps3d.vConcatToSingleColumnPerChannel(imgMatsBGR);
+        
+        // Check if the BGR mat is empty before processing
+        if (oneColumnBGRMat == null || oneColumnBGRMat.empty()) {
+            // Set empty mats for both BGR and HSV
+            stateImage.setOneColumnBGRMat(new Mat());
+            stateImage.setOneColumnHSVMat(new Mat());
+            return;
+        }
+        
         stateImage.setOneColumnBGRMat(oneColumnBGRMat);
         Mat oneColumnHSVMat = new Mat();
         cvtColor(stateImage.getOneColumnBGRMat(), oneColumnHSVMat, COLOR_BGR2HSV);
