@@ -342,8 +342,20 @@ public class FindPipeline {
      * @param collections The object collections that were searched
      */
     private void saveMatchesToStateImages(ActionResult matches, ObjectCollection... collections) {
-        log.info("saveMatchesToStateImages called with {} matches and {} collections", 
+        log.info("[SAVE_MATCHES] saveMatchesToStateImages called with {} matches and {} collections", 
                 matches.getMatchList().size(), collections.length);
+        
+        // Log details about what we're processing
+        log.info("[SAVE_MATCHES] Match details:");
+        for (Match match : matches.getMatchList()) {
+            if (match.getStateObjectData() != null) {
+                log.info("[SAVE_MATCHES]   - Match has StateObjectData: name={}, ownerState={}",
+                        match.getStateObjectData().getStateObjectName(),
+                        match.getStateObjectData().getOwnerStateName());
+            } else {
+                log.info("[SAVE_MATCHES]   - Match has NO StateObjectData!");
+            }
+        }
         
         if (matches.getMatchList().isEmpty()) {
             log.info("No matches to save, clearing lastMatchesFound for all StateImages");
@@ -373,19 +385,26 @@ public class FindPipeline {
         }
         
         // Update each StateImage with its matches
+        log.info("[SAVE_MATCHES] Processing {} collections to update StateImages...", collections.length);
         for (ObjectCollection collection : collections) {
+            log.info("[SAVE_MATCHES] Collection has {} StateImages", collection.getStateImages().size());
             for (StateImage stateImage : collection.getStateImages()) {
+                log.info("[SAVE_MATCHES] Checking StateImage '{}' (instance: {})", 
+                        stateImage.getName(), System.identityHashCode(stateImage));
                 List<Match> imageMatches = matchesByStateImage.get(stateImage.getName());
                 if (imageMatches != null && !imageMatches.isEmpty()) {
                     // Replace the entire list with new matches
+                    log.info("[SAVE_MATCHES] Found {} matches for '{}', updating lastMatchesFound...",
+                            imageMatches.size(), stateImage.getName());
                     stateImage.getLastMatchesFound().clear();
                     stateImage.getLastMatchesFound().addAll(imageMatches);
-                    log.info("IMPORTANT: Saved {} matches to '{}' lastMatchesFound (StateImage instance: {})", 
+                    log.info("[SAVE_MATCHES] ✓ SAVED {} matches to '{}' lastMatchesFound (StateImage instance: {})", 
                              imageMatches.size(), stateImage.getName(), System.identityHashCode(stateImage));
                 } else {
                     // No matches for this image, clear its lastMatchesFound
+                    log.info("[SAVE_MATCHES] No matches found for '{}', clearing lastMatchesFound", stateImage.getName());
                     stateImage.getLastMatchesFound().clear();
-                    log.info("Cleared lastMatchesFound for '{}' (searched but not found, StateImage instance: {})", 
+                    log.info("[SAVE_MATCHES] Cleared lastMatchesFound for '{}' (searched but not found, StateImage instance: {})", 
                              stateImage.getName(), System.identityHashCode(stateImage));
                 }
             }

@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.model.state.StateImage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -96,9 +97,14 @@ public class Find implements ActionInterface {
      * @see FindPipeline#execute(BaseFindOptions, ActionResult, ObjectCollection...)
      */
     public void perform(ActionResult matches, ObjectCollection... objectCollections) {
-        log.info("=== Find.perform() CALLED ===");
-        log.info("  ObjectCollections: {}", objectCollections.length);
-        log.info("  ActionConfig class: {}", 
+        log.info("[FIND] === Find.perform() CALLED ===");
+        log.info("[FIND]   ObjectCollections: {}", objectCollections.length);
+        if (objectCollections.length > 0 && !objectCollections[0].getStateImages().isEmpty()) {
+            StateImage firstImage = objectCollections[0].getStateImages().get(0);
+            log.info("[FIND]   First StateImage: name={}, instance={}", 
+                    firstImage.getName(), System.identityHashCode(firstImage));
+        }
+        log.info("[FIND]   ActionConfig class: {}", 
                 matches.getActionConfig() != null ? matches.getActionConfig().getClass().getName() : "null");
         
         // Validate configuration
@@ -112,9 +118,16 @@ public class Find implements ActionInterface {
         log.info("  FindOptions strategy: {}", findOptions.getFindStrategy());
         
         // Delegate entire orchestration to the pipeline
-        log.info("  Calling findPipeline.execute()...");
+        log.info("[FIND]   Calling findPipeline.execute()...");
         findPipeline.execute(findOptions, matches, objectCollections);
-        log.info("  findPipeline.execute() completed with {} matches", matches.size());
+        log.info("[FIND]   findPipeline.execute() completed with {} matches", matches.size());
+        
+        // Debug: Check if matches have StateObjectData
+        if (!matches.getMatchList().isEmpty()) {
+            log.info("[FIND]   First match StateObjectData: {}",
+                    matches.getMatchList().get(0).getStateObjectData() != null ?
+                    matches.getMatchList().get(0).getStateObjectData().getStateObjectName() : "NULL");
+        }
     }
 
 }
