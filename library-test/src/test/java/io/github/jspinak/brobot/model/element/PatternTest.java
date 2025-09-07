@@ -44,7 +44,7 @@ class PatternTest extends BaseIntegrationTest {
         Pattern pattern = new Pattern.Builder()
                 .setFilename(TestPaths.getScreenshotPath("floranext1"))
                 .build();
-        System.out.println("Mat's pointer = " + pattern.getMat().getPointer());
+        // Mat object doesn't have getPointer() method - just verify it's not null
         assertNotNull(pattern.getMat());
     }
 }
