@@ -188,6 +188,8 @@ public class FindPipeline {
      * @param objectCollections The collections of objects to search for
      */
     public void execute(BaseFindOptions findOptions, ActionResult matches, ObjectCollection... objectCollections) {
+        log.info("FindPipeline.execute() called with {} collections", objectCollections.length);
+        
         // Start a new find session for concise logging
         String sessionId = "find-" + System.currentTimeMillis();
         if (conciseFindLogger != null) {
@@ -234,7 +236,9 @@ public class FindPipeline {
         contentExtractor.set(matches);
         
         // Save matches to their corresponding StateImages for future dependency resolution
+        log.info("About to call saveMatchesToStateImages with {} matches", matches.size());
         saveMatchesToStateImages(matches, objectCollections);
+        log.info("Finished saveMatchesToStateImages");
         
         // Update search regions for objects that depend on what we just found
         if (!matches.isEmpty()) {
@@ -338,7 +342,11 @@ public class FindPipeline {
      * @param collections The object collections that were searched
      */
     private void saveMatchesToStateImages(ActionResult matches, ObjectCollection... collections) {
+        log.info("saveMatchesToStateImages called with {} matches and {} collections", 
+                matches.getMatchList().size(), collections.length);
+        
         if (matches.getMatchList().isEmpty()) {
+            log.info("No matches to save, clearing lastMatchesFound for all StateImages");
             // Clear lastMatchesFound for all StateImages that didn't match
             for (ObjectCollection collection : collections) {
                 for (StateImage stateImage : collection.getStateImages()) {
@@ -372,13 +380,13 @@ public class FindPipeline {
                     // Replace the entire list with new matches
                     stateImage.getLastMatchesFound().clear();
                     stateImage.getLastMatchesFound().addAll(imageMatches);
-                    log.debug("Saved {} matches to '{}' lastMatchesFound", 
-                             imageMatches.size(), stateImage.getName());
+                    log.info("IMPORTANT: Saved {} matches to '{}' lastMatchesFound (StateImage instance: {})", 
+                             imageMatches.size(), stateImage.getName(), System.identityHashCode(stateImage));
                 } else {
                     // No matches for this image, clear its lastMatchesFound
                     stateImage.getLastMatchesFound().clear();
-                    log.debug("Cleared lastMatchesFound for '{}' (searched but not found)", 
-                             stateImage.getName());
+                    log.info("Cleared lastMatchesFound for '{}' (searched but not found, StateImage instance: {})", 
+                             stateImage.getName(), System.identityHashCode(stateImage));
                 }
             }
         }

@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
@@ -55,6 +56,7 @@ import org.springframework.stereotype.Component;
  * @author Joshua Spinak
  */
 @Component
+@Slf4j
 public class Find implements ActionInterface {
 
     @Override
@@ -94,15 +96,25 @@ public class Find implements ActionInterface {
      * @see FindPipeline#execute(BaseFindOptions, ActionResult, ObjectCollection...)
      */
     public void perform(ActionResult matches, ObjectCollection... objectCollections) {
+        log.info("=== Find.perform() CALLED ===");
+        log.info("  ObjectCollections: {}", objectCollections.length);
+        log.info("  ActionConfig class: {}", 
+                matches.getActionConfig() != null ? matches.getActionConfig().getClass().getName() : "null");
+        
         // Validate configuration
         if (!(matches.getActionConfig() instanceof BaseFindOptions)) {
+            log.error("Find requires BaseFindOptions configuration, got: {}", 
+                    matches.getActionConfig() != null ? matches.getActionConfig().getClass() : "null");
             throw new IllegalArgumentException("Find requires BaseFindOptions configuration");
         }
         
         BaseFindOptions findOptions = (BaseFindOptions) matches.getActionConfig();
+        log.info("  FindOptions strategy: {}", findOptions.getFindStrategy());
         
         // Delegate entire orchestration to the pipeline
+        log.info("  Calling findPipeline.execute()...");
         findPipeline.execute(findOptions, matches, objectCollections);
+        log.info("  findPipeline.execute() completed with {} matches", matches.size());
     }
 
 }

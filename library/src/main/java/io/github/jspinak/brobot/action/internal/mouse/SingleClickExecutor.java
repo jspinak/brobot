@@ -7,7 +7,9 @@ import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+import io.github.jspinak.brobot.util.coordinates.CoordinateScaler;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -63,6 +65,9 @@ public class SingleClickExecutor {
     private final MouseUpWrapper mouseUpWrapper;
     private final MoveMouseWrapper moveMouseWrapper;
     private final TimeProvider time;
+    
+    @Autowired
+    private CoordinateScaler coordinateScaler;
 
     /**
      * Constructs a ClickLocationOnce with required mouse operation wrappers.
@@ -174,8 +179,11 @@ public class SingleClickExecutor {
         double pauseBeforeUp = 0;
         double pauseAfterUp = 0;
 
-        if (isSimpleLeftDoubleClick(clickOptions))
-            location.sikuli().doubleClick();
+        if (isSimpleLeftDoubleClick(clickOptions)) {
+            // Use scaled coordinates for doubleClick
+            org.sikuli.script.Location scaledLocation = coordinateScaler.scaleLocationToLogical(location);
+            scaledLocation.doubleClick();
+        }
         else {
             int i = 1;
             if (isTwoClicks(clickOptions)) {
@@ -238,7 +246,9 @@ public class SingleClickExecutor {
         if (numberOfClicks == 2 && button == MouseButton.LEFT &&
                 pauseBeforeDown == 0 && pauseAfterDown == 0 &&
                 pauseBeforeUp == 0 && pauseAfterUp == 0) {
-            location.sikuli().doubleClick();
+            // Use scaled coordinates for doubleClick
+            org.sikuli.script.Location scaledLocation = coordinateScaler.scaleLocationToLogical(location);
+            scaledLocation.doubleClick();
         } else {
             // Perform clicks with timing
             if (numberOfClicks > 1) {
