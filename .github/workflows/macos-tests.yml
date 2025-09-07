@@ -108,17 +108,17 @@ jobs:
         echo "Test Results:" >> $GITHUB_STEP_SUMMARY
         
         # Find and parse test results if available
-        if [ -f "test-results-library-*.json" ]; then
+        if ls test-results-library-*.json 1> /dev/null 2>&1; then
           python3 -c "
-import json
-import glob
-for file in glob.glob('test-results-library-*.json'):
-    with open(file) as f:
-        data = json.load(f)
-        summary = data.get('summary', {})
-        print(f'- Passed: {len(summary.get(\"passed\", []))}')
-        print(f'- Failed: {len(summary.get(\"failed\", []))}')
-        print(f'- Timed Out: {len(summary.get(\"timed_out\", []))}')
+        import json
+        import glob
+        for file in glob.glob('test-results-library-*.json'):
+            with open(file) as f:
+                data = json.load(f)
+                summary = data.get('summary', {})
+                print(f'- Passed: {len(summary.get(\"passed\", []))}')
+                print(f'- Failed: {len(summary.get(\"failed\", []))}')
+                print(f'- Timed Out: {len(summary.get(\"timed_out\", []))}')
           " >> $GITHUB_STEP_SUMMARY
         else
           echo "No test results file found" >> $GITHUB_STEP_SUMMARY
