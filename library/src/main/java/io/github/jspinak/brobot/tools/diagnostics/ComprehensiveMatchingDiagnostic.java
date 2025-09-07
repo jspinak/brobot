@@ -29,11 +29,12 @@ import java.util.List;
  * Comprehensive diagnostic to identify why SikuliX IDE matches at 0.99 
  * while Brobot only achieves 0.69 similarity.
  */
-@Component
+// @Component  // Disabled to prevent OpenCV loading issues
 public class ComprehensiveMatchingDiagnostic {
 
     static {
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        // Commented out to prevent startup failures when OpenCV natives are not available
+        // System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
 
     public static class MatchingResult {
