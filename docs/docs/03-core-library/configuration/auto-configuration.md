@@ -96,6 +96,50 @@ brobot.pause.*=0
 - Primary bean designations for conflict resolution
 - Automatic wrapper configuration
 
+### 6. NativeLibraryDebugSuppressor
+
+**Purpose**: Automatically suppresses debug output from JavaCV/FFmpeg native libraries.
+
+**Features**:
+- Suppresses messages like "Debug: Loading library nppig64_12"
+- Suppresses "Debug: Failed to load for nppig64_12: java.lang.UnsatisfiedLinkError"
+- Suppresses "Debug: Collecting org.bytedeco.javacpp.Pointer$NativeDeallocator"
+- Runs very early in startup process via Spring ApplicationContextInitializer
+
+**Configuration**:
+```properties
+# Enable/disable suppression (default: true)
+brobot.native.logging.suppress=true
+
+# Fine-grained control (defaults: false)
+brobot.javacpp.debug=false
+brobot.javacv.debug=false
+```
+
+**Why it's needed**: JavaCV/FFmpeg libraries print debug messages directly to stdout/stderr, bypassing Java's logging system. These messages cannot be controlled through standard logging configuration and require system properties to be set before the libraries are loaded.
+
+### 6. NativeLibraryDebugSuppressor
+
+**Purpose**: Automatically suppresses debug output from JavaCV/FFmpeg native libraries.
+
+**Features**:
+- Suppresses messages like "Debug: Loading library nppig64_12"
+- Suppresses "Debug: Failed to load for nppig64_12: java.lang.UnsatisfiedLinkError"
+- Suppresses "Debug: Collecting org.bytedeco.javacpp.Pointer$NativeDeallocator"
+- Runs very early in startup process via Spring ApplicationContextInitializer
+
+**Configuration**:
+```properties
+# Enable/disable suppression (default: true)
+brobot.native.logging.suppress=true
+
+# Fine-grained control (defaults: false)
+brobot.javacpp.debug=false
+brobot.javacv.debug=false
+```
+
+**Why it's needed**: JavaCV/FFmpeg libraries print debug messages directly to stdout/stderr, bypassing Java's logging system. These messages cannot be controlled through standard logging configuration and require system properties to be set before the libraries are loaded.
+
 ## Configuration Properties
 
 While Brobot auto-configures most settings, you can override them via `application.properties`:
@@ -110,6 +154,16 @@ brobot.logging.verbosity=NORMAL        # QUIET, NORMAL, or VERBOSE
 
 # DPI/Scaling (usually auto-detected)
 brobot.dpi.manual-scaling=125          # Override auto-detection if needed
+
+# Native Library Debug Suppression (since 1.0)
+brobot.native.logging.suppress=true    # Suppress JavaCV/FFmpeg debug messages (default: true)
+brobot.javacpp.debug=false            # Enable JavaCPP debug output (default: false)
+brobot.javacv.debug=false             # Enable JavaCV debug output (default: false)
+
+# Native Library Debug Suppression (since 1.0)
+brobot.native.logging.suppress=true    # Suppress JavaCV/FFmpeg debug messages (default: true)
+brobot.javacpp.debug=false            # Enable JavaCPP debug output (default: false)
+brobot.javacv.debug=false             # Enable JavaCV debug output (default: false)
 
 # Test optimization (auto-applied with test profile)
 spring.profiles.active=test            # Activates all test optimizations
@@ -127,6 +181,8 @@ If you're migrating from application-specific configuration classes, here's what
 | `ImageSetupVerifier` | `ImagePathManager.verifyImageSetup()` |
 | `CrossVersionCompatibilityConfig` | `BrobotDPIConfiguration` |
 | `TestProfileMockConfiguration` | `MockConfiguration.TestProfileOptimization` |
+| Custom JavaCV debug suppression | `NativeLibraryDebugSuppressor` |
+| Custom JavaCV debug suppression | `NativeLibraryDebugSuppressor` |
 
 ## Best Practices
 
