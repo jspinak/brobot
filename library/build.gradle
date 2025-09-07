@@ -17,10 +17,12 @@ dependencies {
         // This excludes the old JSON library to resolve the classpath conflict.
         exclude group: 'com.vaadin.external.google', module: 'android-json'
     }
-    api 'org.bytedeco:javacv-platform:1.5.10'
-    // Explicit OpenCV dependency for Linux
-    api 'org.bytedeco:opencv-platform:4.9.0-1.5.10'
-    api 'org.bytedeco:ffmpeg-platform:6.1.1-1.5.10'
+    // Use JavaCV 1.5.3 to match SikuliX's OpenCV 4.3.0
+    api 'org.bytedeco:javacv-platform:1.5.3'
+    // Explicit OpenCV 4.3.0 to match SikuliX 2.0.5
+    api 'org.bytedeco:opencv-platform:4.3.0-1.5.3'
+    // FFmpeg version compatible with JavaCV 1.5.3
+    api 'org.bytedeco:ffmpeg-platform:4.2.2-1.5.3'
     api 'org.apache.commons:commons-lang3:3.0'
     
     // These dependencies are exposed as part of Brobot's public API
