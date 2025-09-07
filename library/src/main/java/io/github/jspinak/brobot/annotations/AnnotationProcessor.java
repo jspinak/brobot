@@ -47,6 +47,7 @@ public class AnnotationProcessor {
     private final StateAnnotationBeanPostProcessor stateBeanPostProcessor;
     private final TransitionAnnotationBeanPostProcessor transitionBeanPostProcessor;
     private final Map<String, Integer> initialStatePriorities = new HashMap<>();
+    private volatile boolean annotationsProcessed = false;
     
     public AnnotationProcessor(ApplicationContext applicationContext,
                              StateTransitionsJointTable jointTable,
@@ -82,8 +83,21 @@ public class AnnotationProcessor {
         log.info("  - StateBeanPostProcessor: {}", stateBeanPostProcessor != null);
         log.info("  - TransitionBeanPostProcessor: {}", transitionBeanPostProcessor != null);
         
+        // Check what beans the BeanPostProcessors have already collected
+        log.info("=== CHECKING COLLECTED BEANS ===");
+        Map<String, Object> collectedStateBeans = stateBeanPostProcessor.getStateBeans();
+        log.info("StateBeanPostProcessor has already collected {} @State beans:", collectedStateBeans.size());
+        collectedStateBeans.forEach((name, bean) -> 
+            log.info("  - {} ({})", name, bean.getClass().getName()));
+        
+        Map<String, Object> collectedTransitionBeans = transitionBeanPostProcessor.getTransitionBeans();
+        log.info("TransitionBeanPostProcessor has already collected {} @Transition beans:", collectedTransitionBeans.size());
+        collectedTransitionBeans.forEach((name, bean) -> 
+            log.info("  - {} ({})", name, bean.getClass().getName()));
+        
         // Check if we're in a test environment
         String[] activeProfiles = applicationContext.getEnvironment().getActiveProfiles();
+        log.info("Active profiles: {}", java.util.Arrays.toString(activeProfiles));
         boolean isTestProfile = false;
         for (String profile : activeProfiles) {
             if ("test".equals(profile) || "testing".equals(profile)) {
@@ -92,11 +106,17 @@ public class AnnotationProcessor {
             }
         }
         
-        // In test environments, process annotations immediately
-        // since ApplicationReadyEvent may not fire
-        if (isTestProfile) {
+        // Process annotations immediately if we have beans to process
+        // This ensures states are registered early in the lifecycle
+        if (collectedStateBeans.size() > 0 || collectedTransitionBeans.size() > 0) {
+            log.info("Found {} state beans and {} transition beans - processing immediately", 
+                    collectedStateBeans.size(), collectedTransitionBeans.size());
+            processAnnotations();
+        } else if (isTestProfile) {
             log.info("Test profile detected - processing annotations immediately");
             processAnnotations();
+        } else {
+            log.info("Will wait for ApplicationReadyEvent to process annotations");
         }
     }
 
@@ -107,6 +127,9 @@ public class AnnotationProcessor {
     @EventListener(ApplicationReadyEvent.class)
     @Order(1)  // Run early
     public void onApplicationReady(ApplicationReadyEvent event) {
+        log.info("=== ApplicationReadyEvent RECEIVED ===");
+        log.info("Event source: {}", event.getSource());
+        log.info("Timestamp: {}", event.getTimestamp());
         processAnnotations();
     }
     
@@ -115,9 +138,14 @@ public class AnnotationProcessor {
      * This method can be called manually if needed (e.g., from InitializationOrchestrator).
      */
     public void processAnnotations() {
+        if (annotationsProcessed) {
+            log.info("Annotations already processed, skipping duplicate processing");
+            return;
+        }
+        
         log.info("=== ANNOTATION PROCESSOR START ===");
         log.info("Processing Brobot annotations...");
-        log.info("AnnotationProcessor running at ApplicationReadyEvent");
+        log.info("Called from: {}", Thread.currentThread().getStackTrace()[2].getMethodName());
         log.info("AnnotationProcessor instance: {} with dependencies:", this.hashCode());
         log.info("  - StateService: {}", stateService != null);
         log.info("  - StateBuilder: {}", stateBuilder != null);
@@ -147,11 +175,15 @@ public class AnnotationProcessor {
                 stateMap.size(), transitionCount);
         log.info("Total states in StateService: {}", stateService.getAllStates().size());
         
+        // Mark as processed
+        annotationsProcessed = true;
+        
         // Publish event to signal that states are registered
         StatesRegisteredEvent event = new StatesRegisteredEvent(this, stateMap.size(), transitionCount);
         eventPublisher.publishEvent(event);
-        log.debug("Published StatesRegisteredEvent with {} states and {} transitions", 
+        log.info("Published StatesRegisteredEvent with {} states and {} transitions", 
                 stateMap.size(), transitionCount);
+        log.info("=== ANNOTATION PROCESSOR COMPLETE ===");
     }
     
     private Map<Class<?>, Object> processStates() {

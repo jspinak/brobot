@@ -49,20 +49,41 @@ public class StateRegistrationService {
         }
         
         try {
-            log.debug("Registering state: {}", stateName);
+            log.info("=== ATTEMPTING STATE REGISTRATION ===");
+            log.info("State name: {}", stateName);
+            log.info("State ID (before save): {}", state.getId());
+            log.info("State images: {}", state.getStateImages().size());
+            log.info("State strings: {}", state.getStateStrings().size());
+            
+            // Check if state already exists
+            if (isStateRegistered(stateName)) {
+                log.warn("State '{}' is already registered, skipping", stateName);
+                return false;
+            }
             
             // Save the state to the StateService
+            log.info("Calling stateService.save() for state: {}", stateName);
             stateService.save(state);
+            
+            // Verify registration
+            boolean nowRegistered = isStateRegistered(stateName);
+            log.info("State '{}' registered successfully: {}", stateName, nowRegistered);
+            
+            // Get the state back to check ID
+            stateService.getState(stateName).ifPresent(savedState -> {
+                log.info("Saved state ID: {}", savedState.getId());
+            });
             
             log.info("Successfully registered state: {} with {} images, {} strings", 
                     stateName, 
                     state.getStateImages().size(),
                     state.getStateStrings().size());
             
-            return true;
+            return nowRegistered;
             
         } catch (Exception e) {
             log.error("Failed to register state: {}", stateName, e);
+            e.printStackTrace();
             return false;
         }
     }
