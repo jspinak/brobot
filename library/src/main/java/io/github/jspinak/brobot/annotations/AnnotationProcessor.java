@@ -45,6 +45,7 @@ public class AnnotationProcessor {
     private final StateRegistrationService registrationService;
     private final ApplicationEventPublisher eventPublisher;
     private final StateAnnotationBeanPostProcessor stateBeanPostProcessor;
+    private final TransitionAnnotationBeanPostProcessor transitionBeanPostProcessor;
     private final Map<String, Integer> initialStatePriorities = new HashMap<>();
     
     public AnnotationProcessor(ApplicationContext applicationContext,
@@ -55,7 +56,8 @@ public class AnnotationProcessor {
                              AnnotatedStateBuilder stateBuilder,
                              StateRegistrationService registrationService,
                              ApplicationEventPublisher eventPublisher,
-                             StateAnnotationBeanPostProcessor stateBeanPostProcessor) {
+                             StateAnnotationBeanPostProcessor stateBeanPostProcessor,
+                             TransitionAnnotationBeanPostProcessor transitionBeanPostProcessor) {
         this.applicationContext = applicationContext;
         this.jointTable = jointTable;
         this.stateService = stateService;
@@ -65,6 +67,7 @@ public class AnnotationProcessor {
         this.registrationService = registrationService;
         this.eventPublisher = eventPublisher;
         this.stateBeanPostProcessor = stateBeanPostProcessor;
+        this.transitionBeanPostProcessor = transitionBeanPostProcessor;
         log.info("AnnotationProcessor constructor called");
     }
     
@@ -76,7 +79,8 @@ public class AnnotationProcessor {
         log.info("  - StateService: {}", stateService != null);
         log.info("  - StateBuilder: {}", stateBuilder != null);
         log.info("  - RegistrationService: {}", registrationService != null);
-        log.info("  - BeanPostProcessor: {}", stateBeanPostProcessor != null);
+        log.info("  - StateBeanPostProcessor: {}", stateBeanPostProcessor != null);
+        log.info("  - TransitionBeanPostProcessor: {}", transitionBeanPostProcessor != null);
         
         // Check if we're in a test environment
         String[] activeProfiles = applicationContext.getEnvironment().getActiveProfiles();
@@ -118,12 +122,18 @@ public class AnnotationProcessor {
         log.info("  - StateService: {}", stateService != null);
         log.info("  - StateBuilder: {}", stateBuilder != null);
         log.info("  - RegistrationService: {}", registrationService != null);
-        log.info("  - BeanPostProcessor: {}", stateBeanPostProcessor != null);
+        log.info("  - StateBeanPostProcessor: {}", stateBeanPostProcessor != null);
+        log.info("  - TransitionBeanPostProcessor: {}", transitionBeanPostProcessor != null);
         
-        // Debug: Check what the BeanPostProcessor has collected
+        // Debug: Check what the BeanPostProcessors have collected
         Map<String, Object> collectedBeans = stateBeanPostProcessor.getStateBeans();
-        log.info("BeanPostProcessor has collected {} @State beans:", collectedBeans.size());
+        log.info("StateBeanPostProcessor has collected {} @State beans:", collectedBeans.size());
         collectedBeans.forEach((name, bean) -> 
+            log.info("  - {} ({})", name, bean.getClass().getName()));
+        
+        Map<String, Object> collectedTransitions = transitionBeanPostProcessor.getTransitionBeans();
+        log.info("TransitionBeanPostProcessor has collected {} @Transition beans:", collectedTransitions.size());
+        collectedTransitions.forEach((name, bean) -> 
             log.info("  - {} ({})", name, bean.getClass().getName()));
         
         // Process @State annotations
@@ -132,7 +142,7 @@ public class AnnotationProcessor {
         // Process @Transition annotations
         processTransitions(stateMap);
         
-        int transitionCount = applicationContext.getBeansWithAnnotation(Transition.class).size();
+        int transitionCount = transitionBeanPostProcessor.getTransitionBeanCount();
         log.info("Brobot annotation processing complete. {} states and {} transitions registered.", 
                 stateMap.size(), transitionCount);
         log.info("Total states in StateService: {}", stateService.getAllStates().size());
@@ -150,7 +160,7 @@ public class AnnotationProcessor {
         
         // Use the BeanPostProcessor to get state beans (more reliable than getBeansWithAnnotation)
         Map<String, Object> stateBeans = stateBeanPostProcessor.getStateBeans();
-        log.info("Found {} beans with @State annotation from BeanPostProcessor", stateBeans.size());
+        log.info("Found {} beans with @State annotation from StateBeanPostProcessor", stateBeans.size());
         
         // Also check what Spring sees directly
         Map<String, Object> springStateBeans = applicationContext.getBeansWithAnnotation(
@@ -230,12 +240,29 @@ public class AnnotationProcessor {
     }
     
     private void processTransitions(Map<Class<?>, Object> stateMap) {
-        Map<String, Object> transitionBeans = applicationContext.getBeansWithAnnotation(Transition.class);
+        // Use the BeanPostProcessor to get transition beans (more reliable than getBeansWithAnnotation)
+        Map<String, Object> transitionBeans = transitionBeanPostProcessor.getTransitionBeans();
+        log.info("Found {} beans with @Transition annotation from BeanPostProcessor", transitionBeans.size());
+        
+        // Also check what Spring sees directly for comparison
+        Map<String, Object> springTransitionBeans = applicationContext.getBeansWithAnnotation(Transition.class);
+        log.info("Spring's getBeansWithAnnotation found {} @Transition beans", springTransitionBeans.size());
+        springTransitionBeans.forEach((name, bean) -> 
+            log.info("  Spring found: {} ({})", name, bean.getClass().getName()));
         
         for (Map.Entry<String, Object> entry : transitionBeans.entrySet()) {
             Object transitionBean = entry.getValue();
             Class<?> transitionClass = transitionBean.getClass();
-            Transition transitionAnnotation = transitionClass.getAnnotation(Transition.class);
+            // Use AnnotationUtils to find annotation on the actual class (handles proxies)
+            Transition transitionAnnotation = 
+                org.springframework.core.annotation.AnnotationUtils.findAnnotation(
+                    org.springframework.aop.framework.AopProxyUtils.ultimateTargetClass(transitionBean), 
+                    Transition.class);
+            
+            if (transitionAnnotation == null) {
+                log.error("No @Transition annotation found on bean {} ({})", entry.getKey(), transitionClass.getName());
+                continue;
+            }
             
             // Get the transition method
             Method transitionMethod = findTransitionMethod(transitionClass, transitionAnnotation.method());
@@ -245,6 +272,13 @@ public class AnnotationProcessor {
                 continue;
             }
             
+            // Log transition details
+            log.info("Processing transition bean: {} ({})", entry.getKey(), transitionClass.getSimpleName());
+            log.info("  - From: {}", (Object) transitionAnnotation.from());
+            log.info("  - To: {}", (Object) transitionAnnotation.to());
+            log.info("  - Method: {}", transitionAnnotation.method());
+            log.info("  - Priority: {}", transitionAnnotation.priority());
+            
             // Register transitions for all from/to combinations
             for (Class<?> fromState : transitionAnnotation.from()) {
                 for (Class<?> toState : transitionAnnotation.to()) {
@@ -253,6 +287,8 @@ public class AnnotationProcessor {
                 }
             }
         }
+        
+        log.info("Successfully processed {} transition beans", transitionBeans.size());
     }
     
     private Method findTransitionMethod(Class<?> transitionClass, String methodName) {
