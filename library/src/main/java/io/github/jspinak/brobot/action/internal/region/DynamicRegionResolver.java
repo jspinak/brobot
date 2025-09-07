@@ -18,6 +18,7 @@ import io.github.jspinak.brobot.util.region.RegionUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,17 +67,25 @@ public class DynamicRegionResolver {
         SearchRegionOnObject config = stateImage.getSearchRegionOnObject();
         if (config == null) return;
 
-        log.debug("Attempting to resolve search region for '{}' based on '{}' from '{}'",
+        log.debug("Attempting to resolve search regions for '{}' based on '{}' from '{}'",
                 stateImage.getName(), config.getTargetObjectName(), config.getTargetStateName());
         
-        Optional<Region> newRegion = resolveRegionFromMatch(config, actionResult);
-        if (newRegion.isPresent()) {
-            stateImage.setFixedSearchRegion(newRegion.get());
-            log.info("✓ Resolved search region for '{}' -> {}", 
-                    stateImage.getName(), newRegion.get());
+        // Get all resolved regions (handles FIND.ALL scenarios)
+        List<Region> resolvedRegions = resolveRegionsFromMatches(config);
+        
+        if (!resolvedRegions.isEmpty()) {
+            // Set all resolved regions as search regions for the StateImage
+            Region[] regionArray = resolvedRegions.toArray(new Region[0]);
+            stateImage.setSearchRegions(regionArray);
+            
+            log.info("✓ Resolved {} search regions for '{}' from '{}' lastMatchesFound", 
+                    resolvedRegions.size(), stateImage.getName(), config.getTargetObjectName());
+            
+            // Log the first region for debugging
+            log.debug("  First region: {}", resolvedRegions.get(0));
         } else {
-            log.debug("Could not resolve search region for '{}' - target not found", 
-                    stateImage.getName());
+            log.debug("Could not resolve search regions for '{}' - target '{}' has no lastMatchesFound", 
+                    stateImage.getName(), config.getTargetObjectName());
         }
     }
 
@@ -85,14 +94,17 @@ public class DynamicRegionResolver {
         
         // StateLocation uses its location as the center of a search region
         SearchRegionOnObject config = stateLocation.getSearchRegionOnObject();
-        Optional<Region> newRegion = resolveRegionFromMatch(config, actionResult);
+        List<Region> resolvedRegions = resolveRegionsFromMatches(config);
         
-        if (newRegion.isPresent()) {
-            // Update the location based on the center of the new region
-            Region region = newRegion.get();
+        if (!resolvedRegions.isEmpty()) {
+            // Update the location based on the center of the first region
+            // (StateLocation typically represents a single point)
+            Region region = resolvedRegions.get(0);
             int centerX = region.getX() + region.getW() / 2;
             int centerY = region.getY() + region.getH() / 2;
             stateLocation.setLocation(new Location(centerX, centerY));
+            log.debug("Updated StateLocation '{}' to [{}, {}]", 
+                     stateLocation.getName(), centerX, centerY);
         }
     }
 
@@ -120,93 +132,118 @@ public class DynamicRegionResolver {
     }
 
     /**
-     * Resolves a region from a match based on the SearchRegionOnObject configuration.
+     * Resolves search regions from matches based on the SearchRegionOnObject configuration.
+     * Creates regions around all matches (for FIND.ALL scenarios).
      */
-    private Optional<Region> resolveRegionFromMatch(SearchRegionOnObject config, ActionResult actionResult) {
-        // Find the source match
-        Optional<Match> sourceMatch = findMatchForConfig(config, actionResult);
-        if (sourceMatch.isEmpty()) return Optional.empty();
-
-        Match match = sourceMatch.get();
-        Region baseRegion = match.getRegion();
-
-        // Apply adjustments
-        MatchAdjustmentOptions adjustments = config.getAdjustments();
-        
-        int x = baseRegion.getX();
-        int y = baseRegion.getY();
-        int w = baseRegion.getW();
-        int h = baseRegion.getH();
-        
-        if (adjustments != null) {
-            x += adjustments.getAddX();
-            y += adjustments.getAddY();
-            w += adjustments.getAddW();
-            h += adjustments.getAddH();
-            
-            // Apply absolute dimensions if specified (>= 0 means set)
-            if (adjustments.getAbsoluteW() >= 0) w = adjustments.getAbsoluteW();
-            if (adjustments.getAbsoluteH() >= 0) h = adjustments.getAbsoluteH();
+    private List<Region> resolveRegionsFromMatches(SearchRegionOnObject config) {
+        // Find all source matches
+        List<Match> sourceMatches = findMatchesForConfig(config);
+        if (sourceMatches.isEmpty()) {
+            return new ArrayList<>();
         }
 
-        return Optional.of(new Region(x, y, w, h));
+        List<Region> resolvedRegions = new ArrayList<>();
+        MatchAdjustmentOptions adjustments = config.getAdjustments();
+        
+        // Create a region for each match with adjustments
+        for (Match match : sourceMatches) {
+            Region baseRegion = match.getRegion();
+            
+            int x = baseRegion.getX();
+            int y = baseRegion.getY();
+            int w = baseRegion.getW();
+            int h = baseRegion.getH();
+            
+            if (adjustments != null) {
+                x += adjustments.getAddX();
+                y += adjustments.getAddY();
+                w += adjustments.getAddW();
+                h += adjustments.getAddH();
+                
+                // Apply absolute dimensions if specified (>= 0 means set)
+                if (adjustments.getAbsoluteW() >= 0) w = adjustments.getAbsoluteW();
+                if (adjustments.getAbsoluteH() >= 0) h = adjustments.getAbsoluteH();
+            }
+            
+            resolvedRegions.add(new Region(x, y, w, h));
+        }
+        
+        log.debug("Resolved {} search regions from {} matches", resolvedRegions.size(), sourceMatches.size());
+        return resolvedRegions;
     }
 
     /**
-     * Finds a match that corresponds to the SearchRegionOnObject configuration.
+     * Finds matches that correspond to the SearchRegionOnObject configuration.
+     * Returns all matches (for FIND.ALL scenarios) to calculate search regions.
      */
-    private Optional<Match> findMatchForConfig(SearchRegionOnObject config, ActionResult actionResult) {
+    private List<Match> findMatchesForConfig(SearchRegionOnObject config) {
         String targetStateName = config.getTargetStateName();
         String targetObjectName = config.getTargetObjectName();
         StateObject.Type targetType = config.getTargetType();
 
-        // First, try to find in the current matches
-        List<Match> matchList = actionResult.getMatchList();
-        for (Match match : matchList) {
-            if (matchesConfig(match, targetStateName, targetObjectName, targetType)) {
-                return Optional.of(match);
-            }
-        }
-
-        // If not found in current matches, try to get from state store
+        log.debug("Looking for matches of '{}' from state '{}'", targetObjectName, targetStateName);
+        
+        // Get the target state from the state store
         Optional<State> targetStateOpt = stateStore.getState(targetStateName);
-        if (targetStateOpt.isEmpty()) return Optional.empty();
+        if (targetStateOpt.isEmpty()) {
+            log.warn("Target state '{}' not found in state store", targetStateName);
+            return new ArrayList<>();
+        }
         
         State targetState = targetStateOpt.get();
+        log.debug("Found target state '{}' in store", targetStateName);
 
-        // Find the target object in the state
+        // Find the target object in the state and get its lastMatchesFound
         switch (targetType) {
             case IMAGE:
                 return targetState.getStateImages().stream()
                     .filter(img -> img.getName().equals(targetObjectName))
                     .findFirst()
-                    .flatMap(img -> {
-                        List<ActionRecord> snapshots = img.getMatchHistory().getSnapshots();
-                        if (snapshots.isEmpty()) return Optional.empty();
-                        ActionRecord lastSnapshot = snapshots.get(snapshots.size() - 1);
-                        List<Match> matches = lastSnapshot.getMatchList();
-                        return matches.isEmpty() ? Optional.empty() : Optional.of(matches.get(0));
+                    .map(img -> {
+                        log.debug("Found target StateImage '{}', checking lastMatchesFound", img.getName());
+                        List<Match> lastMatches = img.getLastMatchesFound();
+                        log.debug("StateImage '{}' has {} last matches", img.getName(), lastMatches.size());
+                        if (lastMatches.isEmpty()) {
+                            log.warn("No lastMatchesFound for '{}' - it was never found or not searched yet!", targetObjectName);
+                        }
+                        return new ArrayList<>(lastMatches); // Return a copy to avoid modification
+                    })
+                    .orElseGet(() -> {
+                        log.warn("Target StateImage '{}' not found in state '{}'", targetObjectName, targetStateName);
+                        return new ArrayList<>();
                     });
             case REGION:
                 return targetState.getStateRegions().stream()
                     .filter(reg -> reg.getName().equals(targetObjectName))
                     .findFirst()
-                    .map(reg -> new Match.Builder()
-                        .setRegion(reg.getSearchRegion())
-                        .setStateObjectData(reg)
-                        .build());
+                    .map(reg -> {
+                        Match match = new Match.Builder()
+                            .setRegion(reg.getSearchRegion())
+                            .setStateObjectData(reg)
+                            .build();
+                        List<Match> matches = new ArrayList<>();
+                        matches.add(match);
+                        return matches;
+                    })
+                    .orElse(new ArrayList<>());
             case LOCATION:
                 return targetState.getStateLocations().stream()
                     .filter(loc -> loc.getName().equals(targetObjectName))
                     .findFirst()
                     .filter(loc -> loc.getLocation() != null)
-                    .map(loc -> new Match.Builder()
-                        .setRegion(loc.getLocation().getCalculatedX(), 
-                                  loc.getLocation().getCalculatedY(), 1, 1)
-                        .setStateObjectData(loc)
-                        .build());
+                    .map(loc -> {
+                        Match match = new Match.Builder()
+                            .setRegion(loc.getLocation().getCalculatedX(), 
+                                      loc.getLocation().getCalculatedY(), 1, 1)
+                            .setStateObjectData(loc)
+                            .build();
+                        List<Match> matches = new ArrayList<>();
+                        matches.add(match);
+                        return matches;
+                    })
+                    .orElse(new ArrayList<>());
             default:
-                return Optional.empty();
+                return new ArrayList<>();
         }
     }
 
