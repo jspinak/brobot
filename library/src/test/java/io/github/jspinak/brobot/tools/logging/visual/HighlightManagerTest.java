@@ -70,6 +70,9 @@ public class HighlightManagerTest extends BrobotTestBase {
 
     @Mock
     private io.github.jspinak.brobot.statemanagement.StateMemory stateMemory;
+    
+    @Mock
+    private io.github.jspinak.brobot.util.coordinates.CoordinateScaler coordinateScaler;
 
     @BeforeEach
     @Override
@@ -116,7 +119,7 @@ public class HighlightManagerTest extends BrobotTestBase {
         lenient().when(clickConfig.getRadius()).thenReturn(20);
         lenient().when(clickConfig.isRippleEffect()).thenReturn(false);
 
-        highlightManager = new HighlightManager(config, brobotLogger, highlightWrapper, stateMemory);
+        highlightManager = new HighlightManager(config, brobotLogger, highlightWrapper, stateMemory, coordinateScaler);
 
         // Set up default wrapper behavior
         // lenient().when(highlightWrapper.isAvailable()).thenReturn(true); // COMMENTED
@@ -587,7 +590,7 @@ public class HighlightManagerTest extends BrobotTestBase {
     @Test
     public void testGetColorName_CommonColors() {
         // Use reflection to test private method
-        HighlightManager manager = new HighlightManager(config, brobotLogger, highlightWrapper, stateMemory);
+        HighlightManager manager = new HighlightManager(config, brobotLogger, highlightWrapper, stateMemory, coordinateScaler);
 
         assertEquals("red", invokeGetColorName(manager, Color.RED));
         assertEquals("green", invokeGetColorName(manager, Color.GREEN));
@@ -603,7 +606,7 @@ public class HighlightManagerTest extends BrobotTestBase {
 
     @Test
     public void testGetColorName_CustomColors() {
-        HighlightManager manager = new HighlightManager(config, brobotLogger, highlightWrapper, stateMemory);
+        HighlightManager manager = new HighlightManager(config, brobotLogger, highlightWrapper, stateMemory, coordinateScaler);
 
         // Test color approximation
         assertEquals("red", invokeGetColorName(manager, new Color(220, 50, 50)));
