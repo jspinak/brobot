@@ -14,6 +14,7 @@ import io.github.jspinak.brobot.analysis.match.MatchFusion;
 import io.github.jspinak.brobot.logging.ConciseFindLogger;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.element.SearchRegionOnObject;
+import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.state.StateObject;
 import io.github.jspinak.brobot.model.state.StateRegion;
@@ -27,7 +28,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Encapsulates the Find operation pipeline, orchestrating all steps of the pattern matching process.
@@ -230,6 +233,9 @@ public class FindPipeline {
         matchAdjuster.adjustAll(matches, findOptions.getMatchAdjustmentOptions());
         contentExtractor.set(matches);
         
+        // Save matches to their corresponding StateImages for future dependency resolution
+        saveMatchesToStateImages(matches, objectCollections);
+        
         // Update search regions for objects that depend on what we just found
         if (!matches.isEmpty()) {
             log.debug("FindPipeline: Found {} matches, updating dependent search regions", matches.size());
@@ -320,6 +326,61 @@ public class FindPipeline {
         // (avoid highlighting the entire screen as a fallback)
         if (!regionsWithContext.isEmpty()) {
             highlightManager.highlightSearchRegionsWithContext(regionsWithContext);
+        }
+    }
+    
+    /**
+     * Saves matches to their corresponding StateImages' lastMatchesFound field.
+     * This is the single source of truth for where each StateImage was last found,
+     * used by DynamicRegionResolver for SearchRegionOnObject dependencies.
+     * 
+     * @param matches The action result containing all matches
+     * @param collections The object collections that were searched
+     */
+    private void saveMatchesToStateImages(ActionResult matches, ObjectCollection... collections) {
+        if (matches.getMatchList().isEmpty()) {
+            // Clear lastMatchesFound for all StateImages that didn't match
+            for (ObjectCollection collection : collections) {
+                for (StateImage stateImage : collection.getStateImages()) {
+                    boolean hasMatch = matches.getMatchList().stream()
+                        .anyMatch(m -> m.getStateObjectData() != null && 
+                                      stateImage.getName().equals(m.getStateObjectData().getStateObjectName()));
+                    if (!hasMatch) {
+                        stateImage.getLastMatchesFound().clear();
+                        log.debug("Cleared lastMatchesFound for '{}' (no matches)", stateImage.getName());
+                    }
+                }
+            }
+            return;
+        }
+        
+        // Group matches by StateImage name
+        Map<String, List<Match>> matchesByStateImage = new HashMap<>();
+        for (Match match : matches.getMatchList()) {
+            if (match.getStateObjectData() != null && 
+                match.getStateObjectData().getStateObjectName() != null) {
+                String imageName = match.getStateObjectData().getStateObjectName();
+                matchesByStateImage.computeIfAbsent(imageName, k -> new ArrayList<>()).add(match);
+            }
+        }
+        
+        // Update each StateImage with its matches
+        for (ObjectCollection collection : collections) {
+            for (StateImage stateImage : collection.getStateImages()) {
+                List<Match> imageMatches = matchesByStateImage.get(stateImage.getName());
+                if (imageMatches != null && !imageMatches.isEmpty()) {
+                    // Replace the entire list with new matches
+                    stateImage.getLastMatchesFound().clear();
+                    stateImage.getLastMatchesFound().addAll(imageMatches);
+                    log.debug("Saved {} matches to '{}' lastMatchesFound", 
+                             imageMatches.size(), stateImage.getName());
+                } else {
+                    // No matches for this image, clear its lastMatchesFound
+                    stateImage.getLastMatchesFound().clear();
+                    log.debug("Cleared lastMatchesFound for '{}' (searched but not found)", 
+                             stateImage.getName());
+                }
+            }
         }
     }
     

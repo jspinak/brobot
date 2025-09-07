@@ -14,6 +14,7 @@ import io.github.jspinak.brobot.model.element.Position;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.SearchRegionOnObject;
+import io.github.jspinak.brobot.model.match.Match;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -105,6 +106,11 @@ public class StateImage implements StateObject {
     
     // Custom highlight color for this StateImage (e.g., "#00FF00" for green, "#0000FF" for blue)
     private String highlightColor;
+    
+    // Last matches found for this StateImage - used for resolving SearchRegionOnObject dependencies
+    // This is the single source of truth for where this StateImage was last found
+    @JsonIgnore
+    private List<Match> lastMatchesFound = new ArrayList<>();
 
     public String getIdAsString() {
         return objectType.name() + name + patterns.toString();
