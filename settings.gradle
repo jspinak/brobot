@@ -1,5 +1,10 @@
 // settings.gradle for the brobot project
 
+// Configure toolchain repositories for CI/CD environments
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.9.0'
+}
+
 rootProject.name = 'brobot'
 include 'library', 'library-features', 'persistence', 'runner', 'library-test', 'pattern-capture-tool'
 // 'library-test' module re-enabled after migration
