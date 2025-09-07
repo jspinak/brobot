@@ -16,6 +16,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import jakarta.annotation.PostConstruct;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -43,6 +44,7 @@ public class AnnotationProcessor {
     private final AnnotatedStateBuilder stateBuilder;
     private final StateRegistrationService registrationService;
     private final ApplicationEventPublisher eventPublisher;
+    private final StateAnnotationBeanPostProcessor stateBeanPostProcessor;
     private final Map<String, Integer> initialStatePriorities = new HashMap<>();
     
     public AnnotationProcessor(ApplicationContext applicationContext,
@@ -52,7 +54,8 @@ public class AnnotationProcessor {
                              InitialStates initialStates,
                              AnnotatedStateBuilder stateBuilder,
                              StateRegistrationService registrationService,
-                             ApplicationEventPublisher eventPublisher) {
+                             ApplicationEventPublisher eventPublisher,
+                             StateAnnotationBeanPostProcessor stateBeanPostProcessor) {
         this.applicationContext = applicationContext;
         this.jointTable = jointTable;
         this.stateService = stateService;
@@ -61,14 +64,67 @@ public class AnnotationProcessor {
         this.stateBuilder = stateBuilder;
         this.registrationService = registrationService;
         this.eventPublisher = eventPublisher;
+        this.stateBeanPostProcessor = stateBeanPostProcessor;
+        log.info("AnnotationProcessor constructor called");
+    }
+    
+    @PostConstruct
+    public void init() {
+        log.info("=== AnnotationProcessor CREATED ===");
+        log.info("AnnotationProcessor bean initialized");
+        log.info("Dependencies available:");
+        log.info("  - StateService: {}", stateService != null);
+        log.info("  - StateBuilder: {}", stateBuilder != null);
+        log.info("  - RegistrationService: {}", registrationService != null);
+        log.info("  - BeanPostProcessor: {}", stateBeanPostProcessor != null);
+        
+        // Check if we're in a test environment
+        String[] activeProfiles = applicationContext.getEnvironment().getActiveProfiles();
+        boolean isTestProfile = false;
+        for (String profile : activeProfiles) {
+            if ("test".equals(profile) || "testing".equals(profile)) {
+                isTestProfile = true;
+                break;
+            }
+        }
+        
+        // In test environments, process annotations immediately
+        // since ApplicationReadyEvent may not fire
+        if (isTestProfile) {
+            log.info("Test profile detected - processing annotations immediately");
+            processAnnotations();
+        }
     }
 
+    /**
+     * Process annotations when application is ready.
+     * Also provides a public method that can be called manually if needed.
+     */
     @EventListener(ApplicationReadyEvent.class)
     @Order(1)  // Run early
+    public void onApplicationReady(ApplicationReadyEvent event) {
+        processAnnotations();
+    }
+    
+    /**
+     * Process all @State and @Transition annotations.
+     * This method can be called manually if needed (e.g., from InitializationOrchestrator).
+     */
     public void processAnnotations() {
         log.info("=== ANNOTATION PROCESSOR START ===");
         log.info("Processing Brobot annotations...");
         log.info("AnnotationProcessor running at ApplicationReadyEvent");
+        log.info("AnnotationProcessor instance: {} with dependencies:", this.hashCode());
+        log.info("  - StateService: {}", stateService != null);
+        log.info("  - StateBuilder: {}", stateBuilder != null);
+        log.info("  - RegistrationService: {}", registrationService != null);
+        log.info("  - BeanPostProcessor: {}", stateBeanPostProcessor != null);
+        
+        // Debug: Check what the BeanPostProcessor has collected
+        Map<String, Object> collectedBeans = stateBeanPostProcessor.getStateBeans();
+        log.info("BeanPostProcessor has collected {} @State beans:", collectedBeans.size());
+        collectedBeans.forEach((name, bean) -> 
+            log.info("  - {} ({})", name, bean.getClass().getName()));
         
         // Process @State annotations
         Map<Class<?>, Object> stateMap = processStates();
@@ -92,17 +148,39 @@ public class AnnotationProcessor {
         Map<Class<?>, Object> stateMap = new HashMap<>();
         List<String> initialStateNames = new ArrayList<>();
         
-        Map<String, Object> stateBeans = applicationContext.getBeansWithAnnotation(io.github.jspinak.brobot.annotations.State.class);
-        log.info("Found {} beans with @State annotation", stateBeans.size());
+        // Use the BeanPostProcessor to get state beans (more reliable than getBeansWithAnnotation)
+        Map<String, Object> stateBeans = stateBeanPostProcessor.getStateBeans();
+        log.info("Found {} beans with @State annotation from BeanPostProcessor", stateBeans.size());
+        
+        // Also check what Spring sees directly
+        Map<String, Object> springStateBeans = applicationContext.getBeansWithAnnotation(
+            io.github.jspinak.brobot.annotations.State.class);
+        log.info("Spring's getBeansWithAnnotation found {} @State beans", springStateBeans.size());
+        springStateBeans.forEach((name, bean) -> 
+            log.info("  Spring found: {} ({})", name, bean.getClass().getName()));
         
         for (Map.Entry<String, Object> entry : stateBeans.entrySet()) {
             Object stateBean = entry.getValue();
             Class<?> stateClass = stateBean.getClass();
             log.info("Processing state bean: {} (class: {})", entry.getKey(), stateClass.getName());
-            io.github.jspinak.brobot.annotations.State stateAnnotation = stateClass.getAnnotation(io.github.jspinak.brobot.annotations.State.class);
+            
+            // Use AnnotationUtils to find annotation on the actual class (handles proxies)
+            io.github.jspinak.brobot.annotations.State stateAnnotation = 
+                org.springframework.core.annotation.AnnotationUtils.findAnnotation(
+                    org.springframework.aop.framework.AopProxyUtils.ultimateTargetClass(stateBean), 
+                    io.github.jspinak.brobot.annotations.State.class);
+            
+            if (stateAnnotation == null) {
+                log.error("No @State annotation found on bean {} ({})", entry.getKey(), stateClass.getName());
+                continue;
+            }
             
             // Build the actual State object from the annotated class
+            log.info("Building State object for {} with annotation: initial={}, name={}",
+                    stateClass.getSimpleName(), stateAnnotation.initial(), stateAnnotation.name());
             State state = stateBuilder.buildState(stateBean, stateAnnotation);
+            log.info("Built State: name={}, id={}", 
+                    state.getName(), state.getId());
             
             // Register the state with the StateService
             boolean registered = registrationService.registerState(state);

@@ -98,8 +98,17 @@ public class Find implements ActionInterface {
      */
     public void perform(ActionResult matches, ObjectCollection... objectCollections) {
         log.info("[FIND] === Find.perform() CALLED ===");
+        
+        // Handle null varargs
+        if (objectCollections == null) {
+            log.warn("[FIND] ObjectCollections is null");
+            matches.setSuccess(false);
+            return;
+        }
+        
         log.info("[FIND]   ObjectCollections: {}", objectCollections.length);
-        if (objectCollections.length > 0 && !objectCollections[0].getStateImages().isEmpty()) {
+        if (objectCollections.length > 0 && objectCollections[0] != null && 
+                !objectCollections[0].getStateImages().isEmpty()) {
             StateImage firstImage = objectCollections[0].getStateImages().get(0);
             log.info("[FIND]   First StateImage: name={}, instance={}", 
                     firstImage.getName(), System.identityHashCode(firstImage));
@@ -116,6 +125,14 @@ public class Find implements ActionInterface {
         
         BaseFindOptions findOptions = (BaseFindOptions) matches.getActionConfig();
         log.info("  FindOptions strategy: {}", findOptions.getFindStrategy());
+        
+        // Handle null or empty object collections
+        if (objectCollections == null || objectCollections.length == 0 || 
+                (objectCollections.length == 1 && objectCollections[0] == null)) {
+            log.warn("[FIND] No valid object collections provided");
+            matches.setSuccess(false);
+            return;
+        }
         
         // Delegate entire orchestration to the pipeline
         log.info("[FIND]   Calling findPipeline.execute()...");

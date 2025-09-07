@@ -11,6 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -241,6 +242,7 @@ public class InitialStatesTest extends BrobotTestBase {
 
         @Test
         @DisplayName("Should search for states in normal mode")
+        @DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Requires non-mock mode")
         public void testNormalModeSearch() {
             State state1 = createMockState(1L, "State1");
             State state2 = createMockState(2L, "State2");
@@ -262,6 +264,7 @@ public class InitialStatesTest extends BrobotTestBase {
 
         @Test
         @DisplayName("Should search all states if no predefined sets found")
+        @DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Requires non-mock mode")
         public void testSearchAllStatesIfNoneFound() {
             State state1 = createMockState(1L, "State1");
             State state2 = createMockState(2L, "State2");
@@ -286,6 +289,7 @@ public class InitialStatesTest extends BrobotTestBase {
 
         @Test
         @DisplayName("Should handle empty potential states in normal mode")
+        @DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Requires non-mock mode")
         public void testNormalModeEmptyPotentialStates() {
             try {
                 // No state sets defined

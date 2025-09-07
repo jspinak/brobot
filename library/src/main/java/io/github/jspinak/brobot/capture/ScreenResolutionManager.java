@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import jakarta.annotation.PostConstruct;
 import java.awt.*;
 
@@ -68,6 +69,16 @@ public class ScreenResolutionManager {
     
     private void detectResolution() {
         String provider = captureProviderName.toUpperCase();
+        
+        // Check if we're in mock mode or headless environment
+        if (FrameworkSettings.mock || provider.contains("MOCK") || GraphicsEnvironment.isHeadless()) {
+            // Use default dimensions for mock/headless mode
+            screenWidth = 1920;
+            screenHeight = 1080;
+            isPhysicalResolution = false;
+            log.debug("Using mock/headless resolution: {}x{}", screenWidth, screenHeight);
+            return;
+        }
         
         // Determine resolution based on capture provider
         if (provider.contains("JAVACV_FFMPEG") || 

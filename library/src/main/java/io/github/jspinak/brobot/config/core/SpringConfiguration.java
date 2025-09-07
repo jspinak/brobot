@@ -55,7 +55,7 @@ import org.springframework.context.annotation.Configuration;
  * @see ComponentScan
  */
 @Configuration
-@ComponentScan
+@ComponentScan(basePackages = "io.github.jspinak.brobot")
 public class SpringConfiguration {
 
     /**

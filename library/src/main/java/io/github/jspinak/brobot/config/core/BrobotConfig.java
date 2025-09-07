@@ -55,7 +55,7 @@ import org.springframework.context.annotation.Import;
  * @see FrameworkSettings
  */
 @Configuration
-@ComponentScan
+@ComponentScan(basePackages = "io.github.jspinak.brobot")
 @Import({BrobotDefaultsConfiguration.class, io.github.jspinak.brobot.config.logging.SikuliXLoggingConfig.class})
 public class BrobotConfig {
 

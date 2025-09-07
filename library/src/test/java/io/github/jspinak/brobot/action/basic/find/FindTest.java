@@ -426,11 +426,12 @@ class FindTest extends BrobotTestBase {
             // Arrange
             ActionResult actionResult = new ActionResult(patternFindOptions);
             
-            // Act - Find delegates to pipeline which should handle null
+            // Act - Find should handle null gracefully without calling pipeline
             find.perform(actionResult, (ObjectCollection[]) null);
             
-            // Assert - verify pipeline was called with null
-            verify(findPipeline).execute(eq(patternFindOptions), eq(actionResult), (ObjectCollection[]) isNull());
+            // Assert - verify result is unsuccessful and pipeline was not called
+            assertFalse(actionResult.isSuccess());
+            verify(findPipeline, never()).execute(any(), any(), any());
         }
         
         @Test
