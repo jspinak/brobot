@@ -66,6 +66,9 @@ public class AnnotationProcessorTest extends BrobotTestBase {
     @Mock
     private StateAnnotationBeanPostProcessor stateBeanPostProcessor;
     
+    @Mock
+    private TransitionAnnotationBeanPostProcessor transitionBeanPostProcessor;
+    
     private AnnotationProcessor processor;
     private AutoCloseable mocks;
     
@@ -100,7 +103,8 @@ public class AnnotationProcessorTest extends BrobotTestBase {
             stateBuilder,
             registrationService,
             eventPublisher,
-            stateBeanPostProcessor
+            stateBeanPostProcessor,
+            transitionBeanPostProcessor
         );
     }
     
@@ -225,6 +229,10 @@ public class AnnotationProcessorTest extends BrobotTestBase {
                 .thenReturn(stateBeans);
             when(applicationContext.getBeansWithAnnotation(Transition.class))
                 .thenReturn(transitionBeans);
+            
+            // Mock the BeanPostProcessors
+            when(transitionBeanPostProcessor.getTransitionBeans()).thenReturn(transitionBeans);
+            when(transitionBeanPostProcessor.getTransitionBeanCount()).thenReturn(transitionBeans.size());
             when(applicationContext.getEnvironment()).thenReturn(environment);
             when(environment.getActiveProfiles()).thenReturn(new String[]{});
             when(stateBuilder.buildState(any(), any()))
@@ -310,6 +318,10 @@ public class AnnotationProcessorTest extends BrobotTestBase {
                 .thenReturn(new HashMap<>());
             when(applicationContext.getBeansWithAnnotation(Transition.class))
                 .thenReturn(transitionBeans);
+            
+            // Mock the BeanPostProcessors
+            when(transitionBeanPostProcessor.getTransitionBeans()).thenReturn(transitionBeans);
+            when(transitionBeanPostProcessor.getTransitionBeanCount()).thenReturn(transitionBeans.size());
             when(applicationContext.getEnvironment()).thenReturn(environment);
             when(environment.getActiveProfiles()).thenReturn(new String[]{});
             when(registrationService.getRegisteredStateCount()).thenReturn(0);

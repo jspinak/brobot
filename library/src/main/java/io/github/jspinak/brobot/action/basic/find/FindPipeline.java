@@ -29,8 +29,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Encapsulates the Find operation pipeline, orchestrating all steps of the pattern matching process.
@@ -138,43 +140,59 @@ public class FindPipeline {
      * @return A new list with images ordered by dependencies
      */
     private List<StateImage> orderByDependencies(List<StateImage> stateImages) {
-        List<StateImage> ordered = new ArrayList<>();
-        List<StateImage> withDependencies = new ArrayList<>();
-        List<StateImage> noDependencies = new ArrayList<>();
+        log.info("[ORDERING] Ordering {} StateImages by dependencies", stateImages.size());
         
-        // Separate images with and without dependencies
+        // Create a map to track which images are depended upon
+        Map<String, List<StateImage>> dependencyMap = new HashMap<>();
+        List<StateImage> noDependencies = new ArrayList<>();
+        List<StateImage> withDependencies = new ArrayList<>();
+        
+        // First pass: categorize images and build dependency map
         for (StateImage image : stateImages) {
             if (image.getSearchRegionOnObject() != null) {
                 withDependencies.add(image);
+                String targetKey = image.getSearchRegionOnObject().getTargetObjectName();
+                log.info("[ORDERING]   {} depends on {}", image.getName(), targetKey);
             } else {
                 noDependencies.add(image);
+                log.info("[ORDERING]   {} has no dependencies", image.getName());
             }
         }
         
-        // Add images without dependencies first (they can be found anywhere)
-        ordered.addAll(noDependencies);
+        // Build a set of all target names that are dependencies
+        Set<String> targetNames = new HashSet<>();
+        for (StateImage dependent : withDependencies) {
+            targetNames.add(dependent.getSearchRegionOnObject().getTargetObjectName());
+        }
         
-        // Then add images with dependencies
-        // For now, just add them after - a more sophisticated ordering could be implemented
-        // to handle complex dependency chains
-        ordered.addAll(withDependencies);
+        // Now separate the no-dependency list into targets and non-targets
+        List<StateImage> targets = new ArrayList<>();
+        List<StateImage> nonTargets = new ArrayList<>();
         
-        log.debug("Ordered {} StateImages: {} without dependencies, {} with dependencies",
-                stateImages.size(), noDependencies.size(), withDependencies.size());
-        
-        // Log the order for debugging
-        if (log.isDebugEnabled()) {
-            for (int i = 0; i < ordered.size(); i++) {
-                StateImage img = ordered.get(i);
-                if (img.getSearchRegionOnObject() != null) {
-                    log.debug("  [{}] {} depends on {}.{}",
-                            i, img.getName(),
-                            img.getSearchRegionOnObject().getTargetStateName(),
-                            img.getSearchRegionOnObject().getTargetObjectName());
-                } else {
-                    log.debug("  [{}] {} (no dependencies)", i, img.getName());
-                }
+        for (StateImage image : noDependencies) {
+            if (targetNames.contains(image.getName())) {
+                targets.add(image);
+                log.info("[ORDERING]   {} is a TARGET (other images depend on it)", image.getName());
+            } else {
+                nonTargets.add(image);
             }
+        }
+        
+        // Build the ordered list:
+        // 1. First add targets (images that others depend on)
+        // 2. Then add non-targets without dependencies
+        // 3. Finally add images with dependencies
+        List<StateImage> ordered = new ArrayList<>();
+        ordered.addAll(targets);  // These must be found first
+        ordered.addAll(nonTargets);  // These can be found anytime
+        ordered.addAll(withDependencies);  // These need their dependencies found first
+        
+        log.info("[ORDERING] Final order:");
+        for (int i = 0; i < ordered.size(); i++) {
+            StateImage img = ordered.get(i);
+            String type = targets.contains(img) ? "TARGET" : 
+                         withDependencies.contains(img) ? "DEPENDENT" : "INDEPENDENT";
+            log.info("[ORDERING]   [{}] {} ({})", i, img.getName(), type);
         }
         
         return ordered;
@@ -213,6 +231,21 @@ public class FindPipeline {
         
         // Note: Dependencies should be registered when states are built, not here
         // For now, we'll check if search regions need updating based on previous matches
+        log.info("[PIPELINE_DEBUG] About to call updateCrossStateSearchRegions");
+        log.info("[PIPELINE_DEBUG]   - Current matches size: {}", matches.size());
+        log.info("[PIPELINE_DEBUG]   - Collections count: {}", objectCollections.length);
+        for (ObjectCollection collection : objectCollections) {
+            log.info("[PIPELINE_DEBUG]   - Collection has {} StateImages", collection.getStateImages().size());
+            for (StateImage img : collection.getStateImages()) {
+                log.info("[PIPELINE_DEBUG]     - StateImage: {}, SearchRegionOnObject: {}",
+                        img.getName(), img.getSearchRegionOnObject() != null);
+                if (img.getSearchRegionOnObject() != null) {
+                    log.info("[PIPELINE_DEBUG]       -> Depends on: {}.{}",
+                            img.getSearchRegionOnObject().getTargetStateName(),
+                            img.getSearchRegionOnObject().getTargetObjectName());
+                }
+            }
+        }
         updateCrossStateSearchRegions(matches, objectCollections);
         
         // Highlight search regions if enabled

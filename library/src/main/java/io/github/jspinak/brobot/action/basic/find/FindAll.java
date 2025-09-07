@@ -14,6 +14,7 @@ import io.github.jspinak.brobot.model.element.Position;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.tools.testing.mock.action.ExecutionModeController;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -43,6 +44,7 @@ import java.util.Set;
  * @see StateImage
  * @see Pattern
  */
+@Slf4j
 @Component
 public class FindAll {
     private final SearchRegionResolver selectRegions;
@@ -94,14 +96,46 @@ public class FindAll {
      *         if no matches are found or all matches are filtered out by region constraints.
      */
     public List<Match> find(StateImage stateImage, Scene scene, ActionConfig actionConfig) {
+        log.info("[FINDALL_DEBUG] Finding patterns for StateImage: {}", stateImage.getName());
+        log.info("[FINDALL_DEBUG]   - Has SearchRegionOnObject: {}", stateImage.getSearchRegionOnObject() != null);
+        if (stateImage.getSearchRegionOnObject() != null) {
+            log.info("[FINDALL_DEBUG]   - SearchRegionOnObject target: {}.{}",
+                    stateImage.getSearchRegionOnObject().getTargetStateName(),
+                    stateImage.getSearchRegionOnObject().getTargetObjectName());
+        }
+        log.info("[FINDALL_DEBUG]   - Number of patterns: {}", stateImage.getPatterns().size());
+        
         List<Match> allMatchObjects = new ArrayList<>();
+        int patternIndex = 0;
         for (Pattern pattern : stateImage.getPatterns()) {
+            log.info("[FINDALL_DEBUG]   Processing pattern {} (index {})", pattern.getName(), patternIndex);
+            log.info("[FINDALL_DEBUG]     - Pattern has search regions: {}", 
+                    pattern.getSearchRegions() != null && !pattern.getSearchRegions().getAllRegions().isEmpty());
+            if (pattern.getSearchRegions() != null && !pattern.getSearchRegions().getAllRegions().isEmpty()) {
+                log.info("[FINDALL_DEBUG]     - Pattern search regions count: {}", 
+                        pattern.getSearchRegions().getAllRegions().size());
+                for (Region r : pattern.getSearchRegions().getAllRegions()) {
+                    log.info("[FINDALL_DEBUG]       - Region: {}", r);
+                }
+            }
+            
             // Use pattern's target position and offset
             Position targetPosition = pattern.getTargetPosition();
             Location xyOffset = pattern.getTargetOffset();
+            
+            // CRITICAL: The pattern being passed to mockOrLive.findAll does NOT have the
+            // SearchRegionOnObject from its parent StateImage!
+            // The pattern's search regions should have been set by DynamicRegionResolver
+            // BEFORE we get here.
+            
             List<Match> matchList = mockOrLive.findAll(pattern, scene);
+            log.info("[FINDALL_DEBUG]     - Found {} matches for pattern {}", matchList.size(), pattern.getName());
+            
             addMatchObjects(allMatchObjects, matchList, pattern, stateImage, actionConfig, scene, targetPosition, xyOffset);
+            patternIndex++;
         }
+        
+        log.info("[FINDALL_DEBUG] Total matches found for {}: {}", stateImage.getName(), allMatchObjects.size());
         return allMatchObjects;
     }
     
@@ -117,13 +151,36 @@ public class FindAll {
      *         if no matches are found or all matches are filtered out by region constraints.
      */
     public List<Match> find(StateImage stateImage, Scene scene, PatternFindOptions findOptions) {
+        log.info("[FINDALL_DEBUG] Finding patterns for StateImage: {} (PatternFindOptions version)", stateImage.getName());
+        log.info("[FINDALL_DEBUG]   - Has SearchRegionOnObject: {}", stateImage.getSearchRegionOnObject() != null);
+        if (stateImage.getSearchRegionOnObject() != null) {
+            log.info("[FINDALL_DEBUG]   - SearchRegionOnObject target: {}.{}",
+                    stateImage.getSearchRegionOnObject().getTargetStateName(),
+                    stateImage.getSearchRegionOnObject().getTargetObjectName());
+        }
+        log.info("[FINDALL_DEBUG]   - Number of patterns: {}", stateImage.getPatterns().size());
+        
         List<Match> allMatchObjects = new ArrayList<>();
+        int patternIndex = 0;
         for (Pattern pattern : stateImage.getPatterns()) {
+            log.info("[FINDALL_DEBUG]   Processing pattern {} (index {})", pattern.getName(), patternIndex);
+            log.info("[FINDALL_DEBUG]     - Pattern has search regions: {}", 
+                    pattern.getSearchRegions() != null && !pattern.getSearchRegions().getAllRegions().isEmpty());
+            if (pattern.getSearchRegions() != null && !pattern.getSearchRegions().getAllRegions().isEmpty()) {
+                log.info("[FINDALL_DEBUG]     - Pattern search regions count: {}", 
+                        pattern.getSearchRegions().getAllRegions().size());
+            }
+            
             Position targetPosition = pattern.getTargetPosition();
             Location xyOffset = pattern.getTargetOffset();
             List<Match> matchList = mockOrLive.findAll(pattern, scene);
+            log.info("[FINDALL_DEBUG]     - Found {} matches for pattern {}", matchList.size(), pattern.getName());
+            
             addMatchObjects(allMatchObjects, matchList, pattern, stateImage, findOptions, scene, targetPosition, xyOffset);
+            patternIndex++;
         }
+        
+        log.info("[FINDALL_DEBUG] Total matches found for {}: {}", stateImage.getName(), allMatchObjects.size());
         return allMatchObjects;
     }
 
