@@ -59,15 +59,16 @@ public class DynamicRegionResolver {
     }
 
     private void updateStateImageSearchRegion(StateImage stateImage, ActionResult actionResult) {
+        log.info("updateStateImageSearchRegion called for '{}'", stateImage.getName());
         if (!shouldUpdateSearchRegion(stateImage)) {
-            log.debug("Skipping search region update for '{}' - conditions not met", stateImage.getName());
+            log.info("Skipping search region update for '{}' - conditions not met (no SearchRegionOnObject or already has defined region)", stateImage.getName());
             return;
         }
         
         SearchRegionOnObject config = stateImage.getSearchRegionOnObject();
         if (config == null) return;
 
-        log.debug("Attempting to resolve search regions for '{}' based on '{}' from '{}'",
+        log.info("IMPORTANT: Attempting to resolve search regions for '{}' based on '{}' from '{}'",
                 stateImage.getName(), config.getTargetObjectName(), config.getTargetStateName());
         
         // Get all resolved regions (handles FIND.ALL scenarios)
@@ -84,7 +85,7 @@ public class DynamicRegionResolver {
             // Log the first region for debugging
             log.debug("  First region: {}", resolvedRegions.get(0));
         } else {
-            log.debug("Could not resolve search regions for '{}' - target '{}' has no lastMatchesFound", 
+            log.warn("Could not resolve search regions for '{}' - target '{}' has no lastMatchesFound", 
                     stateImage.getName(), config.getTargetObjectName());
         }
     }
@@ -200,11 +201,14 @@ public class DynamicRegionResolver {
                     .filter(img -> img.getName().equals(targetObjectName))
                     .findFirst()
                     .map(img -> {
-                        log.debug("Found target StateImage '{}', checking lastMatchesFound", img.getName());
+                        log.info("Found target StateImage '{}' (instance: {}), checking lastMatchesFound", 
+                                img.getName(), System.identityHashCode(img));
                         List<Match> lastMatches = img.getLastMatchesFound();
-                        log.debug("StateImage '{}' has {} last matches", img.getName(), lastMatches.size());
+                        log.info("StateImage '{}' has {} last matches stored", img.getName(), lastMatches.size());
                         if (lastMatches.isEmpty()) {
                             log.warn("No lastMatchesFound for '{}' - it was never found or not searched yet!", targetObjectName);
+                        } else {
+                            log.info("  First match region: {}", lastMatches.get(0).getRegion());
                         }
                         return new ArrayList<>(lastMatches); // Return a copy to avoid modification
                     })
@@ -260,7 +264,12 @@ public class DynamicRegionResolver {
      * Batch update search regions for multiple state objects.
      */
     public void updateSearchRegionsForObjects(List<StateObject> objects, ActionResult actionResult) {
-        objects.forEach(obj -> updateSearchRegions(obj, actionResult));
+        log.info("DynamicRegionResolver.updateSearchRegionsForObjects called with {} objects", objects.size());
+        objects.forEach(obj -> {
+            log.info("  Processing object: {} (type: {}, instance: {})", 
+                    obj.getName(), obj.getClass().getSimpleName(), System.identityHashCode(obj));
+            updateSearchRegions(obj, actionResult);
+        });
     }
     
     /**
