@@ -110,9 +110,18 @@ public class OpenCVNativeLibraryInitializer implements ApplicationContextInitial
                     log.debug("opencv_features2d not loaded (optional): {}", t.getMessage());
                 }
                 
-                // Load JavaCV utilities
-                Loader.load(org.bytedeco.javacv.Java2DFrameUtils.class);
-                Loader.load(org.bytedeco.javacv.OpenCVFrameConverter.class);
+                // Load JavaCV utilities - handle version differences
+                try {
+                    Loader.load(org.bytedeco.javacv.Java2DFrameUtils.class);
+                } catch (Throwable t) {
+                    log.debug("Java2DFrameUtils not loaded (may not be needed for JavaCV 1.5.3): {}", t.getMessage());
+                }
+                
+                try {
+                    Loader.load(org.bytedeco.javacv.OpenCVFrameConverter.class);
+                } catch (Throwable t) {
+                    log.debug("OpenCVFrameConverter not loaded (optional): {}", t.getMessage());
+                }
                 
                 log.info("OpenCV native libraries loaded successfully");
                 

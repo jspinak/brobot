@@ -227,7 +227,9 @@ public class LogEvent {
             if (this.metadata == null) {
                 this.metadata = new HashMap<>();
             }
-            this.metadata.putAll(metadata);
+            if (metadata != null) {
+                this.metadata.putAll(metadata);
+            }
             return this;
         }
         

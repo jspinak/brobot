@@ -63,6 +63,9 @@ public class AnnotationProcessorTest extends BrobotTestBase {
     @Mock
     private Environment environment;
     
+    @Mock
+    private StateAnnotationBeanPostProcessor stateBeanPostProcessor;
+    
     private AnnotationProcessor processor;
     private AutoCloseable mocks;
     
@@ -96,7 +99,8 @@ public class AnnotationProcessorTest extends BrobotTestBase {
             initialStates,
             stateBuilder,
             registrationService,
-            eventPublisher
+            eventPublisher,
+            stateBeanPostProcessor
         );
     }
     
