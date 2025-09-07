@@ -96,16 +96,44 @@ public class IterativePatternFinder {
         for (Scene scene : scenes) {
             List<Match> singleSceneMatchList = new ArrayList<>(); // holds finds for a specific scene
             for (int i=0; i<stateImages.size(); i++) { // run for each StateImage
-                List<Match> newMatches = findAll.find(stateImages.get(i), scene, matches.getActionConfig());
+                StateImage currentImage = stateImages.get(i);
+                log.info("[ITERATIVE] Processing StateImage {} of {}: '{}'", 
+                        i+1, stateImages.size(), currentImage.getName());
+                log.info("[ITERATIVE]   Has SearchRegionOnObject: {}", 
+                        currentImage.getSearchRegionOnObject() != null);
+                if (currentImage.getSearchRegionOnObject() != null) {
+                    log.info("[ITERATIVE]   Depends on: {}.{}",
+                            currentImage.getSearchRegionOnObject().getTargetStateName(),
+                            currentImage.getSearchRegionOnObject().getTargetObjectName());
+                }
+                
+                // Log current pattern search regions BEFORE searching
+                log.info("[ITERATIVE]   Pattern search regions BEFORE find:");
+                for (int p = 0; p < currentImage.getPatterns().size(); p++) {
+                    var pattern = currentImage.getPatterns().get(p);
+                    log.info("[ITERATIVE]     Pattern {}: {} regions",
+                            p, pattern.getSearchRegions() != null ? 
+                            pattern.getSearchRegions().getAllRegions().size() : 0);
+                    if (pattern.getSearchRegions() != null && !pattern.getSearchRegions().getAllRegions().isEmpty()) {
+                        for (var region : pattern.getSearchRegions().getAllRegions()) {
+                            log.info("[ITERATIVE]       - {}", region);
+                        }
+                    }
+                }
+                
+                List<Match> newMatches = findAll.find(currentImage, scene, matches.getActionConfig());
                 singleSceneMatchList.addAll(newMatches);
                 matches.addAll(newMatches); // holds all matches found
+                
+                log.info("[ITERATIVE]   Found {} matches for '{}'", 
+                        newMatches.size(), currentImage.getName());
                 
                 // CRITICAL: Update dependent search regions immediately after finding matches
                 // This ensures that if ImageA is found, ImageB's search regions are updated
                 // before ImageB is searched for, enabling proper declarative region resolution
                 if (!newMatches.isEmpty()) {
-                    log.debug("Found {} matches for {}, updating dependent search regions", 
-                            newMatches.size(), stateImages.get(i).getName());
+                    log.info("[ITERATIVE] Found {} matches for {}, updating dependent search regions", 
+                            newMatches.size(), currentImage.getName());
                     dynamicRegionResolver.updateDependentSearchRegions(matches);
                     
                     // Also update search regions for remaining state images in this iteration
@@ -113,7 +141,11 @@ public class IterativePatternFinder {
                     // gets its search regions updated before being searched
                     List<StateImage> remainingImages = stateImages.subList(i + 1, stateImages.size());
                     if (!remainingImages.isEmpty()) {
-                        log.debug("Updating search regions for {} remaining state images", remainingImages.size());
+                        log.info("[ITERATIVE] Updating search regions for {} remaining state images", remainingImages.size());
+                        for (StateImage img : remainingImages) {
+                            log.info("[ITERATIVE]   - Will update: '{}' (has dependency: {})",
+                                    img.getName(), img.getSearchRegionOnObject() != null);
+                        }
                         dynamicRegionResolver.updateSearchRegionsForObjects(
                             new ArrayList<>(remainingImages), matches);
                     }
