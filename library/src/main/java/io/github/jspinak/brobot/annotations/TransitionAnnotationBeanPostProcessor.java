@@ -41,13 +41,17 @@ public class TransitionAnnotationBeanPostProcessor implements BeanPostProcessor 
         Transition transitionAnnotation = AnnotationUtils.findAnnotation(targetClass, Transition.class);
         
         if (transitionAnnotation != null) {
-            log.debug("Found @Transition annotated bean: {} ({})", beanName, targetClass.getName());
-            log.debug("  - From: {}", (Object) transitionAnnotation.from());
-            log.debug("  - To: {}", (Object) transitionAnnotation.to());
-            log.debug("  - Method: {}", transitionAnnotation.method());
-            log.debug("  - Priority: {}", transitionAnnotation.priority());
+            log.info("=== TRANSITION BEAN DETECTED BY POST PROCESSOR ===");
+            log.info("Bean name: {}", beanName);
+            log.info("Bean class: {}", targetClass.getName());
+            log.info("Transition annotation details:");
+            log.info("  - From: {}", (Object) transitionAnnotation.from());
+            log.info("  - To: {}", (Object) transitionAnnotation.to());
+            log.info("  - Method: {}", transitionAnnotation.method());
+            log.info("  - Priority: {}", transitionAnnotation.priority());
             
             transitionBeans.put(beanName, bean);
+            log.info("Total transition beans collected so far: {}", transitionBeans.size());
         }
         
         return bean;
