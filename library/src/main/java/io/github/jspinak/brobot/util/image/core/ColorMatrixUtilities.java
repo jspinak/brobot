@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.util.image.core;
 
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+import lombok.extern.slf4j.Slf4j;
 
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.opencv.opencv_core.*;
@@ -59,6 +60,7 @@ import static org.bytedeco.opencv.global.opencv_core.*;
  * @see BufferedImageUtilities
  */
 @Component
+@Slf4j
 public class ColorMatrixUtilities {
 
     private final BufferedImageUtilities bufferedImageOps;
@@ -97,22 +99,70 @@ public class ColorMatrixUtilities {
      */
     public Mat vConcatToSingleColumnPerChannel(List<Mat> mats) {
         if (mats.isEmpty()) return new Mat();
+        
+        // Validate input mats
+        boolean hasValidMat = false;
+        for (Mat mat : mats) {
+            if (mat != null && !mat.empty() && mat.channels() > 0) {
+                hasValidMat = true;
+                break;
+            }
+        }
+        if (!hasValidMat) {
+            log.warn("No valid Mats found in vConcatToSingleColumnPerChannel");
+            return new Mat();
+        }
+        
         MatVector columnMats = new MatVector(3);
         // Initialize empty Mats for each channel
         for (int i=0; i<3; i++) {
             columnMats.put(i, new Mat());
         }
+        
+        boolean firstValidMat = true;
         for (int m=0; m<mats.size(); m++) {
-            Mat colMat = mats.get(m).reshape(0, (int) mats.get(m).total());
+            Mat currentMat = mats.get(m);
+            
+            // Skip invalid mats
+            if (currentMat == null || currentMat.empty() || currentMat.channels() == 0) {
+                log.debug("Skipping invalid Mat at index {}", m);
+                continue;
+            }
+            
+            Mat colMat = currentMat.reshape(0, (int) currentMat.total());
+            
+            // Check if the reshaped mat has the expected channels
+            if (colMat.channels() < 3) {
+                log.warn("Mat at index {} has only {} channels after reshape, expected 3. Skipping.", 
+                        m, colMat.channels());
+                continue;
+            }
+            
             MatVector colMatVec = sPlit(colMat);
+            
+            // Verify split was successful
+            if (colMatVec.size() < 3) {
+                log.warn("Split produced only {} channels at index {}, expected 3. Skipping.", 
+                        colMatVec.size(), m);
+                continue;
+            }
+            
             for (int i=0; i<3; i++) {
-                if (m==0) {
+                if (firstValidMat) {
                     columnMats.put(i, colMatVec.get(i));
                 } else {
                     vconcat(columnMats.get(i), colMatVec.get(i), columnMats.get(i));
                 }
             }
+            firstValidMat = false;
         }
+        
+        // Check if we processed any valid mats
+        if (firstValidMat) {
+            log.warn("No valid 3-channel Mats were processed in vConcatToSingleColumnPerChannel");
+            return new Mat();
+        }
+        
         // Horizontally concatenate the 3 single-channel columns
         Mat result = new Mat();
         hconcat(columnMats, result);
