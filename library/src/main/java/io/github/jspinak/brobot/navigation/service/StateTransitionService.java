@@ -152,7 +152,20 @@ public class StateTransitionService {
      * @return Optional containing StateTransitions if found
      */
     public Optional<StateTransitions> getTransitions(Long stateId) {
-        return stateTransitionsRepository.get(stateId);
+        // Debug: Log what we're looking for and what's available
+        System.out.println("=== TRANSITION DEBUG: getTransitions() called for stateId: " + stateId);
+        System.out.println("=== TRANSITION DEBUG: Repository contains transitions for states: " + 
+                          stateTransitionsRepository.getAllStateIds());
+        
+        Optional<StateTransitions> result = stateTransitionsRepository.get(stateId);
+        if (result.isPresent()) {
+            System.out.println("=== TRANSITION DEBUG: Found StateTransitions for state " + stateId);
+            System.out.println("=== TRANSITION DEBUG: Transitions: " + result.get().getTransitions().size());
+        } else {
+            System.out.println("=== TRANSITION DEBUG: NO StateTransitions found for state " + stateId);
+        }
+        
+        return result;
     }
 
     /**

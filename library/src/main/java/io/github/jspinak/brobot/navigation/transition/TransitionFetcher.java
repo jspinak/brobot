@@ -177,12 +177,39 @@ public class TransitionFetcher {
      * @param to Target state ID (may be PREVIOUS)
      */
     private void setFromTransitions(Long from, Long to) {
+        System.out.println("=== TRANSITION DEBUG: TransitionFetcher.setFromTransitions() from=" + from + " to=" + to);
+        
         Optional<StateTransitions> fromTransitions = stateTransitionsInProjectService.getTransitions(from);
-        allStatesInProjectService.getState(from).ifPresent(state -> fromState = state);
+        allStatesInProjectService.getState(from).ifPresent(state -> {
+            fromState = state;
+            System.out.println("=== TRANSITION DEBUG: Found fromState: " + state.getName());
+        });
+        
+        if (fromTransitions.isEmpty()) {
+            System.out.println("=== TRANSITION DEBUG: No StateTransitions found for from state " + from);
+        }
+        
         fromTransitions.ifPresent(transitions -> {
             this.fromTransitions = transitions;
+            System.out.println("=== TRANSITION DEBUG: Found transitions object for state " + from);
+            System.out.println("=== TRANSITION DEBUG: Number of transitions: " + transitions.getTransitions().size());
+            
             transitionToEnum = stateTransitionsInProjectService.getTransitionToEnum(from, to);
-            transitions.getTransitionFunctionByActivatedStateId(transitionToEnum).ifPresent(trsn -> this.fromTransition = trsn);
+            System.out.println("=== TRANSITION DEBUG: transitionToEnum resolved to: " + transitionToEnum);
+            
+            transitions.getTransitionFunctionByActivatedStateId(transitionToEnum).ifPresent(trsn -> {
+                this.fromTransition = trsn;
+                System.out.println("=== TRANSITION DEBUG: Found transition function for " + transitionToEnum);
+            });
+            
+            if (this.fromTransition == null) {
+                System.out.println("=== TRANSITION DEBUG: NO transition function found for " + transitionToEnum);
+                System.out.println("=== TRANSITION DEBUG: Available activations in transitions:");
+                transitions.getTransitions().forEach(t -> {
+                    System.out.println("===   - Activates: " + t.getActivate());
+                });
+            }
+            
             transitions.getTransitionFunctionByActivatedStateId(transitionToEnum).ifPresent(
                     trsFunction -> fromTransitionFunction =
                             transitionBooleanSupplierPackager.toBooleanSupplier(trsFunction));
