@@ -151,13 +151,213 @@ ActionChainOptions chain = new ActionChainOptions.Builder(
     .build();
 ```
 
+## Critical Insight: Object Type Preservation in Chains
+
+:::warning Important
+When chaining actions that use different object types (e.g., StateImage for find/click vs StateString for type), be aware that the **NESTED strategy does NOT preserve all object types** through the chain.
+:::
+
+### The Object Type Problem
+
+The NESTED strategy creates a new ObjectCollection containing only regions from previous matches, **discarding other object types like StateStrings**. This is a common pitfall when trying to chain find->click->type operations.
+
+```java
+// ❌ WRONG: This will fail - strings are lost in NESTED chain
+PatternFindOptions findClickType = new PatternFindOptions.Builder()
+    .then(new ClickOptions.Builder().build())  // Uses StateImage
+    .then(new TypeOptions.Builder().build())   // Needs StateString - but it's lost!
+    .build();
+
+ObjectCollection mixed = new ObjectCollection.Builder()
+    .withImages(buttonImage)      // Used by find & click
+    .withStrings("Hello World")   // Lost during NESTED chaining!
+    .build();
+
+// The type action will receive NO strings and fail silently
+```
+
+### Solutions for Mixed Object Types
+
+#### Solution 1: Split Chains by Object Type (RECOMMENDED)
+
+Chain actions that use the same object type, then execute different types separately:
+
+```java
+// ✅ CORRECT: Chain find->click (both use StateImage)
+PatternFindOptions findClick = new PatternFindOptions.Builder()
+    .setPauseAfterEnd(0.5)
+    .then(new ClickOptions.Builder()
+        .setPauseAfterEnd(0.5)
+        .build())
+    .build();
+
+// Execute find->click with images
+ObjectCollection imageCollection = new ObjectCollection.Builder()
+    .withImages(buttonImage)
+    .build();
+ActionResult clickResult = action.perform(findClick, imageCollection);
+
+// Then execute type separately with strings
+TypeOptions typeOptions = new TypeOptions.Builder()
+    .setPauseBeforeBegin(0.5)
+    .build();
+ObjectCollection stringCollection = new ObjectCollection.Builder()
+    .withStrings("Hello World")
+    .build();
+ActionResult typeResult = action.perform(typeOptions, stringCollection);
+```
+
+#### Solution 2: Use CONFIRM Strategy
+
+The CONFIRM strategy preserves the original ObjectCollection, but may not be semantically appropriate for all workflows:
+
+```java
+// ✅ Alternative: CONFIRM strategy preserves all objects
+ActionChainOptions chain = new ActionChainOptions.Builder(
+    new PatternFindOptions.Builder().build())
+    .setStrategy(ActionChainOptions.ChainingStrategy.CONFIRM)  // Preserves ObjectCollection
+    .then(new ClickOptions.Builder().build())
+    .then(new TypeOptions.Builder().build())
+    .build();
+
+// Now mixed collections work
+ObjectCollection mixed = new ObjectCollection.Builder()
+    .withImages(buttonImage)
+    .withStrings("Hello World")
+    .build();
+```
+
+#### Solution 3: Custom Coordination
+
+For complex workflows, manually coordinate between actions:
+
+```java
+// ✅ Full control: Coordinate actions manually
+ActionResult findResult = action.find(targetImage);
+if (findResult.isSuccess()) {
+    // Click at the found location
+    ObjectCollection clickTarget = new ObjectCollection.Builder()
+        .withRegions(findResult.getMatchList().get(0).getRegion())
+        .build();
+    action.perform(new ClickOptions.Builder().build(), clickTarget);
+    
+    // Then type
+    ObjectCollection typeTarget = new ObjectCollection.Builder()
+        .withStrings("Hello World")
+        .build();
+    action.perform(new TypeOptions.Builder().build(), typeTarget);
+}
+```
+
 ## Best Practices
 
-1. **Use appropriate strategies**: Choose NESTED for hierarchical navigation, CONFIRM for validation
-2. **Set proper delays**: Use `setPauseAfterEnd()` to allow UI updates between actions
-3. **Handle failures gracefully**: Check intermediate results when needed
-4. **Create reusable patterns**: Build utility methods for common chains
-5. **Keep chains focused**: Break complex workflows into smaller, manageable chains
+1. **Understand object type flow**: Know which actions use which object types
+   - Find/Click/Drag: Use StateImage, StateRegion, StateLocation
+   - Type: Uses StateString
+   - Highlight: Uses any visual object type
+2. **Chain same-type actions**: Group actions that use the same object type
+3. **Use appropriate strategies**: 
+   - NESTED: For hierarchical searches within same object type
+   - CONFIRM: When you need to preserve all object types
+4. **Set proper delays**: Use `setPauseAfterEnd()` to allow UI updates between actions
+5. **Handle failures gracefully**: Check intermediate results when needed
+6. **Create reusable patterns**: Build utility methods for common chains
+7. **Keep chains focused**: Break complex workflows into smaller, manageable chains
+
+## Common Pattern: Find-Click-Type Workflow
+
+This is one of the most common automation patterns - finding an input field, clicking it, and typing text. Here's the definitive guide:
+
+### ❌ Common Mistake
+
+```java
+// This looks logical but FAILS due to object type loss
+PatternFindOptions chainedActions = new PatternFindOptions.Builder()
+    .then(new ClickOptions.Builder().build())
+    .then(new TypeOptions.Builder().build())
+    .build();
+
+ObjectCollection everything = new ObjectCollection.Builder()
+    .withImages(inputFieldImage)
+    .withStrings("user@example.com")
+    .build();
+
+// The type action never receives the string!
+action.perform(chainedActions, everything);
+```
+
+### ✅ Correct Implementation
+
+```java
+@Component
+public class LoginAutomation {
+    @Autowired
+    private Action action;
+    
+    public boolean fillLoginForm(StateImage emailField, StateImage passwordField,
+                                 String email, String password) {
+        // Step 1: Find and click email field
+        PatternFindOptions findClickEmail = new PatternFindOptions.Builder()
+            .setSimilarity(0.85)
+            .setPauseAfterEnd(0.3)
+            .then(new ClickOptions.Builder()
+                .setPauseAfterEnd(0.5)  // Wait for field to be active
+                .build())
+            .build();
+        
+        ObjectCollection emailFieldTarget = new ObjectCollection.Builder()
+            .withImages(emailField)
+            .build();
+        
+        ActionResult emailClick = action.perform(findClickEmail, emailFieldTarget);
+        if (!emailClick.isSuccess()) {
+            log.error("Failed to find/click email field");
+            return false;
+        }
+        
+        // Step 2: Type email
+        TypeOptions typeEmail = new TypeOptions.Builder()
+            .setPauseBeforeBegin(0.2)
+            .setTypeDelay(0.05)  // Human-like typing speed
+            .build();
+        
+        ObjectCollection emailText = new ObjectCollection.Builder()
+            .withStrings(email)
+            .build();
+        
+        action.perform(typeEmail, emailText);
+        
+        // Step 3: Tab to password field (or find-click it)
+        action.perform(new TypeOptions.Builder().build(), 
+            new ObjectCollection.Builder().withStrings("\t").build());
+        
+        // Step 4: Type password
+        ObjectCollection passwordText = new ObjectCollection.Builder()
+            .withStrings(password)
+            .build();
+        
+        action.perform(typeEmail, passwordText);
+        
+        return true;
+    }
+}
+```
+
+### Alternative: Using State Transitions
+
+For complex forms, consider using state transitions instead of chained actions:
+
+```java
+@Transition(from = LoginFormState.class, to = FilledFormState.class)
+public class FillLoginFormTransition {
+    
+    public boolean execute() {
+        // Each action is clear and separated
+        // State management handles the flow
+        return fillEmailField() && fillPasswordField() && clickSubmit();
+    }
+}
+```
 
 ## Enhanced Conditional Action Chaining
 
