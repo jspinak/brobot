@@ -82,7 +82,6 @@ public class ApplicationLifecycleService {
      * @return true if shutdown has been initiated
      */
     public boolean isShutdownInProgress() {
-        // This could be enhanced to track shutdown state
-        return false;
+        return shutdownHandler.isShutdownInProgress();
     }
 }
