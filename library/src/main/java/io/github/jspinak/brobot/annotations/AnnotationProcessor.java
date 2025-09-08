@@ -397,23 +397,50 @@ public class AnnotationProcessor {
         // Use HashSet to create a mutable set
         javaTransition.setActivate(new HashSet<>(Set.of(toStateId)));
         
+        // Debug: Print state information
+        System.out.println("=== ANNOTATION DEBUG: Processing transition from " + fromName + "(" + fromStateId + 
+                          ") to " + toName + "(" + toStateId + ")");
+        
+        // CRITICAL: Re-fetch the state IDs after ALL states have been saved
+        // This ensures we have the correct IDs assigned by StateStore
+        Long correctFromId = stateService.getState(fromName)
+            .map(State::getId)
+            .orElse(fromStateId);
+        Long correctToId = stateService.getState(toName)
+            .map(State::getId)
+            .orElse(toStateId);
+            
+        if (!correctFromId.equals(fromStateId) || !correctToId.equals(toStateId)) {
+            System.out.println("=== ANNOTATION DEBUG: State ID correction needed!");
+            System.out.println("===   From: " + fromStateId + " -> " + correctFromId);
+            System.out.println("===   To: " + toStateId + " -> " + correctToId);
+            fromStateId = correctFromId;
+            toStateId = correctToId;
+            
+            // Update the transition's activate set with corrected ID
+            javaTransition.setActivate(new HashSet<>(Set.of(correctToId)));
+        }
+        
         // Get existing transitions for this state or create new container
-        Optional<StateTransitions> existingTransitions = transitionService.getTransitions(fromStateId);
+        Optional<StateTransitions> existingTransitions = transitionService.getTransitions(correctFromId);
         StateTransitions stateTransitions;
         
         if (existingTransitions.isPresent()) {
+            System.out.println("=== ANNOTATION DEBUG: Found existing StateTransitions for " + fromName);
             stateTransitions = existingTransitions.get();
             stateTransitions.addTransition(javaTransition);
             // Existing transitions are already in the repository, no need to add again
         } else {
+            System.out.println("=== ANNOTATION DEBUG: Creating new StateTransitions for " + fromName);
             // Create new StateTransitions container for the from state
             stateTransitions = new StateTransitions.Builder(fromName)
                     .addTransition(javaTransition)
                     .build();
-            stateTransitions.setStateId(fromStateId);
+            stateTransitions.setStateId(correctFromId);
             
             // Register new StateTransitions with StateTransitionStore repository
             transitionService.getStateTransitionsRepository().add(stateTransitions);
+            System.out.println("=== ANNOTATION DEBUG: Added StateTransitions to repository for state " + correctFromId);
         }
         
         // Also add to joint table for path finding

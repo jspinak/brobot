@@ -170,11 +170,16 @@ public class StateTransitionsJointTable {
      * @param stateTransitions Container of transitions to process
      */
     public void addToJointTable(StateTransitions stateTransitions) {
+        System.out.println("=== JOINT TABLE DEBUG: Adding transitions for state " + stateTransitions.getStateId());
         for (StateTransition transition : stateTransitions.getTransitions()) {
+            System.out.println("=== JOINT TABLE DEBUG: Processing transition with activations: " + transition.getActivate());
             for (Long child : transition.getActivate()) {
+                System.out.println("=== JOINT TABLE DEBUG: Adding transition from " + stateTransitions.getStateId() + " to " + child);
                 add(child, stateTransitions.getStateId());
             }
         }
+        System.out.println("=== JOINT TABLE DEBUG: After addition, outgoing from " + stateTransitions.getStateId() + ": " + 
+                          outgoingTransitions.get(stateTransitions.getStateId()));
     }
 
     /**
