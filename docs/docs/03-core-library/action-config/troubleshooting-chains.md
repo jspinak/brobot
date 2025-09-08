@@ -201,5 +201,5 @@ ConditionalActionChain
 
 - See [Action Chaining Guide](./07-action-chaining.md) for detailed documentation
 - Review [Enhanced Conditional Chains](./conditional-chains-examples) for advanced patterns
-- Check [Integration Tests](/docs/04-testing/integration-testing) for working examples
+- Check [Integration Tests](/docs/testing/integration-testing) for working examples
 - Consult the [API Reference](./05-reference.md) for all options
