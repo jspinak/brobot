@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import io.github.jspinak.brobot.model.transition.StateTransition;
+import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.navigation.transition.StateTransitions;
 import lombok.Getter;
 import lombok.Setter;
@@ -115,8 +116,17 @@ public class Path {
     }
 
     public void print() {
-        System.out.format("(%d)", score);
+        System.out.format("  (%d) ", score);
         states.forEach(s -> System.out.format("-> %s ", s));
+        System.out.println();
+    }
+    
+    public void print(StateService stateService) {
+        System.out.format("  (%d) ", score);
+        states.forEach(s -> {
+            String stateName = stateService != null ? stateService.getStateName(s) : "Unknown";
+            System.out.format("-> %s(%s) ", s, stateName);
+        });
         System.out.println();
     }
 
