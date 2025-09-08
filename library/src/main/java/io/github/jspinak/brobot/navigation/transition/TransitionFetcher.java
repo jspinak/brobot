@@ -149,15 +149,29 @@ public class TransitionFetcher {
      * @return true if all components present and valid
      */
     private boolean isComplete() {
-        return
-                !Objects.equals(transitionToEnum, "null") &&
+        // The 'to' state might not have any transitions (it could be a terminal state)
+        // We only need the toState to be valid, not necessarily toTransitions or toTransition
+        boolean fromComplete = !Objects.equals(transitionToEnum, "null") &&
                 fromTransitions != null &&
                 fromTransition != null &&
                 fromState != null &&
-                fromTransitionFunction != null &&
-                toTransitions != null &&
-                toTransition != null &&
-                toState != null;
+                fromTransitionFunction != null;
+        
+        boolean toComplete = toState != null;
+        
+        if (!fromComplete || !toComplete) {
+            System.out.println("=== TRANSITION DEBUG: isComplete() check failed:");
+            System.out.println("===   transitionToEnum: " + transitionToEnum);
+            System.out.println("===   fromTransitions: " + (fromTransitions != null));
+            System.out.println("===   fromTransition: " + (fromTransition != null));
+            System.out.println("===   fromState: " + (fromState != null));
+            System.out.println("===   fromTransitionFunction: " + (fromTransitionFunction != null));
+            System.out.println("===   toState: " + (toState != null));
+            System.out.println("===   toTransitions: " + (toTransitions != null) + " (optional)");
+            System.out.println("===   toTransition: " + (toTransition != null) + " (optional)");
+        }
+        
+        return fromComplete && toComplete;
     }
 
     /**
