@@ -19,6 +19,7 @@ import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.state.StateObject;
 import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
+import io.github.jspinak.brobot.statemanagement.StateMemoryUpdater;
 import io.github.jspinak.brobot.tools.logging.visual.HighlightManager;
 import io.github.jspinak.brobot.tools.logging.visual.VisualFeedbackConfig;
 import io.github.jspinak.brobot.util.string.TextSelector;
@@ -76,6 +77,7 @@ public class FindPipeline {
     private final ModernFindStrategyRegistry findStrategyRegistry;
     private final ActionSuccessCriteria actionSuccessCriteria;
     private final ConciseFindLogger conciseFindLogger;
+    private final StateMemoryUpdater stateMemoryUpdater;
     
     @Value("${brobot.highlighting.enabled:false}")
     private boolean highlightEnabled;
@@ -94,6 +96,7 @@ public class FindPipeline {
                        VisualFeedbackConfig visualFeedbackConfig,
                        ModernFindStrategyRegistry findStrategyRegistry,
                        ActionSuccessCriteria actionSuccessCriteria,
+                       StateMemoryUpdater stateMemoryUpdater,
                        @Autowired(required = false) ConciseFindLogger conciseFindLogger) {
         this.profileSetBuilder = profileSetBuilder;
         this.offsetLocationManager = offsetLocationManager;
@@ -108,6 +111,7 @@ public class FindPipeline {
         this.visualFeedbackConfig = visualFeedbackConfig;
         this.findStrategyRegistry = findStrategyRegistry;
         this.actionSuccessCriteria = actionSuccessCriteria;
+        this.stateMemoryUpdater = stateMemoryUpdater;
         this.conciseFindLogger = conciseFindLogger;
     }
 
@@ -272,6 +276,12 @@ public class FindPipeline {
         log.info("About to call saveMatchesToStateImages with {} matches", matches.size());
         saveMatchesToStateImages(matches, objectCollections);
         log.info("Finished saveMatchesToStateImages");
+        
+        // Update StateMemory based on found matches - when an image is found, 
+        // the state it belongs to should be set as active
+        if (!matches.isEmpty()) {
+            stateMemoryUpdater.updateFromActionResult(matches);
+        }
         
         // Update search regions for objects that depend on what we just found
         if (!matches.isEmpty()) {
