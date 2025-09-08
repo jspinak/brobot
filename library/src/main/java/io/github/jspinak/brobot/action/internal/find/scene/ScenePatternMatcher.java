@@ -207,6 +207,10 @@ public class ScenePatternMatcher {
         List<Match> topMatches = new ArrayList<>();
         final int MAX_VERBOSE_MATCHES = 3;
         
+        // Track filtered matches for combined logging
+        List<String> filteredOutMatches = new ArrayList<>();
+        List<String> acceptedRegionMatches = new ArrayList<>();
+        
         while (f.hasNext()) {
             org.sikuli.script.Match sikuliMatch = f.next();
             
@@ -227,24 +231,25 @@ public class ScenePatternMatcher {
                     int regionW = region.w();
                     int regionH = region.h();
                     
-                    // Check if match center is within this region
-                    int matchCenterX = matchX + matchW / 2;
-                    int matchCenterY = matchY + matchH / 2;
+                    // Check if entire match is within this region (not just center)
+                    // This ensures consistency with RegionBasedProofer filtering
+                    boolean matchFullyContained = 
+                        matchX >= regionX && 
+                        matchY >= regionY && 
+                        (matchX + matchW) <= (regionX + regionW) && 
+                        (matchY + matchH) <= (regionY + regionH);
                     
-                    if (matchCenterX >= regionX && matchCenterX < regionX + regionW &&
-                        matchCenterY >= regionY && matchCenterY < regionY + regionH) {
+                    if (matchFullyContained) {
                         withinSearchRegion = true;
                         if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
-                            ConsoleReporter.println("[FILTER] Match at (" + matchX + ", " + matchY + 
-                                ") accepted - within region [" + regionX + "," + regionY + " " + regionW + "x" + regionH + "]");
+                            acceptedRegionMatches.add("(" + matchX + ", " + matchY + ")");
                         }
                         break;
                     }
                 }
                 
                 if (!withinSearchRegion && verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
-                    ConsoleReporter.println("[FILTER] Match at (" + matchX + ", " + matchY + 
-                        ") filtered out - not within any search regions");
+                    filteredOutMatches.add("(" + matchX + ", " + matchY + ")");
                 }
             }
             
@@ -301,6 +306,23 @@ public class ScenePatternMatcher {
         }
         
         f.destroy();
+        
+        // Log combined filter messages if verbose mode is enabled
+        if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
+            // Log all filtered out matches in one message
+            if (!filteredOutMatches.isEmpty()) {
+                String filteredList = String.join(", ", filteredOutMatches);
+                ConsoleReporter.println("[OBSERVE] [FILTER] " + filteredOutMatches.size() + 
+                    " matches filtered out (not fully contained in search regions): " + filteredList);
+            }
+            
+            // Log all accepted matches in one message if needed
+            if (!acceptedRegionMatches.isEmpty() && acceptedRegionMatches.size() > 3) {
+                // Only log if there are many accepted matches to avoid clutter
+                ConsoleReporter.println("[OBSERVE] [FILTER] " + acceptedRegionMatches.size() + 
+                    " matches accepted within search regions");
+            }
+        }
         
         // Log match summary
         if (conciseFindLogger == null) {

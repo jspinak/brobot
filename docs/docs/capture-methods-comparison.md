@@ -51,7 +51,7 @@ A comprehensive comparison study was conducted to determine the optimal screen c
 - **SikuliX Tool ↔ SikuliX/Robot**: 97.2% similarity
 - Minor differences due to capture timing
 
-#### Significant Differences (<80% Similarity)
+#### Significant Differences (&lt;80% Similarity)
 - **Robot Tool** captures showed 69-75% similarity with other methods
 - Likely due to different color space handling or compression
 

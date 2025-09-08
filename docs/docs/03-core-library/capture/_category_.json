@@ -5,7 +5,7 @@
   "collapsed": false,
   "link": {
     "type": "doc",
-    "id": "capture/modular-capture-system"
+    "id": "core-library/capture/modular-capture-system"
   },
   "customProps": {
     "description": "Modular screen capture system with Robot, FFmpeg, and SikuliX providers"
