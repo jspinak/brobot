@@ -75,6 +75,15 @@ public class BrobotShutdownHandler {
     }
     
     /**
+     * Checks if shutdown is currently in progress.
+     * 
+     * @return true if shutdown has been initiated
+     */
+    public boolean isShutdownInProgress() {
+        return shutdownInProgress;
+    }
+    
+    /**
      * Performs the actual shutdown sequence.
      */
     private synchronized void performShutdown() {
@@ -100,6 +109,10 @@ public class BrobotShutdownHandler {
             
             log.info("Brobot shutdown sequence completed successfully");
             
+        } catch (InterruptedException e) {
+            // Preserve interrupt status when InterruptedException occurs
+            Thread.currentThread().interrupt();
+            log.warn("Shutdown sequence interrupted, preserving interrupt status");
         } catch (Exception e) {
             log.error("Error during Brobot shutdown", e);
         }
@@ -138,6 +151,11 @@ public class BrobotShutdownHandler {
      * @param exitCode The exit code to use (0 for success, non-zero for error)
      */
     public void initiateGracefulShutdown(int exitCode) {
+        if (shutdownInProgress) {
+            log.debug("Shutdown already in progress, ignoring duplicate request");
+            return;
+        }
+        
         log.info("Graceful shutdown requested with exit code: {}", exitCode);
         
         // Perform cleanup first
