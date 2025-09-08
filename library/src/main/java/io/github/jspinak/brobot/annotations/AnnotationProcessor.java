@@ -404,16 +404,17 @@ public class AnnotationProcessor {
         if (existingTransitions.isPresent()) {
             stateTransitions = existingTransitions.get();
             stateTransitions.addTransition(javaTransition);
+            // Existing transitions are already in the repository, no need to add again
         } else {
             // Create new StateTransitions container for the from state
             stateTransitions = new StateTransitions.Builder(fromName)
                     .addTransition(javaTransition)
                     .build();
             stateTransitions.setStateId(fromStateId);
+            
+            // Register new StateTransitions with StateTransitionStore repository
+            transitionService.getStateTransitionsRepository().add(stateTransitions);
         }
-        
-        // Register with StateTransitionStore repository
-        transitionService.getStateTransitionsRepository().add(stateTransitions);
         
         // Also add to joint table for path finding
         jointTable.addToJointTable(stateTransitions);
