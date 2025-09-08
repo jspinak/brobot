@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-sikulix-to-javacv-migration" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.8.1">
+<title data-rh="true">SikuliX to JavaCV Migration Strategy | Brobot</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://jspinak.github.io/brobot/docs/sikulix-to-javacv-migration"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="SikuliX to JavaCV Migration Strategy | Brobot"><meta data-rh="true" name="description" content="Executive Summary"><meta data-rh="true" property="og:description" content="Executive Summary"><link data-rh="true" rel="icon" href="/brobot/img/brobot-happy.ico"><link data-rh="true" rel="canonical" href="https://jspinak.github.io/brobot/docs/sikulix-to-javacv-migration"><link data-rh="true" rel="alternate" href="https://jspinak.github.io/brobot/docs/sikulix-to-javacv-migration" hreflang="en"><link data-rh="true" rel="alternate" href="https://jspinak.github.io/brobot/docs/sikulix-to-javacv-migration" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"SikuliX to JavaCV Migration Strategy","item":"https://jspinak.github.io/brobot/docs/sikulix-to-javacv-migration"}]}</script><link rel="alternate" type="application/rss+xml" href="/brobot/blog/rss.xml" title="Brobot RSS Feed">
+<link rel="alternate" type="application/atom+xml" href="/brobot/blog/atom.xml" title="Brobot Atom Feed">
+
+
+
+
+<link rel="preconnect" href="https://www.google-analytics.com">
+<link rel="preconnect" href="https://www.googletagmanager.com">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6WY1S6ZWEY"></script>
+<script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","G-6WY1S6ZWEY",{anonymize_ip:!0})</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous"><link rel="stylesheet" href="/brobot/assets/css/styles.1b22d91f.css">
+<script src="/brobot/assets/js/runtime~main.2197dcb2.js" defer="defer"></script>
+<script src="/brobot/assets/js/main.74751b1e.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t="light";var e=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",e||t),document.documentElement.setAttribute("data-theme-choice",e||t)}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/brobot/"><div class="navbar__logo"><img src="/brobot/img/brobot_logo/brobot-happy-text.svg" alt="Brobot Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/brobot/img/brobot_logo/brobot-happy-text.svg" alt="Brobot Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">Brobot</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/brobot/docs/getting-started/introduction">Documentation</a><a href="https://jspinak.github.io/brobot/api/" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">API Reference<svg width="13.5" height="13.5" aria-hidden="true" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><a class="navbar__item navbar__link" href="/brobot/visualAPI">The Visual API</a><a class="navbar__item navbar__link" href="/brobot/blog">Blog</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a class="navbar__link" aria-haspopup="true" aria-expanded="false" role="button" href="/brobot/docs/sikulix-to-javacv-migration">Latest</a><ul class="dropdown__menu"><li><a aria-current="page" class="dropdown__link dropdown__link--active" href="/brobot/docs/sikulix-to-javacv-migration">Latest</a></li><li><a class="dropdown__link" href="/brobot/docs/1.0.7/getting-started/introduction">1.0.7</a></li><li><a class="dropdown__link" href="/brobot/docs/1.0.6/introduction">1.0.6</a></li></ul></div><a href="https://github.com/jspinak/brobot" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-hidden="true" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/brobot/docs/getting-started/introduction">Getting Started</a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/brobot/docs/no-code-automation/desktop-runner/runner-overview">No-Code Automation (Beta)</a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/brobot/docs/core-library/guides/finding-objects/configuration-note">Core Library (for Developers)</a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/brobot/docs/testing/testing-intro">Testing Your Automation</a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist" href="/brobot/docs/category/theoretical-foundations">Theoretical Foundations</a><button aria-label="Expand sidebar category &#x27;Theoretical Foundations&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist" href="/brobot/docs/category/integrations">Integrations</a><button aria-label="Expand sidebar category &#x27;Integrations&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/brobot/docs/brobot-name-origin">Origin of the Name Brobot</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/brobot/docs/ASPECTJ_USAGE_GUIDE">AspectJ Usage Guide for Brobot</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/brobot/docs/ai-brobot-project-creation">AI Instructions for Creating Brobot Projects</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/brobot/docs/capture-methods-comparison">Screenshot Capture Methods Comparison Study</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/brobot/docs/complete-javacv-replacement">Complete SikuliX Replacement with JavaCV + Robot</a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/brobot/docs/migration/actionoptions-to-actionconfig">migration</a></div></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/brobot/docs/pattern-capture-tool-guide">Brobot Pattern Capture Tool Guide</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/brobot/docs/pattern-creation-tools">Pattern Creation Tools Guide</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/brobot/docs/preparing-folder-for-ai-project-creation">Preparing a Folder for AI-Assisted Brobot Project Creation</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/brobot/docs/quick-start-capture-setup">Quick Start: Pattern Capture Setup</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" href="/brobot/docs/sikulix-to-javacv-migration">SikuliX to JavaCV Migration Strategy</a></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/brobot/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">SikuliX to JavaCV Migration Strategy</span></li></ul></nav><span class="theme-doc-version-badge badge badge--secondary">Version: Latest</span><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>SikuliX to JavaCV Migration Strategy</h1></header>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="executive-summary">Executive Summary<a href="#executive-summary" class="hash-link" aria-label="Direct link to Executive Summary" title="Direct link to Executive Summary">​</a></h2>
+<p>Brobot can completely replace SikuliX with JavaCV, providing a more modern, efficient, and maintainable solution. The migration would reduce dependencies, improve performance, and provide better control over core functionality.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="current-architecture-analysis">Current Architecture Analysis<a href="#current-architecture-analysis" class="hash-link" aria-label="Direct link to Current Architecture Analysis" title="Direct link to Current Architecture Analysis">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="sikulix-dependencies-what-we-use">SikuliX Dependencies (What We Use)<a href="#sikulix-dependencies-what-we-use" class="hash-link" aria-label="Direct link to SikuliX Dependencies (What We Use)" title="Direct link to SikuliX Dependencies (What We Use)">​</a></h3>
+<ol>
+<li>
+<p><strong>Pattern Matching</strong> (<code>org.sikuli.script.Finder</code>)</p>
+<ul>
+<li>Template matching for finding images</li>
+<li>~60 files depend on this</li>
+</ul>
+</li>
+<li>
+<p><strong>OCR</strong> (<code>org.sikuli.script.OCR</code>)</p>
+<ul>
+<li>Text recognition via Tesseract</li>
+<li>Used for text-based automation</li>
+</ul>
+</li>
+<li>
+<p><strong>Input Control</strong> (<code>org.sikuli.script.Mouse</code>, <code>org.sikuli.script.Key</code>)</p>
+<ul>
+<li>Mouse and keyboard simulation</li>
+<li>Cross-platform input handling</li>
+</ul>
+</li>
+<li>
+<p><strong>Geometric Classes</strong> (<code>org.sikuli.script.Region</code>, <code>org.sikuli.script.Location</code>)</p>
+<ul>
+<li>Rectangle and point abstractions</li>
+<li>Used throughout for positioning</li>
+</ul>
+</li>
+<li>
+<p><strong>Image Management</strong> (<code>org.sikuli.script.ImagePath</code>)</p>
+<ul>
+<li>Pattern loading and caching</li>
+<li>Bundle management</li>
+</ul>
+</li>
+</ol>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="javacv-replacement-architecture">JavaCV Replacement Architecture<a href="#javacv-replacement-architecture" class="hash-link" aria-label="Direct link to JavaCV Replacement Architecture" title="Direct link to JavaCV Replacement Architecture">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="direct-replacements-available">Direct Replacements Available<a href="#direct-replacements-available" class="hash-link" aria-label="Direct link to Direct Replacements Available" title="Direct link to Direct Replacements Available">​</a></h3>
+<table><thead><tr><th>SikuliX Component</th><th>JavaCV Replacement</th><th>Status</th></tr></thead><tbody><tr><td>Screen Capture</td><td>✅ JavaCVFFmpegProvider</td><td><strong>Implemented &amp; Tested</strong></td></tr><tr><td>Pattern Matching</td><td>JavaCVPatternMatcher</td><td><strong>Proof of Concept Ready</strong></td></tr><tr><td>OCR</td><td>JavaCVOCRService</td><td><strong>Proof of Concept Ready</strong></td></tr><tr><td>Mouse/Keyboard</td><td>Java Robot API</td><td><strong>Already in RobotProvider</strong></td></tr><tr><td>Region/Location</td><td>Java AWT Rectangle/Point</td><td><strong>Simple replacement</strong></td></tr><tr><td>Image Loading</td><td>Java ImageIO + JavaCV</td><td><strong>Straightforward</strong></td></tr></tbody></table>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="benefits-of-migration">Benefits of Migration<a href="#benefits-of-migration" class="hash-link" aria-label="Direct link to Benefits of Migration" title="Direct link to Benefits of Migration">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="1-performance-improvements">1. Performance Improvements<a href="#1-performance-improvements" class="hash-link" aria-label="Direct link to 1. Performance Improvements" title="Direct link to 1. Performance Improvements">​</a></h3>
+<ul>
+<li><strong>Direct OpenCV calls</strong> - No abstraction overhead</li>
+<li><strong>Native memory management</strong> - Better control over resources</li>
+<li><strong>Optimized algorithms</strong> - Can choose specific OpenCV methods</li>
+<li><strong>Parallel processing</strong> - JavaCV supports GPU acceleration</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="2-reduced-dependencies">2. Reduced Dependencies<a href="#2-reduced-dependencies" class="hash-link" aria-label="Direct link to 2. Reduced Dependencies" title="Direct link to 2. Reduced Dependencies">​</a></h3>
+<ul>
+<li><strong>Remove 60MB+ SikuliX JAR</strong></li>
+<li><strong>Single ecosystem</strong> - JavaCV for both capture and matching</li>
+<li><strong>Fewer version conflicts</strong> - One OpenCV version</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="3-better-maintenance">3. Better Maintenance<a href="#3-better-maintenance" class="hash-link" aria-label="Direct link to 3. Better Maintenance" title="Direct link to 3. Better Maintenance">​</a></h3>
+<ul>
+<li><strong>Active development</strong> - JavaCV is actively maintained</li>
+<li><strong>Modern API</strong> - Better documentation and examples</li>
+<li><strong>Direct debugging</strong> - No black box abstractions</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="4-proven-success">4. Proven Success<a href="#4-proven-success" class="hash-link" aria-label="Direct link to 4. Proven Success" title="Direct link to 4. Proven Success">​</a></h3>
+<ul>
+<li><strong>FFmpeg capture</strong> - Already achieving 100% match with Windows</li>
+<li><strong>Production ready</strong> - JavaCV used in many production systems</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="implementation-plan">Implementation Plan<a href="#implementation-plan" class="hash-link" aria-label="Direct link to Implementation Plan" title="Direct link to Implementation Plan">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="phase-1-parallel-implementation-low-risk">Phase 1: Parallel Implementation (Low Risk)<a href="#phase-1-parallel-implementation-low-risk" class="hash-link" aria-label="Direct link to Phase 1: Parallel Implementation (Low Risk)" title="Direct link to Phase 1: Parallel Implementation (Low Risk)">​</a></h3>
+<p><strong>Duration: 2-4 weeks</strong></p>
+<ol>
+<li>
+<p><strong>Complete JavaCV implementations</strong></p>
+<div class="language-java codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-java codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">@Component</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">public class AdaptivePatternMatcher {</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    @Value(&quot;${brobot.matcher:SIKULIX}&quot;)</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    private String provider;</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    </span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    public List&lt;Match&gt; find(BufferedImage screen, Pattern pattern) {</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">        return &quot;JAVACV&quot;.equals(provider) </span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">            ? javaCVMatcher.find(screen, pattern)</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">            : sikuliMatcher.find(screen, pattern);</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    }</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">}</span><br></span></code></pre></div></div>
+</li>
+<li>
+<p><strong>Add configuration switches</strong></p>
+<div class="language-properties codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-properties codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain"># application.properties</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">brobot.matcher.provider=JAVACV  # or SIKULIX</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">brobot.ocr.provider=JAVACV      # or SIKULIX</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">brobot.input.provider=ROBOT     # or SIKULIX</span><br></span></code></pre></div></div>
+</li>
+<li>
+<p><strong>Compatibility adapters</strong></p>
+<ul>
+<li>Convert between SikuliX and JavaCV result formats</li>
+<li>Maintain existing APIs</li>
+</ul>
+</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="phase-2-testing--validation-critical">Phase 2: Testing &amp; Validation (Critical)<a href="#phase-2-testing--validation-critical" class="hash-link" aria-label="Direct link to Phase 2: Testing &amp; Validation (Critical)" title="Direct link to Phase 2: Testing &amp; Validation (Critical)">​</a></h3>
+<p><strong>Duration: 2-3 weeks</strong></p>
+<ol>
+<li>
+<p><strong>Performance benchmarks</strong></p>
+<div class="language-java codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-java codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">@Test</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">public void compareMatchingPerformance() {</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    // Test 1000 pattern matches</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    long sikulixTime = timeMatching(sikulixMatcher);</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    long javacvTime = timeMatching(javaCVMatcher);</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    </span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    // Expect JavaCV to be faster</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    assertTrue(javacvTime &lt; sikulixTime);</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">}</span><br></span></code></pre></div></div>
+</li>
+<li>
+<p><strong>Accuracy comparison</strong></p>
+<ul>
+<li>Match score differences</li>
+<li>False positive/negative rates</li>
+<li>OCR accuracy metrics</li>
+</ul>
+</li>
+<li>
+<p><strong>Memory profiling</strong></p>
+<ul>
+<li>Heap usage comparison</li>
+<li>Native memory tracking</li>
+<li>Leak detection</li>
+</ul>
+</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="phase-3-gradual-migration-safe">Phase 3: Gradual Migration (Safe)<a href="#phase-3-gradual-migration-safe" class="hash-link" aria-label="Direct link to Phase 3: Gradual Migration (Safe)" title="Direct link to Phase 3: Gradual Migration (Safe)">​</a></h3>
+<p><strong>Duration: 4-6 weeks</strong></p>
+<ol>
+<li>
+<p><strong>Module by module conversion</strong></p>
+<ul>
+<li>Start with non-critical modules</li>
+<li>Run both in parallel initially</li>
+<li>Switch based on success metrics</li>
+</ul>
+</li>
+<li>
+<p><strong>User opt-in</strong></p>
+<div class="language-properties codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-properties codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain"># Users can choose</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">brobot.experimental.javacv=true</span><br></span></code></pre></div></div>
+</li>
+<li>
+<p><strong>Fallback mechanism</strong></p>
+<div class="language-java codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-java codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">try {</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    return javaCVMatcher.find(screen, pattern);</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">} catch (Exception e) {</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    log.warn(&quot;JavaCV failed, falling back to SikuliX&quot;, e);</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    return sikulixMatcher.find(screen, pattern);</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">}</span><br></span></code></pre></div></div>
+</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="phase-4-complete-migration-final">Phase 4: Complete Migration (Final)<a href="#phase-4-complete-migration-final" class="hash-link" aria-label="Direct link to Phase 4: Complete Migration (Final)" title="Direct link to Phase 4: Complete Migration (Final)">​</a></h3>
+<p><strong>Duration: 2-3 weeks</strong></p>
+<ol>
+<li><strong>Remove SikuliX dependencies</strong></li>
+<li><strong>Update documentation</strong></li>
+<li><strong>Migration tools for users</strong></li>
+</ol>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="code-examples">Code Examples<a href="#code-examples" class="hash-link" aria-label="Direct link to Code Examples" title="Direct link to Code Examples">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="pattern-matching-comparison">Pattern Matching Comparison<a href="#pattern-matching-comparison" class="hash-link" aria-label="Direct link to Pattern Matching Comparison" title="Direct link to Pattern Matching Comparison">​</a></h3>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="current-sikulix">Current (SikuliX)<a href="#current-sikulix" class="hash-link" aria-label="Direct link to Current (SikuliX)" title="Direct link to Current (SikuliX)">​</a></h4>
+<div class="language-java codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-java codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">Finder finder = new Finder(screenImage);</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">finder.findAll(pattern.sikuli());</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">while (finder.hasNext()) {</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    Match match = finder.next();</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    // Process match</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">}</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">finder.destroy();</span><br></span></code></pre></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="new-javacv">New (JavaCV)<a href="#new-javacv" class="hash-link" aria-label="Direct link to New (JavaCV)" title="Direct link to New (JavaCV)">​</a></h4>
+<div class="language-java codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-java codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">JavaCVPatternMatcher matcher = new JavaCVPatternMatcher();</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">List&lt;MatchResult&gt; matches = matcher.findPatterns(</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    screenImage, pattern, options);</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">for (MatchResult match : matches) {</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    // Process match</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">}</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">// No explicit cleanup needed - try-with-resources in implementation</span><br></span></code></pre></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="ocr-comparison">OCR Comparison<a href="#ocr-comparison" class="hash-link" aria-label="Direct link to OCR Comparison" title="Direct link to OCR Comparison">​</a></h3>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="current-sikulix-1">Current (SikuliX)<a href="#current-sikulix-1" class="hash-link" aria-label="Direct link to Current (SikuliX)" title="Direct link to Current (SikuliX)">​</a></h4>
+<div class="language-java codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-java codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">List&lt;Match&gt; words = OCR.readWords(image);</span><br></span></code></pre></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="new-javacv-1">New (JavaCV)<a href="#new-javacv-1" class="hash-link" aria-label="Direct link to New (JavaCV)" title="Direct link to New (JavaCV)">​</a></h4>
+<div class="language-java codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-java codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">JavaCVOCRService ocr = new JavaCVOCRService();</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">List&lt;WordMatch&gt; words = ocr.findWords(image);</span><br></span></code></pre></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="risk-mitigation">Risk Mitigation<a href="#risk-mitigation" class="hash-link" aria-label="Direct link to Risk Mitigation" title="Direct link to Risk Mitigation">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="compatibility-risks">Compatibility Risks<a href="#compatibility-risks" class="hash-link" aria-label="Direct link to Compatibility Risks" title="Direct link to Compatibility Risks">​</a></h3>
+<ul>
+<li><strong>Solution</strong>: Adapter pattern to maintain API compatibility</li>
+<li><strong>Testing</strong>: Comprehensive test suite comparing results</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="performance-risks">Performance Risks<a href="#performance-risks" class="hash-link" aria-label="Direct link to Performance Risks" title="Direct link to Performance Risks">​</a></h3>
+<ul>
+<li><strong>Solution</strong>: Benchmark before full migration</li>
+<li><strong>Fallback</strong>: Keep SikuliX as fallback option</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="user-impact">User Impact<a href="#user-impact" class="hash-link" aria-label="Direct link to User Impact" title="Direct link to User Impact">​</a></h3>
+<ul>
+<li><strong>Solution</strong>: Gradual rollout with opt-in</li>
+<li><strong>Documentation</strong>: Clear migration guides</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="success-metrics">Success Metrics<a href="#success-metrics" class="hash-link" aria-label="Direct link to Success Metrics" title="Direct link to Success Metrics">​</a></h2>
+<ol>
+<li>
+<p><strong>Performance</strong></p>
+<ul>
+<li>✅ Pattern matching 20% faster</li>
+<li>✅ Memory usage reduced by 30%</li>
+<li>✅ Startup time improved by 2 seconds</li>
+</ul>
+</li>
+<li>
+<p><strong>Reliability</strong></p>
+<ul>
+<li>✅ Same or better match accuracy</li>
+<li>✅ No increase in false positives</li>
+<li>✅ OCR accuracy maintained</li>
+</ul>
+</li>
+<li>
+<p><strong>Adoption</strong></p>
+<ul>
+<li>✅ 50% of users on JavaCV within 3 months</li>
+<li>✅ No critical bugs reported</li>
+<li>✅ Positive performance feedback</li>
+</ul>
+</li>
+</ol>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="recommendation">Recommendation<a href="#recommendation" class="hash-link" aria-label="Direct link to Recommendation" title="Direct link to Recommendation">​</a></h2>
+<p><strong>Proceed with Phase 1 immediately</strong>. The proof of concepts show JavaCV is viable and the benefits are substantial:</p>
+<ol>
+<li><strong>Already proven</strong> - FFmpeg capture shows JavaCV works perfectly</li>
+<li><strong>Low risk</strong> - Parallel implementation allows easy rollback</li>
+<li><strong>High reward</strong> - Significant performance and maintenance benefits</li>
+<li><strong>Future-proof</strong> - JavaCV is actively developed, SikuliX development has slowed</li>
+</ol>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="next-steps">Next Steps<a href="#next-steps" class="hash-link" aria-label="Direct link to Next Steps" title="Direct link to Next Steps">​</a></h2>
+<ol>
+<li><strong>Complete JavaCVPatternMatcher</strong> - Add remaining features</li>
+<li><strong>Integration tests</strong> - Ensure drop-in compatibility</li>
+<li><strong>Performance benchmarks</strong> - Quantify improvements</li>
+<li><strong>User documentation</strong> - Prepare migration guides</li>
+<li><strong>Beta program</strong> - Get early user feedback</li>
+</ol>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="conclusion">Conclusion<a href="#conclusion" class="hash-link" aria-label="Direct link to Conclusion" title="Direct link to Conclusion">​</a></h2>
+<p>Moving from SikuliX to JavaCV is not just feasible but highly recommended. The successful implementation of JavaCV FFmpeg capture (100% match with Windows) proves the approach works. A complete migration would modernize Brobot&#x27;s architecture, improve performance, and reduce technical debt.</p>
+<p>The phased approach ensures minimal risk while maximizing the benefits of a modern, efficient pattern matching and OCR solution.</p></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col"><a href="https://github.com/jspinak/brobot/edit/main/docs/docs/sikulix-to-javacv-migration.md" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/brobot/docs/quick-start-capture-setup"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Quick Start: Pattern Capture Setup</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#executive-summary" class="table-of-contents__link toc-highlight">Executive Summary</a></li><li><a href="#current-architecture-analysis" class="table-of-contents__link toc-highlight">Current Architecture Analysis</a><ul><li><a href="#sikulix-dependencies-what-we-use" class="table-of-contents__link toc-highlight">SikuliX Dependencies (What We Use)</a></li></ul></li><li><a href="#javacv-replacement-architecture" class="table-of-contents__link toc-highlight">JavaCV Replacement Architecture</a><ul><li><a href="#direct-replacements-available" class="table-of-contents__link toc-highlight">Direct Replacements Available</a></li></ul></li><li><a href="#benefits-of-migration" class="table-of-contents__link toc-highlight">Benefits of Migration</a><ul><li><a href="#1-performance-improvements" class="table-of-contents__link toc-highlight">1. Performance Improvements</a></li><li><a href="#2-reduced-dependencies" class="table-of-contents__link toc-highlight">2. Reduced Dependencies</a></li><li><a href="#3-better-maintenance" class="table-of-contents__link toc-highlight">3. Better Maintenance</a></li><li><a href="#4-proven-success" class="table-of-contents__link toc-highlight">4. Proven Success</a></li></ul></li><li><a href="#implementation-plan" class="table-of-contents__link toc-highlight">Implementation Plan</a><ul><li><a href="#phase-1-parallel-implementation-low-risk" class="table-of-contents__link toc-highlight">Phase 1: Parallel Implementation (Low Risk)</a></li><li><a href="#phase-2-testing--validation-critical" class="table-of-contents__link toc-highlight">Phase 2: Testing &amp; Validation (Critical)</a></li><li><a href="#phase-3-gradual-migration-safe" class="table-of-contents__link toc-highlight">Phase 3: Gradual Migration (Safe)</a></li><li><a href="#phase-4-complete-migration-final" class="table-of-contents__link toc-highlight">Phase 4: Complete Migration (Final)</a></li></ul></li><li><a href="#code-examples" class="table-of-contents__link toc-highlight">Code Examples</a><ul><li><a href="#pattern-matching-comparison" class="table-of-contents__link toc-highlight">Pattern Matching Comparison</a></li><li><a href="#ocr-comparison" class="table-of-contents__link toc-highlight">OCR Comparison</a></li></ul></li><li><a href="#risk-mitigation" class="table-of-contents__link toc-highlight">Risk Mitigation</a><ul><li><a href="#compatibility-risks" class="table-of-contents__link toc-highlight">Compatibility Risks</a></li><li><a href="#performance-risks" class="table-of-contents__link toc-highlight">Performance Risks</a></li><li><a href="#user-impact" class="table-of-contents__link toc-highlight">User Impact</a></li></ul></li><li><a href="#success-metrics" class="table-of-contents__link toc-highlight">Success Metrics</a></li><li><a href="#recommendation" class="table-of-contents__link toc-highlight">Recommendation</a></li><li><a href="#next-steps" class="table-of-contents__link toc-highlight">Next Steps</a></li><li><a href="#conclusion" class="table-of-contents__link toc-highlight">Conclusion</a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Docs</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://www.youtube.com/watch?v=aHnVQ8KmOVw" target="_blank" rel="noopener noreferrer" class="footer__link-item">Introductory Video</a></li><li class="footer__item"><a class="footer__link-item" href="/brobot/docs/getting-started/introduction">Get Started</a></li><li class="footer__item"><a class="footer__link-item" href="/brobot/visualAPI">The Visual API</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Community</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://stackoverflow.com/questions/tagged/brobot" target="_blank" rel="noopener noreferrer" class="footer__link-item">Stack Overflow<svg width="13.5" height="13.5" aria-hidden="true" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">More</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/brobot/blog">Blog</a></li><li class="footer__item"><a href="https://github.com/jspinak/brobot" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-hidden="true" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://www.youtube.com/channel/UCgRljq-lHkMLrzRzpJC4HNw" target="_blank" rel="noopener noreferrer" class="footer__link-item">YouTube<svg width="13.5" height="13.5" aria-hidden="true" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://search.maven.org/artifact/io.github.jspinak/brobot" target="_blank" rel="noopener noreferrer" class="footer__link-item">Maven Central<svg width="13.5" height="13.5" aria-hidden="true" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">© 2025 Joshua Spinak · Free & Open Source</div></div></div></footer></div>
+</body>
+</html>
