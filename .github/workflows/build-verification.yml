@@ -49,9 +49,12 @@ jobs:
       shell: bash
       run: |
         echo "Checking build artifacts..."
-        if [[ -f "library/build/libs/library-*.jar" ]]; then
+        if ls library/build/libs/library-*.jar 1> /dev/null 2>&1; then
           echo "✅ Library JAR created"
+          ls -la library/build/libs/library-*.jar
         else
           echo "❌ Library JAR not found"
+          echo "Contents of library/build/libs (if exists):"
+          ls -la library/build/libs/ 2>/dev/null || echo "Directory doesn't exist"
           exit 1
         fi
