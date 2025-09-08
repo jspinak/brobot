@@ -234,7 +234,7 @@ public class StateImage implements StateObject {
         List<Region> definedFixed = new ArrayList<>();
         for (Pattern pattern : patterns) {
             Region fixedRegion = pattern.getSearchRegions().getFixedRegion();
-            if (fixedRegion.isDefined()) definedFixed.add(fixedRegion);
+            if (fixedRegion != null && fixedRegion.isDefined()) definedFixed.add(fixedRegion);
         }
         return definedFixed;
     }
