@@ -138,11 +138,15 @@ public class TransitionExecutor {
      * @see #doTransitions(Long, Long)
      */
     public boolean go(Long fromStateId, Long toStateId) {
+        String fromStateName = allStatesInProjectService.getStateName(fromStateId);
+        String toStateName = allStatesInProjectService.getStateName(toStateId);
         if (doTransitions(fromStateId, toStateId)) {
-            ConsoleReporter.format(MessageFormatter.check+" Transition %s->%s successful. \n", fromStateId, toStateId);
+            ConsoleReporter.format(MessageFormatter.check+" Transition %s(%s)->%s(%s) successful. \n", 
+                fromStateId, fromStateName, toStateId, toStateName);
             return true;
         }
-        ConsoleReporter.format(MessageFormatter.fail+" Transition %s->%s not successful. \n", fromStateId, toStateId);
+        ConsoleReporter.format(MessageFormatter.fail+" Transition %s(%s)->%s(%s) not successful. \n", 
+            fromStateId, fromStateName, toStateId, toStateName);
         return false;
     }
 
@@ -180,17 +184,22 @@ public class TransitionExecutor {
      * @return true if transition completes successfully
      */
     private boolean doTransitions(Long from, Long to) {
+        String fromStateName = allStatesInProjectService.getStateName(from);
+        String toStateName = allStatesInProjectService.getStateName(to);
         if (!stateMemory.getActiveStates().contains(from)) {
-            System.out.println("=== TRANSITION DEBUG: 'from' state " + from + " is not active. Active states: " + stateMemory.getActiveStates());
+            String activeStatesStr = stateMemory.getActiveStates().stream()
+                .map(id -> id + "(" + allStatesInProjectService.getStateName(id) + ")")
+                .reduce("", (s1, s2) -> s1.isEmpty() ? s2 : s1 + ", " + s2);
+            System.out.println("=== TRANSITION DEBUG: 'from' state " + from + "(" + fromStateName + ") is not active. Active states: [" + activeStatesStr + "]");
             return false; // the 'from' State is not active
         }
         Optional<TransitionFetcher> transitionsOpt = transitionFetcher.getTransitions(from, to);
         if (transitionsOpt.isEmpty()) {
-            System.out.println("=== TRANSITION DEBUG: No transitions found from " + from + " to " + to);
+            System.out.println("=== TRANSITION DEBUG: No transitions found from " + from + "(" + fromStateName + ") to " + to + "(" + toStateName + ")");
             return false; // couldn't find one of the needed Transitions
         }
         TransitionFetcher transitions = transitionsOpt.get();
-        System.out.println("=== TRANSITION DEBUG: Executing FromTransition from " + from + " to " + to);
+        System.out.println("=== TRANSITION DEBUG: Executing FromTransition from " + from + "(" + fromStateName + ") to " + to + "(" + toStateName + ")");
         boolean transitionSuccess = transitions.getFromTransitionFunction().getAsBoolean();
         System.out.println("=== TRANSITION DEBUG: FromTransition result = " + transitionSuccess);
         if (!transitionSuccess) return false; // the FromTransition didn't succeed

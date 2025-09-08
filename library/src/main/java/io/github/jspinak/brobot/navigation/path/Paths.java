@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
+import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
 /**
@@ -107,7 +108,13 @@ public class Paths {
 
     public void print() {
         if (paths.isEmpty()) return;
-        ConsoleReporter.println("_(score)_Paths Found_");
+        System.out.println("\n=== Paths Found (score) ===");
         paths.forEach(Path::print);
+    }
+    
+    public void print(StateService stateService) {
+        if (paths.isEmpty()) return;
+        System.out.println("\n=== Paths Found (score) ===");
+        paths.forEach(path -> path.print(stateService));
     }
 }

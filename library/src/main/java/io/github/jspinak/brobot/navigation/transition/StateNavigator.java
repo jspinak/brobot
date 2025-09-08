@@ -203,7 +203,10 @@ public class StateNavigator {
         );
 
         if (!success) ConsoleReporter.println(MessageFormatter.fail+" All paths tried, open failed.");
-        ConsoleReporter.println("Active States: " + activeStates +"\n");
+        String activeStatesStr = activeStates.stream()
+            .map(id -> id + "(" + allStatesInProjectService.getStateName(id) + ")")
+            .reduce("", (s1, s2) -> s1.isEmpty() ? s2 : s1 + ", " + s2);
+        ConsoleReporter.println("Active States: [" + activeStatesStr + "]\n");
         return success;
     }
 

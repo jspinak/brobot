@@ -98,7 +98,7 @@ public class PathFinder {
         if (pathList.isEmpty()) ConsoleReporter.println(MessageFormatter.fail + "Path to state not found.");
         Paths paths = new Paths(pathList);
         paths.sort();
-        paths.print();
+        paths.print(allStates);
         return paths;
     }
 
