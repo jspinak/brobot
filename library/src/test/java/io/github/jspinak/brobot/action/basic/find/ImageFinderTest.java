@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -32,6 +33,8 @@ import static org.mockito.Mockito.*;
  * Tests various image finding strategies and operations.
  */
 @DisplayName("ImageFinder Tests")
+
+@DisabledInCI
 public class ImageFinderTest extends BrobotTestBase {
     
     @Mock

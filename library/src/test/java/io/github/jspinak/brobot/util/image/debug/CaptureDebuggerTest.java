@@ -23,11 +23,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+
+@DisabledInCI
 public class CaptureDebuggerTest extends BrobotTestBase {
 
     private CaptureDebugger captureDebugger;

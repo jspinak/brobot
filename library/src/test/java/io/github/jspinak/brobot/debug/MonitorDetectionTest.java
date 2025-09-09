@@ -10,12 +10,14 @@ import org.junit.jupiter.api.Assumptions;
 import org.sikuli.script.Screen;
 import org.sikuli.script.Region;
 import org.sikuli.script.Env;
+import io.github.jspinak.brobot.test.DisabledInCI;
 import java.awt.*;
 
 /**
  * Test to check if SikuliX is detecting monitors incorrectly,
  * which could cause coordinate offset issues.
  */
+@DisabledInCI
 public class MonitorDetectionTest extends DebugTestBase {
     
     @Test  

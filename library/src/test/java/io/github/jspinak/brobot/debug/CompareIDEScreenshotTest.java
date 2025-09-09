@@ -12,11 +12,13 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Test that compares different screenshot capture methods to understand
  * why SikuliX IDE achieves 0.99 similarity while Brobot gets 0.70.
  */
+@DisabledInCI
 public class CompareIDEScreenshotTest extends BrobotTestBase {
     
     @Test

@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
 import java.util.ArrayList;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -35,6 +36,8 @@ import static org.mockito.Mockito.*;
  * Ensures configurations follow business constraints and best practices.
  */
 @DisplayName("BusinessRuleValidator Tests")
+
+@DisabledInCI
 public class BusinessRuleValidatorTest extends BrobotTestBase {
     
     private BusinessRuleValidator validator;

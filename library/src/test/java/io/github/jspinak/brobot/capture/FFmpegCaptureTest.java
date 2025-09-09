@@ -13,6 +13,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * 
  * Compares FFmpeg captures with SikuliX captures to verify physical resolution.
  */
+@DisabledInCI
 public class FFmpegCaptureTest extends BrobotTestBase {
     
     @Autowired(required = false)

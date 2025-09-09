@@ -11,7 +11,9 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
+@DisabledInCI
 public class PatternMatchingVerificationTest extends BrobotTestBase {
     
     @Test

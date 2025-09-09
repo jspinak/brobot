@@ -16,11 +16,13 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Investigates why screenshots are blurry compared to SikuliX IDE patterns.
  * Tests different capture methods and DPI/scaling behavior.
  */
+@DisabledInCI
 public class ScreenCaptureInvestigationTest extends DebugTestBase {
     
     @Test

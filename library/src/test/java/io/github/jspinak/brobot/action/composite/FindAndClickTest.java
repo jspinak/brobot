@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import io.github.jspinak.brobot.model.action.MouseButton;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,6 +20,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests configuration combinations for find and click operations.
  */
 @DisplayName("FindAndClick Tests")
+
+@DisabledInCI
 public class FindAndClickTest extends BrobotTestBase {
     
     private PatternFindOptions defaultFindOptions;

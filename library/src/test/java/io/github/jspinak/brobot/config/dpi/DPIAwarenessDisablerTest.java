@@ -7,12 +7,14 @@ import org.sikuli.script.ScreenImage;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests that DPI awareness is properly disabled and captures occur at physical resolution.
  */
+@DisabledInCI
 public class DPIAwarenessDisablerTest extends BrobotTestBase {
     
     @Test

@@ -12,11 +12,13 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Definitive test to prove that file path vs BufferedImage loading makes no difference,
  * and that Settings.AlwaysResize is the real solution.
  */
+@DisabledInCI
 public class DefinitivePatternTest extends DebugTestBase {
     
     @Test

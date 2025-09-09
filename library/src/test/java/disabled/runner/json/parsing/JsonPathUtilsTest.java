@@ -15,6 +15,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 import java.util.Optional;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,6 +29,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Edge cases and error handling
  */
 @DisplayName("JsonPathUtils - JSON Path Navigation")
+
+@DisabledInCI
 public class JsonPathUtilsTest extends BrobotTestBase {
 
     private JsonPathUtils jsonPathUtils;

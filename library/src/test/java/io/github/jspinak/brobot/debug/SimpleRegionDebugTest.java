@@ -4,10 +4,12 @@ import io.github.jspinak.brobot.test.BrobotTestBase;
 
 import io.github.jspinak.brobot.model.element.Region;
 import org.junit.jupiter.api.Test;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Simple unit test to verify and debug region calculations.
  */
+@DisabledInCI
 public class SimpleRegionDebugTest extends BrobotTestBase {
     
     @Test

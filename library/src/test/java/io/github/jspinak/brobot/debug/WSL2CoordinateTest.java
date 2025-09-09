@@ -5,11 +5,13 @@ import io.github.jspinak.brobot.debug.DebugTestBase;
 import io.github.jspinak.brobot.model.element.Region;
 import org.junit.jupiter.api.Test;
 import org.sikuli.script.Screen;
+import io.github.jspinak.brobot.test.DisabledInCI;
 import java.awt.*;
 
 /**
  * Test to identify if WSL2/X11 is causing coordinate transformation issues.
  */
+@DisabledInCI
 public class WSL2CoordinateTest extends DebugTestBase {
     
     @Test

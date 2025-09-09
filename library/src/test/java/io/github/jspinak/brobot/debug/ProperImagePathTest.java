@@ -9,10 +9,12 @@ import org.sikuli.basics.Debug;
 import java.io.File;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Test with proper ImagePath configuration to match how SikuliX IDE loads images
  */
+@DisabledInCI
 public class ProperImagePathTest extends BrobotTestBase {
     
     @Test

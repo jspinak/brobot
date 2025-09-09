@@ -24,6 +24,7 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,6 +41,8 @@ import static org.junit.jupiter.api.Assertions.*;
     "brobot.dpi.debug=true",
     "brobot.action.similarity=0.65"
 })
+
+@DisabledInCI
 public class DPIAutoDetectionTest extends BrobotTestBase {
     
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.SSS");

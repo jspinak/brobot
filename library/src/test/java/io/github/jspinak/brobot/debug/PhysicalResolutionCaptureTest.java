@@ -15,11 +15,13 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Tests methods to capture screenshots at physical resolution (1920x1080)
  * instead of logical resolution (1536x864) on 125% scaled displays.
  */
+@DisabledInCI
 public class PhysicalResolutionCaptureTest extends DebugTestBase {
     
     @Test

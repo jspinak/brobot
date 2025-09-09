@@ -17,10 +17,12 @@ import org.sikuli.script.Screen;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Tests DPI scaling detection and automatic compensation.
  */
+@DisabledInCI
 public class DPIScalingTest extends DebugTestBase {
     
     @Test

@@ -7,10 +7,12 @@ import org.sikuli.script.*;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Test to compare SikuliX pattern matching when using the same approach as the IDE
  */
+@DisabledInCI
 public class SikuliXDirectComparisonTest extends BrobotTestBase {
     
     @Test

@@ -9,11 +9,13 @@ import org.sikuli.basics.Debug;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Compare EXACTLY what SikuliX IDE does vs what Brobot does
  * Both running on Windows, searching VS Code in WSL2
  */
+@DisabledInCI
 public class SikuliXIDEComparisonTest extends BrobotTestBase {
     
     @Test

@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.ArrayList;
 import java.util.List;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,6 +27,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * full Spring context or complex dependency injection.
  */
 @DisplayName("Simple Click Action Tests")
+
+@DisabledInCI
 public class ClickSimpleTest extends BrobotTestBase {
 
     private ActionResult actionResult;

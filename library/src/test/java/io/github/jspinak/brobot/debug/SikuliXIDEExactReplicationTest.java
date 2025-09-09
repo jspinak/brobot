@@ -9,11 +9,13 @@ import org.sikuli.basics.Debug;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Exact replication of what SikuliX IDE does when finding patterns
  * This test aims to achieve the same 0.99 similarity that IDE shows
  */
+@DisabledInCI
 public class SikuliXIDEExactReplicationTest extends BrobotTestBase {
     
     @Test

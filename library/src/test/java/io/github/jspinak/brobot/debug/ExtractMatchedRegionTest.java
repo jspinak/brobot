@@ -10,10 +10,12 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Extract and save the matched regions to compare with pattern images
  */
+@DisabledInCI
 public class ExtractMatchedRegionTest extends BrobotTestBase {
     
     @Test

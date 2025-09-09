@@ -11,11 +11,13 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Comprehensive diagnostic test to understand why patterns don't match
  * despite SikuliX IDE showing 0.99 similarity
  */
+@DisabledInCI
 public class PatternMatchingDiagnosticTest extends DebugTestBase {
     
     @Test

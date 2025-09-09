@@ -15,6 +15,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -28,6 +29,8 @@ import static org.mockito.Mockito.lenient;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ConsoleOutputCapture Tests")
 @DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "System stream manipulation unreliable in CI")
+
+@DisabledInCI
 public class ConsoleOutputCaptureTest extends BrobotTestBase {
 
     private ConsoleOutputCapture capture;

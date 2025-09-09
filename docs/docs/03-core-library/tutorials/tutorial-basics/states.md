@@ -8,13 +8,12 @@ States in Brobot represent distinct screens or UI contexts in your application. 
 
 ## Modern State Definition with @State Annotation
 
-The `@State` annotation automatically registers your state with Brobot's state management system:
+The `@State` annotation automatically registers your state with Brobot's state management system. Note that `@State` includes Spring's `@Component` annotation, so you don't need to add `@Component` separately:
 
 ```java
 import io.github.jspinak.brobot.tools.testing.data.ActionRecordTestUtils;
 
-@State(initial = true)  // Marks this as the initial state
-@Component
+@State(initial = true)  // Marks this as the initial state (includes @Component)
 @Getter
 @Slf4j
 public class HomeState {
@@ -107,7 +106,6 @@ States typically contain multiple UI elements:
 
 ```java
 @State
-@Component
 @Getter
 public class WorldState {
     private final StateImage minimap;
@@ -263,7 +261,6 @@ For integration testing, you can initialize states with ActionRecords that provi
 import io.github.jspinak.brobot.tools.testing.data.ActionRecordTestUtils;
 
 @State
-@Component
 @Getter
 public class TestableState {
     private final StateImage element;
@@ -319,7 +316,6 @@ Here's a complete state definition for our Day of Towers automation:
 
 ```java
 @State(initial = true)
-@Component
 @Getter
 @Slf4j
 public class MainMenuState {

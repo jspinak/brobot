@@ -14,11 +14,13 @@ import java.io.File;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.util.Iterator;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Test to see if patterns can be found anywhere on screen,
  * even if not at expected locations.
  */
+@DisabledInCI
 public class FullScreenSearchTest extends DebugTestBase {
     
     @Test

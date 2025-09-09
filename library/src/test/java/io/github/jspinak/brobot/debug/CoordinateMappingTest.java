@@ -12,11 +12,13 @@ import org.sikuli.script.Region;
 import org.sikuli.script.Location;
 import java.awt.*;
 import java.util.Scanner;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Systematic test to determine how SikuliX is mapping coordinates.
  * This test will help identify the transformation between requested and actual positions.
  */
+@DisabledInCI
 public class CoordinateMappingTest extends DebugTestBase {
     
     @Test

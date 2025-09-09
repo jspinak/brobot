@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Collections;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,6 +33,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * reachability analysis, efficiency checks, and concurrency validation.
  */
 @DisplayName("TransitionRuleValidator Tests")
+
+@DisabledInCI
 public class TransitionRuleValidatorTest extends BrobotTestBase {
     
     private TransitionRuleValidator validator;

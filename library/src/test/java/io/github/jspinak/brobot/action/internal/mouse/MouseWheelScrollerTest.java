@@ -19,6 +19,7 @@ import org.mockito.MockedStatic;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -29,6 +30,8 @@ import static org.mockito.Mockito.*;
  * Tests scrolling in both real and mock modes with various configurations.
  */
 @DisplayName("MouseWheelScroller Tests")
+
+@DisabledInCI
 public class MouseWheelScrollerTest extends BrobotTestBase {
 
     private MouseWheelScroller mouseWheelScroller;

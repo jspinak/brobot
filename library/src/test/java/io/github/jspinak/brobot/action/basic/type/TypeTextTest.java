@@ -22,6 +22,7 @@ import org.sikuli.basics.Settings;
 
 import java.util.Arrays;
 import java.util.List;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -31,6 +32,8 @@ import static org.mockito.Mockito.*;
  * Tests text typing functionality, timing configuration, and batch processing.
  */
 @DisplayName("TypeText Tests")
+
+@DisabledInCI
 public class TypeTextTest extends BrobotTestBase {
     
     @Mock

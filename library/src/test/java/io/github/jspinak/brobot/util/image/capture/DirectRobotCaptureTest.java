@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -21,6 +22,8 @@ import static org.mockito.Mockito.*;
  * Tests direct screen capture operations using SikuliX Screen API.
  */
 @ExtendWith(MockitoExtension.class)
+
+@DisabledInCI
 public class DirectRobotCaptureTest extends BrobotTestBase {
 
     private DirectRobotCapture directRobotCapture;

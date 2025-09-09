@@ -10,10 +10,12 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Analyze if the scaling/DPI is causing the pattern mismatch
  */
+@DisabledInCI
 public class ScalingAnalysisTest extends DebugTestBase {
     
     @Test

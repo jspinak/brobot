@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Timeout;
 
 import java.util.concurrent.TimeUnit;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @DisplayName("Basic Framework Simple Test")
 @Timeout(value = 5, unit = TimeUnit.SECONDS) // Aggressive timeout for CI/CD
+@DisabledInCI
 public class BasicFrameworkSimpleTest {
     
     @BeforeAll

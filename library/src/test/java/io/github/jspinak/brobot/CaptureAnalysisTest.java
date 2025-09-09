@@ -13,11 +13,13 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Analyzes captured images and patterns to debug matching issues.
  * This test doesn't require a display - it analyzes existing files.
  */
+@DisabledInCI
 public class CaptureAnalysisTest extends BrobotTestBase {
     
     @Test

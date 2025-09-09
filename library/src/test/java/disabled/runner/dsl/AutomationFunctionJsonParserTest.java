@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.runner.dsl;
+package disabled.runner.dsl;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.runner.dsl.BusinessTask;

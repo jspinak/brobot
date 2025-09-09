@@ -7,10 +7,12 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Arrays;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Analyze the saved comparison images from previous tests
  */
+@DisabledInCI
 public class AnalyzeSavedComparisonTest extends BrobotTestBase {
     
     @Test

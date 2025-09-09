@@ -9,10 +9,12 @@ import org.sikuli.basics.Settings;
 import org.sikuli.script.*;
 
 import java.io.File;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Final test to verify DPI scaling solution.
  */
+@DisabledInCI
 public class FinalDPITest extends DebugTestBase {
     
     @Test

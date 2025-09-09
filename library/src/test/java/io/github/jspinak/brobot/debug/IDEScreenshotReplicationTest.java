@@ -14,11 +14,13 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Replicates EXACTLY how the IDE takes screenshots to compare with Brobot.
  * This mimics the code from PatternWindow.takeScreenshot() in the IDE.
  */
+@DisabledInCI
 public class IDEScreenshotReplicationTest extends DebugTestBase {
     
     @Test

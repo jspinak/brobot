@@ -10,10 +10,12 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import javax.imageio.ImageIO;
 import java.awt.Color;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Deep dive into why patterns don't match even though they're the same files
  */
+@DisabledInCI
 public class ImageComparisonDebugTest extends BrobotTestBase {
     
     @Test

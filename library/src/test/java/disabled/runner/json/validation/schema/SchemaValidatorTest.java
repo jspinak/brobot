@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,6 +28,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * NOTE: The validators are incomplete implementations, so these tests are placeholders.
  */
 @DisplayName("SchemaValidator Tests")
+
+@DisabledInCI
 public class SchemaValidatorTest extends BrobotTestBase {
     
     private SchemaValidator validator;
