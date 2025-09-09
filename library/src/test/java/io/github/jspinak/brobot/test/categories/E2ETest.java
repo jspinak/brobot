@@ -7,6 +7,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 /**
  * Marks a test as an end-to-end test.
@@ -22,7 +23,8 @@ import java.lang.annotation.Target;
  * <pre>
  * {@code
  * @E2ETest
- * class ApplicationE2ETest {
+ * @DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
+class ApplicationE2ETest {
  *     @Test
  *     void testCompleteUserWorkflow() {
  *         // Test implementation

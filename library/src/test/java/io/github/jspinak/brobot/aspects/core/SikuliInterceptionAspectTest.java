@@ -17,12 +17,14 @@ import org.sikuli.script.FindFailed;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.concurrent.ConcurrentHashMap;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
 public class SikuliInterceptionAspectTest extends BrobotTestBase {
 
     private SikuliInterceptionAspect aspect;

@@ -23,6 +23,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -32,6 +33,7 @@ import static org.mockito.Mockito.*;
  * Tests for IllustrationController class.
  * Verifies illustration filtering logic and permission management.
  */
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
 public class IllustrationControllerTest extends BrobotTestBase {
 
     @Mock

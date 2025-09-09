@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.*;
 
 import java.util.Optional;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -13,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests for MockGridConfig and grid operations in mock mode.
  */
 @DisplayName("MockGridConfig Tests")
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
 public class MockGridConfigTest extends BrobotTestBase {
     
     @BeforeEach

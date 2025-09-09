@@ -7,6 +7,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 /**
  * Marks a test as slow (takes more than 1 second).
@@ -21,7 +22,8 @@ import java.lang.annotation.Target;
  * {@code
  * @IntegrationTest
  * @SlowTest
- * class DatabaseIntegrationTest {
+ * @DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
+class DatabaseIntegrationTest {
  *     @Test
  *     void testLargeDatasetProcessing() {
  *         // Test implementation

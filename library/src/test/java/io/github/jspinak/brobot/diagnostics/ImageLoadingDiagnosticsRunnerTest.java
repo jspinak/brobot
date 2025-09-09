@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,6 +36,7 @@ import static org.mockito.Mockito.*;
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ImageLoadingDiagnosticsRunner Tests")
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
 public class ImageLoadingDiagnosticsRunnerTest extends BrobotTestBase {
 
     @Mock

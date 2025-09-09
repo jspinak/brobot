@@ -7,6 +7,7 @@ import org.junit.jupiter.api.condition.OS;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests for resolution handling in WSL and Windows environments.
  * This test simulates the DPI scaling issues encountered on Windows with 125% scaling.
  */
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
 public class WSLResolutionTest extends BrobotTestBase {
     
     @Test

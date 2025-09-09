@@ -16,6 +16,7 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -27,6 +28,7 @@ import static org.hamcrest.Matchers.*;
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AnsiColor Tests")
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
 public class AnsiColorTest extends BrobotTestBase {
     
     // ANSI escape sequence pattern

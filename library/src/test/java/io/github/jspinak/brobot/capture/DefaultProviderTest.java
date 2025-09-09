@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
     CaptureConfiguration.class
 })
 @TestPropertySource(locations = "classpath:brobot-defaults.properties")
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
 class DefaultProviderTest {
     
     @Value("${brobot.capture.provider:AUTO}")

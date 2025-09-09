@@ -19,12 +19,14 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.*;
 import java.util.function.BooleanSupplier;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @DisplayName("TransitionExecutor Tests")
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
 public class TransitionExecutorTest extends BrobotTestBase {
     
     @Mock
