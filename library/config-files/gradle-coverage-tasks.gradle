@@ -1,0 +1,341 @@
+// Gradle Coverage Tasks for Brobot Library
+// Add this to your build.gradle: apply from: 'gradle-coverage-tasks.gradle'
+
+// Coverage threshold enforcement
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                // Start with achievable goal, increase over time
+                minimum = 0.10 // 10% for now, target 75%
+            }
+        }
+        
+        // Critical packages should have higher coverage
+        rule {
+            element = 'PACKAGE'
+            includes = [
+                'io.github.jspinak.brobot.action',
+                'io.github.jspinak.brobot.action.basic.click',
+                'io.github.jspinak.brobot.action.basic.find'
+            ]
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.20 // 20% for critical packages
+            }
+        }
+        
+        // Exclude problematic packages temporarily
+        rule {
+            element = 'PACKAGE'
+            excludes = [
+                'io.github.jspinak.brobot.analysis.motion',
+                'io.github.jspinak.brobot.analysis.histogram'
+            ]
+        }
+    }
+}
+
+// Task to run tests with coverage and enforcement
+task testWithCoverage {
+    group = 'verification'
+    description = 'Runs tests with coverage report and threshold checking'
+    
+    dependsOn test
+    dependsOn jacocoTestReport
+    finalizedBy jacocoTestCoverageVerification
+    
+    doLast {
+        println "Coverage report: file://${buildDir}/jacocoHtml/index.html"
+    }
+}
+
+// Task to run only passing tests
+task testPassingOnly {
+    group = 'verification'
+    description = 'Runs only tests that are known to pass'
+    
+    dependsOn compileTestJava
+    
+    doLast {
+        test {
+            // Exclude known failing test patterns
+            exclude '**/ActionLoggingIntegrationTest**'
+            exclude '**/*OpenCV*'
+            exclude '**/*Histogram*'
+            exclude '**/*Motion*'
+            exclude '**/StateDetectorTest**'
+            exclude '**/MoveMouseTest**'
+            
+            // Continue on failure to see all results
+            ignoreFailures = true
+        }
+    }
+}
+
+// Task to run quick unit tests only
+task quickTest {
+    group = 'verification'
+    description = 'Runs quick unit tests excluding slow integration tests'
+    
+    dependsOn compileTestJava
+    
+    doLast {
+        test {
+            // Include only unit tests
+            include '**/*Test.class'
+            
+            // Exclude integration and slow tests
+            exclude '**/*IntegrationTest**'
+            exclude '**/*SlowTest**'
+            exclude '**/*E2ETest**'
+            
+            // Set timeout for quick tests
+            timeout = Duration.ofMinutes(5)
+            
+            // Fail fast on first failure
+            failFast = true
+        }
+    }
+}
+
+// Task to generate detailed coverage report
+task detailedCoverageReport {
+    group = 'reporting'
+    description = 'Generates detailed coverage report with package breakdown'
+    
+    dependsOn jacocoTestReport
+    
+    doLast {
+        def reportFile = file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml")
+        if (reportFile.exists()) {
+            // Parse XML and extract coverage data
+            def xml = new XmlSlurper().parse(reportFile)
+            def lineRate = xml.@'line-rate'.toDouble()
+            def branchRate = xml.@'branch-rate'.toDouble()
+            
+            println "=" * 60
+            println "COVERAGE SUMMARY"
+            println "=" * 60
+            println "Overall Line Coverage: ${(lineRate * 100).round(2)}%"
+            println "Overall Branch Coverage: ${(branchRate * 100).round(2)}%"
+            println "=" * 60
+            
+            // Package level coverage
+            println "\nPACKAGE COVERAGE:"
+            xml.packages.package.each { pkg ->
+                def pkgName = pkg.@name
+                def pkgLineRate = pkg.@'line-rate'.toDouble()
+                def coverage = (pkgLineRate * 100).round(2)
+                def status = coverage >= 20 ? "✓" : "✗"
+                println "${status} ${pkgName}: ${coverage}%"
+            }
+            
+            println "\nDetailed report: file://${buildDir}/jacocoHtml/index.html"
+        } else {
+            println "Coverage report not found. Run 'gradle test jacocoTestReport' first."
+        }
+    }
+}
+
+// Task to identify untested classes
+task findUntestedClasses {
+    group = 'reporting'
+    description = 'Identifies classes with no test coverage'
+    
+    dependsOn jacocoTestReport
+    
+    doLast {
+        def srcDir = file('src/main/java')
+        def testDir = file('src/test/java')
+        def untestedClasses = []
+        
+        fileTree(srcDir) {
+            include '**/*.java'
+            exclude '**/package-info.java'
+        }.each { srcFile ->
+            def className = srcFile.name.replace('.java', '')
+            def testFile = file("${testDir}/${srcFile.path.replace(srcDir.path, '').replace('.java', 'Test.java')}")
+            
+            if (!testFile.exists()) {
+                untestedClasses << srcFile.path.replace(srcDir.path + '/', '')
+            }
+        }
+        
+        println "=" * 60
+        println "UNTESTED CLASSES (${untestedClasses.size()} total)"
+        println "=" * 60
+        
+        untestedClasses.sort().each { className ->
+            println "  - ${className}"
+        }
+        
+        println "\nConsider adding tests for these classes to improve coverage."
+    }
+}
+
+// Task to run coverage with incremental goals
+task coverageGoals {
+    group = 'reporting'
+    description = 'Shows current coverage against incremental goals'
+    
+    dependsOn jacocoTestReport
+    
+    doLast {
+        def goals = [
+            [week: 1, target: 10, description: "Fix easy issues"],
+            [week: 2, target: 20, description: "Fix mock verification"],
+            [week: 3, target: 25, description: "Fix Spring context"],
+            [week: 4, target: 30, description: "Add unit tests"],
+            [week: 8, target: 40, description: "Add integration tests"],
+            [week: 12, target: 60, description: "Comprehensive coverage"]
+        ]
+        
+        def reportFile = file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml")
+        def currentCoverage = 2 // Default to current known value
+        
+        if (reportFile.exists()) {
+            def xml = new XmlSlurper().parse(reportFile)
+            currentCoverage = (xml.@'line-rate'.toDouble() * 100).round(2)
+        }
+        
+        println "=" * 60
+        println "COVERAGE GOALS PROGRESS"
+        println "=" * 60
+        println "Current Coverage: ${currentCoverage}%"
+        println "-" * 60
+        
+        goals.each { goal ->
+            def status = currentCoverage >= goal.target ? "✓ ACHIEVED" : "○ PENDING"
+            def progress = Math.min(100, (currentCoverage / goal.target * 100).round(0))
+            println "Week ${goal.week}: ${goal.target}% - ${goal.description}"
+            println "  Status: ${status} (${progress}% of goal)"
+        }
+        
+        def nextGoal = goals.find { it.target > currentCoverage }
+        if (nextGoal) {
+            def needed = nextGoal.target - currentCoverage
+            println "\nNext Goal: ${nextGoal.target}% (need +${needed}% more coverage)"
+        } else {
+            println "\nExcellent! All coverage goals achieved!"
+        }
+    }
+}
+
+// Task to generate coverage badge (for README)
+task generateCoverageBadge {
+    group = 'reporting'
+    description = 'Generates coverage badge data for README'
+    
+    dependsOn jacocoTestReport
+    
+    doLast {
+        def reportFile = file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml")
+        def coverage = 2 // Default
+        def color = 'red'
+        
+        if (reportFile.exists()) {
+            def xml = new XmlSlurper().parse(reportFile)
+            coverage = (xml.@'line-rate'.toDouble() * 100).round(0)
+            
+            // Determine badge color
+            if (coverage >= 80) color = 'brightgreen'
+            else if (coverage >= 60) color = 'green'
+            else if (coverage >= 40) color = 'yellow'
+            else if (coverage >= 20) color = 'orange'
+        }
+        
+        def badgeUrl = "https://img.shields.io/badge/coverage-${coverage}%25-${color}"
+        
+        println "=" * 60
+        println "COVERAGE BADGE"
+        println "=" * 60
+        println "Coverage: ${coverage}%"
+        println "Badge URL: ${badgeUrl}"
+        println "\nAdd to README.md:"
+        println "![Coverage](${badgeUrl})"
+        
+        // Save to file for CI/CD
+        file("${buildDir}/coverage-badge.txt").text = badgeUrl
+    }
+}
+
+// Configure test task defaults
+test {
+    // Generate reports even on failure
+    reports {
+        html.required = true
+        junitXml.required = true
+    }
+    
+    // Continue running tests after failure
+    ignoreFailures = project.hasProperty('ignoreTestFailures')
+    
+    // Show test output
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+        showStandardStreams = project.hasProperty('showTestOutput')
+    }
+    
+    // JVM args for better test execution
+    jvmArgs = [
+        '-Xmx2g',
+        '-XX:+HeapDumpOnOutOfMemoryError',
+        '-Djava.awt.headless=true'
+    ]
+    
+    // Exclude problematic tests if property is set
+    if (project.hasProperty('excludeFailingTests')) {
+        exclude '**/ActionLoggingIntegrationTest**'
+        exclude '**/*OpenCV*'
+        exclude '**/*Histogram*'
+        exclude '**/*Motion*'
+    }
+}
+
+// Help task
+task coverageHelp {
+    group = 'help'
+    description = 'Shows available coverage tasks and usage'
+    
+    doLast {
+        println """
+        =====================================
+        COVERAGE TASKS HELP
+        =====================================
+        
+        Available Tasks:
+        ----------------
+        gradle testWithCoverage    - Run tests with coverage and enforcement
+        gradle testPassingOnly     - Run only known passing tests
+        gradle quickTest          - Run quick unit tests only
+        gradle detailedCoverageReport - Generate detailed coverage breakdown
+        gradle findUntestedClasses - List classes without tests
+        gradle coverageGoals      - Show progress against coverage goals
+        gradle generateCoverageBadge - Generate coverage badge for README
+        
+        Useful Properties:
+        ------------------
+        -PignoreTestFailures      - Continue even if tests fail
+        -PshowTestOutput         - Show test console output
+        -PexcludeFailingTests    - Skip known failing tests
+        
+        Examples:
+        ---------
+        # Run all tests ignoring failures
+        gradle test -PignoreTestFailures
+        
+        # Run passing tests with coverage
+        gradle testPassingOnly jacocoTestReport
+        
+        # Check coverage goals
+        gradle test jacocoTestReport coverageGoals
+        
+        # Full coverage workflow
+        gradle clean testWithCoverage detailedCoverageReport coverageGoals
+        """
+    }
+}

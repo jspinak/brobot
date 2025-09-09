@@ -15,6 +15,7 @@ import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
 import java.util.Optional;
 import java.util.Set;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 

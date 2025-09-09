@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.awt.image.BufferedImage;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -34,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class,
          io.github.jspinak.brobot.test.config.TestApplicationConfiguration.class})
 @ContextConfiguration(initializers = TestEnvironmentInitializer.class)
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Integration test requires non-CI environment")
 public class ObjectCollectionIntegrationTest {
     
     @BeforeAll

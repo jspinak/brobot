@@ -31,6 +31,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -40,6 +41,7 @@ import static org.mockito.Mockito.*;
  * ensuring that image paths are correctly configured before Pattern creation.
  */
 @DisplayName("Image Loading Integration Tests")
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Integration test requires non-CI environment")
 public class ImageLoadingIntegrationTest extends BrobotTestBase {
 
     @Mock

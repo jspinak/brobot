@@ -23,6 +23,7 @@ import org.springframework.test.context.TestPropertySource;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.bytedeco.opencv.global.opencv_core.CV_8UC3;
 import static org.junit.jupiter.api.Assertions.*;

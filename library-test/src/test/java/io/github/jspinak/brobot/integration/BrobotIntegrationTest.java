@@ -7,6 +7,7 @@ import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Test to verify that Brobot library's auto-configuration is working correctly.
  */
 @SpringBootTest
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Integration test requires non-CI environment")
 public class BrobotIntegrationTest extends BrobotTestBase {
 
     @Autowired

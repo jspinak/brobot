@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
@@ -13,6 +14,7 @@ import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
 import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 /**
  * Base class for integration tests that need to work with real image files

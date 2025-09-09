@@ -20,6 +20,7 @@ import io.github.jspinak.brobot.model.transition.StateTransition;
 
 import java.util.Arrays;
 import java.util.List;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;

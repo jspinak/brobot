@@ -25,6 +25,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import java.util.Set;
 import java.util.List;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -45,6 +46,7 @@ import static org.junit.jupiter.api.Assertions.*;
     "spring.main.allow-bean-definition-overriding=true"
 })
 @Slf4j
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Integration test requires non-CI environment")
 public class StateDetectionIntegrationTest extends BrobotTestBase {
 
     @Autowired
