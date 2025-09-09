@@ -155,7 +155,9 @@ class TestRunner:
         """Compile all test classes."""
         print(f"Compiling tests for {self.module}...")
         cmd = f"{self.gradle_cmd} :{self.module}:compileTestJava --no-daemon"
-        returncode, stdout, stderr = self.run_command(cmd, timeout=120)
+        # Use longer timeout for library-test module which has many tests
+        compile_timeout = 300 if self.module == "library-test" else 120
+        returncode, stdout, stderr = self.run_command(cmd, timeout=compile_timeout)
         
         if returncode != 0:
             print(f"Failed to compile tests: {stderr}")

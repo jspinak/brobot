@@ -66,7 +66,11 @@ public abstract class ActionConfig {
      * Enables streamlined success/failure logging without manual checks.
      */
     @Data
-    @lombok.Builder(builderClassName = "LoggingOptionsBuilder")
+    @lombok.Builder(builderClassName = "LoggingOptionsBuilder", toBuilder = true)
+    @lombok.NoArgsConstructor
+    @lombok.AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @com.fasterxml.jackson.databind.annotation.JsonDeserialize(builder = LoggingOptions.LoggingOptionsBuilder.class)
     public static class LoggingOptions {
         private String beforeActionMessage;
         private String afterActionMessage;
@@ -94,6 +98,12 @@ public abstract class ActionConfig {
          */
         public static LoggingOptions defaults() {
             return LoggingOptions.builder().build();
+        }
+        
+        @JsonPOJOBuilder(withPrefix = "")
+        @JsonIgnoreProperties(ignoreUnknown = true)
+        public static class LoggingOptionsBuilder {
+            // Lombok generates the implementation
         }
     }
 
