@@ -13,10 +13,12 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Diagnoses the DPI scaling issue by comparing pattern and capture dimensions.
  */
+@DisabledInCI
 public class DiagnoseDPIScalingTest extends DebugTestBase {
     
     @Test

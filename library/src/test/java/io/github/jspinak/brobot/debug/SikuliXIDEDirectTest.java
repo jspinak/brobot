@@ -11,10 +11,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Field;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Test that directly uses SikuliX IDE's search functionality
  */
+@DisabledInCI
 public class SikuliXIDEDirectTest extends BrobotTestBase {
     
     @Test

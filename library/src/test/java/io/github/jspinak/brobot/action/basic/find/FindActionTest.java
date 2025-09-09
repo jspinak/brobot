@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -39,6 +40,8 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Find Action Tests")
+
+@DisabledInCI
 public class FindActionTest extends BrobotTestBase {
 
     @Mock

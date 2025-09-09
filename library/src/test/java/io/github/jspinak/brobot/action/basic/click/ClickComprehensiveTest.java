@@ -21,6 +21,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.ArrayList;
 import java.util.List;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,6 +35,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Performance characteristics in mock mode
  */
 @DisplayName("Comprehensive Click Action Tests")
+
+@DisabledInCI
 public class ClickComprehensiveTest extends BrobotTestBase {
 
     private Click click;

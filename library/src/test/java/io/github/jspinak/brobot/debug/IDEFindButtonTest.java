@@ -10,10 +10,12 @@ import java.io.File;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.util.Iterator;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Test that replicates exactly what the SikuliX IDE "Find" button does
  */
+@DisabledInCI
 public class IDEFindButtonTest extends BrobotTestBase {
     
     @Test

@@ -9,11 +9,13 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.awt.Rectangle;
 import java.awt.Robot;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Test to verify if SikuliX image searches work correctly despite highlighting issues.
  * This is critical - if searches are also broken, the entire automation won't work.
  */
+@DisabledInCI
 public class ImageSearchAccuracyTest extends DebugTestBase {
     
     @Test

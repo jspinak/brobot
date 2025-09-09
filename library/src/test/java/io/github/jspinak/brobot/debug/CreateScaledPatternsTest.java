@@ -7,10 +7,12 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Create scaled versions of patterns at 0.8x for better matching
  */
+@DisabledInCI
 public class CreateScaledPatternsTest extends BrobotTestBase {
     
     @Test

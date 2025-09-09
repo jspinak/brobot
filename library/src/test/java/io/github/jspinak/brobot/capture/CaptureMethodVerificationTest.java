@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.capture;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -11,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * This test ensures that BufferedImageUtilities and SceneProvider
  * use the configured capture provider (FFmpeg, Robot, or SikuliX).
  */
+@DisabledInCI
 public class CaptureMethodVerificationTest extends BrobotTestBase {
     
     @Test

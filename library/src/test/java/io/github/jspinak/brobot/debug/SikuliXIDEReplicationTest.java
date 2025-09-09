@@ -10,10 +10,12 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Test to replicate exactly what SikuliX IDE does when matching patterns
  */
+@DisabledInCI
 public class SikuliXIDEReplicationTest extends BrobotTestBase {
     
     @Test

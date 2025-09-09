@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Stream;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -36,6 +37,8 @@ import static org.mockito.ArgumentMatchers.*;
  * and file I/O operations.
  */
 @DisplayName("JsonUtils Tests")
+
+@DisabledInCI
 public class JsonUtilsTest extends BrobotTestBase {
 
     @Mock

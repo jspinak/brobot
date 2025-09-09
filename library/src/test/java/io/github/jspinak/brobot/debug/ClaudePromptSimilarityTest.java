@@ -11,11 +11,13 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Focused similarity test using only claude-prompt-1.png
  * Compare with SikuliX IDE's 0.99 similarity score
  */
+@DisabledInCI
 public class ClaudePromptSimilarityTest extends BrobotTestBase {
     
     @Test

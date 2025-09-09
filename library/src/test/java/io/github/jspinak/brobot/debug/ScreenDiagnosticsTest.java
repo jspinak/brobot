@@ -5,11 +5,13 @@ import io.github.jspinak.brobot.debug.DebugTestBase;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 
 import org.junit.jupiter.api.Test;
+import io.github.jspinak.brobot.test.DisabledInCI;
 import java.awt.*;
 
 /**
  * Diagnostic test to understand screen configuration and potential offset issues.
  */
+@DisabledInCI
 public class ScreenDiagnosticsTest extends DebugTestBase {
     
     @Test

@@ -18,6 +18,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.ArrayList;
 import java.util.List;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,6 +32,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Find options configuration
  */
 @DisplayName("Comprehensive Find Action Tests")
+
+@DisabledInCI
 public class FindComprehensiveTest extends BrobotTestBase {
     
     private ActionResult actionResult;

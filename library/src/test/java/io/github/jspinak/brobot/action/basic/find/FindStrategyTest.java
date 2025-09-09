@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,6 +15,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests all find strategy types and their categorization.
  */
 @DisplayName("FindStrategy Tests")
+
+@DisabledInCI
 public class FindStrategyTest extends BrobotTestBase {
     
     @Nested

@@ -14,6 +14,7 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
@@ -25,6 +26,8 @@ import static org.mockito.Mockito.*;
  * mapping.
  */
 @DisplayName("MonitorManager Tests")
+
+@DisabledInCI
 public class MonitorManagerTest extends BrobotTestBase {
 
     @Mock

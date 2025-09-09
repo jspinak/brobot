@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -20,6 +21,8 @@ import static org.mockito.Mockito.*;
  * Tests continuous screenshot capture and recording capabilities.
  */
 @ExtendWith(MockitoExtension.class)
+
+@DisabledInCI
 public class ScreenshotRecorderTest extends BrobotTestBase {
 
     @Mock

@@ -16,10 +16,12 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Compare screen captures from SikuliX vs Brobot to see if there's a difference
  */
+@DisabledInCI
 public class ScreenCaptureComparisonTest extends BrobotTestBase {
     
     @Test

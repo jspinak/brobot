@@ -11,11 +11,13 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Test to understand why Brobot sometimes captures at 1536x864 and sometimes at 1920x1080.
  * This is the KEY to understanding the pattern matching discrepancy!
  */
+@DisabledInCI
 public class ResolutionMysteryTest extends DebugTestBase {
     
     @Test

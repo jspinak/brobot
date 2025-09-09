@@ -13,6 +13,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import io.github.jspinak.brobot.test.DisabledInCI;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Simple test to verify DPI scaling theory without Spring dependencies.
  * Tests that screen capture and pattern matching use compatible pixel dimensions.
  */
+@DisabledInCI
 public class SimpleDPIVerificationTest extends BrobotTestBase {
     
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.SSS");

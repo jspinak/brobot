@@ -8,11 +8,10 @@ Transitions define how your automation moves between states. With Brobot's moder
 
 ## Modern Transition Definition with @Transition Annotation
 
-The `@Transition` annotation automatically registers transitions between states:
+The `@Transition` annotation automatically registers transitions between states. Note that `@Transition` includes Spring's `@Component` annotation, so you don't need to add `@Component` separately:
 
 ```java
 @Transition(from = HomeState.class, to = WorldState.class)
-@Component
 @RequiredArgsConstructor
 @Slf4j
 public class HomeToWorldTransition {
@@ -41,7 +40,6 @@ public class LoginToDashboardTransition {
 Transitions are Spring components with full DI support:
 ```java
 @Transition(from = WorldState.class, to = IslandState.class)
-@Component
 @RequiredArgsConstructor
 public class WorldToIslandTransition {
     private final WorldState worldState;
@@ -76,7 +74,6 @@ Handle failures gracefully with sequential action patterns:
 
 ```java
 @Transition(from = MainMenuState.class, to = GameState.class)
-@Component
 @RequiredArgsConstructor
 @Slf4j
 public class MainMenuToGameTransition {
@@ -118,7 +115,6 @@ public class MainMenuToGameTransition {
 ### Simple Click Transition
 ```java
 @Transition(from = HomeState.class, to = SettingsState.class)
-@Component
 @RequiredArgsConstructor
 public class HomeToSettingsTransition {
     private final HomeState homeState;
@@ -133,7 +129,6 @@ public class HomeToSettingsTransition {
 ### Multi-Step Transition
 ```java
 @Transition(from = LoginState.class, to = DashboardState.class)
-@Component
 @RequiredArgsConstructor
 public class LoginTransition {
     private final LoginState loginState;
@@ -161,7 +156,6 @@ public class LoginTransition {
 ### Conditional Navigation
 ```java
 @Transition(from = ProductListState.class, to = ProductDetailsState.class)
-@Component
 @RequiredArgsConstructor
 public class SelectProductTransition {
     private final ProductListState productList;
@@ -190,7 +184,6 @@ Use modern ActionConfig classes for precise control:
 
 ```java
 @Transition(from = FormState.class, to = ConfirmationState.class)
-@Component
 @RequiredArgsConstructor
 public class SubmitFormTransition {
     private final FormState formState;
@@ -228,7 +221,6 @@ Ensure you've reached the correct state:
 
 ```java
 @Transition(from = HomeState.class, to = WorldState.class)
-@Component
 @RequiredArgsConstructor
 @Slf4j
 public class HomeToWorldWithValidation {
@@ -263,7 +255,6 @@ public class HomeToWorldWithValidation {
 
 ```java
 @Transition(from = ConnectionState.class, to = ConnectedState.class)
-@Component
 @RequiredArgsConstructor
 @Slf4j
 public class ConnectWithRetryTransition {
@@ -388,7 +379,6 @@ Here's a complete transition with all modern features:
 
 ```java
 @Transition(from = ShoppingCartState.class, to = CheckoutState.class)
-@Component
 @RequiredArgsConstructor
 @Slf4j
 public class CartToCheckoutTransition {

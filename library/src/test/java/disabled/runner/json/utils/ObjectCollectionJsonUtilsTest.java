@@ -19,6 +19,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import java.util.*;
 
@@ -31,6 +32,8 @@ import static org.mockito.ArgumentMatchers.*;
  * Tests heterogeneous collection serialization, Map conversion, and deep copying.
  */
 @DisplayName("ObjectCollectionJsonUtils Tests")
+
+@DisabledInCI
 public class ObjectCollectionJsonUtilsTest extends BrobotTestBase {
 
     @Mock

@@ -12,11 +12,13 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Diagnostic test to understand why SikuliX IDE finds patterns at 0.99 
  * but our code doesn't find them at all.
  */
+@DisabledInCI
 public class DiagnosticPatternTest extends DebugTestBase {
     
     @Test

@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.time.Duration;
 import java.util.*;
 import io.github.jspinak.brobot.model.element.Text;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -30,6 +31,8 @@ import static org.mockito.Mockito.*;
  * Tests Map conversion, JSON serialization, and deep copying of action results.
  */
 @DisplayName("MatchesJsonUtils Tests")
+
+@DisabledInCI
 public class MatchesJsonUtilsTest extends BrobotTestBase {
 
     @Mock

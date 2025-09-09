@@ -4,6 +4,10 @@ sidebar_position: 1
 
 # Intro
 
+:::warning Game No Longer Available
+Dawn of Titans was shut down in 2022 and is no longer playable. You won't be able to run this tutorial with live automation. However, this tutorial remains valuable for learning about Brobot's mocking capabilities and model-based GUI automation concepts. The mock execution will still work perfectly. For a tutorial with live automation, check out the [mrdoob tutorial](../tutorial-mrdoob/setup).
+:::
+
 :::info Version Note
 This tutorial was originally created for Brobot 1.0.1 but has been updated for version 1.1.0. The original code examples are available in documentation versions 1.0.6 and 1.0.7.
 :::
@@ -40,7 +44,4 @@ This demo is meant as an introduction to the Brobot library
 and as a demonstration of its mocking functionality. It can be run
 in any Java IDE on Windows, Mac, or Linux with mocking enabled. 
 You can see the real execution in the 
-[live automation video](./live-automation).
-Update: Dawn of Titans has been shut down since 2022, but you can still learn about 
-mocking and model-based GUI automation with this tutorial. If you are interested in a tutorial 
-that allows for live automation, check out the [mrdoob tutorial](../tutorial-mrdoob/setup). 
+[live automation video](./live-automation). 

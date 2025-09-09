@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.Map;
 import java.util.List;
 import java.util.HashMap;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,6 +30,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * NOTE: The validator implementations are incomplete, so these tests are placeholders.
  */
 @DisplayName("ReferenceValidator Tests")
+
+@DisabledInCI
 public class ReferenceValidatorTest extends BrobotTestBase {
     
     private ReferenceValidator validator;

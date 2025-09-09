@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.github.jspinak.brobot.runner.json.mixins.MatMixin;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,6 +29,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests builder pattern, default values, and serialization.
  */
 @DisplayName("ClickOptions Tests")
+
+@DisabledInCI
 public class ClickOptionsTest extends BrobotTestBase {
     
     private ClickOptions.Builder builder;

@@ -12,6 +12,7 @@ import org.sikuli.script.Screen;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Verifies that the pattern matching fix achieves 0.99 similarity like SikuliX IDE.
@@ -21,6 +22,7 @@ import java.io.File;
  * Brobot was converting to BufferedImage first, causing image type changes that reduced similarity.
  * Now Brobot's Pattern.sikuli() method uses direct file path loading when available.
  */
+@DisabledInCI
 public class VerifyPatternMatchingFixTest extends BrobotTestBase {
     
     @Test

@@ -9,11 +9,13 @@ import org.sikuli.script.Pattern;
 import org.sikuli.script.Screen;
 import org.sikuli.script.Match;
 import org.sikuli.script.ImagePath;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import java.awt.*;
 
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@DisabledInCI
 public class DPIScalingTest extends BrobotTestBase {
     
     @Test

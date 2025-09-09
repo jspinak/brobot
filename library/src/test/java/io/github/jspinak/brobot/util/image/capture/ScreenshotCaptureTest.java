@@ -16,6 +16,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.file.Path;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -25,6 +26,7 @@ import static org.mockito.Mockito.*;
  * Test class for ScreenshotCapture functionality.
  * Tests screenshot capture operations in mock mode.
  */
+@DisabledInCI
 public class ScreenshotCaptureTest extends BrobotTestBase {
 
     @Mock

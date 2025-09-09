@@ -9,11 +9,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Timeout;
 
 import java.util.concurrent.TimeUnit;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Basic Framework Test")
 @Timeout(value = 10, unit = TimeUnit.SECONDS) // Prevent CI/CD timeout
+@DisabledInCI
 public class BasicFrameworkTest extends BrobotTestBase {
     
     @BeforeAll

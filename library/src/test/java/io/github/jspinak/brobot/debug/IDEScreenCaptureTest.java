@@ -13,11 +13,13 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Test that mimics exactly how SikuliX IDE captures screenshots.
  * This will help us understand why IDE patterns are sharp.
  */
+@DisabledInCI
 public class IDEScreenCaptureTest extends DebugTestBase {
     
     @Test

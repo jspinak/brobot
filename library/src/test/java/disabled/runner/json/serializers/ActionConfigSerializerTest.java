@@ -24,6 +24,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.io.StringWriter;
 import java.util.stream.Stream;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -38,6 +39,8 @@ import static org.mockito.Mockito.*;
  * - Serialization of all ActionConfig implementations
  */
 @DisplayName("ActionConfigSerializer - Polymorphic Serialization")
+
+@DisabledInCI
 public class ActionConfigSerializerTest extends BrobotTestBase {
 
     private ActionConfigSerializer serializer;

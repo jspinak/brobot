@@ -24,6 +24,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -40,6 +41,8 @@ import static org.mockito.Mockito.*;
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("HighlightManager Tests")
+
+@DisabledInCI
 public class HighlightManagerTest extends BrobotTestBase {
 
     private HighlightManager highlightManager;

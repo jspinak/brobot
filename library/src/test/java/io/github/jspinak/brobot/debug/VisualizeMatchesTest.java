@@ -10,10 +10,12 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Test to visually show what's being matched by saving annotated screenshots
  */
+@DisabledInCI
 public class VisualizeMatchesTest extends BrobotTestBase {
     
     @Test

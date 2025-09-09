@@ -7,10 +7,12 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.security.MessageDigest;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Check if pattern images are being modified during loading
  */
+@DisabledInCI
 public class PatternIntegrityCheckTest extends BrobotTestBase {
     
     @Test

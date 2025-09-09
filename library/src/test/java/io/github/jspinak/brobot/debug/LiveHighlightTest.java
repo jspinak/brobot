@@ -7,11 +7,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assumptions;
 import org.sikuli.script.Screen;
 import org.sikuli.script.Region;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Live test to highlight specific regions and see where they actually appear.
  * Run this test and observe where the highlights show up on your screen.
  */
+@DisabledInCI
 public class LiveHighlightTest extends BrobotTestBase {
     
     @Test

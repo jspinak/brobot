@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.core.services;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.test.DisabledInCI;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -15,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @DisplayName("SikuliMouseController Unit Tests")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+
+@DisabledInCI
 public class SikuliMouseControllerUnitTest extends BrobotTestBase {
 
     private SikuliMouseController controller;

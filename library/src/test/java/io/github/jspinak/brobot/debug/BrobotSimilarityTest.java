@@ -9,11 +9,13 @@ import org.sikuli.script.*;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Test to verify what similarity threshold Brobot is actually using
  * and compare with direct SikuliX matching
  */
+@DisabledInCI
 public class BrobotSimilarityTest extends BrobotTestBase {
     
     @Test

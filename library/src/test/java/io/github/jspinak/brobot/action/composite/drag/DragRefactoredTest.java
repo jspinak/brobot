@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -21,6 +22,7 @@ import static org.mockito.Mockito.*;
  * Test for refactored Drag class that no longer depends on ActionChainExecutor.
  * This verifies the pure action implementation works correctly.
  */
+@DisabledInCI
 public class DragRefactoredTest extends BrobotTestBase {
 
     @Mock

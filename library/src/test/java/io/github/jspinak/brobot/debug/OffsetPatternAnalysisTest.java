@@ -15,11 +15,13 @@ import java.awt.Rectangle;
 import java.awt.Robot;
 import java.util.ArrayList;
 import java.util.List;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Test to determine if there's a consistent offset pattern in SikuliX operations.
  * If the offset is consistent, we can create a compensation mechanism.
  */
+@DisabledInCI
 public class OffsetPatternAnalysisTest extends DebugTestBase {
     
     static class OffsetData {

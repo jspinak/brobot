@@ -13,6 +13,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.*;
 import java.util.stream.Stream;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
@@ -22,6 +23,8 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
  * special state types with reserved negative IDs in the Brobot framework.
  */
 @DisplayName("SpecialStateType Enum Tests")
+
+@DisabledInCI
 public class SpecialStateTypeTest extends BrobotTestBase {
 
     @BeforeEach

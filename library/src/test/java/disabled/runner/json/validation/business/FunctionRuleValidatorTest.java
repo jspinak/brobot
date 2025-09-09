@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Collections;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,6 +32,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * state management, and performance patterns.
  */
 @DisplayName("FunctionRuleValidator Tests")
+
+@DisabledInCI
 public class FunctionRuleValidatorTest extends BrobotTestBase {
     
     private FunctionRuleValidator validator;

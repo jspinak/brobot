@@ -11,11 +11,13 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Direct test to find the pattern in the Windows screenshot using SikuliX Finder.
  * This should work in WSL2 as it's just image processing, not screen capture.
  */
+@DisabledInCI
 public class DirectPatternMatchTest extends BrobotTestBase {
     
     @Test

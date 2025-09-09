@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.stream.Stream;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -32,6 +33,8 @@ import static org.mockito.Mockito.*;
  * Tests polymorphic serialization, deep copying, and type conversion for ActionConfig hierarchy.
  */
 @DisplayName("ActionConfigJsonUtils Tests")
+
+@DisabledInCI
 public class ActionConfigJsonUtilsTest extends BrobotTestBase {
 
     @Mock

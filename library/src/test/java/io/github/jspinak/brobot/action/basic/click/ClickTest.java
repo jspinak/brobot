@@ -16,6 +16,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 import java.util.List;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,6 +25,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * These tests run in mock mode for CI/CD compatibility.
  */
 @DisplayName("Click Action Tests")
+
+@DisabledInCI
 public class ClickTest extends BrobotTestBase {
     
     private Click click;

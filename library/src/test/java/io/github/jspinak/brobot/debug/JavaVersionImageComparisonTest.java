@@ -9,11 +9,13 @@ import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.io.File;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Test to identify Java version differences in image processing
  * Java 8 vs Java 21 image handling comparison
  */
+@DisabledInCI
 public class JavaVersionImageComparisonTest extends DebugTestBase {
     
     @Test

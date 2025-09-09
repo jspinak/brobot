@@ -8,11 +8,13 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Test to capture the specific regions where patterns should be found
  * and compare them with the pattern images
  */
+@DisabledInCI
 public class CaptureTargetRegionTest extends BrobotTestBase {
     
     @Test
