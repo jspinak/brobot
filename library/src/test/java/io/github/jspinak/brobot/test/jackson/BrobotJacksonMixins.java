@@ -38,14 +38,18 @@ public class BrobotJacksonMixins {
     /**
      * Mix-in for StateImage class
      */
-    @JsonDeserialize(builder = StateImageBuilder.class)
+    @JsonDeserialize(builder = io.github.jspinak.brobot.model.state.StateImage.Builder.class)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static abstract class StateImageMixin {
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
+    /**
+     * Mix-in for StateImage.Builder class
+     * This configures how Jackson should handle the StateImage.Builder
+     */
+    @JsonPOJOBuilder(withPrefix = "set", buildMethodName = "build")
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class StateImageBuilder {
+    public static abstract class StateImageBuilderMixin {
     }
 
     /**
@@ -105,6 +109,7 @@ public class BrobotJacksonMixins {
         // Register mix-ins for model classes
         mapper.addMixIn(io.github.jspinak.brobot.model.action.ActionRecord.class, ActionRecordMixin.class);
         mapper.addMixIn(io.github.jspinak.brobot.model.state.StateImage.class, StateImageMixin.class);
+        mapper.addMixIn(io.github.jspinak.brobot.model.state.StateImage.Builder.class, StateImageBuilderMixin.class);
         mapper.addMixIn(io.github.jspinak.brobot.model.match.Match.class, MatchMixin.class);
         mapper.addMixIn(io.github.jspinak.brobot.model.element.Pattern.class, PatternMixin.class);
         mapper.addMixIn(io.github.jspinak.brobot.model.element.Region.class, RegionMixin.class);

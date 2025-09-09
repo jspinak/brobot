@@ -92,8 +92,11 @@ public class BrobotPatternCaptureTest extends BrobotTestBase {
             when(mockTransform.getScaleY()).thenReturn(1.0);
             
             Toolkit mockToolkit = mock(Toolkit.class);
+            Dimension mockDimension = mock(Dimension.class);
+            mockDimension.width = 1920;
+            mockDimension.height = 1080;
             toolkitMock.when(Toolkit::getDefaultToolkit).thenReturn(mockToolkit);
-            when(mockToolkit.getScreenSize()).thenReturn(new Dimension(1920, 1080));
+            when(mockToolkit.getScreenSize()).thenReturn(mockDimension);
             
             // Mock ImageIO for writing
             try (MockedStatic<ImageIO> imageIOMock = mockStatic(ImageIO.class)) {
@@ -153,7 +156,9 @@ public class BrobotPatternCaptureTest extends BrobotTestBase {
             // Mock Toolkit - need to properly stub it
             try (MockedStatic<Toolkit> toolkitMock = mockStatic(Toolkit.class)) {
                 Toolkit mockToolkit = mock(Toolkit.class);
-                Dimension mockDimension = new Dimension(1920, 1080);
+                Dimension mockDimension = mock(Dimension.class);
+                mockDimension.width = 1920;
+                mockDimension.height = 1080;
                 
                 // Complete the stubbing properly
                 toolkitMock.when(Toolkit::getDefaultToolkit).thenReturn(mockToolkit);
