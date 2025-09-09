@@ -520,4 +520,40 @@ public class StateImage implements StateObject {
             return stateImage;
         }
     }
+    
+    /**
+     * Adds ActionRecord snapshots to all patterns in this StateImage.
+     * This is useful for setting up mock data for testing or providing
+     * historical match data for the mock framework.
+     * 
+     * @param snapshots The ActionRecord snapshots to add to all patterns
+     * @return This StateImage instance for method chaining
+     */
+    public StateImage addActionSnapshotsToAllPatterns(ActionRecord... snapshots) {
+        if (snapshots == null || snapshots.length == 0) {
+            return this;
+        }
+        
+        // Create a shared ActionHistory with all snapshots
+        ActionHistory history = new ActionHistory();
+        for (ActionRecord snapshot : snapshots) {
+            history.addSnapshot(snapshot);
+        }
+        
+        // Apply the history to all patterns
+        for (Pattern pattern : patterns) {
+            // If pattern already has history, merge with existing
+            if (pattern.getMatchHistory() != null && !pattern.getMatchHistory().getSnapshots().isEmpty()) {
+                ActionHistory existingHistory = pattern.getMatchHistory();
+                for (ActionRecord snapshot : snapshots) {
+                    existingHistory.addSnapshot(snapshot);
+                }
+            } else {
+                // Set new history
+                pattern.setMatchHistory(history);
+            }
+        }
+        
+        return this;
+    }
 }
