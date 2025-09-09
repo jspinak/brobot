@@ -15,7 +15,7 @@
 <script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","G-6WY1S6ZWEY",{anonymize_ip:!0})</script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous"><link rel="stylesheet" href="/brobot/assets/css/styles.1b22d91f.css">
-<script src="/brobot/assets/js/runtime~main.204eda6d.js" defer="defer"></script>
+<script src="/brobot/assets/js/runtime~main.6d3b21d8.js" defer="defer"></script>
 <script src="/brobot/assets/js/main.1a0d2b07.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -26,45 +26,59 @@
 <p>This guide helps you quickly set up the optimal pattern capture workflow based on extensive testing and comparison.</p>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="tldr---best-configuration">TL;DR - Best Configuration<a href="#tldr---best-configuration" class="hash-link" aria-label="Direct link to TL;DR - Best Configuration" title="Direct link to TL;DR - Best Configuration">​</a></h2>
 <div class="language-properties codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-properties codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain"># Add to application.properties</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">brobot.capture.provider=JAVACV_FFMPEG</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">brobot.dpi.resize-factor=auto</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">brobot.action.similarity=0.70</span><br></span></code></pre></div></div>
-<p><strong>Use either:</strong></p>
+<p><strong>For pattern creation, use OS native tools:</strong></p>
 <ul>
-<li>Windows Snipping Tool (Win+Shift+S)</li>
-<li>Brobot Pattern Capture Tool with FFmpeg selected</li>
+<li><strong>Windows</strong>: Windows Snipping Tool (Win+Shift+S) - <strong>95-100% match rate</strong></li>
+<li><strong>macOS</strong>: Built-in screenshot (Cmd+Shift+4) - <strong>95-100% match rate</strong></li>
+<li><strong>Linux</strong>: GNOME Screenshot or Spectacle - <strong>95-100% match rate</strong></li>
 </ul>
-<p>Both achieve <strong>100% identical results</strong>.</p>
+<p><strong>Note</strong>: While FFmpeg captures match Windows screenshots pixel-perfectly, Windows Snipping Tool patterns achieve better runtime match rates.</p>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="why-this-configuration">Why This Configuration?<a href="#why-this-configuration" class="hash-link" aria-label="Direct link to Why This Configuration?" title="Direct link to Why This Configuration?">​</a></h2>
 <p>Based on comprehensive testing comparing 8 different capture methods:</p>
 <ul>
-<li><strong>FFmpeg achieves 100% pixel-perfect match</strong> with Windows Snipping Tool</li>
-<li><strong>FFmpeg achieves 100% pixel-perfect match</strong> with SikuliX IDE</li>
-<li>Captures at physical resolution (1920x1080), avoiding DPI scaling issues</li>
-<li>Smallest file sizes with best compression</li>
+<li><strong>Windows Snipping Tool patterns achieve 95-100% runtime match rates</strong></li>
+<li><strong>FFmpeg patterns only achieve 70-80% runtime match rates</strong></li>
+<li>Clean, artifact-free patterns from native OS tools match better</li>
+<li>JavaCV FFmpeg for runtime capture at physical resolution (1920x1080)</li>
 </ul>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="setup-instructions">Setup Instructions<a href="#setup-instructions" class="hash-link" aria-label="Direct link to Setup Instructions" title="Direct link to Setup Instructions">​</a></h2>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="step-1-configure-brobot">Step 1: Configure Brobot<a href="#step-1-configure-brobot" class="hash-link" aria-label="Direct link to Step 1: Configure Brobot" title="Direct link to Step 1: Configure Brobot">​</a></h3>
 <p>Add to your <code>application.properties</code>:</p>
 <div class="language-properties codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-properties codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain"># Essential settings for optimal capture</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">brobot.capture.provider=JAVACV_FFMPEG  # Use bundled FFmpeg</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">brobot.dpi.resize-factor=auto          # Auto-detect screen scaling</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">brobot.capture.prefer-physical=true    # Prefer physical resolution</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"># Optional: Fine-tuning</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">brobot.action.similarity=0.70          # Can go higher with FFmpeg</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">brobot.capture.enable-logging=true     # See what&#x27;s happening</span><br></span></code></pre></div></div>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="step-2-choose-your-capture-tool">Step 2: Choose Your Capture Tool<a href="#step-2-choose-your-capture-tool" class="hash-link" aria-label="Direct link to Step 2: Choose Your Capture Tool" title="Direct link to Step 2: Choose Your Capture Tool">​</a></h3>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="option-a-windows-snipping-tool-simplest">Option A: Windows Snipping Tool (Simplest)<a href="#option-a-windows-snipping-tool-simplest" class="hash-link" aria-label="Direct link to Option A: Windows Snipping Tool (Simplest)" title="Direct link to Option A: Windows Snipping Tool (Simplest)">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="option-a-os-native-tools-recommended">Option A: OS Native Tools (RECOMMENDED)<a href="#option-a-os-native-tools-recommended" class="hash-link" aria-label="Direct link to Option A: OS Native Tools (RECOMMENDED)" title="Direct link to Option A: OS Native Tools (RECOMMENDED)">​</a></h4>
+<p><strong>Windows:</strong></p>
 <ol>
 <li>Press <code>Win+Shift+S</code></li>
 <li>Select the UI element</li>
 <li>Save to your project&#x27;s <code>images/[state-name]/</code> folder</li>
 <li>Name descriptively (e.g., <code>login-button.png</code>)</li>
 </ol>
-<p><strong>Pros:</strong> No setup, built into Windows, 100% compatible
+<p><strong>macOS:</strong></p>
+<ol>
+<li>Press <code>Cmd+Shift+4</code></li>
+<li>Select the UI element</li>
+<li>Save as PNG</li>
+</ol>
+<p><strong>Linux:</strong></p>
+<ol>
+<li>Use GNOME Screenshot or Spectacle</li>
+<li>Select region mode</li>
+<li>Save as PNG</li>
+</ol>
+<p><strong>Pros:</strong> Best runtime match rates (95-100%), no setup required
 <strong>Cons:</strong> Manual file organization</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="option-b-brobot-pattern-capture-tool-recommended">Option B: Brobot Pattern Capture Tool (Recommended)<a href="#option-b-brobot-pattern-capture-tool-recommended" class="hash-link" aria-label="Direct link to Option B: Brobot Pattern Capture Tool (Recommended)" title="Direct link to Option B: Brobot Pattern Capture Tool (Recommended)">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="option-b-brobot-pattern-capture-tool-for-testing">Option B: Brobot Pattern Capture Tool (For Testing)<a href="#option-b-brobot-pattern-capture-tool-for-testing" class="hash-link" aria-label="Direct link to Option B: Brobot Pattern Capture Tool (For Testing)" title="Direct link to Option B: Brobot Pattern Capture Tool (For Testing)">​</a></h4>
 <ol>
 <li>Run the tool: <code>java -jar pattern-capture-tool-1.0.0.jar</code></li>
-<li>Select &quot;FFmpeg&quot; from the provider dropdown</li>
+<li>Use any provider for testing similarity</li>
 <li>Press F1 or click &quot;Capture&quot;</li>
 <li>Auto-saves to <code>patterns/</code> folder with timestamp</li>
 </ol>
-<p><strong>Pros:</strong> Auto-organization, same 100% quality, batch capture
-<strong>Cons:</strong> Requires running the tool</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="option-c-sikulix-ide-legacy">Option C: SikuliX IDE (Legacy)<a href="#option-c-sikulix-ide-legacy" class="hash-link" aria-label="Direct link to Option C: SikuliX IDE (Legacy)" title="Direct link to Option C: SikuliX IDE (Legacy)">​</a></h4>
-<p>Continue using SikuliX IDE - patterns are 100% compatible with FFmpeg provider.</p>
+<p><strong>Pros:</strong> Good for testing patterns, auto-organization
+<strong>Cons:</strong> Lower runtime match rates (70-80%) than native OS tools</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="option-c-sikulix-ide-for-testing-only">Option C: SikuliX IDE (For Testing Only)<a href="#option-c-sikulix-ide-for-testing-only" class="hash-link" aria-label="Direct link to Option C: SikuliX IDE (For Testing Only)" title="Direct link to Option C: SikuliX IDE (For Testing Only)">​</a></h4>
+<p>SikuliX IDE can be used to test similarity thresholds but achieves lower runtime match rates (70-80%) compared to native OS tools.</p>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="verification">Verification<a href="#verification" class="hash-link" aria-label="Direct link to Verification" title="Direct link to Verification">​</a></h2>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="test-your-setup">Test Your Setup<a href="#test-your-setup" class="hash-link" aria-label="Direct link to Test Your Setup" title="Direct link to Test Your Setup">​</a></h3>
 <ol>

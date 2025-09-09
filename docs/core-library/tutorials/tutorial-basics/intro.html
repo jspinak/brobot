@@ -15,7 +15,7 @@
 <script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","G-6WY1S6ZWEY",{anonymize_ip:!0})</script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous"><link rel="stylesheet" href="/brobot/assets/css/styles.1b22d91f.css">
-<script src="/brobot/assets/js/runtime~main.204eda6d.js" defer="defer"></script>
+<script src="/brobot/assets/js/runtime~main.6d3b21d8.js" defer="defer"></script>
 <script src="/brobot/assets/js/main.1a0d2b07.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -40,10 +40,15 @@ machine learning models.</p>
 <p>The complete code can be found in the GitHub repository
 <a href="https://github.com/jspinak/brobot-demo-labeled-data-DOTislands" target="_blank" rel="noopener noreferrer">brobot-demo-labeled-data-DOTislands</a>.</p>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="requirements">Requirements<a href="#requirements" class="hash-link" aria-label="Direct link to Requirements" title="Direct link to Requirements">​</a></h2>
-<p>The <a href="http://sikulix.com/" target="_blank" rel="noopener noreferrer">Sikuli</a> IDE is a great tool for capturing images on your screen. Using the IDE,
-you can toggle an image&#x27;s similarity score to see how it affects the matches found.
-This will give you a better feeling for the minimum similarity to use in different
-situations.</p>
+<p>For capturing pattern images, we recommend using:</p>
+<ul>
+<li><strong>Windows</strong>: Windows Snipping Tool (Win+Shift+S) - produces the cleanest patterns with best match rates</li>
+<li><strong>macOS</strong>: Built-in screenshot tool (Cmd+Shift+4)</li>
+<li><strong>Linux</strong>: GNOME Screenshot or Spectacle</li>
+</ul>
+<p>While the <a href="http://sikulix.com/" target="_blank" rel="noopener noreferrer">Sikuli</a> IDE can be used to test similarity scores,
+the Windows Snipping Tool consistently produces cleaner patterns that achieve better
+match rates (95-100% vs 70-80%) during runtime automation.</p>
 <p>It is not recommended to call Sikuli functions directly when using Brobot. Doing so
 will bypass Brobot&#x27;s mocking capabilities and permit your application to execute
 real commands during a mock run.</p>
