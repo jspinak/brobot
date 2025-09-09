@@ -517,6 +517,6 @@ jreleaser {
 }
 
 // Apply coverage tasks
-// apply from: 'gradle-coverage-tasks.gradle'  // Temporarily disabled for testing
-apply from: 'test-suites.gradle'  // Test suite configuration for 5000+ tests
+// apply from: 'config-files/gradle-coverage-tasks.gradle'  // Temporarily disabled for testing
+apply from: 'config-files/test-suites.gradle'  // Test suite configuration for 5000+ tests
 // apply from: 'gradle/test-performance.gradle'  // Temporarily disabled - duplicate task error
