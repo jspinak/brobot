@@ -332,11 +332,16 @@ public class ActionRecord {
             actionRecord.text = text;
             actionRecord.matchList = matchList;
             actionRecord.duration = duration;
-            actionRecord.timeStamp = LocalDateTime.now();
+            actionRecord.timeStamp = timeStamp != null ? timeStamp : LocalDateTime.now();
             actionRecord.actionSuccess = actionSuccess;
             actionRecord.resultSuccess = resultSuccess;
             actionRecord.stateName = state;
             return actionRecord;
+        }
+
+        public Builder setTimeStamp(LocalDateTime timeStamp) {
+            this.timeStamp = timeStamp;
+            return this;
         }
     }
 
