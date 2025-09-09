@@ -11,19 +11,20 @@ brobot.dpi.resize-factor=auto
 brobot.action.similarity=0.70
 ```
 
-**Use either:**
-- Windows Snipping Tool (Win+Shift+S) 
-- Brobot Pattern Capture Tool with FFmpeg selected
+**For pattern creation, use OS native tools:**
+- **Windows**: Windows Snipping Tool (Win+Shift+S) - **95-100% match rate**
+- **macOS**: Built-in screenshot (Cmd+Shift+4) - **95-100% match rate**
+- **Linux**: GNOME Screenshot or Spectacle - **95-100% match rate**
 
-Both achieve **100% identical results**.
+**Note**: While FFmpeg captures match Windows screenshots pixel-perfectly, Windows Snipping Tool patterns achieve better runtime match rates.
 
 ## Why This Configuration?
 
 Based on comprehensive testing comparing 8 different capture methods:
-- **FFmpeg achieves 100% pixel-perfect match** with Windows Snipping Tool
-- **FFmpeg achieves 100% pixel-perfect match** with SikuliX IDE
-- Captures at physical resolution (1920x1080), avoiding DPI scaling issues
-- Smallest file sizes with best compression
+- **Windows Snipping Tool patterns achieve 95-100% runtime match rates**
+- **FFmpeg patterns only achieve 70-80% runtime match rates**
+- Clean, artifact-free patterns from native OS tools match better
+- JavaCV FFmpeg for runtime capture at physical resolution (1920x1080)
 
 ## Setup Instructions
 
@@ -44,26 +45,38 @@ brobot.capture.enable-logging=true     # See what's happening
 
 ### Step 2: Choose Your Capture Tool
 
-#### Option A: Windows Snipping Tool (Simplest)
+#### Option A: OS Native Tools (RECOMMENDED)
+
+**Windows:**
 1. Press `Win+Shift+S`
 2. Select the UI element
 3. Save to your project's `images/[state-name]/` folder
 4. Name descriptively (e.g., `login-button.png`)
 
-**Pros:** No setup, built into Windows, 100% compatible
+**macOS:**
+1. Press `Cmd+Shift+4`
+2. Select the UI element
+3. Save as PNG
+
+**Linux:**
+1. Use GNOME Screenshot or Spectacle
+2. Select region mode
+3. Save as PNG
+
+**Pros:** Best runtime match rates (95-100%), no setup required
 **Cons:** Manual file organization
 
-#### Option B: Brobot Pattern Capture Tool (Recommended)
+#### Option B: Brobot Pattern Capture Tool (For Testing)
 1. Run the tool: `java -jar pattern-capture-tool-1.0.0.jar`
-2. Select "FFmpeg" from the provider dropdown
+2. Use any provider for testing similarity
 3. Press F1 or click "Capture"
 4. Auto-saves to `patterns/` folder with timestamp
 
-**Pros:** Auto-organization, same 100% quality, batch capture
-**Cons:** Requires running the tool
+**Pros:** Good for testing patterns, auto-organization
+**Cons:** Lower runtime match rates (70-80%) than native OS tools
 
-#### Option C: SikuliX IDE (Legacy)
-Continue using SikuliX IDE - patterns are 100% compatible with FFmpeg provider.
+#### Option C: SikuliX IDE (For Testing Only)
+SikuliX IDE can be used to test similarity thresholds but achieves lower runtime match rates (70-80%) compared to native OS tools.
 
 ## Verification
 

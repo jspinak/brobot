@@ -60,7 +60,7 @@ Brobot is a Java-based GUI automation framework that provides model-based automa
 - **Modular Capture System**: [Capture System](03-core-library/capture/modular-capture-system.md)
 - **DPI Resolution Guide**: [DPI Guide](03-core-library/capture/dpi-resolution-guide.md)
 - **Capture Quick Reference**: [Capture Quick Reference](03-core-library/capture/capture-quick-reference.md)
-- **Quick Start Capture Setup**: [Capture Setup](quick-start-capture-setup.md)
+- **Quick Start Capture Setup**: [Capture Setup](../03-core-library/tools/quick-start-capture-setup.md)
 
 #### Region Management
 - **Screen-Adaptive Regions**: [Adaptive Regions](03-core-library/guides/screen-adaptive-regions.md)
@@ -68,8 +68,8 @@ Brobot is a Java-based GUI automation framework that provides model-based automa
 - **Search Regions & Fixed Locations**: [Search Regions](03-core-library/guides/search-regions-and-fixed-locations.md)
 
 #### Pattern Tools
-- **Pattern Creation Tools**: [Pattern Tools](pattern-creation-tools.md)
-- **Pattern Capture Tool Guide**: [Capture Tool](pattern-capture-tool-guide.md)
+- **Pattern Creation Tools**: [Pattern Tools](../03-core-library/tools/pattern-creation-tools.md)
+- **Pattern Capture Tool Guide**: [Capture Tool](../03-core-library/tools/pattern-capture-tool-guide.md)
 - **Debugging Pattern Matching**: [Debug Patterns](04-testing/debugging-pattern-matching.md)
 
 ### ⚙️ Configuration
@@ -260,7 +260,7 @@ brobot:
 
 - **GitHub Repository**: [github.com/jspinak/brobot](https://github.com/jspinak/brobot)
 - **Issue Tracker**: [GitHub Issues](https://github.com/jspinak/brobot/issues)
-- **Brobot Name Origin**: [Why "Brobot"?](brobot-name-origin.md)
+- **Brobot Name Origin**: [Why "Brobot"?](../05-theoretical-foundations/background/brobot-name-origin.md)
 
 ---
 

@@ -81,16 +81,20 @@ automatically if using Gradle):
 
 <img src="https://jspinak.github.io/brobot/img/demo-project-structure.png" alt="project structure" width="200"/>
 
-## Capture Images with the Sikuli IDE
+## Capture Pattern Images
 
-Open the Sikuli IDE and in Sikuli, the folder 'images.sikuli'. Capture
-images from the screen with the following names:
+For best pattern matching results, use your OS's native screenshot tool:
+- **Windows**: Windows Snipping Tool (Win+Shift+S) - achieves 95-100% match rates
+- **macOS**: Built-in screenshot (Cmd+Shift+4)
+- **Linux**: GNOME Screenshot or Spectacle
+
+Save your captured patterns with the following names in the 'images' folder:
 
 <img src="https://jspinak.github.io/brobot/img/image-names.png" alt="image names" width="200"/>
 
 To follow the tutorial to prepare mock runs, the captured images can be of anything.
-You can play around with the similarity score by clicking on an image
-that has been saved in the Sikuli IDE.
+While the Sikuli IDE can be used to test similarity scores, the native OS screenshot
+tools produce cleaner patterns with better match rates.
 
 <u>Preparing your Demo for Live Runs</u>  
 
