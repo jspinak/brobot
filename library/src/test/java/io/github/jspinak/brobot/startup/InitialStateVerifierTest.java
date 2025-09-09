@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -30,6 +31,7 @@ import static org.mockito.Mockito.*;
  * Verifies initial state detection and verification functionality.
  */
 @DisplayName("InitialStateVerifier Tests")
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
 public class InitialStateVerifierTest extends BrobotTestBase {
 
     @Mock

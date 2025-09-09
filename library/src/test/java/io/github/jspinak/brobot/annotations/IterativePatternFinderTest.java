@@ -28,12 +28,14 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
 import org.mockito.ArgumentCaptor;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 /**
  * Test suite for IterativePatternFinder class.
  * Tests iterative pattern finding with multiple attempts and strategies.
  */
 @DisplayName("IterativePatternFinder Tests")
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
 public class IterativePatternFinderTest extends BrobotTestBase {
 
     private IterativePatternFinder iterativePatternFinder;

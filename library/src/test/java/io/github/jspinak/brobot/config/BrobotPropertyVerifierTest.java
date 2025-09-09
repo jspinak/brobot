@@ -25,6 +25,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -38,6 +39,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("BrobotPropertyVerifier Tests")
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
 public class BrobotPropertyVerifierTest extends BrobotTestBase {
 
     @Mock

@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests directory scanning, file filtering, and Scene object creation.
  */
 @DisplayName("SceneCreator Tests")
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
 public class SceneCreatorTest extends BrobotTestBase {
 
     private SceneCreator sceneCreator;

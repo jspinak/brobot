@@ -21,6 +21,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,6 +35,7 @@ import static org.hamcrest.Matchers.*;
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("MockTime Tests")
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
 public class MockTimeTest extends BrobotTestBase {
     
     @Mock

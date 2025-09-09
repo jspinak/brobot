@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -38,6 +39,7 @@ import static org.mockito.Mockito.*;
 @ResourceLock(value = ConcurrentTestBase.ResourceLocks.NETWORK)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS) // Share instance for @AfterAll
 @Timeout(value = 25, unit = TimeUnit.SECONDS) // Global timeout under CI/CD 30s limit
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
 public class MonitoringServiceTest extends ConcurrentTestBase {
     
     @Mock

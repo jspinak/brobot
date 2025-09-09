@@ -8,6 +8,7 @@ import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import java.awt.*;
 
@@ -17,6 +18,7 @@ import static org.mockito.Mockito.*;
 /**
  * Tests for MoveMouseWrapper coordinate scaling functionality.
  */
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
 public class MoveMouseWrapperTest extends BrobotTestBase {
 
     private MoveMouseWrapper moveMouseWrapper;

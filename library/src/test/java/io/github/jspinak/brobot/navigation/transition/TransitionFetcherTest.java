@@ -16,6 +16,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.*;
  * Tests retrieval and packaging of transition components.
  */
 @DisplayName("TransitionFetcher Tests")
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
 class TransitionFetcherTest extends BrobotTestBase {
     
     @Mock

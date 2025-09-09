@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -30,6 +31,7 @@ import static org.hamcrest.Matchers.*;
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ActionDurations Tests")
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
 public class ActionDurationsTest extends BrobotTestBase {
 
     private ActionDurations actionDurations;

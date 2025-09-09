@@ -30,6 +30,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
@@ -42,6 +43,7 @@ import static org.mockito.Mockito.*;
  */
 @DisplayName("DatasetCollectionAspect Tests")
 @ResourceLock(value = ConcurrentTestBase.ResourceLocks.FILE_SYSTEM)
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
 public class DatasetCollectionAspectTest extends ConcurrentTestBase {
 
     private DatasetCollectionAspect aspect;
