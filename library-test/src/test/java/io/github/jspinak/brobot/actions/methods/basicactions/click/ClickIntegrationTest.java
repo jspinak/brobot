@@ -28,6 +28,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;

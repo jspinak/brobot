@@ -5,43 +5,41 @@ This guide helps you choose the best tool for creating pattern images that work 
 
 ## Recommended Tools
 
-### 🏆 Optimal Tools (100% Similarity)
-These tools provide perfect pattern matching when used with Brobot's default configuration:
+### 🏆 Optimal Tools for Pattern Creation
+These tools provide the best pattern matching during runtime automation:
 
-#### 1. **Windows Snipping Tool** 
+#### 1. **Windows Snipping Tool** (RECOMMENDED)
 - **Resolution**: 1920x1080 (physical)
-- **Similarity Score**: 100% with Brobot's JAVACV_FFMPEG capture
+- **Runtime Match Rate**: **95-100%** with Brobot's JAVACV_FFMPEG capture
 - **Platform**: Windows only
+- **Why it's best**: Produces the cleanest, artifact-free patterns
 - **How to use**:
   1. Press `Win + Shift + S` to open Snipping Tool
   2. Select the area you want to capture
   3. Save as PNG in your project's `images/` directory
 
-#### 2. **SikuliX IDE**
-- **Resolution**: 1920x1080 (physical)
-- **Similarity Score**: 100% with Brobot's JAVACV_FFMPEG capture
-- **Platform**: Cross-platform (Windows, Mac, Linux)
-- **How to use**:
-  1. Open SikuliX IDE
-  2. Click the camera icon or use the capture shortcut
-  3. Select the pattern area
-  4. Export/save as PNG to your project's `images/` directory
+#### 2. **macOS Screenshot Tool**
+- **Platform**: macOS
+- **Runtime Match Rate**: 95-100%
+- **How to use**: Press `Cmd + Shift + 4`
 
-#### 3. **Brobot FFmpeg Tool** *(Coming Soon)*
-- **Resolution**: 1920x1080 (physical)
-- **Similarity Score**: 100% with Brobot's JAVACV_FFMPEG capture
-- **Platform**: Cross-platform
-- **How to use**: 
-  - Standalone tool that saves patterns directly to configured directory
-  - Captures at physical resolution using FFmpeg
-  - Perfect compatibility with Brobot
+#### 3. **Linux Screenshot Tools**
+- **Platform**: Linux
+- **Runtime Match Rate**: 95-100%
+- **Tools**: GNOME Screenshot or Spectacle
 
-### ✅ Good Alternative (95% Similarity)
-#### **Custom SikuliX-based Tool**
-- **Resolution**: 1536x864 (logical)
-- **Similarity Score**: 95% with Brobot's SikuliX/Robot capture
+### ✅ Alternative Tools (Lower Match Rates)
+#### **SikuliX IDE**
+- **Resolution**: Variable (depends on DPI settings)
+- **Runtime Match Rate**: 70-80% (can be used for testing similarity)
 - **Platform**: Cross-platform
-- **Note**: Requires changing Brobot configuration (see below)
+- **Use case**: Testing similarity thresholds, not for pattern creation
+
+#### **Brobot FFmpeg Tool**
+- **Resolution**: 1920x1080 (physical)
+- **Runtime Match Rate**: 70-80% when used for patterns
+- **Platform**: Cross-platform
+- **Note**: Better for testing than pattern creation
 
 ### ⚠️ Not Recommended (< 70% Similarity)
 - Screenshot tools that apply compression or filters
@@ -80,9 +78,12 @@ brobot.dpi.resize-factor=1.0
 ## Pattern Creation Workflow
 
 ### Step 1: Choose Your Tool
-1. **For best results**: Use Windows Snipping Tool or SikuliX IDE
-2. **For automation**: Wait for Brobot FFmpeg Tool release
-3. **If you have existing patterns**: Check their resolution and adjust configuration
+1. **For best results**: Use OS native screenshot tools
+   - Windows: Windows Snipping Tool (Win+Shift+S)
+   - macOS: Built-in screenshot (Cmd+Shift+4)
+   - Linux: GNOME Screenshot or Spectacle
+2. **For testing patterns**: Use Brobot Pattern Capture Tool
+3. **If you have existing patterns**: Test their match rates and consider recapturing with native tools
 
 ### Step 2: Capture Patterns
 1. Ensure your display is at the target resolution
@@ -151,13 +152,13 @@ If you're getting similarity scores below 90%:
 
 ## Resolution Compatibility Table
 
-| Pattern Tool | Resolution | Best Brobot Provider | Expected Similarity |
-|-------------|------------|---------------------|---------------------|
-| Windows Snipping Tool | 1920x1080 | JAVACV_FFMPEG | 100% |
-| SikuliX IDE | 1920x1080 | JAVACV_FFMPEG | 100% |
-| Brobot FFmpeg Tool | 1920x1080 | JAVACV_FFMPEG | 100% |
-| Custom SikuliX Tool | 1536x864 | SIKULIX | 95% |
-| Custom Robot Tool | 1536x864 | ROBOT | 69% |
+| Pattern Creation Tool | Best Brobot Provider | Runtime Match Rate | Recommendation |
+|----------------------|---------------------|-------------------|----------------|
+| Windows Snipping Tool | JAVACV_FFMPEG | **95-100%** | **RECOMMENDED** |
+| macOS Screenshot | JAVACV_FFMPEG | **95-100%** | **RECOMMENDED** |
+| Linux Screenshot | JAVACV_FFMPEG | **95-100%** | **RECOMMENDED** |
+| Brobot FFmpeg Tool | JAVACV_FFMPEG | 70-80% | Testing only |
+| SikuliX IDE | JAVACV_FFMPEG | 70-80% | Testing only |
 
 ## Best Practices
 
@@ -247,9 +248,9 @@ brobot.console.actions.enabled=true
 ## Summary
 
 For optimal pattern matching:
-1. **Use Windows Snipping Tool or SikuliX IDE** - 100% similarity guaranteed
-2. **Keep default Brobot configuration** - Already optimized for these tools
+1. **Use OS native screenshot tools** - Windows Snipping Tool, macOS Screenshot, or Linux Screenshot tools
+2. **Keep default Brobot configuration** - JAVACV_FFMPEG for runtime capture
 3. **Save patterns as PNG** - Avoid compression artifacts
 4. **Organize patterns by state** - Easier maintenance
 
-The default Brobot configuration is already optimized for the best pattern creation tools. Simply create your patterns with Windows Snipping Tool or SikuliX IDE, and they'll work perfectly with Brobot's pattern matching system.
+**Key insight**: Clean, artifact-free patterns from native OS tools match better during runtime than patterns captured with the same tool used for runtime capture. This counterintuitive result occurs because noise and artifacts compound when present in both pattern and runtime images.

@@ -26,6 +26,7 @@ import org.springframework.test.context.TestPropertySource;
 import java.awt.image.BufferedImage;
 import java.util.Optional;
 import java.util.Set;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 

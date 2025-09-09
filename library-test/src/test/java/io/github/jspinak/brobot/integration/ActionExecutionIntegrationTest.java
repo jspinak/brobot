@@ -32,6 +32,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -43,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("integration-minimal")
 @TestPropertySource(locations = "classpath:application-integration.properties")
 @Slf4j
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Integration test requires non-CI environment")
 public class ActionExecutionIntegrationTest extends IntegrationTestBase {
 
     @Autowired

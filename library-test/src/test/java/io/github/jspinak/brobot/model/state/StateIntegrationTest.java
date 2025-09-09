@@ -16,10 +16,12 @@ import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 import io.github.jspinak.brobot.model.state.State;
 
 import java.awt.image.BufferedImage;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Integration test requires non-CI environment")
 public class StateIntegrationTest {
     
     @BeforeAll

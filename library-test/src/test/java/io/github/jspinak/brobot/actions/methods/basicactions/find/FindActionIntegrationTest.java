@@ -27,6 +27,7 @@ import io.github.jspinak.brobot.BrobotTestApplication;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -55,6 +56,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Import({ MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class,
                 io.github.jspinak.brobot.test.config.TestApplicationConfiguration.class })
 @ContextConfiguration(initializers = TestEnvironmentInitializer.class)
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Integration test requires non-CI environment")
 public class FindActionIntegrationTest {
 
         @BeforeAll

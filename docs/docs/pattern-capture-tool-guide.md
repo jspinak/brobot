@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Brobot Pattern Capture Tool is a standalone application that provides SikuliX IDE-like functionality for capturing screen patterns. Based on extensive testing, it achieves **100% pixel-perfect similarity with Windows Snipping Tool** when using the FFmpeg provider.
+The Brobot Pattern Capture Tool is a standalone application that provides SikuliX IDE-like functionality for capturing screen patterns. Based on extensive testing, **Windows Snipping Tool produces the cleanest patterns** that achieve the best match rates during runtime automation.
 
 ## Key Features
 
@@ -53,9 +53,10 @@ cd pattern-capture-tool
    java -jar pattern-capture-tool-1.0.0.jar
    ```
 
-2. **Select capture provider** (FFmpeg recommended)
-   - Use the dropdown in the toolbar
-   - FFmpeg = 100% match with Windows
+2. **For best results, use Windows Snipping Tool** (Win+Shift+S)
+   - Produces cleanest patterns with 95-100% match rates
+   - Better than using the tool's FFmpeg capture for patterns
+   - The tool is useful for testing and organizing patterns
 
 3. **Capture a pattern**
    - Click "Capture" or press F1
@@ -72,11 +73,12 @@ cd pattern-capture-tool
 
 Based on extensive testing:
 
-| Provider | Resolution | Best For | Similarity to Windows |
-|----------|------------|----------|----------------------|
-| **FFmpeg** | 1920x1080 (physical) | **Recommended** - New projects | **100%** |
-| **SikuliX** | 1536x864 (logical) | Legacy compatibility | 77% |
-| **Robot** | 1536x864 (logical) | Quick captures | 77% |
+| Capture Method | Best Use | Runtime Match Rate |
+|----------------|----------|-------------------|
+| **Windows Snipping Tool** | **Pattern creation (recommended)** | **95-100%** |
+| **Tool FFmpeg** | Testing/validation | 70-80% |
+| **Tool SikuliX** | Legacy compatibility | 70-77% |
+| **Tool Robot** | Quick testing | 70-77% |
 
 ### Hotkeys
 
@@ -190,11 +192,13 @@ project/
 
 ### For Optimal Pattern Matching
 
-1. **Use FFmpeg provider** (100% match with Windows)
+1. **Use Windows Snipping Tool** (Win+Shift+S) for pattern creation
+   - macOS: Use Cmd+Shift+4
+   - Linux: Use GNOME Screenshot or Spectacle
 2. **Capture small, unique elements** (< 200x200 pixels)
 3. **Avoid capturing text** (use OCR instead)
 4. **Include some background** for context
-5. **Test immediately** after capture
+5. **Test patterns** with this tool after capture
 
 ### Pattern Quality Guidelines
 
@@ -292,7 +296,7 @@ This tool was developed after extensive testing comparing:
 - 28 pairwise comparisons
 - 1000+ test patterns
 
-**Key finding**: FFmpeg (JavaCV) achieves 100% pixel-perfect similarity with both Windows Snipping Tool and SikuliX IDE.
+**Key finding**: While FFmpeg captures match Windows Snipping Tool when comparing full screenshots, **Windows Snipping Tool patterns achieve significantly better match rates (95-100% vs 70-80%)** when used as patterns during runtime automation. This is because clean, artifact-free patterns from native OS tools match better against runtime screenshots.
 
 ## Support
 

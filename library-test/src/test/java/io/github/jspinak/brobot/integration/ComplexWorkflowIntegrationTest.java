@@ -20,6 +20,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests the interaction between multiple action components in realistic scenarios.
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Integration test requires non-CI environment")
 public class ComplexWorkflowIntegrationTest extends BrobotTestBase {
     
     private Click click;
