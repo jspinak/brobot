@@ -27,17 +27,17 @@ Brobot is a Java-based GUI automation framework that provides model-based automa
 
 #### Actions & Automation
 - **Action Hierarchy**: [Action Hierarchy](01-getting-started/action-hierarchy.md)
-- **Action Configuration**: [Action Config Overview](03-core-library/action-config/overview.md)
-- **Fluent API Reference**: [Fluent API](03-core-library/action-config/fluent-api.md)
-- **Action Chaining**: [Action Chaining](03-core-library/action-config/action-chaining.md)
+- **Action Configuration**: [Action Config Overview](03-core-library/action-config/01-overview.md)
+- **Fluent API Reference**: [Fluent API](03-core-library/action-config/04-fluent-api.md)
+- **Action Chaining**: [Action Chaining](03-core-library/action-config/07-action-chaining.md)
 - **Pure Actions API**: [Pure Actions Quickstart](01-getting-started/pure-actions-quickstart.md)
 
 #### Conditional Actions & Complex Workflows
-- **ConditionalActionChain Examples**: [Conditional Chains Examples](03-core-library/action-config/conditional-chains-examples.md)
-- **Conditional Actions Guide**: [Conditional Actions](03-core-library/action-config/conditional-actions.md)
-- **ConditionalActionWrapper**: [Conditional Action Wrapper](03-core-library/action-config/conditional-action-wrapper.md)
-- **Complex Workflows**: [Complex Workflows](03-core-library/action-config/complex-workflows.md)
-- **Form Automation**: [Form Automation](03-core-library/action-config/form-automation.md)
+- **ConditionalActionChain Examples**: [Conditional Chains Examples](03-core-library/action-config/15-conditional-chains-examples.md)
+- **Conditional Actions Guide**: [Conditional Actions](03-core-library/action-config/09-conditional-actions.md)
+- **ConditionalActionWrapper**: [Conditional Action Wrapper](03-core-library/action-config/16-conditional-action-wrapper.md)
+- **Complex Workflows**: [Complex Workflows](03-core-library/action-config/08-complex-workflows.md)
+- **Form Automation**: [Form Automation](03-core-library/action-config/10-form-automation.md)
 - **Troubleshooting Chains**: [Troubleshooting Guide](03-core-library/action-config/troubleshooting-chains.md)
 
 ### 🧪 Testing & Mocking
@@ -94,8 +94,6 @@ Brobot is a Java-based GUI automation framework that provides model-based automa
 
 #### Migration Guides
 - **ActionOptions to ActionConfig**: [Migration Guide](03-core-library/migration/actionoptions-to-actionconfig.md)
-- **SikuliX to JavaCV Migration**: [JavaCV Migration](sikulix-to-javacv-migration.md)
-- **Complete JavaCV Replacement**: [JavaCV Replacement](complete-javacv-replacement.md)
 
 ### 🎓 Tutorials
 
@@ -104,7 +102,7 @@ Brobot is a Java-based GUI automation framework that provides model-based automa
 - **Setup**: [Tutorial Setup](03-core-library/tutorials/tutorial-basics/setup.md)
 - **States**: [Tutorial States](03-core-library/tutorials/tutorial-basics/states.md)
 - **Transitions**: [Tutorial Transitions](03-core-library/tutorials/tutorial-basics/transitions.md)
-- **Live Automation**: [Live Demo](03-core-library/tutorials/tutorial-basics/live-automation.md)
+- **Live Automation**: [Live Demo](03-core-library/tutorials/tutorial-basics/live-automation.mdx)
 
 #### MrDoob Tutorial
 - **Introduction**: [MrDoob Intro](03-core-library/tutorials/tutorial-mrdoob/intro.md)
