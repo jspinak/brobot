@@ -2,19 +2,12 @@ package io.github.jspinak.brobot.model.element;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
-import io.github.jspinak.brobot.json.serializers.BufferedImageSerializer;
-import io.github.jspinak.brobot.json.serializers.BufferedImageDeserializer;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 import io.github.jspinak.brobot.util.image.core.ImageConverter;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.opencv.opencv_core.Mat;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 
 import static java.awt.image.BufferedImage.TYPE_BYTE_BINARY;
@@ -207,6 +200,29 @@ public class Image {
                 ", width=" + (bufferedImage != null ? bufferedImage.getWidth() : "N/A") +
                 ", height=" + (bufferedImage != null ? bufferedImage.getHeight() : "N/A") +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        
+        Image image = (Image) o;
+        
+        // Check name equality
+        if (name != null ? !name.equals(image.name) : image.name != null) return false;
+        
+        // Check bufferedImage reference equality (as per test expectations)
+        // Two images are equal if they have the same BufferedImage reference and same name
+        return bufferedImage == image.bufferedImage;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name != null ? name.hashCode() : 0;
+        // Use System.identityHashCode for BufferedImage to match reference equality
+        result = 31 * result + (bufferedImage != null ? System.identityHashCode(bufferedImage) : 0);
+        return result;
     }
 
 }

@@ -48,15 +48,35 @@ class CITestRunner:
             self.setup_ci_environment()
     
     def setup_ci_environment(self):
-        """Configure environment for CI execution."""
-        os.environ['GRADLE_OPTS'] = '-Dorg.gradle.daemon=false -Dorg.gradle.parallel=false'
+        """Setup environment variables for stable CI execution"""
+        # Prevent JVM crashes with safer options
+        os.environ['_JAVA_OPTIONS'] = (
+            '-Djava.awt.headless=true '
+            '-XX:+UseG1GC '
+            '-XX:-TieredCompilation '
+            '-XX:TieredStopAtLevel=1 '
+            '-XX:+DisableExplicitGC '
+            '-Djava.security.egd=file:/dev/./urandom'
+        )
+        
+        # Gradle options for stability
+        os.environ['GRADLE_OPTS'] = (
+            '-Xmx2g '
+            '-XX:MaxMetaspaceSize=512m '
+            '-XX:+HeapDumpOnOutOfMemoryError '
+            '-Dfile.encoding=UTF-8 '
+            '-Dorg.gradle.daemon=false '
+            '-Dorg.gradle.parallel=false '
+            '-Dorg.gradle.workers.max=2'
+        )
+        
         os.environ['JAVA_TOOL_OPTIONS'] = '-Djava.awt.headless=true'
         
         # macOS-specific settings
         if self.is_macos:
-            os.environ['JAVA_TOOL_OPTIONS'] += ' -Djava.awt.headless=true -Dapple.awt.UIElement=true'
+            os.environ['JAVA_TOOL_OPTIONS'] += ' -Dapple.awt.UIElement=true'
             # Reduce memory usage on macOS CI runners
-            os.environ['GRADLE_OPTS'] += ' -Xmx1g'
+            os.environ['GRADLE_OPTS'] = os.environ['GRADLE_OPTS'].replace('-Xmx2g', '-Xmx1g')
     
     def print_progress(self, message: str):
         """Print progress message with timestamp for CI visibility."""
