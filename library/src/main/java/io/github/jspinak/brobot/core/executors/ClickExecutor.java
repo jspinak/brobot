@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.core.location.ElementLocator;
 import io.github.jspinak.brobot.core.services.MouseController;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -29,7 +30,7 @@ public class ClickExecutor {
     
     private final MouseController mouseController;
     
-    public ClickExecutor(MouseController mouseController) {
+    public ClickExecutor(@Qualifier("sikuliMouseController") MouseController mouseController) {
         this.mouseController = mouseController;
     }
     

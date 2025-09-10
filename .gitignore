@@ -192,3 +192,7 @@ test-artifacts/
 screenshots/
 **/target/**/*.png
 **/target/**/*.jpg
+library/src/test/resources/patterns/test_save.json
+**/test_save.json
+**/*test_save*
+library-test/disabled-classes.txt
