@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import io.github.jspinak.brobot.runner.testutils.TestHelper;
 import io.github.jspinak.brobot.runner.testutils.ImprovedJavaFXTestBase;
+import org.junit.jupiter.api.Disabled;
 
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
