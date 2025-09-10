@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Integration test suite for StateFactory.
  * Tests factory methods for creating Brobot state components with Spring context.
  */
-@Disabled("Missing BrobotConfig class")
+@Disabled("Missing BrobotConfig class + Failing in CI")
 @SpringBootTest(classes = BrobotTestApplication.class)
 // @Import(BrobotConfig.class)
 @TestPropertySource(properties = {
