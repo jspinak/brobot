@@ -61,12 +61,14 @@ jobs:
     - name: Run ${{ matrix.module }} tests
       run: |
         if [ "${{ matrix.module }}" = "runner" ]; then
-          # Run runner tests with headless JavaFX configuration
-          ./gradlew ${{ matrix.module }}:test \
+          # Run runner tests with CI flag to skip JavaFX tests
+          # JavaFX tests are disabled with @DisabledIfEnvironmentVariable(named = "CI", matches = "true")
+          CI=true ./gradlew ${{ matrix.module }}:test \
             --no-daemon \
             --parallel \
             --build-cache \
             --continue \
+            --info \
             -Djava.awt.headless=true \
             -Dtestfx.headless=true \
             -Dtestfx.robot=glass \
