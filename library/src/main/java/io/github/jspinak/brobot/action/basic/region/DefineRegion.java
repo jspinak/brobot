@@ -107,6 +107,7 @@ public class DefineRegion implements ActionInterface {
         
         DefineRegionOptions.DefineAs defineAs = defineOptions.getDefineAs();
         System.out.print("Define as: " + defineAs + "| ");
+        System.out.flush();  // Ensure output is flushed before proceeding
         
         ActionInterface action = actions.get(defineAs);
         if (action != null) {
