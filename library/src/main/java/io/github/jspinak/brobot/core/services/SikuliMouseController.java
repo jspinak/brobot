@@ -5,6 +5,7 @@ import org.sikuli.script.Location;
 import org.sikuli.script.Mouse;
 import org.sikuli.script.Region;
 import org.sikuli.script.Button;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
@@ -30,6 +31,7 @@ import java.awt.GraphicsEnvironment;
  * @since 2.0.0
  */
 @Component
+@Primary
 public class SikuliMouseController implements MouseController {
     
     // Button constants for Sikuli

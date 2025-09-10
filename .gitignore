@@ -173,3 +173,22 @@ library/src/test/resources/patterns/test_save.json
 # Platform-specific test runner scripts (temporary/utility)
 library/run-tests-windows.ps1
 runner/fix-javafx-tests.sh
+# Image files (except in docs and examples)
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+!docs/**/*.png
+!docs/**/*.jpg
+!docs/**/*.jpeg
+!examples/**/*.png
+!examples/**/*.jpg
+
+# Working directories
+images/working/
+images/prompt/
+test-artifacts/
+screenshots/
+**/target/**/*.png
+**/target/**/*.jpg
