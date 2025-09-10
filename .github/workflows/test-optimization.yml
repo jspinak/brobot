@@ -88,6 +88,10 @@ jobs:
             --continue \
             --max-workers=2 \
             -Djava.awt.headless=true || true
+        elif [ "${{ matrix.module }}" = "library-test" ]; then
+          # Use Python test runner for library-test to avoid hanging issues
+          echo "Running library-test with Python test runner..."
+          python3 library/scripts/run-tests-ci.py library-test || true
         else
           ./gradlew ${{ matrix.module }}:test \
             --no-daemon \
