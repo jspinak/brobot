@@ -7,8 +7,8 @@ import io.github.jspinak.brobot.aspects.annotations.CollectData;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import io.github.jspinak.brobot.model.state.StateObject;
 import io.github.jspinak.brobot.test.ConcurrentTestBase;
-import io.github.jspinak.brobot.test.annotations.FlakyTest;
-import io.github.jspinak.brobot.test.annotations.FlakyTest.FlakyCause;
+import io.github.jspinak.brobot.test.annotations.Flaky;
+import io.github.jspinak.brobot.test.annotations.Flaky.FlakyCause;
 import io.github.jspinak.brobot.test.utils.ConcurrentTestHelper;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
@@ -396,7 +396,7 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
 
         @Test
         @DisplayName("Should handle queue overflow gracefully")
-        @FlakyTest(reason = "Queue processing timing", cause = FlakyCause.TIMING)
+        @Flaky(reason = "Queue processing timing", cause = FlakyCause.TIMING)
         void shouldHandleQueueOverflow() throws Throwable {
             // Arrange
             ReflectionTestUtils.setField(aspect, "maxQueueSize", 2);
@@ -435,7 +435,7 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
 
         @Test
         @DisplayName("Should write data to output directory")
-        @FlakyTest(reason = "File I/O timing issues", cause = FlakyCause.FILE_SYSTEM)
+        @Flaky(reason = "File I/O timing issues", cause = FlakyCause.FILE_SYSTEM)
         void shouldWriteDataToOutputDirectory() throws Throwable {
             // Arrange
             when(collectData.samplingRate()).thenReturn(1.0);
@@ -478,7 +478,7 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
 
         @Test
         @DisplayName("Should compress data when configured")
-        @FlakyTest(reason = "Async compression timing", cause = FlakyCause.ASYNC)
+        @Flaky(reason = "Async compression timing", cause = FlakyCause.ASYNC)
         void shouldCompressDataWhenConfigured() throws Throwable {
             // Arrange
             when(collectData.samplingRate()).thenReturn(1.0);

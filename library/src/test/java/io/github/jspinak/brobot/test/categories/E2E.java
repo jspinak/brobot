@@ -22,7 +22,7 @@ import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
  * Example usage:
  * <pre>
  * {@code
- * @E2ETest
+ * @E2E
  * @DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
 class ApplicationE2ETest {
  *     @Test
@@ -37,5 +37,5 @@ class ApplicationE2ETest {
 @Retention(RetentionPolicy.RUNTIME)
 @Test
 @Tag("e2e")
-public @interface E2ETest {
+public @interface E2E {
 }

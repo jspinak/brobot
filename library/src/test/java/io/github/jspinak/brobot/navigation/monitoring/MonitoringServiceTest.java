@@ -3,8 +3,8 @@ package io.github.jspinak.brobot.navigation.monitoring;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
 import io.github.jspinak.brobot.test.ConcurrentTestBase;
-import io.github.jspinak.brobot.test.annotations.FlakyTest;
-import io.github.jspinak.brobot.test.annotations.FlakyTest.FlakyCause;
+import io.github.jspinak.brobot.test.annotations.Flaky;
+import io.github.jspinak.brobot.test.annotations.Flaky.FlakyCause;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -220,7 +220,7 @@ public class MonitoringServiceTest extends ConcurrentTestBase {
         @Test
         @DisplayName("Should stop after max consecutive failures")
         @Timeout(value = 5, unit = TimeUnit.SECONDS)
-        @FlakyTest(reason = "Timing-dependent failure accumulation", cause = FlakyCause.TIMING)
+        @Flaky(reason = "Timing-dependent failure accumulation", cause = FlakyCause.TIMING)
         public void testMaxConsecutiveFailures() throws InterruptedException {
             monitoringService.setMaxConsecutiveFailures(3);
             AtomicInteger executionCount = new AtomicInteger(0);
@@ -277,7 +277,7 @@ public class MonitoringServiceTest extends ConcurrentTestBase {
         @Test
         @DisplayName("Should execute task when target state is active")
         @Timeout(value = 5, unit = TimeUnit.SECONDS)
-        @FlakyTest(reason = "State change timing", cause = FlakyCause.ASYNC)
+        @Flaky(reason = "State change timing", cause = FlakyCause.ASYNC)
         public void testStateMonitoring() throws InterruptedException {
             State targetState = new State();
             targetState.setName("TargetState");

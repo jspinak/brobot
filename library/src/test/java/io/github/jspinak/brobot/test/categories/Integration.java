@@ -21,7 +21,7 @@ import java.lang.annotation.Target;
  * Example usage:
  * <pre>
  * {@code
- * @IntegrationTest
+ * @Integration
  * @SpringBootTest
  * class ServiceIntegrationTest {
  *     @Autowired
@@ -39,5 +39,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Test
 @Tag("integration")
-public @interface IntegrationTest {
+public @interface Integration {
 }
