@@ -1,31 +1,30 @@
 package io.github.jspinak.brobot.core.services;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.test.DisabledInCI;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
 /**
- * Comprehensive tests for KeyboardController interface.
- * Tests keyboard control operations and shortcuts.
+ * Comprehensive tests for KeyboardController interface. Tests keyboard control operations and
+ * shortcuts.
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("KeyboardController Interface Tests")
-
 @DisabledInCI
 public class KeyboardControllerTest extends BrobotTestBase {
 
-    @Mock
-    private KeyboardController keyboardController;
-    
+    @Mock private KeyboardController keyboardController;
+
     @BeforeEach
     @Override
     public void setupTest() {
@@ -103,7 +102,7 @@ public class KeyboardControllerTest extends BrobotTestBase {
         testSpecialKey(KeyboardController.SpecialKey.DELETE);
         testSpecialKey(KeyboardController.SpecialKey.SPACE);
     }
-    
+
     private void testSpecialKey(KeyboardController.SpecialKey key) {
         when(keyboardController.pressKey(key)).thenReturn(true);
         assertTrue(keyboardController.pressKey(key));
@@ -136,8 +135,7 @@ public class KeyboardControllerTest extends BrobotTestBase {
 
         // Act & Assert
         for (int i = 1; i <= 12; i++) {
-            KeyboardController.SpecialKey fKey = 
-                KeyboardController.SpecialKey.valueOf("F" + i);
+            KeyboardController.SpecialKey fKey = KeyboardController.SpecialKey.valueOf("F" + i);
             assertTrue(keyboardController.pressKey(fKey));
             verify(keyboardController).pressKey(fKey);
         }
@@ -190,8 +188,7 @@ public class KeyboardControllerTest extends BrobotTestBase {
     void testShortcutMultipleModifiers() {
         // Arrange
         KeyboardController.SpecialKey[] modifiers = {
-            KeyboardController.SpecialKey.CTRL,
-            KeyboardController.SpecialKey.SHIFT
+            KeyboardController.SpecialKey.CTRL, KeyboardController.SpecialKey.SHIFT
         };
         when(keyboardController.shortcut(modifiers, 'S')).thenReturn(true);
 
@@ -208,22 +205,18 @@ public class KeyboardControllerTest extends BrobotTestBase {
     void testShortcutModifierAndSpecialKey() {
         // Arrange
         when(keyboardController.shortcut(
-            KeyboardController.SpecialKey.ALT,
-            KeyboardController.SpecialKey.TAB
-        )).thenReturn(true);
+                        KeyboardController.SpecialKey.ALT, KeyboardController.SpecialKey.TAB))
+                .thenReturn(true);
 
         // Act
-        boolean result = keyboardController.shortcut(
-            KeyboardController.SpecialKey.ALT,
-            KeyboardController.SpecialKey.TAB
-        );
+        boolean result =
+                keyboardController.shortcut(
+                        KeyboardController.SpecialKey.ALT, KeyboardController.SpecialKey.TAB);
 
         // Assert
         assertTrue(result);
-        verify(keyboardController).shortcut(
-            KeyboardController.SpecialKey.ALT,
-            KeyboardController.SpecialKey.TAB
-        );
+        verify(keyboardController)
+                .shortcut(KeyboardController.SpecialKey.ALT, KeyboardController.SpecialKey.TAB);
     }
 
     @Test
@@ -368,7 +361,8 @@ public class KeyboardControllerTest extends BrobotTestBase {
     @DisplayName("Should handle shortcut failure")
     void testShortcutFailure() {
         // Arrange
-        when(keyboardController.shortcut(any(KeyboardController.SpecialKey.class), anyChar())).thenReturn(false);
+        when(keyboardController.shortcut(any(KeyboardController.SpecialKey.class), anyChar()))
+                .thenReturn(false);
 
         // Act
         boolean result = keyboardController.shortcut(KeyboardController.SpecialKey.CTRL, 'Z');
@@ -433,13 +427,13 @@ public class KeyboardControllerTest extends BrobotTestBase {
         // Act & Assert - Test holding and releasing modifiers
         assertTrue(keyboardController.keyDown(KeyboardController.SpecialKey.CTRL));
         assertTrue(keyboardController.keyUp(KeyboardController.SpecialKey.CTRL));
-        
+
         assertTrue(keyboardController.keyDown(KeyboardController.SpecialKey.ALT));
         assertTrue(keyboardController.keyUp(KeyboardController.SpecialKey.ALT));
-        
+
         assertTrue(keyboardController.keyDown(KeyboardController.SpecialKey.SHIFT));
         assertTrue(keyboardController.keyUp(KeyboardController.SpecialKey.SHIFT));
-        
+
         assertTrue(keyboardController.keyDown(KeyboardController.SpecialKey.CMD));
         assertTrue(keyboardController.keyUp(KeyboardController.SpecialKey.CMD));
 
@@ -461,9 +455,9 @@ public class KeyboardControllerTest extends BrobotTestBase {
         when(keyboardController.type(eq(text), anyInt())).thenReturn(true);
 
         // Act & Assert
-        assertTrue(keyboardController.type(text, 0));    // No delay
-        assertTrue(keyboardController.type(text, 10));   // Small delay
-        assertTrue(keyboardController.type(text, 100));  // Medium delay
+        assertTrue(keyboardController.type(text, 0)); // No delay
+        assertTrue(keyboardController.type(text, 10)); // Small delay
+        assertTrue(keyboardController.type(text, 100)); // Medium delay
         assertTrue(keyboardController.type(text, 1000)); // Large delay
 
         verify(keyboardController).type(eq(text), eq(0));

@@ -1,15 +1,15 @@
 package io.github.jspinak.brobot.runner.ui.components.table.services;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableView;
-import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
+import org.springframework.stereotype.Service;
 
 /**
  * Service for managing table selection operations.
@@ -18,12 +18,13 @@ import java.util.function.Consumer;
  */
 @Service
 public class TableSelectionService<T> {
-    
-    private final ObjectProperty<SelectionMode> selectionMode = new SimpleObjectProperty<>(SelectionMode.SINGLE);
+
+    private final ObjectProperty<SelectionMode> selectionMode =
+            new SimpleObjectProperty<>(SelectionMode.SINGLE);
     private TableView<T> tableView;
     private final List<Consumer<T>> selectionListeners = new ArrayList<>();
     private final List<Consumer<List<T>>> multiSelectionListeners = new ArrayList<>();
-    
+
     /**
      * Initializes the selection service with the table view.
      *
@@ -31,31 +32,40 @@ public class TableSelectionService<T> {
      */
     public void initialize(TableView<T> tableView) {
         this.tableView = tableView;
-        
+
         // Setup selection mode binding
-        selectionMode.addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) {
-                tableView.getSelectionModel().setSelectionMode(newVal);
-            }
-        });
-        
+        selectionMode.addListener(
+                (obs, oldVal, newVal) -> {
+                    if (newVal != null) {
+                        tableView.getSelectionModel().setSelectionMode(newVal);
+                    }
+                });
+
         // Initialize with current selection mode
         tableView.getSelectionModel().setSelectionMode(selectionMode.get());
-        
+
         // Setup selection listeners
-        tableView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) {
-                notifySelectionListeners(newVal);
-            }
-        });
-        
-        tableView.getSelectionModel().getSelectedItems().addListener(
-            (javafx.collections.ListChangeListener<T>) change -> {
-                notifyMultiSelectionListeners(new ArrayList<>(change.getList()));
-            }
-        );
+        tableView
+                .getSelectionModel()
+                .selectedItemProperty()
+                .addListener(
+                        (obs, oldVal, newVal) -> {
+                            if (newVal != null) {
+                                notifySelectionListeners(newVal);
+                            }
+                        });
+
+        tableView
+                .getSelectionModel()
+                .getSelectedItems()
+                .addListener(
+                        (javafx.collections.ListChangeListener<T>)
+                                change -> {
+                                    notifyMultiSelectionListeners(
+                                            new ArrayList<>(change.getList()));
+                                });
     }
-    
+
     /**
      * Sets the selection mode for the table.
      *
@@ -64,7 +74,7 @@ public class TableSelectionService<T> {
     public void setSelectionMode(SelectionMode mode) {
         selectionMode.set(mode);
     }
-    
+
     /**
      * Gets the selection mode for the table.
      *
@@ -73,7 +83,7 @@ public class TableSelectionService<T> {
     public SelectionMode getSelectionMode() {
         return selectionMode.get();
     }
-    
+
     /**
      * Gets the selection mode property.
      *
@@ -82,7 +92,7 @@ public class TableSelectionService<T> {
     public ObjectProperty<SelectionMode> selectionModeProperty() {
         return selectionMode;
     }
-    
+
     /**
      * Gets the selected item.
      *
@@ -91,7 +101,7 @@ public class TableSelectionService<T> {
     public T getSelectedItem() {
         return tableView != null ? tableView.getSelectionModel().getSelectedItem() : null;
     }
-    
+
     /**
      * Gets the list of selected items.
      *
@@ -100,7 +110,7 @@ public class TableSelectionService<T> {
     public ObservableList<T> getSelectedItems() {
         return tableView != null ? tableView.getSelectionModel().getSelectedItems() : null;
     }
-    
+
     /**
      * Selects an item in the table.
      *
@@ -111,7 +121,7 @@ public class TableSelectionService<T> {
             tableView.getSelectionModel().select(item);
         }
     }
-    
+
     /**
      * Selects an item by index.
      *
@@ -122,7 +132,7 @@ public class TableSelectionService<T> {
             tableView.getSelectionModel().select(index);
         }
     }
-    
+
     /**
      * Selects multiple items.
      *
@@ -136,25 +146,21 @@ public class TableSelectionService<T> {
             }
         }
     }
-    
-    /**
-     * Clears the selection.
-     */
+
+    /** Clears the selection. */
     public void clearSelection() {
         if (tableView != null) {
             tableView.getSelectionModel().clearSelection();
         }
     }
-    
-    /**
-     * Selects all items in the table.
-     */
+
+    /** Selects all items in the table. */
     public void selectAll() {
         if (tableView != null && selectionMode.get() == SelectionMode.MULTIPLE) {
             tableView.getSelectionModel().selectAll();
         }
     }
-    
+
     /**
      * Checks if an item is selected.
      *
@@ -162,10 +168,10 @@ public class TableSelectionService<T> {
      * @return True if selected
      */
     public boolean isSelected(T item) {
-        return tableView != null && tableView.getSelectionModel().isSelected(
-            tableView.getItems().indexOf(item));
+        return tableView != null
+                && tableView.getSelectionModel().isSelected(tableView.getItems().indexOf(item));
     }
-    
+
     /**
      * Gets the selected index.
      *
@@ -174,7 +180,7 @@ public class TableSelectionService<T> {
     public int getSelectedIndex() {
         return tableView != null ? tableView.getSelectionModel().getSelectedIndex() : -1;
     }
-    
+
     /**
      * Gets the selected indices.
      *
@@ -183,7 +189,7 @@ public class TableSelectionService<T> {
     public ObservableList<Integer> getSelectedIndices() {
         return tableView != null ? tableView.getSelectionModel().getSelectedIndices() : null;
     }
-    
+
     /**
      * Adds a selection listener.
      *
@@ -192,7 +198,7 @@ public class TableSelectionService<T> {
     public void addSelectionListener(Consumer<T> listener) {
         selectionListeners.add(listener);
     }
-    
+
     /**
      * Removes a selection listener.
      *
@@ -201,7 +207,7 @@ public class TableSelectionService<T> {
     public void removeSelectionListener(Consumer<T> listener) {
         selectionListeners.remove(listener);
     }
-    
+
     /**
      * Adds a multi-selection listener.
      *
@@ -210,7 +216,7 @@ public class TableSelectionService<T> {
     public void addMultiSelectionListener(Consumer<List<T>> listener) {
         multiSelectionListeners.add(listener);
     }
-    
+
     /**
      * Removes a multi-selection listener.
      *
@@ -219,7 +225,7 @@ public class TableSelectionService<T> {
     public void removeMultiSelectionListener(Consumer<List<T>> listener) {
         multiSelectionListeners.remove(listener);
     }
-    
+
     /**
      * Notifies selection listeners.
      *
@@ -230,7 +236,7 @@ public class TableSelectionService<T> {
             listener.accept(item);
         }
     }
-    
+
     /**
      * Notifies multi-selection listeners.
      *
@@ -241,10 +247,8 @@ public class TableSelectionService<T> {
             listener.accept(items);
         }
     }
-    
-    /**
-     * Focuses on the selected item.
-     */
+
+    /** Focuses on the selected item. */
     public void focusSelected() {
         if (tableView != null) {
             int index = tableView.getSelectionModel().getSelectedIndex();

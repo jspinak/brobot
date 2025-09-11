@@ -1,42 +1,43 @@
 package io.github.jspinak.brobot.tools.ml.dataset.encoding;
 
+import java.util.Optional;
+
+import org.springframework.stereotype.Component;
+
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.tools.ml.dataset.model.ActionVector;
 
-import org.springframework.stereotype.Component;
-
-import java.util.Optional;
-
 /**
  * One-hot encoding implementation for converting actions to vectors.
- * <p>
- * This implementation uses one-hot encoding for action types to treat them as distinct
+ *
+ * <p>This implementation uses one-hot encoding for action types to treat them as distinct
  * categories rather than ordinal values. This prevents the neural network from inferring
  * relationships between action types (e.g., that DRAG is somehow "between" CLICK and TYPE).
- * <p>
- * <strong>Vector structure:</strong>
+ *
+ * <p><strong>Vector structure:</strong>
+ *
  * <ul>
- * <li>Positions 0-5: One-hot encoded action type (CLICK, DRAG, TYPE, MOVE, SCROLL, HIGHLIGHT)</li>
- * <li>Positions 6-9: Coordinates (x, y, width, height) from the best match</li>
- * <li>Positions 10-11: Highlight-specific options (color index, all-at-once flag)</li>
+ *   <li>Positions 0-5: One-hot encoded action type (CLICK, DRAG, TYPE, MOVE, SCROLL, HIGHLIGHT)
+ *   <li>Positions 6-9: Coordinates (x, y, width, height) from the best match
+ *   <li>Positions 10-11: Highlight-specific options (color index, all-at-once flag)
  * </ul>
- * <p>
- * <strong>Design decisions:</strong>
+ *
+ * <p><strong>Design decisions:</strong>
+ *
  * <ul>
- * <li>Only includes basic GUI-modifying actions (excludes FIND, VANISH, GET_TEXT, etc.)</li>
- * <li>HIGHLIGHT is included as a simple test case for neural network training</li>
- * <li>Failed actions (empty matches) return an empty vector</li>
- * <li>Assumes FIND operations are handled separately or by another neural network</li>
+ *   <li>Only includes basic GUI-modifying actions (excludes FIND, VANISH, GET_TEXT, etc.)
+ *   <li>HIGHLIGHT is included as a simple test case for neural network training
+ *   <li>Failed actions (empty matches) return an empty vector
+ *   <li>Assumes FIND operations are handled separately or by another neural network
  * </ul>
- * <p>
- * The implementation extracts coordinates from successful matches after FIND operations
- * have been performed, making the vectors suitable for training networks that predict
- * direct GUI interactions.
+ *
+ * <p>The implementation extracts coordinates from successful matches after FIND operations have
+ * been performed, making the vectors suitable for training networks that predict direct GUI
+ * interactions.
  *
  * @see ActionVectorTranslator
  * @see ActionVector
@@ -62,9 +63,7 @@ public class OneHotActionVectorEncoder implements ActionVectorTranslator {
     private static final int SCROLL_POS = 4;
     private static final int HIGHLIGHT_POS = 5;
 
-    /**
-     * Enum representing highlight colors with their encoded values.
-     */
+    /** Enum representing highlight colors with their encoded values. */
     public enum HighlightColor {
         BLUE("blue", 0),
         RED("red", 1),
@@ -127,7 +126,7 @@ public class OneHotActionVectorEncoder implements ActionVectorTranslator {
         // Check if the action config is a HighlightOptions
         ActionConfig config = matches.getActionConfig();
         if (!(config instanceof HighlightOptions)) return;
-        
+
         HighlightOptions highlightOptions = (HighlightOptions) config;
         // For now, just set defaults since the color/all-at-once properties
         // may not be available in the new API
@@ -139,13 +138,16 @@ public class OneHotActionVectorEncoder implements ActionVectorTranslator {
         // Determine action type based on the concrete class
         if (actionConfig instanceof io.github.jspinak.brobot.action.basic.click.ClickOptions) {
             vec[CLICK_POS] = 1;
-        } else if (actionConfig instanceof io.github.jspinak.brobot.action.composite.drag.DragOptions) {
+        } else if (actionConfig
+                instanceof io.github.jspinak.brobot.action.composite.drag.DragOptions) {
             vec[DRAG_POS] = 1;
         } else if (actionConfig instanceof io.github.jspinak.brobot.action.basic.type.TypeOptions) {
             vec[TYPE_POS] = 1;
-        } else if (actionConfig instanceof io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions) {
+        } else if (actionConfig
+                instanceof io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions) {
             vec[MOVE_POS] = 1;
-        } else if (actionConfig instanceof io.github.jspinak.brobot.action.basic.mouse.ScrollOptions) {
+        } else if (actionConfig
+                instanceof io.github.jspinak.brobot.action.basic.mouse.ScrollOptions) {
             vec[SCROLL_POS] = 1;
         } else if (actionConfig instanceof HighlightOptions) {
             vec[HIGHLIGHT_POS] = 1;
@@ -158,7 +160,7 @@ public class OneHotActionVectorEncoder implements ActionVectorTranslator {
         // For now, return a basic PatternFindOptions as placeholder
         return new io.github.jspinak.brobot.action.basic.find.PatternFindOptions.Builder().build();
     }
-    
+
     @Override
     public ActionConfig toActionConfig(ActionVector actionVector) {
         // Create appropriate ActionConfig based on the vector
@@ -167,12 +169,12 @@ public class OneHotActionVectorEncoder implements ActionVectorTranslator {
 
     /**
      * Extracts object data from an ActionVector to create an ObjectCollection.
-     * <p>
-     * This method would reconstruct the ObjectCollection (containing regions, locations,
-     * or other objects) from the vector representation. Currently unimplemented.
-     * <p>
-     * TODO: Implement extraction of coordinates and construction of appropriate objects
-     * based on the action type encoded in the vector.
+     *
+     * <p>This method would reconstruct the ObjectCollection (containing regions, locations, or
+     * other objects) from the vector representation. Currently unimplemented.
+     *
+     * <p>TODO: Implement extraction of coordinates and construction of appropriate objects based on
+     * the action type encoded in the vector.
      *
      * @param actionVector The vector containing encoded action and coordinate data
      * @return An ObjectCollection reconstructed from the vector data, or null if unimplemented
@@ -180,7 +182,7 @@ public class OneHotActionVectorEncoder implements ActionVectorTranslator {
     public ObjectCollection toObjectCollection(ActionVector actionVector) {
         return null;
     }
-    
+
     // This method is no longer needed as ActionConfig objects are immutable
     // and created with specific types rather than having mutable action fields
     /*

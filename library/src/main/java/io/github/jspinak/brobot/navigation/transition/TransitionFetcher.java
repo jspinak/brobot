@@ -1,46 +1,49 @@
 package io.github.jspinak.brobot.navigation.transition;
 
-import io.github.jspinak.brobot.model.transition.StateTransition;
-import io.github.jspinak.brobot.navigation.service.StateService;
-import io.github.jspinak.brobot.navigation.service.StateTransitionService;
-import io.github.jspinak.brobot.statemanagement.StateMemory;
-import io.github.jspinak.brobot.model.state.State;
-import lombok.Getter;
-import org.springframework.stereotype.Component;
-
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
+import org.springframework.stereotype.Component;
+
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.transition.StateTransition;
+import io.github.jspinak.brobot.navigation.service.StateService;
+import io.github.jspinak.brobot.navigation.service.StateTransitionService;
+import io.github.jspinak.brobot.statemanagement.StateMemory;
+
+import lombok.Getter;
+
 /**
  * Retrieves and packages all transition components needed for state navigation.
- * 
- * <p>TransitionFetcher acts as a specialized repository that gathers all the transition-related 
- * objects required to execute a navigation from one state to another. It resolves state references, 
- * handles special states like PREVIOUS, and packages both the "from" transition (leaving the 
- * source state) and "to" transition (arriving at the target state) into a convenient bundle.</p>
- * 
+ *
+ * <p>TransitionFetcher acts as a specialized repository that gathers all the transition-related
+ * objects required to execute a navigation from one state to another. It resolves state references,
+ * handles special states like PREVIOUS, and packages both the "from" transition (leaving the source
+ * state) and "to" transition (arriving at the target state) into a convenient bundle.
+ *
  * <p>Components fetched:
+ *
  * <ul>
- *   <li><b>From Transitions</b>: StateTransitions object for the source state</li>
- *   <li><b>From Transition</b>: Specific transition that activates the target state</li>
- *   <li><b>From State</b>: Complete State object for the source</li>
- *   <li><b>From Function</b>: Executable BooleanSupplier for the transition</li>
- *   <li><b>To Transitions</b>: StateTransitions object for the target state</li>
- *   <li><b>To Transition</b>: Transition finish for target state recognition</li>
- *   <li><b>To State</b>: Complete State object for the target</li>
+ *   <li><b>From Transitions</b>: StateTransitions object for the source state
+ *   <li><b>From Transition</b>: Specific transition that activates the target state
+ *   <li><b>From State</b>: Complete State object for the source
+ *   <li><b>From Function</b>: Executable BooleanSupplier for the transition
+ *   <li><b>To Transitions</b>: StateTransitions object for the target state
+ *   <li><b>To Transition</b>: Transition finish for target state recognition
+ *   <li><b>To State</b>: Complete State object for the target
  * </ul>
- * </p>
- * 
+ *
  * <p>Special handling:
+ *
  * <ul>
- *   <li><b>PREVIOUS State</b>: Resolved to actual hidden states when referenced</li>
- *   <li><b>Missing Transitions</b>: Returns empty Optional if any component missing</li>
- *   <li><b>Validation</b>: Ensures all components present before returning</li>
+ *   <li><b>PREVIOUS State</b>: Resolved to actual hidden states when referenced
+ *   <li><b>Missing Transitions</b>: Returns empty Optional if any component missing
+ *   <li><b>Validation</b>: Ensures all components present before returning
  * </ul>
- * </p>
- * 
+ *
  * <p>Usage pattern:
+ *
  * <pre>
  * Optional&lt;TransitionFetcher&gt; fetcher = transitionFetcher.getTransitions(fromId, toId);
  * if (fetcher.isPresent()) {
@@ -48,22 +51,21 @@ import java.util.function.BooleanSupplier;
  *     // Execute transition logic
  * }
  * </pre>
- * </p>
- * 
+ *
  * <p>Design benefits:
+ *
  * <ul>
- *   <li>Single point of transition resolution</li>
- *   <li>Handles all special cases in one place</li>
- *   <li>Provides complete transition context</li>
- *   <li>Enables clean separation of fetching and execution</li>
+ *   <li>Single point of transition resolution
+ *   <li>Handles all special cases in one place
+ *   <li>Provides complete transition context
+ *   <li>Enables clean separation of fetching and execution
  * </ul>
- * </p>
- * 
- * <p>In the model-based approach, TransitionFetcher encapsulates the complexity of resolving 
- * transition references into executable components. This abstraction allows the execution 
- * engine to focus on orchestrating transitions without worrying about the details of finding 
- * and preparing the necessary objects.</p>
- * 
+ *
+ * <p>In the model-based approach, TransitionFetcher encapsulates the complexity of resolving
+ * transition references into executable components. This abstraction allows the execution engine to
+ * focus on orchestrating transitions without worrying about the details of finding and preparing
+ * the necessary objects.
+ *
  * @since 1.0
  * @see StateTransitions
  * @see StateTransition
@@ -89,9 +91,11 @@ public class TransitionFetcher {
     private StateTransition toTransition;
     private State toState;
 
-    public TransitionFetcher(StateMemory stateMemory, StateService allStatesInProjectService,
-                             StateTransitionService stateTransitionsInProjectService,
-                             TransitionConditionPackager transitionBooleanSupplierPackager) {
+    public TransitionFetcher(
+            StateMemory stateMemory,
+            StateService allStatesInProjectService,
+            StateTransitionService stateTransitionsInProjectService,
+            TransitionConditionPackager transitionBooleanSupplierPackager) {
         this.stateMemory = stateMemory;
         this.allStatesInProjectService = allStatesInProjectService;
         this.stateTransitionsInProjectService = stateTransitionsInProjectService;
@@ -100,17 +104,18 @@ public class TransitionFetcher {
 
     /**
      * Fetches all transition components for navigating between two states.
-     * <p>
-     * Main entry point that coordinates the fetching process:
+     *
+     * <p>Main entry point that coordinates the fetching process:
+     *
      * <ol>
-     *   <li>Resets all internal state</li>
-     *   <li>Fetches "from" transition components</li>
-     *   <li>Fetches "to" transition components</li>
-     *   <li>Validates completeness</li>
+     *   <li>Resets all internal state
+     *   <li>Fetches "from" transition components
+     *   <li>Fetches "to" transition components
+     *   <li>Validates completeness
      * </ol>
-     * <p>
-     * Returns this object wrapped in Optional if all components are successfully
-     * fetched, or empty Optional if any required component is missing.
+     *
+     * <p>Returns this object wrapped in Optional if all components are successfully fetched, or
+     * empty Optional if any required component is missing.
      *
      * @param from Source state ID
      * @param to Target state ID (may be PREVIOUS)
@@ -126,8 +131,8 @@ public class TransitionFetcher {
 
     /**
      * Clears all fetched components for a fresh fetch operation.
-     * <p>
-     * Ensures no stale data from previous fetches affects the current operation.
+     *
+     * <p>Ensures no stale data from previous fetches affects the current operation.
      */
     private void reset() {
         transitionToEnum = null;
@@ -142,23 +147,24 @@ public class TransitionFetcher {
 
     /**
      * Validates that all required transition components have been fetched.
-     * <p>
-     * Checks for non-null values in all component fields. Special handling
-     * for "null" string which indicates invalid transition.
+     *
+     * <p>Checks for non-null values in all component fields. Special handling for "null" string
+     * which indicates invalid transition.
      *
      * @return true if all components present and valid
      */
     private boolean isComplete() {
         // The 'to' state might not have any transitions (it could be a terminal state)
         // We only need the toState to be valid, not necessarily toTransitions or toTransition
-        boolean fromComplete = !Objects.equals(transitionToEnum, "null") &&
-                fromTransitions != null &&
-                fromTransition != null &&
-                fromState != null &&
-                fromTransitionFunction != null;
-        
+        boolean fromComplete =
+                !Objects.equals(transitionToEnum, "null")
+                        && fromTransitions != null
+                        && fromTransition != null
+                        && fromState != null
+                        && fromTransitionFunction != null;
+
         boolean toComplete = toState != null;
-        
+
         if (!fromComplete || !toComplete) {
             System.out.println("=== TRANSITION DEBUG: isComplete() check failed:");
             System.out.println("===   transitionToEnum: " + transitionToEnum);
@@ -170,84 +176,122 @@ public class TransitionFetcher {
             System.out.println("===   toTransitions: " + (toTransitions != null) + " (optional)");
             System.out.println("===   toTransition: " + (toTransition != null) + " (optional)");
         }
-        
+
         return fromComplete && toComplete;
     }
 
     /**
      * Fetches components related to leaving the source state.
-     * <p>
-     * Retrieves:
+     *
+     * <p>Retrieves:
+     *
      * <ul>
-     *   <li>StateTransitions object for source state</li>
-     *   <li>Specific transition that activates target</li>
-     *   <li>Source State object</li>
-     *   <li>Executable function for the transition</li>
+     *   <li>StateTransitions object for source state
+     *   <li>Specific transition that activates target
+     *   <li>Source State object
+     *   <li>Executable function for the transition
      * </ul>
-     * <p>
-     * Handles PREVIOUS state resolution through getTransitionToEnum.
+     *
+     * <p>Handles PREVIOUS state resolution through getTransitionToEnum.
      *
      * @param from Source state ID
      * @param to Target state ID (may be PREVIOUS)
      */
     private void setFromTransitions(Long from, Long to) {
-        System.out.println("=== TRANSITION DEBUG: TransitionFetcher.setFromTransitions() from=" + from + " to=" + to);
-        
-        Optional<StateTransitions> fromTransitions = stateTransitionsInProjectService.getTransitions(from);
-        allStatesInProjectService.getState(from).ifPresent(state -> {
-            fromState = state;
-            System.out.println("=== TRANSITION DEBUG: Found fromState: " + state.getName());
-        });
-        
+        System.out.println(
+                "=== TRANSITION DEBUG: TransitionFetcher.setFromTransitions() from="
+                        + from
+                        + " to="
+                        + to);
+
+        Optional<StateTransitions> fromTransitions =
+                stateTransitionsInProjectService.getTransitions(from);
+        allStatesInProjectService
+                .getState(from)
+                .ifPresent(
+                        state -> {
+                            fromState = state;
+                            System.out.println(
+                                    "=== TRANSITION DEBUG: Found fromState: " + state.getName());
+                        });
+
         if (fromTransitions.isEmpty()) {
-            System.out.println("=== TRANSITION DEBUG: No StateTransitions found for from state " + from);
+            System.out.println(
+                    "=== TRANSITION DEBUG: No StateTransitions found for from state " + from);
         }
-        
-        fromTransitions.ifPresent(transitions -> {
-            this.fromTransitions = transitions;
-            System.out.println("=== TRANSITION DEBUG: Found transitions object for state " + from);
-            System.out.println("=== TRANSITION DEBUG: Number of transitions: " + transitions.getTransitions().size());
-            
-            transitionToEnum = stateTransitionsInProjectService.getTransitionToEnum(from, to);
-            System.out.println("=== TRANSITION DEBUG: transitionToEnum resolved to: " + transitionToEnum);
-            
-            transitions.getTransitionFunctionByActivatedStateId(transitionToEnum).ifPresent(trsn -> {
-                this.fromTransition = trsn;
-                System.out.println("=== TRANSITION DEBUG: Found transition function for " + transitionToEnum);
-            });
-            
-            if (this.fromTransition == null) {
-                System.out.println("=== TRANSITION DEBUG: NO transition function found for " + transitionToEnum);
-                System.out.println("=== TRANSITION DEBUG: Available activations in transitions:");
-                transitions.getTransitions().forEach(t -> {
-                    System.out.println("===   - Activates: " + t.getActivate());
+
+        fromTransitions.ifPresent(
+                transitions -> {
+                    this.fromTransitions = transitions;
+                    System.out.println(
+                            "=== TRANSITION DEBUG: Found transitions object for state " + from);
+                    System.out.println(
+                            "=== TRANSITION DEBUG: Number of transitions: "
+                                    + transitions.getTransitions().size());
+
+                    transitionToEnum =
+                            stateTransitionsInProjectService.getTransitionToEnum(from, to);
+                    System.out.println(
+                            "=== TRANSITION DEBUG: transitionToEnum resolved to: "
+                                    + transitionToEnum);
+
+                    transitions
+                            .getTransitionFunctionByActivatedStateId(transitionToEnum)
+                            .ifPresent(
+                                    trsn -> {
+                                        this.fromTransition = trsn;
+                                        System.out.println(
+                                                "=== TRANSITION DEBUG: Found transition function"
+                                                        + " for "
+                                                        + transitionToEnum);
+                                    });
+
+                    if (this.fromTransition == null) {
+                        System.out.println(
+                                "=== TRANSITION DEBUG: NO transition function found for "
+                                        + transitionToEnum);
+                        System.out.println(
+                                "=== TRANSITION DEBUG: Available activations in transitions:");
+                        transitions
+                                .getTransitions()
+                                .forEach(
+                                        t -> {
+                                            System.out.println(
+                                                    "===   - Activates: " + t.getActivate());
+                                        });
+                    }
+
+                    transitions
+                            .getTransitionFunctionByActivatedStateId(transitionToEnum)
+                            .ifPresent(
+                                    trsFunction ->
+                                            fromTransitionFunction =
+                                                    transitionBooleanSupplierPackager
+                                                            .toBooleanSupplier(trsFunction));
                 });
-            }
-            
-            transitions.getTransitionFunctionByActivatedStateId(transitionToEnum).ifPresent(
-                    trsFunction -> fromTransitionFunction =
-                            transitionBooleanSupplierPackager.toBooleanSupplier(trsFunction));
-        });
     }
 
     /**
      * Fetches components related to arriving at the target state.
-     * <p>
-     * Retrieves:
+     *
+     * <p>Retrieves:
+     *
      * <ul>
-     *   <li>StateTransitions object for target state</li>
-     *   <li>Transition finish for state recognition</li>
-     *   <li>Target State object</li>
+     *   <li>StateTransitions object for target state
+     *   <li>Transition finish for state recognition
+     *   <li>Target State object
      * </ul>
      *
      * @param to Target state ID
      */
     private void setToTransitions(Long to) {
-        Optional<StateTransitions> fromTransitions = stateTransitionsInProjectService.getTransitions(to);
+        Optional<StateTransitions> fromTransitions =
+                stateTransitionsInProjectService.getTransitions(to);
         allStatesInProjectService.getState(to).ifPresent(state -> toState = state);
-        fromTransitions.ifPresent(transitions -> {
-            this.toTransitions = transitions;
-            this.toTransition = transitions.getTransitionFinish();
-        });
+        fromTransitions.ifPresent(
+                transitions -> {
+                    this.toTransitions = transitions;
+                    this.toTransition = transitions.getTransitionFinish();
+                });
     }
 }

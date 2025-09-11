@@ -5,16 +5,14 @@ import org.springframework.context.annotation.PropertySource;
 
 /**
  * Loads default Brobot properties from the library's resources.
- * 
- * <p>This configuration ensures that Brobot has sensible defaults even if
- * the application doesn't provide any configuration. Applications can override
- * any of these defaults by providing their own values in application.properties
- * or application.yml.</p>
- * 
- * <p>The {@code ignoreResourceNotFound = false} ensures that the defaults file
- * must exist in the library, preventing silent failures if it's accidentally
- * removed during refactoring.</p>
- * 
+ *
+ * <p>This configuration ensures that Brobot has sensible defaults even if the application doesn't
+ * provide any configuration. Applications can override any of these defaults by providing their own
+ * values in application.properties or application.yml.
+ *
+ * <p>The {@code ignoreResourceNotFound = false} ensures that the defaults file must exist in the
+ * library, preventing silent failures if it's accidentally removed during refactoring.
+ *
  * @since 1.1.0
  */
 @Configuration

@@ -1,9 +1,7 @@
 package io.github.jspinak.brobot.test;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.test.config.OptimizedTestConfig;
-import io.github.jspinak.brobot.test.config.TestActionConfig;
-import io.github.jspinak.brobot.test.config.TestConfigurationManager;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInstance;
@@ -15,28 +13,31 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.concurrent.TimeUnit;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.test.config.OptimizedTestConfig;
+import io.github.jspinak.brobot.test.config.TestActionConfig;
+import io.github.jspinak.brobot.test.config.TestConfigurationManager;
 
 /**
  * Optimized base class for Brobot integration tests.
- * 
- * Key optimizations:
- * - Shared Spring context between tests (TestInstance.Lifecycle.PER_CLASS)
- * - Optimized mock settings for faster execution
- * - Reduced initialization overhead
- * - Configurable timeouts per test
+ *
+ * <p>Key optimizations: - Shared Spring context between tests (TestInstance.Lifecycle.PER_CLASS) -
+ * Optimized mock settings for faster execution - Reduced initialization overhead - Configurable
+ * timeouts per test
  */
 @SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class)
 @ContextConfiguration(initializers = TestConfigurationManager.class)
-@Import({ TestActionConfig.class, OptimizedTestConfig.class })
-@TestPropertySource(locations = "classpath:application-test.properties", properties = {
-        "spring.main.allow-bean-definition-overriding=true",
-        "spring.main.lazy-initialization=true",
-        "logging.level.root=WARN",
-        "logging.level.io.github.jspinak.brobot=INFO"
-})
+@Import({TestActionConfig.class, OptimizedTestConfig.class})
+@TestPropertySource(
+        locations = "classpath:application-test.properties",
+        properties = {
+            "spring.main.allow-bean-definition-overriding=true",
+            "spring.main.lazy-initialization=true",
+            "logging.level.root=WARN",
+            "logging.level.io.github.jspinak.brobot=INFO"
+        })
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@ExtendWith({ SpringExtension.class, OptimizedTestConfig.class })
+@ExtendWith({SpringExtension.class, OptimizedTestConfig.class})
 @Timeout(value = 5, unit = TimeUnit.MINUTES) // Default 5-minute timeout per test
 public abstract class OptimizedIntegrationTestBase {
 
@@ -85,31 +86,23 @@ public abstract class OptimizedIntegrationTestBase {
         }
     }
 
-    /**
-     * Check if test environment is headless.
-     */
+    /** Check if test environment is headless. */
     protected boolean isHeadlessEnvironment() {
-        return java.awt.GraphicsEnvironment.isHeadless() ||
-                System.getenv("BROBOT_FORCE_HEADLESS") != null;
+        return java.awt.GraphicsEnvironment.isHeadless()
+                || System.getenv("BROBOT_FORCE_HEADLESS") != null;
     }
 
-    /**
-     * Skip test if running in CI/CD environment.
-     */
+    /** Skip test if running in CI/CD environment. */
     protected boolean isCI() {
-        return System.getenv("CI") != null ||
-                System.getenv("GITHUB_ACTIONS") != null ||
-                System.getenv("JENKINS_HOME") != null;
+        return System.getenv("CI") != null
+                || System.getenv("GITHUB_ACTIONS") != null
+                || System.getenv("JENKINS_HOME") != null;
     }
 
-    /**
-     * Get timeout multiplier for slower environments.
-     */
+    /** Get timeout multiplier for slower environments. */
     protected double getTimeoutMultiplier() {
-        if (isCI())
-            return 2.0;
-        if (isHeadlessEnvironment())
-            return 1.5;
+        if (isCI()) return 2.0;
+        if (isHeadlessEnvironment()) return 1.5;
         return 1.0;
     }
 }

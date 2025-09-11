@@ -1,22 +1,5 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-
-import io.github.jspinak.brobot.runner.events.EventBus;
-import io.github.jspinak.brobot.runner.events.LogEvent;
-import io.github.jspinak.brobot.runner.project.AutomationProject;
-import io.github.jspinak.brobot.runner.project.AutomationProjectManager;
-import javafx.application.Platform;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import atlantafx.base.theme.Styles;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,10 +11,28 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.github.jspinak.brobot.runner.events.EventBus;
+import io.github.jspinak.brobot.runner.events.LogEvent;
+import io.github.jspinak.brobot.runner.project.AutomationProject;
+import io.github.jspinak.brobot.runner.project.AutomationProjectManager;
+
+import atlantafx.base.theme.Styles;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * Editor component for configuration metadata.
- * Allows editing project information, version, author, and other metadata.
+ * Editor component for configuration metadata. Allows editing project information, version, author,
+ * and other metadata.
  */
 @Slf4j
 @Getter
@@ -199,24 +200,21 @@ public class ConfigMetadataEditor extends BorderPane {
         filesPane.setContent(filesGrid);
 
         // Bind configuration file fields to current config
-        setOnCurrentConfigChanged((config) -> {
-            if (config != null) {
-                projectConfigField.setText(config.getProjectConfigPath().toString());
-                dslConfigField.setText(config.getDslConfigPath().toString());
-                imagePathField.setText(config.getImagePath().toString());
-            } else {
-                projectConfigField.clear();
-                dslConfigField.clear();
-                imagePathField.clear();
-            }
-        });
+        setOnCurrentConfigChanged(
+                (config) -> {
+                    if (config != null) {
+                        projectConfigField.setText(config.getProjectConfigPath().toString());
+                        dslConfigField.setText(config.getDslConfigPath().toString());
+                        imagePathField.setText(config.getImagePath().toString());
+                    } else {
+                        projectConfigField.clear();
+                        dslConfigField.clear();
+                        imagePathField.clear();
+                    }
+                });
 
         // Add all sections to form
-        form.getChildren().addAll(
-                projectMetadataPane,
-                additionalMetadataPane,
-                filesPane
-        );
+        form.getChildren().addAll(projectMetadataPane, additionalMetadataPane, filesPane);
 
         return form;
     }
@@ -241,12 +239,7 @@ public class ConfigMetadataEditor extends BorderPane {
         resetButton.setOnAction(e -> resetChanges());
         resetButton.setDisable(true);
 
-        toolbar.getChildren().addAll(
-                titleLabel,
-                spacer,
-                resetButton,
-                saveButton
-        );
+        toolbar.getChildren().addAll(titleLabel, spacer, resetButton, saveButton);
 
         return toolbar;
     }
@@ -264,11 +257,7 @@ public class ConfigMetadataEditor extends BorderPane {
         modifiedLabel = new Label("");
         modifiedLabel.setStyle("-fx-text-fill: orange; -fx-font-weight: bold;");
 
-        statusBar.getChildren().addAll(
-                statusLabel,
-                spacer,
-                modifiedLabel
-        );
+        statusBar.getChildren().addAll(statusLabel, spacer, modifiedLabel);
 
         return statusBar;
     }
@@ -308,11 +297,15 @@ public class ConfigMetadataEditor extends BorderPane {
         fieldKeyField.setPromptText("Field Key (no spaces)");
 
         // Update field key as user types field name
-        fieldNameField.textProperty().addListener((obs, old, val) -> {
-            if (fieldKeyField.getText().isEmpty() || fieldKeyField.getText().equals(normalizeKey(old))) {
-                fieldKeyField.setText(normalizeKey(val));
-            }
-        });
+        fieldNameField
+                .textProperty()
+                .addListener(
+                        (obs, old, val) -> {
+                            if (fieldKeyField.getText().isEmpty()
+                                    || fieldKeyField.getText().equals(normalizeKey(old))) {
+                                fieldKeyField.setText(normalizeKey(val));
+                            }
+                        });
 
         dialogGrid.add(new Label("Field Name:"), 0, 0);
         dialogGrid.add(fieldNameField, 1, 0);
@@ -325,24 +318,26 @@ public class ConfigMetadataEditor extends BorderPane {
         Platform.runLater(fieldNameField::requestFocus);
 
         // Convert the result
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == addButtonType) {
-                return new String[]{fieldNameField.getText(), fieldKeyField.getText()};
-            }
-            return null;
-        });
+        dialog.setResultConverter(
+                dialogButton -> {
+                    if (dialogButton == addButtonType) {
+                        return new String[] {fieldNameField.getText(), fieldKeyField.getText()};
+                    }
+                    return null;
+                });
 
         // Show the dialog and process the result
         Optional<String[]> result = dialog.showAndWait();
-        result.ifPresent(nameKey -> {
-            if (!nameKey[0].isEmpty() && !nameKey[1].isEmpty()) {
-                // Add new field to the grid
-                int newRow = grid.getRowCount();
-                addAdditionalField(grid, newRow, nameKey[0], nameKey[1]);
+        result.ifPresent(
+                nameKey -> {
+                    if (!nameKey[0].isEmpty() && !nameKey[1].isEmpty()) {
+                        // Add new field to the grid
+                        int newRow = grid.getRowCount();
+                        addAdditionalField(grid, newRow, nameKey[0], nameKey[1]);
 
-                markAsModified();
-            }
-        });
+                        markAsModified();
+                    }
+                });
     }
 
     private String normalizeKey(String input) {
@@ -351,9 +346,7 @@ public class ConfigMetadataEditor extends BorderPane {
         }
 
         // Convert to lowercase, replace spaces with underscores, remove special chars
-        return input.toLowerCase()
-                .replaceAll("\\s+", "_")
-                .replaceAll("[^a-z0-9_]", "");
+        return input.toLowerCase().replaceAll("\\s+", "_").replaceAll("[^a-z0-9_]", "");
     }
 
     /**
@@ -395,7 +388,8 @@ public class ConfigMetadataEditor extends BorderPane {
             projectNameField.setText(project.getName());
             versionField.setText(project.getVersion() != null ? project.getVersion() : "");
             authorField.setText(project.getAuthor() != null ? project.getAuthor() : "");
-            descriptionArea.setText(project.getDescription() != null ? project.getDescription() : "");
+            descriptionArea.setText(
+                    project.getDescription() != null ? project.getDescription() : "");
 
             // Load additional metadata
             loadAdditionalMetadata(project);
@@ -419,7 +413,8 @@ public class ConfigMetadataEditor extends BorderPane {
 
             } catch (IOException e) {
                 logger.error("Error loading configuration data", e);
-                showAlert(Alert.AlertType.ERROR,
+                showAlert(
+                        Alert.AlertType.ERROR,
                         "Load Error",
                         "Error loading configuration data",
                         e.getMessage());
@@ -442,7 +437,8 @@ public class ConfigMetadataEditor extends BorderPane {
             // or a more robust approach to extract metadata
             switch (key) {
                 case "organization":
-                    field.setText(project.getOrganization() != null ? project.getOrganization() : "");
+                    field.setText(
+                            project.getOrganization() != null ? project.getOrganization() : "");
                     break;
                 case "website":
                     field.setText(project.getWebsite() != null ? project.getWebsite() : "");
@@ -455,7 +451,8 @@ public class ConfigMetadataEditor extends BorderPane {
                     break;
                 default:
                     // Try to get from custom properties
-                    if (project.getCustomProperties() != null && project.getCustomProperties().containsKey(key)) {
+                    if (project.getCustomProperties() != null
+                            && project.getCustomProperties().containsKey(key)) {
                         field.setText(project.getCustomProperties().get(key).toString());
                     }
             }
@@ -479,20 +476,25 @@ public class ConfigMetadataEditor extends BorderPane {
             updateProjectConfigFile(currentConfig);
 
             // Log success
-            eventBus.publish(LogEvent.info(this,
-                    "Saved metadata for configuration: " + currentConfig.getName(), "Configuration"));
+            eventBus.publish(
+                    LogEvent.info(
+                            this,
+                            "Saved metadata for configuration: " + currentConfig.getName(),
+                            "Configuration"));
 
             // Reset modified state
             resetModifiedState();
 
-            showAlert(Alert.AlertType.INFORMATION,
+            showAlert(
+                    Alert.AlertType.INFORMATION,
                     "Save Success",
                     "Metadata saved successfully",
                     "The configuration metadata has been updated.");
 
         } catch (Exception e) {
             logger.error("Error saving configuration metadata", e);
-            showAlert(Alert.AlertType.ERROR,
+            showAlert(
+                    Alert.AlertType.ERROR,
                     "Save Error",
                     "Error saving configuration metadata",
                     e.getMessage());
@@ -621,9 +623,7 @@ public class ConfigMetadataEditor extends BorderPane {
         return result.isPresent() && result.get() == ButtonType.OK;
     }
 
-    /**
-     * Clears the editor.
-     */
+    /** Clears the editor. */
     public void clear() {
         currentConfig = null;
         clearForm();
@@ -635,22 +635,19 @@ public class ConfigMetadataEditor extends BorderPane {
         currentConfigChangedListeners.forEach(listener -> listener.accept(null));
     }
 
-    /**
-     * Shows an alert dialog.
-     */
+    /** Shows an alert dialog. */
     private void showAlert(Alert.AlertType type, String title, String header, String content) {
-        Platform.runLater(() -> {
-            Alert alert = new Alert(type);
-            alert.setTitle(title);
-            alert.setHeaderText(header);
-            alert.setContentText(content);
-            alert.showAndWait();
-        });
+        Platform.runLater(
+                () -> {
+                    Alert alert = new Alert(type);
+                    alert.setTitle(title);
+                    alert.setHeaderText(header);
+                    alert.setContentText(content);
+                    alert.showAndWait();
+                });
     }
 
-    /**
-     * Extracts a value from a JSON string using regex.
-     */
+    /** Extracts a value from a JSON string using regex. */
     private String extractJsonValue(String json, String key) {
         if (json == null || json.isEmpty()) {
             return "";
@@ -667,9 +664,7 @@ public class ConfigMetadataEditor extends BorderPane {
         return "";
     }
 
-    /**
-     * Updates a value in a JSON string.
-     */
+    /** Updates a value in a JSON string. */
     private String updateJsonValue(String json, String key, String value) {
         if (json == null || json.isEmpty()) {
             return json;
@@ -703,18 +698,15 @@ public class ConfigMetadataEditor extends BorderPane {
     }
 
     // Event handling for current config changes
-    private final List<Consumer<ConfigEntry>> currentConfigChangedListeners = new java.util.ArrayList<>();
+    private final List<Consumer<ConfigEntry>> currentConfigChangedListeners =
+            new java.util.ArrayList<>();
 
-    /**
-     * Adds a listener for current configuration changes.
-     */
+    /** Adds a listener for current configuration changes. */
     public void setOnCurrentConfigChanged(java.util.function.Consumer<ConfigEntry> listener) {
         currentConfigChangedListeners.add(listener);
     }
 
-    /**
-     * Removes a listener for current configuration changes.
-     */
+    /** Removes a listener for current configuration changes. */
     public void removeOnCurrentConfigChanged(java.util.function.Consumer<ConfigEntry> listener) {
         currentConfigChangedListeners.remove(listener);
     }

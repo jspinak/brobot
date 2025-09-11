@@ -7,11 +7,11 @@ brobot:
   mock:
     enabled: true
     verbose: false
-    
+
   action:
     max-wait: 5
     delay-between-actions: 100
-    
+
   logging:
     level: INFO
 

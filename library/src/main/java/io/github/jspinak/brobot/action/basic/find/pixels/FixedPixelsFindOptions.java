@@ -2,35 +2,36 @@ package io.github.jspinak.brobot.action.basic.find.pixels;
 
 import io.github.jspinak.brobot.action.basic.find.BaseFindOptions;
 import io.github.jspinak.brobot.action.basic.find.FindStrategy;
+
 import lombok.Getter;
 
 /**
  * Configuration for finding fixed (static) pixels within GUI scenes.
- * <p>
- * This class encapsulates parameters for detecting pixels that remain unchanged
- * over time, useful for identifying stable UI elements, static backgrounds, or
- * persistent screen regions. It is an immutable object constructed using its 
- * inner {@link Builder}.
- * <p>
- * Fixed pixel detection helps identify areas of the screen that are not changing,
- * which can be useful for:
+ *
+ * <p>This class encapsulates parameters for detecting pixels that remain unchanged over time,
+ * useful for identifying stable UI elements, static backgrounds, or persistent screen regions. It
+ * is an immutable object constructed using its inner {@link Builder}.
+ *
+ * <p>Fixed pixel detection helps identify areas of the screen that are not changing, which can be
+ * useful for:
+ *
  * <ul>
- *   <li>Detecting when animations have stopped</li>
- *   <li>Identifying stable UI regions for interaction</li>
- *   <li>Waiting for screen stabilization</li>
- *   <li>Finding static reference points</li>
+ *   <li>Detecting when animations have stopped
+ *   <li>Identifying stable UI regions for interaction
+ *   <li>Waiting for screen stabilization
+ *   <li>Finding static reference points
  * </ul>
- * 
+ *
  * Fluent API Usage:
- * <pre>
- * {@code
+ *
+ * <pre>{@code
  * FixedPixelsFindOptions options = new FixedPixelsFindOptions.Builder()
  *     .setMaxMovement(2)
  *     .setStartPlayback(0.5)
  *     .setPlaybackDuration(1.5)
  *     .build();
- * }
- * </pre>
+ * }</pre>
+ *
  * @see BaseFindOptions
  * @see io.github.jspinak.brobot.action.basic.find.Find
  */
@@ -38,20 +39,20 @@ import lombok.Getter;
 public final class FixedPixelsFindOptions extends BaseFindOptions {
 
     /**
-     * The maximum pixel movement threshold to consider a pixel as fixed.
-     * Pixels that move less than this amount between frames are classified as fixed.
+     * The maximum pixel movement threshold to consider a pixel as fixed. Pixels that move less than
+     * this amount between frames are classified as fixed.
      */
     private final int maxMovement;
-    
+
     /**
-     * The time in seconds to wait before starting to monitor for fixed pixels.
-     * This allows for initial screen activity to settle.
+     * The time in seconds to wait before starting to monitor for fixed pixels. This allows for
+     * initial screen activity to settle.
      */
     private final double startPlayback;
-    
+
     /**
-     * The duration in seconds to monitor for fixed pixels.
-     * Longer durations provide more confidence that pixels are truly static.
+     * The duration in seconds to monitor for fixed pixels. Longer durations provide more confidence
+     * that pixels are truly static.
      */
     private final double playbackDuration;
 
@@ -67,18 +68,14 @@ public final class FixedPixelsFindOptions extends BaseFindOptions {
         return FindStrategy.FIXED_PIXELS;
     }
 
-    /**
-     * Builder for constructing {@link FixedPixelsFindOptions} with a fluent API.
-     */
+    /** Builder for constructing {@link FixedPixelsFindOptions} with a fluent API. */
     public static class Builder extends BaseFindOptions.Builder<Builder> {
 
         private int maxMovement = 2;
         private double startPlayback = 0.0;
         private double playbackDuration = 1.0;
 
-        /**
-         * Default constructor for creating a new FixedPixelsFindOptions configuration.
-         */
+        /** Default constructor for creating a new FixedPixelsFindOptions configuration. */
         public Builder() {}
 
         /**
@@ -96,6 +93,7 @@ public final class FixedPixelsFindOptions extends BaseFindOptions {
 
         /**
          * Sets the maximum pixel movement threshold for fixed classification.
+         *
          * @param maxMovement The maximum movement in pixels.
          * @return this Builder instance for chaining.
          */
@@ -103,9 +101,10 @@ public final class FixedPixelsFindOptions extends BaseFindOptions {
             this.maxMovement = maxMovement;
             return self();
         }
-        
+
         /**
          * Sets the delay before starting to monitor fixed pixels.
+         *
          * @param startPlayback The delay in seconds.
          * @return this Builder instance for chaining.
          */
@@ -113,9 +112,10 @@ public final class FixedPixelsFindOptions extends BaseFindOptions {
             this.startPlayback = startPlayback;
             return self();
         }
-        
+
         /**
          * Sets the duration to monitor for fixed pixels.
+         *
          * @param playbackDuration The monitoring duration in seconds.
          * @return this Builder instance for chaining.
          */
@@ -123,7 +123,7 @@ public final class FixedPixelsFindOptions extends BaseFindOptions {
             this.playbackDuration = playbackDuration;
             return self();
         }
-        
+
         /**
          * Builds the immutable {@link FixedPixelsFindOptions} object.
          *

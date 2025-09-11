@@ -4,37 +4,31 @@ import lombok.Data;
 
 /**
  * Represents a decision made by the illustration performance optimizer.
- * <p>
- * This class encapsulates the optimizer's decision about whether and how
- * to proceed with illustration generation, including the reasoning behind
- * the decision for debugging and analysis purposes.
+ *
+ * <p>This class encapsulates the optimizer's decision about whether and how to proceed with
+ * illustration generation, including the reasoning behind the decision for debugging and analysis
+ * purposes.
  *
  * @see IllustrationPerformanceOptimizer
  */
 @Data
 public class OptimizationDecision {
-    
-    /**
-     * The type of decision made.
-     */
+
+    /** The type of decision made. */
     private final DecisionType decision;
-    
-    /**
-     * Human-readable reason for the decision.
-     */
+
+    /** Human-readable reason for the decision. */
     private final String reason;
-    
-    /**
-     * Additional metadata about the decision.
-     */
+
+    /** Additional metadata about the decision. */
     private final Object metadata;
-    
+
     private OptimizationDecision(DecisionType decision, String reason, Object metadata) {
         this.decision = decision;
         this.reason = reason;
         this.metadata = metadata;
     }
-    
+
     /**
      * Creates a decision to proceed with illustration generation.
      *
@@ -44,7 +38,7 @@ public class OptimizationDecision {
     public static OptimizationDecision proceed(String reason) {
         return new OptimizationDecision(DecisionType.PROCEED, reason, null);
     }
-    
+
     /**
      * Creates a decision to skip illustration generation.
      *
@@ -54,7 +48,7 @@ public class OptimizationDecision {
     public static OptimizationDecision skip(String reason) {
         return new OptimizationDecision(DecisionType.SKIP, reason, null);
     }
-    
+
     /**
      * Creates a decision to batch the illustration for later processing.
      *
@@ -64,7 +58,7 @@ public class OptimizationDecision {
     public static OptimizationDecision batch(String reason) {
         return new OptimizationDecision(DecisionType.BATCH, reason, null);
     }
-    
+
     /**
      * Creates a decision to defer illustration to a later time.
      *
@@ -75,7 +69,7 @@ public class OptimizationDecision {
     public static OptimizationDecision defer(String reason, java.time.Duration retryAfter) {
         return new OptimizationDecision(DecisionType.DEFER, reason, retryAfter);
     }
-    
+
     /**
      * Checks if the decision is to proceed with illustration.
      *
@@ -84,7 +78,7 @@ public class OptimizationDecision {
     public boolean shouldProceed() {
         return decision == DecisionType.PROCEED;
     }
-    
+
     /**
      * Checks if the decision is to skip illustration.
      *
@@ -93,7 +87,7 @@ public class OptimizationDecision {
     public boolean shouldSkip() {
         return decision == DecisionType.SKIP;
     }
-    
+
     /**
      * Checks if the decision is to batch illustration.
      *
@@ -102,7 +96,7 @@ public class OptimizationDecision {
     public boolean shouldBatch() {
         return decision == DecisionType.BATCH;
     }
-    
+
     /**
      * Checks if the decision is to defer illustration.
      *
@@ -111,7 +105,7 @@ public class OptimizationDecision {
     public boolean shouldDefer() {
         return decision == DecisionType.DEFER;
     }
-    
+
     /**
      * Gets retry delay if decision is to defer.
      *
@@ -123,29 +117,19 @@ public class OptimizationDecision {
         }
         return null;
     }
-    
-    /**
-     * Types of optimization decisions.
-     */
+
+    /** Types of optimization decisions. */
     public enum DecisionType {
-        /**
-         * Proceed with illustration generation immediately.
-         */
+        /** Proceed with illustration generation immediately. */
         PROCEED,
-        
-        /**
-         * Skip illustration generation entirely.
-         */
+
+        /** Skip illustration generation entirely. */
         SKIP,
-        
-        /**
-         * Add to batch for later processing.
-         */
+
+        /** Add to batch for later processing. */
         BATCH,
-        
-        /**
-         * Defer illustration to a later time.
-         */
+
+        /** Defer illustration to a later time. */
         DEFER
     }
 }

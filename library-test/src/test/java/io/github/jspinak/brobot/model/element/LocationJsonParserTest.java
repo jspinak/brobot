@@ -1,57 +1,60 @@
 package io.github.jspinak.brobot.model.element;
 
-import io.github.jspinak.brobot.BrobotTestApplication;
-import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
-import io.github.jspinak.brobot.test.mock.MockScreenConfig;
-import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
-import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.BrobotTestApplication;
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
 /**
- * Tests for Location JSON parsing with Spring context.
- * Uses Spring Boot's configured ObjectMapper with all necessary Jackson modules.
- * 
- * Key points:
- * - Location can be defined by x,y coordinates or region+position
- * - Supports offsets and anchors
- * - Has multiple constructors for different use cases
+ * Tests for Location JSON parsing with Spring context. Uses Spring Boot's configured ObjectMapper
+ * with all necessary Jackson modules.
+ *
+ * <p>Key points: - Location can be defined by x,y coordinates or region+position - Supports offsets
+ * and anchors - Has multiple constructors for different use cases
  */
 @DisplayName("Location JSON Parser Tests")
-@SpringBootTest(classes = BrobotTestApplication.class,
-    properties = {
-        "spring.main.lazy-initialization=true",
-        "brobot.mock.enabled=true",
-        "brobot.illustration.disabled=true",
-        "brobot.scene.analysis.disabled=true",
-        "brobot.gui-access.continue-on-error=true",
-        "brobot.gui-access.check-on-startup=false",
-        "java.awt.headless=true",
-        "spring.main.allow-bean-definition-overriding=true",
-        "brobot.test.type=unit",
-        "brobot.capture.physical-resolution=false"
-    })
-@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class,
-         io.github.jspinak.brobot.test.config.TestApplicationConfiguration.class})
+@SpringBootTest(
+        classes = BrobotTestApplication.class,
+        properties = {
+            "spring.main.lazy-initialization=true",
+            "brobot.mock.enabled=true",
+            "brobot.illustration.disabled=true",
+            "brobot.scene.analysis.disabled=true",
+            "brobot.gui-access.continue-on-error=true",
+            "brobot.gui-access.check-on-startup=false",
+            "java.awt.headless=true",
+            "spring.main.allow-bean-definition-overriding=true",
+            "brobot.test.type=unit",
+            "brobot.capture.physical-resolution=false"
+        })
+@Import({
+    MockGuiAccessConfig.class,
+    MockGuiAccessMonitor.class,
+    MockScreenConfig.class,
+    io.github.jspinak.brobot.test.config.TestApplicationConfiguration.class
+})
 @ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 class LocationJsonParserTest {
 
-    @Autowired
-    private ConfigurationParser jsonParser;
+    @Autowired private ConfigurationParser jsonParser;
 
     @Test
     @DisplayName("Should parse Location with x,y coordinates from JSON")
     void testParseLocationWithXY() throws ConfigurationException {
-        String json = """
+        String json =
+                """
         {
             "name": "XYLocation",
             "x": 100,
@@ -75,7 +78,8 @@ class LocationJsonParserTest {
     @Test
     @DisplayName("Should parse Location with region and position from JSON")
     void testParseLocationWithRegionAndPosition() throws ConfigurationException {
-        String json = """
+        String json =
+                """
         {
             "name": "RegionLocation",
             "region": {
@@ -263,13 +267,14 @@ class LocationJsonParserTest {
     @DisplayName("Should test Builder pattern")
     void testBuilder() throws ConfigurationException {
         // Create a location with builder
-        Location location = new Location.Builder()
-                .called("BuilderLocation")
-                .setXY(100, 200)
-                .setOffsetX(10)
-                .setOffsetY(20)
-                .setAnchor(Positions.Name.TOPLEFT)
-                .build();
+        Location location =
+                new Location.Builder()
+                        .called("BuilderLocation")
+                        .setXY(100, 200)
+                        .setOffsetX(10)
+                        .setOffsetY(20)
+                        .setAnchor(Positions.Name.TOPLEFT)
+                        .build();
 
         // Serialize
         String json = jsonParser.toJson(location);
@@ -291,7 +296,8 @@ class LocationJsonParserTest {
     @Test
     @DisplayName("Should parse Location with position from JSON")
     void testParseLocationWithPositionName() throws ConfigurationException {
-        String json = """
+        String json =
+                """
         {
             "name": "PositionNameLocation",
             "position": {
@@ -315,7 +321,7 @@ class LocationJsonParserTest {
     void testScreenCenterLocation() {
         // Test creating location at screen center
         Location center = new Location(Positions.Name.MIDDLEMIDDLE);
-        
+
         assertNotNull(center);
         assertNotNull(center.getPosition());
         assertEquals(0.5, center.getPosition().getPercentW(), 0.001);

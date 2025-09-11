@@ -1,15 +1,13 @@
 package io.github.jspinak.brobot.runner.errorhandling.recovery;
 
-import io.github.jspinak.brobot.runner.errorhandling.ErrorContext;
-
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
-/**
- * Interface for implementing different recovery strategies.
- */
+import io.github.jspinak.brobot.runner.errorhandling.ErrorContext;
+
+/** Interface for implementing different recovery strategies. */
 public interface IRecoveryStrategy {
-    
+
     /**
      * Attempt to recover from an error.
      *
@@ -20,9 +18,8 @@ public interface IRecoveryStrategy {
      * @return A future containing the recovery result
      */
     CompletableFuture<RecoveryResult> recover(
-        Throwable error,
-        ErrorContext context,
-        Supplier<Object> retryOperation,
-        RecoveryManager.RecoveryState state
-    );
+            Throwable error,
+            ErrorContext context,
+            Supplier<Object> retryOperation,
+            RecoveryManager.RecoveryState state);
 }

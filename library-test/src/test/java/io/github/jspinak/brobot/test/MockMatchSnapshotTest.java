@@ -1,18 +1,15 @@
 package io.github.jspinak.brobot.test;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-// Removed: ObjectActionOptions no longer exists
-import io.github.jspinak.brobot.model.action.ActionRecord;
-import io.github.jspinak.brobot.model.match.Match;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.model.action.ActionRecord;
+import io.github.jspinak.brobot.model.match.Match;
 
-/**
- * Test to verify MatchSnapshot comparison behavior in mock mode
- */
+/** Test to verify MatchSnapshot comparison behavior in mock mode */
 public class MockMatchSnapshotTest {
 
     @BeforeEach
@@ -23,16 +20,10 @@ public class MockMatchSnapshotTest {
     @Test
     void testMatchSnapshotComparison() {
         // Create a match
-        Match match1 = new Match.Builder()
-                .setName("TestMatch")
-                .setRegion(10, 20, 30, 40)
-                .build();
+        Match match1 = new Match.Builder().setName("TestMatch").setRegion(10, 20, 30, 40).build();
 
         // Create another match with same values
-        Match match2 = new Match.Builder()
-                .setName("TestMatch")
-                .setRegion(10, 20, 30, 40)
-                .build();
+        Match match2 = new Match.Builder().setName("TestMatch").setRegion(10, 20, 30, 40).build();
 
         // Test if matches are equal
         System.out.println("Match1 equals Match2: " + match1.equals(match2));

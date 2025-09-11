@@ -1,5 +1,10 @@
 package io.github.jspinak.brobot.action.basic.highlight;
-import io.github.jspinak.brobot.action.ActionType;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
+
+import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;
@@ -7,37 +12,29 @@ import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateRegion;
-import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Highlights regions on screen without embedded Find operations.
- * 
- * <p>Highlight is a pure action that only performs the highlight operation on
- * provided regions or matches. It does not perform any Find operations. This separation
- * enables better testing, cleaner code, and more flexible action composition.</p>
- * 
+ *
+ * <p>Highlight is a pure action that only performs the highlight operation on provided regions or
+ * matches. It does not perform any Find operations. This separation enables better testing, cleaner
+ * code, and more flexible action composition.
+ *
  * <p>Usage patterns:
+ *
  * <ul>
- * <li>Highlight a specific region:
- * {@code new Highlight().perform(actionResult, region)}</li>
- * <li>Highlight matches from a Find:
- * {@code new Highlight().perform(actionResult, matches)}</li>
+ *   <li>Highlight a specific region: {@code new Highlight().perform(actionResult, region)}
+ *   <li>Highlight matches from a Find: {@code new Highlight().perform(actionResult, matches)}
  * </ul>
- * </p>
- * 
+ *
  * <p>For Find-then-Highlight operations, use ConditionalActionChain:
- * 
+ *
  * <pre>{@code
  * ConditionalActionChain.find(findOptions)
  *         .ifFound(new HighlightOptions.Builder().build())
  *         .perform(objectCollection);
  * }</pre>
- * </p>
- * 
+ *
  * @since 2.0
  * @see ConditionalActionChain for chaining Find with Highlight
  */
@@ -74,7 +71,10 @@ public class Highlight implements ActionInterface {
             }
 
             actionResult.setSuccess(highlightedCount > 0);
-            logger.info(String.format("HighlightV2: Highlighted %d of %d regions", highlightedCount, regions.size()));
+            logger.info(
+                    String.format(
+                            "HighlightV2: Highlighted %d of %d regions",
+                            highlightedCount, regions.size()));
 
         } catch (Exception e) {
             logger.severe("Error in HighlightV2: " + e.getMessage());
@@ -83,8 +83,8 @@ public class Highlight implements ActionInterface {
     }
 
     /**
-     * Extracts highlightable regions from the provided object collections.
-     * Supports Region and StateRegion objects.
+     * Extracts highlightable regions from the provided object collections. Supports Region and
+     * StateRegion objects.
      */
     private List<Region> extractHighlightableRegions(ObjectCollection... collections) {
         List<Region> regions = new ArrayList<>();
@@ -99,9 +99,7 @@ public class Highlight implements ActionInterface {
         return regions;
     }
 
-    /**
-     * Performs the actual highlight operation on the specified region.
-     */
+    /** Performs the actual highlight operation on the specified region. */
     private boolean highlightRegion(Region region) {
         try {
             // Get Sikuli region and highlight
@@ -119,9 +117,7 @@ public class Highlight implements ActionInterface {
         }
     }
 
-    /**
-     * Creates a Match object from a Region for result reporting.
-     */
+    /** Creates a Match object from a Region for result reporting. */
     private Match createMatchFromRegion(Region region) {
         Match match = new Match(region);
         match.setName("Highlighted region");

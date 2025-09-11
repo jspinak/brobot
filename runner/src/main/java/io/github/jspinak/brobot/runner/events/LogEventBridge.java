@@ -1,6 +1,10 @@
 package io.github.jspinak.brobot.runner.events;
 
-import lombok.Data;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -8,14 +12,11 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.ThrowableProxy;
 import ch.qos.logback.core.AppenderBase;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import lombok.Data;
 
 /**
- * Captures log messages from SLF4J/Logback and converts them to events.
- * This appender attaches to the logging system and forwards messages to the event bus.
+ * Captures log messages from SLF4J/Logback and converts them to events. This appender attaches to
+ * the logging system and forwards messages to the event bus.
  */
 @Component
 @Data
@@ -50,9 +51,7 @@ public class LogEventBridge {
         }
     }
 
-    /**
-     * Custom Logback appender that converts log events to BrobotEvents
-     */
+    /** Custom Logback appender that converts log events to BrobotEvents */
     private class LoggingAppender extends AppenderBase<ILoggingEvent> {
         @Override
         protected void append(ILoggingEvent event) {
@@ -61,7 +60,8 @@ public class LogEventBridge {
 
             // Extract exception if present
             Exception exception = null;
-            if (event.getThrowableProxy() != null && event.getThrowableProxy() instanceof ThrowableProxy) {
+            if (event.getThrowableProxy() != null
+                    && event.getThrowableProxy() instanceof ThrowableProxy) {
                 ThrowableProxy throwableProxy = (ThrowableProxy) event.getThrowableProxy();
                 exception = (Exception) throwableProxy.getThrowable();
             }
@@ -83,7 +83,8 @@ public class LogEventBridge {
                     break;
                 case ERROR:
                 case CRITICAL:
-                    logEvent = LogEvent.error(this, event.getFormattedMessage(), category, exception);
+                    logEvent =
+                            LogEvent.error(this, event.getFormattedMessage(), category, exception);
                     break;
                 default:
                     logEvent = LogEvent.info(this, event.getFormattedMessage(), category);
@@ -93,16 +94,14 @@ public class LogEventBridge {
 
             // For ERROR and above, also publish an error event
             if (level == LogEvent.LogLevel.ERROR || level == LogEvent.LogLevel.CRITICAL) {
-                ErrorEvent.ErrorSeverity severity = level == LogEvent.LogLevel.CRITICAL ?
-                        ErrorEvent.ErrorSeverity.HIGH : ErrorEvent.ErrorSeverity.MEDIUM;
+                ErrorEvent.ErrorSeverity severity =
+                        level == LogEvent.LogLevel.CRITICAL
+                                ? ErrorEvent.ErrorSeverity.HIGH
+                                : ErrorEvent.ErrorSeverity.MEDIUM;
 
-                ErrorEvent errorEvent = new ErrorEvent(
-                        this,
-                        event.getFormattedMessage(),
-                        exception,
-                        severity,
-                        category
-                );
+                ErrorEvent errorEvent =
+                        new ErrorEvent(
+                                this, event.getFormattedMessage(), exception, severity, category);
 
                 eventBus.publish(errorEvent);
             }

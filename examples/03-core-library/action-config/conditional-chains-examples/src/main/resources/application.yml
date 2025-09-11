@@ -12,16 +12,16 @@ brobot:
     mock: true
     # Show detailed action logs
     verbose: true
-    
+
   # Success criteria for actions
   action:
     # How long to wait for elements to appear
     max-wait: 5
-    
+
   # Image recognition settings
   find:
     similarity: 0.8
-    
+
 # Logging configuration
 logging:
   level:

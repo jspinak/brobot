@@ -1,8 +1,9 @@
 package io.github.jspinak.brobot.util.image.visualization;
 
-import io.github.jspinak.brobot.model.element.Location;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
+import static org.bytedeco.opencv.global.opencv_core.CV_8UC3;
+import static org.bytedeco.opencv.global.opencv_imgproc.resize;
+
+import java.util.*;
 
 import org.bytedeco.javacpp.indexer.IntRawIndexer;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -10,59 +11,59 @@ import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
 
-import java.util.*;
-
-import static org.bytedeco.opencv.global.opencv_core.CV_8UC3;
-import static org.bytedeco.opencv.global.opencv_imgproc.resize;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
 
 /**
  * Flexible builder for composing multiple OpenCV Mat objects into a single image.
- * 
- * <p>MatBuilder provides a powerful API for assembling complex images from multiple 
- * Mat objects (OpenCV's matrix representation of images). This is essential for 
- * creating visual debugging output, generating test data, building composite images 
- * for analysis, and constructing visual reports in the automation framework.</p>
- * 
+ *
+ * <p>MatBuilder provides a powerful API for assembling complex images from multiple Mat objects
+ * (OpenCV's matrix representation of images). This is essential for creating visual debugging
+ * output, generating test data, building composite images for analysis, and constructing visual
+ * reports in the automation framework.
+ *
  * <p>Key capabilities:
+ *
  * <ul>
- *   <li><b>Dynamic Composition</b>: Automatically resizes base Mat to accommodate submats</li>
- *   <li><b>Flexible Layout</b>: Support for horizontal, vertical, and positioned placement</li>
- *   <li><b>Size Control</b>: Optional maximum dimensions for submats with automatic scaling</li>
- *   <li><b>Spacing Management</b>: Configurable gaps between concatenated images</li>
- *   <li><b>Type Safety</b>: Automatic type conversion for consistent Mat types</li>
+ *   <li><b>Dynamic Composition</b>: Automatically resizes base Mat to accommodate submats
+ *   <li><b>Flexible Layout</b>: Support for horizontal, vertical, and positioned placement
+ *   <li><b>Size Control</b>: Optional maximum dimensions for submats with automatic scaling
+ *   <li><b>Spacing Management</b>: Configurable gaps between concatenated images
+ *   <li><b>Type Safety</b>: Automatic type conversion for consistent Mat types
  * </ul>
- * </p>
- * 
+ *
  * <p>Layout options:
+ *
  * <ul>
- *   <li><b>Horizontal Concatenation</b>: Arrange images side by side</li>
- *   <li><b>Vertical Concatenation</b>: Stack images top to bottom</li>
- *   <li><b>Absolute Positioning</b>: Place submats at specific coordinates</li>
- *   <li><b>Mixed Layouts</b>: Combine all placement methods</li>
+ *   <li><b>Horizontal Concatenation</b>: Arrange images side by side
+ *   <li><b>Vertical Concatenation</b>: Stack images top to bottom
+ *   <li><b>Absolute Positioning</b>: Place submats at specific coordinates
+ *   <li><b>Mixed Layouts</b>: Combine all placement methods
  * </ul>
- * </p>
- * 
+ *
  * <p>Common use cases:
+ *
  * <ul>
- *   <li>Creating image galleries for visual debugging</li>
- *   <li>Building comparison views (before/after)</li>
- *   <li>Assembling multi-panel diagnostic images</li>
- *   <li>Generating visual test reports</li>
- *   <li>Constructing training data visualizations</li>
- *   <li>Creating mock screenshots from components</li>
+ *   <li>Creating image galleries for visual debugging
+ *   <li>Building comparison views (before/after)
+ *   <li>Assembling multi-panel diagnostic images
+ *   <li>Generating visual test reports
+ *   <li>Constructing training data visualizations
+ *   <li>Creating mock screenshots from components
  * </ul>
- * </p>
- * 
+ *
  * <p>Size management features:
+ *
  * <ul>
- *   <li>Automatic base Mat expansion to fit all submats</li>
- *   <li>Optional maximum width/height constraints for submats</li>
- *   <li>Proportional scaling to maintain aspect ratios</li>
- *   <li>Configurable spacing between concatenated images</li>
+ *   <li>Automatic base Mat expansion to fit all submats
+ *   <li>Optional maximum width/height constraints for submats
+ *   <li>Proportional scaling to maintain aspect ratios
+ *   <li>Configurable spacing between concatenated images
  * </ul>
- * </p>
- * 
+ *
  * <p>Example - Creating a diagnostic image:
+ *
  * <pre>
  * Mat diagnostic = new MatBuilder()
  *     .setName("State Analysis")
@@ -72,22 +73,21 @@ import static org.bytedeco.opencv.global.opencv_imgproc.resize;
  *     .addSubMat(new Location(0, 400), matchVisualization)
  *     .build();
  * </pre>
- * </p>
- * 
+ *
  * <p>Advanced features:
+ *
  * <ul>
- *   <li>Single-channel row Mat creation for data visualization</li>
- *   <li>Null-safe submat handling</li>
- *   <li>Automatic type conversion for mixed Mat types</li>
- *   <li>Flexible initialization from regions or dimensions</li>
+ *   <li>Single-channel row Mat creation for data visualization
+ *   <li>Null-safe submat handling
+ *   <li>Automatic type conversion for mixed Mat types
+ *   <li>Flexible initialization from regions or dimensions
  * </ul>
- * </p>
- * 
- * <p>In the model-based approach, MatBuilder is crucial for creating visual 
- * representations of automation state, debugging information, and analysis results. 
- * It enables the framework to generate comprehensive visual reports that help 
- * developers understand what the automation system sees and how it makes decisions.</p>
- * 
+ *
+ * <p>In the model-based approach, MatBuilder is crucial for creating visual representations of
+ * automation state, debugging information, and analysis results. It enables the framework to
+ * generate comprehensive visual reports that help developers understand what the automation system
+ * sees and how it makes decisions.
+ *
  * @since 1.0
  * @see Mat
  * @see MatrixUtilities
@@ -122,7 +122,7 @@ public class MatBuilder {
     public MatBuilder init(Region region) {
         int w = region.w();
         int h = region.h();
-        return setWH(w,h);
+        return setWH(w, h);
     }
 
     public MatBuilder init() {
@@ -187,8 +187,8 @@ public class MatBuilder {
     public MatBuilder concatSubmatsHorizontally(List<Mat> submats) {
         int i = 0;
         for (Mat submat : submats) {
-            addSubMat(new Location(x2,0), submat);
-            x2 = Math.max(x2, getEndSpot(i, submatMaxWidth, submat.cols(), x2,submats.size()-1));
+            addSubMat(new Location(x2, 0), submat);
+            x2 = Math.max(x2, getEndSpot(i, submatMaxWidth, submat.cols(), x2, submats.size() - 1));
             if (submatMaxHeight <= 0) y2 = Math.max(y2, submat.rows());
             i++;
         }
@@ -200,7 +200,10 @@ public class MatBuilder {
         int i = 0;
         for (Mat submat : submats) {
             addSubMat(new Location(0, y2), submat);
-            y2 = Math.max(y2, getEndSpot(i, submatMaxHeight, submat.rows(), y2,submats.size()-1));
+            y2 =
+                    Math.max(
+                            y2,
+                            getEndSpot(i, submatMaxHeight, submat.rows(), y2, submats.size() - 1));
             if (submatMaxWidth <= 0) x2 = Math.max(x2, submat.cols());
             i++;
         }
@@ -209,7 +212,7 @@ public class MatBuilder {
     }
 
     private int getStartSpot(int i, int max, int submatSize, int lastEndSpot, int lastI) {
-        if (i==0) return 0;
+        if (i == 0) return 0;
         return getEndSpot(i, max, submatSize, lastEndSpot, lastI);
     }
 
@@ -249,12 +252,12 @@ public class MatBuilder {
 
     private void resizeUnderlyingMat(int w, int h) {
         if (mat == null || mat.empty()) {
-            setWH(w,h);
+            setWH(w, h);
             return;
         }
         Rect oldLoc = new Rect(0, 0, mat.cols(), mat.rows());
         Mat oldMat = mat.clone();
-        mat = new Mat(h, w, mat.type()); //ok
+        mat = new Mat(h, w, mat.type()); // ok
         Mat insertOld = mat.apply(oldLoc);
         oldMat.copyTo(insertOld);
     }
@@ -284,17 +287,23 @@ public class MatBuilder {
     }
 
     private void resizeSubmats(List<Mat> subMats) {
-        subMats.forEach(subMat -> {
-            double factor = getAdjustFactor(subMat);
-            int newWidth = (int) (subMat.cols() * factor);
-            int newHeight = (int) (subMat.rows() * factor);
-            Size newSize = new Size(newWidth, newHeight);
-            resize(subMat, subMat, newSize);
-        });
+        subMats.forEach(
+                subMat -> {
+                    double factor = getAdjustFactor(subMat);
+                    int newWidth = (int) (subMat.cols() * factor);
+                    int newHeight = (int) (subMat.rows() * factor);
+                    Size newSize = new Size(newWidth, newHeight);
+                    resize(subMat, subMat, newSize);
+                });
     }
 
     private void insertMat(Location location, Mat subMat) {
-        Rect rect = new Rect(location.getCalculatedX(), location.getCalculatedY(), subMat.cols(), subMat.rows());
+        Rect rect =
+                new Rect(
+                        location.getCalculatedX(),
+                        location.getCalculatedY(),
+                        subMat.cols(),
+                        subMat.rows());
         subMat.convertTo(subMat, mat.type());
         Mat target = mat.apply(rect);
         subMat.copyTo(target);
@@ -308,5 +317,4 @@ public class MatBuilder {
         subMats.forEach(this::insertMat);
         return mat;
     }
-
 }

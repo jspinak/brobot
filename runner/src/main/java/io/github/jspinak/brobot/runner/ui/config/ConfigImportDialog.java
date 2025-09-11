@@ -1,15 +1,12 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
-import lombok.Getter;
-import lombok.EqualsAndHashCode;
-import lombok.extern.slf4j.Slf4j;
-
-import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
-import io.github.jspinak.brobot.runner.events.EventBus;
-import io.github.jspinak.brobot.runner.events.LogEvent;
-import io.github.jspinak.brobot.runner.init.BrobotLibraryInitializer;
-import io.github.jspinak.brobot.runner.init.ProjectConfigLoader;
-import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -21,20 +18,22 @@ import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.time.LocalDateTime;
+import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
+import io.github.jspinak.brobot.runner.events.EventBus;
+import io.github.jspinak.brobot.runner.events.LogEvent;
+import io.github.jspinak.brobot.runner.init.BrobotLibraryInitializer;
+import io.github.jspinak.brobot.runner.init.ProjectConfigLoader;
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
 
-/**
- * Dialog for importing configuration files into the Brobot Runner.
- */
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+
+/** Dialog for importing configuration files into the Brobot Runner. */
 @Slf4j
 @Getter
 @EqualsAndHashCode(callSuper = false)
@@ -85,12 +84,13 @@ public class ConfigImportDialog extends Dialog<ConfigEntry> {
         getDialogPane().setContent(content);
 
         // Set result converter
-        setResultConverter(buttonType -> {
-            if (buttonType == ButtonType.OK) {
-                return createConfigEntry();
-            }
-            return null;
-        });
+        setResultConverter(
+                buttonType -> {
+                    if (buttonType == ButtonType.OK) {
+                        return createConfigEntry();
+                    }
+                    return null;
+                });
 
         // Set modality
         initModality(Modality.APPLICATION_MODAL);
@@ -114,12 +114,8 @@ public class ConfigImportDialog extends Dialog<ConfigEntry> {
         validationStatusLabel = new Label("Validation Status: Not Validated");
         validationStatusLabel.setStyle("-fx-font-weight: bold");
 
-        content.getChildren().addAll(
-                form,
-                new Separator(),
-                validationStatusLabel,
-                validationResultsPanel
-        );
+        content.getChildren()
+                .addAll(form, new Separator(), validationStatusLabel, validationResultsPanel);
 
         return content;
     }
@@ -208,7 +204,9 @@ public class ConfigImportDialog extends Dialog<ConfigEntry> {
         GridPane.setHgrow(projectNameField, Priority.ALWAYS);
 
         // Add listeners to update validation button state
-        projectConfigField.textProperty().addListener((obs, old, val) -> updateValidateButtonState());
+        projectConfigField
+                .textProperty()
+                .addListener((obs, old, val) -> updateValidateButtonState());
         dslConfigField.textProperty().addListener((obs, old, val) -> updateValidateButtonState());
         imagePathField.textProperty().addListener((obs, old, val) -> updateValidateButtonState());
 
@@ -218,8 +216,9 @@ public class ConfigImportDialog extends Dialog<ConfigEntry> {
     private void browseForProjectConfig() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select Project Configuration File");
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("JSON Files", "*.json"));
+        fileChooser
+                .getExtensionFilters()
+                .add(new FileChooser.ExtensionFilter("JSON Files", "*.json"));
 
         File file = fileChooser.showOpenDialog(getDialogPane().getScene().getWindow());
         if (file != null) {
@@ -262,12 +261,16 @@ public class ConfigImportDialog extends Dialog<ConfigEntry> {
                 try {
                     Path parentDir = selectedProjectConfig.getParent();
                     Files.list(parentDir)
-                            .filter(p -> p.toString().endsWith(".json") && !p.equals(selectedProjectConfig))
+                            .filter(
+                                    p ->
+                                            p.toString().endsWith(".json")
+                                                    && !p.equals(selectedProjectConfig))
                             .findFirst()
-                            .ifPresent(p -> {
-                                selectedDslConfig = p;
-                                dslConfigField.setText(selectedDslConfig.toString());
-                            });
+                            .ifPresent(
+                                    p -> {
+                                        selectedDslConfig = p;
+                                        dslConfigField.setText(selectedDslConfig.toString());
+                                    });
                 } catch (IOException e) {
                     logger.error("Error listing directory files", e);
                 }
@@ -278,8 +281,9 @@ public class ConfigImportDialog extends Dialog<ConfigEntry> {
     private void browseForDslConfig() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select DSL Configuration File");
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("JSON Files", "*.json"));
+        fileChooser
+                .getExtensionFilters()
+                .add(new FileChooser.ExtensionFilter("JSON Files", "*.json"));
 
         // Set initial directory to the project config directory if available
         if (selectedProjectConfig != null) {
@@ -318,28 +322,33 @@ public class ConfigImportDialog extends Dialog<ConfigEntry> {
         validateButton.setDisable(!(hasProjectConfig && hasDslConfig && hasImagePath));
 
         // Also update OK button
-        getDialogPane().lookupButton(ButtonType.OK).setDisable(lastValidationResult == null || lastValidationResult.hasCriticalErrors());
+        getDialogPane()
+                .lookupButton(ButtonType.OK)
+                .setDisable(
+                        lastValidationResult == null || lastValidationResult.hasCriticalErrors());
     }
 
     void validateConfiguration() {
         if (selectedProjectConfig == null || selectedDslConfig == null) {
-            showAlert(Alert.AlertType.ERROR,
+            showAlert(
+                    Alert.AlertType.ERROR,
                     "Validation Error",
                     "Missing configuration files",
                     "Please select both project and DSL configuration files.");
             return;
         }
 
-        Path imagePath = selectedImagePath != null ?
-                selectedImagePath : Paths.get(properties.getImagePath());
+        Path imagePath =
+                selectedImagePath != null
+                        ? selectedImagePath
+                        : Paths.get(properties.getImagePath());
 
         try {
-            ProjectConfigLoader configLoader = new ProjectConfigLoader(null); // Normally you'd get this from Spring
-            lastValidationResult = configLoader.loadAndValidate(
-                    selectedProjectConfig,
-                    selectedDslConfig,
-                    imagePath
-            );
+            ProjectConfigLoader configLoader =
+                    new ProjectConfigLoader(null); // Normally you'd get this from Spring
+            lastValidationResult =
+                    configLoader.loadAndValidate(
+                            selectedProjectConfig, selectedDslConfig, imagePath);
 
             // Update validation results panel
             validationResultsPanel.setValidationResult(lastValidationResult);
@@ -361,7 +370,8 @@ public class ConfigImportDialog extends Dialog<ConfigEntry> {
 
         } catch (Exception e) {
             logger.error("Error validating configuration", e);
-            showAlert(Alert.AlertType.ERROR,
+            showAlert(
+                    Alert.AlertType.ERROR,
                     "Validation Error",
                     "Error validating configuration",
                     e.getMessage());
@@ -387,8 +397,10 @@ public class ConfigImportDialog extends Dialog<ConfigEntry> {
             projectName = "Unknown";
         }
 
-        Path imagePath = selectedImagePath != null ?
-                selectedImagePath : Paths.get(properties.getImagePath());
+        Path imagePath =
+                selectedImagePath != null
+                        ? selectedImagePath
+                        : Paths.get(properties.getImagePath());
 
         // If copy files is selected, copy to config directory
         Path projectConfigPath = selectedProjectConfig;
@@ -402,7 +414,10 @@ public class ConfigImportDialog extends Dialog<ConfigEntry> {
 
                 // Copy project config
                 Path targetProjectConfig = configDir.resolve(selectedProjectConfig.getFileName());
-                Files.copy(selectedProjectConfig, targetProjectConfig, StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(
+                        selectedProjectConfig,
+                        targetProjectConfig,
+                        StandardCopyOption.REPLACE_EXISTING);
                 projectConfigPath = targetProjectConfig;
 
                 // Copy DSL config
@@ -411,12 +426,16 @@ public class ConfigImportDialog extends Dialog<ConfigEntry> {
                 dslConfigPath = targetDslConfig;
 
                 // Log copy
-                eventBus.publish(LogEvent.info(this,
-                        "Copied configuration files to " + configDir, "Configuration"));
+                eventBus.publish(
+                        LogEvent.info(
+                                this,
+                                "Copied configuration files to " + configDir,
+                                "Configuration"));
 
             } catch (IOException e) {
                 logger.error("Error copying configuration files", e);
-                showAlert(Alert.AlertType.ERROR,
+                showAlert(
+                        Alert.AlertType.ERROR,
                         "Copy Error",
                         "Error copying configuration files",
                         e.getMessage());
@@ -429,17 +448,17 @@ public class ConfigImportDialog extends Dialog<ConfigEntry> {
                 projectConfigPath,
                 dslConfigPath,
                 imagePath,
-                LocalDateTime.now()
-        );
+                LocalDateTime.now());
     }
 
     private void showAlert(Alert.AlertType type, String title, String header, String content) {
-        Platform.runLater(() -> {
-            Alert alert = new Alert(type);
-            alert.setTitle(title);
-            alert.setHeaderText(header);
-            alert.setContentText(content);
-            alert.showAndWait();
-        });
+        Platform.runLater(
+                () -> {
+                    Alert alert = new Alert(type);
+                    alert.setTitle(title);
+                    alert.setHeaderText(header);
+                    alert.setContentText(content);
+                    alert.showAndWait();
+                });
     }
 }

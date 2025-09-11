@@ -1,57 +1,60 @@
 package io.github.jspinak.brobot.model.match;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.github.jspinak.brobot.model.element.Image;
-import io.github.jspinak.brobot.model.element.Pattern;
-import io.github.jspinak.brobot.model.element.Scene;
-import io.github.jspinak.brobot.model.element.Anchors;
-import io.github.jspinak.brobot.model.element.Location;
-import io.github.jspinak.brobot.model.element.Position;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.state.StateObject;
-import io.github.jspinak.brobot.model.state.StateObjectMetadata;
-import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
-import io.github.jspinak.brobot.model.state.StateImage;
-import lombok.Data;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Rect;
-
 import java.awt.image.BufferedImage;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Rect;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import io.github.jspinak.brobot.model.element.Anchors;
+import io.github.jspinak.brobot.model.element.Image;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Position;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.element.Scene;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.state.StateObject;
+import io.github.jspinak.brobot.model.state.StateObjectMetadata;
+import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
+
+import lombok.Data;
+
 /**
- * Represents a successful pattern match found on the screen in the Brobot model-based GUI automation framework.
- * 
- * <p>A Match is created when a Find operation successfully locates a GUI element (image, text, or region) 
- * on the screen. It encapsulates all information about the match including its location, similarity score, 
- * the image content at that location, and metadata about how it was found.</p>
- * 
+ * Represents a successful pattern match found on the screen in the Brobot model-based GUI
+ * automation framework.
+ *
+ * <p>A Match is created when a Find operation successfully locates a GUI element (image, text, or
+ * region) on the screen. It encapsulates all information about the match including its location,
+ * similarity score, the image content at that location, and metadata about how it was found.
+ *
  * <p>In the model-based approach, matches are fundamental for:
+ *
  * <ul>
- *   <li>Providing targets for mouse and keyboard actions (clicks, typing, etc.)</li>
- *   <li>Verifying that GUI elements exist in expected States</li>
- *   <li>Building dynamic relationships between GUI elements</li>
- *   <li>Creating visual feedback through match highlighting</li>
- *   <li>Tracking interaction history with GUI elements</li>
+ *   <li>Providing targets for mouse and keyboard actions (clicks, typing, etc.)
+ *   <li>Verifying that GUI elements exist in expected States
+ *   <li>Building dynamic relationships between GUI elements
+ *   <li>Creating visual feedback through match highlighting
+ *   <li>Tracking interaction history with GUI elements
  * </ul>
- * </p>
- * 
+ *
  * <p>Key features:
+ *
  * <ul>
- *   <li><b>Score</b>: Similarity score (0.0-1.0) indicating match quality</li>
- *   <li><b>Target</b>: Location within the matched region for precise interactions</li>
- *   <li><b>Image content</b>: Actual pixels from the screen at the match location</li>
- *   <li><b>Search image</b>: The pattern that was searched for</li>
- *   <li><b>State context</b>: Information about which State object found this match</li>
+ *   <li><b>Score</b>: Similarity score (0.0-1.0) indicating match quality
+ *   <li><b>Target</b>: Location within the matched region for precise interactions
+ *   <li><b>Image content</b>: Actual pixels from the screen at the match location
+ *   <li><b>Search image</b>: The pattern that was searched for
+ *   <li><b>State context</b>: Information about which State object found this match
  * </ul>
- * </p>
- * 
- * <p>Unlike MatchSnapshot which can represent failed matches, a Match object always 
- * represents a successful find operation. Multiple Match objects are aggregated in 
- * an ActionResult.</p>
- * 
+ *
+ * <p>Unlike MatchSnapshot which can represent failed matches, a Match object always represents a
+ * successful find operation. Multiple Match objects are aggregated in an ActionResult.
+ *
  * @since 1.0
  * @see ActionResult
  * @see Region
@@ -65,11 +68,14 @@ public class Match {
 
     // fields in the SikuliX Match (but Brobot datatypes)
     private double score = 0.0;
-    //private Location target; //
+    // private Location target; //
     private Image image;
     private String text = "";
-    private String name = ""; // in SikuliX Element, extended by many SikuliX object classes, including Match.
-    private Location target; // Location has a Brobot region (SikuliX Match has a SikuliX Region) and a Position and offsets.
+    private String name =
+            ""; // in SikuliX Element, extended by many SikuliX object classes, including Match.
+    private Location
+            target; // Location has a Brobot region (SikuliX Match has a SikuliX Region) and a
+    // Position and offsets.
     // ---------------------------
 
     /*
@@ -87,8 +93,7 @@ public class Match {
      */
     private Anchors anchors;
     private StateObjectMetadata stateObjectData;
-    @JsonIgnore
-    private Mat histogram;
+    @JsonIgnore private Mat histogram;
     private Scene scene;
     private LocalDateTime timeStamp;
     // the old MatchObject had `private double duration;`
@@ -128,8 +133,7 @@ public class Match {
     public void setRegion(Region region) {
         if (target == null) {
             target = new Location(region);
-        }
-        else target.setRegion(region);
+        } else target.setRegion(region);
     }
 
     @com.fasterxml.jackson.annotation.JsonIgnore
@@ -151,7 +155,8 @@ public class Match {
 
     public void setImageWithScene() {
         if (scene == null) return;
-        BufferedImage bImg = BufferedImageUtilities.getSubImage(scene.getPattern().getBImage(), getRegion());
+        BufferedImage bImg =
+                BufferedImageUtilities.getSubImage(scene.getPattern().getBImage(), getRegion());
         if (image == null) image = new Image(bImg);
         else image.setBufferedImage(bImg);
     }
@@ -161,11 +166,12 @@ public class Match {
     }
 
     /**
-     * If there is a StateObject, we try to recreate it as a StateImage. The StateObject was likely a StateImage itself.
-     * If there is no Pattern, there are no SearchRegions. Since the Match region needs to be saved, a new Pattern
-     * is created and the Match region is saved to the fixed region of the Pattern's SearchRegions.
-     * In an operation like Find.ALL_WORDS, there may not be a StateObject, although Pattern objects should be
-     * created.
+     * If there is a StateObject, we try to recreate it as a StateImage. The StateObject was likely
+     * a StateImage itself. If there is no Pattern, there are no SearchRegions. Since the Match
+     * region needs to be saved, a new Pattern is created and the Match region is saved to the fixed
+     * region of the Pattern's SearchRegions. In an operation like Find.ALL_WORDS, there may not be
+     * a StateObject, although Pattern objects should be created.
+     *
      * @return the StateImage created from the Match
      */
     public StateImage toStateImage() {
@@ -173,7 +179,11 @@ public class Match {
         stateImage.setName(name);
         if (stateObjectData != null) {
             stateImage.setOwnerStateName(stateObjectData.getOwnerStateName());
-            if (!stateObjectData.getStateObjectName().isEmpty()) stateImage.setName(stateObjectData.getStateObjectName()); // the StateObject name should take priority since it was the original StateImage
+            if (!stateObjectData.getStateObjectName().isEmpty())
+                stateImage.setName(
+                        stateObjectData
+                                .getStateObjectName()); // the StateObject name should take priority
+            // since it was the original StateImage
         }
         stateImage.addPatterns(new Pattern(this));
         return stateImage;
@@ -189,12 +199,15 @@ public class Match {
         }
         Region r = getRegion();
         if (r != null) {
-            stringBuilder.append(String.format("%sR[%d,%d %dx%d] simScore:%.1f", nameText,
-                    r.x(), r.y(), r.w(), r.h(), score));
+            stringBuilder.append(
+                    String.format(
+                            "%sR[%d,%d %dx%d] simScore:%.1f",
+                            nameText, r.x(), r.y(), r.w(), r.h(), score));
         } else {
             stringBuilder.append(String.format("%sR[null] simScore:%.1f", nameText, score));
         }
-        if (getText() != null && !getText().isEmpty()) stringBuilder.append(" text:").append(getText());
+        if (getText() != null && !getText().isEmpty())
+            stringBuilder.append(" text:").append(getText());
         stringBuilder.append("]");
         return stringBuilder.toString();
     }
@@ -379,7 +392,8 @@ public class Match {
             match.scene = scene;
             setMatchImage(match);
             if (name != null) match.name = name;
-            if (text != null && !text.isEmpty()) match.setText(text); // otherwise, this erases the SikuliX match text
+            if (text != null && !text.isEmpty())
+                match.setText(text); // otherwise, this erases the SikuliX match text
             if (simScore >= 0)
                 match.setScore(simScore); // otherwise, this erases the SikuliX match simScore
             match.anchors = anchors;
@@ -389,7 +403,6 @@ public class Match {
             match.searchImage = searchImage;
             return match;
         }
-
     }
 
     @Override
@@ -397,17 +410,16 @@ public class Match {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Match match = (Match) obj;
-        
+
         // Compare essential fields for match equality
-        return Double.compare(match.score, score) == 0 &&
-                Objects.equals(name, match.name) &&
-                Objects.equals(text, match.text) &&
-                Objects.equals(getRegion(), match.getRegion());
+        return Double.compare(match.score, score) == 0
+                && Objects.equals(name, match.name)
+                && Objects.equals(text, match.text)
+                && Objects.equals(getRegion(), match.getRegion());
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(score, name, text, getRegion());
     }
-
 }

@@ -1,5 +1,22 @@
 package io.github.jspinak.brobot.startup;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.state.StateEnum;
@@ -8,46 +25,30 @@ import io.github.jspinak.brobot.startup.verification.InitialStateVerifier;
 import io.github.jspinak.brobot.statemanagement.StateDetector;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 
 /**
- * Tests for InitialStateVerifier.
- * Verifies initial state detection and verification functionality.
+ * Tests for InitialStateVerifier. Verifies initial state detection and verification functionality.
  */
 @DisplayName("InitialStateVerifier Tests")
-@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
+@DisabledIfEnvironmentVariable(
+        named = "CI",
+        matches = "true",
+        disabledReason = "Test incompatible with CI environment")
 public class InitialStateVerifierTest extends BrobotTestBase {
 
-    @Mock
-    private StateDetector stateDetector;
+    @Mock private StateDetector stateDetector;
 
-    @Mock
-    private StateMemory stateMemory;
+    @Mock private StateMemory stateMemory;
 
-    @Mock
-    private StateService stateService;
+    @Mock private StateService stateService;
 
     private InitialStateVerifier verifier;
 
     // Test state enums
     enum TestState implements StateEnum {
-        HOME, LOGIN, DASHBOARD;
+        HOME,
+        LOGIN,
+        DASHBOARD;
 
         public String getName() {
             return name();
@@ -202,16 +203,18 @@ public class InitialStateVerifierTest extends BrobotTestBase {
             when(stateService.getState("UNKNOWN")).thenReturn(Optional.empty());
 
             // Execute
-            boolean result = verifier.verify(new StateEnum() {
-                public String getName() {
-                    return "UNKNOWN";
-                }
+            boolean result =
+                    verifier.verify(
+                            new StateEnum() {
+                                public String getName() {
+                                    return "UNKNOWN";
+                                }
 
-                @Override
-                public String toString() {
-                    return "UNKNOWN";
-                }
-            });
+                                @Override
+                                public String toString() {
+                                    return "UNKNOWN";
+                                }
+                            });
 
             // Verify
             assertFalse(result);
@@ -282,8 +285,8 @@ public class InitialStateVerifierTest extends BrobotTestBase {
             when(stateDetector.findState(1L)).thenReturn(true);
 
             // Execute
-            InitialStateVerifier.VerificationBuilder builder = verifier.builder()
-                    .withStates(TestState.HOME);
+            InitialStateVerifier.VerificationBuilder builder =
+                    verifier.builder().withStates(TestState.HOME);
             boolean result = builder.verify();
 
             // Verify
@@ -310,14 +313,14 @@ public class InitialStateVerifierTest extends BrobotTestBase {
             when(stateDetector.findState(3L)).thenReturn(true);
 
             // Execute
-            InitialStateVerifier.VerificationBuilder builder = verifier.builder()
-                    .withStates(TestState.HOME)
-                    .withFallbackSearch(true);
+            InitialStateVerifier.VerificationBuilder builder =
+                    verifier.builder().withStates(TestState.HOME).withFallbackSearch(true);
             boolean result = builder.verify();
 
             // Verify
             assertTrue(result);
-            verify(stateDetector, times(2)).findState(1L); // Called once in verifyReal, once in searchAllStates
+            verify(stateDetector, times(2))
+                    .findState(1L); // Called once in verifyReal, once in searchAllStates
             verify(stateDetector).findState(2L);
             verify(stateMemory).addActiveState(2L);
         }
@@ -335,9 +338,8 @@ public class InitialStateVerifierTest extends BrobotTestBase {
             when(stateService.getState(2L)).thenReturn(Optional.of(loginState));
 
             // Execute
-            InitialStateVerifier.VerificationBuilder builder = verifier.builder()
-                    .withState(TestState.HOME, 70)
-                    .withState(TestState.LOGIN, 30);
+            InitialStateVerifier.VerificationBuilder builder =
+                    verifier.builder().withState(TestState.HOME, 70).withState(TestState.LOGIN, 30);
 
             boolean result = builder.verify();
 
@@ -357,9 +359,8 @@ public class InitialStateVerifierTest extends BrobotTestBase {
             when(stateDetector.findState(1L)).thenReturn(true);
 
             // Execute
-            InitialStateVerifier.VerificationBuilder builder = verifier.builder()
-                    .withStates(TestState.HOME)
-                    .activateFirstOnly(true);
+            InitialStateVerifier.VerificationBuilder builder =
+                    verifier.builder().withStates(TestState.HOME).activateFirstOnly(true);
             boolean result = builder.verify();
 
             // Verify

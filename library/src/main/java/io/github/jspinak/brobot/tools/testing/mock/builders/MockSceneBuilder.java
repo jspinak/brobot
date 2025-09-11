@@ -1,32 +1,30 @@
 package io.github.jspinak.brobot.tools.testing.mock.builders;
 
+import static io.github.jspinak.brobot.model.analysis.color.ColorCluster.ColorSchemaName.BGR;
+import static io.github.jspinak.brobot.model.analysis.color.ColorCluster.ColorSchemaName.HSV;
+import static org.bytedeco.opencv.global.opencv_core.CV_8UC3;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Scalar;
+
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.analysis.color.*;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalysis;
 import io.github.jspinak.brobot.model.element.Image;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Scalar;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static io.github.jspinak.brobot.model.analysis.color.ColorCluster.ColorSchemaName.BGR;
-import static io.github.jspinak.brobot.model.analysis.color.ColorCluster.ColorSchemaName.HSV;
-import static org.bytedeco.opencv.global.opencv_core.CV_8UC3;
 
 /**
- * Builder for creating mock Scene and SceneAnalysis objects for testing.
- * Provides properly initialized objects that avoid NPEs in tests.
+ * Builder for creating mock Scene and SceneAnalysis objects for testing. Provides properly
+ * initialized objects that avoid NPEs in tests.
  */
 public class MockSceneBuilder {
 
-    /**
-     * Creates a mock Scene with a valid image.
-     * Only works in mock mode.
-     */
+    /** Creates a mock Scene with a valid image. Only works in mock mode. */
     public static Scene createMockScene() {
         if (!FrameworkSettings.mock) {
             throw new IllegalStateException("MockSceneBuilder should only be used in mock mode");
@@ -36,9 +34,7 @@ public class MockSceneBuilder {
         return new Scene(pattern);
     }
 
-    /**
-     * Creates a mock Pattern with BGR and HSV images.
-     */
+    /** Creates a mock Pattern with BGR and HSV images. */
     public static Pattern createMockPattern() {
         Pattern pattern = new Pattern();
 
@@ -53,8 +49,8 @@ public class MockSceneBuilder {
     }
 
     /**
-     * Creates a mock SceneAnalysis with the specified number of pixel profiles.
-     * Each profile is properly initialized with ColorClusters and schemas.
+     * Creates a mock SceneAnalysis with the specified number of pixel profiles. Each profile is
+     * properly initialized with ColorClusters and schemas.
      */
     public static SceneAnalysis createMockSceneAnalysis(int numProfiles) {
         List<PixelProfiles> profiles = new ArrayList<>();
@@ -66,17 +62,13 @@ public class MockSceneBuilder {
         return new SceneAnalysis(profiles, scene);
     }
 
-    /**
-     * Creates a mock PixelProfiles with properly initialized ColorCluster.
-     */
+    /** Creates a mock PixelProfiles with properly initialized ColorCluster. */
     public static PixelProfiles createMockPixelProfile(int index) {
         Scene scene = createMockScene();
         return createMockPixelProfile(index, scene);
     }
 
-    /**
-     * Creates a mock PixelProfiles with properly initialized ColorCluster.
-     */
+    /** Creates a mock PixelProfiles with properly initialized ColorCluster. */
     public static PixelProfiles createMockPixelProfile(int index, Scene scene) {
         PixelProfiles profiles = new PixelProfiles(scene);
 
@@ -94,9 +86,7 @@ public class MockSceneBuilder {
         return profiles;
     }
 
-    /**
-     * Creates a mock ColorCluster with BGR and HSV schemas.
-     */
+    /** Creates a mock ColorCluster with BGR and HSV schemas. */
     public static ColorCluster createMockColorCluster() {
         ColorCluster cluster = new ColorCluster();
 
@@ -111,28 +101,28 @@ public class MockSceneBuilder {
         return cluster;
     }
 
-    /**
-     * Creates a mock ColorSchema with color statistics.
-     */
+    /** Creates a mock ColorSchema with color statistics. */
     public static ColorSchema createMockColorSchema(ColorCluster.ColorSchemaName schemaName) {
         ColorSchema schema;
 
         if (schemaName == BGR) {
             // Create BGR schema with BLUE, GREEN, RED color values
-            schema = new ColorSchema(
-                    ColorSchema.ColorValue.BLUE,
-                    ColorSchema.ColorValue.GREEN,
-                    ColorSchema.ColorValue.RED);
+            schema =
+                    new ColorSchema(
+                            ColorSchema.ColorValue.BLUE,
+                            ColorSchema.ColorValue.GREEN,
+                            ColorSchema.ColorValue.RED);
             // Set values for each channel (min, max, mean, stddev)
             schema.setValues(ColorSchema.ColorValue.BLUE, 100.0, 156.0, 128.0, 10.0);
             schema.setValues(ColorSchema.ColorValue.GREEN, 100.0, 156.0, 128.0, 10.0);
             schema.setValues(ColorSchema.ColorValue.RED, 100.0, 156.0, 128.0, 10.0);
         } else {
             // Create HSV schema with HUE, SATURATION, VALUE color values
-            schema = new ColorSchema(
-                    ColorSchema.ColorValue.HUE,
-                    ColorSchema.ColorValue.SATURATION,
-                    ColorSchema.ColorValue.VALUE);
+            schema =
+                    new ColorSchema(
+                            ColorSchema.ColorValue.HUE,
+                            ColorSchema.ColorValue.SATURATION,
+                            ColorSchema.ColorValue.VALUE);
             // Set values for each channel (min, max, mean, stddev)
             schema.setValues(ColorSchema.ColorValue.HUE, 0.0, 360.0, 180.0, 50.0);
             schema.setValues(ColorSchema.ColorValue.SATURATION, 100.0, 156.0, 128.0, 10.0);
@@ -142,9 +132,7 @@ public class MockSceneBuilder {
         return schema;
     }
 
-    /**
-     * Builder class for more complex SceneAnalysis configurations.
-     */
+    /** Builder class for more complex SceneAnalysis configurations. */
     public static class SceneAnalysisBuilder {
         private Scene scene;
         private List<PixelProfiles> profiles = new ArrayList<>();
@@ -186,9 +174,7 @@ public class MockSceneBuilder {
         }
     }
 
-    /**
-     * Creates a builder for SceneAnalysis.
-     */
+    /** Creates a builder for SceneAnalysis. */
     public static SceneAnalysisBuilder sceneAnalysis() {
         return new SceneAnalysisBuilder();
     }

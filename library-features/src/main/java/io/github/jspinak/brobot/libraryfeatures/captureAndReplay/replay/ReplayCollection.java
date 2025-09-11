@@ -1,9 +1,9 @@
 package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.replay;
 
-import lombok.Getter;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import lombok.Getter;
 
 @Getter
 public class ReplayCollection {
@@ -15,14 +15,17 @@ public class ReplayCollection {
     }
 
     public void sortByTimelapseFromBeginning() {
-        replayObjects.sort((o1, o2) -> {
-            if (o1.getTimelapseFromStartOfRecording() > o2.getTimelapseFromStartOfRecording()) {
-                return 1;
-            } else if (o1.getTimelapseFromStartOfRecording() < o2.getTimelapseFromStartOfRecording()) {
-                return -1;
-            } else {
-                return 0;
-            }
-        });
+        replayObjects.sort(
+                (o1, o2) -> {
+                    if (o1.getTimelapseFromStartOfRecording()
+                            > o2.getTimelapseFromStartOfRecording()) {
+                        return 1;
+                    } else if (o1.getTimelapseFromStartOfRecording()
+                            < o2.getTimelapseFromStartOfRecording()) {
+                        return -1;
+                    } else {
+                        return 0;
+                    }
+                });
     }
 }

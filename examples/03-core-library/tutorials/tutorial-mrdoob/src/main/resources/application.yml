@@ -12,35 +12,35 @@ brobot:
     mock: false
     # Enable verbose logging to see what's happening
     verbose: true
-    
+
   # State management
   state:
     # Automatically scan for @State annotated classes
     auto-scan: true
     # Package to scan for states
     scan-package: com.example.mrdoob
-    
+
   # Transition settings
   transition:
     # Maximum attempts for a transition
     max-attempts: 3
     # Pause between attempts
     retry-pause: 2.0
-    
+
   # Action settings
   action:
     # Default timeouts
     max-wait: 10
     # Success criteria
     min-similarity: 0.7
-    
+
   # Find settings
   find:
     # Default similarity threshold
     similarity: 0.8
     # Use all cores for parallel searching
     parallel: true
-    
+
   # Screenshot settings
   screenshot:
     # Save screenshots for debugging
@@ -62,7 +62,7 @@ logging:
     io.github.jspinak.brobot.action: DEBUG
   pattern:
     console: '%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n'
-    
+
 # Tutorial-specific settings
 tutorial:
   # Show step-by-step progress

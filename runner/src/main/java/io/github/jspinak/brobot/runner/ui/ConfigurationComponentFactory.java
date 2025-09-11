@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui;
 
+import org.springframework.stereotype.Component;
+
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.runner.config.ApplicationConfig;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
@@ -7,12 +9,10 @@ import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.init.BrobotLibraryInitializer;
 import io.github.jspinak.brobot.runner.project.AutomationProjectManager;
 import io.github.jspinak.brobot.runner.ui.config.ConfigManagementPanel;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
-/**
- * Factory for creating configuration-related UI components.
- */
+import lombok.RequiredArgsConstructor;
+
+/** Factory for creating configuration-related UI components. */
 @Component
 @RequiredArgsConstructor
 public class ConfigurationComponentFactory {
@@ -36,7 +36,6 @@ public class ConfigurationComponentFactory {
                 libraryInitializer,
                 appConfig,
                 projectManager,
-                allStatesInProjectService
-        );
+                allStatesInProjectService);
     }
 }

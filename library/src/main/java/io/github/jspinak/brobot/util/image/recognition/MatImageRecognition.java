@@ -1,55 +1,59 @@
 package io.github.jspinak.brobot.util.image.recognition;
 
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.match.Match;
+import static org.bytedeco.opencv.global.opencv_core.*;
+import static org.bytedeco.opencv.global.opencv_imgproc.*;
+
+import java.util.Optional;
+
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
-import static org.bytedeco.opencv.global.opencv_core.*;
-import static org.bytedeco.opencv.global.opencv_imgproc.*;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.match.Match;
 
 /**
  * OpenCV-based template matching implementation for image recognition.
- * <p>
- * This component provides template matching functionality using OpenCV's matchTemplate
- * function, converting results to Sikuli Match objects for integration with Brobot's
- * automation framework. It uses normalized correlation coefficient matching for
- * robust pattern recognition.
- * <p>
- * Key features:
+ *
+ * <p>This component provides template matching functionality using OpenCV's matchTemplate function,
+ * converting results to Sikuli Match objects for integration with Brobot's automation framework. It
+ * uses normalized correlation coefficient matching for robust pattern recognition.
+ *
+ * <p>Key features:
+ *
  * <ul>
- * <li>Direct OpenCV Mat-based template matching</li>
- * <li>Configurable similarity threshold</li>
- * <li>Automatic conversion to Sikuli Match objects</li>
- * <li>Size validation to prevent invalid operations</li>
- * <li>Optional return pattern for no-match scenarios</li>
+ *   <li>Direct OpenCV Mat-based template matching
+ *   <li>Configurable similarity threshold
+ *   <li>Automatic conversion to Sikuli Match objects
+ *   <li>Size validation to prevent invalid operations
+ *   <li>Optional return pattern for no-match scenarios
  * </ul>
- * <p>
- * Matching algorithm:
+ *
+ * <p>Matching algorithm:
+ *
  * <ul>
- * <li>Method: TM_CCOEFF_NORMED (Normalized Correlation Coefficient)</li>
- * <li>Range: 0.0 to 1.0 (1.0 = perfect match)</li>
- * <li>Returns location of best match if above threshold</li>
- * <li>Single best match only (no multi-match support)</li>
+ *   <li>Method: TM_CCOEFF_NORMED (Normalized Correlation Coefficient)
+ *   <li>Range: 0.0 to 1.0 (1.0 = perfect match)
+ *   <li>Returns location of best match if above threshold
+ *   <li>Single best match only (no multi-match support)
  * </ul>
- * <p>
- * Use cases:
+ *
+ * <p>Use cases:
+ *
  * <ul>
- * <li>Custom template matching outside standard Find operations</li>
- * <li>Performance-critical matching scenarios</li>
- * <li>Integration with custom image processing pipelines</li>
- * <li>Testing and debugging template matching algorithms</li>
+ *   <li>Custom template matching outside standard Find operations
+ *   <li>Performance-critical matching scenarios
+ *   <li>Integration with custom image processing pipelines
+ *   <li>Testing and debugging template matching algorithms
  * </ul>
- * <p>
- * Limitations:
+ *
+ * <p>Limitations:
+ *
  * <ul>
- * <li>Finds only the single best match</li>
- * <li>No rotation or scale invariance</li>
- * <li>Template must be smaller than search image</li>
- * <li>No sub-pixel accuracy</li>
+ *   <li>Finds only the single best match
+ *   <li>No rotation or scale invariance
+ *   <li>Template must be smaller than search image
+ *   <li>No sub-pixel accuracy
  * </ul>
  *
  * @see Match
@@ -60,26 +64,28 @@ public class MatImageRecognition {
 
     /**
      * Finds the best match of a template within a search image.
-     * <p>
-     * Performs normalized cross-correlation template matching to locate
-     * the template pattern within the search image. Returns the location
-     * with the highest correlation score if it exceeds the threshold.
-     * <p>
-     * Algorithm steps:
+     *
+     * <p>Performs normalized cross-correlation template matching to locate the template pattern
+     * within the search image. Returns the location with the highest correlation score if it
+     * exceeds the threshold.
+     *
+     * <p>Algorithm steps:
+     *
      * <ol>
-     * <li>Validate input images are non-empty</li>
-     * <li>Check template fits within search image</li>
-     * <li>Apply matchTemplate with TM_CCOEFF_NORMED</li>
-     * <li>Find location of maximum correlation</li>
-     * <li>Return Match if score exceeds threshold</li>
+     *   <li>Validate input images are non-empty
+     *   <li>Check template fits within search image
+     *   <li>Apply matchTemplate with TM_CCOEFF_NORMED
+     *   <li>Find location of maximum correlation
+     *   <li>Return Match if score exceeds threshold
      * </ol>
-     * <p>
-     * The correlation score ranges from 0.0 to 1.0, where:
+     *
+     * <p>The correlation score ranges from 0.0 to 1.0, where:
+     *
      * <ul>
-     * <li>1.0 = Perfect match (rare in practice)</li>
-     * <li>0.9+ = Excellent match</li>
-     * <li>0.8+ = Good match</li>
-     * <li>0.7+ = Fair match (typical minimum threshold)</li>
+     *   <li>1.0 = Perfect match (rare in practice)
+     *   <li>0.9+ = Excellent match
+     *   <li>0.8+ = Good match
+     *   <li>0.7+ = Fair match (typical minimum threshold)
      * </ul>
      *
      * @param template the pattern to search for; must be smaller than searchImage
@@ -99,7 +105,7 @@ public class MatImageRecognition {
         // Convert images to compatible format if needed
         Mat processedTemplate = ensureCompatibleFormat(template);
         Mat processedSearchImage = ensureCompatibleFormat(searchImage);
-        
+
         // Ensure both images have the same number of channels
         if (processedTemplate.channels() != processedSearchImage.channels()) {
             // Convert both to 3-channel BGR if they differ
@@ -122,7 +128,8 @@ public class MatImageRecognition {
         }
 
         // Create a result Mat to store the correlation scores
-        // Result dimensions: (searchImage.width - template.width + 1) x (searchImage.height - template.height + 1)
+        // Result dimensions: (searchImage.width - template.width + 1) x (searchImage.height -
+        // template.height + 1)
         Mat result = new Mat();
 
         // Perform template matching using normalized correlation coefficient
@@ -130,10 +137,10 @@ public class MatImageRecognition {
         matchTemplate(processedSearchImage, processedTemplate, result, TM_CCOEFF_NORMED);
 
         // Find the location of the best match (highest correlation)
-        double[] minVal = new double[1];  // Minimum correlation (ignored for TM_CCOEFF_NORMED)
-        double[] maxVal = new double[1];  // Maximum correlation (best match score)
-        Point minLoc = new Point();       // Location of minimum (ignored)
-        Point maxLoc = new Point();       // Location of maximum (best match position)
+        double[] minVal = new double[1]; // Minimum correlation (ignored for TM_CCOEFF_NORMED)
+        double[] maxVal = new double[1]; // Maximum correlation (best match score)
+        Point minLoc = new Point(); // Location of minimum (ignored)
+        Point maxLoc = new Point(); // Location of maximum (best match position)
         minMaxLoc(result, minVal, maxVal, minLoc, maxLoc, null);
 
         // Clean up temporary Mats if created
@@ -149,7 +156,9 @@ public class MatImageRecognition {
         if (maxVal[0] >= threshold) {
             // Create a Match object at the found location
             // maxLoc contains the top-left corner of the best match
-            Region region = new Region((int) maxLoc.x(), (int) maxLoc.y(), template.cols(), template.rows());
+            Region region =
+                    new Region(
+                            (int) maxLoc.x(), (int) maxLoc.y(), template.cols(), template.rows());
             Match match = new Match(region);
             match.setScore(maxVal[0]);
 
@@ -160,11 +169,11 @@ public class MatImageRecognition {
             return Optional.empty();
         }
     }
-    
+
     /**
-     * Ensures the image is in a compatible format for template matching.
-     * Converts 4-channel images (BGRA) to 3-channel (BGR).
-     * 
+     * Ensures the image is in a compatible format for template matching. Converts 4-channel images
+     * (BGRA) to 3-channel (BGR).
+     *
      * @param image The image to process
      * @return The processed image (may be the same object if no conversion needed)
      */
@@ -178,5 +187,4 @@ public class MatImageRecognition {
         // Return as-is for 1-channel (grayscale) or 3-channel (BGR) images
         return image;
     }
-
 }

@@ -18,7 +18,7 @@ jobs:
     name: macOS Java 21 Tests
     runs-on: macos-latest
     timeout-minutes: 60
-    
+
     env:
       # Disable Gradle daemon to prevent hanging
       GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Xmx1g
@@ -27,11 +27,11 @@ jobs:
       # CI environment variables
       CI: true
       GITHUB_ACTIONS: true
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    
+
     - name: System information
       run: |
         echo "macOS version:"
@@ -42,7 +42,7 @@ jobs:
         sysctl -n machdep.cpu.brand_string
         echo "Disk space:"
         df -h
-    
+
     - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
@@ -50,18 +50,18 @@ jobs:
         distribution: 'temurin'
         # Minimal cache to prevent extraction timeouts
         cache: 'gradle'
-    
+
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.x'
-    
+
     - name: Clean environment
       run: |
         # Kill any existing Java processes
         pkill -9 java || true
         pkill -9 gradle || true
-        
+
         # Clean Gradle caches
         rm -rf ~/.gradle/caches/modules-2/modules-2.lock
         rm -rf ~/.gradle/caches/*/plugin-resolution/
@@ -69,17 +69,17 @@ jobs:
         rm -rf .gradle/
         rm -rf build/
         rm -rf */build/
-        
+
         # Ensure gradlew is executable
         chmod +x gradlew
-    
+
     - name: Pre-compile tests
       run: |
         echo "Pre-compiling test classes to avoid timeout during test execution..."
         ./gradlew :library:compileTestJava --no-daemon --no-parallel --console=plain
       timeout-minutes: 10
       continue-on-error: true
-    
+
     - name: Run CI-optimized tests (Batch 1 - Fast Tests)
       run: |
         echo "Running fast tests first..."
@@ -88,7 +88,7 @@ jobs:
           --batch-size 5
       timeout-minutes: 15
       continue-on-error: true
-    
+
     - name: Run CI-optimized tests (Batch 2 - Remaining Tests)
       if: success() || failure()
       run: |
@@ -98,7 +98,7 @@ jobs:
           --batch-size 3
       timeout-minutes: 20
       continue-on-error: true
-    
+
     - name: Generate test summary
       if: always()
       run: |
@@ -106,7 +106,7 @@ jobs:
         echo "Platform: macOS $(sw_vers -productVersion)" >> $GITHUB_STEP_SUMMARY
         echo "Java Version: 21" >> $GITHUB_STEP_SUMMARY
         echo "Test Results:" >> $GITHUB_STEP_SUMMARY
-        
+
         # Find and parse test results if available
         if ls test-results-library-*.json 1> /dev/null 2>&1; then
           python3 -c "
@@ -123,7 +123,7 @@ jobs:
         else
           echo "No test results file found" >> $GITHUB_STEP_SUMMARY
         fi
-    
+
     - name: Upload test results
       if: always()
       uses: actions/upload-artifact@v4
@@ -134,7 +134,7 @@ jobs:
           library/build/reports/tests/
           library/build/test-results/
         retention-days: 7
-    
+
     - name: Upload logs on failure
       if: failure()
       uses: actions/upload-artifact@v4
@@ -150,29 +150,29 @@ jobs:
     name: macOS Java 17 Tests
     runs-on: macos-latest
     timeout-minutes: 60
-    
+
     env:
       GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Xmx1g
       JAVA_TOOL_OPTIONS: -Djava.awt.headless=true -Dapple.awt.UIElement=true
       CI: true
       GITHUB_ACTIONS: true
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    
+
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
         cache: 'gradle'
-    
+
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.x'
-    
+
     - name: Clean environment
       run: |
         pkill -9 java || true
@@ -180,7 +180,7 @@ jobs:
         rm -rf ~/.gradle/caches/modules-2/modules-2.lock
         rm -rf ~/.gradle/daemon/
         chmod +x gradlew
-    
+
     - name: Run CI-optimized tests
       run: |
         python3 library/scripts/run-tests-ci.py library \
@@ -188,7 +188,7 @@ jobs:
           --batch-size 5
       timeout-minutes: 30
       continue-on-error: true
-    
+
     - name: Upload test results
       if: always()
       uses: actions/upload-artifact@v4

@@ -1,29 +1,24 @@
 package io.github.jspinak.brobot.runner.json.validation.business;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import io.github.jspinak.brobot.runner.json.validation.business.BusinessRuleValidator;
-import io.github.jspinak.brobot.runner.json.validation.business.FunctionRuleValidator;
-import io.github.jspinak.brobot.runner.json.validation.business.TransitionRuleValidator;
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationError;
 import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
 import io.github.jspinak.brobot.runner.json.validation.model.ValidationSeverity;
-import io.github.jspinak.brobot.runner.json.validation.model.ValidationError;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BusinessRuleValidatorTest {
 
-    @Mock
-    private TransitionRuleValidator transitionRuleValidator;
+    @Mock private TransitionRuleValidator transitionRuleValidator;
 
-    @Mock
-    private FunctionRuleValidator functionRuleValidator;
+    @Mock private FunctionRuleValidator functionRuleValidator;
 
     private BusinessRuleValidator validator;
 
@@ -41,7 +36,8 @@ class BusinessRuleValidatorTest {
         ValidationResult transitionResult = new ValidationResult();
         ValidationResult functionResult = new ValidationResult();
 
-        when(transitionRuleValidator.validateTransitionRules(projectModel)).thenReturn(transitionResult);
+        when(transitionRuleValidator.validateTransitionRules(projectModel))
+                .thenReturn(transitionResult);
         when(functionRuleValidator.validateFunctionRules(dslModel)).thenReturn(functionResult);
 
         // Act
@@ -62,11 +58,13 @@ class BusinessRuleValidatorTest {
         Object dslModel = new Object();
 
         ValidationResult transitionResult = new ValidationResult();
-        transitionResult.addError(new ValidationError("ERROR_CODE", "Error message", ValidationSeverity.ERROR));
+        transitionResult.addError(
+                new ValidationError("ERROR_CODE", "Error message", ValidationSeverity.ERROR));
 
         ValidationResult functionResult = new ValidationResult();
 
-        when(transitionRuleValidator.validateTransitionRules(projectModel)).thenReturn(transitionResult);
+        when(transitionRuleValidator.validateTransitionRules(projectModel))
+                .thenReturn(transitionResult);
         when(functionRuleValidator.validateFunctionRules(dslModel)).thenReturn(functionResult);
 
         // Act
@@ -91,9 +89,12 @@ class BusinessRuleValidatorTest {
         ValidationResult transitionResult = new ValidationResult();
 
         ValidationResult functionResult = new ValidationResult();
-        functionResult.addError(new ValidationError("FUNCTION_ERROR", "Function error message", ValidationSeverity.ERROR));
+        functionResult.addError(
+                new ValidationError(
+                        "FUNCTION_ERROR", "Function error message", ValidationSeverity.ERROR));
 
-        when(transitionRuleValidator.validateTransitionRules(projectModel)).thenReturn(transitionResult);
+        when(transitionRuleValidator.validateTransitionRules(projectModel))
+                .thenReturn(transitionResult);
         when(functionRuleValidator.validateFunctionRules(dslModel)).thenReturn(functionResult);
 
         // Act
@@ -116,12 +117,17 @@ class BusinessRuleValidatorTest {
         Object dslModel = new Object();
 
         ValidationResult transitionResult = new ValidationResult();
-        transitionResult.addError(new ValidationError("TRANSITION_ERROR", "Transition error message", ValidationSeverity.ERROR));
+        transitionResult.addError(
+                new ValidationError(
+                        "TRANSITION_ERROR", "Transition error message", ValidationSeverity.ERROR));
 
         ValidationResult functionResult = new ValidationResult();
-        functionResult.addError(new ValidationError("FUNCTION_ERROR", "Function error message", ValidationSeverity.WARNING));
+        functionResult.addError(
+                new ValidationError(
+                        "FUNCTION_ERROR", "Function error message", ValidationSeverity.WARNING));
 
-        when(transitionRuleValidator.validateTransitionRules(projectModel)).thenReturn(transitionResult);
+        when(transitionRuleValidator.validateTransitionRules(projectModel))
+                .thenReturn(transitionResult);
         when(functionRuleValidator.validateFunctionRules(dslModel)).thenReturn(functionResult);
 
         // Act
@@ -131,8 +137,11 @@ class BusinessRuleValidatorTest {
         assertFalse(result.isValid());
         assertTrue(result.hasErrors());
         assertEquals(2, result.getErrors().size());
-        assertTrue(result.getErrors().stream().anyMatch(e -> "TRANSITION_ERROR".equals(e.errorCode())));
-        assertTrue(result.getErrors().stream().anyMatch(e -> "FUNCTION_ERROR".equals(e.errorCode())));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(e -> "TRANSITION_ERROR".equals(e.errorCode())));
+        assertTrue(
+                result.getErrors().stream().anyMatch(e -> "FUNCTION_ERROR".equals(e.errorCode())));
 
         verify(transitionRuleValidator).validateTransitionRules(projectModel);
         verify(functionRuleValidator).validateFunctionRules(dslModel);
@@ -145,11 +154,14 @@ class BusinessRuleValidatorTest {
         Object dslModel = new Object();
 
         ValidationResult transitionResult = new ValidationResult();
-        transitionResult.addError(new ValidationError("CRITICAL_ERROR", "Critical error message", ValidationSeverity.CRITICAL));
+        transitionResult.addError(
+                new ValidationError(
+                        "CRITICAL_ERROR", "Critical error message", ValidationSeverity.CRITICAL));
 
         ValidationResult functionResult = new ValidationResult();
 
-        when(transitionRuleValidator.validateTransitionRules(projectModel)).thenReturn(transitionResult);
+        when(transitionRuleValidator.validateTransitionRules(projectModel))
+                .thenReturn(transitionResult);
         when(functionRuleValidator.validateFunctionRules(dslModel)).thenReturn(functionResult);
 
         // Act
@@ -173,11 +185,13 @@ class BusinessRuleValidatorTest {
         Object dslModel = new Object();
 
         ValidationResult transitionResult = new ValidationResult();
-        transitionResult.addError(new ValidationError("WARNING", "Warning message", ValidationSeverity.WARNING));
+        transitionResult.addError(
+                new ValidationError("WARNING", "Warning message", ValidationSeverity.WARNING));
 
         ValidationResult functionResult = new ValidationResult();
 
-        when(transitionRuleValidator.validateTransitionRules(projectModel)).thenReturn(transitionResult);
+        when(transitionRuleValidator.validateTransitionRules(projectModel))
+                .thenReturn(transitionResult);
         when(functionRuleValidator.validateFunctionRules(dslModel)).thenReturn(functionResult);
 
         // Act
@@ -245,7 +259,8 @@ class BusinessRuleValidatorTest {
         Object dslModel = new Object();
 
         ValidationResult transitionResult = new ValidationResult();
-        when(transitionRuleValidator.validateTransitionRules(projectModel)).thenReturn(transitionResult);
+        when(transitionRuleValidator.validateTransitionRules(projectModel))
+                .thenReturn(transitionResult);
 
         when(functionRuleValidator.validateFunctionRules(dslModel))
                 .thenThrow(new RuntimeException("Validation error"));

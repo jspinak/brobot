@@ -1,17 +1,16 @@
 package io.github.jspinak.brobot.runner.errorhandling;
 
-import io.github.jspinak.brobot.runner.diagnostics.DiagnosticReport;
-import io.github.jspinak.brobot.runner.session.SessionState;
-import lombok.Builder;
-import lombok.Data;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Comprehensive error report containing all relevant information.
- */
+import io.github.jspinak.brobot.runner.diagnostics.DiagnosticReport;
+import io.github.jspinak.brobot.runner.session.SessionState;
+
+import lombok.Builder;
+import lombok.Data;
+
+/** Comprehensive error report containing all relevant information. */
 @Data
 @Builder
 public class ErrorReport {

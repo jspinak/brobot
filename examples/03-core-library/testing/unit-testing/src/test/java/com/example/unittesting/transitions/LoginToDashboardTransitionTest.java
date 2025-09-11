@@ -1,37 +1,36 @@
 package com.example.unittesting.transitions;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
-import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Unit tests for LoginToDashboardTransition.
- */
+/** Unit tests for LoginToDashboardTransition. */
 class LoginToDashboardTransitionTest {
-    
+
     private LoginToDashboardTransition transition;
-    
+
     @BeforeEach
     void setUp() {
         transition = new LoginToDashboardTransition();
     }
-    
+
     @Test
     @DisplayName("Should have correct transition description")
     void testTransitionDescription() {
         String description = transition.getTransitionDescription();
-        
+
         assertThat(description)
-            .isNotNull()
-            .contains("Login to Dashboard")
-            .contains("credential validation");
+                .isNotNull()
+                .contains("Login to Dashboard")
+                .contains("credential validation");
     }
-    
+
     @ParameterizedTest
     @DisplayName("Should validate credentials correctly")
     @CsvSource({
@@ -45,7 +44,7 @@ class LoginToDashboardTransitionTest {
         boolean result = transition.validateCredentials(username, password);
         assertThat(result).isEqualTo(expected);
     }
-    
+
     @ParameterizedTest
     @DisplayName("Should reject null or empty usernames")
     @NullAndEmptySource
@@ -53,7 +52,7 @@ class LoginToDashboardTransitionTest {
         boolean result = transition.validateCredentials(username, "validpassword");
         assertThat(result).isFalse();
     }
-    
+
     @ParameterizedTest
     @DisplayName("Should reject null passwords")
     @ValueSource(strings = {"", "short"})
@@ -61,14 +60,14 @@ class LoginToDashboardTransitionTest {
         boolean result = transition.validateCredentials("validuser", password);
         assertThat(result).isFalse();
     }
-    
+
     @Test
     @DisplayName("Should reject null password")
     void testNullPassword() {
         boolean result = transition.validateCredentials("validuser", null);
         assertThat(result).isFalse();
     }
-    
+
     @Test
     @DisplayName("Should execute transition steps in order")
     void testTransitionStepsOrder() {
@@ -77,11 +76,11 @@ class LoginToDashboardTransitionTest {
         transition.enterCredentials();
         transition.clickLogin();
         transition.waitForDashboard();
-        
+
         // Verify steps completed (in real implementation, would check logs or state)
         assertThat(transition).isNotNull();
     }
-    
+
     @ParameterizedTest
     @DisplayName("Should validate password length requirements")
     @CsvSource({

@@ -1,55 +1,56 @@
 package io.github.jspinak.brobot.tools.history.performance;
 
-import lombok.Data;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import lombok.Data;
+
 /**
  * Performance metrics for illustration system monitoring.
- * <p>
- * This class tracks various performance indicators to help optimize
- * illustration generation and identify performance bottlenecks:
+ *
+ * <p>This class tracks various performance indicators to help optimize illustration generation and
+ * identify performance bottlenecks:
+ *
  * <ul>
- * <li>Throughput metrics (illustrations per time period)</li>
- * <li>Processing time statistics</li>
- * <li>Resource utilization indicators</li>
- * <li>Quality and effectiveness measures</li>
+ *   <li>Throughput metrics (illustrations per time period)
+ *   <li>Processing time statistics
+ *   <li>Resource utilization indicators
+ *   <li>Quality and effectiveness measures
  * </ul>
- * <p>
- * Used by the performance optimizer to make intelligent decisions
- * about when and how to generate illustrations.
+ *
+ * <p>Used by the performance optimizer to make intelligent decisions about when and how to generate
+ * illustrations.
  *
  * @see IllustrationPerformanceOptimizer
  */
 @Data
 public class PerformanceMetrics {
-    
+
     // Throughput metrics
     private final AtomicInteger totalIllustrationsGenerated = new AtomicInteger(0);
     private final AtomicInteger illustrationsSkipped = new AtomicInteger(0);
     private final AtomicInteger illustrationsBatched = new AtomicInteger(0);
     private final AtomicInteger illustrationsDeferred = new AtomicInteger(0);
-    
+
     // Processing time metrics
     private final AtomicLong totalProcessingTimeMs = new AtomicLong(0);
     private final AtomicLong minProcessingTimeMs = new AtomicLong(Long.MAX_VALUE);
     private final AtomicLong maxProcessingTimeMs = new AtomicLong(0);
-    
+
     // Resource utilization
     private final AtomicLong totalMemoryUsedMB = new AtomicLong(0);
     private final AtomicInteger activeIllustrationThreads = new AtomicInteger(0);
-    
+
     // Quality metrics
     private final AtomicInteger highQualityIllustrations = new AtomicInteger(0);
     private final AtomicInteger lowQualityIllustrations = new AtomicInteger(0);
-    
+
     // Timing
     private final LocalDateTime startTime = LocalDateTime.now();
     private LocalDateTime lastIllustrationTime = LocalDateTime.now();
-    
+
     /**
      * Records the generation of a new illustration.
      *
@@ -62,11 +63,11 @@ public class PerformanceMetrics {
         totalProcessingTimeMs.addAndGet(processingTimeMs);
         totalMemoryUsedMB.addAndGet(memorySizeMB);
         lastIllustrationTime = LocalDateTime.now();
-        
+
         // Update min/max processing times
         minProcessingTimeMs.updateAndGet(current -> Math.min(current, processingTimeMs));
         maxProcessingTimeMs.updateAndGet(current -> Math.max(current, processingTimeMs));
-        
+
         // Update quality metrics
         if (highQuality) {
             highQualityIllustrations.incrementAndGet();
@@ -74,7 +75,7 @@ public class PerformanceMetrics {
             lowQualityIllustrations.incrementAndGet();
         }
     }
-    
+
     /**
      * Records a skipped illustration.
      *
@@ -83,14 +84,12 @@ public class PerformanceMetrics {
     public void recordSkipped(String reason) {
         illustrationsSkipped.incrementAndGet();
     }
-    
-    /**
-     * Records a batched illustration.
-     */
+
+    /** Records a batched illustration. */
     public void recordBatched() {
         illustrationsBatched.incrementAndGet();
     }
-    
+
     /**
      * Records a deferred illustration.
      *
@@ -99,21 +98,17 @@ public class PerformanceMetrics {
     public void recordDeferred(Duration deferDuration) {
         illustrationsDeferred.incrementAndGet();
     }
-    
-    /**
-     * Increments the count of active illustration threads.
-     */
+
+    /** Increments the count of active illustration threads. */
     public void incrementActiveThreads() {
         activeIllustrationThreads.incrementAndGet();
     }
-    
-    /**
-     * Decrements the count of active illustration threads.
-     */
+
+    /** Decrements the count of active illustration threads. */
     public void decrementActiveThreads() {
         activeIllustrationThreads.decrementAndGet();
     }
-    
+
     /**
      * Calculates the average processing time per illustration.
      *
@@ -123,7 +118,7 @@ public class PerformanceMetrics {
         int total = totalIllustrationsGenerated.get();
         return total > 0 ? (double) totalProcessingTimeMs.get() / total : 0.0;
     }
-    
+
     /**
      * Calculates the illustrations per minute rate.
      *
@@ -136,7 +131,7 @@ public class PerformanceMetrics {
         }
         return (double) totalIllustrationsGenerated.get() / elapsed.toMinutes();
     }
-    
+
     /**
      * Calculates the skip rate (percentage of illustrations skipped).
      *
@@ -146,7 +141,7 @@ public class PerformanceMetrics {
         int total = totalIllustrationsGenerated.get() + illustrationsSkipped.get();
         return total > 0 ? (double) illustrationsSkipped.get() / total : 0.0;
     }
-    
+
     /**
      * Calculates the high quality rate (percentage of high-quality illustrations).
      *
@@ -156,7 +151,7 @@ public class PerformanceMetrics {
         int total = highQualityIllustrations.get() + lowQualityIllustrations.get();
         return total > 0 ? (double) highQualityIllustrations.get() / total : 0.0;
     }
-    
+
     /**
      * Gets the average memory usage per illustration.
      *
@@ -166,7 +161,7 @@ public class PerformanceMetrics {
         int total = totalIllustrationsGenerated.get();
         return total > 0 ? (double) totalMemoryUsedMB.get() / total : 0.0;
     }
-    
+
     /**
      * Gets the time since the last illustration was generated.
      *
@@ -175,7 +170,7 @@ public class PerformanceMetrics {
     public Duration getTimeSinceLastIllustration() {
         return Duration.between(lastIllustrationTime, LocalDateTime.now());
     }
-    
+
     /**
      * Gets the total uptime of the metrics system.
      *
@@ -184,10 +179,8 @@ public class PerformanceMetrics {
     public Duration getTotalUptime() {
         return Duration.between(startTime, LocalDateTime.now());
     }
-    
-    /**
-     * Resets all metrics to their initial values.
-     */
+
+    /** Resets all metrics to their initial values. */
     public void reset() {
         totalIllustrationsGenerated.set(0);
         illustrationsSkipped.set(0);
@@ -202,7 +195,7 @@ public class PerformanceMetrics {
         lowQualityIllustrations.set(0);
         lastIllustrationTime = LocalDateTime.now();
     }
-    
+
     /**
      * Creates a snapshot of current metrics.
      *
@@ -210,26 +203,24 @@ public class PerformanceMetrics {
      */
     public MetricsSnapshot snapshot() {
         return MetricsSnapshot.builder()
-            .totalIllustrationsGenerated(totalIllustrationsGenerated.get())
-            .illustrationsSkipped(illustrationsSkipped.get())
-            .illustrationsBatched(illustrationsBatched.get())
-            .illustrationsDeferred(illustrationsDeferred.get())
-            .averageProcessingTimeMs(getAverageProcessingTimeMs())
-            .minProcessingTimeMs(minProcessingTimeMs.get())
-            .maxProcessingTimeMs(maxProcessingTimeMs.get())
-            .illustrationsPerMinute(getIllustrationsPerMinute())
-            .skipRate(getSkipRate())
-            .highQualityRate(getHighQualityRate())
-            .averageMemoryUsageMB(getAverageMemoryUsageMB())
-            .activeThreads(activeIllustrationThreads.get())
-            .timeSinceLastIllustration(getTimeSinceLastIllustration())
-            .totalUptime(getTotalUptime())
-            .build();
+                .totalIllustrationsGenerated(totalIllustrationsGenerated.get())
+                .illustrationsSkipped(illustrationsSkipped.get())
+                .illustrationsBatched(illustrationsBatched.get())
+                .illustrationsDeferred(illustrationsDeferred.get())
+                .averageProcessingTimeMs(getAverageProcessingTimeMs())
+                .minProcessingTimeMs(minProcessingTimeMs.get())
+                .maxProcessingTimeMs(maxProcessingTimeMs.get())
+                .illustrationsPerMinute(getIllustrationsPerMinute())
+                .skipRate(getSkipRate())
+                .highQualityRate(getHighQualityRate())
+                .averageMemoryUsageMB(getAverageMemoryUsageMB())
+                .activeThreads(activeIllustrationThreads.get())
+                .timeSinceLastIllustration(getTimeSinceLastIllustration())
+                .totalUptime(getTotalUptime())
+                .build();
     }
-    
-    /**
-     * Immutable snapshot of performance metrics at a point in time.
-     */
+
+    /** Immutable snapshot of performance metrics at a point in time. */
     @Data
     @lombok.Builder
     public static class MetricsSnapshot {

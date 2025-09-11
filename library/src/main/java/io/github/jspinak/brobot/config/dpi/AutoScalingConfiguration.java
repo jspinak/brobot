@@ -1,34 +1,34 @@
 package io.github.jspinak.brobot.config.dpi;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.beans.factory.annotation.Value;
 import jakarta.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
- * Configuration for automatic pattern scaling detection.
- * This enables Brobot to work across different DPI settings without manual configuration.
+ * Configuration for automatic pattern scaling detection. This enables Brobot to work across
+ * different DPI settings without manual configuration.
  */
 @Configuration
 public class AutoScalingConfiguration {
-    
+
     private static final Logger log = LoggerFactory.getLogger(AutoScalingConfiguration.class);
-    
+
     @Value("${brobot.autoscaling.enabled:true}")
     private boolean autoScalingEnabled;
-    
+
     @Value("${brobot.autoscaling.cache.enabled:true}")
     private boolean cacheEnabled;
-    
+
     @Value("${brobot.autoscaling.global.learning:true}")
     private boolean globalLearningEnabled;
-    
+
     @Value("${brobot.autoscaling.min.confidence:0.85}")
     private double minConfidence;
-    
+
     @PostConstruct
     public void init() {
         if (autoScalingEnabled) {
@@ -44,40 +44,46 @@ public class AutoScalingConfiguration {
             log.info("Patterns will be matched at their original scale.");
         }
     }
-    
-    /**
-     * Bean configuration for auto-scaling settings.
-     */
+
+    /** Bean configuration for auto-scaling settings. */
     @Bean
     public AutoScalingSettings autoScalingSettings() {
         return new AutoScalingSettings(
-            autoScalingEnabled,
-            cacheEnabled,
-            globalLearningEnabled,
-            minConfidence
-        );
+                autoScalingEnabled, cacheEnabled, globalLearningEnabled, minConfidence);
     }
-    
-    /**
-     * Settings holder for auto-scaling configuration.
-     */
+
+    /** Settings holder for auto-scaling configuration. */
     public static class AutoScalingSettings {
         private final boolean enabled;
         private final boolean cacheEnabled;
         private final boolean globalLearningEnabled;
         private final double minConfidence;
-        
-        public AutoScalingSettings(boolean enabled, boolean cacheEnabled,
-                                  boolean globalLearningEnabled, double minConfidence) {
+
+        public AutoScalingSettings(
+                boolean enabled,
+                boolean cacheEnabled,
+                boolean globalLearningEnabled,
+                double minConfidence) {
             this.enabled = enabled;
             this.cacheEnabled = cacheEnabled;
             this.globalLearningEnabled = globalLearningEnabled;
             this.minConfidence = minConfidence;
         }
-        
-        public boolean isEnabled() { return enabled; }
-        public boolean isCacheEnabled() { return cacheEnabled; }
-        public boolean isGlobalLearningEnabled() { return globalLearningEnabled; }
-        public double getMinConfidence() { return minConfidence; }
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public boolean isCacheEnabled() {
+            return cacheEnabled;
+        }
+
+        public boolean isGlobalLearningEnabled() {
+            return globalLearningEnabled;
+        }
+
+        public double getMinConfidence() {
+            return minConfidence;
+        }
     }
 }

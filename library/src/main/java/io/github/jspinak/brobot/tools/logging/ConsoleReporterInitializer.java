@@ -1,42 +1,45 @@
 package io.github.jspinak.brobot.tools.logging;
 
-import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
-import io.github.jspinak.brobot.logging.unified.BrobotLogger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import jakarta.annotation.PostConstruct;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
+import io.github.jspinak.brobot.logging.unified.BrobotLogger;
+
 /**
- * Initializes ConsoleReporter with the BrobotLogger instance during Spring startup.
- * This ensures that all ConsoleReporter calls are routed through the unified logging system.
- * 
- * Also configures the ConsoleReporter output level based on the configured verbosity
- * to prevent excessive debug logging from internal components like SearchRegionResolver.
+ * Initializes ConsoleReporter with the BrobotLogger instance during Spring startup. This ensures
+ * that all ConsoleReporter calls are routed through the unified logging system.
+ *
+ * <p>Also configures the ConsoleReporter output level based on the configured verbosity to prevent
+ * excessive debug logging from internal components like SearchRegionResolver.
  */
 @Component
 public class ConsoleReporterInitializer {
-    
+
     private final BrobotLogger brobotLogger;
     private final LoggingVerbosityConfig loggingVerbosityConfig;
-    
+
     @Autowired
-    public ConsoleReporterInitializer(BrobotLogger brobotLogger, LoggingVerbosityConfig loggingVerbosityConfig) {
+    public ConsoleReporterInitializer(
+            BrobotLogger brobotLogger, LoggingVerbosityConfig loggingVerbosityConfig) {
         this.brobotLogger = brobotLogger;
         this.loggingVerbosityConfig = loggingVerbosityConfig;
     }
-    
+
     @PostConstruct
     public void init() {
         // Set the BrobotLogger instance
         ConsoleReporter.setBrobotLogger(brobotLogger);
-        
+
         // Configure output level based on verbosity
         configureOutputLevel();
     }
-    
+
     /**
-     * Maps LoggingVerbosityConfig levels to ConsoleReporter output levels.
-     * This provides consistent logging behavior across the framework.
+     * Maps LoggingVerbosityConfig levels to ConsoleReporter output levels. This provides consistent
+     * logging behavior across the framework.
      */
     private void configureOutputLevel() {
         switch (loggingVerbosityConfig.getVerbosity()) {
@@ -52,7 +55,7 @@ public class ConsoleReporterInitializer {
             default:
                 ConsoleReporter.outputLevel = ConsoleReporter.OutputLevel.LOW;
         }
-        
+
         // Log the configuration
         System.out.println("ConsoleReporter output level set to: " + ConsoleReporter.outputLevel);
     }

@@ -1,36 +1,33 @@
 package io.github.jspinak.brobot.startup.verification;
 
+import java.io.File;
+import java.util.*;
+
+import org.sikuli.script.ImagePath;
+import org.springframework.stereotype.Component;
+
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.config.core.ImagePathManager;
 import io.github.jspinak.brobot.config.core.SmartImageLoader;
 import io.github.jspinak.brobot.config.environment.ConfigurationDiagnostics;
+import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.state.StateEnum;
 import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
+
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.sikuli.script.ImagePath;
-import org.springframework.stereotype.Component;
-
-import java.io.File;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
- * Provides comprehensive startup verification for Brobot applications.
- * This class handles both image resource verification and initial state
- * detection
- * in a configurable, reusable way.
- * 
- * <p>
- * Example usage:
- * 
+ * Provides comprehensive startup verification for Brobot applications. This class handles both
+ * image resource verification and initial state detection in a configurable, reusable way.
+ *
+ * <p>Example usage:
+ *
  * <pre>{@code
  * // Configure and run startup verification
  * StartupConfig config = StartupConfig.builder()
@@ -41,15 +38,14 @@ import java.util.stream.Collectors;
  *         .uiStabilizationDelay(2.0)
  *         .expectedStates(Arrays.asList(HomePage.HOME, LoginPage.LOGIN))
  *         .build();
- * 
+ *
  * StartupResult result = applicationStartupVerifier.verify(config);
- * 
+ *
  * if (!result.isSuccess()) {
  *     log.error("Startup verification failed: {}", result.getErrorMessages());
  * }
  * }</pre>
- * </p>
- * 
+ *
  * @since 1.1.0
  */
 @Component
@@ -64,9 +60,7 @@ public class ApplicationStartupVerifier {
     private final StateMemory stateMemory;
     private final StateService stateService;
 
-    /**
-     * Configuration for application startup verification
-     */
+    /** Configuration for application startup verification */
     @Data
     @Builder
     public static class StartupConfig {
@@ -74,41 +68,31 @@ public class ApplicationStartupVerifier {
         private String primaryImagePath;
 
         /** Fallback paths to search if primary path doesn't exist */
-        @Builder.Default
-        private List<String> fallbackImagePaths = new ArrayList<>();
+        @Builder.Default private List<String> fallbackImagePaths = new ArrayList<>();
 
         /** Required images that must be present */
-        @Builder.Default
-        private List<String> requiredImages = new ArrayList<>();
+        @Builder.Default private List<String> requiredImages = new ArrayList<>();
 
         /** Whether to clear active states before verification */
-        @Builder.Default
-        private boolean clearStatesBeforeVerification = false;
+        @Builder.Default private boolean clearStatesBeforeVerification = false;
 
         /** Seconds to wait for UI to stabilize before state verification */
-        @Builder.Default
-        private double uiStabilizationDelay = 0.0;
+        @Builder.Default private double uiStabilizationDelay = 0.0;
 
         /** Expected states to find (by name) */
-        @Builder.Default
-        private List<String> expectedStates = new ArrayList<>();
+        @Builder.Default private List<String> expectedStates = new ArrayList<>();
 
         /** Expected states to find (by enum) */
-        @Builder.Default
-        private List<StateEnum> expectedStateEnums = new ArrayList<>();
+        @Builder.Default private List<StateEnum> expectedStateEnums = new ArrayList<>();
 
         /** Whether to throw exception on verification failure */
-        @Builder.Default
-        private boolean throwOnFailure = false;
+        @Builder.Default private boolean throwOnFailure = false;
 
         /** Whether to run diagnostics on failure */
-        @Builder.Default
-        private boolean runDiagnosticsOnFailure = true;
+        @Builder.Default private boolean runDiagnosticsOnFailure = true;
     }
 
-    /**
-     * Result of startup verification
-     */
+    /** Result of startup verification */
     @Data
     @Builder
     public static class StartupResult {
@@ -124,9 +108,8 @@ public class ApplicationStartupVerifier {
     }
 
     /**
-     * Performs comprehensive startup verification based on the provided
-     * configuration
-     * 
+     * Performs comprehensive startup verification based on the provided configuration
+     *
      * @param config The startup configuration
      * @return Result containing verification status and details
      */
@@ -154,28 +137,32 @@ public class ApplicationStartupVerifier {
         // Step 3: Run diagnostics if verification failed and configured
         boolean success = errorMessages.isEmpty();
         if (!success && config.isRunDiagnosticsOnFailure()) {
-            ConfigurationDiagnostics.DiagnosticReport report = configurationDiagnostics.runFullDiagnostics();
+            ConfigurationDiagnostics.DiagnosticReport report =
+                    configurationDiagnostics.runFullDiagnostics();
             diagnosticReport = report.toFormattedString();
             // Don't log the full report to console - it's too verbose
             log.debug("Startup verification failed. Diagnostic report available in debug logs.");
         }
 
         // Step 4: Build result
-        StartupResult result = StartupResult.builder()
-                .success(success)
-                .imageVerificationPassed(imageResult.success)
-                .stateVerificationPassed(stateResult != null ? stateResult.success : true)
-                .verifiedImages(imageResult.verifiedImages)
-                .missingImages(imageResult.missingImages)
-                .activeStates(stateResult != null ? stateResult.activeStates : new HashSet<>())
-                .activeStateNames(
-                        stateResult != null ? stateResult.activeStateNames : stateMemory.getActiveStateNames())
-                .errorMessages(errorMessages)
-                .diagnosticReport(diagnosticReport)
-                .build();
+        StartupResult result =
+                StartupResult.builder()
+                        .success(success)
+                        .imageVerificationPassed(imageResult.success)
+                        .stateVerificationPassed(stateResult != null ? stateResult.success : true)
+                        .verifiedImages(imageResult.verifiedImages)
+                        .missingImages(imageResult.missingImages)
+                        .activeStates(
+                                stateResult != null ? stateResult.activeStates : new HashSet<>())
+                        .activeStateNames(
+                                stateResult != null
+                                        ? stateResult.activeStateNames
+                                        : stateMemory.getActiveStateNames())
+                        .errorMessages(errorMessages)
+                        .diagnosticReport(diagnosticReport)
+                        .build();
 
-        log.debug("Application startup verification complete: {}",
-                success ? "SUCCESS" : "FAILED");
+        log.debug("Application startup verification complete: {}", success ? "SUCCESS" : "FAILED");
 
         // Step 5: Throw exception if configured
         if (!success && config.isThrowOnFailure()) {
@@ -187,14 +174,12 @@ public class ApplicationStartupVerifier {
     }
 
     /**
-     * Performs startup verification with automatic discovery of required images
-     * from states.
-     * This method extracts all StateImages from the provided states and verifies
-     * them.
-     * 
+     * Performs startup verification with automatic discovery of required images from states. This
+     * method extracts all StateImages from the provided states and verifies them.
+     *
      * @param states List of states to extract images from
-     * @param config Additional configuration (required images from config will be
-     *               added to discovered images)
+     * @param config Additional configuration (required images from config will be added to
+     *     discovered images)
      * @return Result containing verification status and details
      */
     public StartupResult verifyFromStates(List<State> states, StartupConfig config) {
@@ -209,27 +194,26 @@ public class ApplicationStartupVerifier {
         allRequiredImages.addAll(config.getRequiredImages());
 
         // Create new config with discovered images
-        StartupConfig enhancedConfig = StartupConfig.builder()
-                .primaryImagePath(config.getPrimaryImagePath())
-                .fallbackImagePaths(config.getFallbackImagePaths())
-                .requiredImages(new ArrayList<>(allRequiredImages))
-                .clearStatesBeforeVerification(config.isClearStatesBeforeVerification())
-                .uiStabilizationDelay(config.getUiStabilizationDelay())
-                .expectedStates(config.getExpectedStates())
-                .expectedStateEnums(config.getExpectedStateEnums())
-                .throwOnFailure(config.isThrowOnFailure())
-                .runDiagnosticsOnFailure(config.isRunDiagnosticsOnFailure())
-                .build();
+        StartupConfig enhancedConfig =
+                StartupConfig.builder()
+                        .primaryImagePath(config.getPrimaryImagePath())
+                        .fallbackImagePaths(config.getFallbackImagePaths())
+                        .requiredImages(new ArrayList<>(allRequiredImages))
+                        .clearStatesBeforeVerification(config.isClearStatesBeforeVerification())
+                        .uiStabilizationDelay(config.getUiStabilizationDelay())
+                        .expectedStates(config.getExpectedStates())
+                        .expectedStateEnums(config.getExpectedStateEnums())
+                        .throwOnFailure(config.isThrowOnFailure())
+                        .runDiagnosticsOnFailure(config.isRunDiagnosticsOnFailure())
+                        .build();
 
         return verify(enhancedConfig);
     }
 
     /**
-     * Performs startup verification with automatic discovery from all registered
-     * states.
-     * 
-     * @param config Configuration for verification (required images will be
-     *               auto-discovered)
+     * Performs startup verification with automatic discovery from all registered states.
+     *
+     * @param config Configuration for verification (required images will be auto-discovered)
      * @return Result containing verification status and details
      */
     public StartupResult verifyFromAllStates(StartupConfig config) {
@@ -242,11 +226,10 @@ public class ApplicationStartupVerifier {
     }
 
     /**
-     * Performs startup verification with automatic discovery from specific states
-     * by name.
-     * 
+     * Performs startup verification with automatic discovery from specific states by name.
+     *
      * @param stateNames Names of states to extract images from
-     * @param config     Additional configuration
+     * @param config Additional configuration
      * @return Result containing verification status and details
      */
     public StartupResult verifyFromStateNames(List<String> stateNames, StartupConfig config) {
@@ -267,7 +250,7 @@ public class ApplicationStartupVerifier {
 
     /**
      * Extracts all image paths from the provided states.
-     * 
+     *
      * @param states List of states to extract images from
      * @return Set of unique image paths
      */
@@ -278,7 +261,9 @@ public class ApplicationStartupVerifier {
             // Check if state has images using reflection
             Set<StateImage> stateImages = null;
             try {
-                stateImages = (Set<StateImage>) state.getClass().getMethod("getStateImages").invoke(state);
+                stateImages =
+                        (Set<StateImage>)
+                                state.getClass().getMethod("getStateImages").invoke(state);
             } catch (Exception e) {
                 // Unable to get state images
                 continue;
@@ -288,7 +273,12 @@ public class ApplicationStartupVerifier {
                     // Assume getPatterns() exists at runtime (Lombok @Getter)
                     List<Pattern> patterns = null;
                     try {
-                        patterns = (List<Pattern>) stateImage.getClass().getMethod("getPatterns").invoke(stateImage);
+                        patterns =
+                                (List<Pattern>)
+                                        stateImage
+                                                .getClass()
+                                                .getMethod("getPatterns")
+                                                .invoke(stateImage);
                     } catch (Exception e) {
                         log.debug("Unable to get patterns: {}", e.getMessage());
                         continue;
@@ -297,15 +287,22 @@ public class ApplicationStartupVerifier {
                         String imagePath = null;
                         try {
                             // Try to use getter method first
-                            imagePath = (String) pattern.getClass().getMethod("getImgpath").invoke(pattern);
+                            imagePath =
+                                    (String)
+                                            pattern.getClass()
+                                                    .getMethod("getImgpath")
+                                                    .invoke(pattern);
                         } catch (Exception e) {
                             // Fallback to field access if getter doesn't work
                             try {
-                                java.lang.reflect.Field field = pattern.getClass().getDeclaredField("imgpath");
+                                java.lang.reflect.Field field =
+                                        pattern.getClass().getDeclaredField("imgpath");
                                 field.setAccessible(true);
                                 imagePath = (String) field.get(pattern);
                             } catch (Exception ex) {
-                                log.debug("Unable to access imgpath from pattern: {}", ex.getMessage());
+                                log.debug(
+                                        "Unable to access imgpath from pattern: {}",
+                                        ex.getMessage());
                             }
                         }
                         if (imagePath != null && !imagePath.isEmpty()) {
@@ -313,7 +310,9 @@ public class ApplicationStartupVerifier {
                             // Get state name using reflection due to Lombok issues
                             String stateName = "";
                             try {
-                                stateName = (String) state.getClass().getMethod("getName").invoke(state);
+                                stateName =
+                                        (String)
+                                                state.getClass().getMethod("getName").invoke(state);
                             } catch (Exception e) {
                                 stateName = "unknown";
                             }
@@ -328,9 +327,7 @@ public class ApplicationStartupVerifier {
         return imagePaths;
     }
 
-    /**
-     * Performs image resource verification
-     */
+    /** Performs image resource verification */
     private ImageVerificationResult verifyImages(StartupConfig config) {
         log.debug("Starting image resource verification");
 
@@ -338,7 +335,8 @@ public class ApplicationStartupVerifier {
         // Access config fields using reflection due to Lombok issues
         String primaryPath = "";
         try {
-            primaryPath = (String) config.getClass().getMethod("getPrimaryImagePath").invoke(config);
+            primaryPath =
+                    (String) config.getClass().getMethod("getPrimaryImagePath").invoke(config);
         } catch (Exception e) {
             log.error("Unable to get primary image path: {}", e.getMessage());
         }
@@ -348,7 +346,9 @@ public class ApplicationStartupVerifier {
         // Check fallback paths using reflection
         List<String> fallbackPaths = new ArrayList<>();
         try {
-            fallbackPaths = (List<String>) config.getClass().getMethod("getFallbackImagePaths").invoke(config);
+            fallbackPaths =
+                    (List<String>)
+                            config.getClass().getMethod("getFallbackImagePaths").invoke(config);
         } catch (Exception e) {
             log.debug("Unable to get fallback paths: {}", e.getMessage());
         }
@@ -365,7 +365,8 @@ public class ApplicationStartupVerifier {
 
         // Validate paths contain images
         if (!imagePathManager.validatePaths()) {
-            return new ImageVerificationResult(false,
+            return new ImageVerificationResult(
+                    false,
                     Collections.emptyList(),
                     config.getRequiredImages(),
                     Collections.singletonList("No valid image paths found"));
@@ -386,7 +387,8 @@ public class ApplicationStartupVerifier {
                     errors.add("Failed to load required image: " + requiredImage);
 
                     // Get troubleshooting suggestions
-                    List<String> suggestions = smartImageLoader.getSuggestionsForFailure(requiredImage);
+                    List<String> suggestions =
+                            smartImageLoader.getSuggestionsForFailure(requiredImage);
                     if (suggestions != null && !suggestions.isEmpty()) {
                         for (String suggestion : suggestions) {
                             log.error("  Suggestion: {}", suggestion);
@@ -407,16 +409,16 @@ public class ApplicationStartupVerifier {
         if (success) {
             log.info("All {} required images verified successfully", verifiedImages.size());
         } else {
-            log.error("{} of {} required images are missing or unloadable",
-                    missingImages.size(), config.getRequiredImages().size());
+            log.error(
+                    "{} of {} required images are missing or unloadable",
+                    missingImages.size(),
+                    config.getRequiredImages().size());
         }
 
         return new ImageVerificationResult(success, verifiedImages, missingImages, errors);
     }
 
-    /**
-     * Performs initial state verification
-     */
+    /** Performs initial state verification */
     private StateVerificationResult verifyStates(StartupConfig config) {
         log.debug("Starting initial state verification");
 
@@ -430,12 +432,15 @@ public class ApplicationStartupVerifier {
 
             // Wait for UI stabilization if configured (skip in test mode)
             String testType = System.getProperty("brobot.test.type");
-            boolean isTestMode = "unit".equals(testType) ||
-                    "true".equals(System.getProperty("brobot.test.mode")) ||
-                    FrameworkSettings.mock;
+            boolean isTestMode =
+                    "unit".equals(testType)
+                            || "true".equals(System.getProperty("brobot.test.mode"))
+                            || FrameworkSettings.mock;
 
             if (!isTestMode && config.getUiStabilizationDelay() > 0) {
-                log.debug("Waiting {} seconds for UI to stabilize...", config.getUiStabilizationDelay());
+                log.debug(
+                        "Waiting {} seconds for UI to stabilize...",
+                        config.getUiStabilizationDelay());
                 Thread.sleep((long) (config.getUiStabilizationDelay() * 1000));
             } else if (isTestMode) {
                 log.debug("Test mode detected - skipping UI stabilization delay");
@@ -445,11 +450,13 @@ public class ApplicationStartupVerifier {
             boolean foundState = false;
 
             if (!config.getExpectedStateEnums().isEmpty()) {
-                foundState = initialStateVerifier.verify(
-                        config.getExpectedStateEnums().toArray(new StateEnum[0]));
+                foundState =
+                        initialStateVerifier.verify(
+                                config.getExpectedStateEnums().toArray(new StateEnum[0]));
             } else if (!config.getExpectedStates().isEmpty()) {
-                foundState = initialStateVerifier.verify(
-                        config.getExpectedStates().toArray(new String[0]));
+                foundState =
+                        initialStateVerifier.verify(
+                                config.getExpectedStates().toArray(new String[0]));
             }
 
             Set<Long> activeStates = new HashSet<>();
@@ -457,8 +464,11 @@ public class ApplicationStartupVerifier {
             List<String> activeStateNames = stateMemory.getActiveStateNames();
 
             if (foundState) {
-                log.info("Successfully verified expected states. Active states: {}", activeStateNames);
-                return new StateVerificationResult(true, activeStates, activeStateNames, Collections.emptyList());
+                log.info(
+                        "Successfully verified expected states. Active states: {}",
+                        activeStateNames);
+                return new StateVerificationResult(
+                        true, activeStates, activeStateNames, Collections.emptyList());
             } else {
                 List<String> errors = new ArrayList<>();
                 errors.add("No expected states found on screen");
@@ -468,21 +478,28 @@ public class ApplicationStartupVerifier {
                     log.info("Attempting to find any active state...");
                     Set<Long> rebuiltStates = initialStateVerifier.rebuildActiveStates();
                     if (!rebuiltStates.isEmpty()) {
-                        log.info("Found {} active states after rebuild: {}",
-                                rebuiltStates.size(), stateMemory.getActiveStateNames());
-                        return new StateVerificationResult(true, rebuiltStates,
-                                stateMemory.getActiveStateNames(), Collections.emptyList());
+                        log.info(
+                                "Found {} active states after rebuild: {}",
+                                rebuiltStates.size(),
+                                stateMemory.getActiveStateNames());
+                        return new StateVerificationResult(
+                                true,
+                                rebuiltStates,
+                                stateMemory.getActiveStateNames(),
+                                Collections.emptyList());
                     } else {
                         errors.add("No states found even after comprehensive search");
                     }
                 }
 
-                return new StateVerificationResult(false, new HashSet<>(), activeStateNames, errors);
+                return new StateVerificationResult(
+                        false, new HashSet<>(), activeStateNames, errors);
             }
 
         } catch (Exception e) {
             log.error("Error during state verification", e);
-            return new StateVerificationResult(false,
+            return new StateVerificationResult(
+                    false,
                     new HashSet<>(),
                     stateMemory.getActiveStateNames(),
                     Collections.singletonList("State verification error: " + e.getMessage()));
@@ -504,8 +521,11 @@ public class ApplicationStartupVerifier {
         final List<String> missingImages;
         final List<String> errors;
 
-        ImageVerificationResult(boolean success, List<String> verifiedImages,
-                List<String> missingImages, List<String> errors) {
+        ImageVerificationResult(
+                boolean success,
+                List<String> verifiedImages,
+                List<String> missingImages,
+                List<String> errors) {
             this.success = success;
             this.verifiedImages = verifiedImages;
             this.missingImages = missingImages;
@@ -519,8 +539,11 @@ public class ApplicationStartupVerifier {
         final List<String> activeStateNames;
         final List<String> errors;
 
-        StateVerificationResult(boolean success, Set<Long> activeStates,
-                List<String> activeStateNames, List<String> errors) {
+        StateVerificationResult(
+                boolean success,
+                Set<Long> activeStates,
+                List<String> activeStateNames,
+                List<String> errors) {
             this.success = success;
             this.activeStates = activeStates;
             this.activeStateNames = activeStateNames;

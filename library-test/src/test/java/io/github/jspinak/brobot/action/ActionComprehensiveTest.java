@@ -1,43 +1,38 @@
 package io.github.jspinak.brobot.action;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.*;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.model.state.StateLocation;
-import io.github.jspinak.brobot.model.state.StateRegion;
-import io.github.jspinak.brobot.model.state.StateString;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.concurrent.*;
-import java.util.stream.Stream;
-import java.util.List;
-import java.util.ArrayList;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Comprehensive test suite for Action class to improve coverage.
- * Tests edge cases, error handling, performance, and concurrent execution.
+ * Comprehensive test suite for Action class to improve coverage. Tests edge cases, error handling,
+ * performance, and concurrent execution.
  */
 @SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class)
 @DisplayName("Action Comprehensive Tests")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ActionComprehensiveTest extends BrobotIntegrationTestBase {
 
-    @Autowired
-    private Action action;
+    @Autowired private Action action;
 
     @BeforeEach
     void setUp() {
@@ -53,9 +48,8 @@ public class ActionComprehensiveTest extends BrobotIntegrationTestBase {
         @Order(1)
         @DisplayName("Should handle null ActionConfig gracefully")
         void testPerformWithNullConfig() {
-            ObjectCollection collection = new ObjectCollection.Builder()
-                    .withRegions(new Region(0, 0, 100, 100))
-                    .build();
+            ObjectCollection collection =
+                    new ObjectCollection.Builder().withRegions(new Region(0, 0, 100, 100)).build();
 
             ActionResult result = action.perform((ActionConfig) null, collection);
             assertNotNull(result);
@@ -122,9 +116,10 @@ public class ActionComprehensiveTest extends BrobotIntegrationTestBase {
             }
 
             ObjectCollection large = builder.build();
-            PatternFindOptions config = new PatternFindOptions.Builder()
-                    .setStrategy(PatternFindOptions.Strategy.FIRST)
-                    .build();
+            PatternFindOptions config =
+                    new PatternFindOptions.Builder()
+                            .setStrategy(PatternFindOptions.Strategy.FIRST)
+                            .build();
 
             long startTime = System.currentTimeMillis();
             ActionResult result = action.perform(config, large);
@@ -138,12 +133,13 @@ public class ActionComprehensiveTest extends BrobotIntegrationTestBase {
         @Order(7)
         @DisplayName("Should handle mixed object types in collection")
         void testPerformWithMixedObjectTypes() {
-            ObjectCollection mixed = new ObjectCollection.Builder()
-                    .withRegions(new Region(0, 0, 100, 100))
-                    .withLocations(new Location(50, 50))
-                    .withStrings("test string")
-                    .withImages(new StateImage.Builder().setName("test").build())
-                    .build();
+            ObjectCollection mixed =
+                    new ObjectCollection.Builder()
+                            .withRegions(new Region(0, 0, 100, 100))
+                            .withLocations(new Location(50, 50))
+                            .withStrings("test string")
+                            .withImages(new StateImage.Builder().setName("test").build())
+                            .build();
 
             ClickOptions config = new ClickOptions.Builder().build();
             ActionResult result = action.perform(config, mixed);
@@ -156,9 +152,8 @@ public class ActionComprehensiveTest extends BrobotIntegrationTestBase {
         @Order(8)
         @DisplayName("Should handle zero-sized regions")
         void testPerformWithZeroSizedRegion() {
-            ObjectCollection collection = new ObjectCollection.Builder()
-                    .withRegions(new Region(100, 100, 0, 0))
-                    .build();
+            ObjectCollection collection =
+                    new ObjectCollection.Builder().withRegions(new Region(100, 100, 0, 0)).build();
 
             ClickOptions config = new ClickOptions.Builder().build();
             ActionResult result = action.perform(config, collection);
@@ -176,9 +171,7 @@ public class ActionComprehensiveTest extends BrobotIntegrationTestBase {
         @Order(9)
         @DisplayName("Should timeout when duration expires")
         void testFindWithTimeoutExpiration() {
-            StateImage image = new StateImage.Builder()
-                    .setName("non-existent")
-                    .build();
+            StateImage image = new StateImage.Builder().setName("non-existent").build();
 
             long startTime = System.currentTimeMillis();
             ActionResult result = action.findWithTimeout(0.1, image); // 100ms timeout
@@ -186,8 +179,7 @@ public class ActionComprehensiveTest extends BrobotIntegrationTestBase {
 
             assertNotNull(result);
             assertFalse(result.isSuccess());
-            assertTrue(duration >= 100 && duration < 500,
-                    "Should timeout around 100ms");
+            assertTrue(duration >= 100 && duration < 500, "Should timeout around 100ms");
         }
 
         @Test
@@ -231,12 +223,16 @@ public class ActionComprehensiveTest extends BrobotIntegrationTestBase {
             // Submit 50 concurrent actions
             for (int i = 0; i < 50; i++) {
                 final int index = i;
-                futures.add(executor.submit(() -> {
-                    ObjectCollection collection = new ObjectCollection.Builder()
-                            .withRegions(new Region(index, index, 10, 10))
-                            .build();
-                    return action.perform(new ClickOptions.Builder().build(), collection);
-                }));
+                futures.add(
+                        executor.submit(
+                                () -> {
+                                    ObjectCollection collection =
+                                            new ObjectCollection.Builder()
+                                                    .withRegions(new Region(index, index, 10, 10))
+                                                    .build();
+                                    return action.perform(
+                                            new ClickOptions.Builder().build(), collection);
+                                }));
             }
 
             // Verify all complete successfully
@@ -244,8 +240,7 @@ public class ActionComprehensiveTest extends BrobotIntegrationTestBase {
             for (Future<ActionResult> future : futures) {
                 ActionResult result = future.get();
                 assertNotNull(result);
-                if (result.isSuccess())
-                    successCount++;
+                if (result.isSuccess()) successCount++;
             }
 
             assertTrue(successCount > 0, "At least some actions should succeed");
@@ -261,15 +256,20 @@ public class ActionComprehensiveTest extends BrobotIntegrationTestBase {
             List<Thread> threads = new ArrayList<>();
 
             for (int i = 0; i < threadCount; i++) {
-                Thread thread = new Thread(() -> {
-                    try {
-                        for (int j = 0; j < 10; j++) {
-                            action.find(new StateImage.Builder().setName("test").build());
-                        }
-                    } finally {
-                        latch.countDown();
-                    }
-                });
+                Thread thread =
+                        new Thread(
+                                () -> {
+                                    try {
+                                        for (int j = 0; j < 10; j++) {
+                                            action.find(
+                                                    new StateImage.Builder()
+                                                            .setName("test")
+                                                            .build());
+                                        }
+                                    } finally {
+                                        latch.countDown();
+                                    }
+                                });
                 threads.add(thread);
                 thread.start();
             }
@@ -309,9 +309,10 @@ public class ActionComprehensiveTest extends BrobotIntegrationTestBase {
 
             // Perform many actions
             for (int i = 0; i < 1000; i++) {
-                ObjectCollection collection = new ObjectCollection.Builder()
-                        .withRegions(new Region(i % 100, i % 100, 50, 50))
-                        .build();
+                ObjectCollection collection =
+                        new ObjectCollection.Builder()
+                                .withRegions(new Region(i % 100, i % 100, 50, 50))
+                                .build();
                 action.perform(new ClickOptions.Builder().build(), collection);
             }
 
@@ -320,7 +321,8 @@ public class ActionComprehensiveTest extends BrobotIntegrationTestBase {
             long memoryIncrease = finalMemory - initialMemory;
 
             // Memory increase should be reasonable (less than 50MB)
-            assertTrue(memoryIncrease < 50 * 1024 * 1024,
+            assertTrue(
+                    memoryIncrease < 50 * 1024 * 1024,
                     "Memory usage should not increase significantly");
         }
     }
@@ -368,9 +370,10 @@ public class ActionComprehensiveTest extends BrobotIntegrationTestBase {
         @DisplayName("Should recover from action failures")
         void testErrorRecovery() {
             // Create a collection that might cause issues
-            ObjectCollection problematic = new ObjectCollection.Builder()
-                    .withRegions(new Region(-100, -100, 10, 10)) // Negative coordinates
-                    .build();
+            ObjectCollection problematic =
+                    new ObjectCollection.Builder()
+                            .withRegions(new Region(-100, -100, 10, 10)) // Negative coordinates
+                            .build();
 
             ActionResult result = action.perform(new ClickOptions.Builder().build(), problematic);
             assertNotNull(result);
@@ -382,12 +385,11 @@ public class ActionComprehensiveTest extends BrobotIntegrationTestBase {
         @DisplayName("Should handle description with special characters")
         void testSpecialCharacterDescription() {
             String description = "Test with special chars: !@#$%^&*(){}[]|\\:;\"'<>,.?/~`";
-            ObjectCollection collection = new ObjectCollection.Builder()
-                    .withRegions(new Region(0, 0, 100, 100))
-                    .build();
+            ObjectCollection collection =
+                    new ObjectCollection.Builder().withRegions(new Region(0, 0, 100, 100)).build();
 
-            ActionResult result = action.perform(description,
-                    new ClickOptions.Builder().build(), collection);
+            ActionResult result =
+                    action.perform(description, new ClickOptions.Builder().build(), collection);
             assertNotNull(result);
             // Should handle special characters in description
         }
@@ -398,31 +400,32 @@ public class ActionComprehensiveTest extends BrobotIntegrationTestBase {
     @DisplayName("Should verify all public methods are callable")
     void testAllPublicMethodsCoverage() {
         // This test ensures all public methods are at least called once
-        assertDoesNotThrow(() -> {
-            StateImage img = new StateImage.Builder().setName("test").build();
-            ObjectCollection coll = new ObjectCollection.Builder().build();
+        assertDoesNotThrow(
+                () -> {
+                    StateImage img = new StateImage.Builder().setName("test").build();
+                    ObjectCollection coll = new ObjectCollection.Builder().build();
 
-            // Test all find variants
-            action.find(img);
-            action.find(coll);
-            action.findWithTimeout(1.0, img);
-            action.findWithTimeout(1.0, coll);
+                    // Test all find variants
+                    action.find(img);
+                    action.find(coll);
+                    action.findWithTimeout(1.0, img);
+                    action.findWithTimeout(1.0, coll);
 
-            // Test all perform variants
-            action.perform(new ClickOptions.Builder().build(), coll);
-            action.perform("description", new ClickOptions.Builder().build(), coll);
-            action.perform(new ClickOptions.Builder().build(), img);
+                    // Test all perform variants
+                    action.perform(new ClickOptions.Builder().build(), coll);
+                    action.perform("description", new ClickOptions.Builder().build(), coll);
+                    action.perform(new ClickOptions.Builder().build(), img);
 
-            // Test convenience methods
-            action.click(img);
-            action.type(coll);
+                    // Test convenience methods
+                    action.click(img);
+                    action.type(coll);
 
-            // Test ActionType variants
-            action.perform(ActionType.CLICK, "string");
-            action.perform(ActionType.FIND, new Region(0, 0, 10, 10));
-            action.perform(ActionType.MOVE, new Location(0, 0));
-            action.perform(ActionType.TYPE, new Region(0, 0, 10, 10));
-            action.perform(ActionType.DRAG, "test");
-        });
+                    // Test ActionType variants
+                    action.perform(ActionType.CLICK, "string");
+                    action.perform(ActionType.FIND, new Region(0, 0, 10, 10));
+                    action.perform(ActionType.MOVE, new Location(0, 0));
+                    action.perform(ActionType.TYPE, new Region(0, 0, 10, 10));
+                    action.perform(ActionType.DRAG, "test");
+                });
     }
 }

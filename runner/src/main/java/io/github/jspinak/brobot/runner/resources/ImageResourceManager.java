@@ -1,18 +1,5 @@
 package io.github.jspinak.brobot.runner.resources;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
-import io.github.jspinak.brobot.model.element.Pattern;
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
-import io.github.jspinak.brobot.runner.events.EventBus;
-import io.github.jspinak.brobot.runner.events.LogEvent;
-import jakarta.annotation.PostConstruct;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 import java.awt.image.BufferedImage;
 import java.lang.ref.SoftReference;
 import java.nio.file.Path;
@@ -22,6 +9,22 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
+
+import jakarta.annotation.PostConstruct;
+
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
+import io.github.jspinak.brobot.runner.events.EventBus;
+import io.github.jspinak.brobot.runner.events.LogEvent;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Component
 @Data
@@ -42,25 +45,24 @@ public class ImageResourceManager implements AutoCloseable {
 
     private final ScheduledExecutorService memoryMonitor;
 
-    public ImageResourceManager(ResourceManager resourceManager,
-                                EventBus eventBus,
-                                BrobotRunnerProperties properties) {
+    public ImageResourceManager(
+            ResourceManager resourceManager, EventBus eventBus, BrobotRunnerProperties properties) {
         this.resourceManager = resourceManager;
         this.eventBus = eventBus;
         this.properties = properties;
 
         // Set threshold to 70% of max heap or 500MB, whichever is less
-        this.memoryThreshold = Math.min(
-                Runtime.getRuntime().maxMemory() * 7 / 10,
-                500 * 1024 * 1024
-        );
+        this.memoryThreshold =
+                Math.min(Runtime.getRuntime().maxMemory() * 7 / 10, 500 * 1024 * 1024);
 
         // Schedule memory monitoring
-        this.memoryMonitor = Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread t = new Thread(r, "Image-Memory-Monitor");
-            t.setDaemon(true);
-            return t;
-        });
+        this.memoryMonitor =
+                Executors.newSingleThreadScheduledExecutor(
+                        r -> {
+                            Thread t = new Thread(r, "Image-Memory-Monitor");
+                            t.setDaemon(true);
+                            return t;
+                        });
 
         resourceManager.registerResource(this, "ImageResourceManager");
     }
@@ -68,18 +70,18 @@ public class ImageResourceManager implements AutoCloseable {
     @PostConstruct
     public void initialize() {
         // Start memory monitoring after initialization
-        this.memoryMonitor.scheduleAtFixedRate(
-                this::checkMemoryUsage, 30, 30, TimeUnit.SECONDS);
+        this.memoryMonitor.scheduleAtFixedRate(this::checkMemoryUsage, 30, 30, TimeUnit.SECONDS);
 
-        eventBus.publish(LogEvent.info(this,
-                "Image resource manager initialized with memory threshold: " +
-                        (memoryThreshold / 1024 / 1024) + "MB",
-                "Resources"));
+        eventBus.publish(
+                LogEvent.info(
+                        this,
+                        "Image resource manager initialized with memory threshold: "
+                                + (memoryThreshold / 1024 / 1024)
+                                + "MB",
+                        "Resources"));
     }
 
-    /**
-     * Retrieves a cached image or loads it from disk
-     */
+    /** Retrieves a cached image or loads it from disk */
     public BufferedImage getBufferedImage(String imageName) {
         String key = normalizeImageName(imageName);
         SoftReference<BufferedImage> ref = imageCache.get(key);
@@ -93,7 +95,8 @@ public class ImageResourceManager implements AutoCloseable {
             // Reference was cleared by GC
             imageCache.remove(key);
             imageSizes.remove(key);
-            eventBus.publish(LogEvent.debug(this, "Image cache reference cleared: " + key, "ImageCache"));
+            eventBus.publish(
+                    LogEvent.debug(this, "Image cache reference cleared: " + key, "ImageCache"));
         }
 
         // Load image from disk
@@ -105,9 +108,7 @@ public class ImageResourceManager implements AutoCloseable {
         return image;
     }
 
-    /**
-     * Caches an image and tracks its memory usage
-     */
+    /** Caches an image and tracks its memory usage */
     public void cacheImage(String key, BufferedImage image) {
         if (image == null) return;
 
@@ -125,10 +126,15 @@ public class ImageResourceManager implements AutoCloseable {
         // Cache the image with a soft reference
         imageCache.put(key, new SoftReference<>(image));
 
-        eventBus.publish(LogEvent.debug(this,
-                String.format("Image cached: %s (%.2f KB, total: %.2f MB)",
-                        key, estimatedSize/1024.0, cachedMemoryUsed.get()/1024.0/1024.0),
-                "ImageCache"));
+        eventBus.publish(
+                LogEvent.debug(
+                        this,
+                        String.format(
+                                "Image cached: %s (%.2f KB, total: %.2f MB)",
+                                key,
+                                estimatedSize / 1024.0,
+                                cachedMemoryUsed.get() / 1024.0 / 1024.0),
+                        "ImageCache"));
 
         // Check if we need to clean up
         if (cachedMemoryUsed.get() > memoryThreshold) {
@@ -136,32 +142,30 @@ public class ImageResourceManager implements AutoCloseable {
         }
     }
 
-    /**
-     * Registers a Mat for tracking and cleanup
-     */
+    /** Registers a Mat for tracking and cleanup */
     public void registerMat(Mat mat) {
         if (mat != null && !mat.isNull()) {
             activeMats.add(mat);
-            eventBus.publish(LogEvent.debug(this,
-                    "Mat registered, active mats: " + activeMats.size(), "Resources"));
+            eventBus.publish(
+                    LogEvent.debug(
+                            this,
+                            "Mat registered, active mats: " + activeMats.size(),
+                            "Resources"));
         }
     }
 
-    /**
-     * Releases a Mat and removes it from tracking
-     */
+    /** Releases a Mat and removes it from tracking */
     public void releaseMat(Mat mat) {
         if (mat != null && !mat.isNull()) {
             mat.release();
             activeMats.remove(mat);
-            eventBus.publish(LogEvent.debug(this,
-                    "Mat released, active mats: " + activeMats.size(), "Resources"));
+            eventBus.publish(
+                    LogEvent.debug(
+                            this, "Mat released, active mats: " + activeMats.size(), "Resources"));
         }
     }
 
-    /**
-     * Updates cached image references from a StateImage
-     */
+    /** Updates cached image references from a StateImage */
     public void updateStateImageCache(StateImage stateImage) {
         if (stateImage == null) return;
 
@@ -199,22 +203,31 @@ public class ImageResourceManager implements AutoCloseable {
             // Use reflection to access the Brobot implementation
             // Note: In a real implementation we would use a more direct approach
             // by accessing the appropriate classes
-            Class<?> bufferImageOpsClass = Class.forName("io.github.jspinak.brobot.imageUtils.BufferedImageOps");
-            java.lang.reflect.Method method = bufferImageOpsClass.getMethod("getBuffImgFromFile", String.class);
+            Class<?> bufferImageOpsClass =
+                    Class.forName("io.github.jspinak.brobot.imageUtils.BufferedImageOps");
+            java.lang.reflect.Method method =
+                    bufferImageOpsClass.getMethod("getBuffImgFromFile", String.class);
             BufferedImage image = (BufferedImage) method.invoke(null, imagePath.toString());
 
             if (image != null) {
-                eventBus.publish(LogEvent.debug(this,
-                        "Image loaded from disk: " + imageName, "ImageCache"));
+                eventBus.publish(
+                        LogEvent.debug(this, "Image loaded from disk: " + imageName, "ImageCache"));
             } else {
-                eventBus.publish(LogEvent.warning(this,
-                        "Failed to load image from disk: " + imageName, "ImageCache"));
+                eventBus.publish(
+                        LogEvent.warning(
+                                this,
+                                "Failed to load image from disk: " + imageName,
+                                "ImageCache"));
             }
 
             return image;
         } catch (Exception e) {
-            eventBus.publish(LogEvent.error(this,
-                    "Error loading image: " + imageName + ", " + e.getMessage(), "ImageCache", e));
+            eventBus.publish(
+                    LogEvent.error(
+                            this,
+                            "Error loading image: " + imageName + ", " + e.getMessage(),
+                            "ImageCache",
+                            e));
             return null;
         }
     }
@@ -224,12 +237,15 @@ public class ImageResourceManager implements AutoCloseable {
         long usedMemory = runtime.totalMemory() - runtime.freeMemory();
         double usedPercent = 100.0 * usedMemory / runtime.maxMemory();
 
-        eventBus.publish(LogEvent.debug(this,
-                String.format("Memory usage: %.1f%% (%.2f MB used, %.2f MB cached)",
-                        usedPercent,
-                        usedMemory / 1024.0 / 1024.0,
-                        cachedMemoryUsed.get() / 1024.0 / 1024.0),
-                "Memory"));
+        eventBus.publish(
+                LogEvent.debug(
+                        this,
+                        String.format(
+                                "Memory usage: %.1f%% (%.2f MB used, %.2f MB cached)",
+                                usedPercent,
+                                usedMemory / 1024.0 / 1024.0,
+                                cachedMemoryUsed.get() / 1024.0 / 1024.0),
+                        "Memory"));
 
         if (usedMemory > memoryThreshold) {
             triggerCleanup();
@@ -237,10 +253,13 @@ public class ImageResourceManager implements AutoCloseable {
     }
 
     private void triggerCleanup() {
-        eventBus.publish(LogEvent.warning(this,
-                String.format("Memory usage high (%.2f MB cached), triggering cleanup",
-                        cachedMemoryUsed.get() / 1024.0 / 1024.0),
-                "Memory"));
+        eventBus.publish(
+                LogEvent.warning(
+                        this,
+                        String.format(
+                                "Memory usage high (%.2f MB cached), triggering cleanup",
+                                cachedMemoryUsed.get() / 1024.0 / 1024.0),
+                        "Memory"));
 
         // Free at least 30% of the cache
         long targetReduction = cachedMemoryUsed.get() * 3 / 10;
@@ -251,17 +270,22 @@ public class ImageResourceManager implements AutoCloseable {
         entries.stream()
                 .sorted(Map.Entry.<String, Long>comparingByValue().reversed()) // Largest first
                 .limit(Math.max(3, entries.size() / 5)) // Clear top 20% of large images, at least 3
-                .forEach(entry -> {
-                    imageCache.remove(entry.getKey());
-                    freed.addAndGet(entry.getValue());
-                });
+                .forEach(
+                        entry -> {
+                            imageCache.remove(entry.getKey());
+                            freed.addAndGet(entry.getValue());
+                        });
 
         // Update memory usage tracker
         cachedMemoryUsed.addAndGet(-freed.get());
 
-        eventBus.publish(LogEvent.info(this,
-                String.format("Memory cleanup completed: %.2f MB freed", freed.get() / 1024.0 / 1024.0),
-                "Memory"));
+        eventBus.publish(
+                LogEvent.info(
+                        this,
+                        String.format(
+                                "Memory cleanup completed: %.2f MB freed",
+                                freed.get() / 1024.0 / 1024.0),
+                        "Memory"));
 
         // Request garbage collection
         System.gc();

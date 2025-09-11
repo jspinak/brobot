@@ -1,10 +1,8 @@
 package io.github.jspinak.brobot.runner.json.validation.model;
 
-import org.junit.jupiter.api.Test;
-
-import io.github.jspinak.brobot.runner.json.validation.model.ValidationSeverity;
-
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 class ValidationSeverityTest {
 

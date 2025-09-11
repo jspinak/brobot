@@ -11,7 +11,7 @@ brobot:
     find-timeout: 1.0
     action-pause: 0.01
     enable-image-cache: false
-    
+
   # Disable all initialization that might block
   startup:
     enabled: false
@@ -20,13 +20,13 @@ brobot:
     ui-stabilization-delay: 0
     verification:
       enabled: false
-      
+
   # Disable diagnostics
   diagnostics:
     enabled: false
     image-loading:
       enabled: false
-      
+
   # Mock timings for fast test execution
   mock:
     time:
@@ -38,13 +38,13 @@ brobot:
       drag: 0.03
       vanish: 0.05
       wait: 0.01
-      
+
   # Disable console output for tests
   console:
     enabled: false
     actions:
       enabled: false
-      
+
   # Logging configuration
   logging:
     capture:
@@ -56,7 +56,7 @@ spring:
   main:
     banner-mode: off
     lazy-initialization: true
-    
+
 # Force headless mode for CI/CD
 java:
   awt:

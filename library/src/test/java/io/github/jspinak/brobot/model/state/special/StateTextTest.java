@@ -1,29 +1,31 @@
 package io.github.jspinak.brobot.model.state.special;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.state.StateObject;
-import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.EmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
-
-import java.util.stream.Stream;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EmptySource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.StateObject;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+
 /**
- * Comprehensive tests for the StateText class which represents persistent text 
- * that uniquely identifies a state in GUI automation.
+ * Comprehensive tests for the StateText class which represents persistent text that uniquely
+ * identifies a state in GUI automation.
  */
 @DisplayName("StateText Model Tests")
 public class StateTextTest extends BrobotTestBase {
@@ -45,7 +47,7 @@ public class StateTextTest extends BrobotTestBase {
     void testDefaultConstructor() {
         // When
         stateText = new StateText();
-        
+
         // Then
         assertNotNull(stateText);
         assertEquals(StateObject.Type.TEXT, stateText.getObjectType());
@@ -59,13 +61,14 @@ public class StateTextTest extends BrobotTestBase {
     @DisplayName("Should create StateText with Builder using all properties")
     void testBuilderWithAllProperties() {
         // When
-        stateText = new StateText.Builder()
-            .setName("WindowTitle")
-            .setSearchRegion(testRegion)
-            .setOwnerStateName("MainWindow")
-            .setText("Settings - Application")
-            .build();
-        
+        stateText =
+                new StateText.Builder()
+                        .setName("WindowTitle")
+                        .setSearchRegion(testRegion)
+                        .setOwnerStateName("MainWindow")
+                        .setText("Settings - Application")
+                        .build();
+
         // Then
         assertEquals("WindowTitle", stateText.getName());
         assertSame(testRegion, stateText.getSearchRegion());
@@ -78,10 +81,8 @@ public class StateTextTest extends BrobotTestBase {
     @DisplayName("Should create StateText with Builder using minimal properties")
     void testBuilderWithMinimalProperties() {
         // When
-        stateText = new StateText.Builder()
-            .setText("Minimal Text")
-            .build();
-        
+        stateText = new StateText.Builder().setText("Minimal Text").build();
+
         // Then
         assertNull(stateText.getName());
         assertNull(stateText.getSearchRegion());
@@ -93,15 +94,16 @@ public class StateTextTest extends BrobotTestBase {
     @DisplayName("Should generate unique ID correctly")
     void testGetId() {
         // Given
-        stateText = new StateText.Builder()
-            .setName("TestName")
-            .setSearchRegion(testRegion)
-            .setText("Test Text")
-            .build();
-        
+        stateText =
+                new StateText.Builder()
+                        .setName("TestName")
+                        .setSearchRegion(testRegion)
+                        .setText("Test Text")
+                        .build();
+
         // When
         String id = stateText.getId();
-        
+
         // Then
         assertNotNull(id);
         assertTrue(id.contains("TEXT"));
@@ -114,14 +116,11 @@ public class StateTextTest extends BrobotTestBase {
     @DisplayName("Should generate ID with null region")
     void testGetIdWithNullRegion() {
         // Given
-        stateText = new StateText.Builder()
-            .setName("NoRegion")
-            .setText("Text Only")
-            .build();
-        
+        stateText = new StateText.Builder().setName("NoRegion").setText("Text Only").build();
+
         // When
         String id = stateText.getId();
-        
+
         // Then
         assertNotNull(id);
         assertTrue(id.contains("TEXT"));
@@ -136,11 +135,11 @@ public class StateTextTest extends BrobotTestBase {
         // Test undefined (null text)
         stateText = new StateText();
         assertFalse(stateText.defined());
-        
+
         // Test undefined (empty text)
         stateText.setText("");
         assertFalse(stateText.defined());
-        
+
         // Test defined
         stateText.setText("Some Text");
         assertTrue(stateText.defined());
@@ -153,10 +152,8 @@ public class StateTextTest extends BrobotTestBase {
     @DisplayName("Should handle various empty text values")
     void testVariousEmptyTextValues(String text) {
         // When
-        stateText = new StateText.Builder()
-            .setText(text)
-            .build();
-        
+        stateText = new StateText.Builder().setText(text).build();
+
         // Then
         assertEquals(text, stateText.getText());
         if (text == null || text.isEmpty()) {
@@ -171,14 +168,14 @@ public class StateTextTest extends BrobotTestBase {
     void testGettersAndSetters() {
         // Given
         stateText = new StateText();
-        
+
         // When
         stateText.setName("UpdatedName");
         stateText.setSearchRegion(testRegion);
         stateText.setOwnerStateName("UpdatedState");
         stateText.setText("Updated Text");
         stateText.setObjectType(StateObject.Type.TEXT); // Should remain TEXT
-        
+
         // Then
         assertEquals("UpdatedName", stateText.getName());
         assertSame(testRegion, stateText.getSearchRegion());
@@ -191,26 +188,27 @@ public class StateTextTest extends BrobotTestBase {
     @DisplayName("Should serialize and deserialize to/from JSON")
     void testJacksonSerialization() throws JsonProcessingException {
         // Given
-        stateText = new StateText.Builder()
-            .setName("SerializedText")
-            .setSearchRegion(testRegion)
-            .setOwnerStateName("SerializedState")
-            .setText("Serialization Test")
-            .build();
-        
+        stateText =
+                new StateText.Builder()
+                        .setName("SerializedText")
+                        .setSearchRegion(testRegion)
+                        .setOwnerStateName("SerializedState")
+                        .setText("Serialization Test")
+                        .build();
+
         // When - Serialize
         String json = objectMapper.writeValueAsString(stateText);
-        
+
         // Then
         assertNotNull(json);
         assertTrue(json.contains("\"objectType\":\"TEXT\""));
         assertTrue(json.contains("\"name\":\"SerializedText\""));
         assertTrue(json.contains("\"ownerStateName\":\"SerializedState\""));
         assertTrue(json.contains("\"text\":\"Serialization Test\""));
-        
+
         // When - Deserialize
         StateText deserialized = objectMapper.readValue(json, StateText.class);
-        
+
         // Then
         assertEquals(stateText.getName(), deserialized.getName());
         assertEquals(stateText.getOwnerStateName(), deserialized.getOwnerStateName());
@@ -222,12 +220,13 @@ public class StateTextTest extends BrobotTestBase {
     @DisplayName("Should handle JsonIgnoreProperties annotation")
     void testJsonIgnoreUnknownProperties() throws JsonProcessingException {
         // Given - JSON with unknown property
-        String jsonWithUnknown = "{\"objectType\":\"TEXT\",\"name\":\"Test\",\"text\":\"TestText\"," +
-                                 "\"unknownProperty\":\"unknown value\"}";
-        
+        String jsonWithUnknown =
+                "{\"objectType\":\"TEXT\",\"name\":\"Test\",\"text\":\"TestText\","
+                        + "\"unknownProperty\":\"unknown value\"}";
+
         // When - Should not throw exception
         StateText deserialized = objectMapper.readValue(jsonWithUnknown, StateText.class);
-        
+
         // Then
         assertEquals("Test", deserialized.getName());
         assertEquals("TestText", deserialized.getText());
@@ -237,51 +236,59 @@ public class StateTextTest extends BrobotTestBase {
     @DisplayName("StateText usage scenarios")
     Stream<DynamicTest> testUsageScenarios() {
         return Stream.of(
-            dynamicTest("Window title identification", () -> {
-                StateText windowTitle = new StateText.Builder()
-                    .setName("WindowTitle")
-                    .setText("Settings - Application Name")
-                    .setSearchRegion(new Region(0, 0, 1920, 30))
-                    .setOwnerStateName("SettingsWindow")
-                    .build();
-                
-                assertTrue(windowTitle.defined());
-                assertTrue(windowTitle.getId().contains("Settings - Application Name"));
-            }),
-            
-            dynamicTest("Page header recognition", () -> {
-                StateText pageHeader = new StateText.Builder()
-                    .setName("DashboardHeader")
-                    .setText("User Account Dashboard")
-                    .setOwnerStateName("Dashboard")
-                    .build();
-                
-                assertEquals("User Account Dashboard", pageHeader.getText());
-                assertTrue(pageHeader.defined());
-            }),
-            
-            dynamicTest("Status message verification", () -> {
-                StateText statusMsg = new StateText.Builder()
-                    .setName("StatusIndicator")
-                    .setText("Processing...")
-                    .setSearchRegion(new Region(500, 500, 200, 50))
-                    .build();
-                
-                assertEquals("Processing...", statusMsg.getText());
-                assertNotNull(statusMsg.getSearchRegion());
-            }),
-            
-            dynamicTest("Unique label identification", () -> {
-                StateText uniqueLabel = new StateText.Builder()
-                    .setName("AdvancedOptionsLabel")
-                    .setText("Advanced Options")
-                    .setOwnerStateName("ConfigurationDialog")
-                    .build();
-                
-                assertEquals("ConfigurationDialog", uniqueLabel.getOwnerStateName());
-                assertTrue(uniqueLabel.defined());
-            })
-        );
+                dynamicTest(
+                        "Window title identification",
+                        () -> {
+                            StateText windowTitle =
+                                    new StateText.Builder()
+                                            .setName("WindowTitle")
+                                            .setText("Settings - Application Name")
+                                            .setSearchRegion(new Region(0, 0, 1920, 30))
+                                            .setOwnerStateName("SettingsWindow")
+                                            .build();
+
+                            assertTrue(windowTitle.defined());
+                            assertTrue(windowTitle.getId().contains("Settings - Application Name"));
+                        }),
+                dynamicTest(
+                        "Page header recognition",
+                        () -> {
+                            StateText pageHeader =
+                                    new StateText.Builder()
+                                            .setName("DashboardHeader")
+                                            .setText("User Account Dashboard")
+                                            .setOwnerStateName("Dashboard")
+                                            .build();
+
+                            assertEquals("User Account Dashboard", pageHeader.getText());
+                            assertTrue(pageHeader.defined());
+                        }),
+                dynamicTest(
+                        "Status message verification",
+                        () -> {
+                            StateText statusMsg =
+                                    new StateText.Builder()
+                                            .setName("StatusIndicator")
+                                            .setText("Processing...")
+                                            .setSearchRegion(new Region(500, 500, 200, 50))
+                                            .build();
+
+                            assertEquals("Processing...", statusMsg.getText());
+                            assertNotNull(statusMsg.getSearchRegion());
+                        }),
+                dynamicTest(
+                        "Unique label identification",
+                        () -> {
+                            StateText uniqueLabel =
+                                    new StateText.Builder()
+                                            .setName("AdvancedOptionsLabel")
+                                            .setText("Advanced Options")
+                                            .setOwnerStateName("ConfigurationDialog")
+                                            .build();
+
+                            assertEquals("ConfigurationDialog", uniqueLabel.getOwnerStateName());
+                            assertTrue(uniqueLabel.defined());
+                        }));
     }
 
     @ParameterizedTest
@@ -292,14 +299,16 @@ public class StateTextTest extends BrobotTestBase {
         "NullText,,AnyState,false"
     })
     @DisplayName("Should handle various text scenarios")
-    void testVariousTextScenarios(String name, String text, String stateName, boolean shouldBeDefined) {
+    void testVariousTextScenarios(
+            String name, String text, String stateName, boolean shouldBeDefined) {
         // When
-        stateText = new StateText.Builder()
-            .setName(name)
-            .setText(text)
-            .setOwnerStateName(stateName)
-            .build();
-        
+        stateText =
+                new StateText.Builder()
+                        .setName(name)
+                        .setText(text)
+                        .setOwnerStateName(stateName)
+                        .build();
+
         // Then
         assertEquals(name, stateText.getName());
         assertEquals(text, stateText.getText());
@@ -312,13 +321,13 @@ public class StateTextTest extends BrobotTestBase {
     void testConsistentObjectType() {
         // Given
         stateText = new StateText();
-        
+
         // Then - Should always be TEXT type
         assertEquals(StateObject.Type.TEXT, stateText.getObjectType());
-        
+
         // When - Try to set different type
         stateText.setObjectType(StateObject.Type.IMAGE);
-        
+
         // Then - Can be changed but not recommended
         assertEquals(StateObject.Type.IMAGE, stateText.getObjectType());
     }
@@ -327,36 +336,39 @@ public class StateTextTest extends BrobotTestBase {
     @DisplayName("Should handle equals and hashCode")
     void testEqualsAndHashCode() {
         // Given
-        StateText text1 = new StateText.Builder()
-            .setName("Text1")
-            .setText("Same Text")
-            .setOwnerStateName("State1")
-            .build();
-            
-        StateText text2 = new StateText.Builder()
-            .setName("Text1")
-            .setText("Same Text")
-            .setOwnerStateName("State1")
-            .build();
-            
-        StateText text3 = new StateText.Builder()
-            .setName("Text2")
-            .setText("Different Text")
-            .setOwnerStateName("State1")
-            .build();
-        
+        StateText text1 =
+                new StateText.Builder()
+                        .setName("Text1")
+                        .setText("Same Text")
+                        .setOwnerStateName("State1")
+                        .build();
+
+        StateText text2 =
+                new StateText.Builder()
+                        .setName("Text1")
+                        .setText("Same Text")
+                        .setOwnerStateName("State1")
+                        .build();
+
+        StateText text3 =
+                new StateText.Builder()
+                        .setName("Text2")
+                        .setText("Different Text")
+                        .setOwnerStateName("State1")
+                        .build();
+
         // Then - Reflexive
         assertEquals(text1, text1);
         assertEquals(text1.hashCode(), text1.hashCode());
-        
+
         // Symmetric
         assertEquals(text1, text2);
         assertEquals(text2, text1);
         assertEquals(text1.hashCode(), text2.hashCode());
-        
+
         // Different properties
         assertNotEquals(text1, text3);
-        
+
         // Null safety
         assertNotEquals(text1, null);
         assertNotEquals(text1, "not a StateText");
@@ -366,20 +378,14 @@ public class StateTextTest extends BrobotTestBase {
     @DisplayName("Should generate different IDs for different texts")
     void testUniqueIds() {
         // Given
-        StateText text1 = new StateText.Builder()
-            .setName("Same")
-            .setText("Text1")
-            .build();
-            
-        StateText text2 = new StateText.Builder()
-            .setName("Same")
-            .setText("Text2")
-            .build();
-        
+        StateText text1 = new StateText.Builder().setName("Same").setText("Text1").build();
+
+        StateText text2 = new StateText.Builder().setName("Same").setText("Text2").build();
+
         // When
         String id1 = text1.getId();
         String id2 = text2.getId();
-        
+
         // Then
         assertNotEquals(id1, id2);
         assertTrue(id1.contains("Text1"));
@@ -390,13 +396,14 @@ public class StateTextTest extends BrobotTestBase {
     @DisplayName("Should handle Builder method chaining")
     void testBuilderMethodChaining() {
         // When - All methods should return Builder
-        stateText = new StateText.Builder()
-            .setName("Chained")
-            .setSearchRegion(testRegion)
-            .setOwnerStateName("ChainedState")
-            .setText("Chained Text")
-            .build();
-        
+        stateText =
+                new StateText.Builder()
+                        .setName("Chained")
+                        .setSearchRegion(testRegion)
+                        .setOwnerStateName("ChainedState")
+                        .setText("Chained Text")
+                        .build();
+
         // Then
         assertNotNull(stateText);
         assertEquals("Chained", stateText.getName());
@@ -408,13 +415,11 @@ public class StateTextTest extends BrobotTestBase {
     void testRegionWithExtremeValues() {
         // Given
         Region extremeRegion = new Region(Integer.MAX_VALUE, Integer.MIN_VALUE, 0, -1);
-        
+
         // When
-        stateText = new StateText.Builder()
-            .setSearchRegion(extremeRegion)
-            .setText("Extreme")
-            .build();
-        
+        stateText =
+                new StateText.Builder().setSearchRegion(extremeRegion).setText("Extreme").build();
+
         // Then
         String id = stateText.getId();
         assertNotNull(id);
@@ -427,7 +432,7 @@ public class StateTextTest extends BrobotTestBase {
     void testDefaultOwnerStateName() {
         // When
         stateText = new StateText();
-        
+
         // Then
         assertEquals("null", stateText.getOwnerStateName());
     }
@@ -437,20 +442,18 @@ public class StateTextTest extends BrobotTestBase {
     void testInternationalizedText() {
         // Given - Various language texts
         String[] texts = {
-            "Hello World",           // English
-            "你好世界",              // Chinese
-            "مرحبا بالعالم",        // Arabic
-            "Здравствуй мир",       // Russian
-            "こんにちは世界",        // Japanese
-            "🎉 Unicode Emoji 🎉"   // Emoji
+            "Hello World", // English
+            "你好世界", // Chinese
+            "مرحبا بالعالم", // Arabic
+            "Здравствуй мир", // Russian
+            "こんにちは世界", // Japanese
+            "🎉 Unicode Emoji 🎉" // Emoji
         };
-        
+
         // When/Then
         for (String text : texts) {
-            StateText st = new StateText.Builder()
-                .setText(text)
-                .build();
-            
+            StateText st = new StateText.Builder().setText(text).build();
+
             assertEquals(text, st.getText());
             assertTrue(st.defined());
             assertTrue(st.getId().contains(text));

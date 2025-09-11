@@ -1,32 +1,35 @@
 package io.github.jspinak.brobot.tools.testing.mock.verification;
 
-import io.github.jspinak.brobot.action.ActionConfig;
-import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.action.ActionType;
-import io.github.jspinak.brobot.tools.testing.mock.scenario.MockTestContext;
-import lombok.Builder;
-import lombok.Data;
-import org.springframework.stereotype.Component;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
+import org.springframework.stereotype.Component;
+
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ActionType;
+import io.github.jspinak.brobot.tools.testing.mock.scenario.MockTestContext;
+
+import lombok.Builder;
+import lombok.Data;
+
 /**
  * Advanced verification system for mock behavior and state transitions.
- * <p>
- * This component provides comprehensive verification capabilities beyond simple
- * operation counting, enabling validation of:
+ *
+ * <p>This component provides comprehensive verification capabilities beyond simple operation
+ * counting, enabling validation of:
+ *
  * <ul>
- * <li>State transition sequences and timing</li>
- * <li>Action execution patterns and dependencies</li>
- * <li>Performance characteristics under different conditions</li>
- * <li>Error recovery and resilience behavior</li>
+ *   <li>State transition sequences and timing
+ *   <li>Action execution patterns and dependencies
+ *   <li>Performance characteristics under different conditions
+ *   <li>Error recovery and resilience behavior
  * </ul>
- * <p>
- * Example usage:
+ *
+ * <p>Example usage:
+ *
  * <pre>{@code
  * // Verify state transition sequence
  * verifier.expectTransitionSequence("login_flow")
@@ -34,7 +37,7 @@ import java.util.function.Predicate;
  *     .toState("DASHBOARD")
  *     .withinTime(Duration.ofSeconds(5))
  *     .verify();
- *     
+ *
  * // Verify action execution patterns
  * verifier.expectActionPattern("retry_pattern")
  *     .action(ActionType.FIND)
@@ -49,11 +52,14 @@ import java.util.function.Predicate;
  */
 @Component
 public class MockBehaviorVerifier {
-    
-    private final Map<String, StateTransitionVerification> activeTransitionVerifications = new ConcurrentHashMap<>();
-    private final Map<String, ActionPatternVerification> activePatternVerifications = new ConcurrentHashMap<>();
-    private final List<ExecutionEvent> executionHistory = Collections.synchronizedList(new ArrayList<>());
-    
+
+    private final Map<String, StateTransitionVerification> activeTransitionVerifications =
+            new ConcurrentHashMap<>();
+    private final Map<String, ActionPatternVerification> activePatternVerifications =
+            new ConcurrentHashMap<>();
+    private final List<ExecutionEvent> executionHistory =
+            Collections.synchronizedList(new ArrayList<>());
+
     /**
      * Starts verification of a state transition sequence.
      *
@@ -63,7 +69,7 @@ public class MockBehaviorVerifier {
     public StateTransitionVerification.Builder expectTransitionSequence(String verificationId) {
         return new StateTransitionVerification.Builder(verificationId, this);
     }
-    
+
     /**
      * Starts verification of an action execution pattern.
      *
@@ -73,7 +79,7 @@ public class MockBehaviorVerifier {
     public ActionPatternVerification.Builder expectActionPattern(String verificationId) {
         return new ActionPatternVerification.Builder(verificationId, this);
     }
-    
+
     /**
      * Records an action execution for verification purposes.
      *
@@ -82,19 +88,20 @@ public class MockBehaviorVerifier {
      * @param context current test context
      */
     public void recordAction(ActionType action, ActionResult result, MockTestContext context) {
-        ExecutionEvent event = ExecutionEvent.builder()
-            .timestamp(LocalDateTime.now())
-            .action(action)
-            .result(result)
-            .context(context)
-            .build();
-            
+        ExecutionEvent event =
+                ExecutionEvent.builder()
+                        .timestamp(LocalDateTime.now())
+                        .action(action)
+                        .result(result)
+                        .context(context)
+                        .build();
+
         executionHistory.add(event);
-        
+
         // Check active verifications
         checkActiveVerifications(event);
     }
-    
+
     /**
      * Records a state transition for verification purposes.
      *
@@ -103,31 +110,32 @@ public class MockBehaviorVerifier {
      * @param context current test context
      */
     public void recordStateTransition(String fromState, String toState, MockTestContext context) {
-        ExecutionEvent event = ExecutionEvent.builder()
-            .timestamp(LocalDateTime.now())
-            .fromState(fromState)
-            .toState(toState)
-            .context(context)
-            .build();
-            
+        ExecutionEvent event =
+                ExecutionEvent.builder()
+                        .timestamp(LocalDateTime.now())
+                        .fromState(fromState)
+                        .toState(toState)
+                        .context(context)
+                        .build();
+
         executionHistory.add(event);
-        
+
         // Check active verifications
         checkActiveVerifications(event);
     }
-    
+
     /**
      * Checks all active verifications against the new event.
      *
      * @param event the execution event to check
      */
     private void checkActiveVerifications(ExecutionEvent event) {
-        activeTransitionVerifications.values().forEach(verification -> 
-            verification.checkEvent(event));
-        activePatternVerifications.values().forEach(verification -> 
-            verification.checkEvent(event));
+        activeTransitionVerifications
+                .values()
+                .forEach(verification -> verification.checkEvent(event));
+        activePatternVerifications.values().forEach(verification -> verification.checkEvent(event));
     }
-    
+
     /**
      * Gets the complete execution history.
      *
@@ -136,7 +144,7 @@ public class MockBehaviorVerifier {
     public List<ExecutionEvent> getExecutionHistory() {
         return new ArrayList<>(executionHistory);
     }
-    
+
     /**
      * Gets events matching the specified criteria.
      *
@@ -144,20 +152,16 @@ public class MockBehaviorVerifier {
      * @return filtered list of events
      */
     public List<ExecutionEvent> getEvents(Predicate<ExecutionEvent> filter) {
-        return executionHistory.stream()
-            .filter(filter)
-            .toList();
+        return executionHistory.stream().filter(filter).toList();
     }
-    
-    /**
-     * Clears all verification history and active verifications.
-     */
+
+    /** Clears all verification history and active verifications. */
     public void reset() {
         executionHistory.clear();
         activeTransitionVerifications.clear();
         activePatternVerifications.clear();
     }
-    
+
     /**
      * Gets verification results for all completed verifications.
      *
@@ -165,25 +169,26 @@ public class MockBehaviorVerifier {
      */
     public Map<String, VerificationResult> getVerificationResults() {
         Map<String, VerificationResult> results = new HashMap<>();
-        
-        activeTransitionVerifications.forEach((id, verification) -> 
-            results.put(id, verification.getResult()));
-        activePatternVerifications.forEach((id, verification) -> 
-            results.put(id, verification.getResult()));
-            
+
+        activeTransitionVerifications.forEach(
+                (id, verification) -> results.put(id, verification.getResult()));
+        activePatternVerifications.forEach(
+                (id, verification) -> results.put(id, verification.getResult()));
+
         return results;
     }
-    
+
     /**
      * Adds a transition verification to the active set.
      *
      * @param verificationId unique identifier
      * @param verification the verification to add
      */
-    void addTransitionVerification(String verificationId, StateTransitionVerification verification) {
+    void addTransitionVerification(
+            String verificationId, StateTransitionVerification verification) {
         activeTransitionVerifications.put(verificationId, verification);
     }
-    
+
     /**
      * Adds a pattern verification to the active set.
      *
@@ -193,10 +198,8 @@ public class MockBehaviorVerifier {
     void addPatternVerification(String verificationId, ActionPatternVerification verification) {
         activePatternVerifications.put(verificationId, verification);
     }
-    
-    /**
-     * Represents a single execution event for verification.
-     */
+
+    /** Represents a single execution event for verification. */
     @Data
     @Builder
     public static class ExecutionEvent {
@@ -207,7 +210,7 @@ public class MockBehaviorVerifier {
         private final String toState;
         private final MockTestContext context;
         private final Map<String, Object> metadata;
-        
+
         /**
          * Checks if this is an action event.
          *
@@ -216,7 +219,7 @@ public class MockBehaviorVerifier {
         public boolean isActionEvent() {
             return action != null;
         }
-        
+
         /**
          * Checks if this is a state transition event.
          *
@@ -225,7 +228,7 @@ public class MockBehaviorVerifier {
         public boolean isStateTransitionEvent() {
             return fromState != null && toState != null;
         }
-        
+
         /**
          * Gets the duration since this event occurred.
          *

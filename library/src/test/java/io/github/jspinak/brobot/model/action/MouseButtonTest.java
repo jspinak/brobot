@@ -1,26 +1,27 @@
 package io.github.jspinak.brobot.model.action;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.ValueSource;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
- * Comprehensive tests for the MouseButton enum which represents
- * physical mouse buttons in the Brobot framework.
+ * Comprehensive tests for the MouseButton enum which represents physical mouse buttons in the
+ * Brobot framework.
  */
 @DisplayName("MouseButton Enum Tests")
 public class MouseButtonTest extends BrobotTestBase {
@@ -36,7 +37,7 @@ public class MouseButtonTest extends BrobotTestBase {
     void testEnumConstants() {
         // When
         MouseButton[] buttons = MouseButton.values();
-        
+
         // Then
         assertEquals(3, buttons.length);
         assertEquals(MouseButton.LEFT, buttons[0]);
@@ -76,7 +77,9 @@ public class MouseButtonTest extends BrobotTestBase {
     void testValueOfInvalid() {
         // Then
         assertThrows(IllegalArgumentException.class, () -> MouseButton.valueOf("INVALID"));
-        assertThrows(IllegalArgumentException.class, () -> MouseButton.valueOf("left")); // Case sensitive
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> MouseButton.valueOf("left")); // Case sensitive
         assertThrows(IllegalArgumentException.class, () -> MouseButton.valueOf(""));
         assertThrows(NullPointerException.class, () -> MouseButton.valueOf(null));
     }
@@ -97,14 +100,15 @@ public class MouseButtonTest extends BrobotTestBase {
     void testSwitchStatement() {
         // Given
         MouseButton button = MouseButton.RIGHT;
-        
+
         // When
-        String action = switch (button) {
-            case LEFT -> "Primary click";
-            case RIGHT -> "Context menu";
-            case MIDDLE -> "Auxiliary action";
-        };
-        
+        String action =
+                switch (button) {
+                    case LEFT -> "Primary click";
+                    case RIGHT -> "Context menu";
+                    case MIDDLE -> "Auxiliary action";
+                };
+
         // Then
         assertEquals("Context menu", action);
     }
@@ -116,15 +120,15 @@ public class MouseButtonTest extends BrobotTestBase {
         MouseButton button1 = MouseButton.LEFT;
         MouseButton button2 = MouseButton.LEFT;
         MouseButton button3 = MouseButton.RIGHT;
-        
+
         // Then - Reference equality
         assertSame(button1, button2);
         assertNotSame(button1, button3);
-        
+
         // Equality comparison
         assertEquals(button1, button2);
         assertNotEquals(button1, button3);
-        
+
         // Comparable
         assertTrue(button1.compareTo(button3) < 0);
         assertTrue(button3.compareTo(button1) > 0);
@@ -136,12 +140,12 @@ public class MouseButtonTest extends BrobotTestBase {
     void testCollections() {
         // Given
         Set<MouseButton> usedButtons = new HashSet<>();
-        
+
         // When
         usedButtons.add(MouseButton.LEFT);
         usedButtons.add(MouseButton.RIGHT);
         usedButtons.add(MouseButton.LEFT); // Duplicate
-        
+
         // Then
         assertEquals(2, usedButtons.size());
         assertTrue(usedButtons.contains(MouseButton.LEFT));
@@ -162,43 +166,45 @@ public class MouseButtonTest extends BrobotTestBase {
     @DisplayName("Mouse button usage scenarios")
     Stream<DynamicTest> testUsageScenarios() {
         return Stream.of(
-            dynamicTest("Primary action mapping", () -> {
-                MouseButton primaryButton = MouseButton.LEFT;
-                assertTrue(primaryButton == MouseButton.LEFT);
-                assertEquals("LEFT", primaryButton.name());
-            }),
-            
-            dynamicTest("Context menu mapping", () -> {
-                MouseButton contextButton = MouseButton.RIGHT;
-                assertTrue(contextButton == MouseButton.RIGHT);
-                assertEquals(1, contextButton.ordinal());
-            }),
-            
-            dynamicTest("Auxiliary action mapping", () -> {
-                MouseButton auxButton = MouseButton.MIDDLE;
-                assertTrue(auxButton == MouseButton.MIDDLE);
-                assertEquals(2, auxButton.ordinal());
-            }),
-            
-            dynamicTest("Button preference handling", () -> {
-                // Simulate user preference
-                MouseButton preferredButton = MouseButton.LEFT;
-                MouseButton alternateButton = MouseButton.RIGHT;
-                
-                assertNotEquals(preferredButton, alternateButton);
-                assertTrue(preferredButton.ordinal() < alternateButton.ordinal());
-            }),
-            
-            dynamicTest("Multi-button combination", () -> {
-                Set<MouseButton> combo = Set.of(
-                    MouseButton.LEFT,
-                    MouseButton.RIGHT
-                );
-                
-                assertEquals(2, combo.size());
-                assertFalse(combo.contains(MouseButton.MIDDLE));
-            })
-        );
+                dynamicTest(
+                        "Primary action mapping",
+                        () -> {
+                            MouseButton primaryButton = MouseButton.LEFT;
+                            assertTrue(primaryButton == MouseButton.LEFT);
+                            assertEquals("LEFT", primaryButton.name());
+                        }),
+                dynamicTest(
+                        "Context menu mapping",
+                        () -> {
+                            MouseButton contextButton = MouseButton.RIGHT;
+                            assertTrue(contextButton == MouseButton.RIGHT);
+                            assertEquals(1, contextButton.ordinal());
+                        }),
+                dynamicTest(
+                        "Auxiliary action mapping",
+                        () -> {
+                            MouseButton auxButton = MouseButton.MIDDLE;
+                            assertTrue(auxButton == MouseButton.MIDDLE);
+                            assertEquals(2, auxButton.ordinal());
+                        }),
+                dynamicTest(
+                        "Button preference handling",
+                        () -> {
+                            // Simulate user preference
+                            MouseButton preferredButton = MouseButton.LEFT;
+                            MouseButton alternateButton = MouseButton.RIGHT;
+
+                            assertNotEquals(preferredButton, alternateButton);
+                            assertTrue(preferredButton.ordinal() < alternateButton.ordinal());
+                        }),
+                dynamicTest(
+                        "Multi-button combination",
+                        () -> {
+                            Set<MouseButton> combo = Set.of(MouseButton.LEFT, MouseButton.RIGHT);
+
+                            assertEquals(2, combo.size());
+                            assertFalse(combo.contains(MouseButton.MIDDLE));
+                        }));
     }
 
     @Test
@@ -206,14 +212,14 @@ public class MouseButtonTest extends BrobotTestBase {
     void testArrayOperations() {
         // Given
         MouseButton[] buttons = MouseButton.values();
-        
+
         // When
         MouseButton[] copy = Arrays.copyOf(buttons, buttons.length);
-        
+
         // Then
         assertArrayEquals(buttons, copy);
         assertEquals(3, copy.length);
-        
+
         // Modify copy doesn't affect original
         copy[0] = MouseButton.MIDDLE;
         assertEquals(MouseButton.LEFT, buttons[0]);
@@ -227,12 +233,12 @@ public class MouseButtonTest extends BrobotTestBase {
         MouseButton button1 = MouseButton.valueOf("LEFT");
         MouseButton button2 = MouseButton.valueOf("LEFT");
         MouseButton button3 = MouseButton.LEFT;
-        
+
         // All references point to same instance
         assertSame(button1, button2);
         assertSame(button2, button3);
         assertSame(button1, button3);
-        
+
         // Same for array access
         assertSame(MouseButton.LEFT, MouseButton.values()[0]);
     }
@@ -243,11 +249,11 @@ public class MouseButtonTest extends BrobotTestBase {
     void testStringRoundTrip(String buttonName) {
         // Given
         MouseButton original = MouseButton.valueOf(buttonName);
-        
+
         // When
         String asString = original.toString();
         MouseButton reconstructed = MouseButton.valueOf(asString);
-        
+
         // Then
         assertEquals(original, reconstructed);
         assertSame(original, reconstructed); // Same instance
@@ -260,13 +266,13 @@ public class MouseButtonTest extends BrobotTestBase {
         // Given
         int count = 0;
         Set<String> names = new HashSet<>();
-        
+
         // When
         for (MouseButton button : MouseButton.values()) {
             count++;
             names.add(button.name());
         }
-        
+
         // Then
         assertEquals(3, count);
         assertEquals(3, names.size());
@@ -281,15 +287,15 @@ public class MouseButtonTest extends BrobotTestBase {
         // Given
         MouseButton button = MouseButton.LEFT;
         MouseButton nullButton = null;
-        
+
         // Then
         assertNotNull(button);
         assertNull(nullButton);
-        
+
         // Comparison with null
         assertNotEquals(button, nullButton);
         assertNotEquals(null, button);
-        
+
         // Can't call methods on null
         assertThrows(NullPointerException.class, () -> nullButton.name());
     }
@@ -299,11 +305,11 @@ public class MouseButtonTest extends BrobotTestBase {
     void testTypeSafety() {
         // MouseButton provides compile-time type safety
         MouseButton button = MouseButton.LEFT;
-        
+
         // Can't assign invalid values
         // button = "LEFT"; // Compilation error
         // button = 0; // Compilation error
-        
+
         // Type checking
         assertTrue(button instanceof MouseButton);
         assertTrue(button instanceof Enum);
@@ -315,19 +321,16 @@ public class MouseButtonTest extends BrobotTestBase {
     void testFunctionalPatterns() {
         // Given
         MouseButton[] buttons = MouseButton.values();
-        
+
         // When - Filter and map
-        long leftAndRightCount = Arrays.stream(buttons)
-            .filter(b -> b != MouseButton.MIDDLE)
-            .count();
-        
-        String[] buttonNames = Arrays.stream(buttons)
-            .map(MouseButton::name)
-            .toArray(String[]::new);
-        
+        long leftAndRightCount =
+                Arrays.stream(buttons).filter(b -> b != MouseButton.MIDDLE).count();
+
+        String[] buttonNames = Arrays.stream(buttons).map(MouseButton::name).toArray(String[]::new);
+
         // Then
         assertEquals(2, leftAndRightCount);
-        assertArrayEquals(new String[]{"LEFT", "RIGHT", "MIDDLE"}, buttonNames);
+        assertArrayEquals(new String[] {"LEFT", "RIGHT", "MIDDLE"}, buttonNames);
     }
 
     @Test
@@ -337,11 +340,11 @@ public class MouseButtonTest extends BrobotTestBase {
         MouseButton button1 = MouseButton.LEFT;
         MouseButton button2 = MouseButton.LEFT;
         MouseButton button3 = MouseButton.RIGHT;
-        
+
         // Then
         assertEquals(button1.hashCode(), button2.hashCode());
         assertNotEquals(button1.hashCode(), button3.hashCode()); // Usually different
-        
+
         // HashCode consistency
         int hash1 = button1.hashCode();
         int hash2 = button1.hashCode();
@@ -352,17 +355,17 @@ public class MouseButtonTest extends BrobotTestBase {
     @DisplayName("Should follow enum best practices")
     void testEnumBestPractices() {
         // Verify enum follows best practices
-        
+
         // 1. Enum is final (can't be extended)
         assertTrue(java.lang.reflect.Modifier.isFinal(MouseButton.class.getModifiers()));
-        
+
         // 2. Has proper enum methods
         assertDoesNotThrow(() -> MouseButton.valueOf("LEFT"));
         assertDoesNotThrow(() -> MouseButton.values());
-        
+
         // 3. Implements Comparable
         assertTrue(Comparable.class.isAssignableFrom(MouseButton.class));
-        
+
         // 4. Implements Serializable
         assertTrue(java.io.Serializable.class.isAssignableFrom(MouseButton.class));
     }

@@ -1,29 +1,31 @@
 package io.github.jspinak.brobot.test;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
+import java.nio.file.Paths;
 
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.nio.file.Paths;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 
 /**
- * Initializes the test environment before Spring context loads.
- * This ensures BrobotEnvironment is configured before any beans are created.
+ * Initializes the test environment before Spring context loads. This ensures BrobotEnvironment is
+ * configured before any beans are created.
  */
 @ContextConfiguration(initializers = TestEnvironmentInitializer.class)
-public class TestEnvironmentInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+public class TestEnvironmentInitializer
+        implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
         ConfigurableEnvironment environment = applicationContext.getEnvironment();
 
         // Get test type from system property or environment
-        String testType = System.getProperty("brobot.test.type",
-                environment.getProperty("brobot.test.type", "unit"));
+        String testType =
+                System.getProperty(
+                        "brobot.test.type", environment.getProperty("brobot.test.type", "unit"));
 
         // Configure paths for test resources
         String projectRoot = Paths.get("").toAbsolutePath().toString();
@@ -38,12 +40,13 @@ public class TestEnvironmentInitializer implements ApplicationContextInitializer
         if ("integration".equals(testType)) {
             System.out.println("Initializing INTEGRATION test environment");
 
-            env = ExecutionEnvironment.builder()
-                    .mockMode(false) // Use real files
-                    .forceHeadless(true) // Force headless for CI/WSL
-                    .allowScreenCapture(false)
-                    .verboseLogging(true)
-                    .build();
+            env =
+                    ExecutionEnvironment.builder()
+                            .mockMode(false) // Use real files
+                            .forceHeadless(true) // Force headless for CI/WSL
+                            .allowScreenCapture(false)
+                            .verboseLogging(true)
+                            .build();
 
             FrameworkSettings.mock = false;
 
@@ -59,11 +62,12 @@ public class TestEnvironmentInitializer implements ApplicationContextInitializer
         } else {
             System.out.println("Initializing UNIT test environment");
 
-            env = ExecutionEnvironment.builder()
-                    .mockMode(true) // Use mock data
-                    .forceHeadless(true)
-                    .allowScreenCapture(false)
-                    .build();
+            env =
+                    ExecutionEnvironment.builder()
+                            .mockMode(true) // Use mock data
+                            .forceHeadless(true)
+                            .allowScreenCapture(false)
+                            .build();
 
             FrameworkSettings.mock = true;
         }

@@ -1,17 +1,15 @@
 package io.github.jspinak.brobot.tools.testing.mock.action;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Random;
+
+import org.springframework.stereotype.Component;
+
 import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.tools.testing.mock.time.MockTime;
 
-import org.springframework.stereotype.Component;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Random;
-
-/**
- * Mock text for GetText Actions using Snapshots.
- */
+/** Mock text for GetText Actions using Snapshots. */
 @Component
 public class MockText {
 

@@ -1,34 +1,33 @@
 package io.github.jspinak.brobot.action;
 
-import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
+
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
+
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 import io.github.jspinak.brobot.test.config.MockOnlyTestConfiguration;
-import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
-
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assumptions.*;
 
 /**
- * Test coverage for Action error handling and recovery scenarios.
- * Tests exception handling, recovery strategies, and edge error conditions.
+ * Test coverage for Action error handling and recovery scenarios. Tests exception handling,
+ * recovery strategies, and edge error conditions.
  */
 @DisplayName("Action Error Handling Tests")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@ContextConfiguration(initializers = { MockOnlyTestConfiguration.class })
+@ContextConfiguration(initializers = {MockOnlyTestConfiguration.class})
 public class ActionErrorHandlingTest extends BrobotIntegrationTestBase {
 
     @Autowired(required = false)
@@ -63,14 +62,16 @@ public class ActionErrorHandlingTest extends BrobotIntegrationTestBase {
         AtomicBoolean actionCompleted = new AtomicBoolean(false);
 
         // When - simulate interrupt during action
-        Thread interruptor = new Thread(() -> {
-            try {
-                Thread.sleep(50);
-                currentThread.interrupt();
-            } catch (InterruptedException e) {
-                // Ignore
-            }
-        });
+        Thread interruptor =
+                new Thread(
+                        () -> {
+                            try {
+                                Thread.sleep(50);
+                                currentThread.interrupt();
+                            } catch (InterruptedException e) {
+                                // Ignore
+                            }
+                        });
 
         interruptor.start();
 
@@ -86,7 +87,8 @@ public class ActionErrorHandlingTest extends BrobotIntegrationTestBase {
 
         // Action should be able to continue after interrupt
         ActionResult postInterruptResult = action.find(image);
-        assertTrue(postInterruptResult == null || postInterruptResult != null,
+        assertTrue(
+                postInterruptResult == null || postInterruptResult != null,
                 "Action should handle post-interrupt state");
     }
 
@@ -97,9 +99,7 @@ public class ActionErrorHandlingTest extends BrobotIntegrationTestBase {
         // Given - create many large objects to stress memory
         StateImage[] manyImages = new StateImage[1000];
         for (int i = 0; i < manyImages.length; i++) {
-            manyImages[i] = new StateImage.Builder()
-                    .setName("memory-test-" + i)
-                    .build();
+            manyImages[i] = new StateImage.Builder().setName("memory-test-" + i).build();
         }
 
         // When - perform action with many objects
@@ -107,8 +107,8 @@ public class ActionErrorHandlingTest extends BrobotIntegrationTestBase {
             ActionResult result = action.find(manyImages);
 
             // Then - should complete without OOM
-            assertTrue(result == null || result != null,
-                    "Action completed despite memory pressure");
+            assertTrue(
+                    result == null || result != null, "Action completed despite memory pressure");
         } catch (OutOfMemoryError e) {
             fail("Action should handle memory efficiently");
         }
@@ -133,14 +133,17 @@ public class ActionErrorHandlingTest extends BrobotIntegrationTestBase {
 
         // When - try to modify while action is running
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        Future<ActionResult> future = executor.submit(() -> {
-            try {
-                return action.perform(new PatternFindOptions.Builder().build(), collection);
-            } catch (Exception e) {
-                exceptionThrown.set(true);
-                return null;
-            }
-        });
+        Future<ActionResult> future =
+                executor.submit(
+                        () -> {
+                            try {
+                                return action.perform(
+                                        new PatternFindOptions.Builder().build(), collection);
+                            } catch (Exception e) {
+                                exceptionThrown.set(true);
+                                return null;
+                            }
+                        });
 
         // Try to get result
         try {
@@ -180,10 +183,11 @@ public class ActionErrorHandlingTest extends BrobotIntegrationTestBase {
         RecursiveAction recursive = new RecursiveAction();
 
         // Then - should not cause stack overflow
-        assertDoesNotThrow(() -> {
-            ActionResult result = recursive.performRecursive(image);
-            assertTrue(result != null, "Recursive action completed");
-        });
+        assertDoesNotThrow(
+                () -> {
+                    ActionResult result = recursive.performRecursive(image);
+                    assertTrue(result != null, "Recursive action completed");
+                });
     }
 
     @Test
@@ -211,20 +215,23 @@ public class ActionErrorHandlingTest extends BrobotIntegrationTestBase {
     @DisplayName("Test invalid pattern data handling")
     void testInvalidPatternHandling() {
         // Given - create StateImage with invalid/empty data
-        StateImage invalidImage = new StateImage.Builder()
-                .setName("") // Empty name
-                .build();
+        StateImage invalidImage =
+                new StateImage.Builder()
+                        .setName("") // Empty name
+                        .build();
 
-        StateImage nullNameImage = new StateImage.Builder()
-                .setName(null) // Null name
-                .build();
+        StateImage nullNameImage =
+                new StateImage.Builder()
+                        .setName(null) // Null name
+                        .build();
 
         // When & Then
-        assertDoesNotThrow(() -> {
-            ActionResult result1 = action.find(invalidImage);
-            ActionResult result2 = action.find(nullNameImage);
-            // Should handle gracefully
-        });
+        assertDoesNotThrow(
+                () -> {
+                    ActionResult result1 = action.find(invalidImage);
+                    ActionResult result2 = action.find(nullNameImage);
+                    // Should handle gracefully
+                });
     }
 
     @Test
@@ -238,20 +245,23 @@ public class ActionErrorHandlingTest extends BrobotIntegrationTestBase {
         AtomicBoolean completedAfterShutdown = new AtomicBoolean(false);
 
         // When - submit task then shutdown
-        Future<ActionResult> future1 = executor.submit(() -> {
-            startLatch.countDown();
-            return action.findWithTimeout(10.0, image);
-        });
+        Future<ActionResult> future1 =
+                executor.submit(
+                        () -> {
+                            startLatch.countDown();
+                            return action.findWithTimeout(10.0, image);
+                        });
 
         startLatch.await();
         executor.shutdown();
 
         // Try to submit after shutdown
         try {
-            executor.submit(() -> {
-                completedAfterShutdown.set(true);
-                return action.find(image);
-            });
+            executor.submit(
+                    () -> {
+                        completedAfterShutdown.set(true);
+                        return action.find(image);
+                    });
             fail("Should reject new tasks after shutdown");
         } catch (RejectedExecutionException e) {
             // Expected
@@ -268,18 +278,20 @@ public class ActionErrorHandlingTest extends BrobotIntegrationTestBase {
     void testInvalidCoordinatesHandling() {
         // Given
         Location[] invalidLocations = {
-                new Location(Integer.MIN_VALUE, Integer.MIN_VALUE),
-                new Location(Integer.MAX_VALUE, Integer.MAX_VALUE),
-                new Location(-999999, -999999),
-                new Location(999999, 999999)
+            new Location(Integer.MIN_VALUE, Integer.MIN_VALUE),
+            new Location(Integer.MAX_VALUE, Integer.MAX_VALUE),
+            new Location(-999999, -999999),
+            new Location(999999, 999999)
         };
 
         // When & Then
         for (Location loc : invalidLocations) {
-            assertDoesNotThrow(() -> {
-                ActionResult result = action.perform(ActionType.MOVE, loc);
-                // Should handle invalid coordinates gracefully
-            }, "Failed for location: " + loc);
+            assertDoesNotThrow(
+                    () -> {
+                        ActionResult result = action.perform(ActionType.MOVE, loc);
+                        // Should handle invalid coordinates gracefully
+                    },
+                    "Failed for location: " + loc);
         }
     }
 
@@ -289,17 +301,16 @@ public class ActionErrorHandlingTest extends BrobotIntegrationTestBase {
     void testNullCollectionElementsHandling() {
         // Given - ObjectCollection.Builder filters out nulls internally
         // Create collection with valid objects and nulls mixed
-        ObjectCollection collection = new ObjectCollection.Builder()
-                .withImages(new StateImage.Builder().setName("valid").build())
-                .withRegions(new Region(0, 0, 10, 10))
-                .withLocations(new Location(50, 50))
-                .withStrings("valid text")
-                .build();
+        ObjectCollection collection =
+                new ObjectCollection.Builder()
+                        .withImages(new StateImage.Builder().setName("valid").build())
+                        .withRegions(new Region(0, 0, 10, 10))
+                        .withLocations(new Location(50, 50))
+                        .withStrings("valid text")
+                        .build();
 
         // When
-        ActionResult result = action.perform(
-                new PatternFindOptions.Builder().build(),
-                collection);
+        ActionResult result = action.perform(new PatternFindOptions.Builder().build(), collection);
 
         // Then
         if (result != null) {
@@ -318,14 +329,16 @@ public class ActionErrorHandlingTest extends BrobotIntegrationTestBase {
         CompletableFuture<ActionResult> future = new CompletableFuture<>();
 
         // When - start action in separate thread
-        Thread actionThread = new Thread(() -> {
-            try {
-                ActionResult result = action.findWithTimeout(10.0, image);
-                future.complete(result);
-            } catch (Exception e) {
-                future.completeExceptionally(e);
-            }
-        });
+        Thread actionThread =
+                new Thread(
+                        () -> {
+                            try {
+                                ActionResult result = action.findWithTimeout(10.0, image);
+                                future.complete(result);
+                            } catch (Exception e) {
+                                future.completeExceptionally(e);
+                            }
+                        });
 
         actionThread.start();
         Thread.sleep(50);
@@ -352,21 +365,19 @@ public class ActionErrorHandlingTest extends BrobotIntegrationTestBase {
         StateImage image1 = new StateImage.Builder().setName("circular1").build();
         StateImage image2 = new StateImage.Builder().setName("circular2").build();
 
-        ObjectCollection collection1 = new ObjectCollection.Builder()
-                .withImages(image1, image2)
-                .build();
+        ObjectCollection collection1 =
+                new ObjectCollection.Builder().withImages(image1, image2).build();
 
-        ObjectCollection collection2 = new ObjectCollection.Builder()
-                .withImages(image2, image1) // Same images in different order
-                .build();
+        ObjectCollection collection2 =
+                new ObjectCollection.Builder()
+                        .withImages(image2, image1) // Same images in different order
+                        .build();
 
         // When - perform actions that might detect circular patterns
-        ActionResult result1 = action.perform(
-                new PatternFindOptions.Builder().build(),
-                collection1);
-        ActionResult result2 = action.perform(
-                new PatternFindOptions.Builder().build(),
-                collection2);
+        ActionResult result1 =
+                action.perform(new PatternFindOptions.Builder().build(), collection1);
+        ActionResult result2 =
+                action.perform(new PatternFindOptions.Builder().build(), collection2);
 
         // Then - should handle without infinite loops
         assertTrue(result1 == null || result1 != null, "First collection handled");
@@ -380,7 +391,7 @@ public class ActionErrorHandlingTest extends BrobotIntegrationTestBase {
         // Given
         StateImage image = new StateImage.Builder().setName("retry-backoff").build();
         int maxRetries = 3;
-        long[] delays = { 100, 200, 400 }; // Exponential backoff
+        long[] delays = {100, 200, 400}; // Exponential backoff
         AtomicInteger attemptCount = new AtomicInteger(0);
 
         // When - implement retry with backoff
@@ -457,33 +468,37 @@ public class ActionErrorHandlingTest extends BrobotIntegrationTestBase {
         CountDownLatch startLatch = new CountDownLatch(2);
 
         // When - create potential deadlock scenario
-        Thread thread1 = new Thread(() -> {
-            synchronized (lock1) {
-                startLatch.countDown();
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    return;
-                }
-                synchronized (lock2) {
-                    action.find(new StateImage.Builder().setName("lock1").build());
-                }
-            }
-        });
+        Thread thread1 =
+                new Thread(
+                        () -> {
+                            synchronized (lock1) {
+                                startLatch.countDown();
+                                try {
+                                    Thread.sleep(50);
+                                } catch (InterruptedException e) {
+                                    return;
+                                }
+                                synchronized (lock2) {
+                                    action.find(new StateImage.Builder().setName("lock1").build());
+                                }
+                            }
+                        });
 
-        Thread thread2 = new Thread(() -> {
-            synchronized (lock2) {
-                startLatch.countDown();
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    return;
-                }
-                synchronized (lock1) {
-                    action.find(new StateImage.Builder().setName("lock2").build());
-                }
-            }
-        });
+        Thread thread2 =
+                new Thread(
+                        () -> {
+                            synchronized (lock2) {
+                                startLatch.countDown();
+                                try {
+                                    Thread.sleep(50);
+                                } catch (InterruptedException e) {
+                                    return;
+                                }
+                                synchronized (lock1) {
+                                    action.find(new StateImage.Builder().setName("lock2").build());
+                                }
+                            }
+                        });
 
         thread1.start();
         thread2.start();
@@ -512,9 +527,9 @@ public class ActionErrorHandlingTest extends BrobotIntegrationTestBase {
     void testExceptionAggregation() {
         // Given - multiple actions that might fail
         StateImage[] problematicImages = {
-                new StateImage.Builder().setName(null).build(),
-                new StateImage.Builder().setName("").build(),
-                new StateImage.Builder().setName("valid").build()
+            new StateImage.Builder().setName(null).build(),
+            new StateImage.Builder().setName("").build(),
+            new StateImage.Builder().setName("valid").build()
         };
 
         AtomicInteger exceptionCount = new AtomicInteger(0);
@@ -535,9 +550,11 @@ public class ActionErrorHandlingTest extends BrobotIntegrationTestBase {
         // Then
         assertTrue(exceptionCount.get() >= 0, "Exceptions handled: " + exceptionCount.get());
         assertTrue(successCount.get() >= 0, "Successes counted: " + successCount.get());
-        assertEquals(problematicImages.length,
-                exceptionCount.get() + successCount.get() +
-                        (problematicImages.length - exceptionCount.get() - successCount.get()),
+        assertEquals(
+                problematicImages.length,
+                exceptionCount.get()
+                        + successCount.get()
+                        + (problematicImages.length - exceptionCount.get() - successCount.get()),
                 "All images processed");
     }
 }

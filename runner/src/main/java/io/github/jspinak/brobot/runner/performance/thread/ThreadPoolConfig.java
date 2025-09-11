@@ -1,24 +1,24 @@
 package io.github.jspinak.brobot.runner.performance.thread;
 
+import java.util.concurrent.TimeUnit;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * Configuration for creating thread pools.
- * 
- * This class provides a fluent builder API for configuring thread pools
- * with appropriate settings for different workload types.
- * 
+ *
+ * <p>This class provides a fluent builder API for configuring thread pools with appropriate
+ * settings for different workload types.
+ *
  * @since 1.0.0
  */
 @Getter
 @Builder
 @ToString
 public class ThreadPoolConfig {
-    
+
     private final int corePoolSize;
     private final int maximumPoolSize;
     private final long keepAliveTime;
@@ -26,10 +26,10 @@ public class ThreadPoolConfig {
     private final int queueCapacity;
     private final boolean allowCoreThreadTimeout;
     private final String threadNamePrefix;
-    
+
     /**
      * Create a default configuration suitable for general purpose use.
-     * 
+     *
      * @return default thread pool configuration
      */
     public static ThreadPoolConfig defaultConfig() {
@@ -44,10 +44,10 @@ public class ThreadPoolConfig {
                 .threadNamePrefix("default")
                 .build();
     }
-    
+
     /**
      * Create a configuration optimized for I/O intensive tasks.
-     * 
+     *
      * @return I/O optimized thread pool configuration
      */
     public static ThreadPoolConfig ioIntensiveConfig() {
@@ -62,10 +62,10 @@ public class ThreadPoolConfig {
                 .threadNamePrefix("io-intensive")
                 .build();
     }
-    
+
     /**
      * Create a configuration optimized for CPU intensive tasks.
-     * 
+     *
      * @return CPU optimized thread pool configuration
      */
     public static ThreadPoolConfig cpuIntensiveConfig() {
@@ -80,10 +80,10 @@ public class ThreadPoolConfig {
                 .threadNamePrefix("cpu-intensive")
                 .build();
     }
-    
+
     /**
      * Create a configuration for single-threaded executor.
-     * 
+     *
      * @return single-threaded configuration
      */
     public static ThreadPoolConfig singleThreadConfig() {
@@ -97,10 +97,10 @@ public class ThreadPoolConfig {
                 .threadNamePrefix("single-thread")
                 .build();
     }
-    
+
     /**
      * Create a configuration for scheduled tasks.
-     * 
+     *
      * @param corePoolSize number of threads to keep in the pool
      * @return scheduled task configuration
      */
@@ -115,10 +115,10 @@ public class ThreadPoolConfig {
                 .threadNamePrefix("scheduled")
                 .build();
     }
-    
+
     /**
      * Validate the configuration.
-     * 
+     *
      * @throws IllegalStateException if configuration is invalid
      */
     public void validate() {

@@ -13,6 +13,9 @@ plugins {
     
     // JaCoCo for code coverage reporting
     id 'jacoco'
+    
+    // Spotless for code formatting and linting
+    id 'com.diffplug.spotless' version '6.25.0'
 }
 
 // Apply coverage configuration
@@ -100,5 +103,68 @@ task jacocoAggregatedReport(type: JacocoReport) {
     
     doLast {
         println "Aggregate coverage report generated at: ${layout.buildDirectory.dir('reports/jacoco/aggregate').get()}"
+    }
+}
+
+// Configure Spotless for code formatting and linting
+spotless {
+    // Java formatting configuration
+    java {
+        target 'library/src/**/*.java', 'library-test/src/**/*.java', 'library-features/src/**/*.java', 
+               'runner/src/**/*.java', 'persistence/src/**/*.java', 'pattern-capture-tool/src/**/*.java',
+               'examples/**/src/**/*.java'
+        
+        // Use Google Java Format for consistent formatting
+        googleJavaFormat('1.19.2')
+            .aosp()  // Android Open Source Project style (4-space indentation)
+            .reflowLongStrings()  // Reflow long string literals
+            .formatJavadoc(true)  // Format Javadoc
+        
+        // Remove unused imports
+        removeUnusedImports()
+        
+        // Organize imports
+        importOrder('java', 'javax', 'jakarta', 'org', 'com', 'io.github.jspinak', '')
+        
+        // Format annotations
+        formatAnnotations()
+        
+        // Trim trailing whitespace
+        trimTrailingWhitespace()
+        
+        // Ensure files end with newline
+        endWithNewline()
+        
+        // Custom license header (optional - uncomment if needed)
+        // licenseHeader '/* Copyright (c) 2024 Brobot Project */'
+    }
+    
+    // Format properties files (removed Gradle formatting to avoid errors)
+    format 'misc', {
+        target '**/*.properties', '**/*.yml', '**/*.yaml'
+        trimTrailingWhitespace()
+        indentWithSpaces(2)
+        endWithNewline()
+    }
+}
+
+// Apply Spotless to all subprojects
+subprojects {
+    apply plugin: 'com.diffplug.spotless'
+    
+    spotless {
+        java {
+            // Use the same configuration as root project
+            googleJavaFormat('1.19.2')
+                .aosp()
+                .reflowLongStrings()
+                .formatJavadoc(true)
+            
+            removeUnusedImports()
+            importOrder('java', 'javax', 'jakarta', 'org', 'com', 'io.github.jspinak', '')
+            formatAnnotations()
+            trimTrailingWhitespace()
+            endWithNewline()
+        }
     }
 }

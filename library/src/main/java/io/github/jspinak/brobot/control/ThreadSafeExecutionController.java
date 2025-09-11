@@ -1,28 +1,27 @@
 package io.github.jspinak.brobot.control;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Thread-safe implementation of ExecutionController.
- * <p>
- * This class provides a robust, thread-safe mechanism for controlling
- * execution flow in multi-threaded automation scenarios. It uses proper
- * synchronization to ensure state transitions are atomic and pause/resume
- * operations work correctly across threads.
- * </p>
- * 
+ *
+ * <p>This class provides a robust, thread-safe mechanism for controlling execution flow in
+ * multi-threaded automation scenarios. It uses proper synchronization to ensure state transitions
+ * are atomic and pause/resume operations work correctly across threads.
+ *
  * <p>Key implementation details:
+ *
  * <ul>
- *   <li>Uses volatile state for visibility across threads</li>
- *   <li>Synchronizes state transitions to ensure atomicity</li>
- *   <li>Implements wait/notify pattern for pause/resume</li>
- *   <li>Provides clear logging for debugging execution flow</li>
+ *   <li>Uses volatile state for visibility across threads
+ *   <li>Synchronizes state transitions to ensure atomicity
+ *   <li>Implements wait/notify pattern for pause/resume
+ *   <li>Provides clear logging for debugging execution flow
  * </ul>
- * </p>
- * 
+ *
  * <p>Usage pattern:
+ *
  * <pre>{@code
  * // In execution loop
  * while (processing) {
@@ -30,28 +29,29 @@ import org.springframework.stereotype.Component;
  *     // Do work here
  * }
  * }</pre>
- * </p>
  */
 @Slf4j
 @Component
 public class ThreadSafeExecutionController implements ExecutionController {
-    
+
     private volatile ExecutionState state = ExecutionState.IDLE;
     private final Object stateLock = new Object();
-    
+
     @Override
     public void start() {
         synchronized (stateLock) {
             if (!state.canStart()) {
                 throw new IllegalStateException(
-                    String.format("Cannot start from state: %s. Execution must be IDLE or STOPPED.", state));
+                        String.format(
+                                "Cannot start from state: %s. Execution must be IDLE or STOPPED.",
+                                state));
             }
             log.debug("Starting execution from state: {}", state);
             state = ExecutionState.RUNNING;
             stateLock.notifyAll(); // Wake any waiting threads
         }
     }
-    
+
     @Override
     public void pause() {
         synchronized (stateLock) {
@@ -63,20 +63,21 @@ public class ThreadSafeExecutionController implements ExecutionController {
             state = ExecutionState.PAUSED;
         }
     }
-    
+
     @Override
     public void resume() {
         synchronized (stateLock) {
             if (!state.canResume()) {
                 throw new IllegalStateException(
-                    String.format("Cannot resume from state: %s. Execution must be PAUSED.", state));
+                        String.format(
+                                "Cannot resume from state: %s. Execution must be PAUSED.", state));
             }
             log.info("Resuming execution");
             state = ExecutionState.RUNNING;
             stateLock.notifyAll(); // Wake all threads waiting at pause points
         }
     }
-    
+
     @Override
     public void stop() {
         synchronized (stateLock) {
@@ -89,27 +90,27 @@ public class ThreadSafeExecutionController implements ExecutionController {
             stateLock.notifyAll(); // Wake any paused threads so they can exit
         }
     }
-    
+
     @Override
     public boolean isPaused() {
         return state == ExecutionState.PAUSED;
     }
-    
+
     @Override
     public boolean isStopped() {
         return state.isTerminated();
     }
-    
+
     @Override
     public boolean isRunning() {
         return state == ExecutionState.RUNNING;
     }
-    
+
     @Override
     public ExecutionState getState() {
         return state;
     }
-    
+
     @Override
     public void checkPausePoint() throws ExecutionStoppedException, InterruptedException {
         synchronized (stateLock) {
@@ -118,7 +119,7 @@ public class ThreadSafeExecutionController implements ExecutionController {
                 state = ExecutionState.STOPPED; // Ensure we're in final stopped state
                 throw new ExecutionStoppedException("Execution stopped at pause point");
             }
-            
+
             // Wait while paused
             while (state == ExecutionState.PAUSED) {
                 log.debug("Thread {} waiting at pause point", Thread.currentThread().getName());
@@ -129,7 +130,7 @@ public class ThreadSafeExecutionController implements ExecutionController {
                     Thread.currentThread().interrupt();
                     throw new InterruptedException("Thread interrupted while paused");
                 }
-                
+
                 // After waking, check if we should stop
                 if (state == ExecutionState.STOPPING || state == ExecutionState.STOPPED) {
                     state = ExecutionState.STOPPED;
@@ -138,7 +139,7 @@ public class ThreadSafeExecutionController implements ExecutionController {
             }
         }
     }
-    
+
     @Override
     public void reset() {
         synchronized (stateLock) {
@@ -147,11 +148,10 @@ public class ThreadSafeExecutionController implements ExecutionController {
             stateLock.notifyAll(); // Wake any waiting threads
         }
     }
-    
+
     /**
-     * Gets a string representation of the current state.
-     * Useful for debugging and logging.
-     * 
+     * Gets a string representation of the current state. Useful for debugging and logging.
+     *
      * @return String representation of the controller state
      */
     @Override

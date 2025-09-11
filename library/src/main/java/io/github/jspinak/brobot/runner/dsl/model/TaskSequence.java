@@ -1,58 +1,60 @@
 // File: io/github/jspinak/brobot/dsl/model/ActionDefinition.java
 package io.github.jspinak.brobot.runner.dsl.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.github.jspinak.brobot.action.ActionConfig;
-import io.github.jspinak.brobot.action.ObjectCollection;
-import lombok.Data;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.ObjectCollection;
+
+import lombok.Data;
+
 /**
  * Defines a sequence of actions as data in the Brobot Domain-Specific Language.
- * 
- * <p>TaskSequence represents a declarative specification of automation steps that can be 
- * stored, transmitted, and executed dynamically. It encapsulates a series of ActionSteps, 
- * each containing the configuration and targets for a specific action. This data-driven 
- * approach enables flexible automation definition without hardcoded logic.</p>
- * 
+ *
+ * <p>TaskSequence represents a declarative specification of automation steps that can be stored,
+ * transmitted, and executed dynamically. It encapsulates a series of ActionSteps, each containing
+ * the configuration and targets for a specific action. This data-driven approach enables flexible
+ * automation definition without hardcoded logic.
+ *
  * <p>Key features:
+ *
  * <ul>
- *   <li><b>Sequential Steps</b>: Maintains an ordered list of actions to execute</li>
- *   <li><b>Data-driven</b>: Can be serialized to/from JSON for configuration-based automation</li>
- *   <li><b>Composable</b>: Steps can be added dynamically to build complex workflows</li>
- *   <li><b>Self-contained</b>: Each step includes both action configuration and target objects</li>
+ *   <li><b>Sequential Steps</b>: Maintains an ordered list of actions to execute
+ *   <li><b>Data-driven</b>: Can be serialized to/from JSON for configuration-based automation
+ *   <li><b>Composable</b>: Steps can be added dynamically to build complex workflows
+ *   <li><b>Self-contained</b>: Each step includes both action configuration and target objects
  * </ul>
- * </p>
- * 
+ *
  * <p>Common use patterns:
+ *
  * <ul>
- *   <li>Defining state transitions as a series of actions</li>
- *   <li>Creating reusable automation sequences</li>
- *   <li>Building dynamic workflows from configuration files</li>
- *   <li>Enabling non-programmers to define automation through data</li>
+ *   <li>Defining state transitions as a series of actions
+ *   <li>Creating reusable automation sequences
+ *   <li>Building dynamic workflows from configuration files
+ *   <li>Enabling non-programmers to define automation through data
  * </ul>
- * </p>
- * 
+ *
  * <p>Example workflow:
+ *
  * <pre>
  * Step 1: Find and click login button
  * Step 2: Type username
- * Step 3: Type password  
+ * Step 3: Type password
  * Step 4: Click submit
  * Step 5: Verify main page appears
  * </pre>
- * </p>
- * 
- * <p>In the model-based approach, TaskSequence bridges the gap between abstract state 
- * transitions and concrete action sequences. It enables state transitions to be defined 
- * declaratively, making the automation more maintainable and allowing runtime modification 
- * of behavior without code changes.</p>
- * 
- * <p>The custom toString() implementation provides human-readable output for debugging 
- * and logging, showing each step in the sequence with its configuration.</p>
- * 
+ *
+ * <p>In the model-based approach, TaskSequence bridges the gap between abstract state transitions
+ * and concrete action sequences. It enables state transitions to be defined declaratively, making
+ * the automation more maintainable and allowing runtime modification of behavior without code
+ * changes.
+ *
+ * <p>The custom toString() implementation provides human-readable output for debugging and logging,
+ * showing each step in the sequence with its configuration.
+ *
  * @since 1.0
  * @see ActionStep
  * @see ActionConfig
@@ -65,8 +67,8 @@ public class TaskSequence {
     private List<ActionStep> steps = new ArrayList<>();
 
     /**
-     * Creates an empty TaskSequence with no steps.
-     * Steps can be added later using the addStep methods.
+     * Creates an empty TaskSequence with no steps. Steps can be added later using the addStep
+     * methods.
      */
     public TaskSequence() {
         // The default constructor is kept for custom initialization.
@@ -86,8 +88,8 @@ public class TaskSequence {
     }
 
     /**
-     * Adds a new action step to this definition.
-     * The step is appended to the end of the current sequence.
+     * Adds a new action step to this definition. The step is appended to the end of the current
+     * sequence.
      *
      * @param options The action configuration for the new step
      * @param objects The target objects for the new step
@@ -100,8 +102,8 @@ public class TaskSequence {
     }
 
     /**
-     * Adds an existing ActionStep to this definition.
-     * The step is appended to the end of the current sequence.
+     * Adds an existing ActionStep to this definition. The step is appended to the end of the
+     * current sequence.
      *
      * @param step The ActionStep to add
      */
@@ -110,9 +112,8 @@ public class TaskSequence {
     }
 
     /**
-     * Returns a human-readable string representation of this TaskSequence.
-     * Shows each step in the sequence with its configuration for debugging
-     * and logging purposes.
+     * Returns a human-readable string representation of this TaskSequence. Shows each step in the
+     * sequence with its configuration for debugging and logging purposes.
      *
      * @return A formatted string showing all steps in the action sequence
      */

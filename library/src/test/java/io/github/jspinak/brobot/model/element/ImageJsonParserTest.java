@@ -1,25 +1,23 @@
 package io.github.jspinak.brobot.model.element;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.junit.jupiter.api.Assertions.*;
 
+import java.awt.image.BufferedImage;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import java.awt.image.BufferedImage;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
  * Tests for Image JSON parsing.
- * 
- * Key points:
- * - Image is a wrapper for BufferedImage
- * - BufferedImage is marked @JsonIgnore, so only name is serialized
- * - Image can be created from BufferedImage, Mat, Pattern, or file
+ *
+ * <p>Key points: - Image is a wrapper for BufferedImage - BufferedImage is marked @JsonIgnore, so
+ * only name is serialized - Image can be created from BufferedImage, Mat, Pattern, or file
  */
 @DisplayName("Image JSON Parser Tests")
 class ImageJsonParserTest extends BrobotTestBase {
@@ -31,7 +29,9 @@ class ImageJsonParserTest extends BrobotTestBase {
     public void setupTest() {
         super.setupTest();
         objectMapper = new ObjectMapper();
-        objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.configure(
+                com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+                false);
     }
 
     @Test
@@ -39,13 +39,12 @@ class ImageJsonParserTest extends BrobotTestBase {
     void testImageSerializationOnly() throws Exception {
         // Image cannot be deserialized from JSON as it has no default constructor
         // and BufferedImage is @JsonIgnore. We can only test serialization.
-        
+
         Image image = new Image(new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB));
         image.setName("TestImage");
-        
+
         String json = objectMapper.writeValueAsString(image);
-        
-        
+
         assertNotNull(json);
         assertTrue(json.contains("\"name\""));
         assertTrue(json.contains("\"TestImage\""));
@@ -64,7 +63,7 @@ class ImageJsonParserTest extends BrobotTestBase {
         assertNotNull(json);
         assertTrue(json.contains("\"name\":") && json.contains("\"SerializedImage\""));
         assertFalse(json.contains("bufferedImage")); // Should not serialize @JsonIgnore field
-        
+
         // Note: Cannot deserialize back to Image as it lacks a default constructor
         // and all constructors require BufferedImage which is @JsonIgnore
     }
@@ -102,7 +101,7 @@ class ImageJsonParserTest extends BrobotTestBase {
         assertNotNull(emptyImage);
         assertEquals("empty scene", emptyImage.getName());
         assertNotNull(emptyImage.getBufferedImage());
-        
+
         // Verify it's actually a valid image
         assertTrue(emptyImage.getBufferedImage().getWidth() > 0);
         assertTrue(emptyImage.getBufferedImage().getHeight() > 0);
@@ -129,22 +128,22 @@ class ImageJsonParserTest extends BrobotTestBase {
         // Create an image and verify its JSON structure
         Image image = new Image(new BufferedImage(100, 80, BufferedImage.TYPE_INT_RGB));
         image.setName("StructureTest");
-        
+
         String json = objectMapper.writeValueAsString(image);
-        
+
         // Parse as generic JSON to verify structure
         @SuppressWarnings("unchecked")
         Map<String, Object> jsonMap = objectMapper.readValue(json, Map.class);
-        
+
         // Print actual JSON structure for debugging
         System.out.println("JSON: " + json);
         System.out.println("Keys: " + jsonMap.keySet());
-        
+
         // Image class may have additional fields beyond 'name'
         // Let's check what fields are actually serialized
         assertTrue(jsonMap.containsKey("name"));
         assertEquals("StructureTest", jsonMap.get("name"));
-        
+
         // If there are more fields, verify they are expected
         // The test was failing because it expected only 1 field but got 2
         // Let's be more flexible and just verify the important fields
@@ -156,14 +155,14 @@ class ImageJsonParserTest extends BrobotTestBase {
     void testSerializeImageWithoutName() throws Exception {
         // Create image without setting name
         Image image = new Image(new BufferedImage(50, 50, BufferedImage.TYPE_INT_RGB));
-        
+
         String json = objectMapper.writeValueAsString(image);
-        
+
         assertNotNull(json);
         // Parse as generic JSON to verify structure
         @SuppressWarnings("unchecked")
         Map<String, Object> jsonMap = objectMapper.readValue(json, Map.class);
-        
+
         // Name should be null
         assertTrue(jsonMap.containsKey("name"));
         assertNull(jsonMap.get("name"));

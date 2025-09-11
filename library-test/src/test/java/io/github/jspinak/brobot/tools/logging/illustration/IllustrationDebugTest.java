@@ -1,45 +1,38 @@
 package io.github.jspinak.brobot.tools.logging.illustration;
 
-import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.model.element.Pattern;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.element.Scene;
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
-import io.github.jspinak.brobot.testutils.TestPaths;
-import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ContextConfiguration;
-import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
-import io.github.jspinak.brobot.test.mock.MockScreenConfig;
-import org.springframework.test.context.TestPropertySource;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.file.Files;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.element.Scene;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.testutils.TestPaths;
+import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 
 /**
- * Debug test specifically for illustration functionality.
- * This test helps identify why illustrations are showing black images.
+ * Debug test specifically for illustration functionality. This test helps identify why
+ * illustrations are showing black images.
  */
 @SpringBootTest
 public class IllustrationDebugTest {
 
-    @Autowired
-    Action action;
+    @Autowired Action action;
 
     @BeforeAll
     public static void setupEnvironment() {
@@ -56,8 +49,10 @@ public class IllustrationDebugTest {
         ExecutionEnvironment env = ExecutionEnvironment.getInstance();
 
         // Assert ExecutionEnvironment is properly configured
-        assertTrue(env.canCaptureScreen(),
-                "ExecutionEnvironment.canCaptureScreen() must be true - if false, this is why illustrations are black");
+        assertTrue(
+                env.canCaptureScreen(),
+                "ExecutionEnvironment.canCaptureScreen() must be true - if false, this is why"
+                        + " illustrations are black");
 
         // Test direct screen capture
         Region fullScreen = new Region(); // Default constructor creates full screen region
@@ -70,8 +65,10 @@ public class IllustrationDebugTest {
 
         // Verify image is not all black
         boolean hasNonBlackPixels = checkForNonBlackPixels(screenshot);
-        assertTrue(hasNonBlackPixels,
-                "Screenshot must contain non-black pixels - all black indicates screen capture failure");
+        assertTrue(
+                hasNonBlackPixels,
+                "Screenshot must contain non-black pixels - all black indicates screen capture"
+                        + " failure");
     }
 
     private boolean checkForNonBlackPixels(BufferedImage image) {
@@ -93,28 +90,26 @@ public class IllustrationDebugTest {
     @Test
     void testFindActionWithIllustrationDebug() {
         // Set up find operation with real images
-        Pattern topLeftPattern = new Pattern.Builder()
-                .setFilename(TestPaths.getImagePath("topLeft"))
-                // .setSimilarity(0.8) // Similarity is now set in PatternFindOptions, not
-                // Pattern
-                .build();
+        Pattern topLeftPattern =
+                new Pattern.Builder()
+                        .setFilename(TestPaths.getImagePath("topLeft"))
+                        // .setSimilarity(0.8) // Similarity is now set in PatternFindOptions, not
+                        // Pattern
+                        .build();
 
-        StateImage stateImage = new StateImage.Builder()
-                .addPattern(topLeftPattern)
-                .setName("DebugTopLeft")
-                .build();
+        StateImage stateImage =
+                new StateImage.Builder().addPattern(topLeftPattern).setName("DebugTopLeft").build();
 
         Scene scene = new Scene(TestPaths.getScreenshotPath("floranext0"));
 
-        ObjectCollection objColl = new ObjectCollection.Builder()
-                .withImages(stateImage)
-                .withScenes(scene)
-                .build();
+        ObjectCollection objColl =
+                new ObjectCollection.Builder().withImages(stateImage).withScenes(scene).build();
 
-        PatternFindOptions findOptions = new PatternFindOptions.Builder()
-                .setStrategy(PatternFindOptions.Strategy.FIRST)
-                .setSimilarity(0.7)
-                .build();
+        PatternFindOptions findOptions =
+                new PatternFindOptions.Builder()
+                        .setStrategy(PatternFindOptions.Strategy.FIRST)
+                        .setSimilarity(0.7)
+                        .build();
 
         // Execute find operation
         ActionResult result = action.perform(findOptions, objColl);
@@ -123,7 +118,8 @@ public class IllustrationDebugTest {
         assertNotNull(result, "ActionResult must not be null");
 
         // Verify scenes were captured for illustration
-        assertTrue(result.getSceneAnalysisCollection().getScenes().size() > 0,
+        assertTrue(
+                result.getSceneAnalysisCollection().getScenes().size() > 0,
                 "Must capture scenes for illustration");
 
         // Verify illustration files were created
@@ -135,14 +131,17 @@ public class IllustrationDebugTest {
 
             // Verify files are not empty
             for (File file : files) {
-                assertTrue(file.length() > 0, "Illustration file " + file.getName() + " must not be empty");
+                assertTrue(
+                        file.length() > 0,
+                        "Illustration file " + file.getName() + " must not be empty");
             }
         }
     }
 
     @Test
     void testGraphicsEnvironmentDebug() {
-        java.awt.GraphicsEnvironment ge = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
+        java.awt.GraphicsEnvironment ge =
+                java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
 
         // Test headless state
         boolean isHeadless = ge.isHeadless();
@@ -150,10 +149,14 @@ public class IllustrationDebugTest {
         if (isHeadless) {
             // If GraphicsEnvironment is headless, ExecutionEnvironment should compensate
             ExecutionEnvironment env = ExecutionEnvironment.getInstance();
-            assertTrue(env.hasDisplay(),
-                    "When GraphicsEnvironment is headless, ExecutionEnvironment must still report display available");
-            assertTrue(env.canCaptureScreen(),
-                    "When GraphicsEnvironment is headless, ExecutionEnvironment must still allow screen capture");
+            assertTrue(
+                    env.hasDisplay(),
+                    "When GraphicsEnvironment is headless, ExecutionEnvironment must still report"
+                            + " display available");
+            assertTrue(
+                    env.canCaptureScreen(),
+                    "When GraphicsEnvironment is headless, ExecutionEnvironment must still allow"
+                            + " screen capture");
         } else {
             // If not headless, verify screen devices
             java.awt.GraphicsDevice[] devices = ge.getScreenDevices();
@@ -175,13 +178,15 @@ public class IllustrationDebugTest {
     @Test
     void testFileSystemPermissions() {
         // Verify test images are accessible
-        assertTrue(Files.exists(TestPaths.getImagePathObject("topLeft")),
-                "topLeft.png must exist");
-        assertTrue(Files.isReadable(TestPaths.getImagePathObject("topLeft")),
+        assertTrue(Files.exists(TestPaths.getImagePathObject("topLeft")), "topLeft.png must exist");
+        assertTrue(
+                Files.isReadable(TestPaths.getImagePathObject("topLeft")),
                 "topLeft.png must be readable");
-        assertTrue(Files.exists(TestPaths.getScreenshotPathObject("floranext0")),
+        assertTrue(
+                Files.exists(TestPaths.getScreenshotPathObject("floranext0")),
                 "floranext0.png must exist");
-        assertTrue(Files.isReadable(TestPaths.getScreenshotPathObject("floranext0")),
+        assertTrue(
+                Files.isReadable(TestPaths.getScreenshotPathObject("floranext0")),
                 "floranext0.png must be readable");
 
         // Verify illustration directory can be created and written to

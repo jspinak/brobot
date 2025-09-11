@@ -2,19 +2,17 @@ package io.github.jspinak.brobot.exception;
 
 /**
  * Thrown when there is an error in the configuration of actions or the framework.
- * <p>
- * This exception indicates problems with how actions are configured, such as
- * invalid parameter combinations, missing required settings, or incompatible
- * option values. It helps catch configuration errors early, before actions
- * are executed.
- * </p>
- * 
+ *
+ * <p>This exception indicates problems with how actions are configured, such as invalid parameter
+ * combinations, missing required settings, or incompatible option values. It helps catch
+ * configuration errors early, before actions are executed.
+ *
  * @since 1.0
  */
 public class ConfigurationException extends BrobotRuntimeException {
-    
+
     private final String configurationItem;
-    
+
     /**
      * Constructs a new configuration exception.
      *
@@ -24,7 +22,7 @@ public class ConfigurationException extends BrobotRuntimeException {
         super(message);
         this.configurationItem = null;
     }
-    
+
     /**
      * Constructs a new configuration exception for a specific configuration item.
      *
@@ -35,7 +33,7 @@ public class ConfigurationException extends BrobotRuntimeException {
         super(String.format("Configuration error in '%s': %s", configurationItem, message));
         this.configurationItem = configurationItem;
     }
-    
+
     /**
      * Constructs a new configuration exception with an underlying cause.
      *
@@ -46,7 +44,7 @@ public class ConfigurationException extends BrobotRuntimeException {
         super(message, cause);
         this.configurationItem = null;
     }
-    
+
     /**
      * Gets the name of the configuration item that caused the exception.
      *

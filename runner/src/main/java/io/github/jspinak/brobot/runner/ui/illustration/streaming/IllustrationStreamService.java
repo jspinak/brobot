@@ -1,23 +1,6 @@
 package io.github.jspinak.brobot.runner.ui.illustration.streaming;
 
-import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.runner.events.EventBus;
-import io.github.jspinak.brobot.runner.ui.illustration.IllustrationMetadata;
-import io.github.jspinak.brobot.tools.history.configuration.IllustrationContext;
-import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.embed.swing.SwingFXUtils;
-import javafx.scene.image.Image;
-import lombok.Getter;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.time.LocalDateTime;
 import java.util.Queue;
 import java.util.UUID;
@@ -25,17 +8,34 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
+import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.image.Image;
+
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.runner.events.EventBus;
+import io.github.jspinak.brobot.runner.ui.illustration.IllustrationMetadata;
+import io.github.jspinak.brobot.tools.history.configuration.IllustrationContext;
+
+import lombok.Getter;
 
 /**
  * Service for streaming real-time illustrations from the automation engine.
- * <p>
- * This service bridges the library's illustration system with the Desktop Runner's
- * UI, providing real-time updates as actions are executed. It handles:
+ *
+ * <p>This service bridges the library's illustration system with the Desktop Runner's UI, providing
+ * real-time updates as actions are executed. It handles:
+ *
  * <ul>
- * <li>Conversion from library formats (Mat) to JavaFX formats (Image)</li>
- * <li>Thread-safe queueing and processing</li>
- * <li>Performance optimization to prevent UI blocking</li>
- * <li>Event broadcasting for UI components</li>
+ *   <li>Conversion from library formats (Mat) to JavaFX formats (Image)
+ *   <li>Thread-safe queueing and processing
+ *   <li>Performance optimization to prevent UI blocking
+ *   <li>Event broadcasting for UI components
  * </ul>
  *
  * @see IllustrationStreamListener
@@ -44,25 +44,25 @@ import java.util.function.Consumer;
 @Service
 @Getter
 public class IllustrationStreamService {
-    
+
     private final EventBus eventBus;
     private final Queue<IllustrationStreamData> streamQueue = new ConcurrentLinkedQueue<>();
     private final ExecutorService processingExecutor = Executors.newSingleThreadExecutor();
     private final BooleanProperty streamingEnabled = new SimpleBooleanProperty(true);
-    
+
     // Performance settings
     private static final int MAX_QUEUE_SIZE = 50;
     private static final long MIN_INTERVAL_MS = 100; // Minimum time between UI updates
-    
+
     private long lastUpdateTime = 0;
     private Consumer<IllustrationStreamEvent> streamConsumer;
-    
+
     @Autowired
     public IllustrationStreamService(EventBus eventBus) {
         this.eventBus = eventBus;
         startProcessingThread();
     }
-    
+
     /**
      * Receives illustration data from the library and queues it for processing.
      *
@@ -70,27 +70,29 @@ public class IllustrationStreamService {
      * @param actionResult the action result associated with the illustration
      * @param context the illustration context
      */
-    public void receiveIllustration(Mat mat, ActionResult actionResult, IllustrationContext context) {
+    public void receiveIllustration(
+            Mat mat, ActionResult actionResult, IllustrationContext context) {
         if (!streamingEnabled.get()) {
             return;
         }
-        
+
         // Create stream data
-        IllustrationStreamData data = IllustrationStreamData.builder()
-            .id(UUID.randomUUID().toString())
-            .timestamp(LocalDateTime.now())
-            .mat(mat.clone()) // Clone to avoid memory issues
-            .actionResult(actionResult)
-            .context(context)
-            .build();
-        
+        IllustrationStreamData data =
+                IllustrationStreamData.builder()
+                        .id(UUID.randomUUID().toString())
+                        .timestamp(LocalDateTime.now())
+                        .mat(mat.clone()) // Clone to avoid memory issues
+                        .actionResult(actionResult)
+                        .context(context)
+                        .build();
+
         // Add to queue with size limit
         if (streamQueue.size() >= MAX_QUEUE_SIZE) {
             streamQueue.poll(); // Remove oldest
         }
         streamQueue.offer(data);
     }
-    
+
     /**
      * Sets the consumer for stream events.
      *
@@ -99,22 +101,18 @@ public class IllustrationStreamService {
     public void setStreamConsumer(Consumer<IllustrationStreamEvent> consumer) {
         this.streamConsumer = consumer;
     }
-    
-    /**
-     * Starts streaming illustrations.
-     */
+
+    /** Starts streaming illustrations. */
     public void startStreaming() {
         streamingEnabled.set(true);
     }
-    
-    /**
-     * Stops streaming illustrations.
-     */
+
+    /** Stops streaming illustrations. */
     public void stopStreaming() {
         streamingEnabled.set(false);
         streamQueue.clear();
     }
-    
+
     /**
      * Gets the current queue size.
      *
@@ -123,40 +121,35 @@ public class IllustrationStreamService {
     public int getQueueSize() {
         return streamQueue.size();
     }
-    
-    /**
-     * Clears the stream queue.
-     */
+
+    /** Clears the stream queue. */
     public void clearQueue() {
         streamQueue.clear();
     }
-    
-    /**
-     * Starts the background thread for processing illustrations.
-     */
+
+    /** Starts the background thread for processing illustrations. */
     private void startProcessingThread() {
-        processingExecutor.submit(() -> {
-            while (!Thread.currentThread().isInterrupted()) {
-                try {
-                    processQueue();
-                    Thread.sleep(50); // Check queue every 50ms
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
-            }
-        });
+        processingExecutor.submit(
+                () -> {
+                    while (!Thread.currentThread().isInterrupted()) {
+                        try {
+                            processQueue();
+                            Thread.sleep(50); // Check queue every 50ms
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            break;
+                        }
+                    }
+                });
     }
-    
-    /**
-     * Processes illustrations from the queue.
-     */
+
+    /** Processes illustrations from the queue. */
     private void processQueue() {
         IllustrationStreamData data = streamQueue.poll();
         if (data == null) {
             return;
         }
-        
+
         // Rate limiting
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastUpdateTime < MIN_INTERVAL_MS) {
@@ -164,40 +157,40 @@ public class IllustrationStreamService {
             streamQueue.offer(data);
             return;
         }
-        
+
         try {
             // Convert Mat to JavaFX Image
             Image image = convertMatToImage(data.getMat());
-            
+
             // Create metadata
             IllustrationMetadata metadata = createMetadata(data);
-            
+
             // Create stream event
-            IllustrationStreamEvent event = IllustrationStreamEvent.builder()
-                .id(data.getId())
-                .timestamp(data.getTimestamp())
-                .image(image)
-                .metadata(metadata)
-                .queueSize(streamQueue.size())
-                .build();
-            
+            IllustrationStreamEvent event =
+                    IllustrationStreamEvent.builder()
+                            .id(data.getId())
+                            .timestamp(data.getTimestamp())
+                            .image(image)
+                            .metadata(metadata)
+                            .queueSize(streamQueue.size())
+                            .build();
+
             // Dispatch to UI thread
-            Platform.runLater(() -> {
-                // Notify consumer
-                if (streamConsumer != null) {
-                    streamConsumer.accept(event);
-                }
-                
-                // Broadcast event
-                eventBus.publish(new io.github.jspinak.brobot.runner.events.UIUpdateEvent(
-                    this,
-                    "ILLUSTRATION_CAPTURED",
-                    event
-                ));
-            });
-            
+            Platform.runLater(
+                    () -> {
+                        // Notify consumer
+                        if (streamConsumer != null) {
+                            streamConsumer.accept(event);
+                        }
+
+                        // Broadcast event
+                        eventBus.publish(
+                                new io.github.jspinak.brobot.runner.events.UIUpdateEvent(
+                                        this, "ILLUSTRATION_CAPTURED", event));
+                    });
+
             lastUpdateTime = currentTime;
-            
+
         } catch (Exception e) {
             // Log error but continue processing
             System.err.println("Error processing illustration: " + e.getMessage());
@@ -208,7 +201,7 @@ public class IllustrationStreamService {
             }
         }
     }
-    
+
     /**
      * Converts OpenCV Mat to JavaFX Image.
      *
@@ -218,11 +211,11 @@ public class IllustrationStreamService {
     private Image convertMatToImage(Mat mat) throws Exception {
         // Convert Mat to BufferedImage
         BufferedImage bufferedImage = matToBufferedImage(mat);
-        
+
         // Convert BufferedImage to JavaFX Image
         return SwingFXUtils.toFXImage(bufferedImage, null);
     }
-    
+
     /**
      * Converts OpenCV Mat to BufferedImage.
      *
@@ -231,7 +224,7 @@ public class IllustrationStreamService {
      */
     private BufferedImage matToBufferedImage(Mat mat) throws Exception {
         int type;
-        
+
         // Determine BufferedImage type based on Mat channels
         if (mat.channels() == 1) {
             type = BufferedImage.TYPE_BYTE_GRAY;
@@ -242,14 +235,14 @@ public class IllustrationStreamService {
         } else {
             throw new IllegalArgumentException("Unsupported number of channels: " + mat.channels());
         }
-        
+
         // Create BufferedImage
         BufferedImage image = new BufferedImage(mat.cols(), mat.rows(), type);
-        
+
         // Get data from Mat
         byte[] data = new byte[(int) (mat.total() * mat.channels())];
         mat.data().get(data);
-        
+
         // Copy data to BufferedImage
         if (type == BufferedImage.TYPE_BYTE_GRAY) {
             // For grayscale images
@@ -257,7 +250,7 @@ public class IllustrationStreamService {
         } else {
             // For color images, need to convert from BGR(A) to RGB(A)
             int[] pixels = new int[mat.cols() * mat.rows()];
-            
+
             for (int i = 0; i < pixels.length; i++) {
                 int base = i * mat.channels();
                 if (mat.channels() == 3) {
@@ -275,13 +268,13 @@ public class IllustrationStreamService {
                     pixels[i] = (a << 24) | (r << 16) | (g << 8) | b;
                 }
             }
-            
+
             image.setRGB(0, 0, mat.cols(), mat.rows(), pixels, 0, mat.cols());
         }
-        
+
         return image;
     }
-    
+
     /**
      * Creates metadata from stream data.
      *
@@ -289,51 +282,58 @@ public class IllustrationStreamService {
      * @return illustration metadata
      */
     private IllustrationMetadata createMetadata(IllustrationStreamData data) {
-        IllustrationMetadata.IllustrationMetadataBuilder builder = IllustrationMetadata.builder()
-            .id(data.getId())
-            .timestamp(data.getTimestamp())
-            .success(data.getActionResult() != null && data.getActionResult().isSuccess());
-        
+        IllustrationMetadata.IllustrationMetadataBuilder builder =
+                IllustrationMetadata.builder()
+                        .id(data.getId())
+                        .timestamp(data.getTimestamp())
+                        .success(
+                                data.getActionResult() != null
+                                        && data.getActionResult().isSuccess());
+
         // Extract action type from context
         if (data.getContext() != null) {
             builder.actionType(data.getContext().getCurrentAction().toString());
-            
+
             // Add active states
             if (data.getContext().getActiveStates() != null) {
                 builder.stateName(String.join(", ", data.getContext().getActiveStates()));
             }
         }
-        
+
         // Extract matches from action result
         if (data.getActionResult() != null) {
-            data.getActionResult().getMatchList().forEach(match -> {
-                builder.match(IllustrationMetadata.Match.builder()
-                    .x(match.x())
-                    .y(match.y())
-                    .width(match.w())
-                    .height(match.h())
-                    .similarity(match.getScore())
-                    .objectName(match.getName())
-                    .build());
-            });
-            
+            data.getActionResult()
+                    .getMatchList()
+                    .forEach(
+                            match -> {
+                                builder.match(
+                                        IllustrationMetadata.Match.builder()
+                                                .x(match.x())
+                                                .y(match.y())
+                                                .width(match.w())
+                                                .height(match.h())
+                                                .similarity(match.getScore())
+                                                .objectName(match.getName())
+                                                .build());
+                            });
+
             // Add performance data
-            builder.performanceData(IllustrationMetadata.PerformanceData.builder()
-                .executionTimeMs(data.getActionResult().getDuration().toMillis())
-                .matchesFound(data.getActionResult().getMatchList().size())
-                .averageSimilarity(data.getActionResult().getMatchList().stream()
-                    .mapToDouble(m -> m.getScore())
-                    .average()
-                    .orElse(0.0))
-                .build());
+            builder.performanceData(
+                    IllustrationMetadata.PerformanceData.builder()
+                            .executionTimeMs(data.getActionResult().getDuration().toMillis())
+                            .matchesFound(data.getActionResult().getMatchList().size())
+                            .averageSimilarity(
+                                    data.getActionResult().getMatchList().stream()
+                                            .mapToDouble(m -> m.getScore())
+                                            .average()
+                                            .orElse(0.0))
+                            .build());
         }
-        
+
         return builder.build();
     }
-    
-    /**
-     * Shuts down the service and releases resources.
-     */
+
+    /** Shuts down the service and releases resources. */
     public void shutdown() {
         streamingEnabled.set(false);
         streamQueue.clear();

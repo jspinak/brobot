@@ -1,33 +1,27 @@
 package io.github.jspinak.brobot.runner.execution;
 
-import lombok.Setter;
-
 import java.time.Instant;
 import java.util.function.Consumer;
 
+import lombok.Setter;
+
 /**
- * Manages the status of an execution and provides methods to update it.
- * Also handles notifying any registered status consumers when the status changes.
- * Thread-safe: All methods are synchronized to prevent concurrent modification.
+ * Manages the status of an execution and provides methods to update it. Also handles notifying any
+ * registered status consumers when the status changes. Thread-safe: All methods are synchronized to
+ * prevent concurrent modification.
  */
 public class ExecutionStatusManager {
     private final ExecutionStatus status;
     private final Object lock = new Object();
-    
-    /**
-     * -- SETTER --
-     *  Sets a consumer that will be notified of status changes
-     */
-    @Setter
-    private volatile Consumer<ExecutionStatus> statusConsumer;
+
+    /** -- SETTER -- Sets a consumer that will be notified of status changes */
+    @Setter private volatile Consumer<ExecutionStatus> statusConsumer;
 
     public ExecutionStatusManager(ExecutionStatus status) {
         this.status = status;
     }
 
-    /**
-     * Updates the execution state and notifies consumers
-     */
+    /** Updates the execution state and notifies consumers */
     public void updateState(ExecutionState state) {
         synchronized (lock) {
             status.setState(state);
@@ -35,9 +29,7 @@ public class ExecutionStatusManager {
         }
     }
 
-    /**
-     * Updates the execution progress and notifies consumers
-     */
+    /** Updates the execution progress and notifies consumers */
     public void updateProgress(double progress) {
         synchronized (lock) {
             status.setProgress(progress);
@@ -45,9 +37,7 @@ public class ExecutionStatusManager {
         }
     }
 
-    /**
-     * Updates the current operation description and notifies consumers
-     */
+    /** Updates the current operation description and notifies consumers */
     public void setCurrentOperation(String operation) {
         synchronized (lock) {
             status.setCurrentOperation(operation);
@@ -55,9 +45,7 @@ public class ExecutionStatusManager {
         }
     }
 
-    /**
-     * Updates the start time and notifies consumers
-     */
+    /** Updates the start time and notifies consumers */
     public void updateStartTime(Instant startTime) {
         synchronized (lock) {
             status.setStartTime(startTime);
@@ -65,9 +53,7 @@ public class ExecutionStatusManager {
         }
     }
 
-    /**
-     * Updates the end time and notifies consumers
-     */
+    /** Updates the end time and notifies consumers */
     public void updateEndTime(Instant endTime) {
         synchronized (lock) {
             status.setEndTime(endTime);
@@ -75,9 +61,7 @@ public class ExecutionStatusManager {
         }
     }
 
-    /**
-     * Sets an error that occurred during execution
-     */
+    /** Sets an error that occurred during execution */
     public void setError(Exception error) {
         synchronized (lock) {
             status.setError(error);
@@ -85,9 +69,7 @@ public class ExecutionStatusManager {
         }
     }
 
-    /**
-     * Resets the status to initial state
-     */
+    /** Resets the status to initial state */
     public void reset() {
         synchronized (lock) {
             status.reset();
@@ -96,8 +78,8 @@ public class ExecutionStatusManager {
     }
 
     /**
-     * Notifies any registered consumers of a status change
-     * Note: Called within synchronized blocks, so already thread-safe
+     * Notifies any registered consumers of a status change Note: Called within synchronized blocks,
+     * so already thread-safe
      */
     private void notifyStatusChange() {
         Consumer<ExecutionStatus> consumer = statusConsumer;
@@ -105,10 +87,8 @@ public class ExecutionStatusManager {
             consumer.accept(status.copy());
         }
     }
-    
-    /**
-     * Manually triggers notification of current status to consumers
-     */
+
+    /** Manually triggers notification of current status to consumers */
     public void notifyConsumer() {
         synchronized (lock) {
             notifyStatusChange();

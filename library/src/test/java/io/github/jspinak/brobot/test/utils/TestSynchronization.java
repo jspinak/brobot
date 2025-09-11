@@ -2,24 +2,23 @@ package io.github.jspinak.brobot.test.utils;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
 /**
- * Utility class for proper test synchronization without Thread.sleep.
- * Provides various synchronization mechanisms to replace Thread.sleep in tests.
+ * Utility class for proper test synchronization without Thread.sleep. Provides various
+ * synchronization mechanisms to replace Thread.sleep in tests.
  */
 public class TestSynchronization {
-    
+
     private static final int DEFAULT_TIMEOUT_MS = 5000;
     private static final int POLL_INTERVAL_MS = 10;
-    
+
     /**
-     * Wait for a condition to become true with timeout.
-     * Replaces Thread.sleep with condition-based waiting.
-     * 
+     * Wait for a condition to become true with timeout. Replaces Thread.sleep with condition-based
+     * waiting.
+     *
      * @param condition The condition to wait for
      * @param timeoutMs Maximum time to wait in milliseconds
      * @return true if condition was met, false if timeout
@@ -39,33 +38,33 @@ public class TestSynchronization {
         }
         return false;
     }
-    
-    /**
-     * Wait for a condition with default timeout.
-     */
+
+    /** Wait for a condition with default timeout. */
     public static boolean waitForCondition(BooleanSupplier condition) {
         return waitForCondition(condition, DEFAULT_TIMEOUT_MS);
     }
-    
+
     /**
-     * Wait for async operation using CountDownLatch.
-     * Better alternative to Thread.sleep for async operations.
+     * Wait for async operation using CountDownLatch. Better alternative to Thread.sleep for async
+     * operations.
      */
     public static boolean awaitAsync(Runnable asyncOperation, long timeoutMs) {
         CountDownLatch latch = new CountDownLatch(1);
         AtomicBoolean success = new AtomicBoolean(false);
-        
-        Thread thread = new Thread(() -> {
-            try {
-                asyncOperation.run();
-                success.set(true);
-            } finally {
-                latch.countDown();
-            }
-        });
-        
+
+        Thread thread =
+                new Thread(
+                        () -> {
+                            try {
+                                asyncOperation.run();
+                                success.set(true);
+                            } finally {
+                                latch.countDown();
+                            }
+                        });
+
         thread.start();
-        
+
         try {
             boolean completed = latch.await(timeoutMs, TimeUnit.MILLISECONDS);
             return completed && success.get();
@@ -74,11 +73,8 @@ public class TestSynchronization {
             return false;
         }
     }
-    
-    /**
-     * Wait for a value to be set with timeout.
-     * Useful for waiting for async callbacks.
-     */
+
+    /** Wait for a value to be set with timeout. Useful for waiting for async callbacks. */
     public static <T> T waitForValue(AtomicReference<T> reference, long timeoutMs) {
         long startTime = System.currentTimeMillis();
         while (System.currentTimeMillis() - startTime < timeoutMs) {
@@ -95,28 +91,28 @@ public class TestSynchronization {
         }
         return null;
     }
-    
+
     /**
-     * Synchronization barrier for coordinating multiple threads.
-     * Replaces Thread.sleep when waiting for multiple operations.
+     * Synchronization barrier for coordinating multiple threads. Replaces Thread.sleep when waiting
+     * for multiple operations.
      */
     public static class SyncBarrier {
         private final CountDownLatch latch;
         private final long timeoutMs;
-        
+
         public SyncBarrier(int parties, long timeoutMs) {
             this.latch = new CountDownLatch(parties);
             this.timeoutMs = timeoutMs;
         }
-        
+
         public SyncBarrier(int parties) {
             this(parties, DEFAULT_TIMEOUT_MS);
         }
-        
+
         public void arrive() {
             latch.countDown();
         }
-        
+
         public boolean await() {
             try {
                 return latch.await(timeoutMs, TimeUnit.MILLISECONDS);
@@ -126,10 +122,10 @@ public class TestSynchronization {
             }
         }
     }
-    
+
     /**
-     * Retry mechanism with exponential backoff.
-     * Better than fixed Thread.sleep for flaky operations.
+     * Retry mechanism with exponential backoff. Better than fixed Thread.sleep for flaky
+     * operations.
      */
     public static boolean retryWithBackoff(Runnable operation, int maxRetries) {
         int delay = 10;
@@ -151,11 +147,8 @@ public class TestSynchronization {
         }
         return false;
     }
-    
-    /**
-     * Wait for async flush operations.
-     * Specifically for output stream flushing.
-     */
+
+    /** Wait for async flush operations. Specifically for output stream flushing. */
     public static void waitForFlush() {
         // Force flush and wait briefly for buffers
         System.out.flush();

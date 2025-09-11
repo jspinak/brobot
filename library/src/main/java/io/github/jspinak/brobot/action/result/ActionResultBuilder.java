@@ -1,20 +1,20 @@
 package io.github.jspinak.brobot.action.result;
 
-import io.github.jspinak.brobot.action.ActionConfig;
-import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.model.match.Match;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.match.Match;
+
 /**
- * Builder for creating ActionResult instances with the new component architecture.
- * Provides a fluent API for constructing complex action results.
- * 
- * This builder bridges the gap between the new component-based architecture
- * and the existing ActionResult API, enabling gradual migration.
- * 
+ * Builder for creating ActionResult instances with the new component architecture. Provides a
+ * fluent API for constructing complex action results.
+ *
+ * <p>This builder bridges the gap between the new component-based architecture and the existing
+ * ActionResult API, enabling gradual migration.
+ *
  * @since 2.0
  */
 public class ActionResultBuilder {
@@ -30,15 +30,13 @@ public class ActionResultBuilder {
     private ActionAnalysis analysis = new ActionAnalysis();
     private ActionMetrics metrics = new ActionMetrics();
     private ExecutionHistory history = new ExecutionHistory();
-    
-    /**
-     * Creates a new ActionResultBuilder.
-     */
+
+    /** Creates a new ActionResultBuilder. */
     public ActionResultBuilder() {}
-    
+
     /**
      * Sets the action description.
-     * 
+     *
      * @param description Human-readable description
      * @return This builder for chaining
      */
@@ -46,10 +44,10 @@ public class ActionResultBuilder {
         this.actionDescription = description;
         return this;
     }
-    
+
     /**
      * Sets the success status.
-     * 
+     *
      * @param success Whether the action succeeded
      * @return This builder for chaining
      */
@@ -57,10 +55,10 @@ public class ActionResultBuilder {
         this.success = success;
         return this;
     }
-    
+
     /**
      * Sets the action configuration.
-     * 
+     *
      * @param config The ActionConfig used
      * @return This builder for chaining
      */
@@ -68,10 +66,10 @@ public class ActionResultBuilder {
         this.actionConfig = config;
         return this;
     }
-    
+
     /**
      * Sets the match collection.
-     * 
+     *
      * @param matchCollection The MatchCollection
      * @return This builder for chaining
      */
@@ -81,10 +79,10 @@ public class ActionResultBuilder {
         }
         return this;
     }
-    
+
     /**
      * Adds matches to the collection.
-     * 
+     *
      * @param matchList List of matches to add
      * @return This builder for chaining
      */
@@ -94,10 +92,10 @@ public class ActionResultBuilder {
         }
         return this;
     }
-    
+
     /**
      * Adds a single match.
-     * 
+     *
      * @param match The match to add
      * @return This builder for chaining
      */
@@ -107,10 +105,10 @@ public class ActionResultBuilder {
         }
         return this;
     }
-    
+
     /**
      * Sets the timing data.
-     * 
+     *
      * @param timingData The TimingData
      * @return This builder for chaining
      */
@@ -120,10 +118,10 @@ public class ActionResultBuilder {
         }
         return this;
     }
-    
+
     /**
      * Sets timing using start and end times.
-     * 
+     *
      * @param startTime Start time of execution
      * @param endTime End time of execution
      * @return This builder for chaining
@@ -136,10 +134,10 @@ public class ActionResultBuilder {
         }
         return this;
     }
-    
+
     /**
      * Sets the text extraction result.
-     * 
+     *
      * @param textResult The TextExtractionResult
      * @return This builder for chaining
      */
@@ -149,10 +147,10 @@ public class ActionResultBuilder {
         }
         return this;
     }
-    
+
     /**
      * Adds extracted text.
-     * 
+     *
      * @param extractedText Text that was extracted
      * @return This builder for chaining
      */
@@ -162,10 +160,10 @@ public class ActionResultBuilder {
         }
         return this;
     }
-    
+
     /**
      * Sets selected text.
-     * 
+     *
      * @param selectedText Text that was selected
      * @return This builder for chaining
      */
@@ -175,10 +173,10 @@ public class ActionResultBuilder {
         }
         return this;
     }
-    
+
     /**
      * Sets the state tracker.
-     * 
+     *
      * @param stateTracker The StateTracker
      * @return This builder for chaining
      */
@@ -188,10 +186,10 @@ public class ActionResultBuilder {
         }
         return this;
     }
-    
+
     /**
      * Adds an active state.
-     * 
+     *
      * @param stateName Name of the active state
      * @return This builder for chaining
      */
@@ -201,10 +199,10 @@ public class ActionResultBuilder {
         }
         return this;
     }
-    
+
     /**
      * Sets the region manager.
-     * 
+     *
      * @param regionManager The RegionManager
      * @return This builder for chaining
      */
@@ -214,10 +212,10 @@ public class ActionResultBuilder {
         }
         return this;
     }
-    
+
     /**
      * Adds a defined region.
-     * 
+     *
      * @param region The region to add
      * @return This builder for chaining
      */
@@ -227,10 +225,10 @@ public class ActionResultBuilder {
         }
         return this;
     }
-    
+
     /**
      * Sets the movement tracker.
-     * 
+     *
      * @param movementTracker The MovementTracker
      * @return This builder for chaining
      */
@@ -240,23 +238,24 @@ public class ActionResultBuilder {
         }
         return this;
     }
-    
+
     /**
      * Adds a movement.
-     * 
+     *
      * @param movement The movement to add
      * @return This builder for chaining
      */
-    public ActionResultBuilder withMovement(io.github.jspinak.brobot.model.element.Movement movement) {
+    public ActionResultBuilder withMovement(
+            io.github.jspinak.brobot.model.element.Movement movement) {
         if (movement != null) {
             this.movements.recordMovement(movement);
         }
         return this;
     }
-    
+
     /**
      * Sets the action analysis.
-     * 
+     *
      * @param actionAnalysis The ActionAnalysis
      * @return This builder for chaining
      */
@@ -266,10 +265,10 @@ public class ActionResultBuilder {
         }
         return this;
     }
-    
+
     /**
      * Sets the action metrics.
-     * 
+     *
      * @param actionMetrics The ActionMetrics
      * @return This builder for chaining
      */
@@ -279,10 +278,10 @@ public class ActionResultBuilder {
         }
         return this;
     }
-    
+
     /**
      * Sets the execution history.
-     * 
+     *
      * @param executionHistory The ExecutionHistory
      * @return This builder for chaining
      */
@@ -292,25 +291,25 @@ public class ActionResultBuilder {
         }
         return this;
     }
-    
+
     /**
      * Builds the ActionResult with all configured components.
-     * 
+     *
      * @return The constructed ActionResult
      */
     public ActionResult build() {
         ActionResult result = new ActionResult(actionConfig);
-        
+
         // Set basic properties
         result.setActionDescription(actionDescription);
         result.setSuccess(success);
-        
+
         // Apply match collection
         if (!matches.isEmpty()) {
             result.setMatchList(matches.getMatches());
             result.setInitialMatchList(matches.getInitialMatches());
         }
-        
+
         // Apply timing data
         if (timing.hasStarted()) {
             result.setStartTime(timing.getStartTime());
@@ -319,28 +318,28 @@ public class ActionResultBuilder {
                 result.setDuration(timing.getElapsed());
             }
         }
-        
+
         // Apply text extraction
         if (text.hasText()) {
             result.setText(text.getAccumulatedText());
             result.setSelectedText(text.getSelectedText());
         }
-        
+
         // Apply state tracking
         if (!states.getActiveStates().isEmpty()) {
             result.setActiveStates(states.getActiveStates());
         }
-        
+
         // Apply regions
         if (!regions.isEmpty()) {
             result.setDefinedRegions(regions.getAllRegions());
         }
-        
+
         // Apply movements
         if (!movements.isEmpty()) {
             result.setMovements(movements.getMovementSequence());
         }
-        
+
         // Apply analysis
         if (analysis.hasSceneAnalyses()) {
             result.setSceneAnalysisCollection(analysis.getSceneAnalyses());
@@ -348,7 +347,7 @@ public class ActionResultBuilder {
         if (analysis.hasMask()) {
             result.setMask(analysis.getMask());
         }
-        
+
         // Apply metrics
         if (metrics != null) {
             // Convert standalone ActionMetrics to inner ActionMetrics
@@ -362,62 +361,57 @@ public class ActionResultBuilder {
             matches.getBest().ifPresent(m -> innerMetrics.setBestMatchConfidence(m.getScore()));
             result.setActionMetrics(innerMetrics);
         }
-        
+
         // Apply history
         if (!history.isEmpty()) {
             result.setExecutionHistory(history.getHistory());
         }
-        
+
         return result;
     }
-    
+
     /**
      * Creates a successful result with matches.
-     * 
+     *
      * @param matchList The matches found
      * @return Constructed ActionResult
      */
     public static ActionResult successWith(List<Match> matchList) {
-        return new ActionResultBuilder()
-                .withSuccess(true)
-                .withMatches(matchList)
-                .build();
+        return new ActionResultBuilder().withSuccess(true).withMatches(matchList).build();
     }
-    
+
     /**
      * Creates a failed result with no matches.
-     * 
+     *
      * @return Constructed ActionResult
      */
     public static ActionResult failure() {
-        return new ActionResultBuilder()
-                .withSuccess(false)
-                .build();
+        return new ActionResultBuilder().withSuccess(false).build();
     }
-    
+
     /**
-     * Creates a result from an existing ActionResult.
-     * Useful for copying and modifying results.
-     * 
+     * Creates a result from an existing ActionResult. Useful for copying and modifying results.
+     *
      * @param source The source ActionResult
      * @return New builder initialized with source data
      */
     public static ActionResultBuilder from(ActionResult source) {
-        ActionResultBuilder builder = new ActionResultBuilder()
-                .withDescription(source.getActionDescription())
-                .withSuccess(source.isSuccess())
-                .withActionConfig(source.getActionConfig());
-        
+        ActionResultBuilder builder =
+                new ActionResultBuilder()
+                        .withDescription(source.getActionDescription())
+                        .withSuccess(source.isSuccess())
+                        .withActionConfig(source.getActionConfig());
+
         // Copy matches
         if (!source.getMatchList().isEmpty()) {
             builder.withMatches(source.getMatchList());
         }
-        
+
         // Copy timing
         if (source.getStartTime() != null) {
             builder.withTiming(source.getStartTime(), source.getEndTime());
         }
-        
+
         // Copy text
         if (source.getText() != null && !source.getText().isEmpty()) {
             builder.text.setAccumulatedText(source.getText());
@@ -425,16 +419,16 @@ public class ActionResultBuilder {
         if (source.getSelectedText() != null && !source.getSelectedText().isEmpty()) {
             builder.withSelectedText(source.getSelectedText());
         }
-        
+
         // Copy states
         source.getActiveStates().forEach(builder::withActiveState);
-        
+
         // Copy regions
         source.getDefinedRegions().forEach(builder::withRegion);
-        
+
         // Copy movements
         source.getMovements().forEach(builder::withMovement);
-        
+
         return builder;
     }
 }

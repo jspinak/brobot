@@ -1,76 +1,77 @@
 package io.github.jspinak.brobot.navigation.transition;
 
-import io.github.jspinak.brobot.model.transition.StateTransition;
-import io.github.jspinak.brobot.runner.dsl.model.TaskSequence;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 
+import io.github.jspinak.brobot.model.transition.StateTransition;
+import io.github.jspinak.brobot.runner.dsl.model.TaskSequence;
+
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Code-based state transition implementation for the Brobot framework.
- * 
- * <p>JavaStateTransition represents transitions defined through Java code using BooleanSupplier 
- * functions. This implementation enables dynamic, programmatic state navigation where transition 
- * logic can involve complex conditions, external data, or runtime calculations that cannot be 
- * expressed declaratively.</p>
- * 
+ *
+ * <p>JavaStateTransition represents transitions defined through Java code using BooleanSupplier
+ * functions. This implementation enables dynamic, programmatic state navigation where transition
+ * logic can involve complex conditions, external data, or runtime calculations that cannot be
+ * expressed declaratively.
+ *
  * <p>Key components:
+ *
  * <ul>
- *   <li><b>Transition Function</b>: BooleanSupplier that executes the transition logic</li>
- *   <li><b>Activation List</b>: States to activate after successful transition</li>
- *   <li><b>Exit List</b>: States to deactivate after successful transition</li>
- *   <li><b>Visibility Control</b>: Whether source state remains visible post-transition</li>
- *   <li><b>Path Score</b>: Weight for path-finding algorithms (higher = less preferred)</li>
+ *   <li><b>Transition Function</b>: BooleanSupplier that executes the transition logic
+ *   <li><b>Activation List</b>: States to activate after successful transition
+ *   <li><b>Exit List</b>: States to deactivate after successful transition
+ *   <li><b>Visibility Control</b>: Whether source state remains visible post-transition
+ *   <li><b>Path Score</b>: Weight for path-finding algorithms (higher = less preferred)
  * </ul>
- * </p>
- * 
+ *
  * <p>State reference handling:
+ *
  * <ul>
- *   <li>Uses state names during definition (IDs not yet assigned)</li>
- *   <li>Names are converted to IDs during initialization</li>
- *   <li>Both name and ID sets are maintained for flexibility</li>
- *   <li>Supports multiple target states for branching transitions</li>
+ *   <li>Uses state names during definition (IDs not yet assigned)
+ *   <li>Names are converted to IDs during initialization
+ *   <li>Both name and ID sets are maintained for flexibility
+ *   <li>Supports multiple target states for branching transitions
  * </ul>
- * </p>
- * 
+ *
  * <p>Transition execution flow:
+ *
  * <ol>
- *   <li>BooleanSupplier is invoked to perform transition logic</li>
- *   <li>If true is returned, transition is considered successful</li>
- *   <li>States in 'activate' set become active</li>
- *   <li>States in 'exit' set become inactive</li>
- *   <li>Success counter is incremented for metrics</li>
+ *   <li>BooleanSupplier is invoked to perform transition logic
+ *   <li>If true is returned, transition is considered successful
+ *   <li>States in 'activate' set become active
+ *   <li>States in 'exit' set become inactive
+ *   <li>Success counter is incremented for metrics
  * </ol>
- * </p>
- * 
+ *
  * <p>Common use patterns:
+ *
  * <ul>
- *   <li>Complex navigation logic that depends on runtime conditions</li>
- *   <li>Transitions involving external API calls or data validation</li>
- *   <li>Dynamic state activation based on application state</li>
- *   <li>Fallback transitions with custom error handling</li>
+ *   <li>Complex navigation logic that depends on runtime conditions
+ *   <li>Transitions involving external API calls or data validation
+ *   <li>Dynamic state activation based on application state
+ *   <li>Fallback transitions with custom error handling
  * </ul>
- * </p>
- * 
+ *
  * <p>Builder pattern benefits:
+ *
  * <ul>
- *   <li>Fluent API for readable transition definitions</li>
- *   <li>Default values for optional properties</li>
- *   <li>Type-safe state name specification</li>
- *   <li>Convenient overloads for common patterns</li>
+ *   <li>Fluent API for readable transition definitions
+ *   <li>Default values for optional properties
+ *   <li>Type-safe state name specification
+ *   <li>Convenient overloads for common patterns
  * </ul>
- * </p>
- * 
- * <p>In the model-based approach, JavaStateTransition provides the flexibility needed for 
- * complex automation scenarios where declarative ActionDefinitions are insufficient. It 
- * enables seamless integration of custom logic while maintaining the benefits of the 
- * state graph structure for navigation and path finding.</p>
- * 
+ *
+ * <p>In the model-based approach, JavaStateTransition provides the flexibility needed for complex
+ * automation scenarios where declarative ActionDefinitions are insufficient. It enables seamless
+ * integration of custom logic while maintaining the benefits of the state graph structure for
+ * navigation and path finding.
+ *
  * @since 1.0
  * @see StateTransition
  * @see TaskSequenceStateTransition
@@ -88,9 +89,12 @@ public class JavaStateTransition implements StateTransition {
     Use names instead of IDs for coding these by hand since state ids are set at runtime.
      */
     private Set<String> activateNames = new HashSet<>();
-    private Set<String> exitNames = new HashSet<>();;
-    private Set<Long> activate = new HashSet<>();;
-    private Set<Long> exit = new HashSet<>();;
+    private Set<String> exitNames = new HashSet<>();
+    ;
+    private Set<Long> activate = new HashSet<>();
+    ;
+    private Set<Long> exit = new HashSet<>();
+    ;
     private int score = 0;
     private int timesSuccessful = 0;
 
@@ -106,16 +110,18 @@ public class JavaStateTransition implements StateTransition {
 
     /**
      * Builder for creating JavaStateTransition instances fluently.
-     * <p>
-     * Provides a readable API for constructing transitions with sensible defaults:
+     *
+     * <p>Provides a readable API for constructing transitions with sensible defaults:
+     *
      * <ul>
-     *   <li>Default function returns false (transition fails)</li>
-     *   <li>Default visibility is NONE (inherit from transition type)</li>
-     *   <li>Empty activation and exit sets by default</li>
-     *   <li>Zero score (highest priority)</li>
+     *   <li>Default function returns false (transition fails)
+     *   <li>Default visibility is NONE (inherit from transition type)
+     *   <li>Empty activation and exit sets by default
+     *   <li>Zero score (highest priority)
      * </ul>
-     * <p>
-     * Example usage:
+     *
+     * <p>Example usage:
+     *
      * <pre>
      * JavaStateTransition transition = new JavaStateTransition.Builder()
      *     .setFunction(() -> action.click("Next"))
@@ -134,9 +140,9 @@ public class JavaStateTransition implements StateTransition {
 
         /**
          * Sets the transition logic function.
-         * <p>
-         * The BooleanSupplier should contain all logic needed to execute
-         * the transition, returning true on success and false on failure.
+         *
+         * <p>The BooleanSupplier should contain all logic needed to execute the transition,
+         * returning true on success and false on failure.
          *
          * @param booleanSupplier Function containing transition logic
          * @return This builder for method chaining
@@ -148,12 +154,13 @@ public class JavaStateTransition implements StateTransition {
 
         /**
          * Sets visibility behavior using StaysVisible enum.
-         * <p>
-         * Controls whether the source state remains visible after transition:
+         *
+         * <p>Controls whether the source state remains visible after transition:
+         *
          * <ul>
-         *   <li>TRUE: Source state stays active</li>
-         *   <li>FALSE: Source state is deactivated</li>
-         *   <li>NONE: Behavior determined by transition type</li>
+         *   <li>TRUE: Source state stays active
+         *   <li>FALSE: Source state is deactivated
+         *   <li>NONE: Behavior determined by transition type
          * </ul>
          *
          * @param staysVisibleAfterTransition Visibility behavior
@@ -166,8 +173,8 @@ public class JavaStateTransition implements StateTransition {
 
         /**
          * Sets visibility behavior using boolean convenience method.
-         * <p>
-         * Simplified method for common TRUE/FALSE cases.
+         *
+         * <p>Simplified method for common TRUE/FALSE cases.
          *
          * @param staysVisibleAfterTransition true if source stays visible
          * @return This builder for method chaining
@@ -180,9 +187,9 @@ public class JavaStateTransition implements StateTransition {
 
         /**
          * Adds states to activate after successful transition.
-         * <p>
-         * These states will become active when the transition succeeds.
-         * Can be called multiple times to accumulate states.
+         *
+         * <p>These states will become active when the transition succeeds. Can be called multiple
+         * times to accumulate states.
          *
          * @param stateNames Variable number of state names to activate
          * @return This builder for method chaining
@@ -194,9 +201,9 @@ public class JavaStateTransition implements StateTransition {
 
         /**
          * Adds states to exit after successful transition.
-         * <p>
-         * These states will be deactivated when the transition succeeds.
-         * Can be called multiple times to accumulate states.
+         *
+         * <p>These states will be deactivated when the transition succeeds. Can be called multiple
+         * times to accumulate states.
          *
          * @param stateNames Variable number of state names to exit
          * @return This builder for method chaining
@@ -208,9 +215,9 @@ public class JavaStateTransition implements StateTransition {
 
         /**
          * Sets the path-finding score for this transition.
-         * <p>
-         * Higher scores make this transition less preferred when multiple
-         * paths exist. Score 0 is highest priority.
+         *
+         * <p>Higher scores make this transition less preferred when multiple paths exist. Score 0
+         * is highest priority.
          *
          * @param score Path-finding weight (0 = best)
          * @return This builder for method chaining
@@ -222,9 +229,9 @@ public class JavaStateTransition implements StateTransition {
 
         /**
          * Creates the JavaStateTransition with configured properties.
-         * <p>
-         * Constructs a new instance with all builder settings applied.
-         * The builder can be reused after calling build().
+         *
+         * <p>Constructs a new instance with all builder settings applied. The builder can be reused
+         * after calling build().
          *
          * @return Configured JavaStateTransition instance
          */

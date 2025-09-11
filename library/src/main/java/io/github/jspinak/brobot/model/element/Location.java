@@ -1,41 +1,43 @@
 package io.github.jspinak.brobot.model.element;
 
+import java.util.Optional;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateLocation;
 import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.util.location.LocationUtils;
-import lombok.Data;
 
-import java.util.Optional;
+import lombok.Data;
 
 /**
  * Represents a point on the screen in the Brobot model-based GUI automation framework.
- * 
+ *
  * <p>A Location defines a specific point that can be specified in two ways:
+ *
  * <ul>
- *   <li>Absolute coordinates: Using x,y pixel values directly</li>
- *   <li>Relative position: As a percentage position within a Region</li>
+ *   <li>Absolute coordinates: Using x,y pixel values directly
+ *   <li>Relative position: As a percentage position within a Region
  * </ul>
- * Both methods support optional x,y offsets for fine-tuning the final position.</p>
- * 
+ *
+ * Both methods support optional x,y offsets for fine-tuning the final position.
+ *
  * <p>In the model-based approach, Locations are essential for:
+ *
  * <ul>
- *   <li>Specifying click targets within GUI elements</li>
- *   <li>Defining anchor points for spatial relationships between elements</li>
- *   <li>Positioning the mouse for hover actions</li>
- *   <li>Creating dynamic positions that adapt to different screen sizes</li>
+ *   <li>Specifying click targets within GUI elements
+ *   <li>Defining anchor points for spatial relationships between elements
+ *   <li>Positioning the mouse for hover actions
+ *   <li>Creating dynamic positions that adapt to different screen sizes
  * </ul>
- * </p>
- * 
- * <p>The relative positioning feature is particularly powerful in model-based automation
- * as it allows locations to remain valid even when GUI elements move or resize, making
- * automation more robust to UI changes.</p>
- * 
+ *
+ * <p>The relative positioning feature is particularly powerful in model-based automation as it
+ * allows locations to remain valid even when GUI elements move or resize, making automation more
+ * robust to UI changes.
+ *
  * @since 1.0
  * @see Region
  * @see Position
@@ -55,9 +57,7 @@ public class Location {
     private int offsetX = 0;
     private int offsetY = 0;
 
-    /**
-     * Creates a Location at the origin (0,0).
-     */
+    /** Creates a Location at the origin (0,0). */
     public Location() {
         this.x = 0;
         this.y = 0;
@@ -65,7 +65,7 @@ public class Location {
 
     /**
      * Creates a Location at the specified absolute coordinates.
-     * 
+     *
      * @param x the x-coordinate in pixels
      * @param y the y-coordinate in pixels
      */
@@ -103,10 +103,10 @@ public class Location {
 
     /**
      * Creates a Location at the center of the specified Region.
-     * 
-     * <p>This constructor is useful for targeting the middle of GUI elements
-     * in a way that remains valid even if the element moves or resizes.</p>
-     * 
+     *
+     * <p>This constructor is useful for targeting the middle of GUI elements in a way that remains
+     * valid even if the element moves or resizes.
+     *
      * @param region the Region to center the Location in
      */
     public Location(Region region) {
@@ -123,10 +123,10 @@ public class Location {
 
     /**
      * Creates a Location at a specific position within a Region.
-     * 
-     * <p>The Position specifies where within the Region this Location points to,
-     * using percentage values (0.0 to 1.0) for both width and height.</p>
-     * 
+     *
+     * <p>The Position specifies where within the Region this Location points to, using percentage
+     * values (0.0 to 1.0) for both width and height.
+     *
      * @param region the Region containing this Location
      * @param position the relative position within the Region
      */
@@ -219,10 +219,10 @@ public class Location {
 
     /**
      * Converts this Location to a SikuliX Location for compatibility.
-     * 
-     * <p>This method calculates the final screen coordinates (including any offsets)
-     * and returns them as a SikuliX Location object for use with Sikuli operations.</p>
-     * 
+     *
+     * <p>This method calculates the final screen coordinates (including any offsets) and returns
+     * them as a SikuliX Location object for use with Sikuli operations.
+     *
      * @return a SikuliX Location with the calculated screen coordinates
      */
     @JsonIgnore
@@ -258,11 +258,10 @@ public class Location {
 
     /**
      * Checks if this Location has valid coordinates.
-     * 
-     * <p>A Location is considered defined if it has either valid x,y coordinates
-     * or a valid Region with position. This is important for validating click
-     * targets before attempting interactions.</p>
-     * 
+     *
+     * <p>A Location is considered defined if it has either valid x,y coordinates or a valid Region
+     * with position. This is important for validating click targets before attempting interactions.
+     *
      * @return true if the Location can produce valid screen coordinates
      */
     @JsonIgnore
@@ -317,11 +316,11 @@ public class Location {
 
     /**
      * Adds another Location's coordinates to this Location.
-     * 
-     * <p>If the locations use different definition methods (absolute vs relative),
-     * the result will be converted to absolute coordinates. This is useful for
-     * creating offset positions from a base location.</p>
-     * 
+     *
+     * <p>If the locations use different definition methods (absolute vs relative), the result will
+     * be converted to absolute coordinates. This is useful for creating offset positions from a
+     * base location.
+     *
      * @param loc the Location to add to this one
      */
     public void add(Location loc) {

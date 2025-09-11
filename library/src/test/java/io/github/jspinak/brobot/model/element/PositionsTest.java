@@ -1,7 +1,10 @@
 package io.github.jspinak.brobot.model.element;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.util.common.Pair;
+import static io.github.jspinak.brobot.model.element.Positions.Name.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -9,10 +12,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.stream.Stream;
-
-import static io.github.jspinak.brobot.model.element.Positions.Name.*;
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.util.common.Pair;
 
 /**
  * Tests for Positions class, which defines standard relative positions within a rectangular area.
@@ -104,24 +105,26 @@ class PositionsTest extends BrobotTestBase {
         @ParameterizedTest
         @MethodSource("providePositionsAndCoordinates")
         @DisplayName("Should return correct coordinates for all positions")
-        void shouldReturnCorrectCoordinatesForAllPositions(Positions.Name position, double expectedX, double expectedY) {
+        void shouldReturnCorrectCoordinatesForAllPositions(
+                Positions.Name position, double expectedX, double expectedY) {
             Pair<Double, Double> coords = Positions.getCoordinates(position);
-            assertEquals(expectedX, coords.getKey(), 0.001, "X coordinate mismatch for " + position);
-            assertEquals(expectedY, coords.getValue(), 0.001, "Y coordinate mismatch for " + position);
+            assertEquals(
+                    expectedX, coords.getKey(), 0.001, "X coordinate mismatch for " + position);
+            assertEquals(
+                    expectedY, coords.getValue(), 0.001, "Y coordinate mismatch for " + position);
         }
 
         private static Stream<Arguments> providePositionsAndCoordinates() {
             return Stream.of(
-                Arguments.of(TOPLEFT, 0.0, 0.0),
-                Arguments.of(TOPMIDDLE, 0.5, 0.0),
-                Arguments.of(TOPRIGHT, 1.0, 0.0),
-                Arguments.of(MIDDLELEFT, 0.0, 0.5),
-                Arguments.of(MIDDLEMIDDLE, 0.5, 0.5),
-                Arguments.of(MIDDLERIGHT, 1.0, 0.5),
-                Arguments.of(BOTTOMLEFT, 0.0, 1.0),
-                Arguments.of(BOTTOMMIDDLE, 0.5, 1.0),
-                Arguments.of(BOTTOMRIGHT, 1.0, 1.0)
-            );
+                    Arguments.of(TOPLEFT, 0.0, 0.0),
+                    Arguments.of(TOPMIDDLE, 0.5, 0.0),
+                    Arguments.of(TOPRIGHT, 1.0, 0.0),
+                    Arguments.of(MIDDLELEFT, 0.0, 0.5),
+                    Arguments.of(MIDDLEMIDDLE, 0.5, 0.5),
+                    Arguments.of(MIDDLERIGHT, 1.0, 0.5),
+                    Arguments.of(BOTTOMLEFT, 0.0, 1.0),
+                    Arguments.of(BOTTOMMIDDLE, 0.5, 1.0),
+                    Arguments.of(BOTTOMRIGHT, 1.0, 1.0));
         }
     }
 
@@ -193,7 +196,7 @@ class PositionsTest extends BrobotTestBase {
         void shouldReturnSameCoordinatesForRepeatedCalls() {
             Pair<Double, Double> firstCall = Positions.getCoordinates(MIDDLEMIDDLE);
             Pair<Double, Double> secondCall = Positions.getCoordinates(MIDDLEMIDDLE);
-            
+
             assertEquals(firstCall.getKey(), secondCall.getKey());
             assertEquals(firstCall.getValue(), secondCall.getValue());
         }
@@ -205,11 +208,15 @@ class PositionsTest extends BrobotTestBase {
             for (Positions.Name position : Positions.Name.values()) {
                 Pair<Double, Double> first = Positions.getCoordinates(position);
                 Pair<Double, Double> second = Positions.getCoordinates(position);
-                
-                assertEquals(first.getKey(), second.getKey(), 
-                    "X coordinate should be consistent for " + position);
-                assertEquals(first.getValue(), second.getValue(), 
-                    "Y coordinate should be consistent for " + position);
+
+                assertEquals(
+                        first.getKey(),
+                        second.getKey(),
+                        "X coordinate should be consistent for " + position);
+                assertEquals(
+                        first.getValue(),
+                        second.getValue(),
+                        "Y coordinate should be consistent for " + position);
             }
         }
     }
@@ -240,12 +247,14 @@ class PositionsTest extends BrobotTestBase {
         void shouldHaveCoordinatesInValidRange() {
             for (Positions.Name position : Positions.Name.values()) {
                 Pair<Double, Double> coords = Positions.getCoordinates(position);
-                
+
                 // X and Y should be in [0.0, 1.0] range
-                assertTrue(coords.getKey() >= 0.0 && coords.getKey() <= 1.0, 
-                    "X coordinate should be in [0,1] for " + position);
-                assertTrue(coords.getValue() >= 0.0 && coords.getValue() <= 1.0, 
-                    "Y coordinate should be in [0,1] for " + position);
+                assertTrue(
+                        coords.getKey() >= 0.0 && coords.getKey() <= 1.0,
+                        "X coordinate should be in [0,1] for " + position);
+                assertTrue(
+                        coords.getValue() >= 0.0 && coords.getValue() <= 1.0,
+                        "Y coordinate should be in [0,1] for " + position);
             }
         }
     }

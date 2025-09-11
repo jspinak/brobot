@@ -16,9 +16,8 @@ public class MockDrag {
     }
 
     /**
-     * Drag succeeds when the images are found, but it still takes time to do the
-     * drag.
-     * 
+     * Drag succeeds when the images are found, but it still takes time to do the drag.
+     *
      * @return true
      */
     public boolean drag() {

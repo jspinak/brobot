@@ -1,20 +1,19 @@
 package io.github.jspinak.brobot.runner.ui.config.services;
 
-import io.github.jspinak.brobot.runner.ui.config.ConfigBrowserPanel;
-import javafx.scene.control.TreeItem;
-import org.springframework.stereotype.Service;
-
 import java.util.HashMap;
 import java.util.Map;
+import javafx.scene.control.TreeItem;
 
-/**
- * Service for managing the configuration tree structure.
- */
+import org.springframework.stereotype.Service;
+
+import io.github.jspinak.brobot.runner.ui.config.ConfigBrowserPanel;
+
+/** Service for managing the configuration tree structure. */
 @Service
 public class TreeManagementService {
-    
+
     private final Map<String, TreeItem<ConfigBrowserPanel.ConfigItem>> stateItems = new HashMap<>();
-    
+
     /**
      * Creates the root item for the configuration tree.
      *
@@ -22,13 +21,14 @@ public class TreeManagementService {
      * @return The root tree item
      */
     public TreeItem<ConfigBrowserPanel.ConfigItem> createRootItem(String name) {
-        TreeItem<ConfigBrowserPanel.ConfigItem> rootItem = new TreeItem<>(
-            new ConfigBrowserPanel.ConfigItem(name, ConfigBrowserPanel.ConfigItemType.ROOT)
-        );
+        TreeItem<ConfigBrowserPanel.ConfigItem> rootItem =
+                new TreeItem<>(
+                        new ConfigBrowserPanel.ConfigItem(
+                                name, ConfigBrowserPanel.ConfigItemType.ROOT));
         rootItem.setExpanded(true);
         return rootItem;
     }
-    
+
     /**
      * Clears all tree items and state mappings.
      *
@@ -38,7 +38,7 @@ public class TreeManagementService {
         rootItem.getChildren().clear();
         stateItems.clear();
     }
-    
+
     /**
      * Adds a state item to the tracking map.
      *
@@ -48,7 +48,7 @@ public class TreeManagementService {
     public void addStateItem(String stateName, TreeItem<ConfigBrowserPanel.ConfigItem> stateItem) {
         stateItems.put(stateName, stateItem);
     }
-    
+
     /**
      * Gets a state item by name.
      *
@@ -58,7 +58,7 @@ public class TreeManagementService {
     public TreeItem<ConfigBrowserPanel.ConfigItem> getStateItem(String stateName) {
         return stateItems.get(stateName);
     }
-    
+
     /**
      * Creates a folder item.
      *
@@ -66,9 +66,10 @@ public class TreeManagementService {
      * @return The folder tree item
      */
     public TreeItem<ConfigBrowserPanel.ConfigItem> createFolderItem(String name) {
-        return new TreeItem<>(new ConfigBrowserPanel.ConfigItem(name, ConfigBrowserPanel.ConfigItemType.FOLDER));
+        return new TreeItem<>(
+                new ConfigBrowserPanel.ConfigItem(name, ConfigBrowserPanel.ConfigItemType.FOLDER));
     }
-    
+
     /**
      * Creates a configuration file item.
      *
@@ -77,15 +78,14 @@ public class TreeManagementService {
      * @param data The associated data (e.g., file path)
      * @return The configuration file tree item
      */
-    public TreeItem<ConfigBrowserPanel.ConfigItem> createConfigFileItem(String fileName, 
-            ConfigBrowserPanel.ConfigItemType type, Object data) {
-        TreeItem<ConfigBrowserPanel.ConfigItem> item = new TreeItem<>(
-            new ConfigBrowserPanel.ConfigItem(fileName, type)
-        );
+    public TreeItem<ConfigBrowserPanel.ConfigItem> createConfigFileItem(
+            String fileName, ConfigBrowserPanel.ConfigItemType type, Object data) {
+        TreeItem<ConfigBrowserPanel.ConfigItem> item =
+                new TreeItem<>(new ConfigBrowserPanel.ConfigItem(fileName, type));
         item.getValue().setData(data);
         return item;
     }
-    
+
     /**
      * Creates a state item.
      *
@@ -94,13 +94,14 @@ public class TreeManagementService {
      */
     public TreeItem<ConfigBrowserPanel.ConfigItem> createStateItem(
             io.github.jspinak.brobot.model.state.State state) {
-        TreeItem<ConfigBrowserPanel.ConfigItem> item = new TreeItem<>(
-            new ConfigBrowserPanel.ConfigItem(state.getName(), ConfigBrowserPanel.ConfigItemType.STATE)
-        );
+        TreeItem<ConfigBrowserPanel.ConfigItem> item =
+                new TreeItem<>(
+                        new ConfigBrowserPanel.ConfigItem(
+                                state.getName(), ConfigBrowserPanel.ConfigItemType.STATE));
         item.getValue().setData(state);
         return item;
     }
-    
+
     /**
      * Creates a state image item.
      *
@@ -109,13 +110,15 @@ public class TreeManagementService {
      */
     public TreeItem<ConfigBrowserPanel.ConfigItem> createStateImageItem(
             io.github.jspinak.brobot.model.state.StateImage stateImage) {
-        TreeItem<ConfigBrowserPanel.ConfigItem> item = new TreeItem<>(
-            new ConfigBrowserPanel.ConfigItem(stateImage.getName(), ConfigBrowserPanel.ConfigItemType.STATE_IMAGE)
-        );
+        TreeItem<ConfigBrowserPanel.ConfigItem> item =
+                new TreeItem<>(
+                        new ConfigBrowserPanel.ConfigItem(
+                                stateImage.getName(),
+                                ConfigBrowserPanel.ConfigItemType.STATE_IMAGE));
         item.getValue().setData(stateImage);
         return item;
     }
-    
+
     /**
      * Creates an automation button item.
      *
@@ -124,13 +127,15 @@ public class TreeManagementService {
      */
     public TreeItem<ConfigBrowserPanel.ConfigItem> createAutomationButtonItem(
             io.github.jspinak.brobot.runner.project.TaskButton button) {
-        TreeItem<ConfigBrowserPanel.ConfigItem> item = new TreeItem<>(
-            new ConfigBrowserPanel.ConfigItem(button.getLabel(), ConfigBrowserPanel.ConfigItemType.AUTOMATION_BUTTON)
-        );
+        TreeItem<ConfigBrowserPanel.ConfigItem> item =
+                new TreeItem<>(
+                        new ConfigBrowserPanel.ConfigItem(
+                                button.getLabel(),
+                                ConfigBrowserPanel.ConfigItemType.AUTOMATION_BUTTON));
         item.getValue().setData(button);
         return item;
     }
-    
+
     /**
      * Creates a metadata item.
      *
@@ -138,6 +143,8 @@ public class TreeManagementService {
      * @return The metadata tree item
      */
     public TreeItem<ConfigBrowserPanel.ConfigItem> createMetadataItem(String text) {
-        return new TreeItem<>(new ConfigBrowserPanel.ConfigItem(text, ConfigBrowserPanel.ConfigItemType.METADATA));
+        return new TreeItem<>(
+                new ConfigBrowserPanel.ConfigItem(
+                        text, ConfigBrowserPanel.ConfigItemType.METADATA));
     }
 }

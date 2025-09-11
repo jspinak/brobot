@@ -1,5 +1,14 @@
 package io.github.jspinak.brobot.runner.json.validation.schema;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Objects;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,27 +19,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import io.github.jspinak.brobot.runner.json.validation.model.ValidationError;
 import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
 import io.github.jspinak.brobot.runner.json.validation.model.ValidationSeverity;
-import io.github.jspinak.brobot.runner.json.validation.schema.AutomationDSLValidator;
-import io.github.jspinak.brobot.runner.json.validation.schema.ProjectSchemaValidator;
-import io.github.jspinak.brobot.runner.json.validation.schema.SchemaValidator;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Objects;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class SchemaValidatorTest {
 
-    @Mock
-    private ProjectSchemaValidator projectValidatorMock;
+    @Mock private ProjectSchemaValidator projectValidatorMock;
 
-    @Mock
-    private AutomationDSLValidator dslValidatorMock;
+    @Mock private AutomationDSLValidator dslValidatorMock;
 
     @InjectMocks // This will inject the mocks into a real SchemaValidator instance
     private SchemaValidator schemaValidator;
@@ -42,9 +37,12 @@ class SchemaValidatorTest {
 
     // Helper method to load JSON content from test resources
     private String loadJsonFromFile(String filePath) throws IOException, URISyntaxException {
-        return new String(Files.readAllBytes(Paths.get(
-                Objects.requireNonNull(getClass().getClassLoader().getResource(filePath)).toURI()
-        )));
+        return new String(
+                Files.readAllBytes(
+                        Paths.get(
+                                Objects.requireNonNull(
+                                                getClass().getClassLoader().getResource(filePath))
+                                        .toURI())));
     }
 
     @BeforeEach
@@ -58,9 +56,10 @@ class SchemaValidatorTest {
         validDslJson = loadJsonFromFile("floranext-automation.json");
 
         // For invalid JSON, you can create simple malformed strings or separate files
-        invalidProjectJson = "{ \"name\": \"test\", \"id\": \"not_an_int\" }"; // Example of schema violation
-        invalidDslJson = "{\"automationFunctions\": [{\"name\": null}]}"; // Example of schema violation
-
+        invalidProjectJson =
+                "{ \"name\": \"test\", \"id\": \"not_an_int\" }"; // Example of schema violation
+        invalidDslJson =
+                "{\"automationFunctions\": [{\"name\": null}]}"; // Example of schema violation
     }
 
     @Test
@@ -78,7 +77,8 @@ class SchemaValidatorTest {
     @Test
     void validateProjectSchema_whenProjectJsonIsInvalid_shouldReturnErrorResult() {
         ValidationResult expectedResult = new ValidationResult();
-        expectedResult.addError(new ValidationError("Schema error", "Invalid ID", ValidationSeverity.ERROR));
+        expectedResult.addError(
+                new ValidationError("Schema error", "Invalid ID", ValidationSeverity.ERROR));
         when(projectValidatorMock.validate(invalidProjectJson)).thenReturn(expectedResult);
 
         ValidationResult actualResult = schemaValidator.validateProjectSchema(invalidProjectJson);
@@ -104,7 +104,8 @@ class SchemaValidatorTest {
     @Test
     void validateDSLSchema_whenDslJsonIsInvalid_shouldReturnErrorResult() {
         ValidationResult expectedResult = new ValidationResult();
-        expectedResult.addError(new ValidationError("DSL error", "Null function name", ValidationSeverity.ERROR));
+        expectedResult.addError(
+                new ValidationError("DSL error", "Null function name", ValidationSeverity.ERROR));
         when(dslValidatorMock.validate(invalidDslJson)).thenReturn(expectedResult);
 
         ValidationResult actualResult = schemaValidator.validateDSLSchema(invalidDslJson);
@@ -134,13 +135,15 @@ class SchemaValidatorTest {
     @Test
     void validateAll_whenProjectIsInvalidAndDslIsValid_shouldReturnProjectErrors() {
         ValidationResult projectResult = new ValidationResult();
-        projectResult.addError(new ValidationError("ProjectFail", "Bad project", ValidationSeverity.CRITICAL));
+        projectResult.addError(
+                new ValidationError("ProjectFail", "Bad project", ValidationSeverity.CRITICAL));
         ValidationResult dslResult = new ValidationResult();
 
         when(projectValidatorMock.validate(invalidProjectJson)).thenReturn(projectResult);
         when(dslValidatorMock.validate(validDslJson)).thenReturn(dslResult);
 
-        ValidationResult actualResult = schemaValidator.validateAll(invalidProjectJson, validDslJson);
+        ValidationResult actualResult =
+                schemaValidator.validateAll(invalidProjectJson, validDslJson);
 
         assertFalse(actualResult.isValid());
         assertEquals(1, actualResult.getErrors().size());
@@ -155,11 +158,11 @@ class SchemaValidatorTest {
         ValidationResult dslResult = new ValidationResult();
         dslResult.addError(new ValidationError("DslFail", "Bad DSL", ValidationSeverity.ERROR));
 
-
         when(projectValidatorMock.validate(validProjectJson)).thenReturn(projectResult);
         when(dslValidatorMock.validate(invalidDslJson)).thenReturn(dslResult);
 
-        ValidationResult actualResult = schemaValidator.validateAll(validProjectJson, invalidDslJson);
+        ValidationResult actualResult =
+                schemaValidator.validateAll(validProjectJson, invalidDslJson);
 
         assertFalse(actualResult.isValid());
         assertEquals(1, actualResult.getErrors().size());
@@ -171,19 +174,24 @@ class SchemaValidatorTest {
     @Test
     void validateAll_whenBothAreInvalid_shouldReturnMergedErrors() {
         ValidationResult projectResult = new ValidationResult();
-        projectResult.addError(new ValidationError("ProjectIssue", "Proj issue", ValidationSeverity.WARNING));
+        projectResult.addError(
+                new ValidationError("ProjectIssue", "Proj issue", ValidationSeverity.WARNING));
         ValidationResult dslResult = new ValidationResult();
         dslResult.addError(new ValidationError("DslIssue", "DSL issue", ValidationSeverity.ERROR));
 
         when(projectValidatorMock.validate(invalidProjectJson)).thenReturn(projectResult);
         when(dslValidatorMock.validate(invalidDslJson)).thenReturn(dslResult);
 
-        ValidationResult actualResult = schemaValidator.validateAll(invalidProjectJson, invalidDslJson);
+        ValidationResult actualResult =
+                schemaValidator.validateAll(invalidProjectJson, invalidDslJson);
 
         assertFalse(actualResult.isValid());
         assertEquals(2, actualResult.getErrors().size());
-        assertTrue(actualResult.getErrors().stream().anyMatch(e -> "ProjectIssue".equals(e.errorCode())));
-        assertTrue(actualResult.getErrors().stream().anyMatch(e -> "DslIssue".equals(e.errorCode())));
+        assertTrue(
+                actualResult.getErrors().stream()
+                        .anyMatch(e -> "ProjectIssue".equals(e.errorCode())));
+        assertTrue(
+                actualResult.getErrors().stream().anyMatch(e -> "DslIssue".equals(e.errorCode())));
         verify(projectValidatorMock, times(1)).validate(invalidProjectJson);
         verify(dslValidatorMock, times(1)).validate(invalidDslJson);
     }

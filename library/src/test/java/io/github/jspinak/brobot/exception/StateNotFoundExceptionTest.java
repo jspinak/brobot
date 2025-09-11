@@ -1,6 +1,9 @@
 package io.github.jspinak.brobot.exception;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -10,13 +13,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.stream.Stream;
-
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
- * Comprehensive tests for StateNotFoundException.
- * Achieves 100% coverage of all constructors and methods.
+ * Comprehensive tests for StateNotFoundException. Achieves 100% coverage of all constructors and
+ * methods.
  */
 @DisplayName("StateNotFoundException Tests")
 public class StateNotFoundExceptionTest extends BrobotTestBase {
@@ -26,10 +27,10 @@ public class StateNotFoundExceptionTest extends BrobotTestBase {
     void testExceptionWithStateName() {
         // Given
         String stateName = "LoginScreen";
-        
+
         // When
         StateNotFoundException exception = new StateNotFoundException(stateName);
-        
+
         // Then
         assertEquals(stateName, exception.getStateName());
         assertEquals("State 'LoginScreen' not found in the state model", exception.getMessage());
@@ -42,13 +43,14 @@ public class StateNotFoundExceptionTest extends BrobotTestBase {
         // Given
         String stateName = "CheckoutPage";
         String context = "e-commerce workflow";
-        
+
         // When
         StateNotFoundException exception = new StateNotFoundException(stateName, context);
-        
+
         // Then
         assertEquals(stateName, exception.getStateName());
-        assertEquals("State 'CheckoutPage' not found in e-commerce workflow", exception.getMessage());
+        assertEquals(
+                "State 'CheckoutPage' not found in e-commerce workflow", exception.getMessage());
         assertNull(exception.getCause());
     }
 
@@ -60,10 +62,11 @@ public class StateNotFoundExceptionTest extends BrobotTestBase {
         "ProfilePage, social module, State 'ProfilePage' not found in social module"
     })
     @DisplayName("Should format message correctly with various contexts")
-    void testMessageFormattingWithContext(String stateName, String context, String expectedMessage) {
+    void testMessageFormattingWithContext(
+            String stateName, String context, String expectedMessage) {
         // When
         StateNotFoundException exception = new StateNotFoundException(stateName, context);
-        
+
         // Then
         assertEquals(stateName, exception.getStateName());
         assertEquals(expectedMessage, exception.getMessage());
@@ -71,17 +74,26 @@ public class StateNotFoundExceptionTest extends BrobotTestBase {
 
     @ParameterizedTest
     @NullAndEmptySource
-    @ValueSource(strings = {" ", "\t", "\n", "SimpleState", "State-With-Dashes", 
-                            "State_With_Underscores", "StateWithNumbers123", 
-                            "Very.Long.State.Name.With.Multiple.Parts.That.Exceeds.Normal.Length"})
+    @ValueSource(
+            strings = {
+                " ",
+                "\t",
+                "\n",
+                "SimpleState",
+                "State-With-Dashes",
+                "State_With_Underscores",
+                "StateWithNumbers123",
+                "Very.Long.State.Name.With.Multiple.Parts.That.Exceeds.Normal.Length"
+            })
     @DisplayName("Should handle various state name formats")
     void testVariousStateNameFormats(String stateName) {
         // When
         StateNotFoundException exception = new StateNotFoundException(stateName);
-        
+
         // Then
         assertEquals(stateName, exception.getStateName());
-        String expectedMessage = String.format("State '%s' not found in the state model", stateName);
+        String expectedMessage =
+                String.format("State '%s' not found in the state model", stateName);
         assertEquals(expectedMessage, exception.getMessage());
     }
 
@@ -90,7 +102,7 @@ public class StateNotFoundExceptionTest extends BrobotTestBase {
     void testNullStateName() {
         // When
         StateNotFoundException exception = new StateNotFoundException(null);
-        
+
         // Then
         assertNull(exception.getStateName());
         assertEquals("State 'null' not found in the state model", exception.getMessage());
@@ -101,10 +113,10 @@ public class StateNotFoundExceptionTest extends BrobotTestBase {
     void testNullContext() {
         // Given
         String stateName = "TestState";
-        
+
         // When
         StateNotFoundException exception = new StateNotFoundException(stateName, null);
-        
+
         // Then
         assertEquals(stateName, exception.getStateName());
         assertEquals("State 'TestState' not found in null", exception.getMessage());
@@ -115,7 +127,7 @@ public class StateNotFoundExceptionTest extends BrobotTestBase {
     void testBothNull() {
         // When
         StateNotFoundException exception = new StateNotFoundException(null, null);
-        
+
         // Then
         assertNull(exception.getStateName());
         assertEquals("State 'null' not found in null", exception.getMessage());
@@ -126,7 +138,7 @@ public class StateNotFoundExceptionTest extends BrobotTestBase {
     void testInheritance() {
         // Given
         StateNotFoundException exception = new StateNotFoundException("TestState");
-        
+
         // Then
         assertTrue(exception instanceof BrobotRuntimeException);
         assertTrue(exception instanceof RuntimeException);
@@ -139,12 +151,15 @@ public class StateNotFoundExceptionTest extends BrobotTestBase {
     void testThrowAndCatch() {
         // Given
         String stateName = "NonExistentState";
-        
+
         // When/Then
-        StateNotFoundException caught = assertThrows(StateNotFoundException.class, () -> {
-            throw new StateNotFoundException(stateName);
-        });
-        
+        StateNotFoundException caught =
+                assertThrows(
+                        StateNotFoundException.class,
+                        () -> {
+                            throw new StateNotFoundException(stateName);
+                        });
+
         assertEquals(stateName, caught.getStateName());
     }
 
@@ -152,10 +167,13 @@ public class StateNotFoundExceptionTest extends BrobotTestBase {
     @DisplayName("Should be catchable as BrobotRuntimeException")
     void testCatchAsBrobotRuntimeException() {
         // When/Then
-        BrobotRuntimeException caught = assertThrows(BrobotRuntimeException.class, () -> {
-            throw new StateNotFoundException("TestState", "test context");
-        });
-        
+        BrobotRuntimeException caught =
+                assertThrows(
+                        BrobotRuntimeException.class,
+                        () -> {
+                            throw new StateNotFoundException("TestState", "test context");
+                        });
+
         assertTrue(caught instanceof StateNotFoundException);
     }
 
@@ -164,10 +182,11 @@ public class StateNotFoundExceptionTest extends BrobotTestBase {
     @DisplayName("Should handle realistic state not found scenarios")
     void testRealisticScenarios(String stateName, String context, String expectedInMessage) {
         // When
-        StateNotFoundException exception = (context != null)
-            ? new StateNotFoundException(stateName, context)
-            : new StateNotFoundException(stateName);
-        
+        StateNotFoundException exception =
+                (context != null)
+                        ? new StateNotFoundException(stateName, context)
+                        : new StateNotFoundException(stateName);
+
         // Then
         assertEquals(stateName, exception.getStateName());
         assertTrue(exception.getMessage().contains(expectedInMessage));
@@ -175,14 +194,13 @@ public class StateNotFoundExceptionTest extends BrobotTestBase {
 
     private static Stream<Arguments> provideRealisticScenarios() {
         return Stream.of(
-            Arguments.of("LoginScreen", null, "LoginScreen"),
-            Arguments.of("HomePage", "main navigation", "HomePage"),
-            Arguments.of("UserProfile", "social features", "social features"),
-            Arguments.of("ShoppingCart", "e-commerce flow", "e-commerce flow"),
-            Arguments.of("AdminDashboard", "backend administration", "backend administration"),
-            Arguments.of("PaymentForm", "checkout process", "checkout process"),
-            Arguments.of("SearchResults", "search workflow", "search workflow")
-        );
+                Arguments.of("LoginScreen", null, "LoginScreen"),
+                Arguments.of("HomePage", "main navigation", "HomePage"),
+                Arguments.of("UserProfile", "social features", "social features"),
+                Arguments.of("ShoppingCart", "e-commerce flow", "e-commerce flow"),
+                Arguments.of("AdminDashboard", "backend administration", "backend administration"),
+                Arguments.of("PaymentForm", "checkout process", "checkout process"),
+                Arguments.of("SearchResults", "search workflow", "search workflow"));
     }
 
     @Test
@@ -190,11 +208,11 @@ public class StateNotFoundExceptionTest extends BrobotTestBase {
     void testStackTrace() {
         // Given
         String stateName = "TestState";
-        
+
         // When
         StateNotFoundException exception = new StateNotFoundException(stateName);
         StackTraceElement[] stackTrace = exception.getStackTrace();
-        
+
         // Then
         assertTrue(stackTrace.length > 0);
         assertEquals(this.getClass().getName(), stackTrace[0].getClassName());
@@ -222,7 +240,7 @@ public class StateNotFoundExceptionTest extends BrobotTestBase {
             "State\"Quote\"",
             "State'Single'"
         };
-        
+
         // When/Then
         for (String stateName : specialNames) {
             StateNotFoundException exception = new StateNotFoundException(stateName);
@@ -247,7 +265,7 @@ public class StateNotFoundExceptionTest extends BrobotTestBase {
             "상태", // Korean
             "สถานะ" // Thai
         };
-        
+
         // When/Then
         for (String stateName : unicodeNames) {
             StateNotFoundException exception = new StateNotFoundException(stateName);
@@ -262,11 +280,11 @@ public class StateNotFoundExceptionTest extends BrobotTestBase {
         // Given
         String originalName = "OriginalState";
         StateNotFoundException exception = new StateNotFoundException(originalName);
-        
+
         // When
         String retrievedName1 = exception.getStateName();
         String retrievedName2 = exception.getStateName();
-        
+
         // Then
         assertEquals(originalName, retrievedName1);
         assertEquals(originalName, retrievedName2);
@@ -282,10 +300,10 @@ public class StateNotFoundExceptionTest extends BrobotTestBase {
             longName.append("VeryLongStateName");
         }
         String stateName = longName.toString();
-        
+
         // When
         StateNotFoundException exception = new StateNotFoundException(stateName);
-        
+
         // Then
         assertEquals(stateName, exception.getStateName());
         assertTrue(exception.getMessage().length() > 1000);
@@ -295,20 +313,23 @@ public class StateNotFoundExceptionTest extends BrobotTestBase {
     @DisplayName("Should handle concurrent access")
     void testConcurrentAccess() throws InterruptedException {
         // Given
-        StateNotFoundException exception = new StateNotFoundException("ConcurrentState", "test context");
-        
+        StateNotFoundException exception =
+                new StateNotFoundException("ConcurrentState", "test context");
+
         // When - Access from multiple threads
         Thread[] threads = new Thread[10];
         for (int i = 0; i < threads.length; i++) {
-            threads[i] = new Thread(() -> {
-                for (int j = 0; j < 1000; j++) {
-                    assertEquals("ConcurrentState", exception.getStateName());
-                    assertTrue(exception.getMessage().contains("ConcurrentState"));
-                }
-            });
+            threads[i] =
+                    new Thread(
+                            () -> {
+                                for (int j = 0; j < 1000; j++) {
+                                    assertEquals("ConcurrentState", exception.getStateName());
+                                    assertTrue(exception.getMessage().contains("ConcurrentState"));
+                                }
+                            });
             threads[i].start();
         }
-        
+
         // Then - Wait for all threads
         for (Thread thread : threads) {
             thread.join();

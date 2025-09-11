@@ -1,25 +1,27 @@
 package io.github.jspinak.brobot.tools.testing.mock.scenario;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.Singular;
-
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.List;
 
+import lombok.Builder;
+import lombok.Data;
+import lombok.Singular;
+
 /**
  * Defines time-based conditions that affect mock behavior during testing.
- * <p>
- * This class enables simulation of time-dependent scenarios such as:
+ *
+ * <p>This class enables simulation of time-dependent scenarios such as:
+ *
  * <ul>
- * <li>Network delays and latency variations</li>
- * <li>Peak hours with slower system response</li>
- * <li>Time-of-day dependent behavior</li>
- * <li>Progressive delays that worsen over time</li>
+ *   <li>Network delays and latency variations
+ *   <li>Peak hours with slower system response
+ *   <li>Time-of-day dependent behavior
+ *   <li>Progressive delays that worsen over time
  * </ul>
- * <p>
- * Example usage:
+ *
+ * <p>Example usage:
+ *
  * <pre>{@code
  * TemporalConditions networkDelay = TemporalConditions.builder()
  *     .baseDelay(Duration.ofMillis(500))
@@ -35,51 +37,32 @@ import java.util.List;
 @Data
 @Builder
 public class TemporalConditions {
-    
-    /**
-     * Base delay to apply to operations.
-     */
+
+    /** Base delay to apply to operations. */
     private final Duration baseDelay;
-    
-    /**
-     * Maximum delay that can be applied (caps progression).
-     */
+
+    /** Maximum delay that can be applied (caps progression). */
     private final Duration maximumDelay;
-    
-    /**
-     * Amount to increase delay with each operation (progressive delays).
-     */
+
+    /** Amount to increase delay with each operation (progressive delays). */
     private final Duration delayProgression;
-    
-    /**
-     * Time ranges when these conditions are active.
-     */
+
+    /** Time ranges when these conditions are active. */
     @Singular("activeTimeRange")
     private final List<TimeRange> activeTimeRanges;
-    
-    /**
-     * Whether delays should reset after a period of inactivity.
-     */
-    @Builder.Default
-    private final boolean resetOnInactivity = false;
-    
-    /**
-     * Duration of inactivity required to reset progressive delays.
-     */
+
+    /** Whether delays should reset after a period of inactivity. */
+    @Builder.Default private final boolean resetOnInactivity = false;
+
+    /** Duration of inactivity required to reset progressive delays. */
     private final Duration inactivityThreshold;
-    
-    /**
-     * Multiplier for delays during "peak hours" or high-load simulation.
-     */
-    @Builder.Default
-    private final double peakMultiplier = 1.0;
-    
-    /**
-     * Random variation range for delays (percentage of base delay).
-     */
-    @Builder.Default
-    private final double randomVariation = 0.0;
-    
+
+    /** Multiplier for delays during "peak hours" or high-load simulation. */
+    @Builder.Default private final double peakMultiplier = 1.0;
+
+    /** Random variation range for delays (percentage of base delay). */
+    @Builder.Default private final double randomVariation = 0.0;
+
     /**
      * Calculates the current delay based on operation count and time.
      *
@@ -91,36 +74,36 @@ public class TemporalConditions {
         if (!isActiveAt(currentTime)) {
             return Duration.ZERO;
         }
-        
+
         Duration currentDelay = baseDelay != null ? baseDelay : Duration.ZERO;
-        
+
         // Apply progression
         if (delayProgression != null && operationCount > 0) {
             Duration progressionDelay = delayProgression.multipliedBy(operationCount);
             currentDelay = currentDelay.plus(progressionDelay);
         }
-        
+
         // Apply peak multiplier
         if (peakMultiplier != 1.0) {
             long delayMillis = (long) (currentDelay.toMillis() * peakMultiplier);
             currentDelay = Duration.ofMillis(delayMillis);
         }
-        
+
         // Apply random variation
         if (randomVariation > 0) {
             double variation = (Math.random() - 0.5) * 2 * randomVariation;
             long variationMillis = (long) (currentDelay.toMillis() * variation);
             currentDelay = currentDelay.plusMillis(variationMillis);
         }
-        
+
         // Cap at maximum
         if (maximumDelay != null && currentDelay.compareTo(maximumDelay) > 0) {
             currentDelay = maximumDelay;
         }
-        
+
         return currentDelay.isNegative() ? Duration.ZERO : currentDelay;
     }
-    
+
     /**
      * Checks if these conditions are active at the specified time.
      *
@@ -131,20 +114,17 @@ public class TemporalConditions {
         if (activeTimeRanges.isEmpty()) {
             return true; // Always active if no ranges specified
         }
-        
-        return activeTimeRanges.stream()
-            .anyMatch(range -> range.contains(currentTime));
+
+        return activeTimeRanges.stream().anyMatch(range -> range.contains(currentTime));
     }
-    
-    /**
-     * Represents a time range for conditional activation.
-     */
+
+    /** Represents a time range for conditional activation. */
     @Data
     @Builder
     public static class TimeRange {
         private final LocalTime start;
         private final LocalTime end;
-        
+
         /**
          * Checks if the given time falls within this range.
          *

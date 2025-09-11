@@ -1,19 +1,18 @@
 package io.github.jspinak.brobot.tools.testing.data;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.Map;
+
+import org.junit.jupiter.api.*;
+import org.springframework.test.util.ReflectionTestUtils;
+
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.state.StateString;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.junit.jupiter.api.*;
-import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
-
-/**
- * Comprehensive tests for TestDataBuilder
- */
+/** Comprehensive tests for TestDataBuilder */
 @DisplayName("TestDataBuilder Tests")
 public class TestDataBuilderTest extends BrobotTestBase {
 
@@ -46,9 +45,7 @@ public class TestDataBuilderTest extends BrobotTestBase {
         @DisplayName("Should store baseline scenario")
         void shouldStoreBaselineScenario() {
             // Arrange
-            TestScenario scenario = TestScenario.builder()
-                .name("baseline-test")
-                .build();
+            TestScenario scenario = TestScenario.builder().name("baseline-test").build();
 
             // Act
             testDataBuilder.storeBaselineScenario("baseline-test", scenario);
@@ -73,15 +70,9 @@ public class TestDataBuilderTest extends BrobotTestBase {
         @DisplayName("Should overwrite existing baseline scenario")
         void shouldOverwriteExistingScenario() {
             // Arrange
-            TestScenario scenario1 = TestScenario.builder()
-                .name("test")
-                .version("1.0")
-                .build();
-            
-            TestScenario scenario2 = TestScenario.builder()
-                .name("test")
-                .version("2.0")
-                .build();
+            TestScenario scenario1 = TestScenario.builder().name("test").version("1.0").build();
+
+            TestScenario scenario2 = TestScenario.builder().name("test").version("2.0").build();
 
             // Act
             testDataBuilder.storeBaselineScenario("test", scenario1);
@@ -108,7 +99,7 @@ public class TestDataBuilderTest extends BrobotTestBase {
             assertNotNull(builder);
             assertNotNull(scenario);
             assertEquals("login_flow", scenario.getName());
-            
+
             // Should have pre-configured elements
             Map<String, StateImage> images = scenario.getStateImages();
             assertNotNull(images);
@@ -116,14 +107,14 @@ public class TestDataBuilderTest extends BrobotTestBase {
             assertTrue(images.containsKey("username_field"));
             assertTrue(images.containsKey("password_field"));
             assertTrue(images.containsKey("login_button"));
-            
+
             // Should have state strings
             Map<String, StateString> strings = scenario.getStateStrings();
             assertNotNull(strings);
             assertEquals(2, strings.size());
             assertTrue(strings.containsKey("username_text"));
             assertTrue(strings.containsKey("password_text"));
-            
+
             // Should have region
             Map<String, Region> regions = scenario.getRegions();
             assertNotNull(regions);
@@ -142,7 +133,7 @@ public class TestDataBuilderTest extends BrobotTestBase {
             assertNotNull(builder);
             assertNotNull(scenario);
             assertEquals("navigation_flow", scenario.getName());
-            
+
             // Should have navigation elements
             Map<String, StateImage> images = scenario.getStateImages();
             assertNotNull(images);
@@ -150,7 +141,7 @@ public class TestDataBuilderTest extends BrobotTestBase {
             assertTrue(images.containsKey("back_button"));
             assertTrue(images.containsKey("forward_button"));
             assertTrue(images.containsKey("menu_button"));
-            
+
             // Should have navigation bar region
             Map<String, Region> regions = scenario.getRegions();
             assertNotNull(regions);
@@ -196,17 +187,11 @@ public class TestDataBuilderTest extends BrobotTestBase {
         @DisplayName("Should manage multiple baseline scenarios")
         void shouldManageMultipleScenarios() {
             // Arrange
-            TestScenario scenario1 = TestScenario.builder()
-                .name("scenario1")
-                .build();
-            
-            TestScenario scenario2 = TestScenario.builder()
-                .name("scenario2")
-                .build();
-            
-            TestScenario scenario3 = TestScenario.builder()
-                .name("scenario3")
-                .build();
+            TestScenario scenario1 = TestScenario.builder().name("scenario1").build();
+
+            TestScenario scenario2 = TestScenario.builder().name("scenario2").build();
+
+            TestScenario scenario3 = TestScenario.builder().name("scenario3").build();
 
             // Act
             testDataBuilder.storeBaselineScenario("scenario1", scenario1);
@@ -223,18 +208,14 @@ public class TestDataBuilderTest extends BrobotTestBase {
         @DisplayName("Should maintain scenario isolation")
         void shouldMaintainScenarioIsolation() {
             // Arrange
-            TestScenario scenario1 = TestScenario.builder()
-                .name("isolated1")
-                .version("1.0")
-                .build();
+            TestScenario scenario1 =
+                    TestScenario.builder().name("isolated1").version("1.0").build();
 
             // Act
             testDataBuilder.storeBaselineScenario("isolated1", scenario1);
-            
+
             // Create modified version
-            TestScenario scenario2 = scenario1.toBuilder()
-                .version("2.0")
-                .build();
+            TestScenario scenario2 = scenario1.toBuilder().version("2.0").build();
 
             // Assert - stored version should not change since scenarios are immutable
             TestScenario retrieved = testDataBuilder.getBaselineScenario("isolated1");
@@ -260,11 +241,12 @@ public class TestDataBuilderTest extends BrobotTestBase {
         @DisplayName("Should support method chaining for scenario creation")
         void shouldSupportMethodChaining() {
             // Act - this should compile and not throw
-            TestScenario.Builder builder = testDataBuilder
-                .scenario("chained")
-                .withStateImage("image1", "path1.png")
-                .withStateString("string1", "value1")
-                .withRegion("region1", new Region(0, 0, 100, 100));
+            TestScenario.Builder builder =
+                    testDataBuilder
+                            .scenario("chained")
+                            .withStateImage("image1", "path1.png")
+                            .withStateString("string1", "value1")
+                            .withRegion("region1", new Region(0, 0, 100, 100));
 
             // Assert
             assertNotNull(builder);
@@ -279,7 +261,7 @@ public class TestDataBuilderTest extends BrobotTestBase {
 
             // Assert
             assertNotSame(builder1, builder2);
-            
+
             String name1 = (String) ReflectionTestUtils.getField(builder1, "name");
             String name2 = (String) ReflectionTestUtils.getField(builder2, "name");
             assertNotEquals(name1, name2);
@@ -294,14 +276,11 @@ public class TestDataBuilderTest extends BrobotTestBase {
         @DisplayName("Should handle null scenario name in storage")
         void shouldHandleNullScenarioName() {
             // Arrange
-            TestScenario scenario = TestScenario.builder()
-                .name(null)
-                .build();
+            TestScenario scenario = TestScenario.builder().name(null).build();
 
             // Act & Assert - should not throw
-            assertDoesNotThrow(() -> 
-                testDataBuilder.storeBaselineScenario(null, scenario));
-            
+            assertDoesNotThrow(() -> testDataBuilder.storeBaselineScenario(null, scenario));
+
             // Can retrieve with null key
             TestScenario retrieved = testDataBuilder.getBaselineScenario(null);
             assertEquals(scenario, retrieved);
@@ -311,9 +290,8 @@ public class TestDataBuilderTest extends BrobotTestBase {
         @DisplayName("Should handle null scenario in storage")
         void shouldHandleNullScenario() {
             // Act & Assert - should not throw
-            assertDoesNotThrow(() -> 
-                testDataBuilder.storeBaselineScenario("test", null));
-            
+            assertDoesNotThrow(() -> testDataBuilder.storeBaselineScenario("test", null));
+
             // Should store null
             assertNull(testDataBuilder.getBaselineScenario("test"));
         }
@@ -335,9 +313,7 @@ public class TestDataBuilderTest extends BrobotTestBase {
         void shouldHandleSpecialCharactersInName() {
             // Arrange
             String specialName = "test-scenario_2024!@#$%^&*()";
-            TestScenario scenario = TestScenario.builder()
-                .name(specialName)
-                .build();
+            TestScenario scenario = TestScenario.builder().name(specialName).build();
 
             // Act
             testDataBuilder.storeBaselineScenario(specialName, scenario);
@@ -361,14 +337,12 @@ public class TestDataBuilderTest extends BrobotTestBase {
 
             // Act
             long startTime = System.currentTimeMillis();
-            
+
             for (int i = 0; i < scenarioCount; i++) {
-                TestScenario scenario = TestScenario.builder()
-                    .name("scenario" + i)
-                    .build();
+                TestScenario scenario = TestScenario.builder().name("scenario" + i).build();
                 testDataBuilder.storeBaselineScenario("scenario" + i, scenario);
             }
-            
+
             long storeTime = System.currentTimeMillis() - startTime;
 
             // Retrieve all
@@ -380,8 +354,11 @@ public class TestDataBuilderTest extends BrobotTestBase {
             long retrieveTime = System.currentTimeMillis() - startTime;
 
             // Assert - operations should be fast
-            assertTrue(storeTime < 1000, "Storing 1000 scenarios took too long: " + storeTime + "ms");
-            assertTrue(retrieveTime < 1000, "Retrieving 1000 scenarios took too long: " + retrieveTime + "ms");
+            assertTrue(
+                    storeTime < 1000, "Storing 1000 scenarios took too long: " + storeTime + "ms");
+            assertTrue(
+                    retrieveTime < 1000,
+                    "Retrieving 1000 scenarios took too long: " + retrieveTime + "ms");
         }
 
         @Test
@@ -395,15 +372,18 @@ public class TestDataBuilderTest extends BrobotTestBase {
             // Act
             for (int i = 0; i < threadCount; i++) {
                 final int threadId = i;
-                threads[i] = new Thread(() -> {
-                    for (int j = 0; j < operationsPerThread; j++) {
-                        TestScenario scenario = TestScenario.builder()
-                            .name("thread" + threadId + "_scenario" + j)
-                            .build();
-                        testDataBuilder.storeBaselineScenario(
-                            "thread" + threadId + "_scenario" + j, scenario);
-                    }
-                });
+                threads[i] =
+                        new Thread(
+                                () -> {
+                                    for (int j = 0; j < operationsPerThread; j++) {
+                                        TestScenario scenario =
+                                                TestScenario.builder()
+                                                        .name("thread" + threadId + "_scenario" + j)
+                                                        .build();
+                                        testDataBuilder.storeBaselineScenario(
+                                                "thread" + threadId + "_scenario" + j, scenario);
+                                    }
+                                });
                 threads[i].start();
             }
 
@@ -415,8 +395,8 @@ public class TestDataBuilderTest extends BrobotTestBase {
             // Assert - all scenarios should be stored
             for (int i = 0; i < threadCount; i++) {
                 for (int j = 0; j < operationsPerThread; j++) {
-                    TestScenario retrieved = testDataBuilder.getBaselineScenario(
-                        "thread" + i + "_scenario" + j);
+                    TestScenario retrieved =
+                            testDataBuilder.getBaselineScenario("thread" + i + "_scenario" + j);
                     assertNotNull(retrieved);
                 }
             }

@@ -1,12 +1,5 @@
 package io.github.jspinak.brobot.config.core;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -14,273 +7,211 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
+
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+
 /**
- * Unified configuration system for Brobot with validation and environment-specific profiles.
- * This replaces scattered configuration with a cohesive, validated system.
+ * Unified configuration system for Brobot with validation and environment-specific profiles. This
+ * replaces scattered configuration with a cohesive, validated system.
  */
 @Slf4j
 @Data
 @Configuration
 @ConfigurationProperties(prefix = "brobot")
 public class BrobotConfiguration {
-    
-    /**
-     * Core configuration settings
-     */
+
+    /** Core configuration settings */
     @Data
     public static class CoreConfig {
-        
-        /**
-         * Primary image path for pattern matching
-         */
+
+        /** Primary image path for pattern matching */
         private String imagePath = "images";
-        
-        /**
-         * Additional image search paths
-         */
+
+        /** Additional image search paths */
         private List<String> additionalImagePaths = new ArrayList<>();
-        
-        /**
-         * Enable mock mode for testing without real GUI operations
-         */
+
+        /** Enable mock mode for testing without real GUI operations */
         private boolean mockMode = false;
-        
-        /**
-         * Force headless mode regardless of display availability
-         */
+
+        /** Force headless mode regardless of display availability */
         private Boolean forceHeadless = null;
-        
-        /**
-         * Allow screen capture operations
-         */
+
+        /** Allow screen capture operations */
         private boolean allowScreenCapture = true;
-        
-        /**
-         * Enable verbose logging for debugging
-         */
+
+        /** Enable verbose logging for debugging */
         private boolean verboseLogging = false;
-        
-        /**
-         * Timeout for finding elements (seconds)
-         */
+
+        /** Timeout for finding elements (seconds) */
         private double findTimeout = 3.0;
-        
-        /**
-         * Default pause between actions (seconds)
-         */
+
+        /** Default pause between actions (seconds) */
         private double actionPause = 0.3;
-        
-        /**
-         * Enable image caching for performance
-         */
+
+        /** Enable image caching for performance */
         private boolean enableImageCache = true;
-        
-        /**
-         * Maximum cache size in MB
-         */
+
+        /** Maximum cache size in MB */
         private int maxCacheSizeMB = 100;
     }
-    
-    /**
-     * SikuliX-specific configuration
-     */
+
+    /** SikuliX-specific configuration */
     @Data
     public static class SikuliConfig {
-        
-        /**
-         * Minimum similarity for pattern matching (0.0 to 1.0)
-         */
+
+        /** Minimum similarity for pattern matching (0.0 to 1.0) */
         private double minSimilarity = 0.7;
-        
-        /**
-         * Wait time for elements to appear (seconds)
-         */
+
+        /** Wait time for elements to appear (seconds) */
         private double waitTime = 3.0;
-        
-        /**
-         * Highlight duration for found elements (seconds)
-         */
+
+        /** Highlight duration for found elements (seconds) */
         private double highlightTime = 2.0;
-        
-        /**
-         * Enable visual debugging features
-         */
+
+        /** Enable visual debugging features */
         private boolean visualDebugging = false;
-        
-        /**
-         * Save screenshots on failures
-         */
+
+        /** Save screenshots on failures */
         private boolean saveFailureScreenshots = true;
-        
-        /**
-         * Screenshot directory
-         */
+
+        /** Screenshot directory */
         private String screenshotDirectory = "screenshots";
     }
-    
-    /**
-     * Environment-specific configuration
-     */
+
+    /** Environment-specific configuration */
     @Data
     public static class EnvironmentConfig {
-        
-        /**
-         * Current environment profile
-         */
+
+        /** Current environment profile */
         private String profile = "development";
-        
-        /**
-         * Track if profile was explicitly set
-         */
+
+        /** Track if profile was explicitly set */
         private boolean profileExplicitlySet = false;
-        
-        /**
-         * CI/CD specific settings
-         */
+
+        /** CI/CD specific settings */
         private boolean ciMode = false;
-        
-        /**
-         * Docker container mode
-         */
+
+        /** Docker container mode */
         private boolean dockerMode = false;
-        
-        /**
-         * Remote automation settings
-         */
+
+        /** Remote automation settings */
         private boolean remoteMode = false;
-        
-        /**
-         * Remote server URL
-         */
+
+        /** Remote server URL */
         private String remoteServerUrl;
-        
-        /**
-         * Override setter to track explicit profile setting
-         */
+
+        /** Override setter to track explicit profile setting */
         public void setProfile(String profile) {
             this.profile = profile;
             this.profileExplicitlySet = true;
         }
     }
-    
-    /**
-     * Performance tuning configuration
-     */
+
+    /** Performance tuning configuration */
     @Data
     public static class PerformanceConfig {
-        
-        /**
-         * Thread pool size for parallel operations
-         */
+
+        /** Thread pool size for parallel operations */
         private int threadPoolSize = 4;
-        
-        /**
-         * Enable parallel execution
-         */
+
+        /** Enable parallel execution */
         private boolean enableParallelExecution = false;
-        
-        /**
-         * Maximum retry attempts for failed operations
-         */
+
+        /** Maximum retry attempts for failed operations */
         private int maxRetryAttempts = 3;
-        
-        /**
-         * Delay between retries (seconds)
-         */
+
+        /** Delay between retries (seconds) */
         private double retryDelay = 1.0;
-        
-        /**
-         * Enable performance metrics collection
-         */
+
+        /** Enable performance metrics collection */
         private boolean collectMetrics = false;
     }
-    
+
     // Main configuration sections
     private CoreConfig core = new CoreConfig();
     private SikuliConfig sikuli = new SikuliConfig();
     private EnvironmentConfig environment = new EnvironmentConfig();
     private PerformanceConfig performance = new PerformanceConfig();
-    
-    /**
-     * Validate configuration after properties are bound
-     */
+
+    /** Validate configuration after properties are bound */
     public void validate() {
         log.info("Validating Brobot configuration...");
-        
+
         // Auto-detect environment if not explicitly set
         if (!environment.isProfileExplicitlySet()) {
             detectEnvironmentProfile();
         }
-        
+
         // Apply environment-specific defaults
         applyEnvironmentDefaults();
-        
+
         // Validate configuration consistency
         validateConsistency();
-        
+
         // Log final configuration
         if (core.isVerboseLogging()) {
             logConfiguration();
         }
     }
-    
-    /**
-     * Get effective ExecutionEnvironment based on configuration
-     */
+
+    /** Get effective ExecutionEnvironment based on configuration */
     public ExecutionEnvironment getExecutionEnvironment() {
         return ExecutionEnvironment.builder()
-            .mockMode(core.isMockMode())
-            .forceHeadless(core.getForceHeadless())
-            .allowScreenCapture(core.isAllowScreenCapture())
-            .verboseLogging(core.isVerboseLogging())
-            .build();
+                .mockMode(core.isMockMode())
+                .forceHeadless(core.getForceHeadless())
+                .allowScreenCapture(core.isAllowScreenCapture())
+                .verboseLogging(core.isVerboseLogging())
+                .build();
     }
-    
-    /**
-     * Check if running in a specific profile
-     */
+
+    /** Check if running in a specific profile */
     public boolean isProfile(String profile) {
         return environment.getProfile().equalsIgnoreCase(profile);
     }
-    
-    /**
-     * Get configuration for a specific profile
-     */
+
+    /** Get configuration for a specific profile */
     public void applyProfile(String profile) {
         log.info("Applying configuration profile: {}", profile);
         environment.setProfile(profile);
         environment.setProfileExplicitlySet(true);
         applyEnvironmentDefaults();
     }
-    
+
     private void detectEnvironmentProfile() {
         // Check for CI environment (both env variable and system property)
-        if (System.getenv("CI") != null || 
-            System.getenv("CONTINUOUS_INTEGRATION") != null ||
-            "true".equals(System.getProperty("CI"))) {
-            environment.profile = "ci";  // Use field directly to avoid setting the flag
+        if (System.getenv("CI") != null
+                || System.getenv("CONTINUOUS_INTEGRATION") != null
+                || "true".equals(System.getProperty("CI"))) {
+            environment.profile = "ci"; // Use field directly to avoid setting the flag
             environment.setCiMode(true);
             log.info("Detected CI environment");
             return;
         }
-        
+
         // Check for Docker
         if (Files.exists(Paths.get("/.dockerenv"))) {
             environment.setDockerMode(true);
             log.info("Detected Docker environment");
         }
-        
+
         // Check for common test indicators
         String classPath = System.getProperty("java.class.path", "");
         if (classPath.contains("test-classes") || classPath.contains("junit")) {
-            environment.profile = "testing";  // Use field directly to avoid setting the flag
+            environment.profile = "testing"; // Use field directly to avoid setting the flag
             log.info("Detected testing environment");
             return;
         }
-        
+
         // Default remains as development
     }
-    
+
     private void applyEnvironmentDefaults() {
         switch (environment.getProfile()) {
             case "ci":
@@ -293,7 +224,7 @@ public class BrobotConfiguration {
                 sikuli.setWaitTime(1.0);
                 sikuli.setSaveFailureScreenshots(false);
                 break;
-                
+
             case "testing":
                 // Testing defaults - mock mode, fast execution
                 core.setMockMode(true);
@@ -301,7 +232,7 @@ public class BrobotConfiguration {
                 core.setActionPause(0.0);
                 performance.setEnableParallelExecution(true);
                 break;
-                
+
             case "production":
                 // Production defaults - conservative settings
                 core.setVerboseLogging(false);
@@ -309,7 +240,7 @@ public class BrobotConfiguration {
                 performance.setMaxRetryAttempts(5);
                 performance.setCollectMetrics(true);
                 break;
-                
+
             case "development":
                 // Development defaults - debugging enabled
                 core.setVerboseLogging(true);
@@ -318,28 +249,30 @@ public class BrobotConfiguration {
                 break;
         }
     }
-    
+
     private void validateConsistency() {
         // Mock mode and screen capture are incompatible
         if (core.isMockMode() && core.isAllowScreenCapture()) {
             log.warn("Mock mode enabled but screen capture allowed - disabling screen capture");
             core.setAllowScreenCapture(false);
         }
-        
+
         // Remote mode requires server URL
-        if (environment.isRemoteMode() && 
-            (environment.getRemoteServerUrl() == null || environment.getRemoteServerUrl().isEmpty())) {
+        if (environment.isRemoteMode()
+                && (environment.getRemoteServerUrl() == null
+                        || environment.getRemoteServerUrl().isEmpty())) {
             throw new IllegalStateException("Remote mode enabled but no server URL provided");
         }
-        
+
         // Parallel execution requires adequate thread pool
         if (performance.isEnableParallelExecution() && performance.getThreadPoolSize() < 2) {
-            log.warn("Parallel execution enabled but thread pool size is {}, increasing to 4", 
+            log.warn(
+                    "Parallel execution enabled but thread pool size is {}, increasing to 4",
                     performance.getThreadPoolSize());
             performance.setThreadPoolSize(4);
         }
     }
-    
+
     private void logConfiguration() {
         log.debug("=== Brobot Configuration ===");
         log.debug("Profile: {}", environment.getProfile());
@@ -349,10 +282,10 @@ public class BrobotConfiguration {
         log.debug("Performance: {}", performance);
         log.debug("==========================");
     }
-    
+
     /**
-     * Get a diagnostic report of the current configuration
-     * Method name doesn't follow getter convention to avoid Spring property binding
+     * Get a diagnostic report of the current configuration Method name doesn't follow getter
+     * convention to avoid Spring property binding
      */
     @JsonIgnore
     public Map<String, Object> diagnosticReport() {

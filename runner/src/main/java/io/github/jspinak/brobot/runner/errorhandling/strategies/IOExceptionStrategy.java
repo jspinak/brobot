@@ -1,48 +1,48 @@
 package io.github.jspinak.brobot.runner.errorhandling.strategies;
 
+import java.io.IOException;
+
 import io.github.jspinak.brobot.runner.errorhandling.ErrorContext;
 import io.github.jspinak.brobot.runner.errorhandling.ErrorResult;
 import io.github.jspinak.brobot.runner.errorhandling.IErrorStrategy;
+
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
-
-/**
- * Strategy for handling I/O exceptions.
- * These errors are often recoverable through retry.
- */
+/** Strategy for handling I/O exceptions. These errors are often recoverable through retry. */
 @Slf4j
 public class IOExceptionStrategy implements IErrorStrategy {
-    
+
     private static final int MAX_RETRY_ATTEMPTS = 3;
-    
+
     @Override
     public ErrorResult handle(Throwable error, ErrorContext context) {
         IOException ioException = (IOException) error;
-        
+
         log.error("I/O error in {}: {}", context.getOperation(), ioException.getMessage());
-        
+
         String userMessage = createUserMessage(ioException);
         boolean recoverable = isRecoverable(ioException);
-        
+
         return ErrorResult.builder()
-            .errorId(context.getErrorId())
-            .success(false)
-            .recoverable(recoverable)
-            .userMessage(userMessage)
-            .technicalDetails(String.format(
-                "IOException: %s\nCause: %s\nOperation: %s",
-                ioException.getMessage(),
-                ioException.getCause() != null ? ioException.getCause().getMessage() : "None",
-                context.getOperation()
-            ))
-            .recoveryAction(recoverable ? createRecoveryAction(context) : null)
-            .build();
+                .errorId(context.getErrorId())
+                .success(false)
+                .recoverable(recoverable)
+                .userMessage(userMessage)
+                .technicalDetails(
+                        String.format(
+                                "IOException: %s\nCause: %s\nOperation: %s",
+                                ioException.getMessage(),
+                                ioException.getCause() != null
+                                        ? ioException.getCause().getMessage()
+                                        : "None",
+                                context.getOperation()))
+                .recoveryAction(recoverable ? createRecoveryAction(context) : null)
+                .build();
     }
-    
+
     private String createUserMessage(IOException exception) {
         String message = exception.getMessage();
-        
+
         if (message == null) {
             return "File operation failed. Please check file permissions and availability.";
         } else if (message.contains("Permission denied")) {
@@ -55,19 +55,19 @@ public class IOExceptionStrategy implements IErrorStrategy {
             return "File operation failed: " + message;
         }
     }
-    
+
     private boolean isRecoverable(IOException exception) {
         String message = exception.getMessage();
         if (message == null) {
             return true; // Assume recoverable by default
         }
-        
+
         // Non-recoverable conditions
-        return !message.contains("Permission denied") && 
-               !message.contains("Read-only file system") &&
-               !message.contains("Invalid path");
+        return !message.contains("Permission denied")
+                && !message.contains("Read-only file system")
+                && !message.contains("Invalid path");
     }
-    
+
     private Runnable createRecoveryAction(ErrorContext context) {
         return () -> {
             log.info("Retrying file operation for {}", context.getOperation());

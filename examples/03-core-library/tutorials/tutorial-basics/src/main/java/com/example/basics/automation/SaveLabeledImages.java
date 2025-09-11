@@ -1,32 +1,33 @@
 package com.example.basics.automation;
 
-import io.github.jspinak.brobot.navigation.transition.StateNavigator;
-import org.springframework.stereotype.Component;
-import lombok.extern.slf4j.Slf4j;
-
 import static com.example.basics.StateNames.ISLAND;
+
+import org.springframework.stereotype.Component;
+
+import io.github.jspinak.brobot.navigation.transition.StateNavigator;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
 public class SaveLabeledImages {
-    
+
     private StateNavigator stateNavigator;
     private GetNewIsland getNewIsland;
     private IslandRegion islandRegion;
-    
-    public SaveLabeledImages(StateNavigator stateNavigator,
-                             GetNewIsland getNewIsland,
-                             IslandRegion islandRegion) {
+
+    public SaveLabeledImages(
+            StateNavigator stateNavigator, GetNewIsland getNewIsland, IslandRegion islandRegion) {
         this.stateNavigator = stateNavigator;
         this.getNewIsland = getNewIsland;
         this.islandRegion = islandRegion;
     }
-    
+
     public void saveImages(int maxImages) {
         String directory = "labeledImages/";
         // Navigate to ISLAND state
         stateNavigator.openState(ISLAND);
-        for (int i=0; i<maxImages; i++) {
+        for (int i = 0; i < maxImages; i++) {
             String newIslandType = getNewIsland.getIsland();
             log.info("text = {}", newIslandType);
             if (!newIslandType.isEmpty() && islandRegion.ensureRegionReady()) {

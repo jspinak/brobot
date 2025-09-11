@@ -1,13 +1,11 @@
 package io.github.jspinak.brobot.runner.errorhandling.circuit;
 
+import java.time.Instant;
+
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.Instant;
-
-/**
- * Metrics snapshot for a circuit breaker.
- */
+/** Metrics snapshot for a circuit breaker. */
 @Data
 @Builder
 public class CircuitBreakerMetrics {
@@ -18,10 +16,10 @@ public class CircuitBreakerMetrics {
     private final int failedCalls;
     private final int consecutiveFailures;
     private final Instant lastStateTransition;
-    
+
     /**
      * Gets the success rate.
-     * 
+     *
      * @return success rate as percentage (0-100)
      */
     public double getSuccessRate() {
@@ -31,10 +29,10 @@ public class CircuitBreakerMetrics {
         int successfulCalls = totalCalls - failedCalls - blockedCalls;
         return (double) successfulCalls / totalCalls * 100;
     }
-    
+
     /**
      * Gets the block rate.
-     * 
+     *
      * @return block rate as percentage (0-100)
      */
     public double getBlockRate() {

@@ -1,12 +1,6 @@
 package io.github.jspinak.brobot.runner.session.persistence;
 
-import io.github.jspinak.brobot.runner.common.diagnostics.DiagnosticInfo;
-import io.github.jspinak.brobot.runner.session.Session;
-import io.github.jspinak.brobot.runner.session.SessionEvent;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import org.springframework.test.util.ReflectionTestUtils;
+import static org.assertj.core.api.Assertions.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,20 +9,27 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import io.github.jspinak.brobot.runner.common.diagnostics.DiagnosticInfo;
+import io.github.jspinak.brobot.runner.session.Session;
+import io.github.jspinak.brobot.runner.session.SessionEvent;
 
 class SessionPersistenceServiceTest {
 
     private SessionPersistenceService persistenceService;
-    
-    @TempDir
-    Path tempDir;
+
+    @TempDir Path tempDir;
 
     @BeforeEach
     void setUp() {
         persistenceService = new SessionPersistenceService();
         // Use reflection to set the storage path to our temp directory
-        ReflectionTestUtils.setField(persistenceService, "sessionStoragePathConfig", tempDir.toString());
+        ReflectionTestUtils.setField(
+                persistenceService, "sessionStoragePathConfig", tempDir.toString());
         persistenceService.initialize();
     }
 
@@ -67,7 +68,8 @@ class SessionPersistenceServiceTest {
         // Then
         assertThat(loadedSession).isPresent();
         assertThat(loadedSession.get().getId()).isEqualTo(originalSession.getId());
-        assertThat(loadedSession.get().getProjectName()).isEqualTo(originalSession.getProjectName());
+        assertThat(loadedSession.get().getProjectName())
+                .isEqualTo(originalSession.getProjectName());
         assertThat(loadedSession.get().getConfigPath()).isEqualTo(originalSession.getConfigPath());
     }
 
@@ -137,7 +139,7 @@ class SessionPersistenceServiceTest {
         assertThat(backupPath).isPresent();
         assertThat(backupPath.get()).exists();
         assertThat(backupPath.get().toString()).contains("backup");
-        
+
         // Verify backup content
         String backupContent = Files.readString(backupPath.get());
         assertThat(backupContent).contains("backup");
@@ -192,15 +194,17 @@ class SessionPersistenceServiceTest {
         // When
         for (int i = 0; i < threadCount; i++) {
             final int index = i;
-            threads[i] = new Thread(() -> {
-                try {
-                    Session session = createTestSession();
-                    session.setId("concurrent-session-" + index);
-                    persistenceService.saveSession(session);
-                } catch (IOException e) {
-                    fail("Failed to save session: " + e.getMessage());
-                }
-            });
+            threads[i] =
+                    new Thread(
+                            () -> {
+                                try {
+                                    Session session = createTestSession();
+                                    session.setId("concurrent-session-" + index);
+                                    persistenceService.saveSession(session);
+                                } catch (IOException e) {
+                                    fail("Failed to save session: " + e.getMessage());
+                                }
+                            });
             threads[i].start();
         }
 
@@ -221,7 +225,7 @@ class SessionPersistenceServiceTest {
         Session session1 = createTestSession();
         Session session2 = createTestSession();
         session2.setId(UUID.randomUUID().toString());
-        
+
         persistenceService.saveSession(session1);
         persistenceService.saveSession(session2);
         persistenceService.loadSession(session1.getId());
@@ -232,13 +236,20 @@ class SessionPersistenceServiceTest {
 
         // Then
         assertThat(diagnosticInfo.getComponent()).isEqualTo("SessionPersistenceService");
-        assertThat(diagnosticInfo.getStates()).containsKeys(
-                "storagePath", "sessionsSaved", "sessionsLoaded", 
-                "sessionsDeleted", "totalStorageSizeMB", "totalSessionFiles"
-        );
-        assertThat((Integer) diagnosticInfo.getStates().get("sessionsSaved")).isGreaterThanOrEqualTo(2);
-        assertThat((Integer) diagnosticInfo.getStates().get("sessionsLoaded")).isGreaterThanOrEqualTo(1);
-        assertThat((Integer) diagnosticInfo.getStates().get("sessionsDeleted")).isGreaterThanOrEqualTo(1);
+        assertThat(diagnosticInfo.getStates())
+                .containsKeys(
+                        "storagePath",
+                        "sessionsSaved",
+                        "sessionsLoaded",
+                        "sessionsDeleted",
+                        "totalStorageSizeMB",
+                        "totalSessionFiles");
+        assertThat((Integer) diagnosticInfo.getStates().get("sessionsSaved"))
+                .isGreaterThanOrEqualTo(2);
+        assertThat((Integer) diagnosticInfo.getStates().get("sessionsLoaded"))
+                .isGreaterThanOrEqualTo(1);
+        assertThat((Integer) diagnosticInfo.getStates().get("sessionsDeleted"))
+                .isGreaterThanOrEqualTo(1);
     }
 
     @Test

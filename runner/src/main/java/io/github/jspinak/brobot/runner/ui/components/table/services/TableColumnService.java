@@ -1,5 +1,8 @@
 package io.github.jspinak.brobot.runner.ui.components.table.services;
 
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.control.TableCell;
@@ -7,11 +10,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Callback;
-import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.stereotype.Service;
 
 /**
  * Service for managing table columns.
@@ -20,9 +20,9 @@ import java.util.Map;
  */
 @Service
 public class TableColumnService<T> {
-    
+
     private final Map<TableColumn<T, ?>, StringProperty> columnTitles = new HashMap<>();
-    
+
     /**
      * Adds a string column to the table.
      *
@@ -31,23 +31,24 @@ public class TableColumnService<T> {
      * @param propertyName The property name to bind to
      * @return The created column
      */
-    public TableColumn<T, String> addStringColumn(TableView<T> tableView, String title, String propertyName) {
+    public TableColumn<T, String> addStringColumn(
+            TableView<T> tableView, String title, String propertyName) {
         TableColumn<T, String> column = new TableColumn<>();
-        
+
         // Create a property for the title to allow dynamic updates
         StringProperty titleProperty = new SimpleStringProperty(title);
         column.textProperty().bind(titleProperty);
         columnTitles.put(column, titleProperty);
-        
+
         // Set the cell value factory
         column.setCellValueFactory(new PropertyValueFactory<>(propertyName));
-        
+
         // Add the column to the table
         tableView.getColumns().add(column);
-        
+
         return column;
     }
-    
+
     /**
      * Adds a column with a custom cell value factory.
      *
@@ -57,24 +58,27 @@ public class TableColumnService<T> {
      * @param cellValueFactory The cell value factory for the column
      * @return The created column
      */
-    public <S> TableColumn<T, S> addColumn(TableView<T> tableView, String title, 
-            Callback<TableColumn.CellDataFeatures<T, S>, javafx.beans.value.ObservableValue<S>> cellValueFactory) {
+    public <S> TableColumn<T, S> addColumn(
+            TableView<T> tableView,
+            String title,
+            Callback<TableColumn.CellDataFeatures<T, S>, javafx.beans.value.ObservableValue<S>>
+                    cellValueFactory) {
         TableColumn<T, S> column = new TableColumn<>();
-        
+
         // Create a property for the title to allow dynamic updates
         StringProperty titleProperty = new SimpleStringProperty(title);
         column.textProperty().bind(titleProperty);
         columnTitles.put(column, titleProperty);
-        
+
         // Set the cell value factory
         column.setCellValueFactory(cellValueFactory);
-        
+
         // Add the column to the table
         tableView.getColumns().add(column);
-        
+
         return column;
     }
-    
+
     /**
      * Adds a column with custom cell value factory and cell factory.
      *
@@ -85,14 +89,17 @@ public class TableColumnService<T> {
      * @param cellFactory The cell factory
      * @return The created column
      */
-    public <S> TableColumn<T, S> addColumn(TableView<T> tableView, String title,
-            Callback<TableColumn.CellDataFeatures<T, S>, javafx.beans.value.ObservableValue<S>> valueFactory,
+    public <S> TableColumn<T, S> addColumn(
+            TableView<T> tableView,
+            String title,
+            Callback<TableColumn.CellDataFeatures<T, S>, javafx.beans.value.ObservableValue<S>>
+                    valueFactory,
             Callback<TableColumn<T, S>, TableCell<T, S>> cellFactory) {
         TableColumn<T, S> column = addColumn(tableView, title, valueFactory);
         column.setCellFactory(cellFactory);
         return column;
     }
-    
+
     /**
      * Sets the title of a column.
      *
@@ -105,7 +112,7 @@ public class TableColumnService<T> {
             titleProperty.set(title);
         }
     }
-    
+
     /**
      * Removes a column from the table.
      *
@@ -116,7 +123,7 @@ public class TableColumnService<T> {
         tableView.getColumns().remove(column);
         columnTitles.remove(column);
     }
-    
+
     /**
      * Clears all columns from the table.
      *
@@ -126,7 +133,7 @@ public class TableColumnService<T> {
         tableView.getColumns().clear();
         columnTitles.clear();
     }
-    
+
     /**
      * Sets a comparator for a specific column.
      *
@@ -137,7 +144,7 @@ public class TableColumnService<T> {
     public <S> void setColumnComparator(TableColumn<T, S> column, Comparator<S> comparator) {
         column.setComparator(comparator);
     }
-    
+
     /**
      * Sets the preferred width for a column.
      *
@@ -147,7 +154,7 @@ public class TableColumnService<T> {
     public void setColumnWidth(TableColumn<T, ?> column, double width) {
         column.setPrefWidth(width);
     }
-    
+
     /**
      * Sets the minimum width for a column.
      *
@@ -157,7 +164,7 @@ public class TableColumnService<T> {
     public void setColumnMinWidth(TableColumn<T, ?> column, double width) {
         column.setMinWidth(width);
     }
-    
+
     /**
      * Sets the maximum width for a column.
      *
@@ -167,7 +174,7 @@ public class TableColumnService<T> {
     public void setColumnMaxWidth(TableColumn<T, ?> column, double width) {
         column.setMaxWidth(width);
     }
-    
+
     /**
      * Sets whether a column is resizable.
      *
@@ -177,7 +184,7 @@ public class TableColumnService<T> {
     public void setColumnResizable(TableColumn<T, ?> column, boolean resizable) {
         column.setResizable(resizable);
     }
-    
+
     /**
      * Gets the current title of a column.
      *

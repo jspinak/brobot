@@ -1,22 +1,20 @@
 package io.github.jspinak.brobot.runner.ui.config.atlanta.services;
 
-import io.github.jspinak.brobot.runner.ui.components.BrobotButton;
-import io.github.jspinak.brobot.runner.ui.components.base.AtlantaCard;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+
 import org.springframework.stereotype.Service;
 
-/**
- * Factory service for creating UI components for the Atlanta config panel.
- */
+import io.github.jspinak.brobot.runner.ui.components.BrobotButton;
+import io.github.jspinak.brobot.runner.ui.components.base.AtlantaCard;
+
+/** Factory service for creating UI components for the Atlanta config panel. */
 @Service
 public class AtlantaConfigUIFactory {
-    
-    /**
-     * Configuration for UI component creation.
-     */
+
+    /** Configuration for UI component creation. */
     public static class UIConfiguration {
         private int searchFieldWidth = 300;
         private int leftCardMinWidth = 600;
@@ -25,52 +23,72 @@ public class AtlantaConfigUIFactory {
         private int actionBarSpacing = 8;
         private int tableContentSpacing = 16;
         private Insets actionBarPadding = new Insets(0);
-        
+
         // Builder pattern
         public static Builder builder() {
             return new Builder();
         }
-        
+
         public static class Builder {
             private final UIConfiguration config = new UIConfiguration();
-            
+
             public Builder searchFieldWidth(int width) {
                 config.searchFieldWidth = width;
                 return this;
             }
-            
+
             public Builder leftCardMinWidth(int width) {
                 config.leftCardMinWidth = width;
                 return this;
             }
-            
+
             public Builder rightCardMinWidth(int width) {
                 config.rightCardMinWidth = width;
                 return this;
             }
-            
+
             public Builder splitLayoutSpacing(int spacing) {
                 config.splitLayoutSpacing = spacing;
                 return this;
             }
-            
+
             public UIConfiguration build() {
                 return config;
             }
         }
-        
+
         // Getters
-        public int getSearchFieldWidth() { return searchFieldWidth; }
-        public int getLeftCardMinWidth() { return leftCardMinWidth; }
-        public int getRightCardMinWidth() { return rightCardMinWidth; }
-        public int getSplitLayoutSpacing() { return splitLayoutSpacing; }
-        public int getActionBarSpacing() { return actionBarSpacing; }
-        public int getTableContentSpacing() { return tableContentSpacing; }
-        public Insets getActionBarPadding() { return actionBarPadding; }
+        public int getSearchFieldWidth() {
+            return searchFieldWidth;
+        }
+
+        public int getLeftCardMinWidth() {
+            return leftCardMinWidth;
+        }
+
+        public int getRightCardMinWidth() {
+            return rightCardMinWidth;
+        }
+
+        public int getSplitLayoutSpacing() {
+            return splitLayoutSpacing;
+        }
+
+        public int getActionBarSpacing() {
+            return actionBarSpacing;
+        }
+
+        public int getTableContentSpacing() {
+            return tableContentSpacing;
+        }
+
+        public Insets getActionBarPadding() {
+            return actionBarPadding;
+        }
     }
-    
+
     private UIConfiguration configuration = new UIConfiguration();
-    
+
     /**
      * Sets the UI configuration.
      *
@@ -79,7 +97,7 @@ public class AtlantaConfigUIFactory {
     public void setConfiguration(UIConfiguration configuration) {
         this.configuration = configuration;
     }
-    
+
     /**
      * Creates the action bar with buttons.
      *
@@ -92,7 +110,7 @@ public class AtlantaConfigUIFactory {
         actionBar.setPadding(configuration.getActionBarPadding());
         return actionBar;
     }
-    
+
     /**
      * Creates a primary button.
      *
@@ -102,7 +120,7 @@ public class AtlantaConfigUIFactory {
     public BrobotButton createPrimaryButton(String text) {
         return BrobotButton.primary(text);
     }
-    
+
     /**
      * Creates a secondary button.
      *
@@ -112,7 +130,7 @@ public class AtlantaConfigUIFactory {
     public BrobotButton createSecondaryButton(String text) {
         return BrobotButton.secondary(text);
     }
-    
+
     /**
      * Creates a standard button with custom style classes.
      *
@@ -125,7 +143,7 @@ public class AtlantaConfigUIFactory {
         button.getStyleClass().addAll(styleClasses);
         return button;
     }
-    
+
     /**
      * Creates the split layout container.
      *
@@ -136,7 +154,7 @@ public class AtlantaConfigUIFactory {
         splitLayout.getStyleClass().add("split-layout");
         return splitLayout;
     }
-    
+
     /**
      * Creates an Atlanta card.
      *
@@ -153,7 +171,7 @@ public class AtlantaConfigUIFactory {
         HBox.setHgrow(card, Priority.ALWAYS);
         return card;
     }
-    
+
     /**
      * Creates the search bar.
      *
@@ -165,22 +183,22 @@ public class AtlantaConfigUIFactory {
         HBox searchBar = new HBox(12);
         searchBar.getStyleClass().add("search-bar");
         searchBar.setAlignment(Pos.CENTER_LEFT);
-        
+
         searchField.getStyleClass().add("search-input");
         searchField.setPromptText("Search configurations...");
         searchField.setPrefWidth(configuration.getSearchFieldWidth());
         HBox.setHgrow(searchField, Priority.ALWAYS);
-        
+
         Label itemsLabel = new Label("Items per page:");
         itemsLabel.getStyleClass().add("form-label");
-        
+
         itemsPerPage.getStyleClass().add("select");
-        
+
         searchBar.getChildren().addAll(searchField, itemsLabel, itemsPerPage);
-        
+
         return searchBar;
     }
-    
+
     /**
      * Creates a table content container.
      *
@@ -190,7 +208,7 @@ public class AtlantaConfigUIFactory {
         VBox tableContent = new VBox(configuration.getTableContentSpacing());
         return tableContent;
     }
-    
+
     /**
      * Creates a spacer region.
      *
@@ -201,7 +219,7 @@ public class AtlantaConfigUIFactory {
         HBox.setHgrow(spacer, Priority.ALWAYS);
         return spacer;
     }
-    
+
     /**
      * Creates a label with specific style.
      *
@@ -214,7 +232,7 @@ public class AtlantaConfigUIFactory {
         label.getStyleClass().addAll(styleClasses);
         return label;
     }
-    
+
     /**
      * Creates the items per page combo box.
      *
@@ -227,7 +245,7 @@ public class AtlantaConfigUIFactory {
         itemsPerPage.getStyleClass().add("select");
         return itemsPerPage;
     }
-    
+
     /**
      * Creates a search field.
      *
@@ -240,10 +258,8 @@ public class AtlantaConfigUIFactory {
         searchField.setPrefWidth(configuration.getSearchFieldWidth());
         return searchField;
     }
-    
-    /**
-     * Holder class for action bar components.
-     */
+
+    /** Holder class for action bar components. */
     public static class ActionBarComponents {
         private final BrobotButton newConfigBtn;
         private final BrobotButton importBtn;
@@ -252,11 +268,15 @@ public class AtlantaConfigUIFactory {
         private final BrobotButton changePathBtn;
         private final BrobotButton openFolderBtn;
         private final Button importConfigBtn;
-        
-        public ActionBarComponents(BrobotButton newConfigBtn, BrobotButton importBtn, 
-                                 BrobotButton refreshBtn, Label configPathLabel,
-                                 BrobotButton changePathBtn, BrobotButton openFolderBtn,
-                                 Button importConfigBtn) {
+
+        public ActionBarComponents(
+                BrobotButton newConfigBtn,
+                BrobotButton importBtn,
+                BrobotButton refreshBtn,
+                Label configPathLabel,
+                BrobotButton changePathBtn,
+                BrobotButton openFolderBtn,
+                Button importConfigBtn) {
             this.newConfigBtn = newConfigBtn;
             this.importBtn = importBtn;
             this.refreshBtn = refreshBtn;
@@ -265,17 +285,37 @@ public class AtlantaConfigUIFactory {
             this.openFolderBtn = openFolderBtn;
             this.importConfigBtn = importConfigBtn;
         }
-        
+
         // Getters
-        public BrobotButton getNewConfigBtn() { return newConfigBtn; }
-        public BrobotButton getImportBtn() { return importBtn; }
-        public BrobotButton getRefreshBtn() { return refreshBtn; }
-        public Label getConfigPathLabel() { return configPathLabel; }
-        public BrobotButton getChangePathBtn() { return changePathBtn; }
-        public BrobotButton getOpenFolderBtn() { return openFolderBtn; }
-        public Button getImportConfigBtn() { return importConfigBtn; }
+        public BrobotButton getNewConfigBtn() {
+            return newConfigBtn;
+        }
+
+        public BrobotButton getImportBtn() {
+            return importBtn;
+        }
+
+        public BrobotButton getRefreshBtn() {
+            return refreshBtn;
+        }
+
+        public Label getConfigPathLabel() {
+            return configPathLabel;
+        }
+
+        public BrobotButton getChangePathBtn() {
+            return changePathBtn;
+        }
+
+        public BrobotButton getOpenFolderBtn() {
+            return openFolderBtn;
+        }
+
+        public Button getImportConfigBtn() {
+            return importConfigBtn;
+        }
     }
-    
+
     /**
      * Creates all action bar components.
      *
@@ -286,16 +326,22 @@ public class AtlantaConfigUIFactory {
         BrobotButton newConfigBtn = createPrimaryButton("+ New Configuration");
         BrobotButton importBtn = createSecondaryButton("📁 Import");
         BrobotButton refreshBtn = createSecondaryButton("🔄 Refresh");
-        
+
         Label configPathLabel = new Label("Config Path: " + configPath);
         configPathLabel.getStyleClass().addAll("button", "secondary");
-        
+
         BrobotButton changePathBtn = createSecondaryButton("🔧 Change...");
         BrobotButton openFolderBtn = createSecondaryButton("📂 Open Folder");
-        
+
         Button importConfigBtn = createButton("Import Config", "button", "primary");
-        
-        return new ActionBarComponents(newConfigBtn, importBtn, refreshBtn, 
-            configPathLabel, changePathBtn, openFolderBtn, importConfigBtn);
+
+        return new ActionBarComponents(
+                newConfigBtn,
+                importBtn,
+                refreshBtn,
+                configPathLabel,
+                changePathBtn,
+                openFolderBtn,
+                importConfigBtn);
     }
 }

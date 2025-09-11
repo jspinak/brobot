@@ -1,17 +1,16 @@
 package io.github.jspinak.brobot.runner.json.validation.business;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import io.github.jspinak.brobot.runner.json.validation.business.FunctionRuleValidator;
 import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
 import io.github.jspinak.brobot.runner.json.validation.model.ValidationSeverity;
-
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class FunctionRuleValidatorTest {
@@ -73,8 +72,9 @@ class FunctionRuleValidatorTest {
 
         // Assert
         assertTrue(result.hasErrors());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Function too complex")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(e -> e.errorCode().equals("Function too complex")));
     }
 
     @Test
@@ -87,8 +87,9 @@ class FunctionRuleValidatorTest {
 
         // Assert
         assertTrue(result.hasErrors());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Excessive nesting")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(e -> e.errorCode().equals("Excessive nesting")));
     }
 
     @Test
@@ -101,8 +102,9 @@ class FunctionRuleValidatorTest {
 
         // Assert
         assertTrue(result.hasErrors());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Too many action calls")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(e -> e.errorCode().equals("Too many action calls")));
     }
 
     @Test
@@ -116,9 +118,12 @@ class FunctionRuleValidatorTest {
         // Assert
         assertTrue(result.hasErrors());
         assertTrue(result.hasWarnings());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Insufficient error handling") &&
-                        e.severity() == ValidationSeverity.WARNING));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(
+                                e ->
+                                        e.errorCode().equals("Insufficient error handling")
+                                                && e.severity() == ValidationSeverity.WARNING));
     }
 
     @Test
@@ -132,9 +137,12 @@ class FunctionRuleValidatorTest {
         // Assert
         assertTrue(result.hasErrors());
         assertTrue(result.hasWarnings());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("State management concern") &&
-                        e.severity() == ValidationSeverity.WARNING));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(
+                                e ->
+                                        e.errorCode().equals("State management concern")
+                                                && e.severity() == ValidationSeverity.WARNING));
     }
 
     @Test
@@ -148,9 +156,12 @@ class FunctionRuleValidatorTest {
         // Assert
         assertTrue(result.hasErrors());
         assertTrue(result.hasWarnings());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Inefficient search pattern") &&
-                        e.severity() == ValidationSeverity.WARNING));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(
+                                e ->
+                                        e.errorCode().equals("Inefficient search pattern")
+                                                && e.severity() == ValidationSeverity.WARNING));
     }
 
     @Test
@@ -164,9 +175,12 @@ class FunctionRuleValidatorTest {
         // Assert
         assertTrue(result.hasErrors());
         assertTrue(result.hasWarnings());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Performance concern") &&
-                        e.severity() == ValidationSeverity.WARNING));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(
+                                e ->
+                                        e.errorCode().equals("Performance concern")
+                                                && e.severity() == ValidationSeverity.WARNING));
     }
 
     @Test
@@ -180,9 +194,12 @@ class FunctionRuleValidatorTest {
         // Assert
         assertTrue(result.hasErrors());
         assertTrue(result.hasWarnings());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Inefficient wait pattern") &&
-                        e.severity() == ValidationSeverity.WARNING));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(
+                                e ->
+                                        e.errorCode().equals("Inefficient wait pattern")
+                                                && e.severity() == ValidationSeverity.WARNING));
     }
 
     @Test
@@ -196,10 +213,12 @@ class FunctionRuleValidatorTest {
         // Assert
         assertTrue(result.hasErrors());
         assertTrue(result.getErrors().size() > 1);
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Function too complex")));
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Insufficient error handling")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(e -> e.errorCode().equals("Function too complex")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(e -> e.errorCode().equals("Insufficient error handling")));
     }
 
     @Test
@@ -213,9 +232,12 @@ class FunctionRuleValidatorTest {
 
         // Assert
         assertTrue(result.hasErrors());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Validation error") &&
-                        e.severity() == ValidationSeverity.ERROR));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(
+                                e ->
+                                        e.errorCode().equals("Validation error")
+                                                && e.severity() == ValidationSeverity.ERROR));
     }
 
     // Helper methods for creating test models
@@ -256,7 +278,8 @@ class FunctionRuleValidatorTest {
         Map<String, Object> currentIf = createIfStatement("level1");
         statements.add(currentIf);
 
-        List<Map<String, Object>> currentStatements = (List<Map<String, Object>>) currentIf.get("thenStatements");
+        List<Map<String, Object>> currentStatements =
+                (List<Map<String, Object>>) currentIf.get("thenStatements");
 
         for (int i = 2; i <= 6; i++) {
             Map<String, Object> nestedIf = createIfStatement("level" + i);

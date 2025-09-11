@@ -6,14 +6,11 @@ import org.slf4j.LoggerFactory;
 
 import io.github.jspinak.brobot.config.mock.MockModeManager;
 
-/**
- * Base class for integration tests.
- * Ensures mock mode is properly configured before each test.
- */
+/** Base class for integration tests. Ensures mock mode is properly configured before each test. */
 public abstract class IntegrationTestBase {
-    
+
     protected final Logger log = LoggerFactory.getLogger(getClass());
-    
+
     @BeforeEach
     public void setupTest() {
         // Ensure mock mode is enabled
@@ -21,7 +18,7 @@ public abstract class IntegrationTestBase {
         System.setProperty("brobot.core.mock", "true");
         System.setProperty("brobot.mock.enabled", "true");
         System.setProperty("java.awt.headless", "true");
-        
+
         log.debug("Integration test setup complete - mock mode enabled");
     }
 }

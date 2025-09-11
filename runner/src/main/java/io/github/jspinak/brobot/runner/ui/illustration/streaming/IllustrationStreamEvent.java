@@ -1,17 +1,18 @@
 package io.github.jspinak.brobot.runner.ui.illustration.streaming;
 
-import io.github.jspinak.brobot.runner.ui.illustration.IllustrationMetadata;
+import java.time.LocalDateTime;
 import javafx.scene.image.Image;
+
+import io.github.jspinak.brobot.runner.ui.illustration.IllustrationMetadata;
+
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.LocalDateTime;
-
 /**
  * Event fired when a new illustration is available in the stream.
- * <p>
- * This event is posted to the EventBus and consumed by UI components
- * that display real-time illustration updates.
+ *
+ * <p>This event is posted to the EventBus and consumed by UI components that display real-time
+ * illustration updates.
  *
  * @see IllustrationStreamService
  * @see IllustrationStreamListener
@@ -19,38 +20,25 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 public class IllustrationStreamEvent {
-    
-    /**
-     * Unique identifier for this stream event.
-     */
+
+    /** Unique identifier for this stream event. */
     private final String id;
-    
-    /**
-     * Timestamp when the illustration was created.
-     */
+
+    /** Timestamp when the illustration was created. */
     private final LocalDateTime timestamp;
-    
-    /**
-     * The JavaFX Image containing the illustration.
-     */
+
+    /** The JavaFX Image containing the illustration. */
     private final Image image;
-    
-    /**
-     * Metadata about the illustrated action.
-     */
+
+    /** Metadata about the illustrated action. */
     private final IllustrationMetadata metadata;
-    
-    /**
-     * Current size of the stream queue.
-     */
+
+    /** Current size of the stream queue. */
     private final int queueSize;
-    
-    /**
-     * Processing time in milliseconds.
-     */
-    @Builder.Default
-    private final long processingTimeMs = 0;
-    
+
+    /** Processing time in milliseconds. */
+    @Builder.Default private final long processingTimeMs = 0;
+
     /**
      * Checks if this is a high-priority event.
      *
@@ -58,10 +46,10 @@ public class IllustrationStreamEvent {
      */
     public boolean isHighPriority() {
         if (metadata == null) return false;
-        
+
         // High priority for failures
         if (!metadata.isSuccess()) return true;
-        
+
         // High priority for specific action types
         String actionType = metadata.getActionType();
         return "CLICK".equals(actionType) || "TYPE".equals(actionType);

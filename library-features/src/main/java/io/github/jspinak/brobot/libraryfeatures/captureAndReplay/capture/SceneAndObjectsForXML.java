@@ -1,11 +1,13 @@
 package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.capture;
 
-import io.github.jspinak.brobot.model.element.Location;
-import lombok.Getter;
-import org.w3c.dom.Node;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.w3c.dom.Node;
+
+import io.github.jspinak.brobot.model.element.Location;
+
+import lombok.Getter;
 
 @Getter
 public class SceneAndObjectsForXML {
@@ -18,7 +20,8 @@ public class SceneAndObjectsForXML {
         this.sceneName = String.valueOf(sceneNumber);
     }
 
-    public SceneAndObjectsForXML(int sceneNumber, List<String> objectsNames, List<Location> objectsLocations) {
+    public SceneAndObjectsForXML(
+            int sceneNumber, List<String> objectsNames, List<Location> objectsLocations) {
         this.sceneName = String.valueOf(sceneNumber);
         this.objectsNames = objectsNames;
         this.objectsLocations = objectsLocations;
@@ -30,9 +33,18 @@ public class SceneAndObjectsForXML {
             Node objectAsNode = sceneAsNode.getChildNodes().item(i);
             if (objectAsNode.getNodeName().equals("object")) {
                 objectsNames.add(objectAsNode.getAttributes().getNamedItem("name").getNodeValue());
-                objectsLocations.add(new Location(
-                        Integer.parseInt(objectAsNode.getAttributes().getNamedItem("x").getNodeValue()),
-                        Integer.parseInt(objectAsNode.getAttributes().getNamedItem("y").getNodeValue())));
+                objectsLocations.add(
+                        new Location(
+                                Integer.parseInt(
+                                        objectAsNode
+                                                .getAttributes()
+                                                .getNamedItem("x")
+                                                .getNodeValue()),
+                                Integer.parseInt(
+                                        objectAsNode
+                                                .getAttributes()
+                                                .getNamedItem("y")
+                                                .getNodeValue())));
             }
         }
     }
@@ -41,5 +53,4 @@ public class SceneAndObjectsForXML {
         objectsNames.add(objectName);
         objectsLocations.add(objectLocation);
     }
-
 }

@@ -1,13 +1,13 @@
 package io.github.jspinak.brobot.runner;
 
 import javafx.application.Application;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
 /**
- * Main entry point for the Brobot Runner application.
- * This class serves as a bridge between the Spring Boot application
- * and the JavaFX UI framework.
+ * Main entry point for the Brobot Runner application. This class serves as a bridge between the
+ * Spring Boot application and the JavaFX UI framework.
  */
 public class BrobotRunnerMain {
 
@@ -22,8 +22,8 @@ public class BrobotRunnerMain {
     }
 
     /**
-     * Creates and configures the Spring application context.
-     * This is used by JavaFxApplication during initialization.
+     * Creates and configures the Spring application context. This is used by JavaFxApplication
+     * during initialization.
      *
      * @param args Command line arguments
      * @return Configured Spring application context
@@ -32,10 +32,10 @@ public class BrobotRunnerMain {
         try {
             // Configure Spring Boot application
             SpringApplication app = new SpringApplication(BrobotRunnerApplication.class);
-            
+
             // Disable headless mode for JavaFX compatibility
             app.setHeadless(false);
-            
+
             // Run the application
             return app.run(args);
         } catch (Exception e) {

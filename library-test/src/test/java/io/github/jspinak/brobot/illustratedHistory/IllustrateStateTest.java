@@ -1,31 +1,7 @@
 package io.github.jspinak.brobot.illustratedHistory;
 
-import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.model.element.Pattern;
-import io.github.jspinak.brobot.model.element.Location;
-import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
-import io.github.jspinak.brobot.action.internal.find.match.MatchToStateConverter;
-import io.github.jspinak.brobot.action.basic.find.FindState;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.state.State;
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
-import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
-import io.github.jspinak.brobot.util.image.visualization.MatBuilder;
-import io.github.jspinak.brobot.BrobotTestApplication;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.test.config.TestApplicationConfiguration;
-import io.github.jspinak.brobot.tools.history.StateLayoutVisualizer;
-
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
+import static org.bytedeco.opencv.global.opencv_core.countNonZero;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -33,10 +9,34 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
 import javax.imageio.ImageIO;
 
-import static org.bytedeco.opencv.global.opencv_core.countNonZero;
-import static org.junit.jupiter.api.Assertions.*;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+
+import io.github.jspinak.brobot.BrobotTestApplication;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.basic.find.FindState;
+import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
+import io.github.jspinak.brobot.action.internal.find.match.MatchToStateConverter;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.test.config.TestApplicationConfiguration;
+import io.github.jspinak.brobot.tools.history.StateLayoutVisualizer;
+import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
+import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
+import io.github.jspinak.brobot.util.image.visualization.MatBuilder;
 
 @SpringBootTest(classes = BrobotTestApplication.class)
 @Import(TestApplicationConfiguration.class)
@@ -54,27 +54,21 @@ class IllustrateStateTest {
         FrameworkSettings.mock = false; // Allow real image processing
     }
 
-    @Autowired
-    MatchToStateConverter createStatesFromMatches;
+    @Autowired MatchToStateConverter createStatesFromMatches;
 
-    @Autowired
-    Action action;
+    @Autowired Action action;
 
-    @Autowired
-    FindState findStates;
+    @Autowired FindState findStates;
 
-    @Autowired
-    ActionResultFactory matchesInitializer;
+    @Autowired ActionResultFactory matchesInitializer;
 
-    @Autowired
-    StateLayoutVisualizer illustrateState;
+    @Autowired StateLayoutVisualizer illustrateState;
 
-    @Autowired
-    ImageFileUtilities imageUtils;
+    @Autowired ImageFileUtilities imageUtils;
 
     /**
-     * Creates states from saved FloraNext screenshots instead of live OCR.
-     * This allows tests to run in headless/CI environments.
+     * Creates states from saved FloraNext screenshots instead of live OCR. This allows tests to run
+     * in headless/CI environments.
      */
     private List<State> createStatesFromScreenshots() {
         List<State> states = new ArrayList<>();
@@ -90,7 +84,8 @@ class IllustrateStateTest {
             }
             if (!dir.exists()) {
                 // Try from current working directory
-                screenshotDir = Paths.get("").toAbsolutePath().toString() + "/library-test/screenshots";
+                screenshotDir =
+                        Paths.get("").toAbsolutePath().toString() + "/library-test/screenshots";
                 dir = new File(screenshotDir);
             }
 
@@ -102,22 +97,32 @@ class IllustrateStateTest {
                     Mat mat = MatrixUtilities.bufferedImageToMat(bufferedImage).orElse(new Mat());
 
                     // Create a state with the image
-                    StateImage stateImage = new StateImage.Builder()
-                            .setName("floranext" + i)
-                            .setSearchRegionForAllPatterns(
-                                    new Region(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight()))
-                            .build();
+                    StateImage stateImage =
+                            new StateImage.Builder()
+                                    .setName("floranext" + i)
+                                    .setSearchRegionForAllPatterns(
+                                            new Region(
+                                                    0,
+                                                    0,
+                                                    bufferedImage.getWidth(),
+                                                    bufferedImage.getHeight()))
+                                    .build();
 
                     // Create pattern from the Mat
-                    Pattern pattern = new Pattern.Builder()
-                            .setMat(mat)
-                            .setFixedRegion(new Region(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight()))
-                            .build();
+                    Pattern pattern =
+                            new Pattern.Builder()
+                                    .setMat(mat)
+                                    .setFixedRegion(
+                                            new Region(
+                                                    0,
+                                                    0,
+                                                    bufferedImage.getWidth(),
+                                                    bufferedImage.getHeight()))
+                                    .build();
                     stateImage.getPatterns().add(pattern);
 
-                    State state = new State.Builder("FloraNextState" + i)
-                            .withImages(stateImage)
-                            .build();
+                    State state =
+                            new State.Builder("FloraNextState" + i).withImages(stateImage).build();
                     states.add(state);
                 }
             }
@@ -144,7 +149,8 @@ class IllustrateStateTest {
 
         Mat state0 = illustrateState.illustrateWithFixedSearchRegions(first);
         assertNotNull(state0);
-        assertTrue(countNonZero(MatrixUtilities.toGrayscale(state0)) > 0,
+        assertTrue(
+                countNonZero(MatrixUtilities.toGrayscale(state0)) > 0,
                 "Illustrated state should have non-zero pixels");
     }
 
@@ -167,12 +173,15 @@ class IllustrateStateTest {
         assertNotNull(matRegion);
 
         MatBuilder matBuilder = new MatBuilder();
-        Mat illustratedMat = matBuilder.init()
-                .addSubMat(new Location(matRegion.x(), matRegion.y()), mat)
-                .build();
+        Mat illustratedMat =
+                matBuilder
+                        .init()
+                        .addSubMat(new Location(matRegion.x(), matRegion.y()), mat)
+                        .build();
 
         assertNotNull(illustratedMat);
-        assertTrue(countNonZero(MatrixUtilities.toGrayscale(illustratedMat)) > 0,
+        assertTrue(
+                countNonZero(MatrixUtilities.toGrayscale(illustratedMat)) > 0,
                 "Illustrated mat should have non-zero pixels");
     }
 
@@ -200,7 +209,8 @@ class IllustrateStateTest {
 
         Mat illustratedMat = matBuilder.build();
         assertNotNull(illustratedMat);
-        assertTrue(countNonZero(MatrixUtilities.toGrayscale(illustratedMat)) > 0,
+        assertTrue(
+                countNonZero(MatrixUtilities.toGrayscale(illustratedMat)) > 0,
                 "Combined illustrated mat should have non-zero pixels");
     }
 
@@ -216,23 +226,27 @@ class IllustrateStateTest {
         }
 
         // Write each state to file
-        states.forEach(state -> {
-            assertDoesNotThrow(
-                    () -> illustrateState.writeIllustratedStateToFile(state, "history/state" + state.getName()));
-        });
+        states.forEach(
+                state -> {
+                    assertDoesNotThrow(
+                            () ->
+                                    illustrateState.writeIllustratedStateToFile(
+                                            state, "history/state" + state.getName()));
+                });
 
         // Verify at least one file was created
         File[] files = historyDir.listFiles((dir, name) -> name.startsWith("state"));
-        assertTrue(files != null && files.length > 0, "Should have created at least one state file");
+        assertTrue(
+                files != null && files.length > 0, "Should have created at least one state file");
     }
 
     @Test
     void verifyFloraNextScreenshotsExist() {
         // Verify we can access the FloraNext screenshots
         String[] possiblePaths = {
-                "screenshots",
-                "library-test/screenshots",
-                Paths.get("").toAbsolutePath().toString() + "/library-test/screenshots"
+            "screenshots",
+            "library-test/screenshots",
+            Paths.get("").toAbsolutePath().toString() + "/library-test/screenshots"
         };
 
         boolean foundScreenshots = false;
@@ -250,8 +264,10 @@ class IllustrateStateTest {
             }
         }
 
-        assertTrue(foundScreenshots,
-                "FloraNext screenshots should be accessible. Checked paths: " + String.join(", ", possiblePaths));
+        assertTrue(
+                foundScreenshots,
+                "FloraNext screenshots should be accessible. Checked paths: "
+                        + String.join(", ", possiblePaths));
         System.out.println("Found FloraNext screenshots in: " + foundPath);
     }
 }

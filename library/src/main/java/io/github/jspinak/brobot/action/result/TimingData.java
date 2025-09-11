@@ -1,20 +1,20 @@
 package io.github.jspinak.brobot.action.result;
 
-import lombok.Data;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Data;
+
 /**
- * Manages timing information for action execution.
- * Tracks start time, end time, duration, and optional time segments.
- * 
- * This class encapsulates all timing-related functionality that was
- * previously embedded in ActionResult.
- * 
+ * Manages timing information for action execution. Tracks start time, end time, duration, and
+ * optional time segments.
+ *
+ * <p>This class encapsulates all timing-related functionality that was previously embedded in
+ * ActionResult.
+ *
  * @since 2.0
  */
 @Data
@@ -25,37 +25,31 @@ public class TimingData {
     private List<TimeSegment> segments = new ArrayList<>();
     private Instant instantStart;
     private Instant instantEnd;
-    
-    /**
-     * Creates TimingData with the current time as start.
-     */
+
+    /** Creates TimingData with the current time as start. */
     public TimingData() {
         start();
     }
-    
+
     /**
      * Creates TimingData with specified start time.
-     * 
+     *
      * @param startTime The start time
      */
     public TimingData(LocalDateTime startTime) {
         this.startTime = startTime;
         this.instantStart = Instant.now();
     }
-    
-    /**
-     * Starts or restarts timing.
-     */
+
+    /** Starts or restarts timing. */
     public void start() {
         this.startTime = LocalDateTime.now();
         this.instantStart = Instant.now();
         this.endTime = null;
         this.instantEnd = null;
     }
-    
-    /**
-     * Stops timing and calculates duration.
-     */
+
+    /** Stops timing and calculates duration. */
     public void stop() {
         if (startTime != null) {
             if (endTime == null) {
@@ -65,18 +59,17 @@ public class TimingData {
             calculateDuration();
         }
     }
-    
+
     /**
-     * Gets the elapsed duration.
-     * If still running, calculates duration to current time.
-     * 
+     * Gets the elapsed duration. If still running, calculates duration to current time.
+     *
      * @return The elapsed duration
      */
     public Duration getElapsed() {
         if (startTime == null) {
             return Duration.ZERO;
         }
-        
+
         if (endTime == null) {
             // Still running, calculate to now
             if (instantStart != null) {
@@ -84,32 +77,32 @@ public class TimingData {
             }
             return Duration.between(startTime, LocalDateTime.now());
         }
-        
+
         return totalDuration;
     }
-    
+
     /**
      * Gets execution time in milliseconds.
-     * 
+     *
      * @return Execution time in milliseconds
      */
     public long getExecutionTimeMs() {
         return getElapsed().toMillis();
     }
-    
+
     /**
      * Adds a time segment for tracking sub-operations.
-     * 
+     *
      * @param name Name of the segment
      * @param duration Duration of the segment
      */
     public void addSegment(String name, Duration duration) {
         segments.add(new TimeSegment(name, duration));
     }
-    
+
     /**
      * Adds a time segment with start and end times.
-     * 
+     *
      * @param name Name of the segment
      * @param segmentStart Start time of segment
      * @param segmentEnd End time of segment
@@ -118,45 +111,45 @@ public class TimingData {
         Duration segmentDuration = Duration.between(segmentStart, segmentEnd);
         addSegment(name, segmentDuration);
     }
-    
+
     /**
-     * Merges timing data from another instance.
-     * Adds the durations and combines segments.
-     * 
+     * Merges timing data from another instance. Adds the durations and combines segments.
+     *
      * @param other The TimingData to merge
      */
     public void merge(TimingData other) {
         if (other != null) {
             // Use totalDuration directly if it has been set, otherwise use elapsed
-            Duration otherDuration = other.totalDuration != null && !other.totalDuration.isZero() 
-                ? other.totalDuration 
-                : other.getElapsed();
+            Duration otherDuration =
+                    other.totalDuration != null && !other.totalDuration.isZero()
+                            ? other.totalDuration
+                            : other.getElapsed();
             totalDuration = totalDuration.plus(otherDuration);
             segments.addAll(other.segments);
         }
     }
-    
+
     /**
      * Checks if timing has started.
-     * 
+     *
      * @return true if start time is set
      */
     public boolean hasStarted() {
         return startTime != null;
     }
-    
+
     /**
      * Checks if timing has completed.
-     * 
+     *
      * @return true if end time is set
      */
     public boolean hasCompleted() {
         return endTime != null;
     }
-    
+
     /**
      * Gets the total duration of all segments.
-     * 
+     *
      * @return Sum of all segment durations
      */
     public Duration getSegmentsDuration() {
@@ -164,42 +157,44 @@ public class TimingData {
                 .map(TimeSegment::getDuration)
                 .reduce(Duration.ZERO, Duration::plus);
     }
-    
+
     /**
-     * Gets overhead time (total duration minus segments).
-     * Useful for identifying time spent outside tracked segments.
-     * 
+     * Gets overhead time (total duration minus segments). Useful for identifying time spent outside
+     * tracked segments.
+     *
      * @return Overhead duration
      */
     public Duration getOverhead() {
         return totalDuration.minus(getSegmentsDuration());
     }
-    
+
     /**
      * Formats the timing data as a string.
-     * 
+     *
      * @return Formatted timing information
      */
     public String format() {
         StringBuilder sb = new StringBuilder();
         // Use totalDuration directly if it has been set, otherwise calculate elapsed
-        Duration duration = totalDuration != null && !totalDuration.isZero() ? totalDuration : getElapsed();
+        Duration duration =
+                totalDuration != null && !totalDuration.isZero() ? totalDuration : getElapsed();
         sb.append("Duration: ").append(formatDuration(duration));
-        
+
         if (!segments.isEmpty()) {
             sb.append(" (");
             for (int i = 0; i < segments.size(); i++) {
                 if (i > 0) sb.append(", ");
                 TimeSegment segment = segments.get(i);
-                sb.append(segment.getName()).append(": ")
-                  .append(formatDuration(segment.getDuration()));
+                sb.append(segment.getName())
+                        .append(": ")
+                        .append(formatDuration(segment.getDuration()));
             }
             sb.append(")");
         }
-        
+
         return sb.toString();
     }
-    
+
     private void calculateDuration() {
         if (instantStart != null && instantEnd != null) {
             totalDuration = Duration.between(instantStart, instantEnd);
@@ -207,7 +202,7 @@ public class TimingData {
             totalDuration = Duration.between(startTime, endTime);
         }
     }
-    
+
     private String formatDuration(Duration duration) {
         long millis = duration.toMillis();
         if (millis < 1000) {
@@ -220,15 +215,13 @@ public class TimingData {
             return String.format("%dm %ds", minutes, seconds);
         }
     }
-    
-    /**
-     * Represents a timed segment within the overall execution.
-     */
+
+    /** Represents a timed segment within the overall execution. */
     @Data
     public static class TimeSegment {
         private final String name;
         private final Duration duration;
-        
+
         public TimeSegment(String name, Duration duration) {
             this.name = name;
             this.duration = duration != null ? duration : Duration.ZERO;

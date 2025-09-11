@@ -1,12 +1,11 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
-import io.github.jspinak.brobot.model.state.State;
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.navigation.service.StateService;
-import io.github.jspinak.brobot.runner.events.EventBus;
-import io.github.jspinak.brobot.runner.events.LogEvent;
-import io.github.jspinak.brobot.runner.project.AutomationProject;
-import io.github.jspinak.brobot.runner.project.AutomationProjectManager;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
@@ -16,21 +15,22 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import lombok.Getter;
-import lombok.Setter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.navigation.service.StateService;
+import io.github.jspinak.brobot.runner.events.EventBus;
+import io.github.jspinak.brobot.runner.events.LogEvent;
+import io.github.jspinak.brobot.runner.project.AutomationProject;
+import io.github.jspinak.brobot.runner.project.AutomationProjectManager;
 
-/**
- * Panel for browsing configuration structure using a tree-based view.
- */
+import lombok.Getter;
+import lombok.Setter;
+
+/** Panel for browsing configuration structure using a tree-based view. */
 public class ConfigBrowserPanel extends BorderPane {
     private static final Logger logger = LoggerFactory.getLogger(ConfigBrowserPanel.class);
 
@@ -48,8 +48,10 @@ public class ConfigBrowserPanel extends BorderPane {
     private ConfigEntry currentConfig;
     private final Map<String, TreeItem<ConfigItem>> stateItems = new HashMap<>();
 
-    public ConfigBrowserPanel(EventBus eventBus, AutomationProjectManager projectManager,
-                              StateService allStatesService) {
+    public ConfigBrowserPanel(
+            EventBus eventBus,
+            AutomationProjectManager projectManager,
+            StateService allStatesService) {
         this.eventBus = eventBus;
         this.projectManager = projectManager;
         this.allStatesService = allStatesService;
@@ -60,9 +62,10 @@ public class ConfigBrowserPanel extends BorderPane {
 
         configTree = new TreeView<>(rootItem);
         configTree.setCellFactory(tv -> new ConfigTreeCell());
-        configTree.getSelectionModel().selectedItemProperty().addListener(
-                (obs, oldVal, newVal) -> handleItemSelection(newVal)
-        );
+        configTree
+                .getSelectionModel()
+                .selectedItemProperty()
+                .addListener((obs, oldVal, newVal) -> handleItemSelection(newVal));
 
         // Create details panel
         detailsTextArea = new TextArea();
@@ -78,26 +81,17 @@ public class ConfigBrowserPanel extends BorderPane {
         // Preview panel layout
         previewPanel = new VBox(10);
         previewPanel.setPadding(new Insets(10));
-        previewPanel.getChildren().addAll(
-                new Label("Preview"),
-                imagePreview
-        );
+        previewPanel.getChildren().addAll(new Label("Preview"), imagePreview);
         previewPanel.setVisible(false);
 
         // Split pane for tree and details
         SplitPane splitPane = new SplitPane();
 
         VBox treeBox = new VBox(5);
-        treeBox.getChildren().addAll(
-                new Label("Configuration Structure"),
-                configTree
-        );
+        treeBox.getChildren().addAll(new Label("Configuration Structure"), configTree);
 
         VBox detailsBox = new VBox(5);
-        detailsBox.getChildren().addAll(
-                new Label("Details"),
-                detailsTextArea
-        );
+        detailsBox.getChildren().addAll(new Label("Details"), detailsTextArea);
         VBox.setVgrow(detailsTextArea, Priority.ALWAYS);
 
         // Add nodes to split pane
@@ -107,21 +101,21 @@ public class ConfigBrowserPanel extends BorderPane {
         // Search field
         TextField searchField = new TextField();
         searchField.setPromptText("Search configuration...");
-        searchField.textProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal.trim().isEmpty()) {
-                resetTreeExpansion(rootItem);
-            } else {
-                searchTree(rootItem, newVal.toLowerCase());
-            }
-        });
+        searchField
+                .textProperty()
+                .addListener(
+                        (obs, oldVal, newVal) -> {
+                            if (newVal.trim().isEmpty()) {
+                                resetTreeExpansion(rootItem);
+                            } else {
+                                searchTree(rootItem, newVal.toLowerCase());
+                            }
+                        });
 
         // Toolbar
         HBox toolbar = new HBox(10);
         toolbar.setPadding(new Insets(5));
-        toolbar.getChildren().addAll(
-                new Label("Search:"),
-                searchField
-        );
+        toolbar.getChildren().addAll(new Label("Search:"), searchField);
         HBox.setHgrow(searchField, Priority.ALWAYS);
 
         // Add to layout
@@ -154,12 +148,16 @@ public class ConfigBrowserPanel extends BorderPane {
             rootItem.setExpanded(true);
 
             // Log
-            eventBus.publish(LogEvent.info(this,
-                    "Configuration browser loaded: " + config.getName(), "Configuration"));
+            eventBus.publish(
+                    LogEvent.info(
+                            this,
+                            "Configuration browser loaded: " + config.getName(),
+                            "Configuration"));
 
         } catch (Exception e) {
             logger.error("Error loading configuration for browser", e);
-            showAlert(Alert.AlertType.ERROR,
+            showAlert(
+                    Alert.AlertType.ERROR,
                     "Load Error",
                     "Error loading configuration for browser",
                     e.getMessage());
@@ -171,18 +169,20 @@ public class ConfigBrowserPanel extends BorderPane {
         rootItem.setValue(new ConfigItem(config.getName(), ConfigItemType.ROOT));
 
         // Add configuration files
-        TreeItem<ConfigItem> filesItem = new TreeItem<>(new ConfigItem("Configuration Files", ConfigItemType.FOLDER));
+        TreeItem<ConfigItem> filesItem =
+                new TreeItem<>(new ConfigItem("Configuration Files", ConfigItemType.FOLDER));
 
         // Project config file
-        TreeItem<ConfigItem> projectConfigItem = new TreeItem<>(
-                new ConfigItem(config.getProjectConfigFileName(), ConfigItemType.PROJECT_CONFIG)
-        );
+        TreeItem<ConfigItem> projectConfigItem =
+                new TreeItem<>(
+                        new ConfigItem(
+                                config.getProjectConfigFileName(), ConfigItemType.PROJECT_CONFIG));
         projectConfigItem.getValue().setData(config.getProjectConfigPath());
 
         // DSL config file
-        TreeItem<ConfigItem> dslConfigItem = new TreeItem<>(
-                new ConfigItem(config.getDslConfigFileName(), ConfigItemType.DSL_CONFIG)
-        );
+        TreeItem<ConfigItem> dslConfigItem =
+                new TreeItem<>(
+                        new ConfigItem(config.getDslConfigFileName(), ConfigItemType.DSL_CONFIG));
         dslConfigItem.getValue().setData(config.getDslConfigPath());
 
         filesItem.getChildren().addAll(projectConfigItem, dslConfigItem);
@@ -191,20 +191,21 @@ public class ConfigBrowserPanel extends BorderPane {
         AutomationProject project = projectManager.getCurrentProject();
         if (project != null) {
             // Add states
-            TreeItem<ConfigItem> statesItem = new TreeItem<>(new ConfigItem("States", ConfigItemType.FOLDER));
+            TreeItem<ConfigItem> statesItem =
+                    new TreeItem<>(new ConfigItem("States", ConfigItemType.FOLDER));
 
             // Use allStatesService instead of project.getAllStates()
             for (State state : allStatesService.getAllStates()) {
-                TreeItem<ConfigItem> stateItem = new TreeItem<>(
-                        new ConfigItem(state.getName(), ConfigItemType.STATE)
-                );
+                TreeItem<ConfigItem> stateItem =
+                        new TreeItem<>(new ConfigItem(state.getName(), ConfigItemType.STATE));
                 stateItem.getValue().setData(state);
 
                 // Add state images
                 for (StateImage stateImage : state.getStateImages()) {
-                    TreeItem<ConfigItem> imageItem = new TreeItem<>(
-                            new ConfigItem(stateImage.getName(), ConfigItemType.STATE_IMAGE)
-                    );
+                    TreeItem<ConfigItem> imageItem =
+                            new TreeItem<>(
+                                    new ConfigItem(
+                                            stateImage.getName(), ConfigItemType.STATE_IMAGE));
                     imageItem.getValue().setData(stateImage);
                     stateItem.getChildren().add(imageItem);
                 }
@@ -214,30 +215,52 @@ public class ConfigBrowserPanel extends BorderPane {
             }
 
             // Add state definitions
-            TreeItem<ConfigItem> transitionsItem = new TreeItem<>(new ConfigItem("State Transitions", ConfigItemType.FOLDER));
+            TreeItem<ConfigItem> transitionsItem =
+                    new TreeItem<>(new ConfigItem("State Transitions", ConfigItemType.FOLDER));
 
             // Add automation buttons
-            TreeItem<ConfigItem> automationItem = new TreeItem<>(new ConfigItem("Automation", ConfigItemType.FOLDER));
+            TreeItem<ConfigItem> automationItem =
+                    new TreeItem<>(new ConfigItem("Automation", ConfigItemType.FOLDER));
             if (project.getAutomation() != null && project.getAutomation().getButtons() != null) {
-                for (io.github.jspinak.brobot.runner.project.TaskButton button : project.getAutomation().getButtons()) {
-                    TreeItem<ConfigItem> buttonItem = new TreeItem<>(
-                            new ConfigItem(button.getLabel(), ConfigItemType.AUTOMATION_BUTTON)
-                    );
+                for (io.github.jspinak.brobot.runner.project.TaskButton button :
+                        project.getAutomation().getButtons()) {
+                    TreeItem<ConfigItem> buttonItem =
+                            new TreeItem<>(
+                                    new ConfigItem(
+                                            button.getLabel(), ConfigItemType.AUTOMATION_BUTTON));
                     buttonItem.getValue().setData(button);
                     automationItem.getChildren().add(buttonItem);
                 }
             }
 
             // Add metadata
-            TreeItem<ConfigItem> metadataItem = new TreeItem<>(new ConfigItem("Metadata", ConfigItemType.FOLDER));
+            TreeItem<ConfigItem> metadataItem =
+                    new TreeItem<>(new ConfigItem("Metadata", ConfigItemType.FOLDER));
 
-            metadataItem.getChildren().addAll(
-                    new TreeItem<>(new ConfigItem("Project: " + project.getName(), ConfigItemType.METADATA)),
-                    new TreeItem<>(new ConfigItem("Version: " + (project.getVersion() != null ? project.getVersion() : "Not specified"), ConfigItemType.METADATA)),
-                    new TreeItem<>(new ConfigItem("Author: " + (project.getAuthor() != null ? project.getAuthor() : "Not specified"), ConfigItemType.METADATA))
-            );
+            metadataItem
+                    .getChildren()
+                    .addAll(
+                            new TreeItem<>(
+                                    new ConfigItem(
+                                            "Project: " + project.getName(),
+                                            ConfigItemType.METADATA)),
+                            new TreeItem<>(
+                                    new ConfigItem(
+                                            "Version: "
+                                                    + (project.getVersion() != null
+                                                            ? project.getVersion()
+                                                            : "Not specified"),
+                                            ConfigItemType.METADATA)),
+                            new TreeItem<>(
+                                    new ConfigItem(
+                                            "Author: "
+                                                    + (project.getAuthor() != null
+                                                            ? project.getAuthor()
+                                                            : "Not specified"),
+                                            ConfigItemType.METADATA)));
 
-            rootItem.getChildren().addAll(filesItem, metadataItem, statesItem, transitionsItem, automationItem);
+            rootItem.getChildren()
+                    .addAll(filesItem, metadataItem, statesItem, transitionsItem, automationItem);
         } else {
             rootItem.getChildren().add(filesItem);
         }
@@ -268,9 +291,16 @@ public class ConfigBrowserPanel extends BorderPane {
 
                 case STATE:
                     if (configItem.getData() instanceof State state) {
-                        String details = "State: " + state.getName() + "\n\n" +
-                                "ID: " + state.getId() + "\n" +
-                                "Images: " + state.getStateImages().size() + "\n";
+                        String details =
+                                "State: "
+                                        + state.getName()
+                                        + "\n\n"
+                                        + "ID: "
+                                        + state.getId()
+                                        + "\n"
+                                        + "Images: "
+                                        + state.getStateImages().size()
+                                        + "\n";
                         // Add more state details as needed
                         detailsTextArea.setText(details);
                     }
@@ -280,17 +310,26 @@ public class ConfigBrowserPanel extends BorderPane {
 
                 case STATE_IMAGE:
                     if (configItem.getData() instanceof StateImage stateImage) {
-                        String details = "State Image: " + stateImage.getName() + "\n\n" +
-                                "Type: " + stateImage.getObjectType() + "\n" +
-                                "Path: " + stateImage.getPatterns().getFirst().getImgpath() + "\n";
+                        String details =
+                                "State Image: "
+                                        + stateImage.getName()
+                                        + "\n\n"
+                                        + "Type: "
+                                        + stateImage.getObjectType()
+                                        + "\n"
+                                        + "Path: "
+                                        + stateImage.getPatterns().getFirst().getImgpath()
+                                        + "\n";
                         // Add more image details as needed
                         detailsTextArea.setText(details);
 
                         // Try to load the image for preview
                         String imageName = stateImage.getPatterns().getFirst().getImgpath();
                         if (imageName != null && !imageName.isEmpty()) {
-                            // This is simplified - in a real implementation you'd use your image loading utilities
-                            Path imagePath = currentConfig.getImagePath().resolve(imageName + ".png");
+                            // This is simplified - in a real implementation you'd use your image
+                            // loading utilities
+                            Path imagePath =
+                                    currentConfig.getImagePath().resolve(imageName + ".png");
                             if (Files.exists(imagePath)) {
                                 try {
                                     Image image = new Image(imagePath.toUri().toString());
@@ -313,11 +352,23 @@ public class ConfigBrowserPanel extends BorderPane {
                     break;
 
                 case AUTOMATION_BUTTON:
-                    if (configItem.getData() instanceof io.github.jspinak.brobot.runner.project.TaskButton button) {
-                        String details = "Button: " + button.getLabel() + "\n\n" +
-                                "Function: " + button.getFunctionName() + "\n" +
-                                "Category: " + (button.getCategory() != null ? button.getCategory() : "None") + "\n" +
-                                "Confirmation Required: " + button.isConfirmationRequired() + "\n";
+                    if (configItem.getData()
+                            instanceof io.github.jspinak.brobot.runner.project.TaskButton button) {
+                        String details =
+                                "Button: "
+                                        + button.getLabel()
+                                        + "\n\n"
+                                        + "Function: "
+                                        + button.getFunctionName()
+                                        + "\n"
+                                        + "Category: "
+                                        + (button.getCategory() != null
+                                                ? button.getCategory()
+                                                : "None")
+                                        + "\n"
+                                        + "Confirmation Required: "
+                                        + button.isConfirmationRequired()
+                                        + "\n";
                         // Add more button details as needed
                         detailsTextArea.setText(details);
                     }
@@ -398,18 +449,17 @@ public class ConfigBrowserPanel extends BorderPane {
     }
 
     private void showAlert(Alert.AlertType type, String title, String header, String content) {
-        Platform.runLater(() -> {
-            Alert alert = new Alert(type);
-            alert.setTitle(title);
-            alert.setHeaderText(header);
-            alert.setContentText(content);
-            alert.showAndWait();
-        });
+        Platform.runLater(
+                () -> {
+                    Alert alert = new Alert(type);
+                    alert.setTitle(title);
+                    alert.setHeaderText(header);
+                    alert.setContentText(content);
+                    alert.showAndWait();
+                });
     }
 
-    /**
-     * Clears the configuration browser.
-     */
+    /** Clears the configuration browser. */
     public void clear() {
         rootItem.getChildren().clear();
         stateItems.clear();
@@ -418,15 +468,12 @@ public class ConfigBrowserPanel extends BorderPane {
         previewPanel.setVisible(false);
     }
 
-    /**
-     * Data class for config tree items.
-     */
+    /** Data class for config tree items. */
     @Getter
     public static class ConfigItem {
         private final String name;
         private final ConfigItemType type;
-        @Setter
-        private Object data;
+        @Setter private Object data;
 
         public ConfigItem(String name, ConfigItemType type) {
             this.name = name;
@@ -439,9 +486,7 @@ public class ConfigBrowserPanel extends BorderPane {
         }
     }
 
-    /**
-     * Enum for configuration item types.
-     */
+    /** Enum for configuration item types. */
     public enum ConfigItemType {
         ROOT,
         FOLDER,
@@ -453,9 +498,7 @@ public class ConfigBrowserPanel extends BorderPane {
         METADATA
     }
 
-    /**
-     * Custom tree cell for configuration items.
-     */
+    /** Custom tree cell for configuration items. */
     private static class ConfigTreeCell extends TreeCell<ConfigItem> {
         @Override
         protected void updateItem(ConfigItem item, boolean empty) {
@@ -470,19 +513,23 @@ public class ConfigBrowserPanel extends BorderPane {
             setText(item.getName());
 
             // Set icon based on item type
-            String iconPath = switch (item.getType()) {
-                case ROOT -> "/icons/16/home.png";
-                case FOLDER -> "/icons/16/folder.png";
-                case PROJECT_CONFIG, DSL_CONFIG -> "/icons/16/file.png";
-                case STATE -> "/icons/16/state.png";
-                case STATE_IMAGE -> "/icons/16/image.png";
-                case AUTOMATION_BUTTON -> "/icons/16/button.png";
-                case METADATA -> "/icons/16/info.png";
-            };
+            String iconPath =
+                    switch (item.getType()) {
+                        case ROOT -> "/icons/16/home.png";
+                        case FOLDER -> "/icons/16/folder.png";
+                        case PROJECT_CONFIG, DSL_CONFIG -> "/icons/16/file.png";
+                        case STATE -> "/icons/16/state.png";
+                        case STATE_IMAGE -> "/icons/16/image.png";
+                        case AUTOMATION_BUTTON -> "/icons/16/button.png";
+                        case METADATA -> "/icons/16/info.png";
+                    };
 
             try {
-                ImageView icon = new ImageView(
-                        new Image(Objects.requireNonNull(getClass().getResourceAsStream(iconPath))));
+                ImageView icon =
+                        new ImageView(
+                                new Image(
+                                        Objects.requireNonNull(
+                                                getClass().getResourceAsStream(iconPath))));
                 icon.setFitHeight(16);
                 icon.setFitWidth(16);
                 setGraphic(icon);

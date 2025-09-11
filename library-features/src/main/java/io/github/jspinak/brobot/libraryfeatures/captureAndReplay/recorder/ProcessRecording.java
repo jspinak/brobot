@@ -1,13 +1,13 @@
 package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.recorder;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 @Component
 public class ProcessRecording {
@@ -19,8 +19,8 @@ public class ProcessRecording {
     }
 
     /**
-     * Simplifies the raw user inputs and returns the simplified XML Document.
-     * Different simplification methods can be used based on the given ProcessNode class.
+     * Simplifies the raw user inputs and returns the simplified XML Document. Different
+     * simplification methods can be used based on the given ProcessNode class.
      *
      * @param rawInputsDoc the raw user inputs XML Document
      * @return the simplified XML Document

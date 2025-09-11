@@ -12,26 +12,22 @@ public class FluentStateBuilder {
     private final InitialStates initialStates;
     private final FrameworkInitializer init;
 
-    public FluentStateBuilder(StateStructureBuilder stateBuilder,
-            InitialStates initialStates, FrameworkInitializer init) {
+    public FluentStateBuilder(
+            StateStructureBuilder stateBuilder,
+            InitialStates initialStates,
+            FrameworkInitializer init) {
         this.stateAndTransitionBuilder = stateBuilder;
         this.initialStates = initialStates;
         this.init = init;
     }
 
     public FluentStateBuilder newState(String name, String image, String toState) {
-        stateAndTransitionBuilder
-                .init(name)
-                .addTransitionImage(image, toState)
-                .build();
+        stateAndTransitionBuilder.init(name).addTransitionImage(image, toState).build();
         return this;
     }
 
     public FluentStateBuilder newState(String name, String image) {
-        stateAndTransitionBuilder
-                .init(name)
-                .addImage(image)
-                .build();
+        stateAndTransitionBuilder.init(name).addImage(image).build();
         return this;
     }
 

@@ -1,23 +1,24 @@
 package io.github.jspinak.brobot;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Timeout;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.concurrent.TimeUnit;
-import io.github.jspinak.brobot.test.DisabledInCI;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
+
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 @DisplayName("Basic Framework Test")
 @Timeout(value = 10, unit = TimeUnit.SECONDS) // Prevent CI/CD timeout
 @DisabledInCI
 public class BasicFrameworkTest extends BrobotTestBase {
-    
+
     @BeforeAll
     public static void earlySetup() {
         // Set test properties BEFORE parent class static initialization

@@ -1,12 +1,10 @@
 package io.github.jspinak.brobot.runner.session;
 
-import lombok.Data;
-
 import java.time.LocalDateTime;
 
-/**
- * A lightweight summary of a session for display in the UI
- */
+import lombok.Data;
+
+/** A lightweight summary of a session for display in the UI */
 @Data
 public class SessionSummary {
     private String id;

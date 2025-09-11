@@ -1,12 +1,10 @@
 package io.github.jspinak.brobot.runner.session;
 
-import lombok.Data;
-
 import java.time.LocalDateTime;
 
-/**
- * Represents an event that occurred during a session
- */
+import lombok.Data;
+
+/** Represents an event that occurred during a session */
 @Data
 public class SessionEvent {
     private String type;

@@ -1,29 +1,27 @@
 package io.github.jspinak.brobot.action.internal.find;
 
+import java.util.List;
+
+import org.sikuli.script.Mouse;
+import org.springframework.stereotype.Component;
+
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.MatchAdjustmentOptions;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
-import org.sikuli.script.Mouse;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * Manages offset-based location adjustments for find and action operations.
- * <p>
- * This component handles the creation of synthetic matches based on position offsets,
- * enabling actions at relative positions from found elements or absolute screen
- * coordinates.
- * </p>
- * <p>
- * This is version 2 of the OffsetLocationManager, updated to work with the new
- * ActionConfig hierarchy. The functionality for secondary offsets (addX2/addY2) has
- * been removed as this is now handled through action chaining.
- * </p>
- * 
+ *
+ * <p>This component handles the creation of synthetic matches based on position offsets, enabling
+ * actions at relative positions from found elements or absolute screen coordinates.
+ *
+ * <p>This is version 2 of the OffsetLocationManager, updated to work with the new ActionConfig
+ * hierarchy. The functionality for secondary offsets (addX2/addY2) has been removed as this is now
+ * handled through action chaining.
+ *
  * @see MatchAdjustmentOptions
  * @see Match
  * @see Location
@@ -31,40 +29,41 @@ import java.util.List;
  */
 @Component
 public class OffsetMatchCreator {
-    
+
     // No longer needs legacy dependency - this class is now standalone
 
     /**
      * Creates a match at an offset position when no other matches exist.
-     * <p>
-     * This method is typically called at the beginning of a FIND action when there are
-     * no searchable objects in the collections, or when an action needs to operate at
-     * a specific offset from the current mouse position. The offset creates a synthetic
-     * match that enables actions at arbitrary screen locations.
-     * </p>
-     * 
+     *
+     * <p>This method is typically called at the beginning of a FIND action when there are no
+     * searchable objects in the collections, or when an action needs to operate at a specific
+     * offset from the current mouse position. The offset creates a synthetic match that enables
+     * actions at arbitrary screen locations.
+     *
      * @param objectCollections The collections being searched in the FIND action
      * @param matches The ActionResult to which the offset match will be added
      * @param adjustmentOptions The adjustment options containing offset values (addX/addY)
-     * @param doOnlyWhenCollectionsAreEmpty If true, only creates offset match when all
-     *                                      collections are empty
+     * @param doOnlyWhenCollectionsAreEmpty If true, only creates offset match when all collections
+     *     are empty
      */
-    public void addOffsetAsOnlyMatch(List<ObjectCollection> objectCollections, 
-                                   ActionResult matches,
-                                   MatchAdjustmentOptions adjustmentOptions,
-                                   boolean doOnlyWhenCollectionsAreEmpty) {
-        if (adjustmentOptions == null || (adjustmentOptions.getAddX() == 0 && adjustmentOptions.getAddY() == 0)) {
+    public void addOffsetAsOnlyMatch(
+            List<ObjectCollection> objectCollections,
+            ActionResult matches,
+            MatchAdjustmentOptions adjustmentOptions,
+            boolean doOnlyWhenCollectionsAreEmpty) {
+        if (adjustmentOptions == null
+                || (adjustmentOptions.getAddX() == 0 && adjustmentOptions.getAddY() == 0)) {
             return;
         }
-        
+
         if (!areCollectionsEmpty(objectCollections) && doOnlyWhenCollectionsAreEmpty) {
             return;
         }
-        
+
         // Get current mouse position with proper synchronization
         int baseX = 0, baseY = 0;
         boolean useMousePosition = false;
-        
+
         try {
             // Synchronize access to Mouse to avoid race conditions in tests
             synchronized (Mouse.class) {
@@ -79,29 +78,28 @@ public class OffsetMatchCreator {
             // In headless mode or when Mouse is not available, use 0,0 as base
             // This is expected in mock mode or headless environments
         }
-        
+
         // Calculate final position
         int offsetX = baseX + adjustmentOptions.getAddX();
         int offsetY = baseY + adjustmentOptions.getAddY();
-        
+
         // Create the offset match with a 1x1 region at the location
         // Note: In the new architecture, offset matches don't need StateObjectMetadata
         Region offsetRegion = new Region(offsetX, offsetY, 1, 1);
         Match offsetMatch = new Match(offsetRegion);
         // The Match constructor already creates a Location from the region,
         // so we don't need to set it separately
-        
+
         matches.add(offsetMatch);
     }
-    
+
     /**
      * Checks if all provided object collections are empty.
-     * <p>
-     * This utility method determines whether any searchable objects exist across all
-     * collections. It's used to decide whether offset-only matches should be created
-     * when no actual pattern matching can occur.
-     * </p>
-     * 
+     *
+     * <p>This utility method determines whether any searchable objects exist across all
+     * collections. It's used to decide whether offset-only matches should be created when no actual
+     * pattern matching can occur.
+     *
      * @param objectCollections The list of collections to check
      * @return true if all collections are empty, false otherwise
      */

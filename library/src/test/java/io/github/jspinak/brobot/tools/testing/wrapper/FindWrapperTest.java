@@ -1,53 +1,52 @@
 package io.github.jspinak.brobot.tools.testing.wrapper;
 
-import io.github.jspinak.brobot.model.element.Pattern;
-import io.github.jspinak.brobot.model.element.Scene;
-import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.config.environment.ExecutionMode;
-import io.github.jspinak.brobot.tools.testing.mock.action.MockFind;
-import io.github.jspinak.brobot.action.internal.find.scene.ScenePatternMatcher;
-import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import io.github.jspinak.brobot.action.internal.find.scene.ScenePatternMatcher;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.environment.ExecutionMode;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Scene;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.tools.testing.mock.action.MockFind;
 
 /**
- * Comprehensive test suite for FindWrapper.
- * Tests routing between mock and live find implementations.
+ * Comprehensive test suite for FindWrapper. Tests routing between mock and live find
+ * implementations.
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("FindWrapper Tests")
-@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
+@DisabledIfEnvironmentVariable(
+        named = "CI",
+        matches = "true",
+        disabledReason = "Test incompatible with CI environment")
 public class FindWrapperTest extends BrobotTestBase {
 
-    @Mock
-    private ExecutionMode executionMode;
+    @Mock private ExecutionMode executionMode;
 
-    @Mock
-    private MockFind mockFind;
+    @Mock private MockFind mockFind;
 
-    @Mock
-    private ScenePatternMatcher scenePatternMatcher;
+    @Mock private ScenePatternMatcher scenePatternMatcher;
 
     private FindWrapper findWrapper;
 
-    @Mock
-    private Pattern pattern;
+    @Mock private Pattern pattern;
 
-    @Mock
-    private Scene scene;
+    @Mock private Scene scene;
 
     @BeforeEach
     @Override
@@ -68,9 +67,7 @@ public class FindWrapperTest extends BrobotTestBase {
         @Test
         @DisplayName("Should route findAll to mock implementation in mock mode")
         void shouldRouteFindAllToMockInMockMode() {
-            List<Match> mockMatches = Arrays.asList(
-                    mock(Match.class),
-                    mock(Match.class));
+            List<Match> mockMatches = Arrays.asList(mock(Match.class), mock(Match.class));
             when(mockFind.getMatches(pattern)).thenReturn(mockMatches);
 
             List<Match> result = findWrapper.findAll(pattern, scene);
@@ -83,10 +80,8 @@ public class FindWrapperTest extends BrobotTestBase {
         @Test
         @DisplayName("Should route findAllWords to mock implementation in mock mode")
         void shouldRouteFindAllWordsToMockInMockMode() {
-            List<Match> mockWordMatches = Arrays.asList(
-                    mock(Match.class),
-                    mock(Match.class),
-                    mock(Match.class));
+            List<Match> mockWordMatches =
+                    Arrays.asList(mock(Match.class), mock(Match.class), mock(Match.class));
             when(mockFind.getWordMatches()).thenReturn(mockWordMatches);
 
             List<Match> result = findWrapper.findAllWords(scene);
@@ -134,9 +129,7 @@ public class FindWrapperTest extends BrobotTestBase {
         @Test
         @DisplayName("Should route findAll to live implementation in live mode")
         void shouldRouteFindAllToLiveInLiveMode() {
-            List<Match> liveMatches = Arrays.asList(
-                    mock(Match.class),
-                    mock(Match.class));
+            List<Match> liveMatches = Arrays.asList(mock(Match.class), mock(Match.class));
             when(scenePatternMatcher.findAllInScene(pattern, scene)).thenReturn(liveMatches);
 
             List<Match> result = findWrapper.findAll(pattern, scene);
@@ -149,10 +142,8 @@ public class FindWrapperTest extends BrobotTestBase {
         @Test
         @DisplayName("Should route findAllWords to live implementation in live mode")
         void shouldRouteFindAllWordsToLiveInLiveMode() {
-            List<Match> liveWordMatches = Arrays.asList(
-                    mock(Match.class),
-                    mock(Match.class),
-                    mock(Match.class));
+            List<Match> liveWordMatches =
+                    Arrays.asList(mock(Match.class), mock(Match.class), mock(Match.class));
             when(scenePatternMatcher.getWordMatches(scene)).thenReturn(liveWordMatches);
 
             List<Match> result = findWrapper.findAllWords(scene);
@@ -165,7 +156,8 @@ public class FindWrapperTest extends BrobotTestBase {
         @Test
         @DisplayName("Should handle empty results from live implementation")
         void shouldHandleEmptyResultsFromLive() {
-            when(scenePatternMatcher.findAllInScene(pattern, scene)).thenReturn(Collections.emptyList());
+            when(scenePatternMatcher.findAllInScene(pattern, scene))
+                    .thenReturn(Collections.emptyList());
             when(scenePatternMatcher.getWordMatches(scene)).thenReturn(Collections.emptyList());
 
             List<Match> patternResult = findWrapper.findAll(pattern, scene);
@@ -178,7 +170,8 @@ public class FindWrapperTest extends BrobotTestBase {
         @Test
         @DisplayName("Should handle null scene in live mode")
         void shouldHandleNullSceneInLiveMode() {
-            when(scenePatternMatcher.findAllInScene(pattern, null)).thenReturn(Collections.emptyList());
+            when(scenePatternMatcher.findAllInScene(pattern, null))
+                    .thenReturn(Collections.emptyList());
             when(scenePatternMatcher.getWordMatches(null)).thenReturn(Collections.emptyList());
 
             List<Match> patternResult = findWrapper.findAll(pattern, null);
@@ -303,10 +296,12 @@ public class FindWrapperTest extends BrobotTestBase {
 
             // Setup live to simulate slower execution
             when(executionMode.isMock()).thenReturn(false);
-            when(scenePatternMatcher.findAllInScene(pattern, scene)).thenAnswer(invocation -> {
-                Thread.sleep(1); // Simulate processing time
-                return Collections.emptyList();
-            });
+            when(scenePatternMatcher.findAllInScene(pattern, scene))
+                    .thenAnswer(
+                            invocation -> {
+                                Thread.sleep(1); // Simulate processing time
+                                return Collections.emptyList();
+                            });
 
             long startLive = System.nanoTime();
             for (int i = 0; i < 10; i++) { // Fewer iterations due to sleep
@@ -316,8 +311,11 @@ public class FindWrapperTest extends BrobotTestBase {
             double liveTimePerOp = liveTime / 10.0;
 
             // Mock should be significantly faster per operation
-            assertTrue(mockTimePerOp < liveTimePerOp / 10,
-                    String.format("Mock time per op (%.2f ns) should be at least 10x faster than live (%.2f ns)",
+            assertTrue(
+                    mockTimePerOp < liveTimePerOp / 10,
+                    String.format(
+                            "Mock time per op (%.2f ns) should be at least 10x faster than live"
+                                    + " (%.2f ns)",
                             mockTimePerOp, liveTimePerOp));
         }
     }
@@ -338,10 +336,12 @@ public class FindWrapperTest extends BrobotTestBase {
 
             Thread[] threads = new Thread[10];
             for (int i = 0; i < threads.length; i++) {
-                threads[i] = new Thread(() -> {
-                    List<Match> result = findWrapper.findAll(pattern, scene);
-                    matches.addAll(result);
-                });
+                threads[i] =
+                        new Thread(
+                                () -> {
+                                    List<Match> result = findWrapper.findAll(pattern, scene);
+                                    matches.addAll(result);
+                                });
                 threads[i].start();
             }
 
@@ -363,11 +363,14 @@ public class FindWrapperTest extends BrobotTestBase {
         void shouldRespectFrameworkSettings() {
             // Create real ExecutionMode to test integration
             ExecutionMode realExecutionMode = new ExecutionMode();
-            FindWrapper realWrapper = new FindWrapper(realExecutionMode, mockFind, scenePatternMatcher);
+            FindWrapper realWrapper =
+                    new FindWrapper(realExecutionMode, mockFind, scenePatternMatcher);
 
             // Setup mock matches
-            when(mockFind.getMatches(pattern)).thenReturn(Collections.singletonList(mock(Match.class)));
-            when(scenePatternMatcher.findAllInScene(pattern, scene)).thenReturn(Collections.emptyList());
+            when(mockFind.getMatches(pattern))
+                    .thenReturn(Collections.singletonList(mock(Match.class)));
+            when(scenePatternMatcher.findAllInScene(pattern, scene))
+                    .thenReturn(Collections.emptyList());
 
             // Test with mock mode enabled
             FrameworkSettings.mock = true;

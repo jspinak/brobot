@@ -4,12 +4,11 @@ import org.springframework.boot.test.context.TestConfiguration;
 
 /**
  * Test configuration for the action framework.
- * 
- * The circular dependency issue has been resolved architecturally:
- * - TimeProvider no longer depends on ExecutionModeController
- * - TimeService interface breaks the circular dependency
- * - DefaultTimeService provides the implementation
- * - MockFind and other mocks are now properly loaded from component scan
+ *
+ * <p>The circular dependency issue has been resolved architecturally: - TimeProvider no longer
+ * depends on ExecutionModeController - TimeService interface breaks the circular dependency -
+ * DefaultTimeService provides the implementation - MockFind and other mocks are now properly loaded
+ * from component scan
  */
 @TestConfiguration
 public class TestActionConfig {

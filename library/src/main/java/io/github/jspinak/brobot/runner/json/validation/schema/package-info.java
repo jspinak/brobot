@@ -1,25 +1,25 @@
 /**
  * JSON Schema validators for structural validation.
- * 
- * <p>This package contains validators that use JSON Schema to ensure
- * configurations conform to their expected structure. Schema validation
- * provides the first line of defense against malformed configurations by
- * checking data types, required fields, and value constraints.</p>
- * 
+ *
+ * <p>This package contains validators that use JSON Schema to ensure configurations conform to
+ * their expected structure. Schema validation provides the first line of defense against malformed
+ * configurations by checking data types, required fields, and value constraints.
+ *
  * <h2>Validators</h2>
- * 
+ *
  * <ul>
- *   <li>{@link io.github.jspinak.brobot.runner.json.validation.schema.SchemaValidator} - 
- *       Base schema validation interface</li>
- *   <li>{@link io.github.jspinak.brobot.runner.json.validation.schema.ProjectSchemaValidator} - 
- *       Validates project configurations</li>
- *   <li>{@link io.github.jspinak.brobot.runner.json.validation.schema.AutomationDSLValidator} - 
- *       Validates DSL definitions</li>
+ *   <li>{@link io.github.jspinak.brobot.runner.json.validation.schema.SchemaValidator} - Base
+ *       schema validation interface
+ *   <li>{@link io.github.jspinak.brobot.runner.json.validation.schema.ProjectSchemaValidator} -
+ *       Validates project configurations
+ *   <li>{@link io.github.jspinak.brobot.runner.json.validation.schema.AutomationDSLValidator} -
+ *       Validates DSL definitions
  * </ul>
- * 
+ *
  * <h2>JSON Schema Features</h2>
- * 
+ *
  * <h3>Type Validation</h3>
+ *
  * <pre>{@code
  * {
  *   "type": "object",
@@ -34,8 +34,9 @@
  *   }
  * }
  * }</pre>
- * 
+ *
  * <h3>Required Fields</h3>
+ *
  * <pre>{@code
  * {
  *   "type": "object",
@@ -47,8 +48,9 @@
  *   }
  * }
  * }</pre>
- * 
+ *
  * <h3>Value Constraints</h3>
+ *
  * <pre>{@code
  * {
  *   "properties": {
@@ -69,8 +71,9 @@
  *   }
  * }
  * }</pre>
- * 
+ *
  * <h3>Pattern Matching</h3>
+ *
  * <pre>{@code
  * {
  *   "properties": {
@@ -89,18 +92,20 @@
  *   }
  * }
  * }</pre>
- * 
+ *
  * <h2>Schema Organization</h2>
- * 
+ *
  * <h3>Main Schemas</h3>
+ *
  * <ul>
- *   <li><b>project-schema.json</b> - Overall project structure</li>
- *   <li><b>automation-dsl-schema.json</b> - DSL language constructs</li>
- *   <li><b>state-schema.json</b> - State definitions</li>
- *   <li><b>transition-schema.json</b> - Transition specifications</li>
+ *   <li><b>project-schema.json</b> - Overall project structure
+ *   <li><b>automation-dsl-schema.json</b> - DSL language constructs
+ *   <li><b>state-schema.json</b> - State definitions
+ *   <li><b>transition-schema.json</b> - Transition specifications
  * </ul>
- * 
+ *
  * <h3>Schema Composition</h3>
+ *
  * <pre>{@code
  * {
  *   "$ref": "#/definitions/State",
@@ -125,16 +130,16 @@
  *   }
  * }
  * }</pre>
- * 
+ *
  * <h2>Validation Process</h2>
- * 
+ *
  * <pre>{@code
  * // Load and compile schema
  * JsonSchema schema = schemaManager.getProjectSchema();
- * 
+ *
  * // Validate JSON
  * Set<ValidationMessage> errors = schema.validate(jsonNode);
- * 
+ *
  * // Convert to ValidationResult
  * ValidationResult result = new ValidationResult();
  * for (ValidationMessage msg : errors) {
@@ -145,10 +150,11 @@
  *     ));
  * }
  * }</pre>
- * 
+ *
  * <h2>Custom Keywords</h2>
- * 
- * <p>Extend schemas with custom validation:</p>
+ *
+ * <p>Extend schemas with custom validation:
+ *
  * <pre>{@code
  * {
  *   "properties": {
@@ -159,28 +165,29 @@
  *   }
  * }
  * }</pre>
- * 
+ *
  * <h2>Error Messages</h2>
- * 
- * <p>Schema validation provides detailed errors:</p>
+ *
+ * <p>Schema validation provides detailed errors:
+ *
  * <pre>{@code
  * - $.project.name: is missing but it is required
  * - $.timeout: 1500.5 is not a valid integer
  * - $.action: "HOVER" is not one of ["CLICK","TYPE","FIND"]
  * - $.id: "123abc" does not match pattern ^[a-zA-Z][a-zA-Z0-9_]*$
  * }</pre>
- * 
+ *
  * <h2>Best Practices</h2>
- * 
+ *
  * <ul>
- *   <li>Keep schemas versioned and documented</li>
- *   <li>Use clear, descriptive property names</li>
- *   <li>Provide examples in schema descriptions</li>
- *   <li>Compose complex schemas from definitions</li>
- *   <li>Include format validations where applicable</li>
- *   <li>Test schemas with valid and invalid examples</li>
+ *   <li>Keep schemas versioned and documented
+ *   <li>Use clear, descriptive property names
+ *   <li>Provide examples in schema descriptions
+ *   <li>Compose complex schemas from definitions
+ *   <li>Include format validations where applicable
+ *   <li>Test schemas with valid and invalid examples
  * </ul>
- * 
+ *
  * @since 1.0
  * @see com.networknt.schema
  * @see io.github.jspinak.brobot.runner.json.parsing.SchemaManager

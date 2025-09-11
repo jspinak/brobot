@@ -1,16 +1,5 @@
 package io.github.jspinak.brobot.runner.config;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
-import lombok.Getter;
-import lombok.Setter;
-import io.github.jspinak.brobot.runner.events.EventBus;
-import io.github.jspinak.brobot.runner.events.LogEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,9 +10,23 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import io.github.jspinak.brobot.runner.events.EventBus;
+import io.github.jspinak.brobot.runner.events.LogEvent;
+
+import lombok.Getter;
+import lombok.Setter;
+
 /**
- * Manages application configuration and user preferences.
- * Provides methods for saving and loading settings persistently.
+ * Manages application configuration and user preferences. Provides methods for saving and loading
+ * settings persistently.
  */
 @Component
 public class ApplicationConfig {
@@ -44,8 +47,7 @@ public class ApplicationConfig {
     // Autosave executor
     private ScheduledExecutorService autosaveExecutor;
 
-    @Getter @Setter
-    private boolean autosaveEnabled = true;
+    @Getter @Setter private boolean autosaveEnabled = true;
 
     @Autowired
     public ApplicationConfig(EventBus eventBus, BrobotRunnerProperties properties) {
@@ -63,8 +65,12 @@ public class ApplicationConfig {
             Files.createDirectories(configFilePath.getParent());
         } catch (IOException e) {
             logger.error("Failed to create config directory", e);
-            eventBus.publish(LogEvent.error(this,
-                    "Failed to initialize configuration: " + e.getMessage(), "Config", e));
+            eventBus.publish(
+                    LogEvent.error(
+                            this,
+                            "Failed to initialize configuration: " + e.getMessage(),
+                            "Config",
+                            e));
         }
 
         // Load existing configuration
@@ -79,21 +85,24 @@ public class ApplicationConfig {
         eventBus.publish(LogEvent.info(this, "Application configuration initialized", "Config"));
     }
 
-    /**
-     * Loads the configuration from the properties file.
-     */
+    /** Loads the configuration from the properties file. */
     public void loadConfiguration() {
         // First try to load from file
         if (Files.exists(configFilePath)) {
             try (InputStream is = Files.newInputStream(configFilePath)) {
                 appProperties.load(is);
                 logger.info("Loaded configuration from {}", configFilePath);
-                eventBus.publish(LogEvent.info(this,
-                        "Configuration loaded from " + configFilePath, "Config"));
+                eventBus.publish(
+                        LogEvent.info(
+                                this, "Configuration loaded from " + configFilePath, "Config"));
             } catch (IOException e) {
                 logger.error("Failed to load configuration from file", e);
-                eventBus.publish(LogEvent.error(this,
-                        "Failed to load configuration from file: " + e.getMessage(), "Config", e));
+                eventBus.publish(
+                        LogEvent.error(
+                                this,
+                                "Failed to load configuration from file: " + e.getMessage(),
+                                "Config",
+                                e));
             }
         } else {
             logger.info("No configuration file found at {}, using defaults", configFilePath);
@@ -101,25 +110,25 @@ public class ApplicationConfig {
         }
     }
 
-    /**
-     * Saves the configuration to the properties file.
-     */
+    /** Saves the configuration to the properties file. */
     public void saveConfiguration() {
         try (OutputStream os = Files.newOutputStream(configFilePath)) {
             appProperties.store(os, "Brobot Runner Application Settings");
             logger.info("Saved configuration to {}", configFilePath);
-            eventBus.publish(LogEvent.info(this,
-                    "Configuration saved to " + configFilePath, "Config"));
+            eventBus.publish(
+                    LogEvent.info(this, "Configuration saved to " + configFilePath, "Config"));
         } catch (IOException e) {
             logger.error("Failed to save configuration to file", e);
-            eventBus.publish(LogEvent.error(this,
-                    "Failed to save configuration to file: " + e.getMessage(), "Config", e));
+            eventBus.publish(
+                    LogEvent.error(
+                            this,
+                            "Failed to save configuration to file: " + e.getMessage(),
+                            "Config",
+                            e));
         }
     }
 
-    /**
-     * Loads default configuration settings.
-     */
+    /** Loads default configuration settings. */
     private void loadDefaults() {
         // Set default values for configuration properties
         appProperties.setProperty("app.version", "1.0.0");
@@ -271,9 +280,7 @@ public class ApplicationConfig {
         logger.debug("User preference '{}' set to '{}'", key, value);
     }
 
-    /**
-     * Clears all user preferences.
-     */
+    /** Clears all user preferences. */
     public void clearUserPreferences() {
         try {
             userPrefs.clear();
@@ -281,36 +288,42 @@ public class ApplicationConfig {
             eventBus.publish(LogEvent.info(this, "User preferences cleared", "Config"));
         } catch (Exception e) {
             logger.error("Failed to clear user preferences", e);
-            eventBus.publish(LogEvent.error(this,
-                    "Failed to clear user preferences: " + e.getMessage(), "Config", e));
+            eventBus.publish(
+                    LogEvent.error(
+                            this,
+                            "Failed to clear user preferences: " + e.getMessage(),
+                            "Config",
+                            e));
         }
     }
 
-    /**
-     * Starts the autosave mechanism.
-     */
+    /** Starts the autosave mechanism. */
     protected void startAutosave() {
-        autosaveExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread t = new Thread(r, "Config-Autosave");
-            t.setDaemon(true);
-            return t;
-        });
+        autosaveExecutor =
+                Executors.newSingleThreadScheduledExecutor(
+                        r -> {
+                            Thread t = new Thread(r, "Config-Autosave");
+                            t.setDaemon(true);
+                            return t;
+                        });
 
         // Schedule autosave every 5 minutes
-        autosaveExecutor.scheduleAtFixedRate(() -> {
-            try {
-                saveConfiguration();
-            } catch (Exception e) {
-                logger.error("Error during configuration autosave", e);
-            }
-        }, 5, 5, TimeUnit.MINUTES);
+        autosaveExecutor.scheduleAtFixedRate(
+                () -> {
+                    try {
+                        saveConfiguration();
+                    } catch (Exception e) {
+                        logger.error("Error during configuration autosave", e);
+                    }
+                },
+                5,
+                5,
+                TimeUnit.MINUTES);
 
         logger.info("Configuration autosave started");
     }
 
-    /**
-     * Stops the autosave mechanism.
-     */
+    /** Stops the autosave mechanism. */
     public void stopAutosave() {
         if (autosaveExecutor != null) {
             autosaveExecutor.shutdown();
@@ -328,7 +341,7 @@ public class ApplicationConfig {
 
     /**
      * Gets the configuration directory.
-     * 
+     *
      * @return The configuration directory as a File
      */
     public File getConfigDirectory() {
@@ -341,9 +354,7 @@ public class ApplicationConfig {
         return configDir.toFile();
     }
 
-    /**
-     * Cleans up resources when the application is shutting down.
-     */
+    /** Cleans up resources when the application is shutting down. */
     @PreDestroy
     public void shutdown() {
         // Save configuration one final time

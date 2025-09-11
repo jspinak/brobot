@@ -1,18 +1,18 @@
 package io.github.jspinak.brobot.model.element;
 
-import lombok.Getter;
 import java.util.Objects;
+
+import lombok.Getter;
 
 /**
  * Represents a directed movement from a start location to an end location.
- * <p>
- * This class is essential for representing actions that have a clear direction and
- * path, such as a mouse drag or a screen swipe. Unlike a Region, which only defines
- * a static area, a Movement encapsulates the dynamic concept of a transition
- * between two points.
- * <p>
- * It is an immutable object, ensuring that the definition of a movement cannot be
- * changed after it is created.
+ *
+ * <p>This class is essential for representing actions that have a clear direction and path, such as
+ * a mouse drag or a screen swipe. Unlike a Region, which only defines a static area, a Movement
+ * encapsulates the dynamic concept of a transition between two points.
+ *
+ * <p>It is an immutable object, ensuring that the definition of a movement cannot be changed after
+ * it is created.
  *
  * @see Location
  * @see io.github.jspinak.brobot.action.composite.drag.Drag
@@ -27,7 +27,7 @@ public final class Movement {
      * Constructs a new Movement instance.
      *
      * @param startLocation The non-null starting point of the movement.
-     * @param endLocation   The non-null ending point of the movement.
+     * @param endLocation The non-null ending point of the movement.
      */
     public Movement(Location startLocation, Location endLocation) {
         Objects.requireNonNull(startLocation, "Start location cannot be null");
@@ -64,7 +64,8 @@ public final class Movement {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Movement movement = (Movement) o;
-        return startLocation.equals(movement.startLocation) && endLocation.equals(movement.endLocation);
+        return startLocation.equals(movement.startLocation)
+                && endLocation.equals(movement.endLocation);
     }
 
     @Override

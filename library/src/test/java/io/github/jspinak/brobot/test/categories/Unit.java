@@ -1,26 +1,23 @@
 package io.github.jspinak.brobot.test.categories;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
 /**
  * Marks a test as a unit test.
- * 
- * Unit tests should:
- * - Test a single class or method in isolation
- * - Use mocks for dependencies
- * - Run quickly (< 100ms)
- * - Not require external resources (files, network, display)
- * - Be deterministic and repeatable
- * 
- * Example usage:
- * <pre>
- * {@code
+ *
+ * <p>Unit tests should: - Test a single class or method in isolation - Use mocks for dependencies -
+ * Run quickly (< 100ms) - Not require external resources (files, network, display) - Be
+ * deterministic and repeatable
+ *
+ * <p>Example usage:
+ *
+ * <pre>{@code
  * @Unit
  * class MyServiceTest {
  *     @Test
@@ -28,12 +25,10 @@ import java.lang.annotation.Target;
  *         // Test implementation
  *     }
  * }
- * }
- * </pre>
+ * }</pre>
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Test
 @Tag("unit")
-public @interface Unit {
-}
+public @interface Unit {}

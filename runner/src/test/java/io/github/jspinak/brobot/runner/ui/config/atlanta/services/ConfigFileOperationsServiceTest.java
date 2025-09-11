@@ -1,50 +1,40 @@
 package io.github.jspinak.brobot.runner.ui.config.atlanta.services;
 
-import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
-import io.github.jspinak.brobot.runner.events.EventBus;
-import io.github.jspinak.brobot.runner.events.LogEvent;
-import io.github.jspinak.brobot.runner.testutils.ImprovedJavaFXTestBase;
-import javafx.application.Platform;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
+import io.github.jspinak.brobot.runner.events.EventBus;
+import io.github.jspinak.brobot.runner.events.LogEvent;
+import io.github.jspinak.brobot.runner.testutils.ImprovedJavaFXTestBase;
 
 class ConfigFileOperationsServiceTest extends ImprovedJavaFXTestBase {
-    
-    @Mock
-    private EventBus eventBus;
-    
-    @Mock
-    private BrobotRunnerProperties runnerProperties;
-    
+
+    @Mock private EventBus eventBus;
+
+    @Mock private BrobotRunnerProperties runnerProperties;
+
     private ConfigFileOperationsService service;
-    
-    @TempDir
-    Path tempDir;
-    
+
+    @TempDir Path tempDir;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         service = new ConfigFileOperationsService(eventBus, runnerProperties);
         // JavaFX initialization is handled by ImprovedJavaFXTestBase
     }
-    
+
     @Test
     void testValidateConfigurationFile() {
         // Given
@@ -52,7 +42,7 @@ class ConfigFileOperationsServiceTest extends ImprovedJavaFXTestBase {
         File yamlFile = new File(tempDir.toFile(), "config.yml");
         File yamlFile2 = new File(tempDir.toFile(), "config.yaml");
         File otherFile = new File(tempDir.toFile(), "config.txt");
-        
+
         // Create the files
         try {
             jsonFile.createNewFile();
@@ -62,7 +52,7 @@ class ConfigFileOperationsServiceTest extends ImprovedJavaFXTestBase {
         } catch (Exception e) {
             fail("Failed to create test files");
         }
-        
+
         // When/Then
         assertTrue(service.validateConfigurationFile(jsonFile));
         assertTrue(service.validateConfigurationFile(yamlFile));
@@ -71,80 +61,91 @@ class ConfigFileOperationsServiceTest extends ImprovedJavaFXTestBase {
         assertFalse(service.validateConfigurationFile(null));
         assertFalse(service.validateConfigurationFile(new File("nonexistent.json")));
     }
-    
+
     @Test
     void testGetConfigPath() {
         // Given
         String expectedPath = "/test/config/path";
         when(runnerProperties.getConfigPath()).thenReturn(expectedPath);
-        
+
         // When
         String actualPath = service.getConfigPath();
-        
+
         // Then
         assertEquals(expectedPath, actualPath);
     }
-    
+
     @Test
     void testUpdateConfigPath() {
         // Given
         String newPath = "/new/config/path";
-        
+
         // When
         service.updateConfigPath(newPath);
-        
+
         // Then
         ArgumentCaptor<LogEvent> eventCaptor = ArgumentCaptor.forClass(LogEvent.class);
         verify(eventBus).publish(eventCaptor.capture());
-        
+
         LogEvent event = eventCaptor.getValue();
         assertEquals(service, event.getSource());
         assertTrue(event.getMessage().contains("Configuration path updated to: " + newPath));
         assertEquals("Config", event.getCategory());
     }
-    
+
     @Test
     void testOpenConfigFolderWithNonExistentDirectory() {
         // Given
         String nonExistentPath = "/non/existent/path";
         when(runnerProperties.getConfigPath()).thenReturn(nonExistentPath);
-        
+
         // When
         service.openConfigFolder();
-        
+
         // Then
         // Should not publish success log event
-        verify(eventBus, never()).publish(argThat(event -> 
-            event instanceof LogEvent && ((LogEvent) event).getMessage().contains("Opened configuration folder")
-        ));
+        verify(eventBus, never())
+                .publish(
+                        argThat(
+                                event ->
+                                        event instanceof LogEvent
+                                                && ((LogEvent) event)
+                                                        .getMessage()
+                                                        .contains("Opened configuration folder")));
     }
-    
+
     @Test
     void testOpenConfigFolderWithValidDirectory() {
         // Given
         when(runnerProperties.getConfigPath()).thenReturn(tempDir.toString());
-        
+
         // When
         service.openConfigFolder();
-        
+
         // Then
         // Should attempt to open the folder
         // Note: Actually opening the folder might not work in test environment
         ArgumentCaptor<LogEvent> eventCaptor = ArgumentCaptor.forClass(LogEvent.class);
         verify(eventBus, atLeastOnce()).publish(eventCaptor.capture());
-        
-        boolean foundOpenEvent = eventCaptor.getAllValues().stream()
-            .anyMatch(event -> event.getMessage().contains("Opened configuration folder") ||
-                              event.getMessage().contains("Failed to open configuration folder"));
+
+        boolean foundOpenEvent =
+                eventCaptor.getAllValues().stream()
+                        .anyMatch(
+                                event ->
+                                        event.getMessage().contains("Opened configuration folder")
+                                                || event.getMessage()
+                                                        .contains(
+                                                                "Failed to open configuration"
+                                                                        + " folder"));
         assertTrue(foundOpenEvent);
     }
-    
+
     @Test
     void testValidateConfigurationFileWithMixedCase() {
         // Given
         File jsonFile = new File(tempDir.toFile(), "Config.JSON");
         File yamlFile = new File(tempDir.toFile(), "Config.YML");
-        
+
         // Create the files
         try {
             jsonFile.createNewFile();
@@ -152,7 +153,7 @@ class ConfigFileOperationsServiceTest extends ImprovedJavaFXTestBase {
         } catch (Exception e) {
             fail("Failed to create test files");
         }
-        
+
         // When/Then - Should handle case-insensitive extensions
         assertTrue(service.validateConfigurationFile(jsonFile));
         assertTrue(service.validateConfigurationFile(yamlFile));

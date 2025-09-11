@@ -1,15 +1,14 @@
 package io.github.jspinak.brobot.runner.project;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Represents a UI button configuration for the desktop runner that calls automation functions.
- */
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import lombok.Getter;
+import lombok.Setter;
+
+/** Represents a UI button configuration for the desktop runner that calls automation functions. */
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -64,8 +63,8 @@ public class TaskButton {
     }
 
     /**
-     * Gets the parameters as a Map for easier manipulation.
-     * Only works if parameters is a Map or can be cast to a Map.
+     * Gets the parameters as a Map for easier manipulation. Only works if parameters is a Map or
+     * can be cast to a Map.
      *
      * @return The parameters as a Map or an empty Map if parameters is null or not a Map
      */
@@ -83,22 +82,26 @@ public class TaskButton {
         return new HashMap<>();
     }
 
-    /**
-     * Creates a simple string representation of the button configuration.
-     */
+    /** Creates a simple string representation of the button configuration. */
     @Override
     public String toString() {
-        return "Button{" +
-                "id='" + id + '\'' +
-                ", label='" + label + '\'' +
-                ", functionName='" + functionName + '\'' +
-                ", category='" + category + '\'' +
-                '}';
+        return "Button{"
+                + "id='"
+                + id
+                + '\''
+                + ", label='"
+                + label
+                + '\''
+                + ", functionName='"
+                + functionName
+                + '\''
+                + ", category='"
+                + category
+                + '\''
+                + '}';
     }
 
-    /**
-     * Represents position information for a button in the UI.
-     */
+    /** Represents position information for a button in the UI. */
     @Getter
     @Setter
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -108,9 +111,7 @@ public class TaskButton {
         private Integer order;
     }
 
-    /**
-     * Represents styling information for a button.
-     */
+    /** Represents styling information for a button. */
     @Getter
     @Setter
     @JsonIgnoreProperties(ignoreUnknown = true)

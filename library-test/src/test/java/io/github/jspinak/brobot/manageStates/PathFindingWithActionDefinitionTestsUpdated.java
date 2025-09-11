@@ -1,61 +1,53 @@
 package io.github.jspinak.brobot.manageStates;
 
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import static org.junit.jupiter.api.Assertions.*;
 
-import io.github.jspinak.brobot.action.basic.click.ClickOptions;
-import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
-import io.github.jspinak.brobot.model.action.MouseButton;
-import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.model.element.Pattern;
-import io.github.jspinak.brobot.model.state.State;
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.config.core.FrameworkInitializer;
-import io.github.jspinak.brobot.navigation.service.StateTransitionService;
-import io.github.jspinak.brobot.model.transition.StateTransitionStore;
-import io.github.jspinak.brobot.navigation.path.PathFinder;
-import io.github.jspinak.brobot.navigation.path.Paths;
-import io.github.jspinak.brobot.navigation.service.StateService;
-import io.github.jspinak.brobot.runner.dsl.model.TaskSequence;
-import io.github.jspinak.brobot.navigation.transition.StateTransitions;
-import io.github.jspinak.brobot.navigation.transition.TaskSequenceStateTransition;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
+import io.github.jspinak.brobot.config.core.FrameworkInitializer;
+import io.github.jspinak.brobot.model.action.MouseButton;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.transition.StateTransitionStore;
+import io.github.jspinak.brobot.navigation.path.PathFinder;
+import io.github.jspinak.brobot.navigation.path.Paths;
+import io.github.jspinak.brobot.navigation.service.StateService;
+import io.github.jspinak.brobot.navigation.service.StateTransitionService;
+import io.github.jspinak.brobot.navigation.transition.StateTransitions;
+import io.github.jspinak.brobot.navigation.transition.TaskSequenceStateTransition;
+import io.github.jspinak.brobot.runner.dsl.model.TaskSequence;
 
 /**
- * Updated path finding tests using new ActionConfig API.
- * Demonstrates migration from ActionOptions to specific config classes.
- * 
- * Key changes:
- * - Uses ClickOptions instead of ClickOptions
- * - TaskSequence.addStep() now accepts ActionConfig
- * - Type-safe configuration builders
+ * Updated path finding tests using new ActionConfig API. Demonstrates migration from ActionOptions
+ * to specific config classes.
+ *
+ * <p>Key changes: - Uses ClickOptions instead of ClickOptions - TaskSequence.addStep() now accepts
+ * ActionConfig - Type-safe configuration builders
  */
 @SpringBootTest
 public class PathFindingWithActionDefinitionTestsUpdated {
 
-    @Autowired
-    private PathFinder pathFinder;
+    @Autowired private PathFinder pathFinder;
 
-    @Autowired
-    private StateTransitionService stateTransitionsService;
+    @Autowired private StateTransitionService stateTransitionsService;
 
-    @Autowired
-    private StateService allStatesInProjectService;
+    @Autowired private StateService allStatesInProjectService;
 
-    @Autowired
-    private StateTransitionStore stateTransitionsRepository;
+    @Autowired private StateTransitionStore stateTransitionsRepository;
 
-    @Autowired
-    private FrameworkInitializer init;
+    @Autowired private FrameworkInitializer init;
 
     @BeforeAll
     public static void setupHeadlessMode() {
@@ -91,10 +83,14 @@ public class PathFindingWithActionDefinitionTestsUpdated {
         State stateC = createState("StateC");
         State stateD = createState("StateD");
 
-        createTransition(stateA, stateB, createStateImage("Button1", "button1.png"), "Path 1 - Step 1");
-        createTransition(stateB, stateD, createStateImage("Button2", "button2.png"), "Path 1 - Step 2");
-        createTransition(stateA, stateC, createStateImage("Button3", "button3.png"), "Path 2 - Step 1");
-        createTransition(stateC, stateD, createStateImage("Button4", "button4.png"), "Path 2 - Step 2");
+        createTransition(
+                stateA, stateB, createStateImage("Button1", "button1.png"), "Path 1 - Step 1");
+        createTransition(
+                stateB, stateD, createStateImage("Button2", "button2.png"), "Path 1 - Step 2");
+        createTransition(
+                stateA, stateC, createStateImage("Button3", "button3.png"), "Path 2 - Step 1");
+        createTransition(
+                stateC, stateD, createStateImage("Button4", "button4.png"), "Path 2 - Step 2");
         init.initializeStateStructure();
 
         Set<Long> startStates = new HashSet<>();
@@ -104,8 +100,12 @@ public class PathFindingWithActionDefinitionTestsUpdated {
         assertFalse(paths.isEmpty());
         assertEquals(2, paths.getPaths().size());
         assertTrue(paths.getPaths().stream().allMatch(path -> path.getStates().size() == 3));
-        assertTrue(paths.getPaths().stream().allMatch(path -> path.getStates().get(0).equals(stateA.getId())));
-        assertTrue(paths.getPaths().stream().allMatch(path -> path.getStates().get(2).equals(stateD.getId())));
+        assertTrue(
+                paths.getPaths().stream()
+                        .allMatch(path -> path.getStates().get(0).equals(stateA.getId())));
+        assertTrue(
+                paths.getPaths().stream()
+                        .allMatch(path -> path.getStates().get(2).equals(stateD.getId())));
     }
 
     @Test
@@ -147,8 +147,12 @@ public class PathFindingWithActionDefinitionTestsUpdated {
         assertFalse(paths.isEmpty());
         assertEquals(2, paths.getPaths().size());
         assertTrue(paths.getPaths().stream().allMatch(path -> path.getStates().size() == 4));
-        assertTrue(paths.getPaths().stream().allMatch(path -> path.getStates().get(0).equals(stateA.getId()) &&
-                path.getStates().get(3).equals(stateE.getId())));
+        assertTrue(
+                paths.getPaths().stream()
+                        .allMatch(
+                                path ->
+                                        path.getStates().get(0).equals(stateA.getId())
+                                                && path.getStates().get(3).equals(stateE.getId())));
     }
 
     private State createState(String stateName) {
@@ -163,21 +167,20 @@ public class PathFindingWithActionDefinitionTestsUpdated {
         return new StateImage.Builder().setName(imageName).addPattern(pattern).build();
     }
 
-    private void createTransition(State fromState, State toState, StateImage stateImage, String actionDescription) {
+    private void createTransition(
+            State fromState, State toState, StateImage stateImage, String actionDescription) {
         TaskSequence actionDefinition = new TaskSequence();
 
         // NEW API: Use ClickOptions instead of ActionOptions
-        ClickOptions clickOptions = new ClickOptions.Builder()
-                .setPressOptions(MousePressOptions.builder()
-                        .setButton(MouseButton.LEFT)
-                        .build())
-                .setNumberOfClicks(1)
-                .setPauseAfterEnd(0.5)
-                .build();
+        ClickOptions clickOptions =
+                new ClickOptions.Builder()
+                        .setPressOptions(
+                                MousePressOptions.builder().setButton(MouseButton.LEFT).build())
+                        .setNumberOfClicks(1)
+                        .setPauseAfterEnd(0.5)
+                        .build();
 
-        ObjectCollection objects = new ObjectCollection.Builder()
-                .withImages(stateImage)
-                .build();
+        ObjectCollection objects = new ObjectCollection.Builder().withImages(stateImage).build();
 
         // TaskSequence now accepts ActionConfig
         actionDefinition.addStep(clickOptions, objects);
@@ -192,34 +195,37 @@ public class PathFindingWithActionDefinitionTestsUpdated {
         stateTransitionsRepository.add(stateTransitions);
     }
 
-    /**
-     * Create a more complex transition with multiple steps
-     */
+    /** Create a more complex transition with multiple steps */
     private void createMultiStepTransition(State fromState, State toState, String transitionName) {
         TaskSequence actionDefinition = new TaskSequence();
 
         // Step 1: Find the button
-        PatternFindOptions findOptions = new PatternFindOptions.Builder()
-                .setStrategy(PatternFindOptions.Strategy.FIRST)
-                .setSimilarity(0.9)
-                .build();
+        PatternFindOptions findOptions =
+                new PatternFindOptions.Builder()
+                        .setStrategy(PatternFindOptions.Strategy.FIRST)
+                        .setSimilarity(0.9)
+                        .build();
 
-        ObjectCollection findObjects = new ObjectCollection.Builder()
-                .withImages(createStateImage(transitionName + "_Button", transitionName + ".png"))
-                .build();
+        ObjectCollection findObjects =
+                new ObjectCollection.Builder()
+                        .withImages(
+                                createStateImage(
+                                        transitionName + "_Button", transitionName + ".png"))
+                        .build();
 
         actionDefinition.addStep(findOptions, findObjects);
 
         // Step 2: Click the found button
-        ClickOptions clickOptions = new ClickOptions.Builder()
-                .setPressOptions(MousePressOptions.builder()
-                        .setButton(MouseButton.LEFT)
-                        .build())
-                .build();
+        ClickOptions clickOptions =
+                new ClickOptions.Builder()
+                        .setPressOptions(
+                                MousePressOptions.builder().setButton(MouseButton.LEFT).build())
+                        .build();
 
-        ObjectCollection clickObjects = new ObjectCollection.Builder()
-                // No direct method to use matches from previous action
-                .build();
+        ObjectCollection clickObjects =
+                new ObjectCollection.Builder()
+                        // No direct method to use matches from previous action
+                        .build();
 
         actionDefinition.addStep(clickOptions, clickObjects);
 

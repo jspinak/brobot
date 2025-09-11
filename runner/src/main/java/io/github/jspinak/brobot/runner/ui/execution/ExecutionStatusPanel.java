@@ -1,7 +1,8 @@
 package io.github.jspinak.brobot.runner.ui.execution;
 
-import io.github.jspinak.brobot.model.state.State;
-import io.github.jspinak.brobot.runner.execution.ExecutionState;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.property.ObjectProperty;
@@ -14,50 +15,42 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
-import lombok.Getter;
-import io.github.jspinak.brobot.runner.ui.components.base.BrobotCard;
-import atlantafx.base.theme.Styles;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.runner.execution.ExecutionState;
+import io.github.jspinak.brobot.runner.ui.components.base.BrobotCard;
+
+import atlantafx.base.theme.Styles;
+import lombok.Getter;
 
 /**
  * Status panel component for displaying execution progress and current state.
- * 
+ *
  * <p>This panel shows:
+ *
  * <ul>
- *   <li>Execution status indicator and label</li>
- *   <li>Progress bar for overall execution progress</li>
- *   <li>Current action being performed</li>
- *   <li>Current state in the state machine</li>
- *   <li>Elapsed time counter</li>
+ *   <li>Execution status indicator and label
+ *   <li>Progress bar for overall execution progress
+ *   <li>Current action being performed
+ *   <li>Current state in the state machine
+ *   <li>Elapsed time counter
  * </ul>
- * </p>
  */
 public class ExecutionStatusPanel extends BrobotCard {
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
 
-    @Getter
-    private Circle statusIndicator;
-    @Getter
-    private Label statusLabel;
-    @Getter
-    private Label currentActionLabel;
-    @Getter
-    private Label elapsedTimeLabel;
-    @Getter
-    private Label currentStateLabel;
-    @Getter
-    private ProgressBar progressBar;
+    @Getter private Circle statusIndicator;
+    @Getter private Label statusLabel;
+    @Getter private Label currentActionLabel;
+    @Getter private Label elapsedTimeLabel;
+    @Getter private Label currentStateLabel;
+    @Getter private ProgressBar progressBar;
 
     private LocalDateTime executionStartTime;
     private Timeline elapsedTimeUpdater;
     private final ObjectProperty<State> currentState = new SimpleObjectProperty<>();
 
-    /**
-     * Creates a new ExecutionStatusPanel.
-     */
+    /** Creates a new ExecutionStatusPanel. */
     public ExecutionStatusPanel() {
         super("Execution Status");
         setupUI();
@@ -84,8 +77,14 @@ public class ExecutionStatusPanel extends BrobotCard {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        statusRow.getChildren().addAll(statusIndicator, statusLabel, spacer, 
-            createLabel("Elapsed Time:"), elapsedTimeLabel);
+        statusRow
+                .getChildren()
+                .addAll(
+                        statusIndicator,
+                        statusLabel,
+                        spacer,
+                        createLabel("Elapsed Time:"),
+                        elapsedTimeLabel);
 
         // Progress bar
         progressBar = new ProgressBar(0);
@@ -108,11 +107,11 @@ public class ExecutionStatusPanel extends BrobotCard {
         GridPane.setHgrow(currentStateLabel, Priority.ALWAYS);
 
         contentBox.getChildren().addAll(statusRow, progressBar, infoGrid);
-        
+
         // Add content box to card
         addContent(contentBox);
     }
-    
+
     private Label createLabel(String text) {
         Label label = new Label(text);
         label.getStyleClass().add(Styles.TEXT_MUTED);
@@ -127,7 +126,7 @@ public class ExecutionStatusPanel extends BrobotCard {
     public void updateStatus(ExecutionState state) {
         Color indicatorColor;
         String statusText;
-        
+
         switch (state) {
             case IDLE:
                 indicatorColor = Color.LIGHTGRAY;
@@ -161,25 +160,22 @@ public class ExecutionStatusPanel extends BrobotCard {
                 indicatorColor = Color.LIGHTGRAY;
                 statusText = state.toString();
         }
-        
+
         statusIndicator.setFill(indicatorColor);
         statusLabel.setText(statusText);
     }
 
-    /**
-     * Starts the elapsed time updater.
-     */
+    /** Starts the elapsed time updater. */
     public void startElapsedTimeUpdater() {
         executionStartTime = LocalDateTime.now();
-        
-        elapsedTimeUpdater = new Timeline(new KeyFrame(Duration.seconds(1), e -> updateElapsedTime()));
+
+        elapsedTimeUpdater =
+                new Timeline(new KeyFrame(Duration.seconds(1), e -> updateElapsedTime()));
         elapsedTimeUpdater.setCycleCount(Timeline.INDEFINITE);
         elapsedTimeUpdater.play();
     }
 
-    /**
-     * Stops the elapsed time updater.
-     */
+    /** Stops the elapsed time updater. */
     public void stopElapsedTimeUpdater() {
         if (elapsedTimeUpdater != null) {
             elapsedTimeUpdater.stop();
@@ -192,7 +188,7 @@ public class ExecutionStatusPanel extends BrobotCard {
             long hours = seconds / 3600;
             long minutes = (seconds % 3600) / 60;
             long secs = seconds % 60;
-            
+
             elapsedTimeLabel.setText(String.format("%02d:%02d:%02d", hours, minutes, secs));
         }
     }
@@ -225,9 +221,7 @@ public class ExecutionStatusPanel extends BrobotCard {
         progressBar.setProgress(progress);
     }
 
-    /**
-     * Resets the panel to initial state.
-     */
+    /** Resets the panel to initial state. */
     public void reset() {
         updateStatus(ExecutionState.IDLE);
         updateProgress(0);

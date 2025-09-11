@@ -1,5 +1,26 @@
 package io.github.jspinak.brobot.aspects.display;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
+
+import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.Signature;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
+
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
@@ -12,53 +33,25 @@ import io.github.jspinak.brobot.monitor.MonitorManager;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.tools.logging.visual.HighlightManager;
 import io.github.jspinak.brobot.tools.logging.visual.VisualFeedbackConfig;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.Signature;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.sikuli.script.Pattern;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import java.awt.Rectangle;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 public class VisualFeedbackAspectTest extends BrobotTestBase {
 
     private VisualFeedbackAspect aspect;
 
-    @Mock
-    private BrobotLogger brobotLogger;
+    @Mock private BrobotLogger brobotLogger;
 
-    @Mock
-    private LogBuilder logBuilder;
+    @Mock private LogBuilder logBuilder;
 
-    @Mock
-    private HighlightManager highlightManager;
+    @Mock private HighlightManager highlightManager;
 
-    @Mock
-    private VisualFeedbackConfig visualConfig;
+    @Mock private VisualFeedbackConfig visualConfig;
 
-    @Mock
-    private MonitorManager monitorManager;
+    @Mock private MonitorManager monitorManager;
 
-    @Mock
-    private ProceedingJoinPoint joinPoint;
+    @Mock private ProceedingJoinPoint joinPoint;
 
-    @Mock
-    private Signature signature;
+    @Mock private Signature signature;
 
     @BeforeEach
     @Override
@@ -81,7 +74,7 @@ public class VisualFeedbackAspectTest extends BrobotTestBase {
         lenient().when(logBuilder.action(anyString())).thenReturn(logBuilder);
         lenient().when(logBuilder.metadata(anyString(), any())).thenReturn(logBuilder);
         lenient().when(logBuilder.observation(anyString())).thenReturn(logBuilder);
-        
+
         // Mock the void log() method
         lenient().doNothing().when(logBuilder).log();
 
@@ -91,8 +84,8 @@ public class VisualFeedbackAspectTest extends BrobotTestBase {
 
         // Setup monitor manager
         lenient().when(monitorManager.getPrimaryMonitorIndex()).thenReturn(0);
-        MonitorManager.MonitorInfo monitorInfo = new MonitorManager.MonitorInfo(
-            0, new Rectangle(0, 0, 1920, 1080), "primary");
+        MonitorManager.MonitorInfo monitorInfo =
+                new MonitorManager.MonitorInfo(0, new Rectangle(0, 0, 1920, 1080), "primary");
         lenient().when(monitorManager.getMonitorInfo(0)).thenReturn(monitorInfo);
 
         aspect.init();
@@ -102,23 +95,23 @@ public class VisualFeedbackAspectTest extends BrobotTestBase {
     public void testProvideVisualFeedback_FindOperation() throws Throwable {
         // Arrange
         StateImage stateImage = new StateImage.Builder().setName("testImage").build();
-        ObjectCollection objCollection = new ObjectCollection.Builder()
-            .withImages(stateImage)
-            .build();
-        
-        when(joinPoint.getArgs()).thenReturn(new Object[]{objCollection});
+        ObjectCollection objCollection =
+                new ObjectCollection.Builder().withImages(stateImage).build();
+
+        when(joinPoint.getArgs()).thenReturn(new Object[] {objCollection});
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.getName()).thenReturn("find");
         when(signature.getDeclaringType()).thenReturn(FindClass.class);
-        
+
         ActionResult actionResult = new ActionResult();
         actionResult.setSuccess(true);
-        Match match = new Match.Builder()
-            .setRegion(new Region(100, 200, 50, 50))
-            .setSimScore(0.95)
-            .build();
+        Match match =
+                new Match.Builder()
+                        .setRegion(new Region(100, 200, 50, 50))
+                        .setSimScore(0.95)
+                        .build();
         actionResult.setMatchList(Arrays.asList(match));
-        
+
         when(joinPoint.proceed()).thenReturn(actionResult);
 
         // Act
@@ -136,22 +129,22 @@ public class VisualFeedbackAspectTest extends BrobotTestBase {
     @Test
     public void testProvideVisualFeedback_ClickOperation() throws Throwable {
         // Arrange
-        StateRegion stateRegion = new StateRegion.Builder()
-            .setName("clickRegion")
-            .setSearchRegion(new Region(50, 50, 100, 100))
-            .build();
-        ObjectCollection objCollection = new ObjectCollection.Builder()
-            .withRegions(stateRegion)
-            .build();
-        
-        when(joinPoint.getArgs()).thenReturn(new Object[]{objCollection});
+        StateRegion stateRegion =
+                new StateRegion.Builder()
+                        .setName("clickRegion")
+                        .setSearchRegion(new Region(50, 50, 100, 100))
+                        .build();
+        ObjectCollection objCollection =
+                new ObjectCollection.Builder().withRegions(stateRegion).build();
+
+        when(joinPoint.getArgs()).thenReturn(new Object[] {objCollection});
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.getName()).thenReturn("click");
         when(signature.getDeclaringType()).thenReturn(ClickClass.class);
-        
+
         ActionResult actionResult = new ActionResult();
         actionResult.setSuccess(true);
-        
+
         when(joinPoint.proceed()).thenReturn(actionResult);
 
         // Act
@@ -161,7 +154,7 @@ public class VisualFeedbackAspectTest extends BrobotTestBase {
         assertEquals(actionResult, result);
         ArgumentCaptor<List> regionsCaptor = ArgumentCaptor.forClass(List.class);
         verify(highlightManager).highlightSearchRegionsWithContext(regionsCaptor.capture());
-        
+
         List<HighlightManager.RegionWithContext> highlightedRegions = regionsCaptor.getValue();
         assertEquals(1, highlightedRegions.size());
         assertEquals("clickRegion", highlightedRegions.get(0).getObjectName());
@@ -171,23 +164,20 @@ public class VisualFeedbackAspectTest extends BrobotTestBase {
     public void testProvideVisualFeedback_ErrorHandling() throws Throwable {
         // Arrange
         StateImage stateImage = new StateImage.Builder().setName("errorImage").build();
-        ObjectCollection objCollection = new ObjectCollection.Builder()
-            .withImages(stateImage)
-            .build();
-        
-        when(joinPoint.getArgs()).thenReturn(new Object[]{objCollection});
+        ObjectCollection objCollection =
+                new ObjectCollection.Builder().withImages(stateImage).build();
+
+        when(joinPoint.getArgs()).thenReturn(new Object[] {objCollection});
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.getName()).thenReturn("find");
         when(signature.getDeclaringType()).thenReturn(FindClass.class);
-        
+
         RuntimeException exception = new RuntimeException("Find failed");
         when(joinPoint.proceed()).thenThrow(exception);
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> 
-            aspect.provideVisualFeedback(joinPoint)
-        );
-        
+        assertThrows(RuntimeException.class, () -> aspect.provideVisualFeedback(joinPoint));
+
         verify(highlightManager).highlightError(any(Region.class));
         verify(logBuilder, atLeastOnce()).metadata("feedbackType", "ERROR_HIGHLIGHT");
         verify(logBuilder, atLeastOnce()).log();
@@ -201,21 +191,21 @@ public class VisualFeedbackAspectTest extends BrobotTestBase {
         when(signature.getDeclaringType()).thenReturn(FindClass.class);
         when(joinPoint.getArgs()).thenReturn(new Object[0]);
         when(joinPoint.proceed()).thenReturn(new ActionResult());
-        
+
         aspect.provideVisualFeedback(joinPoint);
         verify(logBuilder, atMost(1)).metadata("operationType", "FIND");
-        
+
         // Test click operation
         when(signature.getName()).thenReturn("performClick");
         when(signature.getDeclaringType()).thenReturn(ClickClass.class);
-        
+
         aspect.provideVisualFeedback(joinPoint);
         verify(logBuilder, atMost(1)).metadata("operationType", "CLICK");
-        
+
         // Test type operation
         when(signature.getName()).thenReturn("performType");
         when(signature.getDeclaringType()).thenReturn(TypeClass.class);
-        
+
         aspect.provideVisualFeedback(joinPoint);
         verify(logBuilder, atMost(1)).metadata("operationType", "TYPE");
     }
@@ -224,7 +214,7 @@ public class VisualFeedbackAspectTest extends BrobotTestBase {
     public void testExtractTargets_WithObjectCollection() throws Throwable {
         // Arrange
         ObjectCollection objCollection = new ObjectCollection.Builder().build();
-        when(joinPoint.getArgs()).thenReturn(new Object[]{"param1", objCollection, 123});
+        when(joinPoint.getArgs()).thenReturn(new Object[] {"param1", objCollection, 123});
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.getName()).thenReturn("find");
         when(signature.getDeclaringType()).thenReturn(FindClass.class);
@@ -242,7 +232,7 @@ public class VisualFeedbackAspectTest extends BrobotTestBase {
         // Arrange
         ObjectCollection objCollection = new ObjectCollection.Builder().build();
         ObjectCollection[] collections = {objCollection};
-        when(joinPoint.getArgs()).thenReturn(new Object[]{collections});
+        when(joinPoint.getArgs()).thenReturn(new Object[] {collections});
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.getName()).thenReturn("find");
         when(signature.getDeclaringType()).thenReturn(FindClass.class);
@@ -258,20 +248,21 @@ public class VisualFeedbackAspectTest extends BrobotTestBase {
     @Test
     public void testHighlightSearchRegions_MultipleRegions() throws Throwable {
         // Arrange
-        StateRegion stateRegion1 = new StateRegion.Builder()
-            .setName("region1")
-            .setSearchRegion(new Region(0, 0, 100, 100))
-            .build();
-        StateRegion stateRegion2 = new StateRegion.Builder()
-            .setName("region2")
-            .setSearchRegion(new Region(200, 200, 100, 100))
-            .build();
-        
-        ObjectCollection objCollection = new ObjectCollection.Builder()
-            .withRegions(stateRegion1, stateRegion2)
-            .build();
-        
-        when(joinPoint.getArgs()).thenReturn(new Object[]{objCollection});
+        StateRegion stateRegion1 =
+                new StateRegion.Builder()
+                        .setName("region1")
+                        .setSearchRegion(new Region(0, 0, 100, 100))
+                        .build();
+        StateRegion stateRegion2 =
+                new StateRegion.Builder()
+                        .setName("region2")
+                        .setSearchRegion(new Region(200, 200, 100, 100))
+                        .build();
+
+        ObjectCollection objCollection =
+                new ObjectCollection.Builder().withRegions(stateRegion1, stateRegion2).build();
+
+        when(joinPoint.getArgs()).thenReturn(new Object[] {objCollection});
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.getName()).thenReturn("find");
         when(signature.getDeclaringType()).thenReturn(FindClass.class);
@@ -283,7 +274,7 @@ public class VisualFeedbackAspectTest extends BrobotTestBase {
         // Assert
         ArgumentCaptor<List> regionsCaptor = ArgumentCaptor.forClass(List.class);
         verify(highlightManager).highlightSearchRegionsWithContext(regionsCaptor.capture());
-        
+
         List<HighlightManager.RegionWithContext> highlightedRegions = regionsCaptor.getValue();
         assertEquals(2, highlightedRegions.size());
     }
@@ -295,21 +286,23 @@ public class VisualFeedbackAspectTest extends BrobotTestBase {
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.getName()).thenReturn("find");
         when(signature.getDeclaringType()).thenReturn(FindClass.class);
-        
+
         ActionResult actionResult = new ActionResult();
         actionResult.setSuccess(true);
-        
+
         List<Match> matches = new ArrayList<>();
-        matches.add(new Match.Builder()
-            .setRegion(new Region(100, 100, 50, 50))
-            .setSimScore(0.95)
-            .build());
-        matches.add(new Match.Builder()
-            .setRegion(new Region(200, 200, 60, 60))
-            .setSimScore(0.90)
-            .build());
+        matches.add(
+                new Match.Builder()
+                        .setRegion(new Region(100, 100, 50, 50))
+                        .setSimScore(0.95)
+                        .build());
+        matches.add(
+                new Match.Builder()
+                        .setRegion(new Region(200, 200, 60, 60))
+                        .setSimScore(0.90)
+                        .build());
         actionResult.setMatchList(matches);
-        
+
         when(joinPoint.proceed()).thenReturn(actionResult);
 
         // Act
@@ -324,22 +317,23 @@ public class VisualFeedbackAspectTest extends BrobotTestBase {
     public void testActionFlow() throws Throwable {
         // Arrange
         ReflectionTestUtils.setField(aspect, "showActionFlow", true);
-        
+
         // Simulate multiple operations to build action flow
         for (int i = 0; i < 3; i++) {
             when(joinPoint.getArgs()).thenReturn(new Object[0]);
             when(joinPoint.getSignature()).thenReturn(signature);
             when(signature.getName()).thenReturn("click");
             when(signature.getDeclaringType()).thenReturn(ClickClass.class);
-            
+
             ActionResult actionResult = new ActionResult();
             actionResult.setSuccess(true);
-            Match match = new Match.Builder()
-                .setRegion(new Region(100 * i, 100 * i, 50, 50))
-                .setSimScore(0.95)
-                .build();
+            Match match =
+                    new Match.Builder()
+                            .setRegion(new Region(100 * i, 100 * i, 50, 50))
+                            .setSimScore(0.95)
+                            .build();
             actionResult.setMatchList(Arrays.asList(match));
-            
+
             when(joinPoint.proceed()).thenReturn(actionResult);
 
             // Act
@@ -373,7 +367,7 @@ public class VisualFeedbackAspectTest extends BrobotTestBase {
     public void testNoHighlightManagerAvailable() throws Throwable {
         // Arrange
         ReflectionTestUtils.setField(aspect, "highlightManager", null);
-        
+
         when(joinPoint.getArgs()).thenReturn(new Object[0]);
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.getName()).thenReturn("find");
@@ -392,9 +386,9 @@ public class VisualFeedbackAspectTest extends BrobotTestBase {
     public void testVisualConfigDisabled() throws Throwable {
         // Arrange
         when(visualConfig.isEnabled()).thenReturn(false);
-        
+
         ObjectCollection objCollection = new ObjectCollection.Builder().build();
-        when(joinPoint.getArgs()).thenReturn(new Object[]{objCollection});
+        when(joinPoint.getArgs()).thenReturn(new Object[] {objCollection});
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.getName()).thenReturn("find");
         when(signature.getDeclaringType()).thenReturn(FindClass.class);
@@ -410,16 +404,15 @@ public class VisualFeedbackAspectTest extends BrobotTestBase {
     @Test
     public void testGetScreenRegion_WithMonitorManagerError() throws Throwable {
         // Arrange
-        lenient().when(monitorManager.getPrimaryMonitorIndex()).thenThrow(new RuntimeException("Monitor error"));
-        
-        StateRegion stateRegion = new StateRegion.Builder()
-            .setName("testRegion")
-            .build();
-        ObjectCollection objCollection = new ObjectCollection.Builder()
-            .withRegions(stateRegion)
-            .build();
-        
-        when(joinPoint.getArgs()).thenReturn(new Object[]{objCollection});
+        lenient()
+                .when(monitorManager.getPrimaryMonitorIndex())
+                .thenThrow(new RuntimeException("Monitor error"));
+
+        StateRegion stateRegion = new StateRegion.Builder().setName("testRegion").build();
+        ObjectCollection objCollection =
+                new ObjectCollection.Builder().withRegions(stateRegion).build();
+
+        when(joinPoint.getArgs()).thenReturn(new Object[] {objCollection});
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.getName()).thenReturn("find");
         when(signature.getDeclaringType()).thenReturn(FindClass.class);
@@ -436,11 +429,11 @@ public class VisualFeedbackAspectTest extends BrobotTestBase {
     private static class FindClass {
         public void find() {}
     }
-    
+
     private static class ClickClass {
         public void click() {}
     }
-    
+
     private static class TypeClass {
         public void type() {}
     }

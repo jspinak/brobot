@@ -1,60 +1,60 @@
 package io.github.jspinak.brobot.model.element;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.Data;
 
 /**
  * Represents a captured screenshot or screen state as a searchable pattern.
- * 
- * <p>Scene encapsulates a full or partial screenshot that serves as a reference 
- * image for pattern matching operations. Unlike individual Pattern objects that 
- * typically represent specific UI elements, a Scene captures a broader view of 
- * the application state, providing context for finding multiple patterns within 
- * a single screen capture.</p>
- * 
+ *
+ * <p>Scene encapsulates a full or partial screenshot that serves as a reference image for pattern
+ * matching operations. Unlike individual Pattern objects that typically represent specific UI
+ * elements, a Scene captures a broader view of the application state, providing context for finding
+ * multiple patterns within a single screen capture.
+ *
  * <p>Key characteristics:
+ *
  * <ul>
- *   <li><b>Screenshot Storage</b>: Holds a complete or partial screen capture</li>
- *   <li><b>Pattern Container</b>: Wraps the screenshot as a searchable Pattern</li>
- *   <li><b>Persistent Identity</b>: Maintains database ID for tracking and logging</li>
- *   <li><b>Context Provider</b>: Offers broader view than individual elements</li>
+ *   <li><b>Screenshot Storage</b>: Holds a complete or partial screen capture
+ *   <li><b>Pattern Container</b>: Wraps the screenshot as a searchable Pattern
+ *   <li><b>Persistent Identity</b>: Maintains database ID for tracking and logging
+ *   <li><b>Context Provider</b>: Offers broader view than individual elements
  * </ul>
- * </p>
- * 
+ *
  * <p>Common use cases:
+ *
  * <ul>
- *   <li>Storing reference screenshots for state verification</li>
- *   <li>Creating mock environments from captured scenes</li>
- *   <li>Analyzing screen layouts and element positions</li>
- *   <li>Debugging by comparing expected vs actual scenes</li>
- *   <li>Building training data for pattern recognition</li>
+ *   <li>Storing reference screenshots for state verification
+ *   <li>Creating mock environments from captured scenes
+ *   <li>Analyzing screen layouts and element positions
+ *   <li>Debugging by comparing expected vs actual scenes
+ *   <li>Building training data for pattern recognition
  * </ul>
- * </p>
- * 
+ *
  * <p>Relationship to other components:
+ *
  * <ul>
- *   <li>Contains a Pattern object for the screenshot image</li>
- *   <li>Can be searched for smaller patterns within the scene</li>
- *   <li>Used by mock systems to simulate screen states</li>
- *   <li>Stored in databases for historical analysis</li>
+ *   <li>Contains a Pattern object for the screenshot image
+ *   <li>Can be searched for smaller patterns within the scene
+ *   <li>Used by mock systems to simulate screen states
+ *   <li>Stored in databases for historical analysis
  * </ul>
- * </p>
- * 
+ *
  * <p>Typical workflow:
+ *
  * <ol>
- *   <li>Capture screenshot of current application state</li>
- *   <li>Create Scene with the captured image</li>
- *   <li>Store Scene for later reference or analysis</li>
- *   <li>Search within Scene for specific patterns</li>
- *   <li>Use Scene for mock testing or verification</li>
+ *   <li>Capture screenshot of current application state
+ *   <li>Create Scene with the captured image
+ *   <li>Store Scene for later reference or analysis
+ *   <li>Search within Scene for specific patterns
+ *   <li>Use Scene for mock testing or verification
  * </ol>
- * </p>
- * 
- * <p>In the model-based approach, Scene objects bridge the gap between abstract 
- * state representations and concrete visual captures. They provide the visual 
- * evidence of states, enable offline analysis, and support mock testing scenarios 
- * where live application interaction isn't available or desired.</p>
- * 
+ *
+ * <p>In the model-based approach, Scene objects bridge the gap between abstract state
+ * representations and concrete visual captures. They provide the visual evidence of states, enable
+ * offline analysis, and support mock testing scenarios where live application interaction isn't
+ * available or desired.
+ *
  * @since 1.0
  * @see Pattern
  * @see Image
@@ -82,9 +82,11 @@ public class Scene {
 
     @Override
     public String toString() {
-        return "Scene{" +
-                "id=" + id +
-                ", pattern=" + (pattern != null ? pattern.getName() : "null") +
-                '}';
+        return "Scene{"
+                + "id="
+                + id
+                + ", pattern="
+                + (pattern != null ? pattern.getName() : "null")
+                + '}';
     }
 }

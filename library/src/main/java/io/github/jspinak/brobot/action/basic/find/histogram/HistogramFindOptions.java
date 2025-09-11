@@ -3,23 +3,24 @@ package io.github.jspinak.brobot.action.basic.find.histogram;
 import io.github.jspinak.brobot.action.basic.find.BaseFindOptions;
 import io.github.jspinak.brobot.action.basic.find.FindStrategy;
 import io.github.jspinak.brobot.action.basic.find.HSVBinOptions;
+
 import lombok.Getter;
 
 /**
  * Configuration for histogram-based Find actions.
- * <p>
- * This class encapsulates parameters for finding objects based on their histogram profiles.
- * It is an immutable object and must be constructed using its inner {@link Builder}.
- * <p>
- * By extending {@link BaseFindOptions}, it inherits common find functionality including
- * match adjustment support, while adding histogram-specific settings.
+ *
+ * <p>This class encapsulates parameters for finding objects based on their histogram profiles. It
+ * is an immutable object and must be constructed using its inner {@link Builder}.
+ *
+ * <p>By extending {@link BaseFindOptions}, it inherits common find functionality including match
+ * adjustment support, while adding histogram-specific settings.
  *
  * @see BaseFindOptions
  * @see io.github.jspinak.brobot.action.basic.find.Find
  */
 @Getter
 public final class HistogramFindOptions extends BaseFindOptions {
-    
+
     private final HSVBinOptions binOptions;
 
     private HistogramFindOptions(Builder builder) {
@@ -32,15 +33,11 @@ public final class HistogramFindOptions extends BaseFindOptions {
         return FindStrategy.HISTOGRAM;
     }
 
-    /**
-     * Builder for constructing {@link HistogramFindOptions} with a fluent API.
-     */
+    /** Builder for constructing {@link HistogramFindOptions} with a fluent API. */
     public static class Builder extends BaseFindOptions.Builder<Builder> {
         private HSVBinOptions binOptions = HSVBinOptions.builder().build();
 
-        /**
-         * Default constructor for creating a new HistogramFindOptions configuration.
-         */
+        /** Default constructor for creating a new HistogramFindOptions configuration. */
         public Builder() {}
 
         /**
@@ -56,6 +53,7 @@ public final class HistogramFindOptions extends BaseFindOptions {
 
         /**
          * Sets the hue, saturation, and value bins for histogram analysis.
+         *
          * @param binOptionsBuilder A builder for HSV bins.
          * @return this Builder instance for chaining.
          */
@@ -74,6 +72,8 @@ public final class HistogramFindOptions extends BaseFindOptions {
         }
 
         @Override
-        protected Builder self() { return this; }
+        protected Builder self() {
+            return this;
+        }
     }
 }

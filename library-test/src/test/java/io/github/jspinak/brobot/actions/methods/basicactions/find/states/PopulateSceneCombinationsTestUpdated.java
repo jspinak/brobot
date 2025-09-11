@@ -1,52 +1,47 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.states;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
-import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.action.internal.service.ActionService;
-import io.github.jspinak.brobot.BrobotTestApplication;
-import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
-import io.github.jspinak.brobot.test.ocr.OcrTestSupport;
-import io.github.jspinak.brobot.testutils.TestPaths;
-import io.github.jspinak.brobot.analysis.scene.SceneCombinationPopulator;
-import io.github.jspinak.brobot.analysis.scene.SceneCombinationGenerator;
-import io.github.jspinak.brobot.model.analysis.scene.SceneCombination;
-import io.github.jspinak.brobot.model.state.State;
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.model.element.Pattern;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import static org.junit.jupiter.api.Assertions.*;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import javax.imageio.ImageIO;
+
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.internal.service.ActionService;
+import io.github.jspinak.brobot.analysis.scene.SceneCombinationGenerator;
+import io.github.jspinak.brobot.analysis.scene.SceneCombinationPopulator;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
+import io.github.jspinak.brobot.model.analysis.scene.SceneCombination;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
+import io.github.jspinak.brobot.test.ocr.OcrTestSupport;
+import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
 
 /**
- * Updated tests for scene combinations using saved FloraNext screenshots.
- * Works in headless/CI environments without requiring live OCR.
- * 
- * Key changes:
- * - Uses saved FloraNext screenshots from library-test/screenshots
- * - Removed dependency on brobot.tests.ocr.disable property
- * - Works in CI/CD environments with pre-saved images
- * - Uses PatternFindOptions for state analysis
+ * Updated tests for scene combinations using saved FloraNext screenshots. Works in headless/CI
+ * environments without requiring live OCR.
+ *
+ * <p>Key changes: - Uses saved FloraNext screenshots from library-test/screenshots - Removed
+ * dependency on brobot.tests.ocr.disable property - Works in CI/CD environments with pre-saved
+ * images - Uses PatternFindOptions for state analysis
  */
 @Disabled("CI failure - needs investigation")
-
 class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
 
     private static File screenshotDir;
@@ -61,11 +56,12 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
     @Override
     protected void setUpBrobotEnvironment() {
         // Configure for unit testing with screenshots
-        ExecutionEnvironment env = ExecutionEnvironment.builder()
-                .mockMode(false) // Use real file operations for find
-                .forceHeadless(true) // No screen capture
-                .allowScreenCapture(false)
-                .build();
+        ExecutionEnvironment env =
+                ExecutionEnvironment.builder()
+                        .mockMode(false) // Use real file operations for find
+                        .forceHeadless(true) // No screen capture
+                        .allowScreenCapture(false)
+                        .build();
         ExecutionEnvironment.setInstance(env);
 
         // Don't set mock mode here - let the test methods control it
@@ -75,18 +71,13 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
         // Screenshots would need to be managed differently
     }
 
-    @Autowired
-    SceneCombinationPopulator populateSceneCombinations;
+    @Autowired SceneCombinationPopulator populateSceneCombinations;
 
-    @Autowired
-    SceneCombinationGenerator getSceneCombinations;
+    @Autowired SceneCombinationGenerator getSceneCombinations;
 
-    @Autowired
-    ActionService actionService;
+    @Autowired ActionService actionService;
 
-    /**
-     * Creates test states from FloraNext screenshots.
-     */
+    /** Creates test states from FloraNext screenshots. */
     private List<State> createStatesFromScreenshots() {
         List<State> states = new ArrayList<>();
 
@@ -104,17 +95,27 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
 
                     State.Builder stateBuilder = new State.Builder("TestState" + i);
 
-                    StateImage stateImage = new StateImage.Builder()
-                            .setName("screenshot_" + i)
-                            .setSearchRegionForAllPatterns(new Region(0, 0,
-                                    bufferedImage.getWidth(), bufferedImage.getHeight()))
-                            .build();
+                    StateImage stateImage =
+                            new StateImage.Builder()
+                                    .setName("screenshot_" + i)
+                                    .setSearchRegionForAllPatterns(
+                                            new Region(
+                                                    0,
+                                                    0,
+                                                    bufferedImage.getWidth(),
+                                                    bufferedImage.getHeight()))
+                                    .build();
 
-                    Pattern pattern = new Pattern.Builder()
-                            .setMat(mat)
-                            .setFixedRegion(new Region(0, 0,
-                                    bufferedImage.getWidth(), bufferedImage.getHeight()))
-                            .build();
+                    Pattern pattern =
+                            new Pattern.Builder()
+                                    .setMat(mat)
+                                    .setFixedRegion(
+                                            new Region(
+                                                    0,
+                                                    0,
+                                                    bufferedImage.getWidth(),
+                                                    bufferedImage.getHeight()))
+                                    .build();
                     stateImage.getPatterns().add(pattern);
 
                     stateBuilder.withImages(stateImage);
@@ -128,9 +129,7 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
         return states;
     }
 
-    /**
-     * Creates ObjectCollections from saved screenshots.
-     */
+    /** Creates ObjectCollections from saved screenshots. */
     private List<ObjectCollection> createObjectCollectionsFromScreenshots() {
         List<ObjectCollection> collections = new ArrayList<>();
         List<State> states = createStatesFromScreenshots();
@@ -139,15 +138,13 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
             // Create two collections for testing
             // Extract StateImages from the states
             List<StateImage> images1 = new ArrayList<>(states.get(0).getStateImages());
-            ObjectCollection collection1 = new ObjectCollection.Builder()
-                    .withImages(images1)
-                    .build();
+            ObjectCollection collection1 =
+                    new ObjectCollection.Builder().withImages(images1).build();
             collections.add(collection1);
 
             List<StateImage> images2 = new ArrayList<>(states.get(1).getStateImages());
-            ObjectCollection collection2 = new ObjectCollection.Builder()
-                    .withImages(images2)
-                    .build();
+            ObjectCollection collection2 =
+                    new ObjectCollection.Builder().withImages(images2).build();
             collections.add(collection2);
         }
 
@@ -155,9 +152,9 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
     }
 
     /**
-     * Creates a PatternFindOptions configuration for state analysis.
-     * Since STATES is a special strategy, we configure it with settings
-     * appropriate for analyzing scenes and finding state images.
+     * Creates a PatternFindOptions configuration for state analysis. Since STATES is a special
+     * strategy, we configure it with settings appropriate for analyzing scenes and finding state
+     * images.
      */
     private PatternFindOptions createStateFindOptions(int minArea) {
         return new PatternFindOptions.Builder()
@@ -196,8 +193,8 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
                     FrameworkSettings.screenshots.add(floranext1.getAbsolutePath());
                 }
             }
-            List<SceneCombination> sceneCombinationList = getSceneCombinations
-                    .getAllSceneCombinations(objectCollections);
+            List<SceneCombination> sceneCombinationList =
+                    getSceneCombinations.getAllSceneCombinations(objectCollections);
 
             // If we have no scene combinations due to OCR failure, skip the test
             if (sceneCombinationList.isEmpty()) {
@@ -216,8 +213,9 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
             // sceneCombinationList.forEach(System.out::println);
             int images0 = objectCollections.get(0).getStateImages().size();
             int images1 = objectCollections.get(1).getStateImages().size();
-            SceneCombination sceneCombinationWithDifferentScenes = getSceneCombinations
-                    .getSceneCombinationWithDifferentScenes(sceneCombinationList);
+            SceneCombination sceneCombinationWithDifferentScenes =
+                    getSceneCombinations.getSceneCombinationWithDifferentScenes(
+                            sceneCombinationList);
 
             if (sceneCombinationWithDifferentScenes != null) {
                 int imagesInComb01 = sceneCombinationWithDifferentScenes.getImages().size();
@@ -230,7 +228,9 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
                 // it shouldn't have more than all images in both ObjectCollections
                 assertTrue(images0 + images1 >= imagesInComb01);
             } else {
-                System.out.println("No scene combinations with different scenes found - may need more screenshots");
+                System.out.println(
+                        "No scene combinations with different scenes found - may need more"
+                                + " screenshots");
             }
         } catch (Exception e) {
             System.err.println("Error in scene combination test: " + e.getMessage());
@@ -266,8 +266,8 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
                     FrameworkSettings.screenshots.add(floranext1.getAbsolutePath());
                 }
             }
-            List<SceneCombination> sceneCombinationList = getSceneCombinations
-                    .getAllSceneCombinations(objectCollections);
+            List<SceneCombination> sceneCombinationList =
+                    getSceneCombinations.getAllSceneCombinations(objectCollections);
 
             // If we have no scene combinations due to OCR failure, skip the test
             if (sceneCombinationList.isEmpty()) {
@@ -282,13 +282,16 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
                     sceneCombinationList, objectCollections, stateFindOptions);
 
             for (SceneCombination sceneCombination : sceneCombinationList) {
-                sceneCombination.getImages().forEach(img -> {
-                    if (!img.getPatterns().isEmpty()) {
-                        int size = img.getPatterns().get(0).size();
-                        System.out.print(size + ",");
-                        assertTrue(minArea <= size);
-                    }
-                });
+                sceneCombination
+                        .getImages()
+                        .forEach(
+                                img -> {
+                                    if (!img.getPatterns().isEmpty()) {
+                                        int size = img.getPatterns().get(0).size();
+                                        System.out.print(size + ",");
+                                        assertTrue(minArea <= size);
+                                    }
+                                });
             }
         } catch (Exception e) {
             System.err.println("Error in image size test: " + e.getMessage());
@@ -300,21 +303,23 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
         // NEW API: Demonstrate various configurations for state finding
 
         // Basic state finding
-        PatternFindOptions basicStateOptions = new PatternFindOptions.Builder()
-                .setStrategy(PatternFindOptions.Strategy.ALL)
-                // Note: minArea is not available in PatternFindOptions
-                .build();
+        PatternFindOptions basicStateOptions =
+                new PatternFindOptions.Builder()
+                        .setStrategy(PatternFindOptions.Strategy.ALL)
+                        // Note: minArea is not available in PatternFindOptions
+                        .build();
         assertNotNull(basicStateOptions);
         // minArea would need to be handled at a different level
 
         // Advanced state finding with custom settings
-        PatternFindOptions advancedStateOptions = new PatternFindOptions.Builder()
-                .setStrategy(PatternFindOptions.Strategy.ALL)
-                // Note: minArea is not available
-                .setSimilarity(0.75)
-                .setCaptureImage(true)
-                .setMaxMatchesToActOn(100)
-                .build();
+        PatternFindOptions advancedStateOptions =
+                new PatternFindOptions.Builder()
+                        .setStrategy(PatternFindOptions.Strategy.ALL)
+                        // Note: minArea is not available
+                        .setSimilarity(0.75)
+                        .setCaptureImage(true)
+                        .setMaxMatchesToActOn(100)
+                        .build();
 
         // minArea would need to be handled differently
         assertEquals(0.75, advancedStateOptions.getSimilarity(), 0.001);

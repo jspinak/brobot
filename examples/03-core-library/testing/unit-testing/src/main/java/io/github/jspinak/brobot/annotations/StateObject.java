@@ -6,8 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Placeholder for Brobot StateObject annotation.
- * In a real project, this would come from the Brobot library.
+ * Placeholder for Brobot StateObject annotation. In a real project, this would come from the Brobot
+ * library.
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)

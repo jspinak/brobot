@@ -1,45 +1,46 @@
 package io.github.jspinak.brobot.tools.logging.mapper;
-import io.github.jspinak.brobot.action.ActionType;
-
-import org.springframework.stereotype.Component;
-
-import io.github.jspinak.brobot.tools.logging.dto.LogDataDTO;
-import io.github.jspinak.brobot.tools.logging.dto.ExecutionMetricsDTO;
-import io.github.jspinak.brobot.tools.logging.dto.StateImageLogDTO;
-import io.github.jspinak.brobot.tools.logging.model.LogData;
-import io.github.jspinak.brobot.tools.logging.model.LogEventType;
-import io.github.jspinak.brobot.tools.logging.model.ExecutionMetrics;
-import io.github.jspinak.brobot.tools.logging.model.StateImageLogData;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Component;
+
+import io.github.jspinak.brobot.tools.logging.dto.ExecutionMetricsDTO;
+import io.github.jspinak.brobot.tools.logging.dto.LogDataDTO;
+import io.github.jspinak.brobot.tools.logging.dto.StateImageLogDTO;
+import io.github.jspinak.brobot.tools.logging.model.ExecutionMetrics;
+import io.github.jspinak.brobot.tools.logging.model.LogData;
+import io.github.jspinak.brobot.tools.logging.model.LogEventType;
+import io.github.jspinak.brobot.tools.logging.model.StateImageLogData;
+
 /**
  * Maps between {@link LogData} domain models and {@link LogDataDTO} data transfer objects.
- * <p>
- * This mapper provides bidirectional conversion between the internal domain model used
- * by the logging system and the DTOs exposed to external consumers. The separation allows
- * the internal model to evolve independently of the external API contract.
- * <p>
- * Key responsibilities:
+ *
+ * <p>This mapper provides bidirectional conversion between the internal domain model used by the
+ * logging system and the DTOs exposed to external consumers. The separation allows the internal
+ * model to evolve independently of the external API contract.
+ *
+ * <p>Key responsibilities:
+ *
  * <ul>
- * <li>Convert LogData to LogEntryDTO for external API responses</li>
- * <li>Convert LogEntryDTO to LogData for processing external requests</li>
- * <li>Handle null values and defensive copying of collections</li>
- * <li>Map nested objects (StateImageLogData, PerformanceMetricsData)</li>
- * <li>Provide default values for missing required fields</li>
+ *   <li>Convert LogData to LogEntryDTO for external API responses
+ *   <li>Convert LogEntryDTO to LogData for processing external requests
+ *   <li>Handle null values and defensive copying of collections
+ *   <li>Map nested objects (StateImageLogData, PerformanceMetricsData)
+ *   <li>Provide default values for missing required fields
  * </ul>
- * <p>
- * Design decisions:
+ *
+ * <p>Design decisions:
+ *
  * <ul>
- * <li>Creates new ArrayList instances to prevent external modification of internal collections</li>
- * <li>Handles null LogType by defaulting to ACTION for backward compatibility</li>
- * <li>Maps nested objects only when present to avoid unnecessary object creation</li>
- * <li>Uses method references and streams for clean, functional mapping</li>
+ *   <li>Creates new ArrayList instances to prevent external modification of internal collections
+ *   <li>Handles null LogType by defaulting to ACTION for backward compatibility
+ *   <li>Maps nested objects only when present to avoid unnecessary object creation
+ *   <li>Uses method references and streams for clean, functional mapping
  * </ul>
- * <p>
- * Thread safety: This mapper is stateless and thread-safe. Multiple threads can
- * safely use the same instance concurrently.
+ *
+ * <p>Thread safety: This mapper is stateless and thread-safe. Multiple threads can safely use the
+ * same instance concurrently.
  *
  * @see LogData
  * @see LogDataDTO
@@ -50,16 +51,17 @@ import java.util.stream.Collectors;
 public class LogDataMapper {
     /**
      * Converts a {@link LogDataDTO} to a {@link LogData} domain model.
-     * <p>
-     * This method performs a deep conversion, creating new instances for all
-     * collections and nested objects. This ensures that changes to the DTO
-     * after conversion don't affect the domain model.
-     * <p>
-     * Null handling:
+     *
+     * <p>This method performs a deep conversion, creating new instances for all collections and
+     * nested objects. This ensures that changes to the DTO after conversion don't affect the domain
+     * model.
+     *
+     * <p>Null handling:
+     *
      * <ul>
-     * <li>Null DTO fields are set as null in the model</li>
-     * <li>Null collections in the DTO result in empty collections in the model</li>
-     * <li>The LogType enum is parsed from string representation</li>
+     *   <li>Null DTO fields are set as null in the model
+     *   <li>Null collections in the DTO result in empty collections in the model
+     *   <li>The LogType enum is parsed from string representation
      * </ul>
      *
      * @param dto The data transfer object to convert. Must not be null.
@@ -102,8 +104,7 @@ public class LogDataMapper {
             log.setStateImageLogData(
                     dto.getStateImageLogs().stream()
                             .map(this::mapStateImageLog)
-                            .collect(Collectors.toList())
-            );
+                            .collect(Collectors.toList()));
         }
 
         // Map performance metrics
@@ -121,10 +122,9 @@ public class LogDataMapper {
 
     /**
      * Maps a single {@link StateImageLogDTO} to {@link StateImageLogData}.
-     * <p>
-     * This helper method is used to convert state image log entries when
-     * converting from DTO to domain model. It creates a new instance to
-     * ensure immutability.
+     *
+     * <p>This helper method is used to convert state image log entries when converting from DTO to
+     * domain model. It creates a new instance to ensure immutability.
      *
      * @param dto The state image DTO to convert
      * @return A new StateImageLogData instance
@@ -138,17 +138,17 @@ public class LogDataMapper {
 
     /**
      * Converts a {@link LogData} domain model to a {@link LogDataDTO}.
-     * <p>
-     * This method performs a deep conversion suitable for external API responses.
-     * It handles null values gracefully and provides defaults where necessary
-     * for backward compatibility.
-     * <p>
-     * Special handling:
+     *
+     * <p>This method performs a deep conversion suitable for external API responses. It handles
+     * null values gracefully and provides defaults where necessary for backward compatibility.
+     *
+     * <p>Special handling:
+     *
      * <ul>
-     * <li>Null LogType defaults to "ACTION" to prevent API breaking changes</li>
-     * <li>Collections are defensively copied to prevent external modification</li>
-     * <li>Nested objects are only created when present in the source</li>
-     * <li>The ID field is transferred to support persistence layer requirements</li>
+     *   <li>Null LogType defaults to "ACTION" to prevent API breaking changes
+     *   <li>Collections are defensively copied to prevent external modification
+     *   <li>Nested objects are only created when present in the source
+     *   <li>The ID field is transferred to support persistence layer requirements
      * </ul>
      *
      * @param log The domain model to convert. Must not be null.
@@ -192,8 +192,7 @@ public class LogDataMapper {
             dto.setStateImageLogs(
                     log.getStateImageLogData().stream()
                             .map(this::mapStateImageLogToDTO)
-                            .collect(Collectors.toList())
-            );
+                            .collect(Collectors.toList()));
         }
 
         // Map performance metrics
@@ -211,10 +210,10 @@ public class LogDataMapper {
 
     /**
      * Maps a single {@link StateImageLogData} to {@link StateImageLogDTO}.
-     * <p>
-     * This helper method is used to convert state image log entries when
-     * converting from domain model to DTO. It creates a new instance to
-     * ensure the DTO layer cannot modify the domain model.
+     *
+     * <p>This helper method is used to convert state image log entries when converting from domain
+     * model to DTO. It creates a new instance to ensure the DTO layer cannot modify the domain
+     * model.
      *
      * @param log The state image domain model to convert
      * @return A new StateImageLogDTO instance

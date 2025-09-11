@@ -1,12 +1,13 @@
 package io.github.jspinak.brobot.runner.ui.navigation;
 
-import lombok.Data;
-import lombok.Builder;
 import java.util.Optional;
 
+import lombok.Builder;
+import lombok.Data;
+
 /**
- * Represents contextual data passed during navigation between screens.
- * This allows screens to pass parameters and state information to each other.
+ * Represents contextual data passed during navigation between screens. This allows screens to pass
+ * parameters and state information to each other.
  */
 @Data
 public class NavigationContext {
@@ -119,9 +120,7 @@ public class NavigationContext {
         return new Builder();
     }
 
-    /**
-     * Builder for NavigationContext.
-     */
+    /** Builder for NavigationContext. */
     public static class Builder {
         private final java.util.Map<String, Object> data = new java.util.HashMap<>();
 

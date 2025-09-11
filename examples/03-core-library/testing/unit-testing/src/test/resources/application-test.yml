@@ -10,11 +10,11 @@ brobot:
     delay:
       min: 0
       max: 10
-    
+
   action:
     max-wait: 1
     delay-between-actions: 0
-    
+
   logging:
     level: DEBUG
 

@@ -1,20 +1,8 @@
 package io.github.jspinak.brobot.test;
 
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import static org.junit.jupiter.api.Assertions.*;
 
-import io.github.jspinak.brobot.BrobotTestApplication;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.action.ActionConfig;
-import io.github.jspinak.brobot.model.action.ActionRecord;
-import io.github.jspinak.brobot.model.element.Pattern;
-import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.statemanagement.StateMemory;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
-import io.github.jspinak.brobot.test.mock.MockScreenConfig;
+import java.awt.image.BufferedImage;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,28 +12,41 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.awt.image.BufferedImage;
+import io.github.jspinak.brobot.BrobotTestApplication;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.model.action.ActionRecord;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.statemanagement.StateMemory;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-/**
- * Simple test to verify the API usage patterns
- */
-@SpringBootTest(classes = BrobotTestApplication.class, properties = {
-        "brobot.gui-access.continue-on-error=true",
-        "brobot.gui-access.check-on-startup=false",
-        "java.awt.headless=true",
-        "spring.main.allow-bean-definition-overriding=true",
-        "brobot.test.type=unit",
-        "brobot.capture.physical-resolution=false"
+/** Simple test to verify the API usage patterns */
+@SpringBootTest(
+        classes = BrobotTestApplication.class,
+        properties = {
+            "brobot.gui-access.continue-on-error=true",
+            "brobot.gui-access.check-on-startup=false",
+            "java.awt.headless=true",
+            "spring.main.allow-bean-definition-overriding=true",
+            "brobot.test.type=unit",
+            "brobot.capture.physical-resolution=false"
+        })
+@Import({
+    MockGuiAccessConfig.class,
+    MockGuiAccessMonitor.class,
+    MockScreenConfig.class,
+    io.github.jspinak.brobot.test.config.TestApplicationConfiguration.class
 })
-@Import({ MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class,
-        io.github.jspinak.brobot.test.config.TestApplicationConfiguration.class })
 @ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 public class SimpleAPITest {
 
-    @Autowired
-    private StateMemory stateMemory;
+    @Autowired private StateMemory stateMemory;
 
     @BeforeAll
     static void setupHeadlessMode() {
@@ -61,10 +62,12 @@ public class SimpleAPITest {
     void testPatternWithNameCreation() {
         try {
             // Test Pattern creation with name
-            Pattern pattern = new Pattern.Builder()
-                    .setName("TestPattern")
-                    .setBufferedImage(new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB))
-                    .build();
+            Pattern pattern =
+                    new Pattern.Builder()
+                            .setName("TestPattern")
+                            .setBufferedImage(
+                                    new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB))
+                            .build();
 
             assertNotNull(pattern);
             assertEquals("TestPattern", pattern.getName());
@@ -79,16 +82,15 @@ public class SimpleAPITest {
     @Test
     void testStateImageWithNameCreation() {
         // Create pattern first
-        Pattern pattern = new Pattern.Builder()
-                .setName("TestPattern")
-                .setBufferedImage(new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB))
-                .build();
+        Pattern pattern =
+                new Pattern.Builder()
+                        .setName("TestPattern")
+                        .setBufferedImage(new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB))
+                        .build();
 
         // Create StateImage with name
-        StateImage stateImage = new StateImage.Builder()
-                .addPattern(pattern)
-                .setName("TestStateImage")
-                .build();
+        StateImage stateImage =
+                new StateImage.Builder().addPattern(pattern).setName("TestStateImage").build();
 
         assertNotNull(stateImage);
         assertEquals("TestStateImage", stateImage.getName());
@@ -97,9 +99,7 @@ public class SimpleAPITest {
     @Test
     void testMatchHistoryAccess() {
         // Create pattern
-        Pattern pattern = new Pattern.Builder()
-                .setName("TestPattern")
-                .build();
+        Pattern pattern = new Pattern.Builder().setName("TestPattern").build();
 
         // Create match snapshot
         ActionRecord snapshot = new ActionRecord();
@@ -107,10 +107,8 @@ public class SimpleAPITest {
         snapshot.setDuration(0.5);
 
         // Add match to snapshot
-        Match match = new Match.Builder()
-                .setRegion(new Region(10, 10, 50, 50))
-                .setSimScore(0.95)
-                .build();
+        Match match =
+                new Match.Builder().setRegion(new Region(10, 10, 50, 50)).setSimScore(0.95).build();
         snapshot.addMatch(match);
 
         // Add snapshot to pattern's match history
@@ -129,8 +127,7 @@ public class SimpleAPITest {
         assertTrue(matches1.isEmpty());
 
         // Test constructor with PatternFindOptions
-        PatternFindOptions options = new PatternFindOptions.Builder()
-                .build();
+        PatternFindOptions options = new PatternFindOptions.Builder().build();
         ActionResult matches2 = new ActionResult();
         assertNotNull(matches2);
         // ActionResult no longer stores options in the new API

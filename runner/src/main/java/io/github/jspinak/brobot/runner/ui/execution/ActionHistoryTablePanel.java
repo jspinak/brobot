@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.execution;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -7,18 +9,16 @@ import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
+
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.AccessLevel;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 /**
  * Panel component for displaying action history in a table format.
- * 
- * <p>This panel shows a table of actions that were executed during
- * automation, including action type, target, result, and timing information.</p>
+ *
+ * <p>This panel shows a table of actions that were executed during automation, including action
+ * type, target, result, and timing information.
  */
 @Getter
 @Setter(AccessLevel.PRIVATE)
@@ -26,15 +26,12 @@ public class ActionHistoryTablePanel extends TitledPane {
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
     private static final int MAX_HISTORY_SIZE = 1000;
 
-    @Getter
-    private TableView<ActionRecord> actionHistoryTable;
-    
+    @Getter private TableView<ActionRecord> actionHistoryTable;
+
     @Getter
     private final ObservableList<ActionRecord> actionHistory = FXCollections.observableArrayList();
 
-    /**
-     * Creates a new ActionHistoryTablePanel.
-     */
+    /** Creates a new ActionHistoryTablePanel. */
     public ActionHistoryTablePanel() {
         super("Action History", null);
         setCollapsible(true);
@@ -86,9 +83,15 @@ public class ActionHistoryTablePanel extends TitledPane {
         detailsColumn.setCellValueFactory(new PropertyValueFactory<>("details"));
         detailsColumn.setPrefWidth(200);
 
-        actionHistoryTable.getColumns().addAll(
-            timeColumn, actionColumn, targetColumn, resultColumn, durationColumn, detailsColumn
-        );
+        actionHistoryTable
+                .getColumns()
+                .addAll(
+                        timeColumn,
+                        actionColumn,
+                        targetColumn,
+                        resultColumn,
+                        durationColumn,
+                        detailsColumn);
 
         content.getChildren().addAll(descriptionLabel, actionHistoryTable);
     }
@@ -102,27 +105,20 @@ public class ActionHistoryTablePanel extends TitledPane {
      * @param duration The duration in milliseconds
      * @param details Additional details about the action
      */
-    public void addActionRecord(String action, String target, String result, long duration, String details) {
-        ActionRecord record = new ActionRecord(
-            LocalDateTime.now(),
-            action,
-            target,
-            result,
-            duration,
-            details
-        );
-        
+    public void addActionRecord(
+            String action, String target, String result, long duration, String details) {
+        ActionRecord record =
+                new ActionRecord(LocalDateTime.now(), action, target, result, duration, details);
+
         actionHistory.add(0, record); // Add to beginning for most recent first
-        
+
         // Limit history size
         if (actionHistory.size() > MAX_HISTORY_SIZE) {
             actionHistory.remove(actionHistory.size() - 1);
         }
     }
 
-    /**
-     * Clears all action history records.
-     */
+    /** Clears all action history records. */
     public void clear() {
         actionHistory.clear();
     }
@@ -136,9 +132,7 @@ public class ActionHistoryTablePanel extends TitledPane {
         return actionHistory.size();
     }
 
-    /**
-     * Record class for action history.
-     */
+    /** Record class for action history. */
     @Getter
     public static class ActionRecord {
         private final SimpleStringProperty time;
@@ -148,8 +142,13 @@ public class ActionHistoryTablePanel extends TitledPane {
         private final SimpleStringProperty duration;
         private final SimpleStringProperty details;
 
-        public ActionRecord(LocalDateTime timestamp, String action, String target, 
-                          String result, long durationMs, String details) {
+        public ActionRecord(
+                LocalDateTime timestamp,
+                String action,
+                String target,
+                String result,
+                long durationMs,
+                String details) {
             this.time = new SimpleStringProperty(timestamp.format(TIME_FORMATTER));
             this.action = new SimpleStringProperty(action);
             this.target = new SimpleStringProperty(target != null ? target : "");
@@ -159,11 +158,28 @@ public class ActionHistoryTablePanel extends TitledPane {
         }
 
         // Property getters for TableView
-        public String getTime() { return time.get(); }
-        public String getAction() { return action.get(); }
-        public String getTarget() { return target.get(); }
-        public String getResult() { return result.get(); }
-        public String getDuration() { return duration.get(); }
-        public String getDetails() { return details.get(); }
+        public String getTime() {
+            return time.get();
+        }
+
+        public String getAction() {
+            return action.get();
+        }
+
+        public String getTarget() {
+            return target.get();
+        }
+
+        public String getResult() {
+            return result.get();
+        }
+
+        public String getDuration() {
+            return duration.get();
+        }
+
+        public String getDetails() {
+            return details.get();
+        }
     }
 }

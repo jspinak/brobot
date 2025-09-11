@@ -1,21 +1,13 @@
 package io.github.jspinak.brobot.runner;
 
-import lombok.Data;
-
-import io.github.jspinak.brobot.runner.config.ApplicationConfig;
-import io.github.jspinak.brobot.runner.events.EventBus;
-import io.github.jspinak.brobot.runner.events.LogEvent;
-import io.github.jspinak.brobot.runner.services.DialogService;
-import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
-import io.github.jspinak.brobot.runner.ui.theme.OptimizedThemeManager;
-import io.github.jspinak.brobot.runner.ui.theme.ThemeManager;
-import io.github.jspinak.brobot.runner.util.ErrorUtils;
-import io.github.jspinak.brobot.runner.util.FxThreadUtils;
-import jakarta.annotation.PreDestroy;
+import java.util.List;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+
+import jakarta.annotation.PreDestroy;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -26,11 +18,21 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import io.github.jspinak.brobot.runner.config.ApplicationConfig;
+import io.github.jspinak.brobot.runner.events.EventBus;
+import io.github.jspinak.brobot.runner.events.LogEvent;
+import io.github.jspinak.brobot.runner.services.DialogService;
+import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
+import io.github.jspinak.brobot.runner.ui.theme.OptimizedThemeManager;
+import io.github.jspinak.brobot.runner.ui.theme.ThemeManager;
+import io.github.jspinak.brobot.runner.util.ErrorUtils;
+import io.github.jspinak.brobot.runner.util.FxThreadUtils;
+
+import lombok.Data;
 
 /**
- * Application lifecycle manager that handles startup and shutdown operations.
- * This component is responsible for initializing the application and cleaning up resources.
+ * Application lifecycle manager that handles startup and shutdown operations. This component is
+ * responsible for initializing the application and cleaning up resources.
  */
 @Component
 @Data
@@ -53,9 +55,7 @@ public class ApplicationLifecycle {
     // Application state
     private boolean shuttingDown = false;
 
-    /**
-     * Creates a new ApplicationLifecycle.
-     */
+    /** Creates a new ApplicationLifecycle. */
     public ApplicationLifecycle(
             ApplicationContext context,
             EventBus eventBus,
@@ -73,9 +73,7 @@ public class ApplicationLifecycle {
         this.appArgs = appArgs;
     }
 
-    /**
-     * Called when the application is fully initialized and ready.
-     */
+    /** Called when the application is fully initialized and ready. */
     @EventListener(ApplicationReadyEvent.class)
     public void onApplicationReady() {
         logger.info("Application ready, initializing additional resources");
@@ -114,16 +112,15 @@ public class ApplicationLifecycle {
         }
 
         // Set up stage close request handler
-        stage.setOnCloseRequest(event -> {
-            logger.info("Application close requested via stage close request");
-            shutdown();
-            event.consume(); // Handle closing ourselves
-        });
+        stage.setOnCloseRequest(
+                event -> {
+                    logger.info("Application close requested via stage close request");
+                    shutdown();
+                    event.consume(); // Handle closing ourselves
+                });
     }
 
-    /**
-     * Logs the application startup parameters.
-     */
+    /** Logs the application startup parameters. */
     private void logApplicationParameters() {
         logger.info("Application command line arguments:");
         for (String optionName : appArgs.getOptionNames()) {
@@ -140,9 +137,7 @@ public class ApplicationLifecycle {
         }
     }
 
-    /**
-     * Initiates application shutdown.
-     */
+    /** Initiates application shutdown. */
     public void shutdown() {
         if (shuttingDown) {
             logger.info("Shutdown already in progress, ignoring additional request");
@@ -188,9 +183,9 @@ public class ApplicationLifecycle {
      * @return true if shutdown should proceed, false to cancel
      */
     private boolean confirmAndShutdown() {
-        boolean confirmed = dialogService.showConfirmation(
-                "Confirm Exit",
-                "Are you sure you want to exit the application?");
+        boolean confirmed =
+                dialogService.showConfirmation(
+                        "Confirm Exit", "Are you sure you want to exit the application?");
 
         if (confirmed) {
             logger.info("User confirmed application shutdown");
@@ -208,17 +203,18 @@ public class ApplicationLifecycle {
         }
     }
 
-    /**
-     * Performs the actual shutdown operations.
-     */
+    /** Performs the actual shutdown operations. */
     private void performShutdown() {
         if (context instanceof ConfigurableApplicationContext) {
             try {
                 logger.info("Performing application shutdown");
 
                 // Save theme preference
-                appConfig.setString("ui.theme",
-                        themeManager.getCurrentTheme() == ThemeManager.Theme.DARK ? "dark" : "light");
+                appConfig.setString(
+                        "ui.theme",
+                        themeManager.getCurrentTheme() == ThemeManager.Theme.DARK
+                                ? "dark"
+                                : "light");
 
                 // Publish shutdown event
                 eventBus.publish(LogEvent.info(this, "Application shutting down", "System"));
@@ -245,9 +241,7 @@ public class ApplicationLifecycle {
         }
     }
 
-    /**
-     * Clean up method called by Spring before bean destruction.
-     */
+    /** Clean up method called by Spring before bean destruction. */
     @PreDestroy
     public void cleanup() {
         logger.info("ApplicationLifecycle PreDestroy called");
@@ -268,7 +262,8 @@ public class ApplicationLifecycle {
     public static void launchApp(String[] args) {
         try {
             // Set up Spring Boot application
-            ConfigurableApplicationContext context = SpringApplication.run(BrobotRunnerApplication.class, args);
+            ConfigurableApplicationContext context =
+                    SpringApplication.run(BrobotRunnerApplication.class, args);
 
             // Store context for JavaFX application
             BrobotRunnerApp.setApplicationContext(context);

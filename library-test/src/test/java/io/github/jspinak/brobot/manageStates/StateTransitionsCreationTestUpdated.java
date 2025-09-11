@@ -1,64 +1,56 @@
 package io.github.jspinak.brobot.manageStates;
 
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import io.github.jspinak.brobot.action.basic.click.ClickOptions;
-import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
-import io.github.jspinak.brobot.model.action.MouseButton;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.action.composite.drag.DragOptions;
-import io.github.jspinak.brobot.action.basic.type.TypeOptions;
-import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.model.element.Pattern;
-import io.github.jspinak.brobot.model.state.State;
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.config.core.FrameworkInitializer;
-import io.github.jspinak.brobot.navigation.service.StateTransitionService;
-import io.github.jspinak.brobot.model.transition.StateTransitionStore;
-import io.github.jspinak.brobot.navigation.path.PathFinder;
-import io.github.jspinak.brobot.navigation.path.Paths;
-import io.github.jspinak.brobot.navigation.service.StateService;
-import io.github.jspinak.brobot.runner.dsl.model.TaskSequence;
-import io.github.jspinak.brobot.navigation.transition.StateTransitions;
-import io.github.jspinak.brobot.navigation.transition.TaskSequenceStateTransition;
+import java.util.Collections;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.Collections;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
+import io.github.jspinak.brobot.action.basic.type.TypeOptions;
+import io.github.jspinak.brobot.action.composite.drag.DragOptions;
+import io.github.jspinak.brobot.config.core.FrameworkInitializer;
+import io.github.jspinak.brobot.model.action.MouseButton;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.transition.StateTransitionStore;
+import io.github.jspinak.brobot.navigation.path.PathFinder;
+import io.github.jspinak.brobot.navigation.path.Paths;
+import io.github.jspinak.brobot.navigation.service.StateService;
+import io.github.jspinak.brobot.navigation.service.StateTransitionService;
+import io.github.jspinak.brobot.navigation.transition.StateTransitions;
+import io.github.jspinak.brobot.navigation.transition.TaskSequenceStateTransition;
+import io.github.jspinak.brobot.runner.dsl.model.TaskSequence;
 
 /**
  * Updated state transitions creation test using new ActionConfig API.
- * 
- * Key changes:
- * - Uses specific config classes instead of generic ActionOptions
- * - TaskSequence.addStep() now accepts ActionConfig
- * - Demonstrates various transition types with new API
+ *
+ * <p>Key changes: - Uses specific config classes instead of generic ActionOptions -
+ * TaskSequence.addStep() now accepts ActionConfig - Demonstrates various transition types with new
+ * API
  */
 @SpringBootTest
 public class StateTransitionsCreationTestUpdated {
 
-    @Autowired
-    private PathFinder pathFinder;
+    @Autowired private PathFinder pathFinder;
 
-    @Autowired
-    private StateTransitionService stateTransitionsService;
+    @Autowired private StateTransitionService stateTransitionsService;
 
-    @Autowired
-    private StateService allStatesInProjectService;
+    @Autowired private StateService allStatesInProjectService;
 
-    @Autowired
-    private StateTransitionStore stateTransitionsRepository;
+    @Autowired private StateTransitionStore stateTransitionsRepository;
 
-    @Autowired
-    private FrameworkInitializer init;
+    @Autowired private FrameworkInitializer init;
 
     @BeforeAll
     public static void setupHeadlessMode() {
@@ -144,21 +136,20 @@ public class StateTransitionsCreationTestUpdated {
         return new StateImage.Builder().setName(imageName).addPattern(pattern).build();
     }
 
-    private void createTransition(State fromState, State toState, StateImage stateImage, String actionDescription) {
+    private void createTransition(
+            State fromState, State toState, StateImage stateImage, String actionDescription) {
         // Create ActionDefinition
         TaskSequence actionDefinition = new TaskSequence();
 
         // NEW API: Use ClickOptions
-        ClickOptions clickOptions = new ClickOptions.Builder()
-                .setPressOptions(MousePressOptions.builder()
-                        .setButton(MouseButton.LEFT)
-                        .build())
-                .setNumberOfClicks(1)
-                .build();
+        ClickOptions clickOptions =
+                new ClickOptions.Builder()
+                        .setPressOptions(
+                                MousePressOptions.builder().setButton(MouseButton.LEFT).build())
+                        .setNumberOfClicks(1)
+                        .build();
 
-        ObjectCollection objects = new ObjectCollection.Builder()
-                .withImages(stateImage)
-                .build();
+        ObjectCollection objects = new ObjectCollection.Builder().withImages(stateImage).build();
 
         actionDefinition.addStep(clickOptions, objects);
 
@@ -176,63 +167,69 @@ public class StateTransitionsCreationTestUpdated {
         stateTransitionsRepository.add(stateTransitions);
     }
 
-    private void createLoginTransition(State fromState, State toState,
-            StateImage usernameField, StateImage passwordField, StateImage loginButton) {
+    private void createLoginTransition(
+            State fromState,
+            State toState,
+            StateImage usernameField,
+            StateImage passwordField,
+            StateImage loginButton) {
         TaskSequence actionDefinition = new TaskSequence();
 
         // Step 1: Find and click username field
-        PatternFindOptions findUsernameOptions = new PatternFindOptions.Builder()
-                .setStrategy(PatternFindOptions.Strategy.FIRST)
-                .setSimilarity(0.9)
-                .build();
-        actionDefinition.addStep(findUsernameOptions,
+        PatternFindOptions findUsernameOptions =
+                new PatternFindOptions.Builder()
+                        .setStrategy(PatternFindOptions.Strategy.FIRST)
+                        .setSimilarity(0.9)
+                        .build();
+        actionDefinition.addStep(
+                findUsernameOptions,
                 new ObjectCollection.Builder().withImages(usernameField).build());
 
-        ClickOptions clickUsernameOptions = new ClickOptions.Builder()
-                .setPressOptions(MousePressOptions.builder()
-                        .setButton(MouseButton.LEFT)
-                        .build())
-                .build();
-        actionDefinition.addStep(clickUsernameOptions,
-                new ObjectCollection.Builder().build());
+        ClickOptions clickUsernameOptions =
+                new ClickOptions.Builder()
+                        .setPressOptions(
+                                MousePressOptions.builder().setButton(MouseButton.LEFT).build())
+                        .build();
+        actionDefinition.addStep(clickUsernameOptions, new ObjectCollection.Builder().build());
 
         // Step 2: Type username
-        TypeOptions typeUsernameOptions = new TypeOptions.Builder()
-                .build();
-        actionDefinition.addStep(typeUsernameOptions,
+        TypeOptions typeUsernameOptions = new TypeOptions.Builder().build();
+        actionDefinition.addStep(
+                typeUsernameOptions,
                 new ObjectCollection.Builder().withStrings("testuser").build());
 
         // Step 3: Find and click password field
-        PatternFindOptions findPasswordOptions = new PatternFindOptions.Builder()
-                .setStrategy(PatternFindOptions.Strategy.FIRST)
-                .setSimilarity(0.9)
-                .build();
-        actionDefinition.addStep(findPasswordOptions,
+        PatternFindOptions findPasswordOptions =
+                new PatternFindOptions.Builder()
+                        .setStrategy(PatternFindOptions.Strategy.FIRST)
+                        .setSimilarity(0.9)
+                        .build();
+        actionDefinition.addStep(
+                findPasswordOptions,
                 new ObjectCollection.Builder().withImages(passwordField).build());
 
-        ClickOptions clickPasswordOptions = new ClickOptions.Builder()
-                .setPressOptions(MousePressOptions.builder()
-                        .setButton(MouseButton.LEFT)
-                        .build())
-                .build();
-        actionDefinition.addStep(clickPasswordOptions,
-                new ObjectCollection.Builder().build());
+        ClickOptions clickPasswordOptions =
+                new ClickOptions.Builder()
+                        .setPressOptions(
+                                MousePressOptions.builder().setButton(MouseButton.LEFT).build())
+                        .build();
+        actionDefinition.addStep(clickPasswordOptions, new ObjectCollection.Builder().build());
 
         // Step 4: Type password
-        TypeOptions typePasswordOptions = new TypeOptions.Builder()
-                .build();
-        actionDefinition.addStep(typePasswordOptions,
+        TypeOptions typePasswordOptions = new TypeOptions.Builder().build();
+        actionDefinition.addStep(
+                typePasswordOptions,
                 new ObjectCollection.Builder().withStrings("password123").build());
 
         // Step 5: Click login button
-        ClickOptions clickLoginOptions = new ClickOptions.Builder()
-                .setPressOptions(MousePressOptions.builder()
-                        .setButton(MouseButton.LEFT)
-                        .build())
-                .setPauseAfterEnd(2.0) // Wait for page to load
-                .build();
-        actionDefinition.addStep(clickLoginOptions,
-                new ObjectCollection.Builder().withImages(loginButton).build());
+        ClickOptions clickLoginOptions =
+                new ClickOptions.Builder()
+                        .setPressOptions(
+                                MousePressOptions.builder().setButton(MouseButton.LEFT).build())
+                        .setPauseAfterEnd(2.0) // Wait for page to load
+                        .build();
+        actionDefinition.addStep(
+                clickLoginOptions, new ObjectCollection.Builder().withImages(loginButton).build());
 
         // Create StateTransition
         TaskSequenceStateTransition transition = new TaskSequenceStateTransition();
@@ -248,19 +245,19 @@ public class StateTransitionsCreationTestUpdated {
         stateTransitionsRepository.add(stateTransitions);
     }
 
-    private void createDragTransition(State fromState, State toState,
-            StateImage dragSource, StateImage dragTarget) {
+    private void createDragTransition(
+            State fromState, State toState, StateImage dragSource, StateImage dragTarget) {
         TaskSequence actionDefinition = new TaskSequence();
 
         // NEW API: Use DragOptions
-        DragOptions dragOptions = new DragOptions.Builder()
-                // DragOptions doesn't have setDragFromIndex or setToIndex methods
-                .setPauseAfterEnd(1.0)
-                .build();
+        DragOptions dragOptions =
+                new DragOptions.Builder()
+                        // DragOptions doesn't have setDragFromIndex or setToIndex methods
+                        .setPauseAfterEnd(1.0)
+                        .build();
 
-        ObjectCollection objects = new ObjectCollection.Builder()
-                .withImages(dragSource, dragTarget)
-                .build();
+        ObjectCollection objects =
+                new ObjectCollection.Builder().withImages(dragSource, dragTarget).build();
 
         actionDefinition.addStep(dragOptions, objects);
 

@@ -1,19 +1,17 @@
 package io.github.jspinak.brobot.config;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import static org.junit.jupiter.api.Assertions.*;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.control.ExecutionController;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.control.ExecutionController;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
- * Simple compilation test to verify ExecutionController bean conflict is
- * resolved.
- * The fact that this test compiles and runs means the bean conflict has been
- * fixed.
+ * Simple compilation test to verify ExecutionController bean conflict is resolved. The fact that
+ * this test compiles and runs means the bean conflict has been fixed.
  */
 public class ExecutionControllerVerificationTest extends BrobotTestBase {
 

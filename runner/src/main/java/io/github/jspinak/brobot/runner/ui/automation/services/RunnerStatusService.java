@@ -1,121 +1,109 @@
 package io.github.jspinak.brobot.runner.ui.automation.services;
 
-import io.github.jspinak.brobot.runner.automation.AutomationOrchestrator;
-import io.github.jspinak.brobot.runner.execution.ExecutionState;
-import io.github.jspinak.brobot.runner.execution.ExecutionStatus;
-import javafx.application.Platform;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import javafx.application.Platform;
+
+import org.springframework.stereotype.Service;
+
+import io.github.jspinak.brobot.runner.automation.AutomationOrchestrator;
+import io.github.jspinak.brobot.runner.execution.ExecutionState;
+import io.github.jspinak.brobot.runner.execution.ExecutionStatus;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * Service for managing automation execution status monitoring and updates.
- * Provides real-time status tracking and notification.
+ * Service for managing automation execution status monitoring and updates. Provides real-time
+ * status tracking and notification.
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class RunnerStatusService {
-    
+
     private final AutomationOrchestrator automationOrchestrator;
-    
+
     // Configuration
     private StatusConfiguration configuration = StatusConfiguration.builder().build();
-    
+
     // Status monitoring
     private Thread statusMonitorThread;
     private final AtomicBoolean monitoringActive = new AtomicBoolean(false);
     private final AtomicReference<ExecutionStatus> lastStatus = new AtomicReference<>();
-    
+
     // Listeners
     private final List<StatusUpdateListener> statusListeners = new ArrayList<>();
     private final List<StateChangeListener> stateChangeListeners = new ArrayList<>();
-    
-    /**
-     * Status monitoring configuration.
-     */
+
+    /** Status monitoring configuration. */
     public static class StatusConfiguration {
         private long updateIntervalMs = 500;
         private boolean autoStart = true;
         private boolean notifyOnlyOnChange = true;
-        
+
         public static StatusConfigurationBuilder builder() {
             return new StatusConfigurationBuilder();
         }
-        
+
         public static class StatusConfigurationBuilder {
             private StatusConfiguration config = new StatusConfiguration();
-            
+
             public StatusConfigurationBuilder updateIntervalMs(long interval) {
                 config.updateIntervalMs = interval;
                 return this;
             }
-            
+
             public StatusConfigurationBuilder autoStart(boolean autoStart) {
                 config.autoStart = autoStart;
                 return this;
             }
-            
+
             public StatusConfigurationBuilder notifyOnlyOnChange(boolean onlyOnChange) {
                 config.notifyOnlyOnChange = onlyOnChange;
                 return this;
             }
-            
+
             public StatusConfiguration build() {
                 return config;
             }
         }
     }
-    
-    /**
-     * Sets the configuration.
-     */
+
+    /** Sets the configuration. */
     public void setConfiguration(StatusConfiguration configuration) {
         this.configuration = configuration;
-        
+
         // Restart monitoring if needed
         if (monitoringActive.get()) {
             stopMonitoring();
             startMonitoring();
         }
     }
-    
-    /**
-     * Adds a status update listener.
-     */
+
+    /** Adds a status update listener. */
     public void addStatusListener(StatusUpdateListener listener) {
         statusListeners.add(listener);
     }
-    
-    /**
-     * Adds a state change listener.
-     */
+
+    /** Adds a state change listener. */
     public void addStateChangeListener(StateChangeListener listener) {
         stateChangeListeners.add(listener);
     }
-    
-    /**
-     * Removes a status update listener.
-     */
+
+    /** Removes a status update listener. */
     public void removeStatusListener(StatusUpdateListener listener) {
         statusListeners.remove(listener);
     }
-    
-    /**
-     * Removes a state change listener.
-     */
+
+    /** Removes a state change listener. */
     public void removeStateChangeListener(StateChangeListener listener) {
         stateChangeListeners.remove(listener);
     }
-    
-    /**
-     * Starts status monitoring.
-     */
+
+    /** Starts status monitoring. */
     public void startMonitoring() {
         if (monitoringActive.compareAndSet(false, true)) {
             statusMonitorThread = new Thread(this::monitorStatus, "RunnerStatus-Monitor");
@@ -124,10 +112,8 @@ public class RunnerStatusService {
             log.info("Status monitoring started");
         }
     }
-    
-    /**
-     * Stops status monitoring.
-     */
+
+    /** Stops status monitoring. */
     public void stopMonitoring() {
         if (monitoringActive.compareAndSet(true, false)) {
             if (statusMonitorThread != null) {
@@ -141,85 +127,72 @@ public class RunnerStatusService {
             log.info("Status monitoring stopped");
         }
     }
-    
-    /**
-     * Gets the current execution status.
-     */
+
+    /** Gets the current execution status. */
     public ExecutionStatus getCurrentStatus() {
         return automationOrchestrator.getExecutionStatus();
     }
-    
-    /**
-     * Gets the current execution state.
-     */
+
+    /** Gets the current execution state. */
     public ExecutionState getCurrentState() {
         ExecutionStatus status = getCurrentStatus();
         return status != null ? status.getState() : ExecutionState.IDLE;
     }
-    
-    /**
-     * Checks if automation is currently running.
-     */
+
+    /** Checks if automation is currently running. */
     public boolean isRunning() {
         ExecutionState state = getCurrentState();
         return state == ExecutionState.RUNNING || state == ExecutionState.STARTING;
     }
-    
-    /**
-     * Checks if automation is paused.
-     */
+
+    /** Checks if automation is paused. */
     public boolean isPaused() {
         return getCurrentState() == ExecutionState.PAUSED;
     }
-    
-    /**
-     * Checks if automation is active (running or paused).
-     */
+
+    /** Checks if automation is active (running or paused). */
     public boolean isActive() {
         ExecutionState state = getCurrentState();
         return state.isActive();
     }
-    
-    /**
-     * Forces an immediate status update notification.
-     */
+
+    /** Forces an immediate status update notification. */
     public void forceUpdate() {
         ExecutionStatus status = getCurrentStatus();
         notifyStatusUpdate(status);
     }
-    
-    /**
-     * Monitor thread logic.
-     */
+
+    /** Monitor thread logic. */
     private void monitorStatus() {
         log.debug("Status monitor thread started");
-        
+
         while (monitoringActive.get() && !Thread.currentThread().isInterrupted()) {
             try {
                 ExecutionStatus currentStatus = getCurrentStatus();
-                
+
                 if (currentStatus != null) {
                     ExecutionStatus previousStatus = lastStatus.get();
-                    
+
                     // Check if we should notify
-                    boolean shouldNotify = !configuration.notifyOnlyOnChange ||
-                                         previousStatus == null ||
-                                         hasStatusChanged(previousStatus, currentStatus);
-                    
+                    boolean shouldNotify =
+                            !configuration.notifyOnlyOnChange
+                                    || previousStatus == null
+                                    || hasStatusChanged(previousStatus, currentStatus);
+
                     if (shouldNotify) {
                         lastStatus.set(currentStatus);
                         notifyStatusUpdate(currentStatus);
-                        
+
                         // Check for state changes
-                        if (previousStatus != null && 
-                            previousStatus.getState() != currentStatus.getState()) {
+                        if (previousStatus != null
+                                && previousStatus.getState() != currentStatus.getState()) {
                             notifyStateChange(previousStatus.getState(), currentStatus.getState());
                         }
                     }
                 }
-                
+
                 Thread.sleep(configuration.updateIntervalMs);
-                
+
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 break;
@@ -234,48 +207,42 @@ public class RunnerStatusService {
                 }
             }
         }
-        
+
         log.debug("Status monitor thread stopped");
     }
-    
-    /**
-     * Checks if status has changed.
-     */
+
+    /** Checks if status has changed. */
     private boolean hasStatusChanged(ExecutionStatus previous, ExecutionStatus current) {
         if (previous.getState() != current.getState()) {
             return true;
         }
-        
+
         if (Math.abs(previous.getProgress() - current.getProgress()) > 0.001) {
             return true;
         }
-        
+
         if (!equals(previous.getCurrentOperation(), current.getCurrentOperation())) {
             return true;
         }
-        
+
         // Check for other status changes if needed
         // For now, the above checks are sufficient
-        
+
         return false;
     }
-    
-    /**
-     * Null-safe string comparison.
-     */
+
+    /** Null-safe string comparison. */
     private boolean equals(String s1, String s2) {
         if (s1 == null && s2 == null) return true;
         if (s1 == null || s2 == null) return false;
         return s1.equals(s2);
     }
-    
-    /**
-     * Notifies listeners of status update.
-     */
+
+    /** Notifies listeners of status update. */
     private void notifyStatusUpdate(ExecutionStatus status) {
         // Create a copy of listeners to avoid concurrent modification
         List<StatusUpdateListener> listeners = new ArrayList<>(statusListeners);
-        
+
         for (StatusUpdateListener listener : listeners) {
             try {
                 if (Platform.isFxApplicationThread()) {
@@ -288,13 +255,11 @@ public class RunnerStatusService {
             }
         }
     }
-    
-    /**
-     * Notifies listeners of state change.
-     */
+
+    /** Notifies listeners of state change. */
     private void notifyStateChange(ExecutionState oldState, ExecutionState newState) {
         List<StateChangeListener> listeners = new ArrayList<>(stateChangeListeners);
-        
+
         for (StateChangeListener listener : listeners) {
             try {
                 if (Platform.isFxApplicationThread()) {
@@ -307,34 +272,28 @@ public class RunnerStatusService {
             }
         }
     }
-    
-    /**
-     * Gets status summary for logging.
-     */
+
+    /** Gets status summary for logging. */
     public String getStatusSummary() {
         ExecutionStatus status = getCurrentStatus();
         if (status == null) {
             return "No status available";
         }
-        
-        return String.format("State: %s, Progress: %.1f%%, Operation: %s",
-            status.getState().getDescription(),
-            status.getProgress() * 100,
-            status.getCurrentOperation() != null ? status.getCurrentOperation() : "None"
-        );
+
+        return String.format(
+                "State: %s, Progress: %.1f%%, Operation: %s",
+                status.getState().getDescription(),
+                status.getProgress() * 100,
+                status.getCurrentOperation() != null ? status.getCurrentOperation() : "None");
     }
-    
-    /**
-     * Listener for status updates.
-     */
+
+    /** Listener for status updates. */
     @FunctionalInterface
     public interface StatusUpdateListener {
         void onStatusUpdate(ExecutionStatus status);
     }
-    
-    /**
-     * Listener for state changes.
-     */
+
+    /** Listener for state changes. */
     @FunctionalInterface
     public interface StateChangeListener {
         void onStateChange(ExecutionState oldState, ExecutionState newState);

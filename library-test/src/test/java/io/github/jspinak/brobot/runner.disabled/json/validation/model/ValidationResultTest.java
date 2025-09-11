@@ -1,27 +1,28 @@
 package io.github.jspinak.brobot.runner.json.validation.model;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
+
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
- * Comprehensive unit tests for ValidationResult
- * Testing error aggregation, severity filtering, and result merging
+ * Comprehensive unit tests for ValidationResult Testing error aggregation, severity filtering, and
+ * result merging
  */
 @DisplayName("ValidationResult Tests")
 class ValidationResultTest extends BrobotTestBase {
 
     private ValidationResult result;
-    
+
     @BeforeEach
     void setUp() {
         result = new ValidationResult();
@@ -35,11 +36,12 @@ class ValidationResultTest extends BrobotTestBase {
         @DisplayName("Should add single error with object")
         void shouldAddSingleError() {
             // Given
-            ValidationError error = new ValidationError("TEST001", "Test error message", ValidationSeverity.ERROR);
-            
+            ValidationError error =
+                    new ValidationError("TEST001", "Test error message", ValidationSeverity.ERROR);
+
             // When
             result.addError(error);
-            
+
             // Then
             assertEquals(1, result.getErrors().size());
             assertEquals(error, result.getErrors().get(0));
@@ -52,7 +54,7 @@ class ValidationResultTest extends BrobotTestBase {
         void shouldAddErrorUsingComponents() {
             // When
             result.addError("TEST002", "Component error", ValidationSeverity.WARNING);
-            
+
             // Then
             assertEquals(1, result.getErrors().size());
             ValidationError addedError = result.getErrors().get(0);
@@ -66,7 +68,7 @@ class ValidationResultTest extends BrobotTestBase {
         void shouldHandleNullError() {
             // When
             result.addError(null);
-            
+
             // Then
             assertEquals(0, result.getErrors().size());
             assertFalse(result.hasErrors());
@@ -78,14 +80,16 @@ class ValidationResultTest extends BrobotTestBase {
         void shouldMaintainErrorOrder() {
             // Given
             ValidationError error1 = new ValidationError("ERR1", "First", ValidationSeverity.ERROR);
-            ValidationError error2 = new ValidationError("ERR2", "Second", ValidationSeverity.WARNING);
-            ValidationError error3 = new ValidationError("ERR3", "Third", ValidationSeverity.CRITICAL);
-            
+            ValidationError error2 =
+                    new ValidationError("ERR2", "Second", ValidationSeverity.WARNING);
+            ValidationError error3 =
+                    new ValidationError("ERR3", "Third", ValidationSeverity.CRITICAL);
+
             // When
             result.addError(error1);
             result.addError(error2);
             result.addError(error3);
-            
+
             // Then
             List<ValidationError> errors = result.getErrors();
             assertEquals(3, errors.size());
@@ -99,12 +103,15 @@ class ValidationResultTest extends BrobotTestBase {
         void shouldReturnUnmodifiableErrorList() {
             // Given
             result.addError("TEST", "Error", ValidationSeverity.ERROR);
-            
+
             // When/Then
             List<ValidationError> errors = result.getErrors();
-            assertThrows(UnsupportedOperationException.class, () -> 
-                errors.add(new ValidationError("NEW", "New error", ValidationSeverity.ERROR))
-            );
+            assertThrows(
+                    UnsupportedOperationException.class,
+                    () ->
+                            errors.add(
+                                    new ValidationError(
+                                            "NEW", "New error", ValidationSeverity.ERROR)));
         }
     }
 
@@ -117,14 +124,14 @@ class ValidationResultTest extends BrobotTestBase {
         void shouldMergeTwoResults() {
             // Given
             result.addError("ERR1", "Error 1", ValidationSeverity.ERROR);
-            
+
             ValidationResult other = new ValidationResult();
             other.addError("ERR2", "Error 2", ValidationSeverity.WARNING);
             other.addError("ERR3", "Error 3", ValidationSeverity.CRITICAL);
-            
+
             // When
             result.merge(other);
-            
+
             // Then
             assertEquals(3, result.getErrors().size());
             assertTrue(result.hasCriticalErrors());
@@ -136,10 +143,10 @@ class ValidationResultTest extends BrobotTestBase {
         void shouldHandleMergingNullResult() {
             // Given
             result.addError("ERR1", "Error 1", ValidationSeverity.ERROR);
-            
+
             // When
             result.merge(null);
-            
+
             // Then
             assertEquals(1, result.getErrors().size());
         }
@@ -150,10 +157,10 @@ class ValidationResultTest extends BrobotTestBase {
             // Given
             result.addError("ERR1", "Error 1", ValidationSeverity.ERROR);
             ValidationResult empty = new ValidationResult();
-            
+
             // When
             result.merge(empty);
-            
+
             // Then
             assertEquals(1, result.getErrors().size());
         }
@@ -164,14 +171,14 @@ class ValidationResultTest extends BrobotTestBase {
             // Given
             result.addError("A1", "First set - 1", ValidationSeverity.ERROR);
             result.addError("A2", "First set - 2", ValidationSeverity.WARNING);
-            
+
             ValidationResult other = new ValidationResult();
             other.addError("B1", "Second set - 1", ValidationSeverity.CRITICAL);
             other.addError("B2", "Second set - 2", ValidationSeverity.INFO);
-            
+
             // When
             result.merge(other);
-            
+
             // Then
             List<ValidationError> errors = result.getErrors();
             assertEquals("First set - 1", errors.get(0).message());
@@ -202,7 +209,7 @@ class ValidationResultTest extends BrobotTestBase {
         void shouldGetWarningsOnly() {
             // When
             List<ValidationError> warnings = result.getWarnings();
-            
+
             // Then
             assertEquals(2, warnings.size());
             assertTrue(warnings.stream().allMatch(e -> e.severity() == ValidationSeverity.WARNING));
@@ -213,10 +220,11 @@ class ValidationResultTest extends BrobotTestBase {
         void shouldGetCriticalErrorsOnly() {
             // When
             List<ValidationError> critical = result.getCriticalErrors();
-            
+
             // Then
             assertEquals(2, critical.size());
-            assertTrue(critical.stream().allMatch(e -> e.severity() == ValidationSeverity.CRITICAL));
+            assertTrue(
+                    critical.stream().allMatch(e -> e.severity() == ValidationSeverity.CRITICAL));
         }
 
         @Test
@@ -224,13 +232,16 @@ class ValidationResultTest extends BrobotTestBase {
         void shouldGetErrorsAndCritical() {
             // When
             List<ValidationError> severe = result.getErrorsAndCritical();
-            
+
             // Then
             assertEquals(5, severe.size()); // 2 critical + 3 errors
-            assertTrue(severe.stream().allMatch(e -> 
-                e.severity() == ValidationSeverity.ERROR || 
-                e.severity() == ValidationSeverity.CRITICAL
-            ));
+            assertTrue(
+                    severe.stream()
+                            .allMatch(
+                                    e ->
+                                            e.severity() == ValidationSeverity.ERROR
+                                                    || e.severity()
+                                                            == ValidationSeverity.CRITICAL));
         }
 
         @Test
@@ -238,7 +249,7 @@ class ValidationResultTest extends BrobotTestBase {
         void shouldGetInfoMessagesOnly() {
             // When
             List<ValidationError> info = result.getInfoMessages();
-            
+
             // Then
             assertEquals(1, info.size());
             assertEquals(ValidationSeverity.INFO, info.get(0).severity());
@@ -250,7 +261,7 @@ class ValidationResultTest extends BrobotTestBase {
         void shouldFilterBySpecificSeverity(ValidationSeverity severity) {
             // When
             List<ValidationError> filtered = result.getErrorsBySeverity(severity);
-            
+
             // Then
             assertTrue(filtered.stream().allMatch(e -> e.severity() == severity));
         }
@@ -276,7 +287,7 @@ class ValidationResultTest extends BrobotTestBase {
             // Given
             result.addError("W1", "Warning", ValidationSeverity.WARNING);
             result.addError("I1", "Info", ValidationSeverity.INFO);
-            
+
             // Then
             assertTrue(result.isValid());
             assertTrue(result.hasErrors());
@@ -290,7 +301,7 @@ class ValidationResultTest extends BrobotTestBase {
         void shouldBeInvalidWithErrors() {
             // Given
             result.addError("E1", "Error", ValidationSeverity.ERROR);
-            
+
             // Then
             assertFalse(result.isValid());
             assertTrue(result.hasErrors());
@@ -303,7 +314,7 @@ class ValidationResultTest extends BrobotTestBase {
         void shouldBeInvalidWithCriticalErrors() {
             // Given
             result.addError("C1", "Critical", ValidationSeverity.CRITICAL);
-            
+
             // Then
             assertFalse(result.isValid());
             assertTrue(result.hasErrors());
@@ -317,7 +328,7 @@ class ValidationResultTest extends BrobotTestBase {
         void shouldDetectErrorsOfSeverity(ValidationSeverity severity) {
             // Given
             result.addError("TEST", "Test error", severity);
-            
+
             // Then
             assertTrue(result.hasErrorsOfSeverity(severity));
         }
@@ -330,7 +341,7 @@ class ValidationResultTest extends BrobotTestBase {
             result.addError("E1", "Error", ValidationSeverity.ERROR);
             result.addError("W1", "Warning", ValidationSeverity.WARNING);
             result.addError("I1", "Info", ValidationSeverity.INFO);
-            
+
             // Then
             assertFalse(result.isValid());
             assertTrue(result.hasErrors());
@@ -353,10 +364,10 @@ class ValidationResultTest extends BrobotTestBase {
             result.addError("E2", "Error 2", ValidationSeverity.WARNING);
             result.addError("E3", "Error 3", ValidationSeverity.CRITICAL);
             assertEquals(3, result.getErrors().size());
-            
+
             // When
             result.clear();
-            
+
             // Then
             assertEquals(0, result.getErrors().size());
             assertTrue(result.isValid());
@@ -369,10 +380,10 @@ class ValidationResultTest extends BrobotTestBase {
             // Given
             result.addError("E1", "Error 1", ValidationSeverity.ERROR);
             result.clear();
-            
+
             // When
             result.addError("E2", "Error 2", ValidationSeverity.WARNING);
-            
+
             // Then
             assertEquals(1, result.getErrors().size());
             assertEquals("E2", result.getErrors().get(0).errorCode());
@@ -392,10 +403,10 @@ class ValidationResultTest extends BrobotTestBase {
             result.addError("E1", "Regular error 1", ValidationSeverity.ERROR);
             result.addError("E2", "Regular error 2", ValidationSeverity.ERROR);
             result.addError("W1", "Warning 1", ValidationSeverity.WARNING);
-            
+
             // When
             String formatted = result.getFormattedErrors();
-            
+
             // Then
             assertTrue(formatted.contains("CRITICAL ERRORS:"));
             assertTrue(formatted.contains("Critical error 1"));
@@ -405,7 +416,7 @@ class ValidationResultTest extends BrobotTestBase {
             assertTrue(formatted.contains("Regular error 2"));
             assertTrue(formatted.contains("WARNINGS:"));
             assertTrue(formatted.contains("Warning 1"));
-            
+
             // Verify order - critical should come before errors, errors before warnings
             int criticalIndex = formatted.indexOf("CRITICAL ERRORS:");
             int errorIndex = formatted.indexOf("ERRORS:");
@@ -419,7 +430,7 @@ class ValidationResultTest extends BrobotTestBase {
         void shouldHandleEmptyResultFormatting() {
             // When
             String formatted = result.getFormattedErrors();
-            
+
             // Then
             assertEquals("", formatted);
         }
@@ -430,10 +441,10 @@ class ValidationResultTest extends BrobotTestBase {
             // Given - only warnings
             result.addError("W1", "Warning 1", ValidationSeverity.WARNING);
             result.addError("W2", "Warning 2", ValidationSeverity.WARNING);
-            
+
             // When
             String formatted = result.getFormattedErrors();
-            
+
             // Then
             assertFalse(formatted.contains("CRITICAL ERRORS:"));
             assertFalse(formatted.contains("ERRORS:"));
@@ -447,10 +458,10 @@ class ValidationResultTest extends BrobotTestBase {
         void shouldUseDashPrefixForErrorItems() {
             // Given
             result.addError("E1", "Error message", ValidationSeverity.ERROR);
-            
+
             // When
             String formatted = result.getFormattedErrors();
-            
+
             // Then
             assertTrue(formatted.contains("- Error message"));
         }
@@ -466,10 +477,10 @@ class ValidationResultTest extends BrobotTestBase {
             // Given
             result.addError("E1", "Error 1", ValidationSeverity.ERROR);
             result.addError("W1", "Warning 1", ValidationSeverity.WARNING);
-            
+
             // When
             String string = result.toString();
-            
+
             // Then
             assertTrue(string.contains("ValidationResult"));
             assertTrue(string.contains("isValid=false"));
@@ -481,7 +492,7 @@ class ValidationResultTest extends BrobotTestBase {
         void shouldShowValidStateInToString() {
             // When
             String string = result.toString();
-            
+
             // Then
             assertTrue(string.contains("isValid=true"));
         }
@@ -498,7 +509,7 @@ class ValidationResultTest extends BrobotTestBase {
             for (int i = 0; i < 1000; i++) {
                 result.addError("ERR" + i, "Error " + i, ValidationSeverity.ERROR);
             }
-            
+
             // Then
             assertEquals(1000, result.getErrors().size());
             assertFalse(result.isValid());
@@ -508,13 +519,14 @@ class ValidationResultTest extends BrobotTestBase {
         @DisplayName("Should handle duplicate errors")
         void shouldHandleDuplicateErrors() {
             // Given
-            ValidationError error = new ValidationError("DUP", "Duplicate", ValidationSeverity.ERROR);
-            
+            ValidationError error =
+                    new ValidationError("DUP", "Duplicate", ValidationSeverity.ERROR);
+
             // When
             result.addError(error);
             result.addError(error);
             result.addError(error);
-            
+
             // Then
             assertEquals(3, result.getErrors().size());
             // All references should be to the same object
@@ -522,17 +534,13 @@ class ValidationResultTest extends BrobotTestBase {
         }
 
         @ParameterizedTest
-        @CsvSource({
-            "CRITICAL, false",
-            "ERROR, false",
-            "WARNING, true",
-            "INFO, true"
-        })
+        @CsvSource({"CRITICAL, false", "ERROR, false", "WARNING, true", "INFO, true"})
         @DisplayName("Should determine validity based on severity")
-        void shouldDetermineValidityBasedOnSeverity(ValidationSeverity severity, boolean expectedValid) {
+        void shouldDetermineValidityBasedOnSeverity(
+                ValidationSeverity severity, boolean expectedValid) {
             // Given
             result.addError("TEST", "Test error", severity);
-            
+
             // Then
             assertEquals(expectedValid, result.isValid());
         }

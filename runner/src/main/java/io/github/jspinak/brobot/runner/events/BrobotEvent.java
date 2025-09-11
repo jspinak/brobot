@@ -1,12 +1,10 @@
 package io.github.jspinak.brobot.runner.events;
 
-import lombok.Data;
-
 import java.time.Instant;
 
 /**
- * Base class for all events in the Brobot Runner.
- * All events extend from this class and provide specific event data.
+ * Base class for all events in the Brobot Runner. All events extend from this class and provide
+ * specific event data.
  */
 public abstract class BrobotEvent {
     private final Instant timestamp;
@@ -31,10 +29,7 @@ public abstract class BrobotEvent {
         return source;
     }
 
-    /**
-     * Enum defining the types of events in the system.
-     * New event types should be added here.
-     */
+    /** Enum defining the types of events in the system. New event types should be added here. */
     public enum EventType {
         // Execution events
         EXECUTION_STARTED,
@@ -44,7 +39,7 @@ public abstract class BrobotEvent {
         EXECUTION_PAUSED,
         EXECUTION_RESUMED,
         EXECUTION_STOPPED,
-        
+
         // Automation events
         AUTOMATION_STARTED,
         AUTOMATION_COMPLETED,

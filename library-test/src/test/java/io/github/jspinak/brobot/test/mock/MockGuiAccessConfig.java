@@ -1,18 +1,18 @@
 package io.github.jspinak.brobot.test.mock;
 
-import io.github.jspinak.brobot.tools.logging.gui.GuiAccessConfig;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
+import io.github.jspinak.brobot.tools.logging.gui.GuiAccessConfig;
+
 /**
- * Test configuration for GUI access in headless test environment.
- * Overrides the default GUI access configuration to allow tests to run
- * without a display.
+ * Test configuration for GUI access in headless test environment. Overrides the default GUI access
+ * configuration to allow tests to run without a display.
  */
 @TestConfiguration
 public class MockGuiAccessConfig {
-    
+
     @Bean
     @Primary
     public GuiAccessConfig testGuiAccessConfig() {

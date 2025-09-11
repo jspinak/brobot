@@ -1,15 +1,14 @@
 package io.github.jspinak.brobot.runner.json.validation.crossref;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import io.github.jspinak.brobot.runner.json.validation.crossref.FunctionReferenceValidator;
-import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
-import io.github.jspinak.brobot.runner.json.validation.model.ValidationSeverity;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationSeverity;
 
 class FunctionReferenceValidatorTest {
 
@@ -82,9 +81,13 @@ class FunctionReferenceValidatorTest {
 
         // Assert
         assertTrue(result.hasErrors());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.message().contains("duplicatedFunc") &&
-                        e.errorCode().equals("Duplicate function name")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(
+                                e ->
+                                        e.message().contains("duplicatedFunc")
+                                                && e.errorCode()
+                                                        .equals("Duplicate function name")));
     }
 
     @Test
@@ -113,9 +116,12 @@ class FunctionReferenceValidatorTest {
 
         // Assert
         assertTrue(result.hasErrors());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.message().contains("nonExistentFunc") &&
-                        e.errorCode().equals("Invalid function call")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(
+                                e ->
+                                        e.message().contains("nonExistentFunc")
+                                                && e.errorCode().equals("Invalid function call")));
     }
 
     @Test
@@ -126,10 +132,12 @@ class FunctionReferenceValidatorTest {
         // Assert
         assertTrue(result.hasErrors());
         assertEquals(2, result.getErrors().size());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Invalid project model")));
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Invalid DSL model")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(e -> e.errorCode().equals("Invalid project model")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(e -> e.errorCode().equals("Invalid DSL model")));
     }
 
     @Test
@@ -156,7 +164,8 @@ class FunctionReferenceValidatorTest {
         projectModel.put("automation", automation);
 
         // Act
-        ValidationResult result = validator.validateButtonFunctionReferences(projectModel, dslModel);
+        ValidationResult result =
+                validator.validateButtonFunctionReferences(projectModel, dslModel);
 
         // Assert
         assertFalse(result.hasErrors());
@@ -183,13 +192,18 @@ class FunctionReferenceValidatorTest {
         projectModel.put("automation", automation);
 
         // Act
-        ValidationResult result = validator.validateButtonFunctionReferences(projectModel, dslModel);
+        ValidationResult result =
+                validator.validateButtonFunctionReferences(projectModel, dslModel);
 
         // Assert
         assertTrue(result.hasErrors());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.message().contains("nonExistentFunction") &&
-                        e.errorCode().equals("Invalid function reference")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(
+                                e ->
+                                        e.message().contains("nonExistentFunction")
+                                                && e.errorCode()
+                                                        .equals("Invalid function reference")));
     }
 
     @Test
@@ -226,17 +240,24 @@ class FunctionReferenceValidatorTest {
         projectModel.put("automation", automation);
 
         // Act
-        ValidationResult result = validator.validateButtonFunctionReferences(projectModel, dslModel);
+        ValidationResult result =
+                validator.validateButtonFunctionReferences(projectModel, dslModel);
 
         // Assert
         assertTrue(result.hasErrors());
         assertTrue(result.hasWarnings());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.message().contains("requiredParam") &&
-                        e.errorCode().equals("Missing parameter")));
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.message().contains("wrongParam") &&
-                        e.errorCode().equals("Unknown parameter")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(
+                                e ->
+                                        e.message().contains("requiredParam")
+                                                && e.errorCode().equals("Missing parameter")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(
+                                e ->
+                                        e.message().contains("wrongParam")
+                                                && e.errorCode().equals("Unknown parameter")));
     }
 
     @Test
@@ -269,9 +290,12 @@ class FunctionReferenceValidatorTest {
 
         // Assert
         assertTrue(result.hasErrors());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.message().contains("undeclaredVar") &&
-                        e.errorCode().equals("Undefined variable")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(
+                                e ->
+                                        e.message().contains("undeclaredVar")
+                                                && e.errorCode().equals("Undefined variable")));
     }
 
     @Test
@@ -300,8 +324,11 @@ class FunctionReferenceValidatorTest {
 
         // Assert
         assertTrue(result.hasErrors());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.message().contains("invalidMethod") &&
-                        e.errorCode().equals("Invalid method call")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(
+                                e ->
+                                        e.message().contains("invalidMethod")
+                                                && e.errorCode().equals("Invalid method call")));
     }
 }

@@ -1,64 +1,64 @@
 package io.github.jspinak.brobot.navigation.monitoring;
 
-import io.github.jspinak.brobot.model.state.State;
-import io.github.jspinak.brobot.model.transition.StateTransition;
-import io.github.jspinak.brobot.navigation.transition.StateTransitions;
-import io.github.jspinak.brobot.navigation.transition.StateNavigator;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.transition.StateTransition;
+import io.github.jspinak.brobot.navigation.transition.StateNavigator;
+import io.github.jspinak.brobot.navigation.transition.StateTransitions;
 
 /**
  * Default implementation of StateHandler for automated state navigation.
- * 
- * <p>DefaultStateHandler provides a simple, straightforward approach to handling state 
- * transitions in automation scripts. It implements a "first available transition" strategy, 
- * automatically selecting and executing the first defined transition for any given state. 
- * This approach works well for linear workflows and simple automation scenarios where 
- * states have predictable, single-path navigation.</p>
- * 
+ *
+ * <p>DefaultStateHandler provides a simple, straightforward approach to handling state transitions
+ * in automation scripts. It implements a "first available transition" strategy, automatically
+ * selecting and executing the first defined transition for any given state. This approach works
+ * well for linear workflows and simple automation scenarios where states have predictable,
+ * single-path navigation.
+ *
  * <p>Key behaviors:
+ *
  * <ul>
- *   <li><b>First Transition Selection</b>: Always chooses the first available transition 
- *       from the current state's transition list</li>
- *   <li><b>Single Target Navigation</b>: If a transition activates multiple states, only 
- *       navigates to the first one</li>
- *   <li><b>Error Logging</b>: Logs detailed information about missing transitions and 
- *       navigation failures</li>
- *   <li><b>No Complex Logic</b>: Does not implement conditional branching or dynamic 
- *       transition selection</li>
+ *   <li><b>First Transition Selection</b>: Always chooses the first available transition from the
+ *       current state's transition list
+ *   <li><b>Single Target Navigation</b>: If a transition activates multiple states, only navigates
+ *       to the first one
+ *   <li><b>Error Logging</b>: Logs detailed information about missing transitions and navigation
+ *       failures
+ *   <li><b>No Complex Logic</b>: Does not implement conditional branching or dynamic transition
+ *       selection
  * </ul>
- * </p>
- * 
+ *
  * <p>Suitable for:
+ *
  * <ul>
- *   <li>Linear automation workflows with predetermined paths</li>
- *   <li>Testing scenarios where predictable behavior is desired</li>
- *   <li>Simple applications with straightforward navigation</li>
- *   <li>Proof-of-concept implementations</li>
+ *   <li>Linear automation workflows with predetermined paths
+ *   <li>Testing scenarios where predictable behavior is desired
+ *   <li>Simple applications with straightforward navigation
+ *   <li>Proof-of-concept implementations
  * </ul>
- * </p>
- * 
+ *
  * <p>Limitations:
+ *
  * <ul>
- *   <li>No conditional logic for choosing between multiple transitions</li>
- *   <li>Cannot handle complex branching scenarios</li>
- *   <li>No state-specific error recovery strategies</li>
- *   <li>Limited customization options</li>
+ *   <li>No conditional logic for choosing between multiple transitions
+ *   <li>Cannot handle complex branching scenarios
+ *   <li>No state-specific error recovery strategies
+ *   <li>Limited customization options
  * </ul>
- * </p>
- * 
- * <p>For more sophisticated state handling, consider implementing a custom StateHandler 
- * that incorporates business logic, conditional navigation, or dynamic transition selection 
- * based on application state or external conditions.</p>
- * 
- * <p>In the model-based approach, DefaultStateHandler demonstrates how the framework's 
- * state navigation capabilities can be leveraged with minimal implementation effort. It 
- * serves as both a functional default and an example for custom implementations.</p>
- * 
+ *
+ * <p>For more sophisticated state handling, consider implementing a custom StateHandler that
+ * incorporates business logic, conditional navigation, or dynamic transition selection based on
+ * application state or external conditions.
+ *
+ * <p>In the model-based approach, DefaultStateHandler demonstrates how the framework's state
+ * navigation capabilities can be leveraged with minimal implementation effort. It serves as both a
+ * functional default and an example for custom implementations.
+ *
  * @since 1.0
  * @see StateHandler
  * @see StateNavigator
@@ -81,20 +81,22 @@ public class DefaultStateHandler implements StateHandler {
 
     /**
      * Handles the current state by executing its first available transition.
-     * <p>
-     * Implementation strategy:
+     *
+     * <p>Implementation strategy:
+     *
      * <ol>
-     *   <li>Validates that transitions are available</li>
-     *   <li>Selects the first transition from the list</li>
-     *   <li>Executes navigation to the first activated state</li>
-     *   <li>Returns success/failure of the navigation</li>
+     *   <li>Validates that transitions are available
+     *   <li>Selects the first transition from the list
+     *   <li>Executes navigation to the first activated state
+     *   <li>Returns success/failure of the navigation
      * </ol>
-     * <p>
-     * Side effects:
+     *
+     * <p>Side effects:
+     *
      * <ul>
-     *   <li>Navigates to a new state if transition succeeds</li>
-     *   <li>Logs information about missing transitions</li>
-     *   <li>Logs errors if navigation fails</li>
+     *   <li>Navigates to a new state if transition succeeds
+     *   <li>Logs information about missing transitions
+     *   <li>Logs errors if navigation fails
      * </ul>
      *
      * @param currentState The state currently active in the GUI
@@ -109,14 +111,15 @@ public class DefaultStateHandler implements StateHandler {
         }
 
         // Get first available transition
-        Optional<StateTransition> transition = stateTransitions.getTransitions().stream()
-                .findFirst();
+        Optional<StateTransition> transition =
+                stateTransitions.getTransitions().stream().findFirst();
 
         StateTransition stateTransition = transition.get();
         try {
             // Execute the transition
             if (!stateTransition.getActivate().isEmpty())
-                return stateTransitionsManagement.openState(stateTransition.getActivate().iterator().next());
+                return stateTransitionsManagement.openState(
+                        stateTransition.getActivate().iterator().next());
         } catch (Exception e) {
             logger.error("No transitions for state: {}", currentState.getName(), e);
             return false;
@@ -126,14 +129,15 @@ public class DefaultStateHandler implements StateHandler {
 
     /**
      * Handles the case when no active state with transitions is found.
-     * <p>
-     * This default implementation simply logs a debug message and continues.
-     * Custom implementations might:
+     *
+     * <p>This default implementation simply logs a debug message and continues. Custom
+     * implementations might:
+     *
      * <ul>
-     *   <li>Attempt to recover by finding states</li>
-     *   <li>Navigate to a known safe state</li>
-     *   <li>Trigger error recovery procedures</li>
-     *   <li>Signal the automation to stop</li>
+     *   <li>Attempt to recover by finding states
+     *   <li>Navigate to a known safe state
+     *   <li>Trigger error recovery procedures
+     *   <li>Signal the automation to stop
      * </ul>
      */
     @Override

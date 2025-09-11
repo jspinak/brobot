@@ -1,10 +1,10 @@
 package io.github.jspinak.brobot.test.config;
 
-import io.github.jspinak.brobot.config.core.BrobotConfig;
-import io.github.jspinak.brobot.config.mock.MockModeManager;
-import io.github.jspinak.brobot.core.services.ScreenCaptureService;
-import io.github.jspinak.brobot.test.TestLoggingConfig;
-import io.github.jspinak.brobot.test.mock.MockBrobotLoggerConfig;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.awt.image.BufferedImage;
+
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -15,36 +15,30 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 
-import java.awt.image.BufferedImage;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import io.github.jspinak.brobot.config.core.BrobotConfig;
+import io.github.jspinak.brobot.config.mock.MockModeManager;
+import io.github.jspinak.brobot.core.services.ScreenCaptureService;
+import io.github.jspinak.brobot.test.TestLoggingConfig;
+import io.github.jspinak.brobot.test.mock.MockBrobotLoggerConfig;
 
 /**
- * Minimal integration test configuration that avoids bean conflicts.
- * This configuration provides only the essential beans needed for integration tests.
+ * Minimal integration test configuration that avoids bean conflicts. This configuration provides
+ * only the essential beans needed for integration tests.
  */
 @SpringBootConfiguration
-@EnableAutoConfiguration(exclude = {
-    DataSourceAutoConfiguration.class,
-    HibernateJpaAutoConfiguration.class
-})
+@EnableAutoConfiguration(
+        exclude = {DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 @ComponentScan(
-    basePackages = "io.github.jspinak.brobot",
-    excludeFilters = {
-        @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*TestApplication"),
-        @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*TestConfiguration"),
-        @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*MinimalTestConfig"),
-        @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*BrobotTestConfiguration")
-    }
-)
-@Import({
-    BrobotConfig.class,
-    TestLoggingConfig.class,
-    MockBrobotLoggerConfig.class
-})
+        basePackages = "io.github.jspinak.brobot",
+        excludeFilters = {
+            @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*TestApplication"),
+            @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*TestConfiguration"),
+            @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*MinimalTestConfig"),
+            @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*BrobotTestConfiguration")
+        })
+@Import({BrobotConfig.class, TestLoggingConfig.class, MockBrobotLoggerConfig.class})
 public class IntegrationTestConfig {
-    
+
     static {
         // Enable mock mode before Spring context loads
         MockModeManager.setMockMode(true);
@@ -53,10 +47,8 @@ public class IntegrationTestConfig {
         System.setProperty("brobot.mock.enabled", "true");
         System.setProperty("brobot.framework.mock", "true");
     }
-    
-    /**
-     * Mock ScreenCaptureService for tests
-     */
+
+    /** Mock ScreenCaptureService for tests */
     @Bean
     @Primary
     public ScreenCaptureService mockScreenCaptureService() {

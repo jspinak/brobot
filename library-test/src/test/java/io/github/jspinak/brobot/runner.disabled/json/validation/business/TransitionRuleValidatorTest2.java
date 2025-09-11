@@ -1,17 +1,16 @@
 package io.github.jspinak.brobot.runner.json.validation.business;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import io.github.jspinak.brobot.runner.json.validation.business.TransitionRuleValidator;
 import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
 import io.github.jspinak.brobot.runner.json.validation.model.ValidationSeverity;
-
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class TransitionRuleValidatorTest2 {
@@ -74,8 +73,14 @@ class TransitionRuleValidatorTest2 {
         // Assert
         assertTrue(result.hasErrors());
         assertTrue(result.hasWarnings());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Potentially problematic transition cycle")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(
+                                e ->
+                                        e.errorCode()
+                                                .equals(
+                                                        "Potentially problematic transition"
+                                                                + " cycle")));
     }
 
     @Test
@@ -89,8 +94,9 @@ class TransitionRuleValidatorTest2 {
         // Assert
         assertTrue(result.hasErrors());
         assertTrue(result.hasWarnings());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Unreachable state")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(e -> e.errorCode().equals("Unreachable state")));
     }
 
     @Test
@@ -104,8 +110,9 @@ class TransitionRuleValidatorTest2 {
         // Assert
         assertTrue(result.hasErrors());
         assertTrue(result.hasWarnings());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Redundant transitions")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(e -> e.errorCode().equals("Redundant transitions")));
     }
 
     @Test
@@ -119,8 +126,9 @@ class TransitionRuleValidatorTest2 {
         // Assert
         assertTrue(result.hasErrors());
         assertTrue(result.hasWarnings());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Potential concurrency issue")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(e -> e.errorCode().equals("Potential concurrency issue")));
     }
 
     @Test
@@ -134,12 +142,20 @@ class TransitionRuleValidatorTest2 {
         // Assert
         assertTrue(result.hasErrors());
         assertTrue(result.hasWarnings());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Potentially problematic transition cycle")));
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Unreachable state")));
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Redundant transitions")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(
+                                e ->
+                                        e.errorCode()
+                                                .equals(
+                                                        "Potentially problematic transition"
+                                                                + " cycle")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(e -> e.errorCode().equals("Unreachable state")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(e -> e.errorCode().equals("Redundant transitions")));
     }
 
     @Test
@@ -147,27 +163,41 @@ class TransitionRuleValidatorTest2 {
         // Arrange
         Map<String, Object> model = new HashMap<>();
         model.put("states", "not a list"); // Malformed "states"
-        model.put("stateTransitions", new ArrayList<>()); // Add "stateTransitions" so the methods don't return early
+        model.put(
+                "stateTransitions",
+                new ArrayList<>()); // Add "stateTransitions" so the methods don't return early
 
         // Act
         ValidationResult result = validator.validateTransitionRules(model);
 
         // Debugging output
         if (result.isValid()) { // Assuming isValid() means no errors
-            System.out.println("Test validateTransitionRules_withException_shouldHandleGracefully: No errors found. Result is valid.");
+            System.out.println(
+                    "Test validateTransitionRules_withException_shouldHandleGracefully: No errors"
+                            + " found. Result is valid.");
             System.out.println("Errors list: " + result.getErrors());
         } else {
-            System.out.println("Test validateTransitionRules_withException_shouldHandleGracefully: Errors found:");
+            System.out.println(
+                    "Test validateTransitionRules_withException_shouldHandleGracefully: Errors"
+                            + " found:");
             result.getErrors().forEach(error -> System.out.println("  - " + error));
         }
 
         // Assert
-        assertFalse(result.isValid(), "Result should be invalid as an error should have been caught."); // If hasErrors() is not on ValidationResult
-        // assertTrue(result.hasErrors()); // If hasErrors() is the correct method on ValidationResult
+        assertFalse(
+                result.isValid(),
+                "Result should be invalid as an error should have been caught."); // If hasErrors()
+        // is not on
+        // ValidationResult
+        // assertTrue(result.hasErrors()); // If hasErrors() is the correct method on
+        // ValidationResult
 
-        assertTrue(result.getErrors().stream()
-                        .anyMatch(e -> "Validation error".equals(e.errorCode()) &&
-                                e.severity() == ValidationSeverity.ERROR),
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(
+                                e ->
+                                        "Validation error".equals(e.errorCode())
+                                                && e.severity() == ValidationSeverity.ERROR),
                 "Should contain a 'Validation error' with ERROR severity.");
     }
 

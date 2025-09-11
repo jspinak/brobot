@@ -4,21 +4,20 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+
 import io.github.jspinak.brobot.action.ActionConfig;
+
 import lombok.Getter;
 
 /**
  * Configuration for mouse wheel scrolling actions.
- * <p>
- * This class encapsulates all parameters for scrolling the mouse wheel,
- * including direction and number of scroll steps. It is an immutable object
- * and must be constructed using its inner {@link Builder}.
- * </p>
- * <p>
- * By providing a specialized configuration class, the Brobot API ensures that only
- * relevant options are available for scroll operations, enhancing type safety
- * and ease of use.
- * </p>
+ *
+ * <p>This class encapsulates all parameters for scrolling the mouse wheel, including direction and
+ * number of scroll steps. It is an immutable object and must be constructed using its inner {@link
+ * Builder}.
+ *
+ * <p>By providing a specialized configuration class, the Brobot API ensures that only relevant
+ * options are available for scroll operations, enhancing type safety and ease of use.
  *
  * @see ActionConfig
  * @see io.github.jspinak.brobot.action.basic.mouse.ScrollMouseWheel
@@ -27,18 +26,12 @@ import lombok.Getter;
 @JsonDeserialize(builder = ScrollOptions.Builder.class)
 public final class ScrollOptions extends ActionConfig {
 
-    /**
-     * Defines the direction of mouse wheel scrolling.
-     */
+    /** Defines the direction of mouse wheel scrolling. */
     public enum Direction {
-        /**
-         * Scroll upward (toward the top of the page/content).
-         */
+        /** Scroll upward (toward the top of the page/content). */
         UP,
-        
-        /**
-         * Scroll downward (toward the bottom of the page/content).
-         */
+
+        /** Scroll downward (toward the bottom of the page/content). */
         DOWN
     }
 
@@ -51,26 +44,23 @@ public final class ScrollOptions extends ActionConfig {
         this.scrollSteps = builder.scrollSteps;
     }
 
-    /**
-     * Builder for constructing {@link ScrollOptions} with a fluent API.
-     */
+    /** Builder for constructing {@link ScrollOptions} with a fluent API. */
     @JsonPOJOBuilder(withPrefix = "set")
     public static class Builder extends ActionConfig.Builder<Builder> {
 
         @JsonProperty("direction")
         private Direction direction = Direction.DOWN;
+
         @JsonProperty("scrollSteps")
         private int scrollSteps = 3;
 
-        /**
-         * Default constructor for creating a new ScrollOptions configuration.
-         */
+        /** Default constructor for creating a new ScrollOptions configuration. */
         @JsonCreator
         public Builder() {}
 
         /**
-         * Creates a new Builder instance pre-populated with values from an existing
-         * ScrollOptions object, allowing for easy modification or templating.
+         * Creates a new Builder instance pre-populated with values from an existing ScrollOptions
+         * object, allowing for easy modification or templating.
          *
          * @param original The ScrollOptions instance to copy.
          */
@@ -92,8 +82,8 @@ public final class ScrollOptions extends ActionConfig {
         }
 
         /**
-         * Sets the number of scroll steps (or "clicks" of the wheel).
-         * Each step represents one notch of the mouse wheel.
+         * Sets the number of scroll steps (or "clicks" of the wheel). Each step represents one
+         * notch of the mouse wheel.
          *
          * @param scrollSteps The number of scroll steps. Must be positive.
          * @return this Builder instance for chaining.

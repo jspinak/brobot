@@ -1,30 +1,27 @@
 package io.github.jspinak.brobot.model.match;
 
-import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.model.element.Location;
-import io.github.jspinak.brobot.model.element.Positions;
-import io.github.jspinak.brobot.model.state.StateRegion;
-import io.github.jspinak.brobot.model.state.StateImage;
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Positions;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.state.StateRegion;
 
 class MatchTest {
 
-    private Match match = new Match.Builder()
-            .setRegion(0, 50, 100, 20)
-            .build();
-    private StateRegion stateRegion = new StateRegion.Builder()
-            .setSearchRegion(match.getRegion())
-            .addAnchor(Positions.Name.TOPLEFT, Positions.Name.BOTTOMLEFT)
-            .build();
+    private Match match = new Match.Builder().setRegion(0, 50, 100, 20).build();
+    private StateRegion stateRegion =
+            new StateRegion.Builder()
+                    .setSearchRegion(match.getRegion())
+                    .addAnchor(Positions.Name.TOPLEFT, Positions.Name.BOTTOMLEFT)
+                    .build();
 
     @Test
     void getTarget() {
-        Match newMatch = new Match.Builder()
-                .setMatch(match)
-                .setStateObjectData(stateRegion)
-                .build();
+        Match newMatch =
+                new Match.Builder().setMatch(match).setStateObjectData(stateRegion).build();
         Location location = newMatch.getTarget();
         System.out.println(newMatch);
         System.out.println(location);
@@ -39,5 +36,4 @@ class MatchTest {
         StateImage stateImage = match.toStateImage();
         assertEquals(50, stateImage.getLargestDefinedFixedRegionOrNewRegion().y());
     }
-
 }

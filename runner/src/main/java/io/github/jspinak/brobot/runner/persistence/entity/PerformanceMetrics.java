@@ -1,13 +1,11 @@
 package io.github.jspinak.brobot.runner.persistence.entity;
 
-import lombok.AllArgsConstructor;
-
-import lombok.NoArgsConstructor;
-
-import lombok.Builder;
-
 import jakarta.persistence.Embeddable;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Embeddable
@@ -24,11 +22,15 @@ public class PerformanceMetrics {
 
     @Override
     public String toString() {
-        return "PerformanceMetrics{" +
-                "actionDuration=" + actionDuration +
-                ", pageLoadTime=" + pageLoadTime +
-                ", transitionTime=" + transitionTime +
-                ", totalTestDuration=" + totalTestDuration +
-                '}';
+        return "PerformanceMetrics{"
+                + "actionDuration="
+                + actionDuration
+                + ", pageLoadTime="
+                + pageLoadTime
+                + ", transitionTime="
+                + transitionTime
+                + ", totalTestDuration="
+                + totalTestDuration
+                + '}';
     }
 }

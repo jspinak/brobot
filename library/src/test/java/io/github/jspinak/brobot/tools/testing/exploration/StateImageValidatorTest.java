@@ -1,12 +1,13 @@
 package io.github.jspinak.brobot.tools.testing.exploration;
 
-import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.action.ActionType;
-import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.model.state.State;
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -14,26 +15,21 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.HashSet;
-import java.util.Collections;
-import java.util.Set;
-import java.util.ArrayList;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ActionType;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
-/**
- * Tests for StateImageValidator, which validates all images within a state.
- */
+/** Tests for StateImageValidator, which validates all images within a state. */
 @DisplayName("StateImageValidator Tests")
 class StateImageValidatorTest extends BrobotTestBase {
 
-    @Mock
-    private Action action;
+    @Mock private Action action;
 
-    @Mock
-    private State state;
+    @Mock private State state;
 
     private StateImageValidator validator;
     private Set<StateImage> stateImages;
@@ -60,14 +56,15 @@ class StateImageValidatorTest extends BrobotTestBase {
             when(image.asObjectCollection()).thenReturn(collection);
             stateImages.add(image);
             when(state.getStateImages()).thenReturn(stateImages);
-            
+
             ActionResult result = new ActionResult();
             result.setSuccess(true);
-            when(action.perform(eq(ActionType.FIND), any(ObjectCollection.class))).thenReturn(result);
-            
+            when(action.perform(eq(ActionType.FIND), any(ObjectCollection.class)))
+                    .thenReturn(result);
+
             // Act
             validator.visitAllStateImages(state);
-            
+
             // Assert
             verify(action).perform(eq(ActionType.FIND), eq(collection));
             verify(image).asObjectCollection();
@@ -85,16 +82,18 @@ class StateImageValidatorTest extends BrobotTestBase {
                 stateImages.add(image);
             }
             when(state.getStateImages()).thenReturn(stateImages);
-            
+
             ActionResult result = new ActionResult();
             result.setSuccess(true);
-            when(action.perform(eq(ActionType.FIND), any(ObjectCollection.class))).thenReturn(result);
-            
+            when(action.perform(eq(ActionType.FIND), any(ObjectCollection.class)))
+                    .thenReturn(result);
+
             // Act
             validator.visitAllStateImages(state);
-            
+
             // Assert
-            verify(action, times(imageCount)).perform(eq(ActionType.FIND), any(ObjectCollection.class));
+            verify(action, times(imageCount))
+                    .perform(eq(ActionType.FIND), any(ObjectCollection.class));
             stateImages.forEach(image -> verify(image).asObjectCollection());
         }
 
@@ -103,10 +102,10 @@ class StateImageValidatorTest extends BrobotTestBase {
         void shouldHandleEmptyStateImagesList() {
             // Arrange
             when(state.getStateImages()).thenReturn(Collections.emptySet());
-            
+
             // Act
             validator.visitAllStateImages(state);
-            
+
             // Assert
             verify(action, never()).perform(any(ActionType.class), any(ObjectCollection.class));
         }
@@ -124,21 +123,22 @@ class StateImageValidatorTest extends BrobotTestBase {
             StateImage image2 = mock(StateImage.class);
             ObjectCollection collection1 = mock(ObjectCollection.class);
             ObjectCollection collection2 = mock(ObjectCollection.class);
-            
+
             when(image1.asObjectCollection()).thenReturn(collection1);
             when(image2.asObjectCollection()).thenReturn(collection2);
-            
+
             stateImages.add(image1);
             stateImages.add(image2);
             when(state.getStateImages()).thenReturn(stateImages);
-            
+
             ActionResult result = new ActionResult();
             result.setSuccess(true);
-            when(action.perform(any(ActionType.class), any(ObjectCollection.class))).thenReturn(result);
-            
+            when(action.perform(any(ActionType.class), any(ObjectCollection.class)))
+                    .thenReturn(result);
+
             // Act
             validator.visitAllStateImages(state);
-            
+
             // Assert
             verify(action).perform(eq(ActionType.FIND), eq(collection1));
             verify(action).perform(eq(ActionType.FIND), eq(collection2));
@@ -156,29 +156,29 @@ class StateImageValidatorTest extends BrobotTestBase {
             ObjectCollection collection1 = mock(ObjectCollection.class);
             ObjectCollection collection2 = mock(ObjectCollection.class);
             ObjectCollection collection3 = mock(ObjectCollection.class);
-            
+
             when(image1.asObjectCollection()).thenReturn(collection1);
             when(image2.asObjectCollection()).thenReturn(collection2);
             when(image3.asObjectCollection()).thenReturn(collection3);
-            
+
             stateImages.add(image1);
             stateImages.add(image2);
             stateImages.add(image3);
             when(state.getStateImages()).thenReturn(stateImages);
-            
+
             ActionResult successResult = new ActionResult();
             successResult.setSuccess(true);
             ActionResult failResult = new ActionResult();
             failResult.setSuccess(false);
-            
+
             // First succeeds, second fails, third succeeds
             when(action.perform(eq(ActionType.FIND), eq(collection1))).thenReturn(successResult);
             when(action.perform(eq(ActionType.FIND), eq(collection2))).thenReturn(failResult);
             when(action.perform(eq(ActionType.FIND), eq(collection3))).thenReturn(successResult);
-            
+
             // Act
             validator.visitAllStateImages(state);
-            
+
             // Assert
             verify(action).perform(eq(ActionType.FIND), eq(collection1));
             verify(action).perform(eq(ActionType.FIND), eq(collection2));
@@ -198,27 +198,28 @@ class StateImageValidatorTest extends BrobotTestBase {
             StateImage clickableImage = mock(StateImage.class);
             StateImage textImage = mock(StateImage.class);
             StateImage imageOnlyImage = mock(StateImage.class);
-            
+
             ObjectCollection clickableCollection = mock(ObjectCollection.class);
             ObjectCollection textCollection = mock(ObjectCollection.class);
             ObjectCollection imageOnlyCollection = mock(ObjectCollection.class);
-            
+
             when(clickableImage.asObjectCollection()).thenReturn(clickableCollection);
             when(textImage.asObjectCollection()).thenReturn(textCollection);
             when(imageOnlyImage.asObjectCollection()).thenReturn(imageOnlyCollection);
-            
+
             stateImages.add(clickableImage);
             stateImages.add(textImage);
             stateImages.add(imageOnlyImage);
             when(state.getStateImages()).thenReturn(stateImages);
-            
+
             ActionResult result = new ActionResult();
             result.setSuccess(true);
-            when(action.perform(eq(ActionType.FIND), any(ObjectCollection.class))).thenReturn(result);
-            
+            when(action.perform(eq(ActionType.FIND), any(ObjectCollection.class)))
+                    .thenReturn(result);
+
             // Act
             validator.visitAllStateImages(state);
-            
+
             // Assert
             // All images should be validated with FIND regardless of type
             verify(action).perform(eq(ActionType.FIND), eq(clickableCollection));
@@ -234,21 +235,22 @@ class StateImageValidatorTest extends BrobotTestBase {
             StateImage image2 = mock(StateImage.class);
             ObjectCollection collection1 = mock(ObjectCollection.class);
             ObjectCollection collection2 = mock(ObjectCollection.class);
-            
+
             when(image1.asObjectCollection()).thenReturn(collection1);
             when(image2.asObjectCollection()).thenReturn(collection2);
-            
+
             stateImages.add(image1);
             stateImages.add(image2);
             when(state.getStateImages()).thenReturn(stateImages);
-            
+
             ActionResult result = new ActionResult();
             result.setSuccess(true);
-            when(action.perform(eq(ActionType.FIND), any(ObjectCollection.class))).thenReturn(result);
-            
+            when(action.perform(eq(ActionType.FIND), any(ObjectCollection.class)))
+                    .thenReturn(result);
+
             // Act
             validator.visitAllStateImages(state);
-            
+
             // Assert - verify all were validated
             verify(action).perform(eq(ActionType.FIND), eq(collection1));
             verify(action).perform(eq(ActionType.FIND), eq(collection2));
@@ -278,14 +280,14 @@ class StateImageValidatorTest extends BrobotTestBase {
             when(image.asObjectCollection()).thenReturn(null);
             stateImages.add(image);
             when(state.getStateImages()).thenReturn(stateImages);
-            
+
             // Act
             try {
                 validator.visitAllStateImages(state);
             } catch (NullPointerException e) {
                 // Expected - action.perform will throw NPE with null collection
             }
-            
+
             // Assert
             verify(image).asObjectCollection();
         }
@@ -296,21 +298,23 @@ class StateImageValidatorTest extends BrobotTestBase {
             // Arrange
             StateImage image = mock(StateImage.class);
             ObjectCollection collection = mock(ObjectCollection.class);
-            
+
             when(image.asObjectCollection()).thenReturn(collection);
-            
+
             stateImages.add(image);
             when(state.getStateImages()).thenReturn(stateImages);
-            
+
             // Action throws exception
             when(action.perform(eq(ActionType.FIND), any(ObjectCollection.class)))
                     .thenThrow(new RuntimeException("Find failed"));
-            
+
             // Act & Assert
-            assertThrows(RuntimeException.class, () -> {
-                validator.visitAllStateImages(state);
-            });
-            
+            assertThrows(
+                    RuntimeException.class,
+                    () -> {
+                        validator.visitAllStateImages(state);
+                    });
+
             // Verify action was attempted
             verify(action).perform(eq(ActionType.FIND), eq(collection));
         }
@@ -332,18 +336,20 @@ class StateImageValidatorTest extends BrobotTestBase {
                 stateImages.add(image);
             }
             when(state.getStateImages()).thenReturn(stateImages);
-            
+
             ActionResult result = new ActionResult();
             result.setSuccess(true);
-            when(action.perform(eq(ActionType.FIND), any(ObjectCollection.class))).thenReturn(result);
-            
+            when(action.perform(eq(ActionType.FIND), any(ObjectCollection.class)))
+                    .thenReturn(result);
+
             // Act
             long startTime = System.currentTimeMillis();
             validator.visitAllStateImages(state);
             long endTime = System.currentTimeMillis();
-            
+
             // Assert
-            verify(action, times(largeCount)).perform(eq(ActionType.FIND), any(ObjectCollection.class));
+            verify(action, times(largeCount))
+                    .perform(eq(ActionType.FIND), any(ObjectCollection.class));
             // Should complete quickly even with many images
             assertTrue(endTime - startTime < 1000);
         }

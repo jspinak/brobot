@@ -1,26 +1,28 @@
 package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.replay;
 
-import io.github.jspinak.brobot.libraryfeatures.captureAndReplay.capture.SceneAndObjectsForXML;
-import io.github.jspinak.brobot.libraryfeatures.captureAndReplay.capture.SceneObjectCollectionForXML;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
+import io.github.jspinak.brobot.libraryfeatures.captureAndReplay.capture.SceneAndObjectsForXML;
+import io.github.jspinak.brobot.libraryfeatures.captureAndReplay.capture.SceneObjectCollectionForXML;
+import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
 @Component
 public class ReadXmlScenes {
 
     public SceneObjectCollectionForXML getSceneAndObjects() {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance(); // Instantiate the Factory
+        DocumentBuilderFactory dbf =
+                DocumentBuilderFactory.newInstance(); // Instantiate the Factory
         String path = "capture\\scenes.xml";
         ConsoleReporter.println(Path.of(path).toAbsolutePath().toString());
         DocumentBuilder db;
@@ -47,6 +49,4 @@ public class ReadXmlScenes {
         }
         return sceneObjects;
     }
-
-
 }

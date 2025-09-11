@@ -1,26 +1,26 @@
 package io.github.jspinak.brobot.runner.ui.icons;
 
-import lombok.Data;
-
-import io.github.jspinak.brobot.runner.events.EventBus;
-import io.github.jspinak.brobot.runner.events.LogEvent;
-import jakarta.annotation.PostConstruct;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
-/**
- * Manages application icons and provides easy access to them.
- */
+import jakarta.annotation.PostConstruct;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import io.github.jspinak.brobot.runner.events.EventBus;
+import io.github.jspinak.brobot.runner.events.LogEvent;
+
+import lombok.Data;
+
+/** Manages application icons and provides easy access to them. */
 @Component
 @Data
 public class IconRegistry {
@@ -36,7 +36,7 @@ public class IconRegistry {
     private final Map<String, Image> iconCache = new HashMap<>();
 
     // Available sizes
-    private static final int[] ICON_SIZES = { 16, 24, 32, 48, 64 };
+    private static final int[] ICON_SIZES = {16, 24, 32, 48, 64};
 
     @Autowired
     public IconRegistry(EventBus eventBus, ModernIconGenerator iconGenerator) {
@@ -48,10 +48,10 @@ public class IconRegistry {
     public void initialize() {
         // Don't preload icons in PostConstruct - wait until FX thread is ready
         // Icons will be loaded on-demand when first requested from FX thread
-        
+
         logger.info("IconRegistry initialized");
         eventBus.publish(LogEvent.info(this, "Icon registry initialized", "Resources"));
-        
+
         // Preload common icons on FX thread
         if (javafx.application.Platform.isFxApplicationThread()) {
             preloadCommonIcons();
@@ -60,19 +60,17 @@ public class IconRegistry {
         }
     }
 
-    /**
-     * Preloads common icons into the cache.
-     */
+    /** Preloads common icons into the cache. */
     private void preloadCommonIcons() {
         logger.info("Preloading common icons on thread: {}", Thread.currentThread().getName());
-        
+
         // Tab icons
-        loadIcon("settings", 16);    // Configuration tab
-        loadIcon("play", 16);        // Automation tab
-        loadIcon("grid", 16);        // Resources tab
-        loadIcon("list", 16);        // Logs tab
-        loadIcon("chart", 16);       // Showcase tab
-        
+        loadIcon("settings", 16); // Configuration tab
+        loadIcon("play", 16); // Automation tab
+        loadIcon("grid", 16); // Resources tab
+        loadIcon("list", 16); // Logs tab
+        loadIcon("chart", 16); // Showcase tab
+
         // Button icons
         loadIcon("add", 16);
         loadIcon("folder", 16);
@@ -84,7 +82,7 @@ public class IconRegistry {
         loadIcon("keyboard", 16);
         loadIcon("moon", 16);
         loadIcon("sun", 16);
-        
+
         // Common action icons
         loadIcon("edit", 16);
         loadIcon("delete", 16);
@@ -124,7 +122,7 @@ public class IconRegistry {
                 // Try without size subdirectory
                 path = ICON_BASE_PATH + iconName + ".png";
                 is = getClass().getResourceAsStream(path);
-                
+
                 if (is == null) {
                     // Try SVG if PNG not found
                     path = ICON_BASE_PATH + "svg/" + iconName + ".svg";
@@ -136,7 +134,8 @@ public class IconRegistry {
                         Image generatedIcon = iconGenerator.getIcon(iconName, size);
                         if (generatedIcon != null) {
                             iconCache.put(key, generatedIcon);
-                            logger.info("Successfully generated icon: {} at size {}", iconName, size);
+                            logger.info(
+                                    "Successfully generated icon: {} at size {}", iconName, size);
                             return true;
                         } else {
                             logger.warn("Failed to generate icon: {} at size {}", iconName, size);
@@ -272,7 +271,7 @@ public class IconRegistry {
     public java.util.List<Image> getAppIcons() {
         java.util.List<Image> icons = new java.util.ArrayList<>();
 
-        for (int size : new int[] { 16, 32, 48, 64, 128 }) {
+        for (int size : new int[] {16, 32, 48, 64, 128}) {
             Image icon = getIcon("brobot-icon", size);
             if (icon != null) {
                 icons.add(icon);
@@ -282,9 +281,7 @@ public class IconRegistry {
         return icons;
     }
 
-    /**
-     * Clears the icon cache.
-     */
+    /** Clears the icon cache. */
     public void clearCache() {
         iconCache.clear();
         logger.debug("Icon cache cleared");

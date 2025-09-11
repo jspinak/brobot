@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.runner.ui.components;
 
-import io.github.jspinak.brobot.runner.ui.components.table.services.*;
+import java.util.Comparator;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -10,13 +12,13 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
-import lombok.Getter;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Comparator;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import io.github.jspinak.brobot.runner.ui.components.table.services.*;
+
+import lombok.Getter;
 
 /**
  * Refactored enhanced table component that delegates responsibilities to specialized services.
@@ -25,22 +27,20 @@ import java.util.function.Predicate;
  */
 @Component
 public class RefactoredEnhancedTable<T> extends VBox {
-    
+
     // The underlying TableView
-    @Getter
-    private final TableView<T> tableView;
-    
+    @Getter private final TableView<T> tableView;
+
     // Data
-    @Getter
-    private final ObservableList<T> items = FXCollections.observableArrayList();
+    @Getter private final ObservableList<T> items = FXCollections.observableArrayList();
     private FilteredList<T> filteredItems;
     private SortedList<T> sortedItems;
-    
+
     // UI Components
     private TextField searchField;
     private Pagination pagination;
     private ComboBox<Integer> pageSizeSelector;
-    
+
     // Services
     private final TableColumnService<T> columnService;
     private final TableFilterService<T> filterService;
@@ -48,22 +48,19 @@ public class RefactoredEnhancedTable<T> extends VBox {
     private final TableSortingService<T> sortingService;
     private final TableSelectionService<T> selectionService;
     private final EnhancedTableUIFactory uiFactory;
-    
-    /**
-     * Creates a new RefactoredEnhancedTable using default service instances.
-     */
+
+    /** Creates a new RefactoredEnhancedTable using default service instances. */
     public RefactoredEnhancedTable() {
-        this(new TableColumnService<>(),
-             new TableFilterService<>(),
-             new TablePaginationService<>(),
-             new TableSortingService<>(),
-             new TableSelectionService<>(),
-             new EnhancedTableUIFactory());
+        this(
+                new TableColumnService<>(),
+                new TableFilterService<>(),
+                new TablePaginationService<>(),
+                new TableSortingService<>(),
+                new TableSelectionService<>(),
+                new EnhancedTableUIFactory());
     }
-    
-    /**
-     * Creates a new RefactoredEnhancedTable with injected services.
-     */
+
+    /** Creates a new RefactoredEnhancedTable with injected services. */
     @Autowired
     public RefactoredEnhancedTable(
             TableColumnService<T> columnService,
@@ -72,56 +69,56 @@ public class RefactoredEnhancedTable<T> extends VBox {
             TableSortingService<T> sortingService,
             TableSelectionService<T> selectionService,
             EnhancedTableUIFactory uiFactory) {
-        
+
         this.columnService = columnService;
         this.filterService = filterService;
         this.paginationService = paginationService;
         this.sortingService = sortingService;
         this.selectionService = selectionService;
         this.uiFactory = uiFactory;
-        
+
         // Create UI components
         tableView = uiFactory.createTableView();
-        
+
         // Initialize the table
         initializeTable();
     }
-    
-    /**
-     * Initializes the table components and services.
-     */
+
+    /** Initializes the table components and services. */
     private void initializeTable() {
         // Create UI components
-        EnhancedTableUIFactory.ToolbarComponents toolbarComponents = uiFactory.createToolbarComponents();
+        EnhancedTableUIFactory.ToolbarComponents toolbarComponents =
+                uiFactory.createToolbarComponents();
         searchField = toolbarComponents.getSearchField();
         pageSizeSelector = toolbarComponents.getPageSizeSelector();
         HBox toolbar = toolbarComponents.getToolbar();
-        
+
         pagination = uiFactory.createPagination();
         HBox paginationBox = uiFactory.createPaginationBox(pagination);
-        
+
         // Initialize services
         filteredItems = filterService.initializeFiltering(items);
         sortedItems = sortingService.initializeSorting(filteredItems);
-        
+
         filterService.setSearchField(searchField);
-        filterService.setOnFilterChanged(() -> {
-            paginationService.goToFirstPage();
-            paginationService.updatePagination();
-        });
-        
+        filterService.setOnFilterChanged(
+                () -> {
+                    paginationService.goToFirstPage();
+                    paginationService.updatePagination();
+                });
+
         sortingService.bindToTableView(tableView);
         paginationService.initialize(pagination, pageSizeSelector, tableView);
         paginationService.setSortedItems(sortedItems);
         selectionService.initialize(tableView);
-        
+
         // Assemble UI
         uiFactory.assembleTableUI(this, toolbar, tableView, paginationBox);
-        
+
         // Initialize data
         paginationService.updatePagination();
     }
-    
+
     /**
      * Sets the items in the table.
      *
@@ -134,7 +131,7 @@ public class RefactoredEnhancedTable<T> extends VBox {
         }
         paginationService.updatePagination();
     }
-    
+
     /**
      * Sets the search provider function.
      *
@@ -143,7 +140,7 @@ public class RefactoredEnhancedTable<T> extends VBox {
     public void setSearchProvider(Function<T, String> searchProvider) {
         filterService.setSearchProvider(searchProvider);
     }
-    
+
     /**
      * Gets the search provider function.
      *
@@ -152,7 +149,7 @@ public class RefactoredEnhancedTable<T> extends VBox {
     public Function<T, String> getSearchProvider() {
         return filterService.getSearchProvider();
     }
-    
+
     /**
      * Gets the search provider property.
      *
@@ -161,7 +158,7 @@ public class RefactoredEnhancedTable<T> extends VBox {
     public ObjectProperty<Function<T, String>> searchProviderProperty() {
         return filterService.searchProviderProperty();
     }
-    
+
     /**
      * Sets the selection mode for the table.
      *
@@ -170,7 +167,7 @@ public class RefactoredEnhancedTable<T> extends VBox {
     public void setSelectionMode(SelectionMode mode) {
         selectionService.setSelectionMode(mode);
     }
-    
+
     /**
      * Gets the selection mode for the table.
      *
@@ -179,7 +176,7 @@ public class RefactoredEnhancedTable<T> extends VBox {
     public SelectionMode getSelectionMode() {
         return selectionService.getSelectionMode();
     }
-    
+
     /**
      * Gets the selection mode property.
      *
@@ -188,7 +185,7 @@ public class RefactoredEnhancedTable<T> extends VBox {
     public ObjectProperty<SelectionMode> selectionModeProperty() {
         return selectionService.selectionModeProperty();
     }
-    
+
     /**
      * Sets the page size for pagination.
      *
@@ -197,7 +194,7 @@ public class RefactoredEnhancedTable<T> extends VBox {
     public void setPageSize(int pageSize) {
         paginationService.setPageSize(pageSize);
     }
-    
+
     /**
      * Gets the page size for pagination.
      *
@@ -206,7 +203,7 @@ public class RefactoredEnhancedTable<T> extends VBox {
     public int getPageSize() {
         return paginationService.getPageSize();
     }
-    
+
     /**
      * Gets the page size property.
      *
@@ -215,7 +212,7 @@ public class RefactoredEnhancedTable<T> extends VBox {
     public ObjectProperty<Integer> pageSizeProperty() {
         return paginationService.pageSizeProperty();
     }
-    
+
     /**
      * Adds a column to the table.
      *
@@ -226,7 +223,7 @@ public class RefactoredEnhancedTable<T> extends VBox {
     public TableColumn<T, String> addColumn(String title, String propertyName) {
         return columnService.addStringColumn(tableView, title, propertyName);
     }
-    
+
     /**
      * Adds a column with a custom cell factory.
      *
@@ -235,11 +232,13 @@ public class RefactoredEnhancedTable<T> extends VBox {
      * @param cellFactory The cell factory for the column
      * @return The created column
      */
-    public <S> TableColumn<T, S> addColumn(String title, 
-            Callback<TableColumn.CellDataFeatures<T, S>, javafx.beans.value.ObservableValue<S>> cellFactory) {
+    public <S> TableColumn<T, S> addColumn(
+            String title,
+            Callback<TableColumn.CellDataFeatures<T, S>, javafx.beans.value.ObservableValue<S>>
+                    cellFactory) {
         return columnService.addColumn(tableView, title, cellFactory);
     }
-    
+
     /**
      * Adds a column with custom cell factory and cell value factory.
      *
@@ -249,12 +248,14 @@ public class RefactoredEnhancedTable<T> extends VBox {
      * @param cellFactory The cell factory
      * @return The created column
      */
-    public <S> TableColumn<T, S> addColumn(String title,
-            Callback<TableColumn.CellDataFeatures<T, S>, javafx.beans.value.ObservableValue<S>> valueFactory,
+    public <S> TableColumn<T, S> addColumn(
+            String title,
+            Callback<TableColumn.CellDataFeatures<T, S>, javafx.beans.value.ObservableValue<S>>
+                    valueFactory,
             Callback<TableColumn<T, S>, TableCell<T, S>> cellFactory) {
         return columnService.addColumn(tableView, title, valueFactory, cellFactory);
     }
-    
+
     /**
      * Sets the title of a column.
      *
@@ -264,7 +265,7 @@ public class RefactoredEnhancedTable<T> extends VBox {
     public void setColumnTitle(TableColumn<T, ?> column, String title) {
         columnService.setColumnTitle(column, title);
     }
-    
+
     /**
      * Removes a column from the table.
      *
@@ -273,14 +274,12 @@ public class RefactoredEnhancedTable<T> extends VBox {
     public void removeColumn(TableColumn<T, ?> column) {
         columnService.removeColumn(tableView, column);
     }
-    
-    /**
-     * Clears all columns from the table.
-     */
+
+    /** Clears all columns from the table. */
     public void clearColumns() {
         columnService.clearColumns(tableView);
     }
-    
+
     /**
      * Gets the selection model for the table.
      *
@@ -289,7 +288,7 @@ public class RefactoredEnhancedTable<T> extends VBox {
     public TableView.TableViewSelectionModel<T> getSelectionModel() {
         return tableView.getSelectionModel();
     }
-    
+
     /**
      * Gets the selected item.
      *
@@ -298,7 +297,7 @@ public class RefactoredEnhancedTable<T> extends VBox {
     public T getSelectedItem() {
         return selectionService.getSelectedItem();
     }
-    
+
     /**
      * Gets the list of selected items.
      *
@@ -307,7 +306,7 @@ public class RefactoredEnhancedTable<T> extends VBox {
     public ObservableList<T> getSelectedItems() {
         return selectionService.getSelectedItems();
     }
-    
+
     /**
      * Sets a custom filter predicate.
      *
@@ -316,14 +315,12 @@ public class RefactoredEnhancedTable<T> extends VBox {
     public void setFilter(Predicate<T> predicate) {
         filterService.setFilter(predicate);
     }
-    
-    /**
-     * Clears the filter.
-     */
+
+    /** Clears the filter. */
     public void clearFilter() {
         filterService.clearFilter();
     }
-    
+
     /**
      * Sets the sort order for the table.
      *
@@ -334,7 +331,7 @@ public class RefactoredEnhancedTable<T> extends VBox {
     public <S> void setSortOrder(TableColumn<T, S> column, boolean ascending) {
         sortingService.setSortOrder(column, ascending);
     }
-    
+
     /**
      * Sets a comparator for a specific column.
      *
@@ -345,21 +342,17 @@ public class RefactoredEnhancedTable<T> extends VBox {
     public <S> void setColumnComparator(TableColumn<T, S> column, Comparator<S> comparator) {
         columnService.setColumnComparator(column, comparator);
     }
-    
-    /**
-     * Goes to the first page of the pagination.
-     */
+
+    /** Goes to the first page of the pagination. */
     public void goToFirstPage() {
         paginationService.goToFirstPage();
     }
-    
-    /**
-     * Goes to the last page of the pagination.
-     */
+
+    /** Goes to the last page of the pagination. */
     public void goToLastPage() {
         paginationService.goToLastPage();
     }
-    
+
     /**
      * Goes to a specific page of the pagination.
      *
@@ -368,10 +361,8 @@ public class RefactoredEnhancedTable<T> extends VBox {
     public void goToPage(int pageIndex) {
         paginationService.goToPage(pageIndex);
     }
-    
-    /**
-     * Refreshes the table display.
-     */
+
+    /** Refreshes the table display. */
     public void refresh() {
         tableView.refresh();
     }

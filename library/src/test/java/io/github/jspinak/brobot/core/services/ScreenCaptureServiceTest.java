@@ -1,7 +1,11 @@
 package io.github.jspinak.brobot.core.services;
 
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import java.awt.image.BufferedImage;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,26 +13,21 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.awt.image.BufferedImage;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
- * Comprehensive tests for ScreenCaptureService interface.
- * Tests screen capture operations and multi-monitor support.
+ * Comprehensive tests for ScreenCaptureService interface. Tests screen capture operations and
+ * multi-monitor support.
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ScreenCaptureService Interface Tests")
 public class ScreenCaptureServiceTest extends BrobotTestBase {
 
-    @Mock
-    private ScreenCaptureService screenCaptureService;
-    
-    @Mock
-    private BufferedImage mockImage;
-    
+    @Mock private ScreenCaptureService screenCaptureService;
+
+    @Mock private BufferedImage mockImage;
+
     @BeforeEach
     @Override
     public void setupTest() {
@@ -100,10 +99,10 @@ public class ScreenCaptureServiceTest extends BrobotTestBase {
     @DisplayName("Should handle null Region object")
     void testCaptureRegionWithNullObject() {
         // Arrange
-        when(screenCaptureService.captureRegion((Region)null)).thenCallRealMethod();
+        when(screenCaptureService.captureRegion((Region) null)).thenCallRealMethod();
 
         // Act
-        BufferedImage result = screenCaptureService.captureRegion((Region)null);
+        BufferedImage result = screenCaptureService.captureRegion((Region) null);
 
         // Assert
         assertNull(result);
@@ -329,30 +328,27 @@ public class ScreenCaptureServiceTest extends BrobotTestBase {
     void testMultiMonitorSetup() {
         // Arrange
         when(screenCaptureService.getMonitorCount()).thenReturn(3);
-        when(screenCaptureService.getMonitorBounds(0))
-            .thenReturn(new Region(0, 0, 1920, 1080));
-        when(screenCaptureService.getMonitorBounds(1))
-            .thenReturn(new Region(1920, 0, 1920, 1080));
-        when(screenCaptureService.getMonitorBounds(2))
-            .thenReturn(new Region(3840, 0, 1920, 1080));
+        when(screenCaptureService.getMonitorBounds(0)).thenReturn(new Region(0, 0, 1920, 1080));
+        when(screenCaptureService.getMonitorBounds(1)).thenReturn(new Region(1920, 0, 1920, 1080));
+        when(screenCaptureService.getMonitorBounds(2)).thenReturn(new Region(3840, 0, 1920, 1080));
         when(screenCaptureService.getVirtualDesktopBounds())
-            .thenReturn(new Region(0, 0, 5760, 1080));
+                .thenReturn(new Region(0, 0, 5760, 1080));
 
         // Act & Assert
         assertEquals(3, screenCaptureService.getMonitorCount());
-        
+
         Region monitor0 = screenCaptureService.getMonitorBounds(0);
         assertNotNull(monitor0);
         assertEquals(0, monitor0.x());
-        
+
         Region monitor1 = screenCaptureService.getMonitorBounds(1);
         assertNotNull(monitor1);
         assertEquals(1920, monitor1.x());
-        
+
         Region monitor2 = screenCaptureService.getMonitorBounds(2);
         assertNotNull(monitor2);
         assertEquals(3840, monitor2.x());
-        
+
         Region virtualDesktop = screenCaptureService.getVirtualDesktopBounds();
         assertNotNull(virtualDesktop);
         assertEquals(5760, virtualDesktop.w());
@@ -377,15 +373,15 @@ public class ScreenCaptureServiceTest extends BrobotTestBase {
     @DisplayName("Should validate region boundaries")
     void testRegionBoundaryValidation() {
         // Test various boundary conditions
-        
+
         // Negative coordinates
         when(screenCaptureService.captureRegion(-100, -100, 200, 200)).thenReturn(null);
         assertNull(screenCaptureService.captureRegion(-100, -100, 200, 200));
-        
+
         // Negative dimensions
         when(screenCaptureService.captureRegion(100, 100, -50, -50)).thenReturn(null);
         assertNull(screenCaptureService.captureRegion(100, 100, -50, -50));
-        
+
         // Very large coordinates
         when(screenCaptureService.captureRegion(10000, 10000, 100, 100)).thenReturn(null);
         assertNull(screenCaptureService.captureRegion(10000, 10000, 100, 100));

@@ -1,54 +1,53 @@
 package io.github.jspinak.brobot.model.element;
 
+import java.awt.image.BufferedImage;
+import java.util.List;
+
+import org.bytedeco.opencv.opencv_core.Mat;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.model.action.ActionHistory;
 import io.github.jspinak.brobot.model.action.ActionRecord;
+import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 import io.github.jspinak.brobot.util.string.FilenameExtractor;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.bytedeco.opencv.opencv_core.Mat;
-
-import java.awt.image.BufferedImage;
-import java.util.List;
 
 /**
  * Represents a visual template for pattern matching in the Brobot GUI automation framework.
- * 
- * <p>Pattern is the fundamental unit of visual recognition in Brobot, encapsulating an image 
- * template along with its matching parameters and metadata. It serves as the building block 
- * for StateImages and provides the core pattern matching capability that enables visual 
- * GUI automation.</p>
- * 
+ *
+ * <p>Pattern is the fundamental unit of visual recognition in Brobot, encapsulating an image
+ * template along with its matching parameters and metadata. It serves as the building block for
+ * StateImages and provides the core pattern matching capability that enables visual GUI automation.
+ *
  * <p>Key components:
+ *
  * <ul>
- *   <li><b>Image Data</b>: The actual visual template stored as a BufferedImage</li>
- *   <li><b>Search Configuration</b>: Regions where this pattern should be searched for</li>
- *   <li><b>Target Parameters</b>: Position and offset for precise interaction points</li>
- *   <li><b>Match History</b>: Historical data for mocking and analysis</li>
- *   <li><b>Anchors</b>: Reference points for defining relative positions</li>
+ *   <li><b>Image Data</b>: The actual visual template stored as a BufferedImage
+ *   <li><b>Search Configuration</b>: Regions where this pattern should be searched for
+ *   <li><b>Target Parameters</b>: Position and offset for precise interaction points
+ *   <li><b>Match History</b>: Historical data for mocking and analysis
+ *   <li><b>Anchors</b>: Reference points for defining relative positions
  * </ul>
- * </p>
- * 
+ *
  * <p>Pattern types:
+ *
  * <ul>
- *   <li><b>Fixed</b>: Patterns that always appear in the same screen location</li>
- *   <li><b>Dynamic</b>: Patterns with changing content that require special handling</li>
- *   <li><b>Standard</b>: Regular patterns that can appear anywhere within search regions</li>
+ *   <li><b>Fixed</b>: Patterns that always appear in the same screen location
+ *   <li><b>Dynamic</b>: Patterns with changing content that require special handling
+ *   <li><b>Standard</b>: Regular patterns that can appear anywhere within search regions
  * </ul>
- * </p>
- * 
- * <p>In the model-based approach, Patterns provide the visual vocabulary for describing 
- * GUI elements. They enable the framework to recognize and interact with GUI components 
- * regardless of the underlying technology, making automation truly cross-platform and 
- * technology-agnostic.</p>
- * 
+ *
+ * <p>In the model-based approach, Patterns provide the visual vocabulary for describing GUI
+ * elements. They enable the framework to recognize and interact with GUI components regardless of
+ * the underlying technology, making automation truly cross-platform and technology-agnostic.
+ *
  * @since 1.0
  * @see StateImage
  * @see Image
@@ -71,16 +70,17 @@ public class Pattern {
     */
     private boolean fixed = false;
     private SearchRegions searchRegions = new SearchRegions();
-    private boolean setKmeansColorProfiles = false; // this is an expensive operation and should be done only when needed
-    //@Embedded
-    //private KmeansProfilesAllSchemas kmeansProfilesAllSchemas = new KmeansProfilesAllSchemas();
-    //@Embedded
-    //private ColorCluster colorCluster = new ColorCluster();
+    private boolean setKmeansColorProfiles =
+            false; // this is an expensive operation and should be done only when needed
+    // @Embedded
+    // private KmeansProfilesAllSchemas kmeansProfilesAllSchemas = new KmeansProfilesAllSchemas();
+    // @Embedded
+    // private ColorCluster colorCluster = new ColorCluster();
     private ActionHistory matchHistory = new ActionHistory();
     private int index; // a unique identifier used for classification matrices
     private boolean dynamic = false; // dynamic images cannot be found using pattern matching
-    private Position targetPosition = new Position(.5,.5); // use to convert a match to a location
-    private Location targetOffset = new Location(0,0); // adjusts the match location
+    private Position targetPosition = new Position(.5, .5); // use to convert a match to a location
+    private Location targetOffset = new Location(0, 0); // adjusts the match location
     private Anchors anchors = new Anchors(); // for defining regions using this object as input
 
     /*
@@ -105,26 +105,32 @@ public class Pattern {
         }
         setImgpath(imgPath);
         setNameFromFilenameIfEmpty(imgPath);
-        
+
         ExecutionEnvironment env = ExecutionEnvironment.getInstance();
-        
+
         // Try to load the real image
         BufferedImage bufferedImage = BufferedImageUtilities.getBuffImgFromFile(imgPath);
-        
+
         if (bufferedImage != null) {
             // Successfully loaded the image
             this.image = new Image(bufferedImage, name);
         } else if (env.isMockMode()) {
             // In mock mode, log warning but allow null image
             // Tests should provide their own mock images through proper test setup
-            log.warn("Image '{}' not found in mock mode. Pattern '{}' will have null image. " +
-                    "Tests should provide mock images through MockSceneBuilder or similar test utilities.", 
-                    imgPath, name);
+            log.warn(
+                    "Image '{}' not found in mock mode. Pattern '{}' will have null image. Tests"
+                            + " should provide mock images through MockSceneBuilder or similar test"
+                            + " utilities.",
+                    imgPath,
+                    name);
             this.image = null;
         } else {
             // In real mode, fail if image cannot be loaded
-            throw new IllegalStateException("Failed to load image: " + imgPath + 
-                ". Make sure the image exists in the configured image path and has .png extension.");
+            throw new IllegalStateException(
+                    "Failed to load image: "
+                            + imgPath
+                            + ". Make sure the image exists in the configured image path and has"
+                            + " .png extension.");
         }
     }
 
@@ -148,21 +154,19 @@ public class Pattern {
         if (imageToUse != null) {
             image = imageToUse;
             name = match.getName();
-        }
-        else imgpath = match.getName();
+        } else imgpath = match.getName();
     }
 
     public Pattern(Mat mat) {
         image = new Image(mat);
     }
 
-    /**
-     * Creates a generic Pattern without an associated image.
-     */
+    /** Creates a generic Pattern without an associated image. */
     public Pattern() {}
 
     /**
      * Converts the BufferedImage in Image to a BGR JavaCV Mat.
+     *
      * @return a BGR Mat.
      */
     @JsonIgnore
@@ -171,8 +175,10 @@ public class Pattern {
     }
 
     /**
-     * Setting the Mat involves converting the BGR Mat parameter to a BufferedImage and saving it in the SukiliX Image.
-     * Mat objects are not stored explicitly in Pattern but converted to and from BufferedImage objects.
+     * Setting the Mat involves converting the BGR Mat parameter to a BufferedImage and saving it in
+     * the SukiliX Image. Mat objects are not stored explicitly in Pattern but converted to and from
+     * BufferedImage objects.
+     *
      * @param matBGR a JavaCV Mat in BGR format.
      */
     @JsonIgnore
@@ -182,6 +188,7 @@ public class Pattern {
 
     /**
      * Converts the BufferedImage in Image to an HSV JavaCV Mat.
+     *
      * @return an HSV Mat.
      */
     @JsonIgnore
@@ -208,8 +215,9 @@ public class Pattern {
     }
 
     /**
-     * If the image has a fixed location and has already been found, the region where it was found is returned.
-     * If there are multiple regions, this returns a random selection.
+     * If the image has a fixed location and has already been found, the region where it was found
+     * is returned. If there are multiple regions, this returns a random selection.
+     *
      * @return a region
      */
     @JsonIgnore
@@ -218,18 +226,20 @@ public class Pattern {
     }
 
     /**
-     * If the image has a fixed location and has already been found, the region where it was found is returned.
-     * Otherwise, all regions are returned.
+     * If the image has a fixed location and has already been found, the region where it was found
+     * is returned. Otherwise, all regions are returned.
+     *
      * @return all usable regions
      */
     @JsonIgnore
     public List<Region> getRegions() {
         return searchRegions.getRegions(fixed);
     }
-    
+
     /**
-     * Get regions for searching, with full-screen default if none are configured.
-     * This is the method to use when actually performing searches.
+     * Get regions for searching, with full-screen default if none are configured. This is the
+     * method to use when actually performing searches.
+     *
      * @return regions for searching (never empty)
      */
     @JsonIgnore
@@ -287,11 +297,11 @@ public class Pattern {
 
     // __convenience functions for the SikuliX Pattern object__
     // Cache for SikuliX Pattern to avoid recreating it multiple times
-    @JsonIgnore
-    private transient org.sikuli.script.Pattern cachedSikuliPattern = null;
-    
+    @JsonIgnore private transient org.sikuli.script.Pattern cachedSikuliPattern = null;
+
     /**
      * Checks if an image with alpha channel actually has transparent pixels.
+     *
      * @param img The image to check
      * @return true if the image has pixels with alpha < 255, false otherwise
      */
@@ -299,7 +309,7 @@ public class Pattern {
         if (!img.getColorModel().hasAlpha()) {
             return false;
         }
-        
+
         // Check if any pixel has alpha < 255
         for (int y = 0; y < img.getHeight(); y++) {
             for (int x = 0; x < img.getWidth(); x++) {
@@ -312,29 +322,39 @@ public class Pattern {
         }
         return false; // All pixels are fully opaque
     }
-    
+
     /**
      * Get string representation of BufferedImage type.
+     *
      * @param type The BufferedImage type constant
      * @return String representation of the type
      */
     private String getImageTypeString(int type) {
-        switch(type) {
-            case BufferedImage.TYPE_INT_RGB: return "TYPE_INT_RGB";
-            case BufferedImage.TYPE_INT_ARGB: return "TYPE_INT_ARGB";
-            case BufferedImage.TYPE_INT_ARGB_PRE: return "TYPE_INT_ARGB_PRE";
-            case BufferedImage.TYPE_INT_BGR: return "TYPE_INT_BGR";
-            case BufferedImage.TYPE_3BYTE_BGR: return "TYPE_3BYTE_BGR";
-            case BufferedImage.TYPE_4BYTE_ABGR: return "TYPE_4BYTE_ABGR";
-            case BufferedImage.TYPE_4BYTE_ABGR_PRE: return "TYPE_4BYTE_ABGR_PRE";
-            default: return "Type " + type;
+        switch (type) {
+            case BufferedImage.TYPE_INT_RGB:
+                return "TYPE_INT_RGB";
+            case BufferedImage.TYPE_INT_ARGB:
+                return "TYPE_INT_ARGB";
+            case BufferedImage.TYPE_INT_ARGB_PRE:
+                return "TYPE_INT_ARGB_PRE";
+            case BufferedImage.TYPE_INT_BGR:
+                return "TYPE_INT_BGR";
+            case BufferedImage.TYPE_3BYTE_BGR:
+                return "TYPE_3BYTE_BGR";
+            case BufferedImage.TYPE_4BYTE_ABGR:
+                return "TYPE_4BYTE_ABGR";
+            case BufferedImage.TYPE_4BYTE_ABGR_PRE:
+                return "TYPE_4BYTE_ABGR_PRE";
+            default:
+                return "Type " + type;
         }
     }
-    
+
     /**
-     * Another way to get the SikuliX object.
-     * Uses BufferedImage directly since SikuliX converts to BufferedImage internally anyway.
-     * No need for file path loading as it provides no real benefit.
+     * Another way to get the SikuliX object. Uses BufferedImage directly since SikuliX converts to
+     * BufferedImage internally anyway. No need for file path loading as it provides no real
+     * benefit.
+     *
      * @return the SikuliX Pattern object.
      */
     @JsonIgnore
@@ -343,21 +363,28 @@ public class Pattern {
         if (cachedSikuliPattern != null) {
             return cachedSikuliPattern;
         }
-        
+
         // Ensure we have a valid image
         if (image == null || image.isEmpty()) {
-            throw new IllegalStateException("Cannot create SikuliX Pattern: No valid image for pattern: " + name);
+            throw new IllegalStateException(
+                    "Cannot create SikuliX Pattern: No valid image for pattern: " + name);
         }
-        
+
         // Get the BufferedImage - this is what SikuliX uses internally anyway
         BufferedImage buffImg = image.getBufferedImage();
-        
+
         // Only log pattern creation in debug/verbose mode
-        if (log.isDebugEnabled() && name != null && (name.contains("prompt") || name.contains("claude") || name.contains("debug"))) {
-            log.debug("[PATTERN] Creating SikuliX pattern '{}' {}x{} type={}", 
-                name, buffImg.getWidth(), buffImg.getHeight(), getImageTypeString(buffImg.getType()));
+        if (log.isDebugEnabled()
+                && name != null
+                && (name.contains("prompt") || name.contains("claude") || name.contains("debug"))) {
+            log.debug(
+                    "[PATTERN] Creating SikuliX pattern '{}' {}x{} type={}",
+                    name,
+                    buffImg.getWidth(),
+                    buffImg.getHeight(),
+                    getImageTypeString(buffImg.getType()));
         }
-        
+
         // Create the SikuliX pattern from BufferedImage
         // This is exactly what SikuliX does internally when given a file path
         cachedSikuliPattern = new org.sikuli.script.Pattern(buffImg);
@@ -375,20 +402,34 @@ public class Pattern {
 
     @Override
     public String toString() {
-        return "Pattern{" +
-                "name='" + name + '\'' +
-                ", imgpath='" + imgpath + '\'' +
-                ", fixed=" + fixed +
-                ", dynamic=" + dynamic +
-                ", index=" + index +
-                ", image=" + (image != null ? image.toString() : "null") +
-                ", searchRegions=" + searchRegions +
-                ", targetPosition=" + targetPosition +
-                ", targetOffset=" + targetOffset +
-                ", anchors=" + anchors +
-                ", w=" + w() +
-                ", h=" + h() +
-                '}';
+        return "Pattern{"
+                + "name='"
+                + name
+                + '\''
+                + ", imgpath='"
+                + imgpath
+                + '\''
+                + ", fixed="
+                + fixed
+                + ", dynamic="
+                + dynamic
+                + ", index="
+                + index
+                + ", image="
+                + (image != null ? image.toString() : "null")
+                + ", searchRegions="
+                + searchRegions
+                + ", targetPosition="
+                + targetPosition
+                + ", targetOffset="
+                + targetOffset
+                + ", anchors="
+                + anchors
+                + ", w="
+                + w()
+                + ", h="
+                + h()
+                + '}';
     }
 
     @Slf4j
@@ -400,11 +441,12 @@ public class Pattern {
         private boolean fixed = false;
         private SearchRegions searchRegions = new SearchRegions();
         private boolean setKmeansColorProfiles = false;
-        //private KmeansProfilesAllSchemas kmeansProfilesAllSchemas = new KmeansProfilesAllSchemas();
+        // private KmeansProfilesAllSchemas kmeansProfilesAllSchemas = new
+        // KmeansProfilesAllSchemas();
         private ActionHistory matchHistory = new ActionHistory();
         private int index;
         private boolean dynamic = false;
-        private Position targetPosition = new Position(.5,.5);
+        private Position targetPosition = new Position(.5, .5);
         private Location targetOffset = new Location(0, 0);
         private Anchors anchors = new Anchors();
 
@@ -415,8 +457,9 @@ public class Pattern {
          */
         public Builder setName(String name) {
             this.name = name;
-            //if (this.filename.isEmpty()) this.filename = name;
-            //if (this.image == null) this.image = new Image(BufferedImageOps.getBuffImgFromFile(filename), name);
+            // if (this.filename.isEmpty()) this.filename = name;
+            // if (this.image == null) this.image = new
+            // Image(BufferedImageOps.getBuffImgFromFile(filename), name);
             return this;
         }
 
@@ -437,7 +480,8 @@ public class Pattern {
 
         public Builder setFilename(String filename) {
             this.filename = filename;
-            if (name.isEmpty()) name = FilenameExtractor.getFilenameWithoutExtensionAndDirectory(filename);
+            if (name.isEmpty())
+                name = FilenameExtractor.getFilenameWithoutExtensionAndDirectory(filename);
             this.image = new Image(BufferedImageUtilities.getBuffImgFromFile(filename), name);
             return this;
         }
@@ -467,10 +511,11 @@ public class Pattern {
             return this;
         }
 
-        //public Builder setKmeansProfilesAllSchemas(KmeansProfilesAllSchemas kmeansProfilesAllSchemas) {
+        // public Builder setKmeansProfilesAllSchemas(KmeansProfilesAllSchemas
+        // kmeansProfilesAllSchemas) {
         //    this.kmeansProfilesAllSchemas = kmeansProfilesAllSchemas;
         //    return this;
-        //}
+        // }
 
         public Builder setMatchHistory(ActionHistory matchHistory) {
             this.matchHistory = matchHistory;
@@ -498,8 +543,9 @@ public class Pattern {
         }
 
         /**
-         * Set the target position as a percent of the width and height of the image.
-         * For width, 0 is the leftmost point and 100 the rightmost point.
+         * Set the target position as a percent of the width and height of the image. For width, 0
+         * is the leftmost point and 100 the rightmost point.
+         *
          * @param w percent of width
          * @param h percent of height
          * @return the Builder
@@ -516,12 +562,13 @@ public class Pattern {
 
         /**
          * Move the target location by x and y.
+         *
          * @param x move x by
          * @param y move y by
          * @return the Builder
          */
         public Builder setTargetOffset(int x, int y) {
-            this.targetOffset = new Location(x,y);
+            this.targetOffset = new Location(x, y);
             return this;
         }
 
@@ -556,7 +603,8 @@ public class Pattern {
             } else if (this.bufferedImage != null) {
                 pattern.setImage(new Image(this.bufferedImage, this.name));
             } else if (this.filename != null && !this.filename.isEmpty()) {
-                BufferedImage loadedImage = BufferedImageUtilities.getBuffImgFromFile(this.filename);
+                BufferedImage loadedImage =
+                        BufferedImageUtilities.getBuffImgFromFile(this.filename);
                 if (loadedImage != null) {
                     pattern.setImage(new Image(loadedImage, this.name));
                     pattern.setImgpath(this.filename);
@@ -585,5 +633,4 @@ public class Pattern {
             return pattern;
         }
     }
-
 }

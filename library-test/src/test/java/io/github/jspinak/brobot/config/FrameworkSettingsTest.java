@@ -1,12 +1,9 @@
 package io.github.jspinak.brobot.config;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.junit.jupiter.api.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -14,20 +11,23 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.*;
+
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
- * Comprehensive test suite for FrameworkSettings.
- * Tests global configuration settings for the Brobot framework.
+ * Comprehensive test suite for FrameworkSettings. Tests global configuration settings for the
+ * Brobot framework.
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Disabled("CI failure - needs investigation")
 public class FrameworkSettingsTest extends BrobotTestBase {
-    
+
     // Store original values to restore after tests
     private Map<String, Object> originalSettings = new HashMap<>();
-    
+
     @BeforeAll
     void saveOriginalSettings() {
         // Save mouse control settings
@@ -38,7 +38,7 @@ public class FrameworkSettingsTest extends BrobotTestBase {
         originalSettings.put("pauseAfterMouseUp", FrameworkSettings.pauseAfterMouseUp);
         originalSettings.put("xMoveAfterMouseDown", FrameworkSettings.xMoveAfterMouseDown);
         originalSettings.put("yMoveAfterMouseDown", FrameworkSettings.yMoveAfterMouseDown);
-        
+
         // Save mock mode settings
         originalSettings.put("mock", FrameworkSettings.mock);
         originalSettings.put("mockTimeFindFirst", FrameworkSettings.mockTimeFindFirst);
@@ -49,12 +49,12 @@ public class FrameworkSettingsTest extends BrobotTestBase {
         originalSettings.put("mockTimeFindHistogram", FrameworkSettings.mockTimeFindHistogram);
         originalSettings.put("mockTimeFindColor", FrameworkSettings.mockTimeFindColor);
         originalSettings.put("mockTimeClassify", FrameworkSettings.mockTimeClassify);
-        
+
         // Save data collection settings
         originalSettings.put("saveSnapshots", FrameworkSettings.saveSnapshots);
         originalSettings.put("saveHistory", FrameworkSettings.saveHistory);
         originalSettings.put("buildDataset", FrameworkSettings.buildDataset);
-        
+
         // Save illustration settings
         originalSettings.put("drawFind", FrameworkSettings.drawFind);
         originalSettings.put("drawClick", FrameworkSettings.drawClick);
@@ -65,57 +65,61 @@ public class FrameworkSettingsTest extends BrobotTestBase {
         originalSettings.put("drawClassify", FrameworkSettings.drawClassify);
         originalSettings.put("drawDefine", FrameworkSettings.drawDefine);
     }
-    
+
     @AfterAll
     void restoreOriginalSettings() {
         // Restore mouse control settings
         FrameworkSettings.moveMouseDelay = (float) originalSettings.get("moveMouseDelay");
-        FrameworkSettings.pauseBeforeMouseDown = (double) originalSettings.get("pauseBeforeMouseDown");
-        FrameworkSettings.pauseAfterMouseDown = (double) originalSettings.get("pauseAfterMouseDown");
+        FrameworkSettings.pauseBeforeMouseDown =
+                (double) originalSettings.get("pauseBeforeMouseDown");
+        FrameworkSettings.pauseAfterMouseDown =
+                (double) originalSettings.get("pauseAfterMouseDown");
         FrameworkSettings.pauseBeforeMouseUp = (double) originalSettings.get("pauseBeforeMouseUp");
         FrameworkSettings.pauseAfterMouseUp = (double) originalSettings.get("pauseAfterMouseUp");
         FrameworkSettings.xMoveAfterMouseDown = (int) originalSettings.get("xMoveAfterMouseDown");
         FrameworkSettings.yMoveAfterMouseDown = (int) originalSettings.get("yMoveAfterMouseDown");
-        
-        // Restore mock mode settings  
+
+        // Restore mock mode settings
         FrameworkSettings.mock = (boolean) originalSettings.get("mock");
         FrameworkSettings.mockTimeFindFirst = (double) originalSettings.get("mockTimeFindFirst");
         FrameworkSettings.mockTimeFindAll = (double) originalSettings.get("mockTimeFindAll");
         FrameworkSettings.mockTimeDrag = (double) originalSettings.get("mockTimeDrag");
         FrameworkSettings.mockTimeClick = (double) originalSettings.get("mockTimeClick");
         FrameworkSettings.mockTimeMove = (double) originalSettings.get("mockTimeMove");
-        FrameworkSettings.mockTimeFindHistogram = (double) originalSettings.get("mockTimeFindHistogram");
+        FrameworkSettings.mockTimeFindHistogram =
+                (double) originalSettings.get("mockTimeFindHistogram");
         FrameworkSettings.mockTimeFindColor = (double) originalSettings.get("mockTimeFindColor");
         FrameworkSettings.mockTimeClassify = (double) originalSettings.get("mockTimeClassify");
-        
+
         // Restore data collection settings
         FrameworkSettings.saveSnapshots = (boolean) originalSettings.get("saveSnapshots");
         FrameworkSettings.saveHistory = (boolean) originalSettings.get("saveHistory");
         FrameworkSettings.buildDataset = (boolean) originalSettings.get("buildDataset");
-        
+
         // Restore illustration settings
         FrameworkSettings.drawFind = (boolean) originalSettings.get("drawFind");
         FrameworkSettings.drawClick = (boolean) originalSettings.get("drawClick");
         FrameworkSettings.drawDrag = (boolean) originalSettings.get("drawDrag");
         FrameworkSettings.drawMove = (boolean) originalSettings.get("drawMove");
         FrameworkSettings.drawHighlight = (boolean) originalSettings.get("drawHighlight");
-        FrameworkSettings.drawRepeatedActions = (boolean) originalSettings.get("drawRepeatedActions");
+        FrameworkSettings.drawRepeatedActions =
+                (boolean) originalSettings.get("drawRepeatedActions");
         FrameworkSettings.drawClassify = (boolean) originalSettings.get("drawClassify");
         FrameworkSettings.drawDefine = (boolean) originalSettings.get("drawDefine");
     }
-    
+
     @Nested
     @DisplayName("Mouse Control Settings Tests")
     @Disabled("CI failure - needs investigation")
     class MouseControlSettingsTests {
-        
+
         @Test
         @Order(1)
         @DisplayName("Should have default mouse delay")
         void testDefaultMouseDelay() {
             assertEquals(0.5f, FrameworkSettings.moveMouseDelay, 0.001);
         }
-        
+
         @Test
         @Order(2)
         @DisplayName("Should have default mouse pause settings")
@@ -125,7 +129,7 @@ public class FrameworkSettingsTest extends BrobotTestBase {
             assertEquals(0, FrameworkSettings.pauseBeforeMouseUp, 0.001);
             assertEquals(0, FrameworkSettings.pauseAfterMouseUp, 0.001);
         }
-        
+
         @Test
         @Order(3)
         @DisplayName("Should set custom mouse delays")
@@ -135,14 +139,14 @@ public class FrameworkSettingsTest extends BrobotTestBase {
             FrameworkSettings.pauseAfterMouseDown = 0.2;
             FrameworkSettings.pauseBeforeMouseUp = 0.3;
             FrameworkSettings.pauseAfterMouseUp = 0.4;
-            
+
             assertEquals(1.0f, FrameworkSettings.moveMouseDelay, 0.001);
             assertEquals(0.1, FrameworkSettings.pauseBeforeMouseDown, 0.001);
             assertEquals(0.2, FrameworkSettings.pauseAfterMouseDown, 0.001);
             assertEquals(0.3, FrameworkSettings.pauseBeforeMouseUp, 0.001);
             assertEquals(0.4, FrameworkSettings.pauseAfterMouseUp, 0.001);
         }
-        
+
         @Test
         @Order(4)
         @DisplayName("Should have default mouse movement offsets")
@@ -150,24 +154,24 @@ public class FrameworkSettingsTest extends BrobotTestBase {
             assertEquals(0, FrameworkSettings.xMoveAfterMouseDown);
             assertEquals(0, FrameworkSettings.yMoveAfterMouseDown);
         }
-        
+
         @Test
         @Order(5)
         @DisplayName("Should set mouse movement offsets")
         void testMouseMovementOffsets() {
             FrameworkSettings.xMoveAfterMouseDown = 10;
             FrameworkSettings.yMoveAfterMouseDown = 20;
-            
+
             assertEquals(10, FrameworkSettings.xMoveAfterMouseDown);
             assertEquals(20, FrameworkSettings.yMoveAfterMouseDown);
         }
     }
-    
+
     @Nested
     @DisplayName("Mock Mode Settings Tests")
     @Disabled("CI failure - needs investigation")
     class MockModeSettingsTests {
-        
+
         @Test
         @Order(6)
         @DisplayName("Should default to mock mode false")
@@ -175,7 +179,7 @@ public class FrameworkSettingsTest extends BrobotTestBase {
             // Note: BrobotTestBase sets mock=true, but testing the field itself
             assertNotNull(FrameworkSettings.mock);
         }
-        
+
         @Test
         @Order(7)
         @DisplayName("Should have default mock timings")
@@ -189,7 +193,7 @@ public class FrameworkSettingsTest extends BrobotTestBase {
             assertEquals(0.3, FrameworkSettings.mockTimeFindColor, 0.001);
             assertEquals(0.4, FrameworkSettings.mockTimeClassify, 0.001);
         }
-        
+
         @Test
         @Order(8)
         @DisplayName("Should set custom mock timings")
@@ -199,31 +203,31 @@ public class FrameworkSettingsTest extends BrobotTestBase {
             FrameworkSettings.mockTimeDrag = 0.35;
             FrameworkSettings.mockTimeClick = 0.08;
             FrameworkSettings.mockTimeMove = 0.15;
-            
+
             assertEquals(0.15, FrameworkSettings.mockTimeFindFirst, 0.001);
             assertEquals(0.25, FrameworkSettings.mockTimeFindAll, 0.001);
             assertEquals(0.35, FrameworkSettings.mockTimeDrag, 0.001);
             assertEquals(0.08, FrameworkSettings.mockTimeClick, 0.001);
             assertEquals(0.15, FrameworkSettings.mockTimeMove, 0.001);
         }
-        
+
         @Test
         @Order(9)
         @DisplayName("Should handle zero mock timings")
         void testZeroMockTimings() {
             FrameworkSettings.mockTimeFindFirst = 0.0;
             FrameworkSettings.mockTimeClick = 0.0;
-            
+
             assertEquals(0.0, FrameworkSettings.mockTimeFindFirst, 0.001);
             assertEquals(0.0, FrameworkSettings.mockTimeClick, 0.001);
         }
     }
-    
+
     @Nested
     @DisplayName("Data Collection Settings Tests")
     @Disabled("CI failure - needs investigation")
     class DataCollectionSettingsTests {
-        
+
         @Test
         @Order(10)
         @DisplayName("Should have default snapshot settings")
@@ -232,7 +236,7 @@ public class FrameworkSettingsTest extends BrobotTestBase {
             assertEquals("screenshots/", FrameworkSettings.screenshotPath);
             assertEquals("screen", FrameworkSettings.screenshotFilename);
         }
-        
+
         @Test
         @Order(11)
         @DisplayName("Should have default history settings")
@@ -241,7 +245,7 @@ public class FrameworkSettingsTest extends BrobotTestBase {
             assertEquals("history/", FrameworkSettings.historyPath);
             assertEquals("hist", FrameworkSettings.historyFilename);
         }
-        
+
         @Test
         @Order(12)
         @DisplayName("Should enable data collection")
@@ -249,12 +253,12 @@ public class FrameworkSettingsTest extends BrobotTestBase {
             FrameworkSettings.saveSnapshots = true;
             FrameworkSettings.saveHistory = true;
             FrameworkSettings.buildDataset = true;
-            
+
             assertTrue(FrameworkSettings.saveSnapshots);
             assertTrue(FrameworkSettings.saveHistory);
             assertTrue(FrameworkSettings.buildDataset);
         }
-        
+
         @Test
         @Order(13)
         @DisplayName("Should set custom paths")
@@ -264,14 +268,14 @@ public class FrameworkSettingsTest extends BrobotTestBase {
             FrameworkSettings.historyPath = "/custom/history/";
             FrameworkSettings.historyFilename = "custom_hist";
             FrameworkSettings.datasetPath = "/custom/dataset/";
-            
+
             assertEquals("/custom/screenshots/", FrameworkSettings.screenshotPath);
             assertEquals("custom_screen", FrameworkSettings.screenshotFilename);
             assertEquals("/custom/history/", FrameworkSettings.historyPath);
             assertEquals("custom_hist", FrameworkSettings.historyFilename);
             assertEquals("/custom/dataset/", FrameworkSettings.datasetPath);
         }
-        
+
         @Test
         @Order(14)
         @DisplayName("Should manage screenshot list")
@@ -279,18 +283,18 @@ public class FrameworkSettingsTest extends BrobotTestBase {
             FrameworkSettings.screenshots = new ArrayList<>();
             FrameworkSettings.screenshots.add("screen1.png");
             FrameworkSettings.screenshots.add("screen2.png");
-            
+
             assertEquals(2, FrameworkSettings.screenshots.size());
             assertTrue(FrameworkSettings.screenshots.contains("screen1.png"));
             assertTrue(FrameworkSettings.screenshots.contains("screen2.png"));
         }
     }
-    
+
     @Nested
     @DisplayName("Illustration Settings Tests")
     @Disabled("CI failure - needs investigation")
     class IllustrationSettingsTests {
-        
+
         @Test
         @Order(15)
         @DisplayName("Should have default illustration settings")
@@ -304,7 +308,7 @@ public class FrameworkSettingsTest extends BrobotTestBase {
             assertTrue(FrameworkSettings.drawClassify);
             assertTrue(FrameworkSettings.drawDefine);
         }
-        
+
         @Test
         @Order(16)
         @DisplayName("Should disable specific illustrations")
@@ -313,13 +317,13 @@ public class FrameworkSettingsTest extends BrobotTestBase {
             FrameworkSettings.drawClick = false;
             FrameworkSettings.drawDrag = true;
             FrameworkSettings.drawMove = true;
-            
+
             assertFalse(FrameworkSettings.drawFind);
             assertFalse(FrameworkSettings.drawClick);
             assertTrue(FrameworkSettings.drawDrag);
             assertTrue(FrameworkSettings.drawMove);
         }
-        
+
         @Test
         @Order(17)
         @DisplayName("Should disable all illustrations")
@@ -332,7 +336,7 @@ public class FrameworkSettingsTest extends BrobotTestBase {
             FrameworkSettings.drawRepeatedActions = false;
             FrameworkSettings.drawClassify = false;
             FrameworkSettings.drawDefine = false;
-            
+
             assertFalse(FrameworkSettings.drawFind);
             assertFalse(FrameworkSettings.drawClick);
             assertFalse(FrameworkSettings.drawDrag);
@@ -343,12 +347,12 @@ public class FrameworkSettingsTest extends BrobotTestBase {
             assertFalse(FrameworkSettings.drawDefine);
         }
     }
-    
+
     @Nested
     @DisplayName("K-Means Settings Tests")
     @Disabled("CI failure - needs investigation")
     class KMeansSettingsTests {
-        
+
         @Test
         @Order(18)
         @DisplayName("Should have default k-means settings")
@@ -356,18 +360,18 @@ public class FrameworkSettingsTest extends BrobotTestBase {
             assertEquals(5, FrameworkSettings.kMeansInProfile);
             assertEquals(10, FrameworkSettings.maxKMeansToStoreInProfile);
         }
-        
+
         @Test
         @Order(19)
         @DisplayName("Should set custom k-means values")
         void testCustomKMeansValues() {
             FrameworkSettings.kMeansInProfile = 8;
             FrameworkSettings.maxKMeansToStoreInProfile = 15;
-            
+
             assertEquals(8, FrameworkSettings.kMeansInProfile);
             assertEquals(15, FrameworkSettings.maxKMeansToStoreInProfile);
         }
-        
+
         @Test
         @Order(20)
         @DisplayName("Should have default profile initialization settings")
@@ -377,12 +381,12 @@ public class FrameworkSettingsTest extends BrobotTestBase {
             assertTrue(FrameworkSettings.includeStateImageObjectsFromActiveStatesInAnalysis);
         }
     }
-    
+
     @Nested
     @DisplayName("Capture Settings Tests")
     @Disabled("CI failure - needs investigation")
     class CaptureSettingsTests {
-        
+
         @Test
         @Order(21)
         @DisplayName("Should have default capture settings")
@@ -391,7 +395,7 @@ public class FrameworkSettingsTest extends BrobotTestBase {
             assertEquals(1, FrameworkSettings.captureFrequency);
             assertEquals("recording", FrameworkSettings.recordingFolder);
         }
-        
+
         @Test
         @Order(22)
         @DisplayName("Should set custom capture settings")
@@ -399,18 +403,18 @@ public class FrameworkSettingsTest extends BrobotTestBase {
             FrameworkSettings.secondsToCapture = 500;
             FrameworkSettings.captureFrequency = 5;
             FrameworkSettings.recordingFolder = "custom_recording";
-            
+
             assertEquals(500, FrameworkSettings.secondsToCapture);
             assertEquals(5, FrameworkSettings.captureFrequency);
             assertEquals("custom_recording", FrameworkSettings.recordingFolder);
         }
     }
-    
+
     @Nested
     @DisplayName("Test Environment Settings Tests")
     @Disabled("CI failure - needs investigation")
     class TestEnvironmentSettingsTests {
-        
+
         @Test
         @Order(23)
         @DisplayName("Should have default test settings")
@@ -419,7 +423,7 @@ public class FrameworkSettingsTest extends BrobotTestBase {
             assertTrue(FrameworkSettings.sendLogs);
             assertEquals("screenshots/", FrameworkSettings.testScreenshotsPath);
         }
-        
+
         @Test
         @Order(24)
         @DisplayName("Should set test iteration")
@@ -427,24 +431,24 @@ public class FrameworkSettingsTest extends BrobotTestBase {
             FrameworkSettings.testIteration = 5;
             assertEquals(5, FrameworkSettings.testIteration);
         }
-        
+
         @Test
         @Order(25)
         @DisplayName("Should configure log sending")
         void testConfigureLogSending() {
             FrameworkSettings.sendLogs = false;
             assertFalse(FrameworkSettings.sendLogs);
-            
+
             FrameworkSettings.sendLogs = true;
             assertTrue(FrameworkSettings.sendLogs);
         }
     }
-    
+
     @Nested
     @DisplayName("State Comparison Settings Tests")
     @Disabled("CI failure - needs investigation")
     class StateComparisonSettingsTests {
-        
+
         @Test
         @Order(26)
         @DisplayName("Should have default state comparison settings")
@@ -453,42 +457,42 @@ public class FrameworkSettingsTest extends BrobotTestBase {
             assertFalse(FrameworkSettings.enableStateComparison);
             assertFalse(FrameworkSettings.logStateComparison);
         }
-        
+
         @Test
         @Order(27)
         @DisplayName("Should set state probability threshold")
         void testSetStateProbabilityThreshold() {
             FrameworkSettings.minimumStateProbabilityThreshold = 0.9;
             assertEquals(0.9, FrameworkSettings.minimumStateProbabilityThreshold, 0.001);
-            
+
             FrameworkSettings.minimumStateProbabilityThreshold = 0.5;
             assertEquals(0.5, FrameworkSettings.minimumStateProbabilityThreshold, 0.001);
         }
-        
+
         @Test
         @Order(28)
         @DisplayName("Should enable state comparison")
         void testEnableStateComparison() {
             FrameworkSettings.enableStateComparison = true;
             FrameworkSettings.logStateComparison = true;
-            
+
             assertTrue(FrameworkSettings.enableStateComparison);
             assertTrue(FrameworkSettings.logStateComparison);
         }
     }
-    
+
     @Nested
     @DisplayName("Package Settings Tests")
     @Disabled("CI failure - needs investigation")
     class PackageSettingsTests {
-        
+
         @Test
         @Order(29)
         @DisplayName("Should have default package name")
         void testDefaultPackageName() {
             assertEquals("com.example", FrameworkSettings.packageName);
         }
-        
+
         @Test
         @Order(30)
         @DisplayName("Should set custom package name")
@@ -497,12 +501,12 @@ public class FrameworkSettingsTest extends BrobotTestBase {
             assertEquals("io.github.jspinak.brobot", FrameworkSettings.packageName);
         }
     }
-    
+
     @Nested
     @DisplayName("Thread Safety Tests")
     @Disabled("CI failure - needs investigation")
     class ThreadSafetyTests {
-        
+
         @Test
         @Order(31)
         @DisplayName("Should handle concurrent settings access")
@@ -511,37 +515,38 @@ public class FrameworkSettingsTest extends BrobotTestBase {
             CountDownLatch latch = new CountDownLatch(threadCount);
             ExecutorService executor = Executors.newFixedThreadPool(threadCount);
             AtomicInteger errors = new AtomicInteger(0);
-            
+
             for (int i = 0; i < threadCount; i++) {
                 final int value = i;
-                executor.submit(() -> {
-                    try {
-                        // Concurrent reads and writes to different settings
-                        FrameworkSettings.moveMouseDelay = value * 0.1f;
-                        float delay = FrameworkSettings.moveMouseDelay;
-                        
-                        FrameworkSettings.mock = (value % 2 == 0);
-                        boolean mock = FrameworkSettings.mock;
-                        
-                        FrameworkSettings.kMeansInProfile = value;
-                        int k = FrameworkSettings.kMeansInProfile;
-                        
-                        FrameworkSettings.historyPath = "path" + value;
-                        String path = FrameworkSettings.historyPath;
-                    } catch (Exception e) {
-                        errors.incrementAndGet();
-                    } finally {
-                        latch.countDown();
-                    }
-                });
+                executor.submit(
+                        () -> {
+                            try {
+                                // Concurrent reads and writes to different settings
+                                FrameworkSettings.moveMouseDelay = value * 0.1f;
+                                float delay = FrameworkSettings.moveMouseDelay;
+
+                                FrameworkSettings.mock = (value % 2 == 0);
+                                boolean mock = FrameworkSettings.mock;
+
+                                FrameworkSettings.kMeansInProfile = value;
+                                int k = FrameworkSettings.kMeansInProfile;
+
+                                FrameworkSettings.historyPath = "path" + value;
+                                String path = FrameworkSettings.historyPath;
+                            } catch (Exception e) {
+                                errors.incrementAndGet();
+                            } finally {
+                                latch.countDown();
+                            }
+                        });
             }
-            
+
             assertTrue(latch.await(5, TimeUnit.SECONDS));
             executor.shutdown();
-            
+
             assertEquals(0, errors.get(), "No errors during concurrent access");
         }
-        
+
         @Test
         @Order(32)
         @DisplayName("Should handle concurrent mock timing updates")
@@ -549,25 +554,26 @@ public class FrameworkSettingsTest extends BrobotTestBase {
             int threadCount = 10;
             CountDownLatch latch = new CountDownLatch(threadCount);
             ExecutorService executor = Executors.newFixedThreadPool(threadCount);
-            
+
             for (int i = 0; i < threadCount; i++) {
                 final double timing = i * 0.01;
-                executor.submit(() -> {
-                    try {
-                        FrameworkSettings.mockTimeFindFirst = timing;
-                        FrameworkSettings.mockTimeClick = timing * 2;
-                        FrameworkSettings.mockTimeMove = timing * 3;
-                        
-                        // Verify values are set
-                        assertNotNull(FrameworkSettings.mockTimeFindFirst);
-                        assertNotNull(FrameworkSettings.mockTimeClick);
-                        assertNotNull(FrameworkSettings.mockTimeMove);
-                    } finally {
-                        latch.countDown();
-                    }
-                });
+                executor.submit(
+                        () -> {
+                            try {
+                                FrameworkSettings.mockTimeFindFirst = timing;
+                                FrameworkSettings.mockTimeClick = timing * 2;
+                                FrameworkSettings.mockTimeMove = timing * 3;
+
+                                // Verify values are set
+                                assertNotNull(FrameworkSettings.mockTimeFindFirst);
+                                assertNotNull(FrameworkSettings.mockTimeClick);
+                                assertNotNull(FrameworkSettings.mockTimeMove);
+                            } finally {
+                                latch.countDown();
+                            }
+                        });
             }
-            
+
             assertTrue(latch.await(5, TimeUnit.SECONDS));
             executor.shutdown();
         }

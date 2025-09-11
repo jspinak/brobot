@@ -3,22 +3,24 @@ package io.github.jspinak.brobot.action.basic.find.motion;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+
 import io.github.jspinak.brobot.action.basic.find.BaseFindOptions;
 import io.github.jspinak.brobot.action.basic.find.FindStrategy;
+
 import lombok.Getter;
 
 /**
  * Configuration for motion-based Find actions.
- * <p>
- * This class encapsulates parameters for finding objects by detecting pixel changes
- * between consecutive scenes. It is an immutable object and must be constructed
- * using its inner {@link Builder}.
- * <p>
- * This specialized configuration enhances API clarity by only exposing options
- * relevant to motion detection operations.
- * <p>
- * By extending {@link BaseFindOptions}, it inherits common find functionality including
- * match adjustment support, while adding motion-specific settings.
+ *
+ * <p>This class encapsulates parameters for finding objects by detecting pixel changes between
+ * consecutive scenes. It is an immutable object and must be constructed using its inner {@link
+ * Builder}.
+ *
+ * <p>This specialized configuration enhances API clarity by only exposing options relevant to
+ * motion detection operations.
+ *
+ * <p>By extending {@link BaseFindOptions}, it inherits common find functionality including match
+ * adjustment support, while adding motion-specific settings.
  *
  * @see BaseFindOptions
  * @see io.github.jspinak.brobot.action.basic.find.Find
@@ -40,18 +42,14 @@ public final class MotionFindOptions extends BaseFindOptions {
         return FindStrategy.MOTION;
     }
 
-    /**
-     * Builder for constructing {@link MotionFindOptions} with a fluent API.
-     */
+    /** Builder for constructing {@link MotionFindOptions} with a fluent API. */
     @JsonPOJOBuilder(withPrefix = "set")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Builder extends BaseFindOptions.Builder<Builder> {
 
         private int maxMovement = 300;
 
-        /**
-         * Default constructor for creating a new MotionFindOptions configuration.
-         */
+        /** Default constructor for creating a new MotionFindOptions configuration. */
         public Builder() {}
 
         /**
@@ -66,9 +64,9 @@ public final class MotionFindOptions extends BaseFindOptions {
         }
 
         /**
-         * Sets the maximum distance, in pixels, that a moving object is expected
-         * to travel between two consecutive frames (scenes). This helps the motion
-         * detection algorithm correctly identify and track the same object across frames.
+         * Sets the maximum distance, in pixels, that a moving object is expected to travel between
+         * two consecutive frames (scenes). This helps the motion detection algorithm correctly
+         * identify and track the same object across frames.
          *
          * @param maxMovement The maximum distance an object can move.
          * @return this Builder instance for chaining.

@@ -1,18 +1,18 @@
 package io.github.jspinak.brobot.runner.persistence.mapper;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.Collections;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.runner.persistence.entity.LogEntry;
 import io.github.jspinak.brobot.runner.persistence.entity.PerformanceMetrics;
 import io.github.jspinak.brobot.runner.persistence.entity.StateImageLog;
-import io.github.jspinak.brobot.tools.logging.model.LogData;
 import io.github.jspinak.brobot.tools.logging.model.ExecutionMetrics;
+import io.github.jspinak.brobot.tools.logging.model.LogData;
 import io.github.jspinak.brobot.tools.logging.model.StateImageLogData;
 
-import org.springframework.stereotype.Component;
-
-import java.util.Collections;
-import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
@@ -20,6 +20,7 @@ public class LogEntityMapper {
 
     /**
      * Maps the library's LogData object to the runner's persistable LogEntry entity.
+     *
      * @param logData The data object from the library.
      * @return A persistable LogEntry entity.
      */
@@ -57,9 +58,10 @@ public class LogEntityMapper {
 
         // Map list of StateImageLog
         if (logData.getStateImageLogData() != null) {
-            entity.setStateImageLogs(logData.getStateImageLogData().stream()
-                    .map(this::toStateImageLog)
-                    .collect(Collectors.toList()));
+            entity.setStateImageLogs(
+                    logData.getStateImageLogData().stream()
+                            .map(this::toStateImageLog)
+                            .collect(Collectors.toList()));
         } else {
             entity.setStateImageLogs(Collections.emptyList());
         }

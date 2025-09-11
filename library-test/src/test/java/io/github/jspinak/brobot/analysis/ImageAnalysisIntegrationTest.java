@@ -1,66 +1,49 @@
 package io.github.jspinak.brobot.analysis;
 
-import io.github.jspinak.brobot.analysis.color.ColorAnalysis;
-import io.github.jspinak.brobot.model.analysis.color.ColorStatistics;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.analysis.histogram.HistogramComparator;
-import io.github.jspinak.brobot.analysis.histogram.HistogramExtractor;
-import io.github.jspinak.brobot.analysis.motion.MotionDetector;
-import io.github.jspinak.brobot.model.element.Image;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.util.image.visualization.MatBuilder;
-import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
-import io.github.jspinak.brobot.BrobotTestApplication;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.*;
+import java.awt.image.BufferedImage;
+
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Scalar;
-import org.bytedeco.opencv.opencv_core.Size;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
-import java.awt.image.BufferedImage;
-import java.util.List;
-import java.util.Map;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
-
-import static org.bytedeco.opencv.global.opencv_core.CV_8UC3;
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.BrobotTestApplication;
+import io.github.jspinak.brobot.analysis.color.ColorAnalysis;
+import io.github.jspinak.brobot.analysis.histogram.HistogramComparator;
+import io.github.jspinak.brobot.analysis.histogram.HistogramExtractor;
+import io.github.jspinak.brobot.analysis.motion.MotionDetector;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.model.element.Image;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
+import io.github.jspinak.brobot.util.image.visualization.MatBuilder;
 
 /**
  * Integration tests for the Image Analysis system.
- * 
- * These tests verify the integration between:
- * - Color extraction and analysis
- * - Histogram generation and comparison
- * - Motion detection
- * - OpenCV integration
- * - Spring context and dependency injection
+ *
+ * <p>These tests verify the integration between: - Color extraction and analysis - Histogram
+ * generation and comparison - Motion detection - OpenCV integration - Spring context and dependency
+ * injection
  */
 @SpringBootTest(classes = BrobotTestApplication.class)
-@TestPropertySource(properties = {
-        "spring.main.lazy-initialization=true",
-        "brobot.opencv.headless=true"
-})
+@TestPropertySource(
+        properties = {"spring.main.lazy-initialization=true", "brobot.opencv.headless=true"})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Disabled("CI failure - needs investigation")
 class ImageAnalysisIntegrationTest extends BrobotIntegrationTestBase {
 
-    @Autowired
-    private ColorAnalysis colorAnalysis;
+    @Autowired private ColorAnalysis colorAnalysis;
 
-    @Autowired
-    private HistogramExtractor histogramExtractor;
+    @Autowired private HistogramExtractor histogramExtractor;
 
-    @Autowired
-    private HistogramComparator histogramComparator;
+    @Autowired private HistogramComparator histogramComparator;
 
-    @Autowired
-    private MotionDetector motionDetector;
+    @Autowired private MotionDetector motionDetector;
 
-    @Autowired
-    private MatBuilder matBuilder;
+    @Autowired private MatBuilder matBuilder;
 
     private Mat testMat;
     private Image testImage;
@@ -77,10 +60,11 @@ class ImageAnalysisIntegrationTest extends BrobotIntegrationTestBase {
     private void createTestData() {
         // Create a simple test Mat using MatBuilder
         // MatBuilder creates CV_8UC3 (3 channel) matrices by default
-        testMat = new MatBuilder()
-                .setName("TestMat")
-                .setWH(100, 100) // Width and height
-                .build();
+        testMat =
+                new MatBuilder()
+                        .setName("TestMat")
+                        .setWH(100, 100) // Width and height
+                        .build();
 
         // Create test Image from Mat
         testImage = new Image(testMat);
@@ -135,15 +119,9 @@ class ImageAnalysisIntegrationTest extends BrobotIntegrationTestBase {
     @Order(4)
     void testHistogramComparison() {
         // Create two test images with different colors
-        Mat mat1 = new MatBuilder()
-                .setName("Mat1")
-                .setWH(100, 100)
-                .build();
+        Mat mat1 = new MatBuilder().setName("Mat1").setWH(100, 100).build();
 
-        Mat mat2 = new MatBuilder()
-                .setName("Mat2")
-                .setWH(100, 100)
-                .build();
+        Mat mat2 = new MatBuilder().setName("Mat2").setWH(100, 100).build();
 
         Image image1 = new Image(mat1);
         Image image2 = new Image(mat2);
@@ -165,15 +143,9 @@ class ImageAnalysisIntegrationTest extends BrobotIntegrationTestBase {
 
         // Motion detection typically requires multiple frames
         // Create a sequence of slightly different images
-        Mat frame1 = new MatBuilder()
-                .setName("Frame1")
-                .setWH(100, 100)
-                .build();
+        Mat frame1 = new MatBuilder().setName("Frame1").setWH(100, 100).build();
 
-        Mat frame2 = new MatBuilder()
-                .setName("Frame2")
-                .setWH(100, 100)
-                .build();
+        Mat frame2 = new MatBuilder().setName("Frame2").setWH(100, 100).build();
 
         Image motionImage1 = new Image(frame1);
         Image motionImage2 = new Image(frame2);
@@ -188,23 +160,18 @@ class ImageAnalysisIntegrationTest extends BrobotIntegrationTestBase {
     @Order(6)
     void testMatBuilderComposition() {
         // Test creating composite images with MatBuilder
-        Mat submat1 = new MatBuilder()
-                .setName("Submat1")
-                .setWH(50, 50)
-                .build();
+        Mat submat1 = new MatBuilder().setName("Submat1").setWH(50, 50).build();
 
-        Mat submat2 = new MatBuilder()
-                .setName("Submat2")
-                .setWH(50, 50)
-                .build();
+        Mat submat2 = new MatBuilder().setName("Submat2").setWH(50, 50).build();
 
         // Create a composite image
-        Mat composite = new MatBuilder()
-                .setName("Composite")
-                .setWH(200, 100)
-                .setSpaceBetween(10)
-                .addHorizontalSubmats(submat1, submat2)
-                .build();
+        Mat composite =
+                new MatBuilder()
+                        .setName("Composite")
+                        .setWH(200, 100)
+                        .setSpaceBetween(10)
+                        .addHorizontalSubmats(submat1, submat2)
+                        .build();
 
         assertNotNull(composite);
         assertEquals(200, composite.cols());

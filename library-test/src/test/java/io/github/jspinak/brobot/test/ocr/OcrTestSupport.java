@@ -1,27 +1,27 @@
 package io.github.jspinak.brobot.test.ocr;
 
+import java.io.File;
 import java.lang.annotation.*;
+import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.io.File;
-import java.nio.file.Paths;
 
 /**
- * Utility class for OCR-dependent test support.
- * Provides methods to detect Tesseract availability and support for tests using saved screenshots.
- * Tests no longer require live OCR since they use pre-saved FloraNext screenshots.
+ * Utility class for OCR-dependent test support. Provides methods to detect Tesseract availability
+ * and support for tests using saved screenshots. Tests no longer require live OCR since they use
+ * pre-saved FloraNext screenshots.
  */
 public class OcrTestSupport {
-    
+
     private static final AtomicBoolean tesseractChecked = new AtomicBoolean(false);
     private static final AtomicBoolean tesseractAvailable = new AtomicBoolean(false);
     private static final AtomicReference<String> tesseractVersion = new AtomicReference<>(null);
     private static final AtomicReference<String> tesseractError = new AtomicReference<>(null);
     private static File screenshotDirectory = null;
-    
+
     /**
      * Gets the directory containing FloraNext screenshots.
-     * 
+     *
      * @return File object for the screenshots directory, or null if not found
      */
     public static File getScreenshotDirectory() {
@@ -33,7 +33,7 @@ public class OcrTestSupport {
                 Paths.get("").toAbsolutePath().toString() + "/library-test/screenshots",
                 Paths.get("").toAbsolutePath().toString() + "/library/screenshots"
             };
-            
+
             for (String path : possiblePaths) {
                 File dir = new File(path);
                 if (dir.exists() && new File(dir, "floranext0.png").exists()) {
@@ -44,10 +44,10 @@ public class OcrTestSupport {
         }
         return screenshotDirectory;
     }
-    
+
     /**
      * Checks if FloraNext screenshots are available for testing.
-     * 
+     *
      * @return true if screenshots are available
      */
     public static boolean areScreenshotsAvailable() {
@@ -55,7 +55,7 @@ public class OcrTestSupport {
         if (dir == null || !dir.exists()) {
             return false;
         }
-        
+
         // Check for at least one FloraNext screenshot
         for (int i = 0; i <= 4; i++) {
             File screenshot = new File(dir, "floranext" + i + ".png");
@@ -65,11 +65,11 @@ public class OcrTestSupport {
         }
         return false;
     }
-    
+
     /**
-     * Checks if Tesseract OCR is available on the system.
-     * This is optional for tests using saved screenshots.
-     * 
+     * Checks if Tesseract OCR is available on the system. This is optional for tests using saved
+     * screenshots.
+     *
      * @return true if Tesseract is available and functioning
      */
     public static boolean isTesseractAvailable() {
@@ -78,10 +78,10 @@ public class OcrTestSupport {
         }
         return tesseractAvailable.get();
     }
-    
+
     /**
      * Gets the Tesseract version if available.
-     * 
+     *
      * @return Tesseract version string or null if not available
      */
     public static String getTesseractVersion() {
@@ -90,10 +90,10 @@ public class OcrTestSupport {
         }
         return tesseractVersion.get();
     }
-    
+
     /**
      * Gets the error message if Tesseract is not available.
-     * 
+     *
      * @return Error message or null if Tesseract is available
      */
     public static String getTesseractError() {
@@ -102,21 +102,21 @@ public class OcrTestSupport {
         }
         return tesseractError.get();
     }
-    
+
     /**
-     * Checks if tests can run with saved screenshots.
-     * These tests don't require live OCR capability.
-     * 
+     * Checks if tests can run with saved screenshots. These tests don't require live OCR
+     * capability.
+     *
      * @return true if screenshot-based tests can run
      */
     public static boolean canRunScreenshotTests() {
         return areScreenshotsAvailable();
     }
-    
+
     /**
-     * Checks if tests requiring live OCR should run.
-     * These tests need both Tesseract and appropriate permissions.
-     * 
+     * Checks if tests requiring live OCR should run. These tests need both Tesseract and
+     * appropriate permissions.
+     *
      * @return true if live OCR tests can run
      */
     public static boolean canRunLiveOcrTests() {
@@ -125,32 +125,33 @@ public class OcrTestSupport {
         if (envDisable != null && Boolean.parseBoolean(envDisable)) {
             return false;
         }
-        
+
         // Check if running in headless mode
         if (Boolean.getBoolean("java.awt.headless")) {
             // In headless mode, only allow if screenshots are available
             return areScreenshotsAvailable();
         }
-        
+
         // Otherwise check if Tesseract is available
         return isTesseractAvailable();
     }
-    
+
     private static synchronized void checkTesseractAvailability() {
         if (tesseractChecked.get()) {
             return;
         }
-        
+
         try {
             // Try to execute tesseract command to check availability
             ProcessBuilder pb = new ProcessBuilder("tesseract", "--version");
             Process process = pb.start();
             int exitCode = process.waitFor();
-            
+
             if (exitCode == 0) {
                 // Read version info
-                try (var reader = new java.io.BufferedReader(
-                        new java.io.InputStreamReader(process.getInputStream()))) {
+                try (var reader =
+                        new java.io.BufferedReader(
+                                new java.io.InputStreamReader(process.getInputStream()))) {
                     String line = reader.readLine();
                     if (line != null && line.contains("tesseract")) {
                         tesseractVersion.set(line);
@@ -160,10 +161,10 @@ public class OcrTestSupport {
             } else {
                 tesseractError.set("Tesseract command failed with exit code: " + exitCode);
             }
-            
+
             // Also check for tessdata
             checkTessdataAvailability();
-            
+
         } catch (java.io.IOException e) {
             tesseractError.set("Tesseract not found in PATH: " + e.getMessage());
         } catch (InterruptedException e) {
@@ -175,11 +176,11 @@ public class OcrTestSupport {
             tesseractChecked.set(true);
         }
     }
-    
+
     private static void checkTessdataAvailability() {
         // Check TESSDATA_PREFIX environment variable
         String tessDataPath = System.getenv("TESSDATA_PREFIX");
-        
+
         if (tessDataPath == null || tessDataPath.isEmpty()) {
             // Check common locations
             String[] possiblePaths = {
@@ -188,7 +189,7 @@ public class OcrTestSupport {
                 "/usr/local/share/tessdata",
                 "/usr/share/tessdata"
             };
-            
+
             for (String path : possiblePaths) {
                 File dir = new File(path);
                 if (dir.exists() && dir.isDirectory()) {
@@ -199,17 +200,17 @@ public class OcrTestSupport {
                     }
                 }
             }
-            
+
             // If we get here, tessdata wasn't found
             if (tesseractAvailable.get()) {
                 tesseractError.set("Warning: Tesseract found but tessdata directory not located");
             }
         }
     }
-    
+
     /**
      * Gets the path to tessdata directory.
-     * 
+     *
      * @return Path to tessdata or null if not found
      */
     public static String getTessdataPath() {
@@ -217,7 +218,7 @@ public class OcrTestSupport {
         if (tessDataPath != null && !tessDataPath.isEmpty()) {
             return tessDataPath;
         }
-        
+
         // Check common locations
         String[] possiblePaths = {
             "/usr/share/tesseract-ocr/4.00/tessdata",
@@ -225,7 +226,7 @@ public class OcrTestSupport {
             "/usr/local/share/tessdata",
             "/usr/share/tessdata"
         };
-        
+
         for (String path : possiblePaths) {
             File dir = new File(path);
             if (dir.exists() && dir.isDirectory()) {
@@ -235,13 +236,13 @@ public class OcrTestSupport {
                 }
             }
         }
-        
+
         return null;
     }
-    
+
     /**
-     * Annotation to indicate tests that require FloraNext screenshots.
-     * These tests can run in CI/CD environments.
+     * Annotation to indicate tests that require FloraNext screenshots. These tests can run in CI/CD
+     * environments.
      */
     @Target({ElementType.TYPE, ElementType.METHOD})
     @Retention(RetentionPolicy.RUNTIME)
@@ -249,10 +250,10 @@ public class OcrTestSupport {
     public @interface RequiresScreenshots {
         String value() default "Test requires FloraNext screenshots to be available";
     }
-    
+
     /**
-     * Annotation to indicate tests that require live OCR capability.
-     * These tests may not run in all environments.
+     * Annotation to indicate tests that require live OCR capability. These tests may not run in all
+     * environments.
      */
     @Target({ElementType.TYPE, ElementType.METHOD})
     @Retention(RetentionPolicy.RUNTIME)

@@ -1,17 +1,16 @@
 package io.github.jspinak.brobot.runner.session;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import io.github.jspinak.brobot.navigation.transition.StateTransitions;
-import lombok.Data;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
-/**
- * Represents a persisted automation session
- */
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import io.github.jspinak.brobot.navigation.transition.StateTransitions;
+
+import lombok.Data;
+
+/** Represents a persisted automation session */
 @Data
 public class Session {
     private String id;

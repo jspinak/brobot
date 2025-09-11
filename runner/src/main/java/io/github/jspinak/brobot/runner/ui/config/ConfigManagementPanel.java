@@ -1,17 +1,8 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.AccessLevel;
-import lombok.extern.slf4j.Slf4j;
-
-import io.github.jspinak.brobot.navigation.service.StateService;
-import io.github.jspinak.brobot.runner.config.ApplicationConfig;
-import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
-import io.github.jspinak.brobot.runner.events.EventBus;
-import io.github.jspinak.brobot.runner.events.LogEvent;
-import io.github.jspinak.brobot.runner.init.BrobotLibraryInitializer;
-import io.github.jspinak.brobot.runner.project.AutomationProjectManager;
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
@@ -20,17 +11,25 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.stage.DirectoryChooser;
-import net.rgielen.fxweaver.core.FxmlView;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import io.github.jspinak.brobot.navigation.service.StateService;
+import io.github.jspinak.brobot.runner.config.ApplicationConfig;
+import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
+import io.github.jspinak.brobot.runner.events.EventBus;
+import io.github.jspinak.brobot.runner.events.LogEvent;
+import io.github.jspinak.brobot.runner.init.BrobotLibraryInitializer;
+import io.github.jspinak.brobot.runner.project.AutomationProjectManager;
 
-/**
- * Main configuration management panel that integrates all configuration UI components.
- */
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import net.rgielen.fxweaver.core.FxmlView;
+
+/** Main configuration management panel that integrates all configuration UI components. */
 @FxmlView("")
 @Slf4j
 @Getter
@@ -77,7 +76,8 @@ public class ConfigManagementPanel extends BorderPane {
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
         // Create component panels
-        selectionPanel = new ConfigSelectionPanel(eventBus, runnerProperties, libraryInitializer, appConfig);
+        selectionPanel =
+                new ConfigSelectionPanel(eventBus, runnerProperties, libraryInitializer, appConfig);
         browserPanel = new ConfigBrowserPanel(eventBus, projectManager, allStatesService);
         metadataEditor = new ConfigMetadataEditor(eventBus, projectManager);
 
@@ -125,15 +125,15 @@ public class ConfigManagementPanel extends BorderPane {
         Button openFolderButton = new Button("Open Folder");
         openFolderButton.setOnAction(e -> openConfigFolder());
 
-        toolbar.getItems().addAll(
-                newConfigButton,
-                importButton,
-                refreshButton,
-                separator,
-                pathLabel,
-                changePathButton,
-                openFolderButton
-        );
+        toolbar.getItems()
+                .addAll(
+                        newConfigButton,
+                        importButton,
+                        refreshButton,
+                        separator,
+                        pathLabel,
+                        changePathButton,
+                        openFolderButton);
 
         return toolbar;
     }
@@ -164,14 +164,15 @@ public class ConfigManagementPanel extends BorderPane {
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         // Add items to status bar with proper spacing
-        statusBar.getChildren().addAll(
-                statusLabel,
-                progressBar,
-                spacer,
-                configPathLabel,
-                separator1,
-                imagePathLabel
-        );
+        statusBar
+                .getChildren()
+                .addAll(
+                        statusLabel,
+                        progressBar,
+                        spacer,
+                        configPathLabel,
+                        separator1,
+                        imagePathLabel);
 
         return statusBar;
     }
@@ -219,71 +220,79 @@ public class ConfigManagementPanel extends BorderPane {
         Platform.runLater(projectNameField::requestFocus);
 
         // Convert result
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == createButtonType) {
-                // Create basic configuration template files
-                try {
-                    String projectName = projectNameField.getText().trim();
-                    String configName = configNameField.getText().trim();
+        dialog.setResultConverter(
+                dialogButton -> {
+                    if (dialogButton == createButtonType) {
+                        // Create basic configuration template files
+                        try {
+                            String projectName = projectNameField.getText().trim();
+                            String configName = configNameField.getText().trim();
 
-                    if (projectName.isEmpty() || configName.isEmpty()) {
-                        showAlert(Alert.AlertType.ERROR,
-                                "Validation Error",
-                                "Project and configuration names are required",
-                                "Please enter both project and configuration names.");
-                        return null;
+                            if (projectName.isEmpty() || configName.isEmpty()) {
+                                showAlert(
+                                        Alert.AlertType.ERROR,
+                                        "Validation Error",
+                                        "Project and configuration names are required",
+                                        "Please enter both project and configuration names.");
+                                return null;
+                            }
+
+                            // Create template files
+                            String projectConfig =
+                                    createProjectConfigTemplate(
+                                            projectName,
+                                            versionField.getText().trim(),
+                                            authorField.getText().trim());
+
+                            String dslConfig = createDslConfigTemplate(projectName);
+
+                            // Save files to disk
+                            Path configDir = Paths.get(runnerProperties.getConfigPath());
+                            Path projectConfigPath =
+                                    configDir.resolve(configName + "_project.json");
+                            Path dslConfigPath = configDir.resolve(configName + "_dsl.json");
+
+                            java.nio.file.Files.writeString(projectConfigPath, projectConfig);
+                            java.nio.file.Files.writeString(dslConfigPath, dslConfig);
+
+                            // Create and return config entry
+                            return new ConfigEntry(
+                                    configName,
+                                    projectName,
+                                    projectConfigPath,
+                                    dslConfigPath,
+                                    Paths.get(runnerProperties.getImagePath()),
+                                    java.time.LocalDateTime.now());
+
+                        } catch (Exception e) {
+                            logger.error("Error creating new configuration", e);
+                            showAlert(
+                                    Alert.AlertType.ERROR,
+                                    "Creation Error",
+                                    "Error creating new configuration",
+                                    e.getMessage());
+                            return null;
+                        }
                     }
-
-                    // Create template files
-                    String projectConfig = createProjectConfigTemplate(
-                            projectName,
-                            versionField.getText().trim(),
-                            authorField.getText().trim()
-                    );
-
-                    String dslConfig = createDslConfigTemplate(projectName);
-
-                    // Save files to disk
-                    Path configDir = Paths.get(runnerProperties.getConfigPath());
-                    Path projectConfigPath = configDir.resolve(configName + "_project.json");
-                    Path dslConfigPath = configDir.resolve(configName + "_dsl.json");
-
-                    java.nio.file.Files.writeString(projectConfigPath, projectConfig);
-                    java.nio.file.Files.writeString(dslConfigPath, dslConfig);
-
-                    // Create and return config entry
-                    return new ConfigEntry(
-                            configName,
-                            projectName,
-                            projectConfigPath,
-                            dslConfigPath,
-                            Paths.get(runnerProperties.getImagePath()),
-                            java.time.LocalDateTime.now()
-                    );
-
-                } catch (Exception e) {
-                    logger.error("Error creating new configuration", e);
-                    showAlert(Alert.AlertType.ERROR,
-                            "Creation Error",
-                            "Error creating new configuration",
-                            e.getMessage());
                     return null;
-                }
-            }
-            return null;
-        });
+                });
 
         // Show dialog and handle result
-        dialog.showAndWait().ifPresent(config -> {
-            // Add to recent configs and show in selection panel
-            selectionPanel.addRecentConfiguration(config);
+        dialog.showAndWait()
+                .ifPresent(
+                        config -> {
+                            // Add to recent configs and show in selection panel
+                            selectionPanel.addRecentConfiguration(config);
 
-            eventBus.publish(LogEvent.info(this,
-                    "Created new configuration: " + config.getName(), "Configuration"));
+                            eventBus.publish(
+                                    LogEvent.info(
+                                            this,
+                                            "Created new configuration: " + config.getName(),
+                                            "Configuration"));
 
-            // Switch to selection tab
-            tabPane.getSelectionModel().select(0);
-        });
+                            // Switch to selection tab
+                            tabPane.getSelectionModel().select(0);
+                        });
     }
 
     private String createProjectConfigTemplate(String projectName, String version, String author) {
@@ -313,22 +322,24 @@ public class ConfigManagementPanel extends BorderPane {
     }
 
     void importConfiguration() {
-        ConfigImportDialog dialog = new ConfigImportDialog(
-                libraryInitializer,
-                runnerProperties,
-                eventBus
-        );
+        ConfigImportDialog dialog =
+                new ConfigImportDialog(libraryInitializer, runnerProperties, eventBus);
 
-        dialog.showAndWait().ifPresent(importedConfig -> {
-            // Add to recent configs
-            selectionPanel.addRecentConfiguration(importedConfig);
+        dialog.showAndWait()
+                .ifPresent(
+                        importedConfig -> {
+                            // Add to recent configs
+                            selectionPanel.addRecentConfiguration(importedConfig);
 
-            eventBus.publish(LogEvent.info(this,
-                    "Imported configuration: " + importedConfig.getName(), "Configuration"));
+                            eventBus.publish(
+                                    LogEvent.info(
+                                            this,
+                                            "Imported configuration: " + importedConfig.getName(),
+                                            "Configuration"));
 
-            // Switch to selection tab
-            tabPane.getSelectionModel().select(0);
-        });
+                            // Switch to selection tab
+                            tabPane.getSelectionModel().select(0);
+                        });
     }
 
     void refreshConfiguration() {
@@ -367,8 +378,11 @@ public class ConfigManagementPanel extends BorderPane {
             runnerProperties.setConfigPath(directory.getAbsolutePath());
 
             // Log change
-            eventBus.publish(LogEvent.info(this,
-                    "Configuration path changed to: " + directory.getAbsolutePath(), "Configuration"));
+            eventBus.publish(
+                    LogEvent.info(
+                            this,
+                            "Configuration path changed to: " + directory.getAbsolutePath(),
+                            "Configuration"));
 
             // Refresh view
             refreshConfiguration();
@@ -380,7 +394,8 @@ public class ConfigManagementPanel extends BorderPane {
             java.awt.Desktop.getDesktop().open(new File(runnerProperties.getConfigPath()));
         } catch (Exception e) {
             logger.error("Error opening config folder", e);
-            showAlert(Alert.AlertType.ERROR,
+            showAlert(
+                    Alert.AlertType.ERROR,
                     "Folder Error",
                     "Error opening configuration folder",
                     e.getMessage());
@@ -388,12 +403,13 @@ public class ConfigManagementPanel extends BorderPane {
     }
 
     private void showAlert(Alert.AlertType type, String title, String header, String content) {
-        Platform.runLater(() -> {
-            Alert alert = new Alert(type);
-            alert.setTitle(title);
-            alert.setHeaderText(header);
-            alert.setContentText(content);
-            alert.showAndWait();
-        });
+        Platform.runLater(
+                () -> {
+                    Alert alert = new Alert(type);
+                    alert.setTitle(title);
+                    alert.setHeaderText(header);
+                    alert.setContentText(content);
+                    alert.showAndWait();
+                });
     }
 }

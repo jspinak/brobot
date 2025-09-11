@@ -1,7 +1,8 @@
 package io.github.jspinak.brobot.runner.ui.window;
 
-import lombok.extern.slf4j.Slf4j;
-
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Optional;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
@@ -10,15 +11,11 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Optional;
-
-/**
- * Factory for creating common dialog types.
- */
+/** Factory for creating common dialog types. */
 @Slf4j
 public class DialogFactory {
 
@@ -63,7 +60,8 @@ public class DialogFactory {
      * @param message The error message
      * @param exception The exception that caused the error, or null if none
      */
-    public static void createErrorDialog(Stage owner, String title, String message, Exception exception) {
+    public static void createErrorDialog(
+            Stage owner, String title, String message, Exception exception) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         setupDialog(alert, owner, title);
         alert.setHeaderText(null);
@@ -106,7 +104,8 @@ public class DialogFactory {
      * @param defaultValue The default input value
      * @return The input value, or empty if cancelled
      */
-    public static Optional<String> createInputDialog(Stage owner, String title, String message, String defaultValue) {
+    public static Optional<String> createInputDialog(
+            Stage owner, String title, String message, String defaultValue) {
         TextInputDialog dialog = new TextInputDialog(defaultValue);
         setupDialog(dialog, owner, title);
         dialog.setHeaderText(null);
@@ -145,15 +144,11 @@ public class DialogFactory {
         }
     }
 
-    /**
-     * A custom progress dialog.
-     */
+    /** A custom progress dialog. */
     public static class ProgressDialog {
-        /**
-         *  The dialog stage.
-         */
-        @Getter
-        private final Stage dialogStage;
+        /** The dialog stage. */
+        @Getter private final Stage dialogStage;
+
         private final ProgressBar progressBar;
         private final Label messageLabel;
 
@@ -187,16 +182,12 @@ public class DialogFactory {
             dialogStage.setScene(new javafx.scene.Scene(vbox));
         }
 
-        /**
-         * Shows the dialog.
-         */
+        /** Shows the dialog. */
         public void show() {
             dialogStage.show();
         }
 
-        /**
-         * Closes the dialog.
-         */
+        /** Closes the dialog. */
         public void close() {
             dialogStage.close();
         }
@@ -218,6 +209,5 @@ public class DialogFactory {
         public void setMessage(String message) {
             Platform.runLater(() -> messageLabel.setText(message));
         }
-
     }
 }

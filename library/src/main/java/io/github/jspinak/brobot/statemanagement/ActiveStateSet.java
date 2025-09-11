@@ -7,44 +7,44 @@ import io.github.jspinak.brobot.model.state.StateEnum;
 
 /**
  * Manages a collection of currently active states in the Brobot framework.
- * 
- * <p>ActiveStateSet provides a lightweight container for tracking which states are currently 
- * active in the GUI using StateEnum identifiers. This class is particularly useful during 
- * the development phase when working with enum-based state definitions, before transitioning 
- * to the more robust database-backed state management system.</p>
- * 
+ *
+ * <p>ActiveStateSet provides a lightweight container for tracking which states are currently active
+ * in the GUI using StateEnum identifiers. This class is particularly useful during the development
+ * phase when working with enum-based state definitions, before transitioning to the more robust
+ * database-backed state management system.
+ *
  * <p>Key features:
+ *
  * <ul>
- *   <li><b>Set Semantics</b>: Ensures each state is tracked only once, preventing duplicates</li>
- *   <li><b>Bulk Operations</b>: Supports adding individual states or entire collections</li>
- *   <li><b>Enum-based</b>: Works with StateEnum interface for compile-time type safety</li>
- *   <li><b>Merge Support</b>: Can combine multiple ActiveStateSet instances</li>
+ *   <li><b>Set Semantics</b>: Ensures each state is tracked only once, preventing duplicates
+ *   <li><b>Bulk Operations</b>: Supports adding individual states or entire collections
+ *   <li><b>Enum-based</b>: Works with StateEnum interface for compile-time type safety
+ *   <li><b>Merge Support</b>: Can combine multiple ActiveStateSet instances
  * </ul>
- * </p>
- * 
+ *
  * <p>Use cases:
+ *
  * <ul>
- *   <li>Tracking active states during automation execution</li>
- *   <li>Building state sets for transition operations</li>
- *   <li>Maintaining state context in enum-based automation scripts</li>
- *   <li>Debugging state transitions by examining active state sets</li>
+ *   <li>Tracking active states during automation execution
+ *   <li>Building state sets for transition operations
+ *   <li>Maintaining state context in enum-based automation scripts
+ *   <li>Debugging state transitions by examining active state sets
  * </ul>
- * </p>
- * 
- * <p>This class represents a simpler alternative to StateMemory for scenarios where 
- * database integration is not required. It's particularly useful for:
+ *
+ * <p>This class represents a simpler alternative to StateMemory for scenarios where database
+ * integration is not required. It's particularly useful for:
+ *
  * <ul>
- *   <li>Unit testing state management logic</li>
- *   <li>Lightweight automation scripts</li>
- *   <li>Prototyping state structures before database implementation</li>
+ *   <li>Unit testing state management logic
+ *   <li>Lightweight automation scripts
+ *   <li>Prototyping state structures before database implementation
  * </ul>
- * </p>
- * 
- * <p>In the model-based approach, ActiveStateSet provides a foundation for tracking the 
- * current GUI configuration without the overhead of full state management infrastructure. 
- * This makes it ideal for simpler automation scenarios or as a stepping stone to more 
- * sophisticated state tracking mechanisms.</p>
- * 
+ *
+ * <p>In the model-based approach, ActiveStateSet provides a foundation for tracking the current GUI
+ * configuration without the overhead of full state management infrastructure. This makes it ideal
+ * for simpler automation scenarios or as a stepping stone to more sophisticated state tracking
+ * mechanisms.
+ *
  * @since 1.0
  * @see StateEnum
  * @see StateMemory
@@ -69,5 +69,4 @@ public class ActiveStateSet {
     public Set<StateEnum> getActiveStates() {
         return activeStates;
     }
-
 }

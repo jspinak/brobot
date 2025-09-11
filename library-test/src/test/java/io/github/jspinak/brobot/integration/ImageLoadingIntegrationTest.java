@@ -1,26 +1,8 @@
 package io.github.jspinak.brobot.integration;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
-import io.github.jspinak.brobot.config.core.EarlyImagePathInitializer;
-import io.github.jspinak.brobot.config.core.ImagePathManager;
-import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
-import io.github.jspinak.brobot.model.element.Pattern;
-import io.github.jspinak.brobot.model.state.State;
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.io.TempDir;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.MockitoAnnotations;
-import org.sikuli.script.ImagePath;
-import org.springframework.test.util.ReflectionTestUtils;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -31,30 +13,50 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import javax.imageio.ImageIO;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.junit.jupiter.api.io.TempDir;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.MockitoAnnotations;
+import org.sikuli.script.ImagePath;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import io.github.jspinak.brobot.config.core.BrobotProperties;
+import io.github.jspinak.brobot.config.core.EarlyImagePathInitializer;
+import io.github.jspinak.brobot.config.core.ImagePathManager;
+import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 
 /**
- * Integration tests for the complete image loading flow,
- * ensuring that image paths are correctly configured before Pattern creation.
+ * Integration tests for the complete image loading flow, ensuring that image paths are correctly
+ * configured before Pattern creation.
  */
 @DisplayName("Image Loading Integration Tests")
-@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Integration test requires non-CI environment")
+@DisabledIfEnvironmentVariable(
+        named = "CI",
+        matches = "true",
+        disabledReason = "Integration test requires non-CI environment")
 public class ImageLoadingIntegrationTest extends BrobotTestBase {
 
-    @Mock
-    private BrobotProperties brobotProperties;
+    @Mock private BrobotProperties brobotProperties;
 
-    @Mock
-    private BrobotProperties.Core coreConfig;
+    @Mock private BrobotProperties.Core coreConfig;
 
     private ImagePathManager imagePathManager;
     private EarlyImagePathInitializer earlyInitializer;
 
-    @TempDir
-    Path tempDir;
+    @TempDir Path tempDir;
 
     private BufferedImage testImage;
 
@@ -94,7 +96,8 @@ public class ImageLoadingIntegrationTest extends BrobotTestBase {
 
             // Step 2: Initialize early path configuration
             ReflectionTestUtils.setField(earlyInitializer, "brobotProperties", brobotProperties);
-            ReflectionTestUtils.setField(earlyInitializer, "primaryImagePath", imagesDir.toString());
+            ReflectionTestUtils.setField(
+                    earlyInitializer, "primaryImagePath", imagesDir.toString());
 
             try (MockedStatic<ImagePath> imagePathMock = mockStatic(ImagePath.class)) {
                 earlyInitializer.initializeImagePaths();
@@ -115,11 +118,12 @@ public class ImageLoadingIntegrationTest extends BrobotTestBase {
             Pattern usernamePattern = new Pattern("username-field.png");
 
             // Step 5: Create StateImage with Patterns
-            StateImage loginStateImage = new StateImage.Builder()
-                    .setName("login-elements")
-                    .addPattern(loginPattern)
-                    .addPattern(usernamePattern)
-                    .build();
+            StateImage loginStateImage =
+                    new StateImage.Builder()
+                            .setName("login-elements")
+                            .addPattern(loginPattern)
+                            .addPattern(usernamePattern)
+                            .build();
 
             // Step 6: Create State with StateImage
             State loginState = new State();
@@ -145,7 +149,8 @@ public class ImageLoadingIntegrationTest extends BrobotTestBase {
 
             // Simulate Spring Boot startup sequence
             // 1. @Value injection
-            ReflectionTestUtils.setField(earlyInitializer, "primaryImagePath", imagesDir.toString());
+            ReflectionTestUtils.setField(
+                    earlyInitializer, "primaryImagePath", imagesDir.toString());
 
             // 2. @Autowired injection (optional dependencies)
             ReflectionTestUtils.setField(earlyInitializer, "brobotProperties", null);
@@ -190,7 +195,8 @@ public class ImageLoadingIntegrationTest extends BrobotTestBase {
             Files.createDirectories(programmaticPath);
 
             // 1. Default from @Value
-            ReflectionTestUtils.setField(earlyInitializer, "primaryImagePath", defaultPath.toString());
+            ReflectionTestUtils.setField(
+                    earlyInitializer, "primaryImagePath", defaultPath.toString());
 
             // 2. Override with BrobotProperties
             when(brobotProperties.getCore()).thenReturn(coreConfig);
@@ -262,15 +268,21 @@ public class ImageLoadingIntegrationTest extends BrobotTestBase {
             // Create states with images
             State loginState = new State();
             loginState.setName("Login");
-            loginState.getStateImages().add(new StateImage.Builder().addPattern("login.png").build());
+            loginState
+                    .getStateImages()
+                    .add(new StateImage.Builder().addPattern("login.png").build());
 
             State dashboardState = new State();
             dashboardState.setName("Dashboard");
-            dashboardState.getStateImages().add(new StateImage.Builder().addPattern("dashboard.png").build());
+            dashboardState
+                    .getStateImages()
+                    .add(new StateImage.Builder().addPattern("dashboard.png").build());
 
             State settingsState = new State();
             settingsState.setName("Settings");
-            settingsState.getStateImages().add(new StateImage.Builder().addPattern("settings.png").build());
+            settingsState
+                    .getStateImages()
+                    .add(new StateImage.Builder().addPattern("settings.png").build());
 
             // Verify
             assertFalse(loginState.getStateImages().isEmpty());
@@ -303,9 +315,8 @@ public class ImageLoadingIntegrationTest extends BrobotTestBase {
             ReflectionTestUtils.setField(env, "mockMode", true);
 
             // Create shared image
-            StateImage sharedImage = new StateImage.Builder()
-                    .addPattern("company-logo.png")
-                    .build();
+            StateImage sharedImage =
+                    new StateImage.Builder().addPattern("company-logo.png").build();
             sharedImage.setShared(true);
 
             // Use in multiple states
@@ -355,16 +366,17 @@ public class ImageLoadingIntegrationTest extends BrobotTestBase {
 
             for (int i = 0; i < numImages; i++) {
                 final int index = i;
-                executor.submit(() -> {
-                    try {
-                        Pattern pattern = new Pattern("image" + index + ".png");
-                        if (pattern != null && pattern.getImage() != null) {
-                            successCount.incrementAndGet();
-                        }
-                    } finally {
-                        latch.countDown();
-                    }
-                });
+                executor.submit(
+                        () -> {
+                            try {
+                                Pattern pattern = new Pattern("image" + index + ".png");
+                                if (pattern != null && pattern.getImage() != null) {
+                                    successCount.incrementAndGet();
+                                }
+                            } finally {
+                                latch.countDown();
+                            }
+                        });
             }
 
             // Then
@@ -385,17 +397,18 @@ public class ImageLoadingIntegrationTest extends BrobotTestBase {
             // When - Configure paths concurrently
             for (int i = 0; i < numPaths; i++) {
                 final int index = i;
-                executor.submit(() -> {
-                    try {
-                        Path path = tempDir.resolve("path" + index);
-                        Files.createDirectories(path);
-                        imagePathManager.addPath(path.toString());
-                    } catch (IOException e) {
-                        // Ignore for test
-                    } finally {
-                        latch.countDown();
-                    }
-                });
+                executor.submit(
+                        () -> {
+                            try {
+                                Path path = tempDir.resolve("path" + index);
+                                Files.createDirectories(path);
+                                imagePathManager.addPath(path.toString());
+                            } catch (IOException e) {
+                                // Ignore for test
+                            } finally {
+                                latch.countDown();
+                            }
+                        });
             }
 
             // Then
@@ -424,17 +437,21 @@ public class ImageLoadingIntegrationTest extends BrobotTestBase {
 
             imagePathManager.initialize(imagesDir.toString());
 
-            try (MockedStatic<BufferedImageUtilities> utilsMock = mockStatic(BufferedImageUtilities.class)) {
-                utilsMock.when(() -> BufferedImageUtilities.getBuffImgFromFile("corrupted.png"))
+            try (MockedStatic<BufferedImageUtilities> utilsMock =
+                    mockStatic(BufferedImageUtilities.class)) {
+                utilsMock
+                        .when(() -> BufferedImageUtilities.getBuffImgFromFile("corrupted.png"))
                         .thenReturn(null); // Simulate failure to load
 
                 ExecutionEnvironment env = ExecutionEnvironment.getInstance();
                 ReflectionTestUtils.setField(env, "mockMode", false);
 
                 // When/Then - Should throw with helpful message
-                assertThrows(IllegalStateException.class, () -> {
-                    new Pattern("corrupted.png");
-                });
+                assertThrows(
+                        IllegalStateException.class,
+                        () -> {
+                            new Pattern("corrupted.png");
+                        });
             }
         }
 
@@ -462,17 +479,19 @@ public class ImageLoadingIntegrationTest extends BrobotTestBase {
             // When - Create state with multiple images
             State state = new State();
             state.setName("TestState");
-            state.getStateImages().add(
-                    new StateImage.Builder()
-                            .addPatterns("image1.png", "image2.png", "image3.png")
-                            .build());
+            state.getStateImages()
+                    .add(
+                            new StateImage.Builder()
+                                    .addPatterns("image1.png", "image2.png", "image3.png")
+                                    .build());
 
             // Then - All patterns should have images
             StateImage stateImage = state.getStateImages().iterator().next();
             assertEquals(3, stateImage.getPatterns().size());
 
             for (Pattern pattern : stateImage.getPatterns()) {
-                assertNotNull(pattern.getImage(),
+                assertNotNull(
+                        pattern.getImage(),
                         "Pattern " + pattern.getName() + " should have loaded image");
             }
         }

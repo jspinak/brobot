@@ -1,24 +1,25 @@
 package io.github.jspinak.brobot.model.transition;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.ValueSource;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 import java.util.*;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
- * Comprehensive tests for the Direction enum which represents
- * directional relationships in state transitions and navigation.
+ * Comprehensive tests for the Direction enum which represents directional relationships in state
+ * transitions and navigation.
  */
 @DisplayName("Direction Enum Tests")
 public class DirectionTest extends BrobotTestBase {
@@ -34,7 +35,7 @@ public class DirectionTest extends BrobotTestBase {
     void testEnumConstants() {
         // When
         Direction[] directions = Direction.values();
-        
+
         // Then
         assertEquals(2, directions.length);
         assertEquals(Direction.TO, directions[0]);
@@ -70,7 +71,8 @@ public class DirectionTest extends BrobotTestBase {
     void testValueOfInvalid() {
         // Then
         assertThrows(IllegalArgumentException.class, () -> Direction.valueOf("INVALID"));
-        assertThrows(IllegalArgumentException.class, () -> Direction.valueOf("to")); // Case sensitive
+        assertThrows(
+                IllegalArgumentException.class, () -> Direction.valueOf("to")); // Case sensitive
         assertThrows(IllegalArgumentException.class, () -> Direction.valueOf(""));
         assertThrows(NullPointerException.class, () -> Direction.valueOf(null));
     }
@@ -91,13 +93,14 @@ public class DirectionTest extends BrobotTestBase {
     void testSwitchStatement() {
         // Given
         Direction direction = Direction.TO;
-        
+
         // When
-        String description = switch (direction) {
-            case TO -> "Moving towards target";
-            case FROM -> "Coming from source";
-        };
-        
+        String description =
+                switch (direction) {
+                    case TO -> "Moving towards target";
+                    case FROM -> "Coming from source";
+                };
+
         // Then
         assertEquals("Moving towards target", description);
     }
@@ -109,15 +112,15 @@ public class DirectionTest extends BrobotTestBase {
         Direction dir1 = Direction.TO;
         Direction dir2 = Direction.TO;
         Direction dir3 = Direction.FROM;
-        
+
         // Then - Reference equality
         assertSame(dir1, dir2);
         assertNotSame(dir1, dir3);
-        
+
         // Equality comparison
         assertEquals(dir1, dir2);
         assertNotEquals(dir1, dir3);
-        
+
         // Comparable
         assertTrue(dir1.compareTo(dir3) < 0);
         assertTrue(dir3.compareTo(dir1) > 0);
@@ -129,12 +132,12 @@ public class DirectionTest extends BrobotTestBase {
     void testCollections() {
         // Given
         Set<Direction> usedDirections = new HashSet<>();
-        
+
         // When
         usedDirections.add(Direction.TO);
         usedDirections.add(Direction.FROM);
         usedDirections.add(Direction.TO); // Duplicate
-        
+
         // Then
         assertEquals(2, usedDirections.size());
         assertTrue(usedDirections.contains(Direction.TO));
@@ -153,59 +156,62 @@ public class DirectionTest extends BrobotTestBase {
     @DisplayName("Direction usage scenarios")
     Stream<DynamicTest> testUsageScenarios() {
         return Stream.of(
-            dynamicTest("State transition direction", () -> {
-                // Simulate state transition
-                Direction transitionDirection = Direction.TO;
-                assertEquals(Direction.TO, transitionDirection);
-                assertEquals("TO", transitionDirection.name());
-            }),
-            
-            dynamicTest("Reverse navigation", () -> {
-                // Simulate reverse navigation
-                Direction forward = Direction.TO;
-                Direction reverse = Direction.FROM;
-                
-                assertNotEquals(forward, reverse);
-                assertTrue(forward.ordinal() < reverse.ordinal());
-            }),
-            
-            dynamicTest("Bidirectional relationship", () -> {
-                // Track both directions
-                Map<Direction, String> connections = new EnumMap<>(Direction.class);
-                connections.put(Direction.TO, "TargetState");
-                connections.put(Direction.FROM, "SourceState");
-                
-                assertEquals(2, connections.size());
-                assertEquals("TargetState", connections.get(Direction.TO));
-                assertEquals("SourceState", connections.get(Direction.FROM));
-            }),
-            
-            dynamicTest("Path traversal direction", () -> {
-                // Simulate path traversal
-                List<Direction> path = Arrays.asList(
-                    Direction.TO,
-                    Direction.TO,
-                    Direction.FROM
-                );
-                
-                assertEquals(3, path.size());
-                assertEquals(Direction.FROM, path.get(2));
-            }),
-            
-            dynamicTest("Query filter by direction", () -> {
-                // Simulate filtering transitions
-                Map<String, Direction> transitions = new HashMap<>();
-                transitions.put("Login->Home", Direction.TO);
-                transitions.put("Home->Settings", Direction.TO);
-                transitions.put("Settings->Home", Direction.FROM);
-                
-                long toCount = transitions.values().stream()
-                    .filter(d -> d == Direction.TO)
-                    .count();
-                
-                assertEquals(2, toCount);
-            })
-        );
+                dynamicTest(
+                        "State transition direction",
+                        () -> {
+                            // Simulate state transition
+                            Direction transitionDirection = Direction.TO;
+                            assertEquals(Direction.TO, transitionDirection);
+                            assertEquals("TO", transitionDirection.name());
+                        }),
+                dynamicTest(
+                        "Reverse navigation",
+                        () -> {
+                            // Simulate reverse navigation
+                            Direction forward = Direction.TO;
+                            Direction reverse = Direction.FROM;
+
+                            assertNotEquals(forward, reverse);
+                            assertTrue(forward.ordinal() < reverse.ordinal());
+                        }),
+                dynamicTest(
+                        "Bidirectional relationship",
+                        () -> {
+                            // Track both directions
+                            Map<Direction, String> connections = new EnumMap<>(Direction.class);
+                            connections.put(Direction.TO, "TargetState");
+                            connections.put(Direction.FROM, "SourceState");
+
+                            assertEquals(2, connections.size());
+                            assertEquals("TargetState", connections.get(Direction.TO));
+                            assertEquals("SourceState", connections.get(Direction.FROM));
+                        }),
+                dynamicTest(
+                        "Path traversal direction",
+                        () -> {
+                            // Simulate path traversal
+                            List<Direction> path =
+                                    Arrays.asList(Direction.TO, Direction.TO, Direction.FROM);
+
+                            assertEquals(3, path.size());
+                            assertEquals(Direction.FROM, path.get(2));
+                        }),
+                dynamicTest(
+                        "Query filter by direction",
+                        () -> {
+                            // Simulate filtering transitions
+                            Map<String, Direction> transitions = new HashMap<>();
+                            transitions.put("Login->Home", Direction.TO);
+                            transitions.put("Home->Settings", Direction.TO);
+                            transitions.put("Settings->Home", Direction.FROM);
+
+                            long toCount =
+                                    transitions.values().stream()
+                                            .filter(d -> d == Direction.TO)
+                                            .count();
+
+                            assertEquals(2, toCount);
+                        }));
     }
 
     @Test
@@ -213,14 +219,14 @@ public class DirectionTest extends BrobotTestBase {
     void testArrayOperations() {
         // Given
         Direction[] directions = Direction.values();
-        
+
         // When
         Direction[] copy = Arrays.copyOf(directions, directions.length);
-        
+
         // Then
         assertArrayEquals(directions, copy);
         assertEquals(2, copy.length);
-        
+
         // Modify copy doesn't affect original
         copy[0] = Direction.FROM;
         assertEquals(Direction.TO, directions[0]);
@@ -234,12 +240,12 @@ public class DirectionTest extends BrobotTestBase {
         Direction dir1 = Direction.valueOf("TO");
         Direction dir2 = Direction.valueOf("TO");
         Direction dir3 = Direction.TO;
-        
+
         // All references point to same instance
         assertSame(dir1, dir2);
         assertSame(dir2, dir3);
         assertSame(dir1, dir3);
-        
+
         // Same for array access
         assertSame(Direction.TO, Direction.values()[0]);
     }
@@ -250,11 +256,11 @@ public class DirectionTest extends BrobotTestBase {
     void testStringRoundTrip(String directionName) {
         // Given
         Direction original = Direction.valueOf(directionName);
-        
+
         // When
         String asString = original.toString();
         Direction reconstructed = Direction.valueOf(asString);
-        
+
         // Then
         assertEquals(original, reconstructed);
         assertSame(original, reconstructed); // Same instance
@@ -267,13 +273,13 @@ public class DirectionTest extends BrobotTestBase {
         // Given
         int count = 0;
         Set<String> names = new HashSet<>();
-        
+
         // When
         for (Direction direction : Direction.values()) {
             count++;
             names.add(direction.name());
         }
-        
+
         // Then
         assertEquals(2, count);
         assertEquals(2, names.size());
@@ -287,15 +293,15 @@ public class DirectionTest extends BrobotTestBase {
         // Given
         Direction direction = Direction.TO;
         Direction nullDirection = null;
-        
+
         // Then
         assertNotNull(direction);
         assertNull(nullDirection);
-        
+
         // Comparison with null
         assertNotEquals(direction, nullDirection);
         assertNotEquals(null, direction);
-        
+
         // Can't call methods on null
         assertThrows(NullPointerException.class, () -> nullDirection.name());
     }
@@ -305,7 +311,7 @@ public class DirectionTest extends BrobotTestBase {
     void testTypeSafety() {
         // Direction provides compile-time type safety
         Direction direction = Direction.TO;
-        
+
         // Type checking
         assertTrue(direction instanceof Direction);
         assertTrue(direction instanceof Enum);
@@ -317,14 +323,15 @@ public class DirectionTest extends BrobotTestBase {
     void testFunctionalPatterns() {
         // Given
         Direction[] directions = Direction.values();
-        
+
         // When - Map to descriptions
-        String[] descriptions = Arrays.stream(directions)
-            .map(d -> d == Direction.TO ? "forward" : "backward")
-            .toArray(String[]::new);
-        
+        String[] descriptions =
+                Arrays.stream(directions)
+                        .map(d -> d == Direction.TO ? "forward" : "backward")
+                        .toArray(String[]::new);
+
         // Then
-        assertArrayEquals(new String[]{"forward", "backward"}, descriptions);
+        assertArrayEquals(new String[] {"forward", "backward"}, descriptions);
     }
 
     @Test
@@ -334,11 +341,11 @@ public class DirectionTest extends BrobotTestBase {
         Direction dir1 = Direction.TO;
         Direction dir2 = Direction.TO;
         Direction dir3 = Direction.FROM;
-        
+
         // Then
         assertEquals(dir1.hashCode(), dir2.hashCode());
         assertNotEquals(dir1.hashCode(), dir3.hashCode()); // Usually different
-        
+
         // HashCode consistency
         int hash1 = dir1.hashCode();
         int hash2 = dir1.hashCode();
@@ -350,16 +357,16 @@ public class DirectionTest extends BrobotTestBase {
     void testEnumMap() {
         // EnumMap is optimized for enum keys
         EnumMap<Direction, Integer> counts = new EnumMap<>(Direction.class);
-        
+
         // When
         counts.put(Direction.TO, 5);
         counts.put(Direction.FROM, 3);
-        
+
         // Then
         assertEquals(2, counts.size());
         assertEquals(5, counts.get(Direction.TO));
         assertEquals(3, counts.get(Direction.FROM));
-        
+
         // EnumMap maintains enum order
         Iterator<Direction> iterator = counts.keySet().iterator();
         assertEquals(Direction.TO, iterator.next());
@@ -373,12 +380,12 @@ public class DirectionTest extends BrobotTestBase {
         EnumSet<Direction> allDirections = EnumSet.allOf(Direction.class);
         EnumSet<Direction> noDirections = EnumSet.noneOf(Direction.class);
         EnumSet<Direction> toOnly = EnumSet.of(Direction.TO);
-        
+
         // Then
         assertEquals(2, allDirections.size());
         assertEquals(0, noDirections.size());
         assertEquals(1, toOnly.size());
-        
+
         assertTrue(allDirections.contains(Direction.TO));
         assertTrue(allDirections.contains(Direction.FROM));
         assertFalse(noDirections.contains(Direction.TO));
@@ -390,13 +397,13 @@ public class DirectionTest extends BrobotTestBase {
     @DisplayName("Should demonstrate opposite direction logic")
     void testOppositeDirection() {
         // Given - Using lambda for opposite logic
-        java.util.function.Function<Direction, Direction> getOpposite = 
-            dir -> dir == Direction.TO ? Direction.FROM : Direction.TO;
-        
+        java.util.function.Function<Direction, Direction> getOpposite =
+                dir -> dir == Direction.TO ? Direction.FROM : Direction.TO;
+
         // Then
         assertEquals(Direction.FROM, getOpposite.apply(Direction.TO));
         assertEquals(Direction.TO, getOpposite.apply(Direction.FROM));
-        
+
         // Double opposite returns original
         assertEquals(Direction.TO, getOpposite.apply(getOpposite.apply(Direction.TO)));
     }
@@ -405,17 +412,17 @@ public class DirectionTest extends BrobotTestBase {
     @DisplayName("Should follow enum best practices")
     void testEnumBestPractices() {
         // Verify enum follows best practices
-        
+
         // 1. Enum is final (can't be extended)
         assertTrue(java.lang.reflect.Modifier.isFinal(Direction.class.getModifiers()));
-        
+
         // 2. Has proper enum methods
         assertDoesNotThrow(() -> Direction.valueOf("TO"));
         assertDoesNotThrow(() -> Direction.values());
-        
+
         // 3. Implements Comparable
         assertTrue(Comparable.class.isAssignableFrom(Direction.class));
-        
+
         // 4. Implements Serializable
         assertTrue(java.io.Serializable.class.isAssignableFrom(Direction.class));
     }
@@ -424,18 +431,18 @@ public class DirectionTest extends BrobotTestBase {
     @DisplayName("Should represent semantic relationships")
     void testSemanticRelationships() {
         // Direction represents semantic relationships
-        
+
         // TO implies forward/target
         Direction toTarget = Direction.TO;
         assertEquals("TO", toTarget.name());
-        
-        // FROM implies backward/source  
+
+        // FROM implies backward/source
         Direction fromSource = Direction.FROM;
         assertEquals("FROM", fromSource.name());
-        
+
         // They are mutually exclusive
         assertNotEquals(toTarget, fromSource);
-        
+
         // Complete the direction space
         Set<Direction> allDirections = EnumSet.allOf(Direction.class);
         assertEquals(2, allDirections.size());

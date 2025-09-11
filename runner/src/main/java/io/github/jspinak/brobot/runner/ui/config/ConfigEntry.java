@@ -1,14 +1,12 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 
-/**
- * Represents a configuration entry containing paths to project and DSL configuration files.
- */
+import lombok.Getter;
+import lombok.Setter;
+
+/** Represents a configuration entry containing paths to project and DSL configuration files. */
 @Getter
 @Setter
 public class ConfigEntry {

@@ -1,63 +1,49 @@
 package io.github.jspinak.brobot.runner;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.runner.dsl.InstructionSet;
-import io.github.jspinak.brobot.runner.project.AutomationProjectManager;
-import io.github.jspinak.brobot.runner.dsl.BusinessTask;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.action.basic.click.ClickOptions;
-import io.github.jspinak.brobot.model.state.State;
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.model.state.StateStore;
-import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
-
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.state.StateStore;
+import io.github.jspinak.brobot.runner.dsl.BusinessTask;
+import io.github.jspinak.brobot.runner.dsl.InstructionSet;
+import io.github.jspinak.brobot.runner.project.AutomationProjectManager;
+import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 
 /**
  * Integration tests for the Automation Runner system.
- * 
- * This test class verifies:
- * 1. BusinessTask (automation function) creation and management
- * 2. InstructionSet (automation DSL) parsing and execution
- * 3. State management and transitions
- * 4. Project management functionality
- * 5. Integration between various automation components
- * 
- * The original test tried to test:
- * - AutomationRunner executing tasks (class doesn't exist - functionality may
- * be in ExecutionController)
- * - BusinessTaskBuilder creating tasks (doesn't exist - BusinessTask is created
- * directly)
- * - Planning system for state transitions (doesn't exist - may be in
- * StateTransition)
- * - Operation sequences (doesn't exist - replaced by Statement lists in
- * BusinessTask)
- * - Init service for global mock (doesn't exist - use FrameworkSettings.mock
+ *
+ * <p>This test class verifies: 1. BusinessTask (automation function) creation and management 2.
+ * InstructionSet (automation DSL) parsing and execution 3. State management and transitions 4.
+ * Project management functionality 5. Integration between various automation components
+ *
+ * <p>The original test tried to test: - AutomationRunner executing tasks (class doesn't exist -
+ * functionality may be in ExecutionController) - BusinessTaskBuilder creating tasks (doesn't exist
+ * - BusinessTask is created directly) - Planning system for state transitions (doesn't exist - may
+ * be in StateTransition) - Operation sequences (doesn't exist - replaced by Statement lists in
+ * BusinessTask) - Init service for global mock (doesn't exist - use FrameworkSettings.mock
  * directly)
  */
 @SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class)
-@TestPropertySource(properties = {
-        "spring.main.lazy-initialization=true",
-        "brobot.mock.enabled=true"
-})
+@TestPropertySource(
+        properties = {"spring.main.lazy-initialization=true", "brobot.mock.enabled=true"})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class AutomationIntegrationTest extends BrobotIntegrationTestBase {
 
-    @Autowired
-    private AutomationProjectManager projectManager;
+    @Autowired private AutomationProjectManager projectManager;
 
-    @Autowired
-    private StateStore stateStore;
+    @Autowired private StateStore stateStore;
 
     private State loginState;
     private State dashboardState;
@@ -77,56 +63,64 @@ class AutomationIntegrationTest extends BrobotIntegrationTestBase {
 
     private void createTestStates() {
         // Create Login State with StateImages instead of generic StateObjects
-        StateImage usernameField = new StateImage.Builder()
-                .setName("usernameField")
-                .setSearchRegionForAllPatterns(new Region(100, 100, 200, 30))
-                .build();
+        StateImage usernameField =
+                new StateImage.Builder()
+                        .setName("usernameField")
+                        .setSearchRegionForAllPatterns(new Region(100, 100, 200, 30))
+                        .build();
 
-        StateImage passwordField = new StateImage.Builder()
-                .setName("passwordField")
-                .setSearchRegionForAllPatterns(new Region(100, 150, 200, 30))
-                .build();
+        StateImage passwordField =
+                new StateImage.Builder()
+                        .setName("passwordField")
+                        .setSearchRegionForAllPatterns(new Region(100, 150, 200, 30))
+                        .build();
 
-        StateImage loginButton = new StateImage.Builder()
-                .setName("loginButton")
-                .setSearchRegionForAllPatterns(new Region(150, 200, 100, 40))
-                .build();
+        StateImage loginButton =
+                new StateImage.Builder()
+                        .setName("loginButton")
+                        .setSearchRegionForAllPatterns(new Region(150, 200, 100, 40))
+                        .build();
 
-        loginState = new State.Builder("LoginState")
-                .withImages(usernameField, passwordField, loginButton)
-                .build();
+        loginState =
+                new State.Builder("LoginState")
+                        .withImages(usernameField, passwordField, loginButton)
+                        .build();
         stateStore.save(loginState);
 
         // Create Dashboard State
-        StateImage dashboardTitle = new StateImage.Builder()
-                .setName("dashboardTitle")
-                .setSearchRegionForAllPatterns(new Region(10, 10, 200, 50))
-                .build();
+        StateImage dashboardTitle =
+                new StateImage.Builder()
+                        .setName("dashboardTitle")
+                        .setSearchRegionForAllPatterns(new Region(10, 10, 200, 50))
+                        .build();
 
-        StateImage reportsButton = new StateImage.Builder()
-                .setName("reportsButton")
-                .setSearchRegionForAllPatterns(new Region(50, 100, 120, 40))
-                .build();
+        StateImage reportsButton =
+                new StateImage.Builder()
+                        .setName("reportsButton")
+                        .setSearchRegionForAllPatterns(new Region(50, 100, 120, 40))
+                        .build();
 
-        dashboardState = new State.Builder("DashboardState")
-                .withImages(dashboardTitle, reportsButton)
-                .build();
+        dashboardState =
+                new State.Builder("DashboardState")
+                        .withImages(dashboardTitle, reportsButton)
+                        .build();
         stateStore.save(dashboardState);
 
         // Create Reports State
-        StateImage reportsTitle = new StateImage.Builder()
-                .setName("reportsTitle")
-                .setSearchRegionForAllPatterns(new Region(10, 10, 200, 50))
-                .build();
+        StateImage reportsTitle =
+                new StateImage.Builder()
+                        .setName("reportsTitle")
+                        .setSearchRegionForAllPatterns(new Region(10, 10, 200, 50))
+                        .build();
 
-        StateImage exportButton = new StateImage.Builder()
-                .setName("exportButton")
-                .setSearchRegionForAllPatterns(new Region(300, 100, 100, 40))
-                .build();
+        StateImage exportButton =
+                new StateImage.Builder()
+                        .setName("exportButton")
+                        .setSearchRegionForAllPatterns(new Region(300, 100, 100, 40))
+                        .build();
 
-        reportsState = new State.Builder("ReportsState")
-                .withImages(reportsTitle, exportButton)
-                .build();
+        reportsState =
+                new State.Builder("ReportsState").withImages(reportsTitle, exportButton).build();
         stateStore.save(reportsState);
     }
 
@@ -194,10 +188,11 @@ class AutomationIntegrationTest extends BrobotIntegrationTestBase {
         assertEquals(3, stateStore.getAllStates().size(), "Should have 3 states");
 
         // Find specific state
-        State foundState = stateStore.getAllStates().stream()
-                .filter(s -> s.getName().equals("LoginState"))
-                .findFirst()
-                .orElse(null);
+        State foundState =
+                stateStore.getAllStates().stream()
+                        .filter(s -> s.getName().equals("LoginState"))
+                        .findFirst()
+                        .orElse(null);
 
         assertNotNull(foundState);
         assertEquals("LoginState", foundState.getName());
@@ -224,15 +219,17 @@ class AutomationIntegrationTest extends BrobotIntegrationTestBase {
         assertTrue(FrameworkSettings.mock, "Should be in mock mode");
 
         // In mock mode, actions should succeed without actual GUI
-        PatternFindOptions findOptions = new PatternFindOptions.Builder()
-                .setStrategy(PatternFindOptions.Strategy.FIRST)
-                .build();
+        PatternFindOptions findOptions =
+                new PatternFindOptions.Builder()
+                        .setStrategy(PatternFindOptions.Strategy.FIRST)
+                        .build();
 
         // Verify mock mode doesn't throw exceptions
-        assertDoesNotThrow(() -> {
-            // Mock operations would normally be performed here
-            // Action execution is tested in other test classes
-        });
+        assertDoesNotThrow(
+                () -> {
+                    // Mock operations would normally be performed here
+                    // Action execution is tested in other test classes
+                });
     }
 
     @Test
@@ -242,15 +239,17 @@ class AutomationIntegrationTest extends BrobotIntegrationTestBase {
         // Original test was testing planning system for transitions
         // Verify states have proper structure for transitions
 
-        State login = stateStore.getAllStates().stream()
-                .filter(s -> s.getName().equals("LoginState"))
-                .findFirst()
-                .orElse(null);
+        State login =
+                stateStore.getAllStates().stream()
+                        .filter(s -> s.getName().equals("LoginState"))
+                        .findFirst()
+                        .orElse(null);
 
-        State dashboard = stateStore.getAllStates().stream()
-                .filter(s -> s.getName().equals("DashboardState"))
-                .findFirst()
-                .orElse(null);
+        State dashboard =
+                stateStore.getAllStates().stream()
+                        .filter(s -> s.getName().equals("DashboardState"))
+                        .findFirst()
+                        .orElse(null);
 
         assertNotNull(login);
         assertNotNull(dashboard);

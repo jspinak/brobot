@@ -1,33 +1,30 @@
 package io.github.jspinak.brobot.statemanagement;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.model.state.State;
-import io.github.jspinak.brobot.model.state.special.SpecialStateType;
-import io.github.jspinak.brobot.navigation.service.StateService;
-import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.junit.jupiter.api.*;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import java.time.LocalDateTime;
-import java.util.*;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import java.util.*;
+
+import org.junit.jupiter.api.*;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.state.special.SpecialStateType;
+import io.github.jspinak.brobot.navigation.service.StateService;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+
 /**
- * Test suite for state persistence and recovery functionality.
- * Tests how states are saved, restored, and recovered after failures.
+ * Test suite for state persistence and recovery functionality. Tests how states are saved,
+ * restored, and recovered after failures.
  */
 @DisplayName("State Persistence and Recovery Tests")
 public class StatePersistenceTest extends BrobotTestBase {
 
-    @Mock
-    private StateService stateService;
+    @Mock private StateService stateService;
 
-    @Mock
-    private StateDetector stateDetector;
+    @Mock private StateDetector stateDetector;
 
     private StateMemory stateMemory;
 
@@ -293,11 +290,12 @@ public class StatePersistenceTest extends BrobotTestBase {
             Set<Long> snapshot = new HashSet<>(Arrays.asList(1L, 2L));
 
             // Restore with validation
-            snapshot.forEach(id -> {
-                if (stateService.getState(id).isPresent()) {
-                    stateMemory.addActiveState(id);
-                }
-            });
+            snapshot.forEach(
+                    id -> {
+                        if (stateService.getState(id).isPresent()) {
+                            stateMemory.addActiveState(id);
+                        }
+                    });
 
             assertEquals(1, stateMemory.getActiveStates().size());
             assertTrue(stateMemory.getActiveStates().contains(1L));
@@ -371,7 +369,8 @@ public class StatePersistenceTest extends BrobotTestBase {
             StateMemory mockMemory = mock(StateMemory.class);
             when(mockMemory.getActiveStates()).thenReturn(new HashSet<>());
 
-            InitialStates initialStates = new InitialStates(stateDetector, mockMemory, stateService);
+            InitialStates initialStates =
+                    new InitialStates(stateDetector, mockMemory, stateService);
 
             State initialState = createMockState(1L, "InitialState");
             when(stateService.getState(1L)).thenReturn(Optional.of(initialState));
@@ -390,10 +389,14 @@ public class StatePersistenceTest extends BrobotTestBase {
         @Test
         @DisplayName("Should rebuild states from detector")
         void shouldRebuildFromDetector() {
-            StateDetector detector = new StateDetector(stateService, stateMemory,
-                    mock(io.github.jspinak.brobot.action.Action.class));
+            StateDetector detector =
+                    new StateDetector(
+                            stateService,
+                            stateMemory,
+                            mock(io.github.jspinak.brobot.action.Action.class));
 
-            when(stateService.getAllStateNames()).thenReturn(new HashSet<>(Arrays.asList("State1", "State2")));
+            when(stateService.getAllStateNames())
+                    .thenReturn(new HashSet<>(Arrays.asList("State1", "State2")));
 
             // Simulate rebuild
             Set<Long> rebuiltStates = detector.refreshActiveStates();

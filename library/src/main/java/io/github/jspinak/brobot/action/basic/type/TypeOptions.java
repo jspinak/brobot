@@ -1,21 +1,23 @@
 package io.github.jspinak.brobot.action.basic.type;
 
-import io.github.jspinak.brobot.action.ActionConfig;
-import lombok.Getter;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import org.sikuli.basics.Settings;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.sikuli.basics.Settings;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+
+import io.github.jspinak.brobot.action.ActionConfig;
+
+import lombok.Getter;
 
 /**
  * Configuration for Type actions, which send keyboard input.
- * <p>
- * This class encapsulates all parameters for performing a type action, including
- * the delay between keystrokes and any modifier keys (like SHIFT or CTRL) to be held
- * during the action.
- * <p>
- * It is an immutable object and must be constructed using its inner {@link Builder}.
+ *
+ * <p>This class encapsulates all parameters for performing a type action, including the delay
+ * between keystrokes and any modifier keys (like SHIFT or CTRL) to be held during the action.
+ *
+ * <p>It is an immutable object and must be constructed using its inner {@link Builder}.
  *
  * @see ActionConfig
  * @see io.github.jspinak.brobot.action.basic.type.TypeText
@@ -33,26 +35,23 @@ public final class TypeOptions extends ActionConfig {
         this.modifiers = builder.modifiers;
     }
 
-    /**
-     * Builder for constructing {@link TypeOptions} with a fluent API.
-     */
+    /** Builder for constructing {@link TypeOptions} with a fluent API. */
     @JsonPOJOBuilder(withPrefix = "set")
     public static class Builder extends ActionConfig.Builder<Builder> {
 
         @JsonProperty("typeDelay")
         private double typeDelay = Settings.TypeDelay;
+
         @JsonProperty("modifiers")
         private String modifiers = "";
 
-        /**
-         * Default constructor for creating a new TypeOptions configuration.
-         */
+        /** Default constructor for creating a new TypeOptions configuration. */
         @JsonCreator
         public Builder() {}
 
         /**
-         * Creates a new Builder instance pre-populated with values from an existing
-         * TypeOptions object.
+         * Creates a new Builder instance pre-populated with values from an existing TypeOptions
+         * object.
          *
          * @param original The TypeOptions instance to copy.
          */
@@ -74,8 +73,8 @@ public final class TypeOptions extends ActionConfig {
         }
 
         /**
-         * Sets the modifier keys (e.g., "SHIFT", "CTRL", "ALT") to be held down
-         * during the type action. Multiple keys can be combined with a "+".
+         * Sets the modifier keys (e.g., "SHIFT", "CTRL", "ALT") to be held down during the type
+         * action. Multiple keys can be combined with a "+".
          *
          * @param modifiers A string representing the modifier keys.
          * @return this Builder instance for chaining.

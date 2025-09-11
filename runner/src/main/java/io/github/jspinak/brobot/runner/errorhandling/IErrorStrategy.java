@@ -1,11 +1,11 @@
 package io.github.jspinak.brobot.runner.errorhandling;
 
 /**
- * Interface for error handling strategies.
- * Different strategies can be implemented for different types of errors.
+ * Interface for error handling strategies. Different strategies can be implemented for different
+ * types of errors.
  */
 public interface IErrorStrategy {
-    
+
     /**
      * Handle an error and return a result indicating the outcome.
      *

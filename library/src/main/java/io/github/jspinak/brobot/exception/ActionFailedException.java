@@ -1,24 +1,21 @@
 package io.github.jspinak.brobot.exception;
-import io.github.jspinak.brobot.action.ActionType;
 
 import io.github.jspinak.brobot.action.ActionInterface;
 
 /**
  * Thrown when an action fails during execution.
- * <p>
- * This exception indicates that a specific action (Click, Find, Type, etc.) 
- * could not complete successfully. It provides context about which action failed
- * and why, enabling the framework to make intelligent decisions about recovery
- * strategies.
- * </p>
- * 
+ *
+ * <p>This exception indicates that a specific action (Click, Find, Type, etc.) could not complete
+ * successfully. It provides context about which action failed and why, enabling the framework to
+ * make intelligent decisions about recovery strategies.
+ *
  * @since 1.0
  */
 public class ActionFailedException extends BrobotRuntimeException {
-    
+
     private final ActionInterface.Type actionType;
     private final String actionDetails;
-    
+
     /**
      * Constructs a new action failed exception with details about the failed action.
      *
@@ -30,7 +27,7 @@ public class ActionFailedException extends BrobotRuntimeException {
         this.actionType = actionType;
         this.actionDetails = message;
     }
-    
+
     /**
      * Constructs a new action failed exception with details and underlying cause.
      *
@@ -43,7 +40,7 @@ public class ActionFailedException extends BrobotRuntimeException {
         this.actionType = actionType;
         this.actionDetails = message;
     }
-    
+
     /**
      * Gets the type of action that failed.
      *
@@ -52,7 +49,7 @@ public class ActionFailedException extends BrobotRuntimeException {
     public ActionInterface.Type getActionType() {
         return actionType;
     }
-    
+
     /**
      * Gets detailed information about why the action failed.
      *

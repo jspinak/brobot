@@ -1,13 +1,15 @@
 package io.github.jspinak.brobot.tools.testing.wrapper;
 
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.config.environment.ExecutionMode;
-import io.github.jspinak.brobot.tools.testing.mock.action.MockHistogram;
-import io.github.jspinak.brobot.analysis.histogram.SingleRegionHistogramExtractor;
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import static org.bytedeco.opencv.global.opencv_core.CV_8UC3;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.*;
@@ -15,37 +17,32 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static org.bytedeco.opencv.global.opencv_core.CV_8UC3;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import io.github.jspinak.brobot.analysis.histogram.SingleRegionHistogramExtractor;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.environment.ExecutionMode;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.tools.testing.mock.action.MockHistogram;
 
 /**
- * Comprehensive test suite for HistogramWrapper.
- * Tests routing between mock and live histogram implementations.
+ * Comprehensive test suite for HistogramWrapper. Tests routing between mock and live histogram
+ * implementations.
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("HistogramWrapper Tests")
 public class HistogramWrapperTest extends BrobotTestBase {
 
-    @Mock
-    private ExecutionMode executionMode;
+    @Mock private ExecutionMode executionMode;
 
-    @Mock
-    private MockHistogram mockHistogram;
+    @Mock private MockHistogram mockHistogram;
 
-    @Mock
-    private SingleRegionHistogramExtractor histogramExtractor;
+    @Mock private SingleRegionHistogramExtractor histogramExtractor;
 
     private HistogramWrapper histogramWrapper;
 
-    @Mock
-    private StateImage stateImage;
+    @Mock private StateImage stateImage;
 
     private Mat sceneHSV;
 
@@ -61,9 +58,7 @@ public class HistogramWrapperTest extends BrobotTestBase {
         sceneHSV = new Mat(100, 100, CV_8UC3, new Scalar(120, 200, 150, 0));
 
         // Create test regions
-        regions = Arrays.asList(
-                new Region(0, 0, 50, 50),
-                new Region(50, 50, 50, 50));
+        regions = Arrays.asList(new Region(0, 0, 50, 50), new Region(50, 50, 50, 50));
     }
 
     @AfterEach
@@ -85,10 +80,9 @@ public class HistogramWrapperTest extends BrobotTestBase {
         @Test
         @DisplayName("Should route findHistogram to mock implementation in mock mode")
         void shouldRouteFindHistogramToMockInMockMode() {
-            List<Match> mockMatches = Arrays.asList(
-                    mock(Match.class),
-                    mock(Match.class));
-            when(mockHistogram.getMockHistogramMatches(stateImage, regions)).thenReturn(mockMatches);
+            List<Match> mockMatches = Arrays.asList(mock(Match.class), mock(Match.class));
+            when(mockHistogram.getMockHistogramMatches(stateImage, regions))
+                    .thenReturn(mockMatches);
 
             List<Match> result = histogramWrapper.findHistogram(stateImage, sceneHSV, regions);
 
@@ -127,7 +121,8 @@ public class HistogramWrapperTest extends BrobotTestBase {
         @DisplayName("Should ignore scene HSV in mock mode")
         void shouldIgnoreSceneHSVInMockMode() {
             List<Match> mockMatches = Collections.singletonList(mock(Match.class));
-            when(mockHistogram.getMockHistogramMatches(stateImage, regions)).thenReturn(mockMatches);
+            when(mockHistogram.getMockHistogramMatches(stateImage, regions))
+                    .thenReturn(mockMatches);
 
             // Call with null HSV - should still work in mock mode
             List<Match> result = histogramWrapper.findHistogram(stateImage, null, regions);
@@ -149,10 +144,8 @@ public class HistogramWrapperTest extends BrobotTestBase {
         @Test
         @DisplayName("Should route findHistogram to live implementation in live mode")
         void shouldRouteFindHistogramToLiveInLiveMode() {
-            List<Match> liveMatches = Arrays.asList(
-                    mock(Match.class),
-                    mock(Match.class),
-                    mock(Match.class));
+            List<Match> liveMatches =
+                    Arrays.asList(mock(Match.class), mock(Match.class), mock(Match.class));
             when(histogramExtractor.findAll(regions, stateImage, sceneHSV)).thenReturn(liveMatches);
 
             List<Match> result = histogramWrapper.findHistogram(stateImage, sceneHSV, regions);
@@ -207,7 +200,8 @@ public class HistogramWrapperTest extends BrobotTestBase {
         void shouldSwitchBetweenModes() {
             // Setup mock matches
             List<Match> mockMatches = Collections.singletonList(mock(Match.class));
-            when(mockHistogram.getMockHistogramMatches(stateImage, regions)).thenReturn(mockMatches);
+            when(mockHistogram.getMockHistogramMatches(stateImage, regions))
+                    .thenReturn(mockMatches);
 
             // Setup live matches
             List<Match> liveMatches = Arrays.asList(mock(Match.class), mock(Match.class));
@@ -342,15 +336,15 @@ public class HistogramWrapperTest extends BrobotTestBase {
         @Test
         @DisplayName("Should handle overlapping regions")
         void shouldHandleOverlappingRegions() {
-            List<Region> overlappingRegions = Arrays.asList(
-                    new Region(0, 0, 60, 60),
-                    new Region(40, 40, 60, 60));
+            List<Region> overlappingRegions =
+                    Arrays.asList(new Region(0, 0, 60, 60), new Region(40, 40, 60, 60));
 
             when(executionMode.isMock()).thenReturn(false);
             when(histogramExtractor.findAll(overlappingRegions, stateImage, sceneHSV))
                     .thenReturn(Arrays.asList(mock(Match.class), mock(Match.class)));
 
-            List<Match> result = histogramWrapper.findHistogram(stateImage, sceneHSV, overlappingRegions);
+            List<Match> result =
+                    histogramWrapper.findHistogram(stateImage, sceneHSV, overlappingRegions);
 
             assertEquals(2, result.size());
             verify(histogramExtractor).findAll(overlappingRegions, stateImage, sceneHSV);
@@ -368,7 +362,8 @@ public class HistogramWrapperTest extends BrobotTestBase {
             when(mockHistogram.getMockHistogramMatches(stateImage, regions))
                     .thenThrow(new RuntimeException("Mock histogram error"));
 
-            assertThrows(RuntimeException.class,
+            assertThrows(
+                    RuntimeException.class,
                     () -> histogramWrapper.findHistogram(stateImage, sceneHSV, regions));
         }
 
@@ -379,7 +374,8 @@ public class HistogramWrapperTest extends BrobotTestBase {
             when(histogramExtractor.findAll(regions, stateImage, sceneHSV))
                     .thenThrow(new RuntimeException("Live histogram error"));
 
-            assertThrows(RuntimeException.class,
+            assertThrows(
+                    RuntimeException.class,
                     () -> histogramWrapper.findHistogram(stateImage, sceneHSV, regions));
         }
 
@@ -390,7 +386,8 @@ public class HistogramWrapperTest extends BrobotTestBase {
             when(histogramExtractor.findAll(regions, stateImage, sceneHSV))
                     .thenThrow(new OutOfMemoryError("Histogram processing OOM"));
 
-            assertThrows(OutOfMemoryError.class,
+            assertThrows(
+                    OutOfMemoryError.class,
                     () -> histogramWrapper.findHistogram(stateImage, sceneHSV, regions));
         }
     }
@@ -432,8 +429,8 @@ public class HistogramWrapperTest extends BrobotTestBase {
         void shouldRespectFrameworkSettings() {
             // Create real ExecutionMode to test integration
             ExecutionMode realExecutionMode = new ExecutionMode();
-            HistogramWrapper realWrapper = new HistogramWrapper(
-                    realExecutionMode, mockHistogram, histogramExtractor);
+            HistogramWrapper realWrapper =
+                    new HistogramWrapper(realExecutionMode, mockHistogram, histogramExtractor);
 
             // Setup responses
             when(mockHistogram.getMockHistogramMatches(stateImage, regions))

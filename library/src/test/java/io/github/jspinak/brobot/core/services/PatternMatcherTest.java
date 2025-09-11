@@ -1,8 +1,14 @@
 package io.github.jspinak.brobot.core.services;
 
-import io.github.jspinak.brobot.model.element.Pattern;
-import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,35 +16,26 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.test.DisabledInCI;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
 /**
- * Comprehensive tests for PatternMatcher interface.
- * Tests pattern matching operations and configurations.
+ * Comprehensive tests for PatternMatcher interface. Tests pattern matching operations and
+ * configurations.
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("PatternMatcher Interface Tests")
-
 @DisabledInCI
 public class PatternMatcherTest extends BrobotTestBase {
 
-    @Mock
-    private PatternMatcher patternMatcher;
-    
-    @Mock
-    private BufferedImage mockImage;
-    
-    @Mock
-    private Pattern mockPattern;
-    
+    @Mock private PatternMatcher patternMatcher;
+
+    @Mock private BufferedImage mockImage;
+
+    @Mock private Pattern mockPattern;
+
     @BeforeEach
     @Override
     public void setupTest() {
@@ -49,21 +46,21 @@ public class PatternMatcherTest extends BrobotTestBase {
     @DisplayName("Should find single pattern in screen")
     void testFindSinglePattern() {
         // Arrange
-        PatternMatcher.MatchOptions options = new PatternMatcher.MatchOptions.Builder()
-            .withSimilarity(0.8)
-            .withFindAll(false)
-            .build();
-            
-        PatternMatcher.MatchResult expectedResult = 
-            new PatternMatcher.MatchResult(100, 200, 50, 50, 0.95);
+        PatternMatcher.MatchOptions options =
+                new PatternMatcher.MatchOptions.Builder()
+                        .withSimilarity(0.8)
+                        .withFindAll(false)
+                        .build();
+
+        PatternMatcher.MatchResult expectedResult =
+                new PatternMatcher.MatchResult(100, 200, 50, 50, 0.95);
         List<PatternMatcher.MatchResult> results = Arrays.asList(expectedResult);
-        
-        when(patternMatcher.findPatterns(mockImage, mockPattern, options))
-            .thenReturn(results);
+
+        when(patternMatcher.findPatterns(mockImage, mockPattern, options)).thenReturn(results);
 
         // Act
-        List<PatternMatcher.MatchResult> actualResults = 
-            patternMatcher.findPatterns(mockImage, mockPattern, options);
+        List<PatternMatcher.MatchResult> actualResults =
+                patternMatcher.findPatterns(mockImage, mockPattern, options);
 
         // Assert
         assertNotNull(actualResults);
@@ -77,24 +74,24 @@ public class PatternMatcherTest extends BrobotTestBase {
     @DisplayName("Should find multiple patterns when findAll is true")
     void testFindMultiplePatterns() {
         // Arrange
-        PatternMatcher.MatchOptions options = new PatternMatcher.MatchOptions.Builder()
-            .withSimilarity(0.7)
-            .withFindAll(true)
-            .withMaxMatches(10)
-            .build();
-            
-        List<PatternMatcher.MatchResult> results = Arrays.asList(
-            new PatternMatcher.MatchResult(100, 200, 50, 50, 0.95),
-            new PatternMatcher.MatchResult(300, 400, 50, 50, 0.85),
-            new PatternMatcher.MatchResult(500, 600, 50, 50, 0.75)
-        );
-        
-        when(patternMatcher.findPatterns(mockImage, mockPattern, options))
-            .thenReturn(results);
+        PatternMatcher.MatchOptions options =
+                new PatternMatcher.MatchOptions.Builder()
+                        .withSimilarity(0.7)
+                        .withFindAll(true)
+                        .withMaxMatches(10)
+                        .build();
+
+        List<PatternMatcher.MatchResult> results =
+                Arrays.asList(
+                        new PatternMatcher.MatchResult(100, 200, 50, 50, 0.95),
+                        new PatternMatcher.MatchResult(300, 400, 50, 50, 0.85),
+                        new PatternMatcher.MatchResult(500, 600, 50, 50, 0.75));
+
+        when(patternMatcher.findPatterns(mockImage, mockPattern, options)).thenReturn(results);
 
         // Act
-        List<PatternMatcher.MatchResult> actualResults = 
-            patternMatcher.findPatterns(mockImage, mockPattern, options);
+        List<PatternMatcher.MatchResult> actualResults =
+                patternMatcher.findPatterns(mockImage, mockPattern, options);
 
         // Assert
         assertNotNull(actualResults);
@@ -106,16 +103,15 @@ public class PatternMatcherTest extends BrobotTestBase {
     @DisplayName("Should return empty list when no patterns found")
     void testNoPatternFound() {
         // Arrange
-        PatternMatcher.MatchOptions options = new PatternMatcher.MatchOptions.Builder()
-            .withSimilarity(0.95)
-            .build();
-            
+        PatternMatcher.MatchOptions options =
+                new PatternMatcher.MatchOptions.Builder().withSimilarity(0.95).build();
+
         when(patternMatcher.findPatterns(mockImage, mockPattern, options))
-            .thenReturn(new ArrayList<>());
+                .thenReturn(new ArrayList<>());
 
         // Act
-        List<PatternMatcher.MatchResult> results = 
-            patternMatcher.findPatterns(mockImage, mockPattern, options);
+        List<PatternMatcher.MatchResult> results =
+                patternMatcher.findPatterns(mockImage, mockPattern, options);
 
         // Assert
         assertNotNull(results);
@@ -127,20 +123,32 @@ public class PatternMatcherTest extends BrobotTestBase {
     void testFindPatternsInRegion() {
         // Arrange
         int regionX = 100, regionY = 100, regionWidth = 400, regionHeight = 300;
-        PatternMatcher.MatchOptions options = new PatternMatcher.MatchOptions.Builder()
-            .withSimilarity(0.8)
-            .build();
-            
-        PatternMatcher.MatchResult expectedResult = 
-            new PatternMatcher.MatchResult(150, 150, 50, 50, 0.9);
-        
+        PatternMatcher.MatchOptions options =
+                new PatternMatcher.MatchOptions.Builder().withSimilarity(0.8).build();
+
+        PatternMatcher.MatchResult expectedResult =
+                new PatternMatcher.MatchResult(150, 150, 50, 50, 0.9);
+
         when(patternMatcher.findPatternsInRegion(
-            mockImage, mockPattern, regionX, regionY, regionWidth, regionHeight, options))
-            .thenReturn(Arrays.asList(expectedResult));
+                        mockImage,
+                        mockPattern,
+                        regionX,
+                        regionY,
+                        regionWidth,
+                        regionHeight,
+                        options))
+                .thenReturn(Arrays.asList(expectedResult));
 
         // Act
-        List<PatternMatcher.MatchResult> results = patternMatcher.findPatternsInRegion(
-            mockImage, mockPattern, regionX, regionY, regionWidth, regionHeight, options);
+        List<PatternMatcher.MatchResult> results =
+                patternMatcher.findPatternsInRegion(
+                        mockImage,
+                        mockPattern,
+                        regionX,
+                        regionY,
+                        regionWidth,
+                        regionHeight,
+                        options);
 
         // Assert
         assertNotNull(results);
@@ -153,23 +161,23 @@ public class PatternMatcherTest extends BrobotTestBase {
     @DisplayName("Should respect max matches limit")
     void testMaxMatchesLimit() {
         // Arrange
-        PatternMatcher.MatchOptions options = new PatternMatcher.MatchOptions.Builder()
-            .withSimilarity(0.7)
-            .withFindAll(true)
-            .withMaxMatches(2)
-            .build();
-            
-        List<PatternMatcher.MatchResult> results = Arrays.asList(
-            new PatternMatcher.MatchResult(100, 100, 50, 50, 0.9),
-            new PatternMatcher.MatchResult(200, 200, 50, 50, 0.85)
-        );
-        
-        when(patternMatcher.findPatterns(mockImage, mockPattern, options))
-            .thenReturn(results);
+        PatternMatcher.MatchOptions options =
+                new PatternMatcher.MatchOptions.Builder()
+                        .withSimilarity(0.7)
+                        .withFindAll(true)
+                        .withMaxMatches(2)
+                        .build();
+
+        List<PatternMatcher.MatchResult> results =
+                Arrays.asList(
+                        new PatternMatcher.MatchResult(100, 100, 50, 50, 0.9),
+                        new PatternMatcher.MatchResult(200, 200, 50, 50, 0.85));
+
+        when(patternMatcher.findPatterns(mockImage, mockPattern, options)).thenReturn(results);
 
         // Act
-        List<PatternMatcher.MatchResult> actualResults = 
-            patternMatcher.findPatterns(mockImage, mockPattern, options);
+        List<PatternMatcher.MatchResult> actualResults =
+                patternMatcher.findPatterns(mockImage, mockPattern, options);
 
         // Assert
         assertNotNull(actualResults);
@@ -207,8 +215,7 @@ public class PatternMatcherTest extends BrobotTestBase {
     @DisplayName("Should build MatchOptions with default values")
     void testMatchOptionsDefaultValues() {
         // Act
-        PatternMatcher.MatchOptions options = new PatternMatcher.MatchOptions.Builder()
-            .build();
+        PatternMatcher.MatchOptions options = new PatternMatcher.MatchOptions.Builder().build();
 
         // Assert
         assertEquals(0.7, options.getSimilarity());
@@ -220,11 +227,12 @@ public class PatternMatcherTest extends BrobotTestBase {
     @DisplayName("Should build MatchOptions with custom values")
     void testMatchOptionsCustomValues() {
         // Act
-        PatternMatcher.MatchOptions options = new PatternMatcher.MatchOptions.Builder()
-            .withSimilarity(0.95)
-            .withMaxMatches(5)
-            .withFindAll(false)
-            .build();
+        PatternMatcher.MatchOptions options =
+                new PatternMatcher.MatchOptions.Builder()
+                        .withSimilarity(0.95)
+                        .withMaxMatches(5)
+                        .withFindAll(false)
+                        .build();
 
         // Assert
         assertEquals(0.95, options.getSimilarity());
@@ -236,8 +244,7 @@ public class PatternMatcherTest extends BrobotTestBase {
     @DisplayName("Should convert MatchResult to Match object")
     void testMatchResultToMatch() {
         // Arrange
-        PatternMatcher.MatchResult result = 
-            new PatternMatcher.MatchResult(100, 200, 50, 60, 0.92);
+        PatternMatcher.MatchResult result = new PatternMatcher.MatchResult(100, 200, 50, 60, 0.92);
 
         // Act
         Match match = result.toMatch();
@@ -258,15 +265,14 @@ public class PatternMatcherTest extends BrobotTestBase {
     void testRegionEdgeCases() {
         // Arrange
         PatternMatcher.MatchOptions options = new PatternMatcher.MatchOptions.Builder().build();
-        
+
         // Test with zero-sized region
-        when(patternMatcher.findPatternsInRegion(
-            mockImage, mockPattern, 0, 0, 0, 0, options))
-            .thenReturn(new ArrayList<>());
+        when(patternMatcher.findPatternsInRegion(mockImage, mockPattern, 0, 0, 0, 0, options))
+                .thenReturn(new ArrayList<>());
 
         // Act
-        List<PatternMatcher.MatchResult> results = patternMatcher.findPatternsInRegion(
-            mockImage, mockPattern, 0, 0, 0, 0, options);
+        List<PatternMatcher.MatchResult> results =
+                patternMatcher.findPatternsInRegion(mockImage, mockPattern, 0, 0, 0, 0, options);
 
         // Assert
         assertNotNull(results);
@@ -277,16 +283,15 @@ public class PatternMatcherTest extends BrobotTestBase {
     @DisplayName("Should handle high similarity threshold")
     void testHighSimilarityThreshold() {
         // Arrange
-        PatternMatcher.MatchOptions options = new PatternMatcher.MatchOptions.Builder()
-            .withSimilarity(0.99)
-            .build();
-            
+        PatternMatcher.MatchOptions options =
+                new PatternMatcher.MatchOptions.Builder().withSimilarity(0.99).build();
+
         when(patternMatcher.findPatterns(mockImage, mockPattern, options))
-            .thenReturn(new ArrayList<>());
+                .thenReturn(new ArrayList<>());
 
         // Act
-        List<PatternMatcher.MatchResult> results = 
-            patternMatcher.findPatterns(mockImage, mockPattern, options);
+        List<PatternMatcher.MatchResult> results =
+                patternMatcher.findPatterns(mockImage, mockPattern, options);
 
         // Assert
         assertNotNull(results);
@@ -297,24 +302,23 @@ public class PatternMatcherTest extends BrobotTestBase {
     @DisplayName("Should handle low similarity threshold")
     void testLowSimilarityThreshold() {
         // Arrange
-        PatternMatcher.MatchOptions options = new PatternMatcher.MatchOptions.Builder()
-            .withSimilarity(0.1)
-            .withMaxMatches(100)
-            .build();
-            
+        PatternMatcher.MatchOptions options =
+                new PatternMatcher.MatchOptions.Builder()
+                        .withSimilarity(0.1)
+                        .withMaxMatches(100)
+                        .build();
+
         // With low similarity, expect many matches
         List<PatternMatcher.MatchResult> manyResults = new ArrayList<>();
         for (int i = 0; i < 20; i++) {
-            manyResults.add(new PatternMatcher.MatchResult(
-                i * 10, i * 10, 50, 50, 0.1 + i * 0.04));
+            manyResults.add(new PatternMatcher.MatchResult(i * 10, i * 10, 50, 50, 0.1 + i * 0.04));
         }
-        
-        when(patternMatcher.findPatterns(mockImage, mockPattern, options))
-            .thenReturn(manyResults);
+
+        when(patternMatcher.findPatterns(mockImage, mockPattern, options)).thenReturn(manyResults);
 
         // Act
-        List<PatternMatcher.MatchResult> results = 
-            patternMatcher.findPatterns(mockImage, mockPattern, options);
+        List<PatternMatcher.MatchResult> results =
+                patternMatcher.findPatterns(mockImage, mockPattern, options);
 
         // Assert
         assertNotNull(results);
@@ -327,10 +331,10 @@ public class PatternMatcherTest extends BrobotTestBase {
         // Arrange
         int x = 150, y = 250, width = 75, height = 85;
         double confidence = 0.88;
-        
+
         // Act
-        PatternMatcher.MatchResult result = 
-            new PatternMatcher.MatchResult(x, y, width, height, confidence);
+        PatternMatcher.MatchResult result =
+                new PatternMatcher.MatchResult(x, y, width, height, confidence);
 
         // Assert
         assertEquals(x, result.getX());
@@ -345,7 +349,7 @@ public class PatternMatcherTest extends BrobotTestBase {
     void testMatchOptionsSetters() {
         // Arrange
         PatternMatcher.MatchOptions options = new PatternMatcher.MatchOptions();
-        
+
         // Act
         options.setSimilarity(0.85);
         options.setMaxMatches(10);

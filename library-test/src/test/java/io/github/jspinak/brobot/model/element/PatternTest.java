@@ -1,17 +1,18 @@
 package io.github.jspinak.brobot.model.element;
 
-import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
-import io.github.jspinak.brobot.test.BaseIntegrationTest;
-import io.github.jspinak.brobot.testutils.TestPaths;
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.sikuli.script.ImagePath;
 
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
+import io.github.jspinak.brobot.test.BaseIntegrationTest;
+import io.github.jspinak.brobot.testutils.TestPaths;
 
 /**
- * Integration test for Pattern class.
- * Tests loading real images from files in both regular and headless environments.
+ * Integration test for Pattern class. Tests loading real images from files in both regular and
+ * headless environments.
  */
 class PatternTest extends BaseIntegrationTest {
 
@@ -41,9 +42,10 @@ class PatternTest extends BaseIntegrationTest {
 
     @Test
     void mat2() {
-        Pattern pattern = new Pattern.Builder()
-                .setFilename(TestPaths.getScreenshotPath("floranext1"))
-                .build();
+        Pattern pattern =
+                new Pattern.Builder()
+                        .setFilename(TestPaths.getScreenshotPath("floranext1"))
+                        .build();
         // Mat object doesn't have getPointer() method - just verify it's not null
         assertNotNull(pattern.getMat());
     }

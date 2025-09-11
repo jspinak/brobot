@@ -1,18 +1,18 @@
 package io.github.jspinak.brobot.action;
-import io.github.jspinak.brobot.action.ActionType;
 
-import io.github.jspinak.brobot.tools.logging.model.LogEventType;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.github.jspinak.brobot.tools.logging.model.LogEventType;
+
 /**
  * Fluent builder for creating action chains in a readable, declarative style.
- * <p>
- * This builder simplifies the creation of complex action sequences by providing
- * a fluent interface that clearly expresses the order and configuration of actions.
- * </p>
- * 
+ *
+ * <p>This builder simplifies the creation of complex action sequences by providing a fluent
+ * interface that clearly expresses the order and configuration of actions.
+ *
  * <h3>Example usage:</h3>
+ *
  * <pre>{@code
  * ActionChainOptions chain = ActionChainBuilder
  *     .of(ActionInterface.Type.FIND, new PatternFindOptions.Builder().build())
@@ -23,10 +23,11 @@ import java.util.List;
  * }</pre>
  */
 public class ActionChainBuilder {
-    
+
     private final ActionConfig initialAction;
     private final List<ActionConfig> chainedActions;
-    private ActionChainOptions.ChainingStrategy strategy = ActionChainOptions.ChainingStrategy.NESTED;
+    private ActionChainOptions.ChainingStrategy strategy =
+            ActionChainOptions.ChainingStrategy.NESTED;
     private double pauseBeforeBegin = 0.0;
     private double pauseAfterEnd = 0.0;
     private ActionConfig.Illustrate illustrate = ActionConfig.Illustrate.USE_GLOBAL;
@@ -40,11 +41,12 @@ public class ActionChainBuilder {
     /**
      * Creates a new ActionChainBuilder with the initial action.
      *
-     * @param initialActionType   The type of the initial action
+     * @param initialActionType The type of the initial action
      * @param initialActionConfig The configuration for the initial action
      * @return A new ActionChainBuilder instance
      */
-    public static ActionChainBuilder of(ActionInterface.Type initialActionType, ActionConfig initialActionConfig) {
+    public static ActionChainBuilder of(
+            ActionInterface.Type initialActionType, ActionConfig initialActionConfig) {
         return new ActionChainBuilder(initialActionConfig);
     }
 
@@ -61,11 +63,12 @@ public class ActionChainBuilder {
     /**
      * Adds the next action to the chain.
      *
-     * @param nextActionType   The type of the next action
+     * @param nextActionType The type of the next action
      * @param nextActionConfig The configuration for the next action
      * @return This builder for fluent chaining
      */
-    public ActionChainBuilder then(ActionInterface.Type nextActionType, ActionConfig nextActionConfig) {
+    public ActionChainBuilder then(
+            ActionInterface.Type nextActionType, ActionConfig nextActionConfig) {
         this.chainedActions.add(nextActionConfig);
         return this;
     }
@@ -150,8 +153,8 @@ public class ActionChainBuilder {
     }
 
     /**
-     * Configures the chain to use NESTED chaining strategy.
-     * This is a convenience method equivalent to withStrategy(NESTED).
+     * Configures the chain to use NESTED chaining strategy. This is a convenience method equivalent
+     * to withStrategy(NESTED).
      *
      * @return This builder for fluent chaining
      */
@@ -160,8 +163,8 @@ public class ActionChainBuilder {
     }
 
     /**
-     * Configures the chain to use CONFIRM chaining strategy.
-     * This is a convenience method equivalent to withStrategy(CONFIRM).
+     * Configures the chain to use CONFIRM chaining strategy. This is a convenience method
+     * equivalent to withStrategy(CONFIRM).
      *
      * @return This builder for fluent chaining
      */
@@ -181,12 +184,12 @@ public class ActionChainBuilder {
         }
 
         ActionChainOptions.Builder builder = new ActionChainOptions.Builder(initialAction);
-        
+
         // Add all chained actions
         for (ActionConfig action : chainedActions) {
             builder.then(action);
         }
-        
+
         // Configure chain properties
         builder.setStrategy(strategy)
                 .setPauseBeforeBegin(pauseBeforeBegin)
@@ -200,7 +203,7 @@ public class ActionChainBuilder {
     /**
      * Creates a simple two-action chain.
      *
-     * @param firstAction  The first action configuration
+     * @param firstAction The first action configuration
      * @param secondAction The second action configuration
      * @return The configured ActionChainOptions instance
      */
@@ -219,12 +222,12 @@ public class ActionChainBuilder {
         if (actions == null || actions.isEmpty()) {
             throw new IllegalArgumentException("Action list cannot be null or empty");
         }
-        
+
         ActionChainBuilder builder = of(actions.get(0));
         for (int i = 1; i < actions.size(); i++) {
             builder.then(actions.get(i));
         }
-        
+
         return builder.build();
     }
 }

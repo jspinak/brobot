@@ -1,23 +1,17 @@
 package io.github.jspinak.brobot.model.state;
 
-import io.github.jspinak.brobot.model.element.Region;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ContextConfiguration;
-import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
-import io.github.jspinak.brobot.test.mock.MockScreenConfig;
-import io.github.jspinak.brobot.model.state.StateString;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import io.github.jspinak.brobot.model.element.Region;
+
 @SpringBootTest
 public class StateStringTest {
-    
+
     @BeforeAll
     static void setupHeadlessMode() {
         System.setProperty("java.awt.headless", "true");
@@ -25,13 +19,14 @@ public class StateStringTest {
 
     @Test
     public void testBuilder() {
-        StateString stateString = new StateString.Builder()
-                .setName("testString")
-                .setSearchRegion(new Region(5, 5, 15, 15))
-                .setOwnerStateName("owner")
-                .setTimesActedOn(2)
-                .setString("test")
-                .build();
+        StateString stateString =
+                new StateString.Builder()
+                        .setName("testString")
+                        .setSearchRegion(new Region(5, 5, 15, 15))
+                        .setOwnerStateName("owner")
+                        .setTimesActedOn(2)
+                        .setString("test")
+                        .build();
 
         assertEquals("testString", stateString.getName());
         assertEquals(5, stateString.getSearchRegion().getX());
@@ -62,7 +57,8 @@ public class StateStringTest {
 
     @Test
     public void testAddTimesActedOn() {
-        StateString stateString = new StateString.Builder().setTimesActedOn(2).setString("test").build();
+        StateString stateString =
+                new StateString.Builder().setTimesActedOn(2).setString("test").build();
         stateString.addTimesActedOn();
         assertEquals(3, stateString.getTimesActedOn());
     }

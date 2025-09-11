@@ -1,17 +1,8 @@
 package io.github.jspinak.brobot.runner.ui;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.AccessLevel;
-
-import lombok.extern.slf4j.Slf4j;
-
-import io.github.jspinak.brobot.navigation.service.StateService;
-import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
-import io.github.jspinak.brobot.runner.events.ConfigurationEvent;
-import io.github.jspinak.brobot.runner.events.EventBus;
-import io.github.jspinak.brobot.runner.init.BrobotLibraryInitializer;
-import io.github.jspinak.brobot.runner.ui.dialogs.ErrorDialog;
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
@@ -19,18 +10,26 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
-import net.rgielen.fxweaver.core.FxmlView;
+
+import jakarta.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.annotation.PostConstruct;
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import io.github.jspinak.brobot.navigation.service.StateService;
+import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
+import io.github.jspinak.brobot.runner.events.ConfigurationEvent;
+import io.github.jspinak.brobot.runner.events.EventBus;
+import io.github.jspinak.brobot.runner.init.BrobotLibraryInitializer;
+import io.github.jspinak.brobot.runner.ui.dialogs.ErrorDialog;
 
-/**
- * JavaFX component for configuring the Brobot Runner
- */
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import net.rgielen.fxweaver.core.FxmlView;
+
+/** JavaFX component for configuring the Brobot Runner */
 @FxmlView("")
 @Slf4j
 @Getter
@@ -113,27 +112,22 @@ public class ConfigurationPanel extends VBox {
         statusLabel = new Label("Status: Ready");
         statusLabel.setStyle("-fx-text-fill: blue;");
 
-        getChildren().addAll(
-                titleLabel,
-                new Separator(),
-                configGrid,
-                loadButton,
-                statusLabel
-        );
+        getChildren().addAll(titleLabel, new Separator(), configGrid, loadButton, statusLabel);
     }
 
     private void browseForProjectConfig() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select Project Configuration File");
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("JSON Files", "*.json")
-        );
+        fileChooser
+                .getExtensionFilters()
+                .add(new FileChooser.ExtensionFilter("JSON Files", "*.json"));
 
         // Set initial directory
         Path initialPath = Paths.get(projectConfigField.getText());
-        File initialDir = initialPath.getParent() != null ?
-                initialPath.getParent().toFile() :
-                new File(System.getProperty("user.dir"));
+        File initialDir =
+                initialPath.getParent() != null
+                        ? initialPath.getParent().toFile()
+                        : new File(System.getProperty("user.dir"));
 
         if (initialDir.exists()) {
             fileChooser.setInitialDirectory(initialDir);
@@ -149,15 +143,16 @@ public class ConfigurationPanel extends VBox {
     private void browseForDslConfig() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select DSL Configuration File");
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("JSON Files", "*.json")
-        );
+        fileChooser
+                .getExtensionFilters()
+                .add(new FileChooser.ExtensionFilter("JSON Files", "*.json"));
 
         // Set initial directory
         Path initialPath = Paths.get(dslConfigField.getText());
-        File initialDir = initialPath.getParent() != null ?
-                initialPath.getParent().toFile() :
-                new File(System.getProperty("user.dir"));
+        File initialDir =
+                initialPath.getParent() != null
+                        ? initialPath.getParent().toFile()
+                        : new File(System.getProperty("user.dir"));
 
         if (initialDir.exists()) {
             fileChooser.setInitialDirectory(initialDir);
@@ -188,7 +183,8 @@ public class ConfigurationPanel extends VBox {
                 updateStatus("Images directory updated: " + directory.getName());
             } catch (Exception ex) {
                 logger.error("Failed to update image path", ex);
-                ErrorDialog.show("Image Path Error",
+                ErrorDialog.show(
+                        "Image Path Error",
                         "Failed to update images directory",
                         "Error: " + ex.getMessage());
                 updateStatus("Error updating images directory", true);
@@ -214,53 +210,82 @@ public class ConfigurationPanel extends VBox {
             getChildren().add(progress);
 
             // Use a background thread for loading
-            new Thread(() -> {
-                boolean success = false;
-                try {
-                    success = libraryInitializer.initializeWithConfig(projectConfigPath, dslConfigPath);
+            new Thread(
+                            () -> {
+                                boolean success = false;
+                                try {
+                                    success =
+                                            libraryInitializer.initializeWithConfig(
+                                                    projectConfigPath, dslConfigPath);
 
-                    // Update UI on JavaFX thread
-                    boolean finalSuccess = success;
-                    javafx.application.Platform.runLater(() -> {
-                        getChildren().remove(progress);
+                                    // Update UI on JavaFX thread
+                                    boolean finalSuccess = success;
+                                    javafx.application.Platform.runLater(
+                                            () -> {
+                                                getChildren().remove(progress);
 
-                        if (finalSuccess) {
-                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                            alert.setTitle("Configuration Loaded");
-                            alert.setHeaderText("Success");
-                            alert.setContentText("Configuration loaded successfully!");
-                            alert.showAndWait();
-                            updateStatus("Configuration loaded successfully");
-                            eventBus.publish(ConfigurationEvent.loaded(this, "Project Configuration",
-                                    "Configuration loaded successfully"));
-                        } else {
-                            ErrorDialog.show("Configuration Error",
-                                    "Failed to load configuration",
-                                    "Please check the log for details.");
-                            updateStatus("Configuration loading failed", true);
-                            eventBus.publish(ConfigurationEvent.loadingFailed(this, "Project Configuration",
-                                    "Failed to load configuration", null));
-                        }
-                    });
-                } catch (Exception ex) {
-                    logger.error("Failed to load configuration", ex);
+                                                if (finalSuccess) {
+                                                    Alert alert =
+                                                            new Alert(Alert.AlertType.INFORMATION);
+                                                    alert.setTitle("Configuration Loaded");
+                                                    alert.setHeaderText("Success");
+                                                    alert.setContentText(
+                                                            "Configuration loaded successfully!");
+                                                    alert.showAndWait();
+                                                    updateStatus(
+                                                            "Configuration loaded successfully");
+                                                    eventBus.publish(
+                                                            ConfigurationEvent.loaded(
+                                                                    this,
+                                                                    "Project Configuration",
+                                                                    "Configuration loaded"
+                                                                            + " successfully"));
+                                                } else {
+                                                    ErrorDialog.show(
+                                                            "Configuration Error",
+                                                            "Failed to load configuration",
+                                                            "Please check the log for details.");
+                                                    updateStatus(
+                                                            "Configuration loading failed", true);
+                                                    eventBus.publish(
+                                                            ConfigurationEvent.loadingFailed(
+                                                                    this,
+                                                                    "Project Configuration",
+                                                                    "Failed to load configuration",
+                                                                    null));
+                                                }
+                                            });
+                                } catch (Exception ex) {
+                                    logger.error("Failed to load configuration", ex);
 
-                    // Update UI on JavaFX thread
-                    javafx.application.Platform.runLater(() -> {
-                        getChildren().remove(progress);
-                        ErrorDialog.show("Configuration Error",
-                                "Exception while loading configuration",
-                                "Error: " + ex.getMessage());
-                        updateStatus("Error loading configuration: " + ex.getMessage(), true);
-                        eventBus.publish(ConfigurationEvent.loadingFailed(this, "Project Configuration",
-                                "Error loading configuration: " + ex.getMessage(), ex));
-                    });
-                }
-            }).start();
+                                    // Update UI on JavaFX thread
+                                    javafx.application.Platform.runLater(
+                                            () -> {
+                                                getChildren().remove(progress);
+                                                ErrorDialog.show(
+                                                        "Configuration Error",
+                                                        "Exception while loading configuration",
+                                                        "Error: " + ex.getMessage());
+                                                updateStatus(
+                                                        "Error loading configuration: "
+                                                                + ex.getMessage(),
+                                                        true);
+                                                eventBus.publish(
+                                                        ConfigurationEvent.loadingFailed(
+                                                                this,
+                                                                "Project Configuration",
+                                                                "Error loading configuration: "
+                                                                        + ex.getMessage(),
+                                                                ex));
+                                            });
+                                }
+                            })
+                    .start();
 
         } catch (Exception ex) {
             logger.error("Unexpected error during configuration loading", ex);
-            ErrorDialog.show("Unexpected Error",
+            ErrorDialog.show(
+                    "Unexpected Error",
                     "An unexpected error occurred",
                     "Error: " + ex.getMessage());
             updateStatus("Unexpected error: " + ex.getMessage(), true);
@@ -271,7 +296,8 @@ public class ConfigurationPanel extends VBox {
         // Check project config file
         File projectFile = new File(projectConfigField.getText());
         if (!projectFile.exists() || !projectFile.isFile()) {
-            ErrorDialog.show("Invalid Project File",
+            ErrorDialog.show(
+                    "Invalid Project File",
                     "Project configuration file not found",
                     "Please select a valid JSON file for project configuration.");
             updateStatus("Project configuration file not found", true);
@@ -281,7 +307,8 @@ public class ConfigurationPanel extends VBox {
         // Check DSL config file
         File dslFile = new File(dslConfigField.getText());
         if (!dslFile.exists() || !dslFile.isFile()) {
-            ErrorDialog.show("Invalid DSL File",
+            ErrorDialog.show(
+                    "Invalid DSL File",
                     "DSL configuration file not found",
                     "Please select a valid JSON file for DSL configuration.");
             updateStatus("DSL configuration file not found", true);
@@ -291,7 +318,8 @@ public class ConfigurationPanel extends VBox {
         // Check images directory
         File imageDir = new File(imagePathField.getText());
         if (!imageDir.exists() || !imageDir.isDirectory()) {
-            ErrorDialog.show("Invalid Images Directory",
+            ErrorDialog.show(
+                    "Invalid Images Directory",
                     "Images directory not found",
                     "Please select a valid directory for images.");
             updateStatus("Images directory not found", true);
@@ -301,22 +329,18 @@ public class ConfigurationPanel extends VBox {
         return true;
     }
 
-
-    /**
-     * Updates the status message display.
-     */
+    /** Updates the status message display. */
     public void updateStatus(String message) {
         updateStatus(message, false);
     }
 
-    /**
-     * Updates the status message display with optional error indication.
-     */
+    /** Updates the status message display with optional error indication. */
     public void updateStatus(String message, boolean isError) {
-        Platform.runLater(() -> {
-            statusLabel.setText("Status: " + message);
-            statusLabel.setStyle(isError ? "-fx-text-fill: red;" : "-fx-text-fill: blue;");
-            logger.info(message);
-        });
+        Platform.runLater(
+                () -> {
+                    statusLabel.setText("Status: " + message);
+                    statusLabel.setStyle(isError ? "-fx-text-fill: red;" : "-fx-text-fill: blue;");
+                    logger.info(message);
+                });
     }
 }

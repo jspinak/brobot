@@ -1,15 +1,15 @@
 package io.github.jspinak.brobot.runner.project;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import io.github.jspinak.brobot.runner.project.TaskButton;
-import lombok.Getter;
-import lombok.Setter;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import lombok.Getter;
+import lombok.Setter;
+
 /**
- * Represents the automation configuration for UI buttons in the Brobot Runner.
- * Maps to the "automation" object in the project schema.
+ * Represents the automation configuration for UI buttons in the Brobot Runner. Maps to the
+ * "automation" object in the project schema.
  */
 @Getter
 @Setter

@@ -1,59 +1,62 @@
 package io.github.jspinak.brobot.model.state;
 
+import java.util.*;
+
+import org.bytedeco.opencv.opencv_core.Mat;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.analysis.color.kmeans.KmeansProfilesAllSchemas;
 import io.github.jspinak.brobot.model.action.ActionHistory;
 import io.github.jspinak.brobot.model.action.ActionRecord;
+import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.model.element.Anchor;
 import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Position;
 import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.SearchRegionOnObject;
 import io.github.jspinak.brobot.model.match.Match;
+
 import lombok.Getter;
 import lombok.Setter;
-import org.bytedeco.opencv.opencv_core.Mat;
-import java.util.*;
 
 /**
  * Visual pattern identifier for States in the Brobot model-based GUI automation framework.
- * 
- * <p>StateImage is a fundamental building block of the state structure (Ω), serving as the 
- * primary means of identifying and verifying GUI states. It encapsulates one or more Pattern 
- * objects (image templates) that, when found on screen, indicate the presence of a specific 
- * state configuration.</p>
- * 
+ *
+ * <p>StateImage is a fundamental building block of the state structure (Ω), serving as the primary
+ * means of identifying and verifying GUI states. It encapsulates one or more Pattern objects (image
+ * templates) that, when found on screen, indicate the presence of a specific state configuration.
+ *
  * <p>Key concepts:
+ *
  * <ul>
- *   <li><b>Pattern Collection</b>: Contains multiple Patterns for robust state identification 
- *       (handling variations in appearance, different resolutions, etc.)</li>
- *   <li><b>State Ownership</b>: Belongs to a specific State, though can be marked as "shared" 
- *       when the same visual element appears across multiple states</li>
- *   <li><b>Color Analysis</b>: Supports advanced color-based matching through k-means clustering 
- *       and color profiles for more sophisticated pattern recognition</li>
- *   <li><b>Dynamic Images</b>: Can be marked as dynamic when the visual content changes frequently, 
- *       requiring special handling</li>
+ *   <li><b>Pattern Collection</b>: Contains multiple Patterns for robust state identification
+ *       (handling variations in appearance, different resolutions, etc.)
+ *   <li><b>State Ownership</b>: Belongs to a specific State, though can be marked as "shared" when
+ *       the same visual element appears across multiple states
+ *   <li><b>Color Analysis</b>: Supports advanced color-based matching through k-means clustering
+ *       and color profiles for more sophisticated pattern recognition
+ *   <li><b>Dynamic Images</b>: Can be marked as dynamic when the visual content changes frequently,
+ *       requiring special handling
  * </ul>
- * </p>
- * 
+ *
  * <p>In the model-based approach, StateImages serve multiple critical functions:
+ *
  * <ul>
- *   <li>State identification: Determining which state is currently active</li>
- *   <li>Action targets: Providing clickable/interactive elements within states</li>
- *   <li>Transition triggers: Visual elements that initiate state transitions</li>
- *   <li>Verification points: Confirming successful navigation or action completion</li>
+ *   <li>State identification: Determining which state is currently active
+ *   <li>Action targets: Providing clickable/interactive elements within states
+ *   <li>Transition triggers: Visual elements that initiate state transitions
+ *   <li>Verification points: Confirming successful navigation or action completion
  * </ul>
- * </p>
- * 
- * <p>The class supports both traditional pattern matching and advanced color-based analysis,
- * making it adaptable to various GUI automation challenges including dynamic content,
- * theme variations, and cross-platform differences.</p>
- * 
+ *
+ * <p>The class supports both traditional pattern matching and advanced color-based analysis, making
+ * it adaptable to various GUI automation challenges including dynamic content, theme variations,
+ * and cross-platform differences.
+ *
  * @since 1.0
  * @see Pattern
  * @see State
@@ -65,12 +68,14 @@ import java.util.*;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StateImage implements StateObject {
 
-    private Long id; // set by the StateImageEntity in the App module and important for creating StateImageLogs.
+    private Long id; // set by the StateImageEntity in the App module and important for creating
+    // StateImageLogs.
     private Long projectId = 0L;
     private StateObject.Type objectType = StateObject.Type.IMAGE;
     private String name = "";
     private List<Pattern> patterns = new ArrayList<>();
-    private String ownerStateName = "null"; // ownerStateName is set by the State when the object is added
+    private String ownerStateName =
+            "null"; // ownerStateName is set by the State when the object is added
     private Long ownerStateId = null; // set by the State when the object is added
     private int timesActedOn = 0;
     private boolean shared = false; // shared means also found in other states
@@ -86,14 +91,16 @@ public class StateImage implements StateObject {
     wrapper object that includes information about the Mat size and type. These Mat objects do not contain unique
     data: they are here for convenience and can be recreated with the patterns' BufferedImage objects.
      */
-    @JsonIgnore
-    private Mat oneColumnBGRMat; // initialized when program is run
-    @JsonIgnore
-    private Mat oneColumnHSVMat; // initialized when program is run
+    @JsonIgnore private Mat oneColumnBGRMat; // initialized when program is run
+    @JsonIgnore private Mat oneColumnHSVMat; // initialized when program is run
+
     @JsonIgnore
     private Mat imagesMat; // initialized when program is run, shows the images in the StateImage
+
     @JsonIgnore
-    private Mat profilesMat; // initialized when program is run, shows the color profiles in the StateImage
+    private Mat profilesMat; // initialized when program is run, shows the color profiles in the
+
+    // StateImage
 
     /*
     This stores the ids of transitions to other states for which this StateImage is involved.
@@ -103,14 +110,13 @@ public class StateImage implements StateObject {
 
     // Cross-state search region configuration
     private SearchRegionOnObject searchRegionOnObject;
-    
+
     // Custom highlight color for this StateImage (e.g., "#00FF00" for green, "#0000FF" for blue)
     private String highlightColor;
-    
+
     // Last matches found for this StateImage - used for resolving SearchRegionOnObject dependencies
     // This is the single source of truth for where this StateImage was last found
-    @JsonIgnore
-    private List<Match> lastMatchesFound = new ArrayList<>();
+    @JsonIgnore private List<Match> lastMatchesFound = new ArrayList<>();
 
     public String getIdAsString() {
         return objectType.name() + name + patterns.toString();
@@ -118,6 +124,7 @@ public class StateImage implements StateObject {
 
     /**
      * Sets the Position for each Pattern in the Image.
+     *
      * @param position the Position to use for each Pattern.
      */
     public void setPositionForAllPatterns(Position position) {
@@ -129,7 +136,9 @@ public class StateImage implements StateObject {
     }
 
     /**
-     * Sets the Anchor objects for each Pattern in the Image. Existing Anchor objects will be deleted.
+     * Sets the Anchor objects for each Pattern in the Image. Existing Anchor objects will be
+     * deleted.
+     *
      * @param anchors the Anchor objects to use for each Pattern.
      */
     public void setAnchors(Anchor... anchors) {
@@ -147,7 +156,9 @@ public class StateImage implements StateObject {
     }
 
     /**
-     * Sets the search regions for each Pattern in the Image. Existing search regions will be deleted.
+     * Sets the search regions for each Pattern in the Image. Existing search regions will be
+     * deleted.
+     *
      * @param regions the regions to set for each Pattern.
      */
     public void setSearchRegions(Region... regions) {
@@ -156,28 +167,35 @@ public class StateImage implements StateObject {
 
     /**
      * Sets the fixed search region for all patterns in this StateImage.
+     *
      * @param region the fixed region to set
      */
     public void setFixedSearchRegion(Region region) {
-        patterns.forEach(pattern -> {
-            pattern.getSearchRegions().setFixedRegion(region);
-            pattern.setFixed(true);
-        });
+        patterns.forEach(
+                pattern -> {
+                    pattern.getSearchRegions().setFixedRegion(region);
+                    pattern.setFixed(true);
+                });
     }
 
     /**
      * Finds snapshots from all patterns.
+     *
      * @return a list of snapshots
      */
     public List<ActionRecord> getAllMatchSnapshots() {
         List<ActionRecord> matchSnapshots = new ArrayList<>();
-        patterns.forEach(pattern -> matchSnapshots.addAll(pattern.getMatchHistory().getSnapshots()));
+        patterns.forEach(
+                pattern -> matchSnapshots.addAll(pattern.getMatchHistory().getSnapshots()));
         return matchSnapshots;
     }
 
     public Optional<ActionRecord> getRandomSnapshot(ActionConfig actionConfig) {
         List<ActionRecord> snapshots = new ArrayList<>();
-        patterns.forEach(pattern -> snapshots.addAll(pattern.getMatchHistory().getSimilarSnapshots(actionConfig)));
+        patterns.forEach(
+                pattern ->
+                        snapshots.addAll(
+                                pattern.getMatchHistory().getSimilarSnapshots(actionConfig)));
         if (snapshots.isEmpty()) return Optional.empty();
         return Optional.of(snapshots.get(new Random().nextInt(snapshots.size())));
     }
@@ -187,9 +205,10 @@ public class StateImage implements StateObject {
     }
 
     /**
-     * When a Pattern is fixed, it's defined when the fixed region is defined.
-     * When it's not fixed, it's defined when at least one of its search regions is defined.
-     * The StateImage is defined if at least one Pattern is defined.
+     * When a Pattern is fixed, it's defined when the fixed region is defined. When it's not fixed,
+     * it's defined when at least one of its search regions is defined. The StateImage is defined if
+     * at least one Pattern is defined.
+     *
      * @return true if defined
      */
     public boolean isDefined() {
@@ -200,8 +219,9 @@ public class StateImage implements StateObject {
     }
 
     /**
-     * Checks if this StateImage has a defined search region.
-     * A search region is defined if any pattern has a fixed region or defined search regions.
+     * Checks if this StateImage has a defined search region. A search region is defined if any
+     * pattern has a fixed region or defined search regions.
+     *
      * @return true if any pattern has a defined search region
      */
     public boolean hasDefinedSearchRegion() {
@@ -220,7 +240,9 @@ public class StateImage implements StateObject {
     }
 
     /**
-     * If a pattern has a defined, fixed region, it is included. Otherwise, all search regions are included.
+     * If a pattern has a defined, fixed region, it is included. Otherwise, all search regions are
+     * included.
+     *
      * @return search regions for all patterns.
      */
     public List<Region> getAllSearchRegions() {
@@ -247,9 +269,7 @@ public class StateImage implements StateObject {
     }
 
     public ObjectCollection asObjectCollection() {
-        return new ObjectCollection.Builder()
-                .withImages(this)
-                .build();
+        return new ObjectCollection.Builder().withImages(this).build();
     }
 
     public double getAverageWidth() {
@@ -267,7 +287,7 @@ public class StateImage implements StateObject {
     public int getMaxWidth() {
         if (isEmpty()) return 0;
         int max = patterns.get(0).w();
-        for (int i=1; i<patterns.size(); i++) {
+        for (int i = 1; i < patterns.size(); i++) {
             max = Math.max(max, patterns.get(i).w());
         }
         return max;
@@ -276,7 +296,7 @@ public class StateImage implements StateObject {
     public int getMaxHeight() {
         if (isEmpty()) return 0;
         int max = patterns.get(0).h();
-        for (int i=1; i<patterns.size(); i++) {
+        for (int i = 1; i < patterns.size(); i++) {
             max = Math.max(max, patterns.get(i).h());
         }
         return max;
@@ -285,7 +305,7 @@ public class StateImage implements StateObject {
     public int getMinSize() {
         if (patterns.isEmpty()) return 0;
         int minSize = patterns.get(0).size();
-        for (int i=1; i<patterns.size(); i++) {
+        for (int i = 1; i < patterns.size(); i++) {
             minSize = Math.min(minSize, patterns.get(i).size());
         }
         return minSize;
@@ -294,7 +314,7 @@ public class StateImage implements StateObject {
     public int getMaxSize() {
         if (patterns.isEmpty()) return 0;
         int maxSize = patterns.get(0).size();
-        for (int i=1; i<patterns.size(); i++) {
+        for (int i = 1; i < patterns.size(); i++) {
             maxSize = Math.max(maxSize, patterns.get(i).size());
         }
         return maxSize;
@@ -309,10 +329,12 @@ public class StateImage implements StateObject {
         stringBuilder.append(" ownerState=").append(ownerStateName);
         stringBuilder.append(" searchRegions=");
         getAllSearchRegions().forEach(stringBuilder::append);
-        stringBuilder.append(" fixedSearchRegion=").append(getLargestDefinedFixedRegionOrNewRegion());
+        stringBuilder
+                .append(" fixedSearchRegion=")
+                .append(getLargestDefinedFixedRegionOrNewRegion());
         stringBuilder.append(" snapshotRegions=");
-        getAllMatchSnapshots().forEach(snapshot ->
-                snapshot.getMatchList().forEach(stringBuilder::append));
+        getAllMatchSnapshots()
+                .forEach(snapshot -> snapshot.getMatchList().forEach(stringBuilder::append));
         if (!patterns.isEmpty()) stringBuilder.append(" pattern sizes =");
         patterns.forEach(p -> stringBuilder.append(" ").append(p.size()));
         return stringBuilder.toString();
@@ -372,7 +394,8 @@ public class StateImage implements StateObject {
             return this;
         }
 
-        public Builder setKmeansProfilesAllSchemas(KmeansProfilesAllSchemas kmeansProfilesAllSchemas) {
+        public Builder setKmeansProfilesAllSchemas(
+                KmeansProfilesAllSchemas kmeansProfilesAllSchemas) {
             this.kmeansProfilesAllSchemas = kmeansProfilesAllSchemas;
             return this;
         }
@@ -421,11 +444,11 @@ public class StateImage implements StateObject {
             this.fixedForAllPatterns = fixed;
             return this;
         }
-        
+
         /**
-         * Sets a custom highlight color for this StateImage.
-         * When this image is found, it will be highlighted with this color.
-         * 
+         * Sets a custom highlight color for this StateImage. When this image is found, it will be
+         * highlighted with this color.
+         *
          * @param color the color in hex format (e.g., "#00FF00" for green, "#0000FF" for blue)
          * @return this builder for method chaining
          */
@@ -435,9 +458,9 @@ public class StateImage implements StateObject {
         }
 
         /**
-         * Sets ActionHistory for all patterns in this StateImage.
-         * This is required for mock mode finds to work.
-         * 
+         * Sets ActionHistory for all patterns in this StateImage. This is required for mock mode
+         * finds to work.
+         *
          * @param actionHistory the ActionHistory to apply to all patterns
          * @return this builder for method chaining
          */
@@ -447,21 +470,22 @@ public class StateImage implements StateObject {
         }
 
         /**
-         * Sets ActionHistory for all patterns using a supplier function.
-         * Useful for lazy initialization or conditional creation.
-         * 
+         * Sets ActionHistory for all patterns using a supplier function. Useful for lazy
+         * initialization or conditional creation.
+         *
          * @param historySupplier supplier that creates the ActionHistory
          * @return this builder for method chaining
          */
-        public Builder withActionHistory(java.util.function.Supplier<ActionHistory> historySupplier) {
+        public Builder withActionHistory(
+                java.util.function.Supplier<ActionHistory> historySupplier) {
             this.actionHistoryForAllPatterns = historySupplier.get();
             return this;
         }
 
         /**
-         * Sets ActionHistory for all patterns using a single ActionRecord.
-         * Useful for simple test scenarios.
-         * 
+         * Sets ActionHistory for all patterns using a single ActionRecord. Useful for simple test
+         * scenarios.
+         *
          * @param record the ActionRecord to add as a single snapshot
          * @return this builder for method chaining
          */
@@ -499,16 +523,24 @@ public class StateImage implements StateObject {
             stateImage.ownerStateId = ownerStateId;
             stateImage.searchRegionOnObject = searchRegionOnObject;
             stateImage.highlightColor = highlightColor;
-            if (positionForAllPatterns != null) stateImage.getPatterns().forEach(pattern ->
-                    pattern.setTargetPosition(positionForAllPatterns));
-            if (offsetForAllPatterns != null) stateImage.getPatterns().forEach(pattern ->
-                    pattern.setTargetOffset(offsetForAllPatterns));
-            if (searchRegionForAllPatterns != null) stateImage.getPatterns().forEach(pattern ->
-                    pattern.addSearchRegion(searchRegionForAllPatterns));
-            if (fixedForAllPatterns) stateImage.getPatterns().forEach(pattern ->
-                    pattern.setFixed(true));
-            if (actionHistoryForAllPatterns != null) stateImage.getPatterns().forEach(pattern ->
-                    pattern.setMatchHistory(actionHistoryForAllPatterns));
+            if (positionForAllPatterns != null)
+                stateImage
+                        .getPatterns()
+                        .forEach(pattern -> pattern.setTargetPosition(positionForAllPatterns));
+            if (offsetForAllPatterns != null)
+                stateImage
+                        .getPatterns()
+                        .forEach(pattern -> pattern.setTargetOffset(offsetForAllPatterns));
+            if (searchRegionForAllPatterns != null)
+                stateImage
+                        .getPatterns()
+                        .forEach(pattern -> pattern.addSearchRegion(searchRegionForAllPatterns));
+            if (fixedForAllPatterns)
+                stateImage.getPatterns().forEach(pattern -> pattern.setFixed(true));
+            if (actionHistoryForAllPatterns != null)
+                stateImage
+                        .getPatterns()
+                        .forEach(pattern -> pattern.setMatchHistory(actionHistoryForAllPatterns));
             return stateImage;
         }
 
@@ -520,12 +552,11 @@ public class StateImage implements StateObject {
             return stateImage;
         }
     }
-    
+
     /**
-     * Adds ActionRecord snapshots to all patterns in this StateImage.
-     * This is useful for setting up mock data for testing or providing
-     * historical match data for the mock framework.
-     * 
+     * Adds ActionRecord snapshots to all patterns in this StateImage. This is useful for setting up
+     * mock data for testing or providing historical match data for the mock framework.
+     *
      * @param snapshots The ActionRecord snapshots to add to all patterns
      * @return This StateImage instance for method chaining
      */
@@ -533,17 +564,18 @@ public class StateImage implements StateObject {
         if (snapshots == null || snapshots.length == 0) {
             return this;
         }
-        
+
         // Create a shared ActionHistory with all snapshots
         ActionHistory history = new ActionHistory();
         for (ActionRecord snapshot : snapshots) {
             history.addSnapshot(snapshot);
         }
-        
+
         // Apply the history to all patterns
         for (Pattern pattern : patterns) {
             // If pattern already has history, merge with existing
-            if (pattern.getMatchHistory() != null && !pattern.getMatchHistory().getSnapshots().isEmpty()) {
+            if (pattern.getMatchHistory() != null
+                    && !pattern.getMatchHistory().getSnapshots().isEmpty()) {
                 ActionHistory existingHistory = pattern.getMatchHistory();
                 for (ActionRecord snapshot : snapshots) {
                     existingHistory.addSnapshot(snapshot);
@@ -553,7 +585,7 @@ public class StateImage implements StateObject {
                 pattern.setMatchHistory(history);
             }
         }
-        
+
         return this;
     }
 }

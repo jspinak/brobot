@@ -7,22 +7,23 @@ import io.github.jspinak.brobot.tools.logging.ansi.AnsiColor;
 
 /**
  * Tree structure utility for visualizing hierarchical state relationships in Brobot.
- * 
- * <p>StateHierarchyVisualizer provides a simple tree data structure designed to represent and potentially
- * visualize the hierarchical relationships between states in the automation framework.
- * While currently not fully implemented for visualization, it serves as a foundation
- * for future state hierarchy display features.</p>
- * 
+ *
+ * <p>StateHierarchyVisualizer provides a simple tree data structure designed to represent and
+ * potentially visualize the hierarchical relationships between states in the automation framework.
+ * While currently not fully implemented for visualization, it serves as a foundation for future
+ * state hierarchy display features.
+ *
  * <p>Intended use cases:
+ *
  * <ul>
- *   <li><b>State Hierarchy</b>: Represent parent-child relationships between states</li>
- *   <li><b>Navigation Paths</b>: Show possible navigation routes through state graph</li>
- *   <li><b>Dependency Trees</b>: Display state dependencies and relationships</li>
- *   <li><b>Visual Debugging</b>: Help developers understand complex state structures</li>
+ *   <li><b>State Hierarchy</b>: Represent parent-child relationships between states
+ *   <li><b>Navigation Paths</b>: Show possible navigation routes through state graph
+ *   <li><b>Dependency Trees</b>: Display state dependencies and relationships
+ *   <li><b>Visual Debugging</b>: Help developers understand complex state structures
  * </ul>
- * </p>
- * 
+ *
  * <p>Planned visualization formats:
+ *
  * <pre>
  * HOME
  * ├── LOGIN
@@ -34,43 +35,38 @@ import io.github.jspinak.brobot.tools.logging.ansi.AnsiColor;
  * └── PROFILE
  *     └── EDIT_PROFILE
  * </pre>
- * </p>
- * 
+ *
  * <p>Future enhancements:
+ *
  * <ul>
- *   <li>ASCII art tree rendering with box-drawing characters</li>
- *   <li>Colorized output using {@link AnsiColor} codes</li>
- *   <li>Depth and breadth traversal methods</li>
- *   <li>Integration with {@link ConsoleReporter} for controlled output</li>
- *   <li>Export to GraphViz or other visualization formats</li>
+ *   <li>ASCII art tree rendering with box-drawing characters
+ *   <li>Colorized output using {@link AnsiColor} codes
+ *   <li>Depth and breadth traversal methods
+ *   <li>Integration with {@link ConsoleReporter} for controlled output
+ *   <li>Export to GraphViz or other visualization formats
  * </ul>
- * </p>
- * 
- * <p>Thread safety: This class is not thread-safe. External synchronization
- * is required for concurrent access to the tree structure.</p>
- * 
- * <p>Note: This is a placeholder implementation. Full visualization functionality
- * is planned for future releases to aid in debugging complex state hierarchies.</p>
- * 
+ *
+ * <p>Thread safety: This class is not thread-safe. External synchronization is required for
+ * concurrent access to the tree structure.
+ *
+ * <p>Note: This is a placeholder implementation. Full visualization functionality is planned for
+ * future releases to aid in debugging complex state hierarchies.
+ *
  * @since 1.0
  * @see ConsoleReporter
  * @see MessageFormatter
  */
 public class StateHierarchyVisualizer {
 
-    /**
-     * The name or identifier of this tree node.
-     */
+    /** The name or identifier of this tree node. */
     private String name;
-    
-    /**
-     * List of child nodes in the tree hierarchy.
-     */
+
+    /** List of child nodes in the tree hierarchy. */
     private List<StateHierarchyVisualizer> children = new ArrayList<>();
 
     /**
      * Creates a new tree node with the specified name and no children.
-     * 
+     *
      * @param name the name or identifier for this node (must not be null)
      */
     public StateHierarchyVisualizer(String name) {
@@ -79,12 +75,11 @@ public class StateHierarchyVisualizer {
 
     /**
      * Creates a new tree node with the specified name and initial children.
-     * 
-     * <p>Note: The current implementation ignores the children parameter.
-     * This constructor is planned for future use when full tree operations
-     * are implemented.</p>
-     * 
-     * @param name     the name or identifier for this node (must not be null)
+     *
+     * <p>Note: The current implementation ignores the children parameter. This constructor is
+     * planned for future use when full tree operations are implemented.
+     *
+     * @param name the name or identifier for this node (must not be null)
      * @param children initial list of child nodes (currently unused)
      */
     public StateHierarchyVisualizer(String name, List<StateHierarchyVisualizer> children) {
@@ -93,10 +88,10 @@ public class StateHierarchyVisualizer {
 
     /**
      * Adds a child node to this tree node.
-     * 
-     * <p>Children are maintained in the order they are added, which may be
-     * significant for visualization purposes.</p>
-     * 
+     *
+     * <p>Children are maintained in the order they are added, which may be significant for
+     * visualization purposes.
+     *
      * @param child the child node to add (must not be null)
      */
     public void addChild(StateHierarchyVisualizer child) {

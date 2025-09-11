@@ -1,32 +1,30 @@
 package io.github.jspinak.brobot.statemanagement;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.model.state.State;
-import io.github.jspinak.brobot.navigation.service.StateService;
-import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import java.util.*;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import java.util.*;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.navigation.service.StateService;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+
 @DisplayName("Simple InitialStates Tests")
 public class SimpleInitialStatesTest extends BrobotTestBase {
 
-    @Mock
-    private StateDetector stateDetector;
+    @Mock private StateDetector stateDetector;
 
-    @Mock
-    private StateMemory stateMemory;
+    @Mock private StateMemory stateMemory;
 
-    @Mock
-    private StateService stateService;
+    @Mock private StateService stateService;
 
     private InitialStates initialStates;
 

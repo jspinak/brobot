@@ -1,48 +1,45 @@
 package io.github.jspinak.brobot.tools.logging.visual;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.util.coordinates.CoordinateScaler;
-import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.model.state.StateObject;
-import io.github.jspinak.brobot.statemanagement.StateMemory;
-import io.github.jspinak.brobot.logging.unified.BrobotLogger;
-import io.github.jspinak.brobot.logging.unified.LogEvent;
-import io.github.jspinak.brobot.tools.testing.wrapper.HighlightWrapper;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.logging.unified.BrobotLogger;
+import io.github.jspinak.brobot.logging.unified.LogEvent;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.state.StateObject;
+import io.github.jspinak.brobot.statemanagement.StateMemory;
+import io.github.jspinak.brobot.tools.testing.wrapper.HighlightWrapper;
+import io.github.jspinak.brobot.util.coordinates.CoordinateScaler;
+
+import lombok.extern.slf4j.Slf4j;
+
 /**
- * Manages visual highlighting of screen regions during automation execution.
- * Provides configurable highlighting for finds, search regions, clicks, and
- * errors.
- * 
- * <p>
- * Features:
- * </p>
+ * Manages visual highlighting of screen regions during automation execution. Provides configurable
+ * highlighting for finds, search regions, clicks, and errors.
+ *
+ * <p>Features:
+ *
  * <ul>
- * <li>Configurable colors and durations for different highlight types</li>
- * <li>Support for flashing and ripple effects</li>
- * <li>Asynchronous highlighting to avoid blocking automation</li>
- * <li>Mock mode support for testing</li>
+ *   <li>Configurable colors and durations for different highlight types
+ *   <li>Support for flashing and ripple effects
+ *   <li>Asynchronous highlighting to avoid blocking automation
+ *   <li>Mock mode support for testing
  * </ul>
- * 
+ *
  * @see VisualFeedbackConfig for configuration options
  */
 @Component
 @Slf4j
 public class HighlightManager {
 
-    /**
-     * Represents a region with its state and object context for better logging.
-     */
+    /** Represents a region with its state and object context for better logging. */
     public static class RegionWithContext {
         private final Region region;
         private final String stateName;
@@ -77,7 +74,8 @@ public class HighlightManager {
     private final List<CompletableFuture<Void>> activeHighlights = new ArrayList<>();
 
     @Autowired
-    public HighlightManager(VisualFeedbackConfig config,
+    public HighlightManager(
+            VisualFeedbackConfig config,
             BrobotLogger brobotLogger,
             HighlightWrapper highlightWrapper,
             @Autowired(required = false) StateMemory stateMemory,
@@ -91,7 +89,7 @@ public class HighlightManager {
 
     /**
      * Highlights successful match findings.
-     * 
+     *
      * @param matches List of matches to highlight
      */
     public void highlightMatches(List<Match> matches) {
@@ -103,9 +101,8 @@ public class HighlightManager {
 
         for (Match match : matches) {
             Region region = match.getRegion();
-            if (region == null)
-                continue;
-            
+            if (region == null) continue;
+
             // Scale region from physical to logical coordinates if needed for SikuliX highlighting
             region = coordinateScaler.scaleRegionToLogical(region);
 
@@ -119,11 +116,15 @@ public class HighlightManager {
                 try {
                     highlightColor = Color.decode(customColor);
                     colorString = customColor;
-                    log.debug("Using custom highlight color {} for {}", customColor,
-                            match.getStateObjectData() != null ? match.getStateObjectData().getStateObjectName()
+                    log.debug(
+                            "Using custom highlight color {} for {}",
+                            customColor,
+                            match.getStateObjectData() != null
+                                    ? match.getStateObjectData().getStateObjectName()
                                     : "unknown");
                 } catch (NumberFormatException e) {
-                    log.debug("Invalid custom color '{}' for StateImage, using default", customColor);
+                    log.debug(
+                            "Invalid custom color '{}' for StateImage, using default", customColor);
                 }
             }
 
@@ -140,7 +141,8 @@ public class HighlightManager {
             }
         }
 
-        brobotLogger.log()
+        brobotLogger
+                .log()
                 .observation("Highlighted matches")
                 .metadata("matchCount", matches.size())
                 .metadata("color", findConfig.getColor())
@@ -150,13 +152,16 @@ public class HighlightManager {
 
     /**
      * Highlights search regions before searching.
-     * 
+     *
      * @param regions List of regions to be searched
      */
     public void highlightSearchRegions(List<Region> regions) {
         if (!config.isEnabled() || !config.isAutoHighlightSearchRegions() || regions.isEmpty()) {
-            log.debug("Search region highlighting skipped: enabled={}, autoHighlight={}, regions={}",
-                    config.isEnabled(), config.isAutoHighlightSearchRegions(), regions.size());
+            log.debug(
+                    "Search region highlighting skipped: enabled={}, autoHighlight={}, regions={}",
+                    config.isEnabled(),
+                    config.isAutoHighlightSearchRegions(),
+                    regions.size());
             return;
         }
 
@@ -167,19 +172,22 @@ public class HighlightManager {
             // Perform highlight synchronously using wrapper
             if (highlightWrapper != null) {
                 log.debug("Highlighting {} search regions synchronously", regions.size());
-                brobotLogger.log()
+                brobotLogger
+                        .log()
                         .observation("Starting highlight action")
                         .metadata("regionCount", regions.size())
                         .metadata("color", getColorName(searchConfig.getColorObject()))
                         .metadata("duration", searchConfig.getDuration())
                         .log();
 
-                int successCount = highlightWrapper.highlightRegions(
-                        regions,
-                        searchConfig.getDuration(),
-                        getColorName(searchConfig.getColorObject()));
+                int successCount =
+                        highlightWrapper.highlightRegions(
+                                regions,
+                                searchConfig.getDuration(),
+                                getColorName(searchConfig.getColorObject()));
 
-                brobotLogger.log()
+                brobotLogger
+                        .log()
                         .observation("Highlight action completed")
                         .metadata("success", successCount > 0)
                         .metadata("highlightedCount", successCount)
@@ -189,10 +197,15 @@ public class HighlightManager {
                     log.warn("Highlight action failed - no regions could be highlighted");
                 }
             } else {
-                log.error("Highlight wrapper not available for highlighting - highlights will not appear on screen");
-                brobotLogger.log()
+                log.error(
+                        "Highlight wrapper not available for highlighting - highlights will not"
+                                + " appear on screen");
+                brobotLogger
+                        .log()
                         .error(new IllegalStateException("HighlightWrapper not available"))
-                        .message("Cannot display highlights - HighlightWrapper component not available")
+                        .message(
+                                "Cannot display highlights - HighlightWrapper component not"
+                                        + " available")
                         .log();
             }
 
@@ -206,7 +219,8 @@ public class HighlightManager {
             log.error("Error highlighting search regions", e);
         }
 
-        brobotLogger.log()
+        brobotLogger
+                .log()
                 .observation("Highlighted search regions")
                 .metadata("regionCount", regions.size())
                 .metadata("color", searchConfig.getColor())
@@ -216,22 +230,31 @@ public class HighlightManager {
 
     /**
      * Highlights search regions with state and object context for better logging.
-     * 
+     *
      * @param regionsWithContext List of regions with their state/object context
      */
     public void highlightSearchRegionsWithContext(List<RegionWithContext> regionsWithContext) {
-        if (!config.isEnabled() || !config.isAutoHighlightSearchRegions() || regionsWithContext.isEmpty()) {
-            log.debug("Search region highlighting skipped: enabled={}, autoHighlight={}, regions={}",
-                    config.isEnabled(), config.isAutoHighlightSearchRegions(), regionsWithContext.size());
+        if (!config.isEnabled()
+                || !config.isAutoHighlightSearchRegions()
+                || regionsWithContext.isEmpty()) {
+            log.debug(
+                    "Search region highlighting skipped: enabled={}, autoHighlight={}, regions={}",
+                    config.isEnabled(),
+                    config.isAutoHighlightSearchRegions(),
+                    regionsWithContext.size());
             return;
         }
 
         VisualFeedbackConfig.SearchRegionHighlightConfig searchConfig = config.getSearchRegion();
 
         // Log that we're about to highlight regions with context
-        brobotLogger.log()
+        brobotLogger
+                .log()
                 .level(LogEvent.Level.INFO)
-                .observation(String.format("Highlighting %d search regions with context", regionsWithContext.size()))
+                .observation(
+                        String.format(
+                                "Highlighting %d search regions with context",
+                                regionsWithContext.size()))
                 .log();
 
         // Log each region with its context
@@ -240,10 +263,18 @@ public class HighlightManager {
             String stateName = rwc.getStateName() != null ? rwc.getStateName() : "Unknown";
             String objectName = rwc.getObjectName() != null ? rwc.getObjectName() : "Unknown";
 
-            brobotLogger.log()
+            brobotLogger
+                    .log()
                     .level(LogEvent.Level.INFO)
-                    .observation(String.format("Highlighting region for %s.%s (%d,%d,%dx%d)",
-                            stateName, objectName, region.x(), region.y(), region.w(), region.h()))
+                    .observation(
+                            String.format(
+                                    "Highlighting region for %s.%s (%d,%d,%dx%d)",
+                                    stateName,
+                                    objectName,
+                                    region.x(),
+                                    region.y(),
+                                    region.w(),
+                                    region.h()))
                     .metadata("state", stateName)
                     .metadata("object", objectName)
                     .metadata("x", region.x())
@@ -256,26 +287,28 @@ public class HighlightManager {
         // Perform synchronous highlighting for search regions
         try {
             // Extract just the regions for highlighting
-            List<Region> regions = regionsWithContext.stream()
-                    .map(RegionWithContext::getRegion)
-                    .toList();
+            List<Region> regions =
+                    regionsWithContext.stream().map(RegionWithContext::getRegion).toList();
 
             // Perform highlight synchronously using wrapper
             if (highlightWrapper != null) {
                 log.debug("Highlighting {} search regions synchronously", regions.size());
-                brobotLogger.log()
+                brobotLogger
+                        .log()
                         .observation("Starting highlight action with context")
                         .metadata("regionCount", regions.size())
                         .metadata("color", getColorName(searchConfig.getColorObject()))
                         .metadata("duration", searchConfig.getDuration())
                         .log();
 
-                int successCount = highlightWrapper.highlightRegions(
-                        regions,
-                        searchConfig.getDuration(),
-                        getColorName(searchConfig.getColorObject()));
+                int successCount =
+                        highlightWrapper.highlightRegions(
+                                regions,
+                                searchConfig.getDuration(),
+                                getColorName(searchConfig.getColorObject()));
 
-                brobotLogger.log()
+                brobotLogger
+                        .log()
                         .observation("Highlight action with context completed")
                         .metadata("success", successCount > 0)
                         .metadata("highlightedCount", successCount)
@@ -285,10 +318,15 @@ public class HighlightManager {
                     log.warn("Highlight action failed - no regions could be highlighted");
                 }
             } else {
-                log.error("Highlight wrapper not available for highlighting - highlights will not appear on screen");
-                brobotLogger.log()
+                log.error(
+                        "Highlight wrapper not available for highlighting - highlights will not"
+                                + " appear on screen");
+                brobotLogger
+                        .log()
                         .error(new IllegalStateException("HighlightWrapper not available"))
-                        .message("Cannot display highlights - HighlightWrapper component not available")
+                        .message(
+                                "Cannot display highlights - HighlightWrapper component not"
+                                        + " available")
                         .log();
             }
 
@@ -302,7 +340,8 @@ public class HighlightManager {
             log.error("Error highlighting search regions", e);
         }
 
-        brobotLogger.log()
+        brobotLogger
+                .log()
                 .observation("Highlighted search regions complete")
                 .metadata("regionCount", regionsWithContext.size())
                 .metadata("color", searchConfig.getColor())
@@ -312,7 +351,7 @@ public class HighlightManager {
 
     /**
      * Highlights a click location.
-     * 
+     *
      * @param x X coordinate of the click
      * @param y Y coordinate of the click
      */
@@ -324,11 +363,12 @@ public class HighlightManager {
         VisualFeedbackConfig.ClickHighlightConfig clickConfig = config.getClick();
 
         // Create a small region around the click point
-        Region clickRegion = new Region(
-                x - clickConfig.getRadius(),
-                y - clickConfig.getRadius(),
-                clickConfig.getRadius() * 2,
-                clickConfig.getRadius() * 2);
+        Region clickRegion =
+                new Region(
+                        x - clickConfig.getRadius(),
+                        y - clickConfig.getRadius(),
+                        clickConfig.getRadius() * 2,
+                        clickConfig.getRadius() * 2);
 
         if (clickConfig.isRippleEffect()) {
             showRippleEffect(x, y, clickConfig);
@@ -345,7 +385,7 @@ public class HighlightManager {
 
     /**
      * Highlights an area where a find operation failed.
-     * 
+     *
      * @param searchRegion The region that was searched
      */
     public void highlightError(Region searchRegion) {
@@ -368,18 +408,25 @@ public class HighlightManager {
         }
     }
 
-    /**
-     * Highlights a single region with specified parameters.
-     */
-    private void highlightRegion(Region region, Color color, double duration,
-            int borderWidth, String type, Double score) {
+    /** Highlights a single region with specified parameters. */
+    private void highlightRegion(
+            Region region,
+            Color color,
+            double duration,
+            int borderWidth,
+            String type,
+            Double score) {
         if (FrameworkSettings.mock) {
             // In mock mode, just log the highlight action
-            brobotLogger.log()
+            brobotLogger
+                    .log()
                     .observation("Mock highlight")
                     .metadata("type", type)
-                    .metadata("region", String.format("(%d,%d,%dx%d)",
-                            region.x(), region.y(), region.w(), region.h()))
+                    .metadata(
+                            "region",
+                            String.format(
+                                    "(%d,%d,%dx%d)",
+                                    region.x(), region.y(), region.w(), region.h()))
                     .metadata("color", String.format("#%06X", color.getRGB() & 0xFFFFFF))
                     .metadata("duration", duration)
                     .log();
@@ -388,34 +435,41 @@ public class HighlightManager {
 
         try {
             // Use CompletableFuture for non-blocking highlight
-            CompletableFuture<Void> highlightFuture = CompletableFuture.runAsync(() -> {
-                try {
-                    // Use wrapper to perform the highlight
-                    if (highlightWrapper != null) {
-                        highlightWrapper.highlightRegion(region, duration, getColorName(color));
-                    } else {
-                        log.warn("HighlightWrapper not available for async highlight");
-                    }
+            CompletableFuture<Void> highlightFuture =
+                    CompletableFuture.runAsync(
+                            () -> {
+                                try {
+                                    // Use wrapper to perform the highlight
+                                    if (highlightWrapper != null) {
+                                        highlightWrapper.highlightRegion(
+                                                region, duration, getColorName(color));
+                                    } else {
+                                        log.warn(
+                                                "HighlightWrapper not available for async"
+                                                        + " highlight");
+                                    }
 
-                } catch (Exception e) {
-                    log.error("Error highlighting region: {}", e.getMessage(), e);
-                }
-            });
+                                } catch (Exception e) {
+                                    log.error("Error highlighting region: {}", e.getMessage(), e);
+                                }
+                            });
 
             synchronized (activeHighlights) {
                 activeHighlights.add(highlightFuture);
             }
 
             // Schedule cleanup
-            highlightFuture.whenComplete((result, throwable) -> {
-                synchronized (activeHighlights) {
-                    activeHighlights.remove(highlightFuture);
-                }
-            });
+            highlightFuture.whenComplete(
+                    (result, throwable) -> {
+                        synchronized (activeHighlights) {
+                            activeHighlights.remove(highlightFuture);
+                        }
+                    });
 
         } catch (Exception e) {
             log.error("Error creating highlight", e);
-            brobotLogger.log()
+            brobotLogger
+                    .log()
                     .error(e)
                     .message("Failed to create highlight")
                     .metadata("type", type)
@@ -423,84 +477,85 @@ public class HighlightManager {
         }
     }
 
-    /**
-     * Creates a flashing effect on a region.
-     */
+    /** Creates a flashing effect on a region. */
     private void flashRegion(Region region, VisualFeedbackConfig.FindHighlightConfig config) {
-        CompletableFuture.runAsync(() -> {
-            try {
-                for (int i = 0; i < config.getFlashCount(); i++) {
-                    highlightRegion(region, config.getColorObject(),
-                            config.getFlashInterval() / 1000.0,
-                            config.getBorderWidth(), "FLASH", null);
-                    Thread.sleep(config.getFlashInterval() * 2);
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                log.warn("Flash effect interrupted");
-            }
-        });
+        CompletableFuture.runAsync(
+                () -> {
+                    try {
+                        for (int i = 0; i < config.getFlashCount(); i++) {
+                            highlightRegion(
+                                    region,
+                                    config.getColorObject(),
+                                    config.getFlashInterval() / 1000.0,
+                                    config.getBorderWidth(),
+                                    "FLASH",
+                                    null);
+                            Thread.sleep(config.getFlashInterval() * 2);
+                        }
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        log.warn("Flash effect interrupted");
+                    }
+                });
     }
 
-    /**
-     * Shows a ripple effect at click location.
-     */
+    /** Shows a ripple effect at click location. */
     private void showRippleEffect(int x, int y, VisualFeedbackConfig.ClickHighlightConfig config) {
-        CompletableFuture.runAsync(() -> {
-            try {
-                int maxRadius = config.getRadius() * 3;
-                int steps = 5;
-                long stepDuration = (long) (config.getDuration() * 1000) / steps;
+        CompletableFuture.runAsync(
+                () -> {
+                    try {
+                        int maxRadius = config.getRadius() * 3;
+                        int steps = 5;
+                        long stepDuration = (long) (config.getDuration() * 1000) / steps;
 
-                for (int i = 1; i <= steps; i++) {
-                    int radius = (maxRadius * i) / steps;
-                    int alpha = 255 - (200 * i / steps); // Fade out
+                        for (int i = 1; i <= steps; i++) {
+                            int radius = (maxRadius * i) / steps;
+                            int alpha = 255 - (200 * i / steps); // Fade out
 
-                    Color color = new Color(
-                            config.getColorObject().getRed(),
-                            config.getColorObject().getGreen(),
-                            config.getColorObject().getBlue(),
-                            alpha);
+                            Color color =
+                                    new Color(
+                                            config.getColorObject().getRed(),
+                                            config.getColorObject().getGreen(),
+                                            config.getColorObject().getBlue(),
+                                            alpha);
 
-                    Region rippleRegion = new Region(
-                            x - radius, y - radius, radius * 2, radius * 2);
+                            Region rippleRegion =
+                                    new Region(x - radius, y - radius, radius * 2, radius * 2);
 
-                    highlightRegion(rippleRegion, color, stepDuration / 1000.0,
-                            2, "RIPPLE", null);
+                            highlightRegion(
+                                    rippleRegion, color, stepDuration / 1000.0, 2, "RIPPLE", null);
 
-                    Thread.sleep(stepDuration);
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                log.warn("Ripple effect interrupted");
-            }
-        });
+                            Thread.sleep(stepDuration);
+                        }
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        log.warn("Ripple effect interrupted");
+                    }
+                });
     }
 
-    /**
-     * Shows region dimensions as text overlay.
-     */
+    /** Shows region dimensions as text overlay. */
     private void showRegionDimensions(Region region) {
         String dimensions = String.format("%dx%d", region.w(), region.h());
         // In a real implementation, this would overlay text on the screen
         // For now, just log it
-        brobotLogger.log()
+        brobotLogger
+                .log()
                 .observation("Region dimensions")
                 .metadata("dimensions", dimensions)
                 .metadata("location", String.format("(%d,%d)", region.x(), region.y()))
                 .log();
     }
 
-    /**
-     * Shows region dimensions with state/object context.
-     */
+    /** Shows region dimensions with state/object context. */
     private void showRegionDimensionsWithContext(RegionWithContext rwc) {
         Region region = rwc.getRegion();
         String dimensions = String.format("%dx%d", region.w(), region.h());
         String stateName = rwc.getStateName() != null ? rwc.getStateName() : "Unknown";
         String objectName = rwc.getObjectName() != null ? rwc.getObjectName() : "Unknown";
 
-        brobotLogger.log()
+        brobotLogger
+                .log()
                 .observation(String.format("Region dimensions for %s.%s", stateName, objectName))
                 .metadata("dimensions", dimensions)
                 .metadata("location", String.format("(%d,%d)", region.x(), region.y()))
@@ -509,33 +564,41 @@ public class HighlightManager {
                 .log();
     }
 
-    /**
-     * Shows a cross mark on error regions.
-     */
+    /** Shows a cross mark on error regions. */
     private void showCrossMark(Region region, VisualFeedbackConfig.ErrorHighlightConfig config) {
         // In a real implementation, this would draw an X over the region
         // For now, create two diagonal highlights
-        CompletableFuture.runAsync(() -> {
-            try {
-                // Top-left to bottom-right
-                Region diagonal1 = new Region(region.x(), region.y(), region.w(), 2);
-                highlightRegion(diagonal1, config.getColorObject(),
-                        config.getDuration(), 3, "CROSS", null);
+        CompletableFuture.runAsync(
+                () -> {
+                    try {
+                        // Top-left to bottom-right
+                        Region diagonal1 = new Region(region.x(), region.y(), region.w(), 2);
+                        highlightRegion(
+                                diagonal1,
+                                config.getColorObject(),
+                                config.getDuration(),
+                                3,
+                                "CROSS",
+                                null);
 
-                // Top-right to bottom-left
-                Region diagonal2 = new Region(region.x(), region.y() + region.h() - 2, region.w(), 2);
-                highlightRegion(diagonal2, config.getColorObject(),
-                        config.getDuration(), 3, "CROSS", null);
+                        // Top-right to bottom-left
+                        Region diagonal2 =
+                                new Region(region.x(), region.y() + region.h() - 2, region.w(), 2);
+                        highlightRegion(
+                                diagonal2,
+                                config.getColorObject(),
+                                config.getDuration(),
+                                3,
+                                "CROSS",
+                                null);
 
-            } catch (Exception e) {
-                log.warn("Failed to show cross mark: {}", e.getMessage());
-            }
-        });
+                    } catch (Exception e) {
+                        log.warn("Failed to show cross mark: {}", e.getMessage());
+                    }
+                });
     }
 
-    /**
-     * Clears all active highlights immediately.
-     */
+    /** Clears all active highlights immediately. */
     public void clearAllHighlights() {
         synchronized (activeHighlights) {
             for (CompletableFuture<Void> highlightFuture : activeHighlights) {
@@ -548,45 +611,30 @@ public class HighlightManager {
             activeHighlights.clear();
         }
 
-        brobotLogger.log()
-                .observation("Cleared all highlights")
-                .log();
+        brobotLogger.log().observation("Cleared all highlights").log();
     }
 
-    /**
-     * Gets the current configuration.
-     */
+    /** Gets the current configuration. */
     public VisualFeedbackConfig getConfig() {
         return config;
     }
 
     /**
-     * Converts a Color object to a color name string that Sikuli understands.
-     * Sikuli accepts: "red", "green", "blue", "yellow", "cyan", "magenta", "white",
-     * "black", "gray", "orange"
+     * Converts a Color object to a color name string that Sikuli understands. Sikuli accepts:
+     * "red", "green", "blue", "yellow", "cyan", "magenta", "white", "black", "gray", "orange"
      */
     private String getColorName(Color color) {
         // Check for exact matches to common colors
-        if (color.equals(Color.RED))
-            return "red";
-        if (color.equals(Color.GREEN))
-            return "green";
-        if (color.equals(Color.BLUE))
-            return "blue";
-        if (color.equals(Color.YELLOW))
-            return "yellow";
-        if (color.equals(Color.CYAN))
-            return "cyan";
-        if (color.equals(Color.MAGENTA))
-            return "magenta";
-        if (color.equals(Color.WHITE))
-            return "white";
-        if (color.equals(Color.BLACK))
-            return "black";
-        if (color.equals(Color.GRAY))
-            return "gray";
-        if (color.equals(Color.ORANGE))
-            return "orange";
+        if (color.equals(Color.RED)) return "red";
+        if (color.equals(Color.GREEN)) return "green";
+        if (color.equals(Color.BLUE)) return "blue";
+        if (color.equals(Color.YELLOW)) return "yellow";
+        if (color.equals(Color.CYAN)) return "cyan";
+        if (color.equals(Color.MAGENTA)) return "magenta";
+        if (color.equals(Color.WHITE)) return "white";
+        if (color.equals(Color.BLACK)) return "black";
+        if (color.equals(Color.GRAY)) return "gray";
+        if (color.equals(Color.ORANGE)) return "orange";
 
         // For other colors, find the closest match
         int r = color.getRed();
@@ -594,24 +642,15 @@ public class HighlightManager {
         int b = color.getBlue();
 
         // Simple heuristic for color matching
-        if (r > 200 && g < 100 && b < 100)
-            return "red";
-        if (r < 100 && g > 200 && b < 100)
-            return "green";
-        if (r < 100 && g < 100 && b > 200)
-            return "blue";
-        if (r > 200 && g > 200 && b < 100)
-            return "yellow";
-        if (r < 100 && g > 200 && b > 200)
-            return "cyan";
-        if (r > 200 && g < 100 && b > 200)
-            return "magenta";
-        if (r > 200 && g > 150 && b < 100)
-            return "orange";
-        if (r > 180 && g > 180 && b > 180)
-            return "white";
-        if (r < 80 && g < 80 && b < 80)
-            return "black";
+        if (r > 200 && g < 100 && b < 100) return "red";
+        if (r < 100 && g > 200 && b < 100) return "green";
+        if (r < 100 && g < 100 && b > 200) return "blue";
+        if (r > 200 && g > 200 && b < 100) return "yellow";
+        if (r < 100 && g > 200 && b > 200) return "cyan";
+        if (r > 200 && g < 100 && b > 200) return "magenta";
+        if (r > 200 && g > 150 && b < 100) return "orange";
+        if (r > 180 && g > 180 && b > 180) return "white";
+        if (r < 80 && g < 80 && b < 80) return "black";
 
         // Default to gray for anything else
         return "gray";
@@ -619,7 +658,7 @@ public class HighlightManager {
 
     /**
      * Gets the custom highlight color for a match based on its StateImage.
-     * 
+     *
      * @param match the match to get the color for
      * @return the custom color string, or null if no custom color is defined
      */

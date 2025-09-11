@@ -1,52 +1,52 @@
 package io.github.jspinak.brobot.tools.history;
 
-import io.github.jspinak.brobot.model.element.Pattern;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.springframework.stereotype.Component;
+
 import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
 import io.github.jspinak.brobot.util.image.visualization.MatBuilder;
 
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.springframework.stereotype.Component;
-
-import static org.bytedeco.opencv.global.opencv_core.CV_8UC4;
-
 /**
  * Creates visual representations of Brobot states showing expected element positions.
- * <p>
- * This component generates state illustrations by compositing state images at their
- * expected screen locations. It provides a visual map of where Brobot expects to find
- * UI elements, useful for debugging state definitions and understanding application
- * structure.
- * <p>
- * Illustration approach:
+ *
+ * <p>This component generates state illustrations by compositing state images at their expected
+ * screen locations. It provides a visual map of where Brobot expects to find UI elements, useful
+ * for debugging state definitions and understanding application structure.
+ *
+ * <p>Illustration approach:
+ *
  * <ul>
- * <li>Uses the first pattern from each StateImage as the representative</li>
- * <li>Places patterns at their fixed search region locations</li>
- * <li>Composites all patterns into a single visualization</li>
- * <li>Creates a spatial representation of the state's expected layout</li>
+ *   <li>Uses the first pattern from each StateImage as the representative
+ *   <li>Places patterns at their fixed search region locations
+ *   <li>Composites all patterns into a single visualization
+ *   <li>Creates a spatial representation of the state's expected layout
  * </ul>
- * <p>
- * Use cases:
+ *
+ * <p>Use cases:
+ *
  * <ul>
- * <li>Debugging state definitions to verify element positions</li>
- * <li>Documenting expected UI layouts for different application states</li>
- * <li>Visualizing state transitions by comparing illustrations</li>
- * <li>Training and onboarding to understand state structures</li>
+ *   <li>Debugging state definitions to verify element positions
+ *   <li>Documenting expected UI layouts for different application states
+ *   <li>Visualizing state transitions by comparing illustrations
+ *   <li>Training and onboarding to understand state structures
  * </ul>
- * <p>
- * Limitations:
+ *
+ * <p>Limitations:
+ *
  * <ul>
- * <li>Only shows fixed regions, not dynamic search areas</li>
- * <li>Uses first pattern only when multiple patterns exist</li>
- * <li>Requires patterns to have defined regions</li>
- * <li>May have overlapping images if regions overlap</li>
+ *   <li>Only shows fixed regions, not dynamic search areas
+ *   <li>Uses first pattern only when multiple patterns exist
+ *   <li>Requires patterns to have defined regions
+ *   <li>May have overlapping images if regions overlap
  * </ul>
- * <p>
- * Alternative approaches mentioned include using MatchSnapshots for
- * actual found positions rather than expected positions.
+ *
+ * <p>Alternative approaches mentioned include using MatchSnapshots for actual found positions
+ * rather than expected positions.
  *
  * @see State
  * @see StateImage
@@ -64,24 +64,24 @@ public class StateLayoutVisualizer {
 
     /**
      * Creates a composite visualization of a state's expected element layout.
-     * <p>
-     * Builds a visual map by placing each StateImage's first pattern at its
-     * defined search region location. This shows where Brobot expects to find
-     * UI elements when in this state, creating a spatial representation of the
-     * state's structure.
-     * <p>
-     * Processing steps:
+     *
+     * <p>Builds a visual map by placing each StateImage's first pattern at its defined search
+     * region location. This shows where Brobot expects to find UI elements when in this state,
+     * creating a spatial representation of the state's structure.
+     *
+     * <p>Processing steps:
+     *
      * <ol>
-     * <li>Initialize a blank canvas with MatBuilder</li>
-     * <li>Iterate through all StateImages in the state</li>
-     * <li>For each non-empty StateImage, extract the first pattern</li>
-     * <li>If the pattern has a defined region, place it at that location</li>
-     * <li>Build the final composite image</li>
+     *   <li>Initialize a blank canvas with MatBuilder
+     *   <li>Iterate through all StateImages in the state
+     *   <li>For each non-empty StateImage, extract the first pattern
+     *   <li>If the pattern has a defined region, place it at that location
+     *   <li>Build the final composite image
      * </ol>
-     * <p>
-     * Patterns without defined regions are skipped, as they have no fixed
-     * position to display. The resulting illustration may have empty areas
-     * where patterns are undefined or regions don't contain patterns.
+     *
+     * <p>Patterns without defined regions are skipped, as they have no fixed position to display.
+     * The resulting illustration may have empty areas where patterns are undefined or regions don't
+     * contain patterns.
      *
      * @param state the state containing images and their expected positions
      * @return composite Mat showing all patterns at their expected locations
@@ -104,14 +104,13 @@ public class StateLayoutVisualizer {
 
     /**
      * Generates and saves a state illustration to a file.
-     * <p>
-     * Convenience method that combines illustration generation and file writing.
-     * The illustration shows all state elements at their expected positions,
-     * saved with a unique filename to prevent overwrites.
-     * <p>
-     * The unique filename generation ensures multiple illustrations can be
-     * saved without conflicts, useful for comparing states over time or
-     * across different application versions.
+     *
+     * <p>Convenience method that combines illustration generation and file writing. The
+     * illustration shows all state elements at their expected positions, saved with a unique
+     * filename to prevent overwrites.
+     *
+     * <p>The unique filename generation ensures multiple illustrations can be saved without
+     * conflicts, useful for comparing states over time or across different application versions.
      *
      * @param state the state to illustrate and save
      * @param filename base filename for the illustration (will be made unique)

@@ -1,41 +1,40 @@
 package io.github.jspinak.brobot.action.result;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.github.jspinak.brobot.model.element.Text;
-import io.github.jspinak.brobot.model.match.Match;
-import lombok.Data;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import io.github.jspinak.brobot.model.element.Text;
+import io.github.jspinak.brobot.model.match.Match;
+
+import lombok.Data;
+
 /**
- * Manages text extraction results from action execution.
- * Handles accumulated text, selected text, and match-specific text.
- * 
- * This class encapsulates all text-related functionality that was
- * previously embedded in ActionResult.
- * 
+ * Manages text extraction results from action execution. Handles accumulated text, selected text,
+ * and match-specific text.
+ *
+ * <p>This class encapsulates all text-related functionality that was previously embedded in
+ * ActionResult.
+ *
  * @since 2.0
  */
 @Data
 public class TextExtractionResult {
     private Text accumulatedText;
     private String selectedText;
-    
-    // Map<Match, String> cannot be properly serialized by Jackson since Match 
+
+    // Map<Match, String> cannot be properly serialized by Jackson since Match
     // doesn't have a suitable key serializer. Mark as ignored for JSON.
-    @JsonIgnore
-    private Map<Match, String> matchTextMap = new HashMap<>();
-    
-    /**
-     * Creates an empty TextExtractionResult.
-     */
+    @JsonIgnore private Map<Match, String> matchTextMap = new HashMap<>();
+
+    /** Creates an empty TextExtractionResult. */
     public TextExtractionResult() {}
-    
+
     /**
      * Adds text to the accumulated text collection.
-     * 
+     *
      * @param text Text to add
      */
     public void addText(String text) {
@@ -46,10 +45,10 @@ public class TextExtractionResult {
             accumulatedText.add(text);
         }
     }
-    
+
     /**
      * Adds text associated with a specific match.
-     * 
+     *
      * @param match The match that produced the text
      * @param text The extracted text
      */
@@ -59,19 +58,19 @@ public class TextExtractionResult {
             addText(text);
         }
     }
-    
+
     /**
      * Sets the selected/highlighted text.
-     * 
+     *
      * @param text The selected text
      */
     public void setSelectedText(String text) {
         this.selectedText = text;
     }
-    
+
     /**
      * Gets all accumulated text as a single string.
-     * 
+     *
      * @return Combined text with space separation
      */
     public String getCombinedText() {
@@ -80,10 +79,10 @@ public class TextExtractionResult {
         }
         return String.join(" ", accumulatedText.getAll());
     }
-    
+
     /**
      * Gets all accumulated text as individual lines.
-     * 
+     *
      * @return Text as list of strings
      */
     public java.util.List<String> getTextLines() {
@@ -92,20 +91,20 @@ public class TextExtractionResult {
         }
         return accumulatedText.getAll();
     }
-    
+
     /**
      * Gets text extracted from a specific match.
-     * 
+     *
      * @param match The match to get text for
      * @return The text from that match, or empty string if none
      */
     public String getTextFromMatch(Match match) {
         return matchTextMap.getOrDefault(match, "");
     }
-    
+
     /**
      * Merges text results from another instance.
-     * 
+     *
      * @param other The TextExtractionResult to merge
      */
     public void merge(TextExtractionResult other) {
@@ -118,61 +117,60 @@ public class TextExtractionResult {
             if (other.accumulatedText != null) {
                 accumulatedText.addAll(other.accumulatedText);
             }
-            
+
             // Merge match text maps
             if (other.matchTextMap != null) {
                 matchTextMap.putAll(other.matchTextMap);
             }
-            
+
             // If this has no selected text but other does, use other's
-            if ((selectedText == null || selectedText.isEmpty()) && 
-                other.selectedText != null && !other.selectedText.isEmpty()) {
+            if ((selectedText == null || selectedText.isEmpty())
+                    && other.selectedText != null
+                    && !other.selectedText.isEmpty()) {
                 selectedText = other.selectedText;
             }
         }
     }
-    
+
     /**
      * Checks if any text has been extracted.
-     * 
+     *
      * @return true if text exists
      */
     public boolean hasText() {
-        return (accumulatedText != null && !accumulatedText.isEmpty()) || 
-               (selectedText != null && !selectedText.isEmpty()) || 
-               !matchTextMap.isEmpty();
+        return (accumulatedText != null && !accumulatedText.isEmpty())
+                || (selectedText != null && !selectedText.isEmpty())
+                || !matchTextMap.isEmpty();
     }
-    
+
     /**
      * Checks if selected text exists.
-     * 
+     *
      * @return true if selected text is not empty
      */
     public boolean hasSelectedText() {
         return selectedText != null && !selectedText.isEmpty();
     }
-    
+
     /**
      * Gets the total number of text segments.
-     * 
+     *
      * @return Count of text segments
      */
     public int getTextCount() {
         return accumulatedText != null ? accumulatedText.size() : 0;
     }
-    
-    /**
-     * Clears all text data.
-     */
+
+    /** Clears all text data. */
     public void clear() {
         accumulatedText = null;
         selectedText = null;
         matchTextMap.clear();
     }
-    
+
     /**
      * Gets all unique text values from matches.
-     * 
+     *
      * @return Set of unique text values
      */
     public java.util.Set<String> getUniqueMatchTexts() {
@@ -180,23 +178,23 @@ public class TextExtractionResult {
                 .filter(text -> !text.isEmpty())
                 .collect(Collectors.toSet());
     }
-    
+
     /**
      * Formats the text results as a string summary.
-     * 
+     *
      * @return Formatted text summary
      */
     public String format() {
         StringBuilder sb = new StringBuilder();
-        
+
         if (hasSelectedText()) {
             sb.append("Selected: \"").append(selectedText).append("\"");
         }
-        
+
         if (accumulatedText != null && !accumulatedText.isEmpty()) {
             if (sb.length() > 0) sb.append(", ");
             sb.append("Extracted: ").append(getTextCount()).append(" segments");
-            
+
             String combined = getCombinedText();
             if (combined.length() <= 100) {
                 sb.append(" (\"").append(combined).append("\")");
@@ -204,15 +202,15 @@ public class TextExtractionResult {
                 sb.append(" (\"").append(combined.substring(0, 97)).append("...\")");
             }
         }
-        
+
         if (!matchTextMap.isEmpty()) {
             if (sb.length() > 0) sb.append(", ");
             sb.append("Match texts: ").append(matchTextMap.size());
         }
-        
+
         return sb.length() > 0 ? sb.toString() : "No text extracted";
     }
-    
+
     @Override
     public String toString() {
         return format();

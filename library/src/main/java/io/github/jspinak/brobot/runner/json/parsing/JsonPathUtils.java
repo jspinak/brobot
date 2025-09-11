@@ -1,13 +1,5 @@
 package io.github.jspinak.brobot.runner.json.parsing;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
-
-import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -15,27 +7,37 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+
 /**
  * Provides utilities for navigating and extracting data from JSON structures using path notation.
- * <p>
- * This class simplifies working with complex JSON structures by providing type-safe accessors
- * and path-based navigation. It supports dot notation for accessing nested properties and
- * numeric indices for array elements.
- * <p>
- * Path notation examples:
+ *
+ * <p>This class simplifies working with complex JSON structures by providing type-safe accessors
+ * and path-based navigation. It supports dot notation for accessing nested properties and numeric
+ * indices for array elements.
+ *
+ * <p>Path notation examples:
+ *
  * <ul>
- * <li>"field" - Access a top-level field</li>
- * <li>"parent.child" - Access a nested field</li>
- * <li>"array.0" - Access the first element of an array</li>
- * <li>"parent.array.2.field" - Complex nested path with array access</li>
+ *   <li>"field" - Access a top-level field
+ *   <li>"parent.child" - Access a nested field
+ *   <li>"array.0" - Access the first element of an array
+ *   <li>"parent.array.2.field" - Complex nested path with array access
  * </ul>
- * <p>
- * The class provides:
+ *
+ * <p>The class provides:
+ *
  * <ul>
- * <li>Type-safe getters for primitives (string, int, boolean)</li>
- * <li>Optional variants for graceful handling of missing values</li>
- * <li>Collection utilities for working with arrays</li>
- * <li>Path existence checking</li>
+ *   <li>Type-safe getters for primitives (string, int, boolean)
+ *   <li>Optional variants for graceful handling of missing values
+ *   <li>Collection utilities for working with arrays
+ *   <li>Path existence checking
  * </ul>
  *
  * @see JsonNode
@@ -46,9 +48,9 @@ public class JsonPathUtils {
 
     /**
      * Retrieves a string value from a JSON path.
-     * <p>
-     * The path must point to a text node. If the node exists but is not textual
-     * (e.g., number, boolean, object, array), a ConfigurationException is thrown.
+     *
+     * <p>The path must point to a text node. If the node exists but is not textual (e.g., number,
+     * boolean, object, array), a ConfigurationException is thrown.
      *
      * @param root The root JSON node to start navigation from
      * @param path The dot-notation path to the value (e.g., "config.name")
@@ -65,10 +67,9 @@ public class JsonPathUtils {
 
     /**
      * Retrieves an optional string value from a JSON path.
-     * <p>
-     * This method provides a null-safe way to access string values. If the path
-     * doesn't exist or the value is not a string, an empty Optional is returned
-     * instead of throwing an exception.
+     *
+     * <p>This method provides a null-safe way to access string values. If the path doesn't exist or
+     * the value is not a string, an empty Optional is returned instead of throwing an exception.
      *
      * @param root The root JSON node to start navigation from
      * @param path The dot-notation path to the value
@@ -146,19 +147,21 @@ public class JsonPathUtils {
 
     /**
      * Navigates to and retrieves a JSON node at the specified path.
-     * <p>
-     * This is the core navigation method that supports:
+     *
+     * <p>This is the core navigation method that supports:
+     *
      * <ul>
-     * <li>Dot notation for object field access</li>
-     * <li>Numeric indices for array element access</li>
-     * <li>Mixed paths combining objects and arrays</li>
+     *   <li>Dot notation for object field access
+     *   <li>Numeric indices for array element access
+     *   <li>Mixed paths combining objects and arrays
      * </ul>
-     * <p>
-     * Examples:
+     *
+     * <p>Examples:
+     *
      * <ul>
-     * <li>"field" - Returns root.field</li>
-     * <li>"parent.child" - Returns root.parent.child</li>
-     * <li>"items.0.name" - Returns root.items[0].name</li>
+     *   <li>"field" - Returns root.field
+     *   <li>"parent.child" - Returns root.parent.child
+     *   <li>"items.0.name" - Returns root.items[0].name
      * </ul>
      *
      * @param root The root JSON node to start navigation from
@@ -177,21 +180,25 @@ public class JsonPathUtils {
         for (String part : parts) {
             if (current.isObject()) {
                 if (!current.has(part)) {
-                    throw new ConfigurationException("Path '" + path + "' does not exist: missing field '" + part + "'");
+                    throw new ConfigurationException(
+                            "Path '" + path + "' does not exist: missing field '" + part + "'");
                 }
                 current = current.get(part);
             } else if (current.isArray()) {
                 try {
                     int index = Integer.parseInt(part);
                     if (index < 0 || index >= current.size()) {
-                        throw new ConfigurationException("Path '" + path + "' index out of bounds: " + index);
+                        throw new ConfigurationException(
+                                "Path '" + path + "' index out of bounds: " + index);
                     }
                     current = current.get(index);
                 } catch (NumberFormatException e) {
-                    throw new ConfigurationException("Path '" + path + "' invalid array index: " + part);
+                    throw new ConfigurationException(
+                            "Path '" + path + "' invalid array index: " + part);
                 }
             } else {
-                throw new ConfigurationException("Path '" + path + "' cannot be navigated at '" + part + "'");
+                throw new ConfigurationException(
+                        "Path '" + path + "' cannot be navigated at '" + part + "'");
             }
         }
 
@@ -262,9 +269,9 @@ public class JsonPathUtils {
 
     /**
      * Checks if a path exists in the JSON structure.
-     * <p>
-     * This method provides a safe way to check path existence without throwing
-     * exceptions. It's useful for conditional logic based on JSON structure.
+     *
+     * <p>This method provides a safe way to check path existence without throwing exceptions. It's
+     * useful for conditional logic based on JSON structure.
      *
      * @param root The root JSON node to check
      * @param path The dot-notation path to verify
@@ -281,16 +288,17 @@ public class JsonPathUtils {
 
     /**
      * Iterates over each element in a JSON array, applying the given consumer.
-     * <p>
-     * This method provides a functional approach to array processing, allowing
-     * side effects for each element without collecting results.
+     *
+     * <p>This method provides a functional approach to array processing, allowing side effects for
+     * each element without collecting results.
      *
      * @param root The root JSON node containing the array
      * @param arrayPath The dot-notation path to the array
      * @param consumer The operation to perform on each array element
      * @throws ConfigurationException if the path doesn't exist or doesn't point to an array
      */
-    public void forEachInArray(JsonNode root, String arrayPath, Consumer<JsonNode> consumer) throws ConfigurationException {
+    public void forEachInArray(JsonNode root, String arrayPath, Consumer<JsonNode> consumer)
+            throws ConfigurationException {
         ArrayNode array = getArray(root, arrayPath);
         for (JsonNode element : array) {
             consumer.accept(element);
@@ -299,10 +307,10 @@ public class JsonPathUtils {
 
     /**
      * Transforms each element in a JSON array into a list of typed objects.
-     * <p>
-     * This method provides a functional transformation from JSON array elements
-     * to a strongly-typed Java list. The mapper function defines how each
-     * JsonNode element is converted to the target type.
+     *
+     * <p>This method provides a functional transformation from JSON array elements to a
+     * strongly-typed Java list. The mapper function defines how each JsonNode element is converted
+     * to the target type.
      *
      * @param <T> The target type for list elements
      * @param root The root JSON node containing the array
@@ -311,7 +319,8 @@ public class JsonPathUtils {
      * @return A list containing the transformed elements
      * @throws ConfigurationException if the path doesn't exist or doesn't point to an array
      */
-    public <T> List<T> mapArray(JsonNode root, String arrayPath, Function<JsonNode, T> mapper) throws ConfigurationException {
+    public <T> List<T> mapArray(JsonNode root, String arrayPath, Function<JsonNode, T> mapper)
+            throws ConfigurationException {
         ArrayNode array = getArray(root, arrayPath);
         List<T> result = new ArrayList<>();
 
@@ -324,10 +333,10 @@ public class JsonPathUtils {
 
     /**
      * Finds the first element in a JSON array that matches the given predicate.
-     * <p>
-     * This method provides a functional search mechanism for JSON arrays,
-     * returning the first element that satisfies the predicate condition.
-     * The search stops as soon as a match is found (short-circuit evaluation).
+     *
+     * <p>This method provides a functional search mechanism for JSON arrays, returning the first
+     * element that satisfies the predicate condition. The search stops as soon as a match is found
+     * (short-circuit evaluation).
      *
      * @param root The root JSON node containing the array
      * @param arrayPath The dot-notation path to the array
@@ -335,7 +344,9 @@ public class JsonPathUtils {
      * @return An Optional containing the first matching element, or empty if no matches
      * @throws ConfigurationException if the path doesn't exist or doesn't point to an array
      */
-    public Optional<JsonNode> findInArray(JsonNode root, String arrayPath, Function<JsonNode, Boolean> predicate) throws ConfigurationException {
+    public Optional<JsonNode> findInArray(
+            JsonNode root, String arrayPath, Function<JsonNode, Boolean> predicate)
+            throws ConfigurationException {
         ArrayNode array = getArray(root, arrayPath);
 
         for (JsonNode element : array) {
@@ -349,17 +360,18 @@ public class JsonPathUtils {
 
     /**
      * Retrieves all field names from a JSON object at the specified path.
-     * <p>
-     * This method is useful for dynamic JSON processing where field names
-     * are not known at compile time. It returns the names in iteration order,
-     * which may not be the same as the order in the original JSON text.
+     *
+     * <p>This method is useful for dynamic JSON processing where field names are not known at
+     * compile time. It returns the names in iteration order, which may not be the same as the order
+     * in the original JSON text.
      *
      * @param root The root JSON node to navigate from
      * @param objectPath The dot-notation path to the object (empty for root)
      * @return A list of field names present in the object
      * @throws ConfigurationException if the path doesn't exist or doesn't point to an object
      */
-    public List<String> getFieldNames(JsonNode root, String objectPath) throws ConfigurationException {
+    public List<String> getFieldNames(JsonNode root, String objectPath)
+            throws ConfigurationException {
         JsonNode node = getNode(root, objectPath);
         if (!node.isObject()) {
             throw new ConfigurationException("Value at path '" + objectPath + "' is not an object");

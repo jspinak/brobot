@@ -1,32 +1,32 @@
 package io.github.jspinak.brobot.test;
 
-import io.github.jspinak.brobot.config.core.BrobotConfiguration;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
-import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
-import io.github.jspinak.brobot.startup.orchestration.StartupConfiguration;
-import io.github.jspinak.brobot.tools.logging.console.ConsoleActionConfig;
-import io.github.jspinak.brobot.tools.logging.visual.VisualFeedbackConfig;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
+import io.github.jspinak.brobot.config.core.BrobotConfiguration;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
+import io.github.jspinak.brobot.startup.orchestration.StartupConfiguration;
+import io.github.jspinak.brobot.tools.logging.console.ConsoleActionConfig;
+import io.github.jspinak.brobot.tools.logging.visual.VisualFeedbackConfig;
+
 /**
- * Explicitly configures @ConfigurationProperties beans for tests.
- * This prevents Spring Boot from auto-creating duplicate beans.
- * 
- * Note: We don't include LoggingVerbosityConfig here as it's already
- * enabled by ActionLoggingConfig which is imported via BrobotConfig.
+ * Explicitly configures @ConfigurationProperties beans for tests. This prevents Spring Boot from
+ * auto-creating duplicate beans.
+ *
+ * <p>Note: We don't include LoggingVerbosityConfig here as it's already enabled by
+ * ActionLoggingConfig which is imported via BrobotConfig.
  */
 @Configuration
 @EnableConfigurationProperties({
-        // LoggingVerbosityConfig is enabled by ActionLoggingConfig
-        // VisualFeedbackConfig is enabled by ActionLoggingConfig
-        BrobotConfiguration.class,
-        BrobotProperties.class,
-        StartupConfiguration.class
-// ConsoleActionConfig is enabled by ActionLoggingConfig
-// GuiAccessConfig is handled by MockGuiAccessConfig
+    // LoggingVerbosityConfig is enabled by ActionLoggingConfig
+    // VisualFeedbackConfig is enabled by ActionLoggingConfig
+    BrobotConfiguration.class,
+    BrobotProperties.class,
+    StartupConfiguration.class
+    // ConsoleActionConfig is enabled by ActionLoggingConfig
+    // GuiAccessConfig is handled by MockGuiAccessConfig
 })
 public class TestConfigurationPropertiesConfig {
 
