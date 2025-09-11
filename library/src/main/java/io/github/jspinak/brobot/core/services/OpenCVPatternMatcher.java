@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.core.services;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import org.sikuli.script.Finder;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.awt.image.BufferedImage;
@@ -29,6 +30,7 @@ import java.util.List;
  * @since 2.0.0
  */
 @Component
+@Primary
 public class OpenCVPatternMatcher implements PatternMatcher {
     
     @Override

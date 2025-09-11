@@ -196,3 +196,4 @@ library/src/test/resources/patterns/test_save.json
 **/test_save.json
 **/*test_save*
 library-test/disabled-classes.txt
+**/test_save.json
