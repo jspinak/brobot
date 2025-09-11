@@ -2,8 +2,8 @@ package io.github.jspinak.brobot.action.result;
 
 import io.github.jspinak.brobot.action.result.TimingData.TimeSegment;
 import io.github.jspinak.brobot.test.ConcurrentTestBase;
-import io.github.jspinak.brobot.test.annotations.FlakyTest;
-import io.github.jspinak.brobot.test.annotations.FlakyTest.FlakyCause;
+import io.github.jspinak.brobot.test.annotations.Flaky;
+import io.github.jspinak.brobot.test.annotations.Flaky.FlakyCause;
 import io.github.jspinak.brobot.test.utils.ConcurrentTestHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -100,7 +100,7 @@ public class TimingDataTest extends ConcurrentTestBase {
         
         @Test
         @DisplayName("Stop method sets end time and calculates duration")
-        @FlakyTest(reason = "Timing measurement accuracy", cause = FlakyCause.TIMING)
+        @Flaky(reason = "Timing measurement accuracy", cause = FlakyCause.TIMING)
         public void testStop() throws Exception {
             timingData = new TimingData();
             // Use executeAsync for controlled timing
@@ -152,7 +152,7 @@ public class TimingDataTest extends ConcurrentTestBase {
         
         @Test
         @DisplayName("Get elapsed duration while running")
-        @FlakyTest(reason = "Timing measurement while running", cause = FlakyCause.TIMING)
+        @Flaky(reason = "Timing measurement while running", cause = FlakyCause.TIMING)
         @Timeout(value = 5, unit = TimeUnit.SECONDS)
         public void testElapsedWhileRunning() throws Exception {
             timingData = new TimingData();
@@ -173,7 +173,7 @@ public class TimingDataTest extends ConcurrentTestBase {
         
         @Test
         @DisplayName("Get elapsed duration after stopping")
-        @FlakyTest(reason = "Timing measurement after stop", cause = FlakyCause.TIMING)
+        @Flaky(reason = "Timing measurement after stop", cause = FlakyCause.TIMING)
         public void testElapsedAfterStopping() throws Exception {
             timingData = new TimingData();
             waitFor(() -> false, Duration.ofMillis(100));
@@ -200,7 +200,7 @@ public class TimingDataTest extends ConcurrentTestBase {
         
         @Test
         @DisplayName("Get execution time in milliseconds")
-        @FlakyTest(reason = "Execution time measurement", cause = FlakyCause.TIMING)
+        @Flaky(reason = "Execution time measurement", cause = FlakyCause.TIMING)
         public void testExecutionTimeMs() throws Exception {
             timingData = new TimingData();
             // Use controlled timing
@@ -218,7 +218,7 @@ public class TimingDataTest extends ConcurrentTestBase {
         
         @Test
         @DisplayName("Get execution time in seconds")
-        @FlakyTest(reason = "Long execution time measurement", cause = FlakyCause.TIMING)
+        @Flaky(reason = "Long execution time measurement", cause = FlakyCause.TIMING)
         @Timeout(value = 5, unit = TimeUnit.SECONDS)
         public void testExecutionTimeSeconds() throws Exception {
             timingData = new TimingData();
@@ -331,7 +331,7 @@ public class TimingDataTest extends ConcurrentTestBase {
         
         @Test
         @DisplayName("Instant start and end are set correctly")
-        @FlakyTest(reason = "Instant timing verification", cause = FlakyCause.TIMING)
+        @Flaky(reason = "Instant timing verification", cause = FlakyCause.TIMING)
         public void testInstantTiming() throws Exception {
             Instant beforeStart = Instant.now();
             timingData = new TimingData();
@@ -351,7 +351,7 @@ public class TimingDataTest extends ConcurrentTestBase {
         
         @Test
         @DisplayName("Calculate elapsed using Instant when available")
-        @FlakyTest(reason = "Instant-based elapsed calculation", cause = FlakyCause.TIMING)
+        @Flaky(reason = "Instant-based elapsed calculation", cause = FlakyCause.TIMING)
         public void testElapsedWithInstant() throws Exception {
             timingData = new TimingData();
             
@@ -399,7 +399,7 @@ public class TimingDataTest extends ConcurrentTestBase {
         @ParameterizedTest
         @ValueSource(longs = {0, 10, 50, 100, 500})
         @DisplayName("Accurate timing for various durations")
-        @FlakyTest(reason = "Parameterized timing accuracy test", cause = FlakyCause.TIMING)
+        @Flaky(reason = "Parameterized timing accuracy test", cause = FlakyCause.TIMING)
         @Timeout(value = 10, unit = TimeUnit.SECONDS)
         public void testAccurateTiming(long sleepMs) throws Exception {
             timingData = new TimingData();
@@ -426,7 +426,7 @@ public class TimingDataTest extends ConcurrentTestBase {
         
         @Test
         @DisplayName("Track multi-phase operation timing")
-        @FlakyTest(reason = "Multi-phase timing tracking", cause = FlakyCause.TIMING)
+        @Flaky(reason = "Multi-phase timing tracking", cause = FlakyCause.TIMING)
         @Timeout(value = 5, unit = TimeUnit.SECONDS)
         public void testMultiPhaseOperation() throws Exception {
             timingData = new TimingData();

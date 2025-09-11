@@ -21,7 +21,7 @@ import java.lang.annotation.Target;
  * Example usage:
  * <pre>
  * {@code
- * @UnitTest
+ * @Unit
  * class MyServiceTest {
  *     @Test
  *     void testBusinessLogic() {
@@ -35,5 +35,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Test
 @Tag("unit")
-public @interface UnitTest {
+public @interface Unit {
 }

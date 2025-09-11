@@ -20,8 +20,8 @@ import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
  * Can be combined with other categories:
  * <pre>
  * {@code
- * @IntegrationTest
- * @SlowTest
+ * @Integration
+ * @Slow
  * @DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
 class DatabaseIntegrationTest {
  *     @Test
@@ -36,5 +36,5 @@ class DatabaseIntegrationTest {
 @Retention(RetentionPolicy.RUNTIME)
 @Test
 @Tag("slow")
-public @interface SlowTest {
+public @interface Slow {
 }

@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.test.extensions;
 
-import io.github.jspinak.brobot.test.annotations.FlakyTest;
+import io.github.jspinak.brobot.test.annotations.Flaky;
 import org.junit.jupiter.api.extension.*;
 
 import java.lang.reflect.Method;
@@ -8,7 +8,7 @@ import java.util.Optional;
 
 /**
  * JUnit 5 extension that provides retry capability for flaky tests.
- * Tests annotated with @FlakyTest will be retried the specified number of times.
+ * Tests annotated with @Flaky will be retried the specified number of times.
  */
 public class RetryExtension implements TestExecutionExceptionHandler, BeforeEachCallback {
     
@@ -23,7 +23,7 @@ public class RetryExtension implements TestExecutionExceptionHandler, BeforeEach
         // Check for FlakyTest annotation and set max retries
         Optional<Method> testMethod = context.getTestMethod();
         if (testMethod.isPresent()) {
-            FlakyTest flakyTest = testMethod.get().getAnnotation(FlakyTest.class);
+            Flaky flakyTest = testMethod.get().getAnnotation(Flaky.class);
             if (flakyTest != null) {
                 getStore(context).put(MAX_RETRIES_KEY, flakyTest.retries());
             } else {

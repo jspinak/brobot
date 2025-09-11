@@ -2,8 +2,8 @@ package io.github.jspinak.brobot.util.file;
 
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.test.ConcurrentTestBase;
-import io.github.jspinak.brobot.test.annotations.FlakyTest;
-import io.github.jspinak.brobot.test.annotations.FlakyTest.FlakyCause;
+import io.github.jspinak.brobot.test.annotations.Flaky;
+import io.github.jspinak.brobot.test.annotations.Flaky.FlakyCause;
 import io.github.jspinak.brobot.test.utils.ConcurrentTestHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -482,7 +482,7 @@ public class RecorderSaveToFileTest extends ConcurrentTestBase {
 
         @Test
         @DisplayName("Concurrent image saves")
-        @FlakyTest(reason = "File I/O timing in concurrent operations", cause = FlakyCause.FILE_SYSTEM)
+        @Flaky(reason = "File I/O timing in concurrent operations", cause = FlakyCause.FILE_SYSTEM)
         @Timeout(value = 10, unit = TimeUnit.SECONDS)
         public void testConcurrentImageSaves() throws InterruptedException {
             BufferedImage img = new BufferedImage(50, 50, BufferedImage.TYPE_INT_RGB);

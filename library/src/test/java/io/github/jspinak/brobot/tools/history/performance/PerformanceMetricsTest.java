@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.tools.history.performance;
 
 import io.github.jspinak.brobot.test.ConcurrentTestBase;
-import io.github.jspinak.brobot.test.annotations.FlakyTest;
-import io.github.jspinak.brobot.test.annotations.FlakyTest.FlakyCause;
+import io.github.jspinak.brobot.test.annotations.Flaky;
+import io.github.jspinak.brobot.test.annotations.Flaky.FlakyCause;
 import io.github.jspinak.brobot.test.utils.ConcurrentTestHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -177,7 +177,7 @@ public class PerformanceMetricsTest extends ConcurrentTestBase {
         
         @Test
         @DisplayName("Should calculate throughput")
-        @FlakyTest(reason = "Throughput calculation timing", cause = FlakyCause.TIMING)
+        @Flaky(reason = "Throughput calculation timing", cause = FlakyCause.TIMING)
         @Timeout(value = 5, unit = TimeUnit.SECONDS)
         public void testThroughputCalculation() throws Exception {
             // Record some illustrations with controlled timing
@@ -267,7 +267,7 @@ public class PerformanceMetricsTest extends ConcurrentTestBase {
         
         @Test
         @DisplayName("Should track uptime duration")
-        @FlakyTest(reason = "Uptime duration measurement", cause = FlakyCause.TIMING)
+        @Flaky(reason = "Uptime duration measurement", cause = FlakyCause.TIMING)
         public void testUptimeDuration() throws Exception {
             // Wait until uptime is at least 100ms
             boolean success = waitFor(() -> metrics.getTotalUptime().toMillis() >= 100, 
@@ -279,7 +279,7 @@ public class PerformanceMetricsTest extends ConcurrentTestBase {
         
         @Test
         @DisplayName("Should track time since last illustration")
-        @FlakyTest(reason = "Time since last illustration tracking", cause = FlakyCause.TIMING)
+        @Flaky(reason = "Time since last illustration tracking", cause = FlakyCause.TIMING)
         @Timeout(value = 5, unit = TimeUnit.SECONDS)
         public void testTimeSinceLastIllustration() throws Exception {
             metrics.recordIllustration(100L, 10L, true);

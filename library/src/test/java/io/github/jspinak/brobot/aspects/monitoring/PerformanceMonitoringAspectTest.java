@@ -5,8 +5,8 @@ import io.github.jspinak.brobot.logging.unified.LogBuilder;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
-import io.github.jspinak.brobot.test.annotations.FlakyTest;
-import io.github.jspinak.brobot.test.annotations.FlakyTest.FlakyCause;
+import io.github.jspinak.brobot.test.annotations.Flaky;
+import io.github.jspinak.brobot.test.annotations.Flaky.FlakyCause;
 import io.github.jspinak.brobot.test.utils.ConcurrentTestHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -322,7 +322,7 @@ public class PerformanceMonitoringAspectTest extends BrobotTestBase {
     }
 
     @Test
-    @FlakyTest(reason = "Concurrent performance monitoring", cause = FlakyCause.CONCURRENCY)
+    @Flaky(reason = "Concurrent performance monitoring", cause = FlakyCause.CONCURRENCY)
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testConcurrentExecution() throws Throwable {
         // Arrange

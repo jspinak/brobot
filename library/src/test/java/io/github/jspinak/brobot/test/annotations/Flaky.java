@@ -21,7 +21,7 @@ import java.lang.annotation.Target;
 @Tag("flaky")
 @EnabledIfSystemProperty(named = "runFlakyTests", matches = "true", 
     disabledReason = "Flaky test - run with -DrunFlakyTests=true")
-public @interface FlakyTest {
+public @interface Flaky {
     
     /**
      * Reason why this test is flaky.

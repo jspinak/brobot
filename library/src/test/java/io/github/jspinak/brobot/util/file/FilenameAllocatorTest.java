@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.util.file;
 
 import io.github.jspinak.brobot.test.ConcurrentTestBase;
-import io.github.jspinak.brobot.test.annotations.FlakyTest;
-import io.github.jspinak.brobot.test.annotations.FlakyTest.FlakyCause;
+import io.github.jspinak.brobot.test.annotations.Flaky;
+import io.github.jspinak.brobot.test.annotations.Flaky.FlakyCause;
 import io.github.jspinak.brobot.test.utils.ConcurrentTestHelper;
 import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
 import org.junit.jupiter.api.BeforeEach;
@@ -398,7 +398,7 @@ public class FilenameAllocatorTest extends ConcurrentTestBase {
         
         @Test
         @DisplayName("Concurrent reservations may cause issues")
-        @FlakyTest(reason = "Race conditions in concurrent filename allocation", cause = FlakyCause.CONCURRENCY)
+        @Flaky(reason = "Race conditions in concurrent filename allocation", cause = FlakyCause.CONCURRENCY)
         @Timeout(value = 10, unit = TimeUnit.SECONDS)
         public void testConcurrentReservations() throws Exception {
             when(mockImageUtils.fileExists(anyString())).thenReturn(false);
