@@ -1,6 +1,11 @@
 package io.github.jspinak.brobot.exception;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -10,15 +15,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.stream.Stream;
-
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
- * Comprehensive tests for ConfigurationException.
- * Achieves 100% coverage of all constructors and methods.
+ * Comprehensive tests for ConfigurationException. Achieves 100% coverage of all constructors and
+ * methods.
  */
 @DisplayName("ConfigurationException Tests")
 public class BrobotConfigurationExceptionTest extends BrobotTestBase {
@@ -28,10 +29,10 @@ public class BrobotConfigurationExceptionTest extends BrobotTestBase {
     void testExceptionWithMessage() {
         // Given
         String message = "Invalid configuration detected";
-        
+
         // When
         ConfigurationException exception = new ConfigurationException(message);
-        
+
         // Then
         assertEquals(message, exception.getMessage());
         assertNull(exception.getConfigurationItem());
@@ -44,13 +45,15 @@ public class BrobotConfigurationExceptionTest extends BrobotTestBase {
         // Given
         String configItem = "defaultTimeout";
         String message = "Value must be positive";
-        
+
         // When
         ConfigurationException exception = new ConfigurationException(configItem, message);
-        
+
         // Then
         assertEquals(configItem, exception.getConfigurationItem());
-        assertEquals("Configuration error in 'defaultTimeout': Value must be positive", exception.getMessage());
+        assertEquals(
+                "Configuration error in 'defaultTimeout': Value must be positive",
+                exception.getMessage());
         assertNull(exception.getCause());
     }
 
@@ -60,10 +63,10 @@ public class BrobotConfigurationExceptionTest extends BrobotTestBase {
         // Given
         String message = "Failed to load configuration file";
         IOException cause = new IOException("File not found");
-        
+
         // When
         ConfigurationException exception = new ConfigurationException(message, cause);
-        
+
         // Then
         assertEquals(message, exception.getMessage());
         assertNull(exception.getConfigurationItem());
@@ -73,17 +76,19 @@ public class BrobotConfigurationExceptionTest extends BrobotTestBase {
 
     @ParameterizedTest
     @CsvSource({
-        "similarity, Must be between 0.0 and 1.0, Configuration error in 'similarity': Must be between 0.0 and 1.0",
+        "similarity, Must be between 0.0 and 1.0, Configuration error in 'similarity': Must be"
+                + " between 0.0 and 1.0",
         "timeout, Cannot be negative, Configuration error in 'timeout': Cannot be negative",
         "retryCount, Must be at least 1, Configuration error in 'retryCount': Must be at least 1",
         "clickDelay, Invalid format, Configuration error in 'clickDelay': Invalid format",
         "mockMode, Not a boolean value, Configuration error in 'mockMode': Not a boolean value"
     })
     @DisplayName("Should format message correctly for various configuration items")
-    void testMessageFormattingWithItems(String configItem, String message, String expectedFullMessage) {
+    void testMessageFormattingWithItems(
+            String configItem, String message, String expectedFullMessage) {
         // When
         ConfigurationException exception = new ConfigurationException(configItem, message);
-        
+
         // Then
         assertEquals(configItem, exception.getConfigurationItem());
         assertEquals(expectedFullMessage, exception.getMessage());
@@ -91,13 +96,21 @@ public class BrobotConfigurationExceptionTest extends BrobotTestBase {
 
     @ParameterizedTest
     @NullAndEmptySource
-    @ValueSource(strings = {" ", "\t", "\n", "Simple message", "Message with special: @#$%", 
-                            "Very long configuration error message that provides detailed information about what went wrong"})
+    @ValueSource(
+            strings = {
+                " ",
+                "\t",
+                "\n",
+                "Simple message",
+                "Message with special: @#$%",
+                "Very long configuration error message that provides detailed information about"
+                        + " what went wrong"
+            })
     @DisplayName("Should handle various message formats")
     void testVariousMessageFormats(String message) {
         // When
         ConfigurationException exception = new ConfigurationException(message);
-        
+
         // Then
         assertEquals(message, exception.getMessage());
         assertNull(exception.getConfigurationItem());
@@ -108,7 +121,7 @@ public class BrobotConfigurationExceptionTest extends BrobotTestBase {
     void testNullConfigItem() {
         // When
         ConfigurationException exception = new ConfigurationException(null, "Error message");
-        
+
         // Then
         assertNull(exception.getConfigurationItem());
         assertEquals("Configuration error in 'null': Error message", exception.getMessage());
@@ -119,10 +132,10 @@ public class BrobotConfigurationExceptionTest extends BrobotTestBase {
     void testNullMessageWithItem() {
         // Given
         String configItem = "testItem";
-        
+
         // When
         ConfigurationException exception = new ConfigurationException(configItem, (String) null);
-        
+
         // Then
         assertEquals(configItem, exception.getConfigurationItem());
         assertEquals("Configuration error in 'testItem': null", exception.getMessage());
@@ -133,10 +146,10 @@ public class BrobotConfigurationExceptionTest extends BrobotTestBase {
     void testNullCause() {
         // Given
         String message = "Configuration error";
-        
+
         // When
         ConfigurationException exception = new ConfigurationException(message, (Throwable) null);
-        
+
         // Then
         assertEquals(message, exception.getMessage());
         assertNull(exception.getCause());
@@ -148,7 +161,7 @@ public class BrobotConfigurationExceptionTest extends BrobotTestBase {
     void testInheritance() {
         // Given
         ConfigurationException exception = new ConfigurationException("Test");
-        
+
         // Then
         assertTrue(exception instanceof BrobotRuntimeException);
         assertTrue(exception instanceof RuntimeException);
@@ -161,12 +174,15 @@ public class BrobotConfigurationExceptionTest extends BrobotTestBase {
     void testThrowAndCatch() {
         // Given
         String message = "Invalid configuration";
-        
+
         // When/Then
-        ConfigurationException caught = assertThrows(ConfigurationException.class, () -> {
-            throw new ConfigurationException(message);
-        });
-        
+        ConfigurationException caught =
+                assertThrows(
+                        ConfigurationException.class,
+                        () -> {
+                            throw new ConfigurationException(message);
+                        });
+
         assertEquals(message, caught.getMessage());
     }
 
@@ -174,17 +190,21 @@ public class BrobotConfigurationExceptionTest extends BrobotTestBase {
     @DisplayName("Should be catchable as BrobotRuntimeException")
     void testCatchAsBrobotRuntimeException() {
         // When/Then
-        BrobotRuntimeException caught = assertThrows(BrobotRuntimeException.class, () -> {
-            throw new ConfigurationException("timeout", "Invalid value");
-        });
-        
+        BrobotRuntimeException caught =
+                assertThrows(
+                        BrobotRuntimeException.class,
+                        () -> {
+                            throw new ConfigurationException("timeout", "Invalid value");
+                        });
+
         assertTrue(caught instanceof ConfigurationException);
     }
 
     @ParameterizedTest
     @MethodSource("provideRealisticConfigScenarios")
     @DisplayName("Should handle realistic configuration error scenarios")
-    void testRealisticScenarios(String configItem, String message, Throwable cause, String expectedInMessage) {
+    void testRealisticScenarios(
+            String configItem, String message, Throwable cause, String expectedInMessage) {
         // When
         ConfigurationException exception;
         if (cause != null) {
@@ -194,7 +214,7 @@ public class BrobotConfigurationExceptionTest extends BrobotTestBase {
         } else {
             exception = new ConfigurationException(message);
         }
-        
+
         // Then
         assertTrue(exception.getMessage().contains(expectedInMessage));
         if (configItem != null && cause == null) {
@@ -207,15 +227,27 @@ public class BrobotConfigurationExceptionTest extends BrobotTestBase {
 
     private static Stream<Arguments> provideRealisticConfigScenarios() {
         return Stream.of(
-            Arguments.of(null, "Missing required property", null, "Missing required property"),
-            Arguments.of("defaultSimilarity", "Value 1.5 exceeds maximum", null, "defaultSimilarity"),
-            Arguments.of("screenshotPath", "Directory does not exist", null, "Directory does not exist"),
-            Arguments.of(null, "Failed to parse config file", new FileNotFoundException(), "Failed to parse"),
-            Arguments.of("threadPoolSize", "Must be positive integer", null, "threadPoolSize"),
-            Arguments.of("actionTimeout", "Cannot exceed global timeout", null, "Cannot exceed"),
-            Arguments.of(null, "Circular dependency detected", null, "Circular dependency"),
-            Arguments.of("logLevel", "Unknown level: SUPERFINE", null, "Unknown level")
-        );
+                Arguments.of(null, "Missing required property", null, "Missing required property"),
+                Arguments.of(
+                        "defaultSimilarity",
+                        "Value 1.5 exceeds maximum",
+                        null,
+                        "defaultSimilarity"),
+                Arguments.of(
+                        "screenshotPath",
+                        "Directory does not exist",
+                        null,
+                        "Directory does not exist"),
+                Arguments.of(
+                        null,
+                        "Failed to parse config file",
+                        new FileNotFoundException(),
+                        "Failed to parse"),
+                Arguments.of("threadPoolSize", "Must be positive integer", null, "threadPoolSize"),
+                Arguments.of(
+                        "actionTimeout", "Cannot exceed global timeout", null, "Cannot exceed"),
+                Arguments.of(null, "Circular dependency detected", null, "Circular dependency"),
+                Arguments.of("logLevel", "Unknown level: SUPERFINE", null, "Unknown level"));
     }
 
     @Test
@@ -224,7 +256,7 @@ public class BrobotConfigurationExceptionTest extends BrobotTestBase {
         // When
         ConfigurationException exception = new ConfigurationException("Test error");
         StackTraceElement[] stackTrace = exception.getStackTrace();
-        
+
         // Then
         assertTrue(stackTrace.length > 0);
         assertEquals(this.getClass().getName(), stackTrace[0].getClassName());
@@ -237,10 +269,10 @@ public class BrobotConfigurationExceptionTest extends BrobotTestBase {
         Exception root = new IllegalArgumentException("Invalid value");
         IOException middle = new IOException("File error", root);
         ConfigurationException top = new ConfigurationException("Config load failed", middle);
-        
+
         // When
         Throwable rootCause = getRootCause(top);
-        
+
         // Then
         assertEquals(middle, top.getCause());
         assertEquals(root, rootCause);
@@ -267,7 +299,7 @@ public class BrobotConfigurationExceptionTest extends BrobotTestBase {
             "config*star",
             "config+plus"
         };
-        
+
         // When/Then
         for (String item : specialItems) {
             ConfigurationException exception = new ConfigurationException(item, "Error");
@@ -288,7 +320,7 @@ public class BrobotConfigurationExceptionTest extends BrobotTestBase {
             "brobot.retry.count",
             "brobot.parallel.threads"
         };
-        
+
         // When/Then
         for (String path : propertyPaths) {
             ConfigurationException exception = new ConfigurationException(path, "Invalid value");
@@ -303,11 +335,11 @@ public class BrobotConfigurationExceptionTest extends BrobotTestBase {
         // Given
         String configItem = "immutableItem";
         ConfigurationException exception = new ConfigurationException(configItem, "Test");
-        
+
         // When
         String retrieved1 = exception.getConfigurationItem();
         String retrieved2 = exception.getConfigurationItem();
-        
+
         // Then
         assertEquals(configItem, retrieved1);
         assertEquals(configItem, retrieved2);
@@ -323,10 +355,10 @@ public class BrobotConfigurationExceptionTest extends BrobotTestBase {
             longName.append("very.long.config.path.");
         }
         String configItem = longName.toString();
-        
+
         // When
         ConfigurationException exception = new ConfigurationException(configItem, "Error");
-        
+
         // Then
         assertEquals(configItem, exception.getConfigurationItem());
         assertTrue(exception.getMessage().length() > 2000);
@@ -336,20 +368,24 @@ public class BrobotConfigurationExceptionTest extends BrobotTestBase {
     @DisplayName("Should handle concurrent access")
     void testConcurrentAccess() throws InterruptedException {
         // Given
-        ConfigurationException exception = new ConfigurationException("concurrentConfig", "Test error");
-        
+        ConfigurationException exception =
+                new ConfigurationException("concurrentConfig", "Test error");
+
         // When - Access from multiple threads
         Thread[] threads = new Thread[10];
         for (int i = 0; i < threads.length; i++) {
-            threads[i] = new Thread(() -> {
-                for (int j = 0; j < 1000; j++) {
-                    assertEquals("concurrentConfig", exception.getConfigurationItem());
-                    assertTrue(exception.getMessage().contains("concurrentConfig"));
-                }
-            });
+            threads[i] =
+                    new Thread(
+                            () -> {
+                                for (int j = 0; j < 1000; j++) {
+                                    assertEquals(
+                                            "concurrentConfig", exception.getConfigurationItem());
+                                    assertTrue(exception.getMessage().contains("concurrentConfig"));
+                                }
+                            });
             threads[i].start();
         }
-        
+
         // Then - Wait for all threads
         for (Thread thread : threads) {
             thread.join();

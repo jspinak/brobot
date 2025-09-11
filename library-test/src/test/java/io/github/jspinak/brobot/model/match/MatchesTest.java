@@ -1,22 +1,16 @@
 package io.github.jspinak.brobot.model.match;
 
-import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.model.state.StateImage;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ContextConfiguration;
-import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
-import io.github.jspinak.brobot.test.mock.MockScreenConfig;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.StateImage;
 
 @SpringBootTest
 class MatchesTest {
@@ -28,10 +22,8 @@ class MatchesTest {
 
     List<StateImage> getMatchListAsStateImages() {
         ActionResult matches = new ActionResult();
-        Match match1 = new Match.Builder()
-                .setRegion(new Region(0, 0, 10, 10))
-                .setName("topLeft")
-                .build();
+        Match match1 =
+                new Match.Builder().setRegion(new Region(0, 0, 10, 10)).setName("topLeft").build();
         matches.add(match1);
         List<StateImage> stateImageList = matches.getMatchListAsStateImages();
         stateImageList.forEach(System.out::println);

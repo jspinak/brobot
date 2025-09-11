@@ -1,69 +1,71 @@
 package io.github.jspinak.brobot.runner.dsl;
 
-import io.github.jspinak.brobot.BrobotTestApplication;
-import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
-import io.github.jspinak.brobot.test.mock.MockScreenConfig;
-import io.github.jspinak.brobot.runner.dsl.BusinessTask;
-import io.github.jspinak.brobot.runner.dsl.expressions.LiteralExpression;
-import io.github.jspinak.brobot.runner.dsl.expressions.VariableExpression;
-import io.github.jspinak.brobot.runner.dsl.statements.AssignmentStatement;
-import io.github.jspinak.brobot.runner.dsl.statements.MethodCallStatement;
-import io.github.jspinak.brobot.runner.dsl.statements.ReturnStatement;
-import io.github.jspinak.brobot.runner.dsl.statements.Statement;
-import io.github.jspinak.brobot.runner.dsl.statements.VariableDeclarationStatement;
-import io.github.jspinak.brobot.runner.dsl.model.Parameter;
-import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
-import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.Test;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.BrobotTestApplication;
+import io.github.jspinak.brobot.runner.dsl.expressions.LiteralExpression;
+import io.github.jspinak.brobot.runner.dsl.expressions.VariableExpression;
+import io.github.jspinak.brobot.runner.dsl.model.Parameter;
+import io.github.jspinak.brobot.runner.dsl.statements.AssignmentStatement;
+import io.github.jspinak.brobot.runner.dsl.statements.MethodCallStatement;
+import io.github.jspinak.brobot.runner.dsl.statements.ReturnStatement;
+import io.github.jspinak.brobot.runner.dsl.statements.Statement;
+import io.github.jspinak.brobot.runner.dsl.statements.VariableDeclarationStatement;
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
 /**
- * Tests for BusinessTask (AutomationFunction) JSON parsing with Spring context.
- * Uses Spring Boot's configured ObjectMapper with all necessary Jackson modules.
- * 
- * Key points:
- * - BusinessTask represents a single automation function
- * - Contains parameters, statements, and return type
- * - Statements use polymorphic deserialization with statementType
+ * Tests for BusinessTask (AutomationFunction) JSON parsing with Spring context. Uses Spring Boot's
+ * configured ObjectMapper with all necessary Jackson modules.
+ *
+ * <p>Key points: - BusinessTask represents a single automation function - Contains parameters,
+ * statements, and return type - Statements use polymorphic deserialization with statementType
  */
 @DisplayName("AutomationFunction JSON Parser Tests")
-@SpringBootTest(classes = BrobotTestApplication.class,
-    properties = {
-        "spring.main.lazy-initialization=true",
-        "brobot.mock.enabled=true",
-        "brobot.illustration.disabled=true",
-        "brobot.scene.analysis.disabled=true",
-        "brobot.gui-access.continue-on-error=true",
-        "brobot.gui-access.check-on-startup=false",
-        "java.awt.headless=true",
-        "spring.main.allow-bean-definition-overriding=true",
-        "brobot.test.type=unit",
-        "brobot.capture.physical-resolution=false"
-    })
-@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class,
-         io.github.jspinak.brobot.test.config.TestApplicationConfiguration.class})
+@SpringBootTest(
+        classes = BrobotTestApplication.class,
+        properties = {
+            "spring.main.lazy-initialization=true",
+            "brobot.mock.enabled=true",
+            "brobot.illustration.disabled=true",
+            "brobot.scene.analysis.disabled=true",
+            "brobot.gui-access.continue-on-error=true",
+            "brobot.gui-access.check-on-startup=false",
+            "java.awt.headless=true",
+            "spring.main.allow-bean-definition-overriding=true",
+            "brobot.test.type=unit",
+            "brobot.capture.physical-resolution=false"
+        })
+@Import({
+    MockGuiAccessConfig.class,
+    MockGuiAccessMonitor.class,
+    MockScreenConfig.class,
+    io.github.jspinak.brobot.test.config.TestApplicationConfiguration.class
+})
 @ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 class AutomationFunctionJsonParserTest {
 
-    @Autowired
-    private ConfigurationParser jsonParser;
+    @Autowired private ConfigurationParser jsonParser;
 
     @Test
     @DisplayName("Should parse simple BusinessTask from JSON")
     void testParseSimpleFunction() throws ConfigurationException {
-        String json = """
+        String json =
+                """
         {
             "id": 1,
             "name": "simpleFunction",
@@ -87,7 +89,8 @@ class AutomationFunctionJsonParserTest {
     @Test
     @DisplayName("Should parse BusinessTask with parameters")
     void testParseFunctionWithParameters() throws ConfigurationException {
-        String json = """
+        String json =
+                """
         {
             "id": 2,
             "name": "functionWithParams",
@@ -128,7 +131,8 @@ class AutomationFunctionJsonParserTest {
     @Test
     @DisplayName("Should parse BusinessTask with statements")
     void testParseFunctionWithStatements() throws ConfigurationException {
-        String json = """
+        String json =
+                """
         {
             "id": 3,
             "name": "functionWithStatements",
@@ -185,7 +189,8 @@ class AutomationFunctionJsonParserTest {
         assertTrue(function.getStatements().get(3) instanceof ReturnStatement);
 
         // Check variable declaration
-        VariableDeclarationStatement varDecl = (VariableDeclarationStatement) function.getStatements().get(0);
+        VariableDeclarationStatement varDecl =
+                (VariableDeclarationStatement) function.getStatements().get(0);
         assertEquals("result", varDecl.getName());
         assertEquals("boolean", varDecl.getType());
         assertTrue(varDecl.getValue() instanceof LiteralExpression);
@@ -259,7 +264,8 @@ class AutomationFunctionJsonParserTest {
         assertEquals(1, deserializedFunction.getStatements().size());
         assertTrue(deserializedFunction.getStatements().get(0) instanceof ReturnStatement);
 
-        ReturnStatement deserializedReturn = (ReturnStatement) deserializedFunction.getStatements().get(0);
+        ReturnStatement deserializedReturn =
+                (ReturnStatement) deserializedFunction.getStatements().get(0);
         assertTrue(deserializedReturn.getValue() instanceof LiteralExpression);
 
         LiteralExpression deserializedLiteral = (LiteralExpression) deserializedReturn.getValue();
@@ -270,7 +276,8 @@ class AutomationFunctionJsonParserTest {
     @Test
     @DisplayName("Should handle BusinessTask with null fields")
     void testBusinessTaskWithNullFields() throws ConfigurationException {
-        String json = """
+        String json =
+                """
         {
             "id": 5,
             "name": "minimalFunction",
@@ -292,7 +299,8 @@ class AutomationFunctionJsonParserTest {
     @Test
     @DisplayName("Should parse BusinessTask with complex nested statements")
     void testComplexNestedStatements() throws ConfigurationException {
-        String json = """
+        String json =
+                """
         {
             "id": 4,
             "name": "complexFunction",

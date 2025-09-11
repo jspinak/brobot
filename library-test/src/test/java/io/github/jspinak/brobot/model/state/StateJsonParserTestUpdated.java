@@ -1,33 +1,26 @@
 package io.github.jspinak.brobot.model.state;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.state.State;
-import io.github.jspinak.brobot.model.state.StateObject;
-import io.github.jspinak.brobot.model.state.StateLocation;
-import io.github.jspinak.brobot.model.state.StateRegion;
-import io.github.jspinak.brobot.model.state.StateString;
-import io.github.jspinak.brobot.model.state.StateImage;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashSet;
-import java.util.Set;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.model.element.Region;
 
 /**
- * Updated tests for the State @Disabled("CI failure - needs investigation")
- class with a focus on JSON serialization/deserialization.
- * Tests without Spring dependencies using ObjectMapper directly.
- * Migrated from library-test module.
+ * Updated tests for the State @Disabled("CI failure - needs investigation") class with a focus on
+ * JSON serialization/deserialization. Tests without Spring dependencies using ObjectMapper
+ * directly. Migrated from library-test module.
  */
 @Disabled("CI failure - needs investigation")
-
 public class StateJsonParserTestUpdated {
 
     private ObjectMapper objectMapper;
@@ -36,15 +29,16 @@ public class StateJsonParserTestUpdated {
     void setUp() {
         objectMapper = new ObjectMapper();
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.configure(
+                com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+                false);
     }
 
-    /**
-     * Test parsing a basic State from JSON
-     */
+    /** Test parsing a basic State from JSON */
     @Test
     public void testParseBasicState() throws Exception {
-        String json = """
+        String json =
+                """
                 {
                   "id": 1,
                   "name": "TestState",
@@ -93,8 +87,8 @@ public class StateJsonParserTestUpdated {
     }
 
     /**
-     * Test serializing and deserializing a State with added objects
-     * This test should pass now that we've added @JsonIgnore to break circular references
+     * Test serializing and deserializing a State with added objects This test should pass now that
+     * we've added @JsonIgnore to break circular references
      */
     @Test
     public void testSerializeDeserializeState() throws Exception {
@@ -116,30 +110,28 @@ public class StateJsonParserTestUpdated {
         state.setUsableArea(new Region(50, 50, 1000, 800));
 
         // Add a StateImage
-        StateImage stateImage = new StateImage.Builder()
-                .setName("TestImage")
-                .build();
+        StateImage stateImage = new StateImage.Builder().setName("TestImage").build();
         state.addStateImage(stateImage);
 
         // Add a StateRegion
-        StateRegion stateRegion = new StateRegion.Builder()
-                .setName("TestRegion")
-                .setSearchRegion(100, 100, 200, 200)
-                .build();
+        StateRegion stateRegion =
+                new StateRegion.Builder()
+                        .setName("TestRegion")
+                        .setSearchRegion(100, 100, 200, 200)
+                        .build();
         state.addStateRegion(stateRegion);
 
         // Add a StateLocation
-        StateLocation stateLocation = new StateLocation.Builder()
-                .setName("TestLocation")
-                .setLocation(300, 300)
-                .build();
+        StateLocation stateLocation =
+                new StateLocation.Builder().setName("TestLocation").setLocation(300, 300).build();
         state.addStateLocation(stateLocation);
 
         // Add a StateString
-        StateString stateString = new StateString.Builder()
-                .setName("TestString")
-                .setString("Sample Text String")
-                .build();
+        StateString stateString =
+                new StateString.Builder()
+                        .setName("TestString")
+                        .setString("Sample Text String")
+                        .build();
         state.addStateString(stateString);
 
         // Verify objects were added correctly before serialization
@@ -158,7 +150,8 @@ public class StateJsonParserTestUpdated {
         String json = objectMapper.writeValueAsString(state);
         System.out.println("DEBUG: Serialized State: " + json);
 
-        // Verify JSON contains collections - these should pass now that circular references are fixed
+        // Verify JSON contains collections - these should pass now that circular references are
+        // fixed
         assertTrue(json.contains("\"stateImages\""), "JSON should contain stateImages field");
         assertTrue(json.contains("\"stateRegions\""), "JSON should contain stateRegions field");
         assertTrue(json.contains("\"stateLocations\""), "JSON should contain stateLocations field");
@@ -194,10 +187,18 @@ public class StateJsonParserTestUpdated {
         assertEquals(800, deserializedState.getUsableArea().h());
 
         // Verify collections aren't empty after deserialization
-        assertFalse(deserializedState.getStateImages().isEmpty(), "Deserialized state should have StateImages");
-        assertFalse(deserializedState.getStateRegions().isEmpty(), "Deserialized state should have StateRegions");
-        assertFalse(deserializedState.getStateLocations().isEmpty(), "Deserialized state should have StateLocations");
-        assertFalse(deserializedState.getStateStrings().isEmpty(), "Deserialized state should have StateStrings");
+        assertFalse(
+                deserializedState.getStateImages().isEmpty(),
+                "Deserialized state should have StateImages");
+        assertFalse(
+                deserializedState.getStateRegions().isEmpty(),
+                "Deserialized state should have StateRegions");
+        assertFalse(
+                deserializedState.getStateLocations().isEmpty(),
+                "Deserialized state should have StateLocations");
+        assertFalse(
+                deserializedState.getStateStrings().isEmpty(),
+                "Deserialized state should have StateStrings");
 
         // Verify content of collections after deserialization
         StateImage deserializedImage = deserializedState.getStateImages().iterator().next();
@@ -208,7 +209,8 @@ public class StateJsonParserTestUpdated {
         assertEquals("TestRegion", deserializedRegion.getName());
         assertEquals("SerializedState", deserializedRegion.getOwnerStateName());
 
-        StateLocation deserializedLocation = deserializedState.getStateLocations().iterator().next();
+        StateLocation deserializedLocation =
+                deserializedState.getStateLocations().iterator().next();
         assertEquals("TestLocation", deserializedLocation.getName());
         assertEquals("SerializedState", deserializedLocation.getOwnerStateName());
 
@@ -217,9 +219,7 @@ public class StateJsonParserTestUpdated {
         assertEquals("SerializedState", deserializedString.getOwnerStateName());
     }
 
-    /**
-     * Test the addState* methods to ensure they set owner state names correctly
-     */
+    /** Test the addState* methods to ensure they set owner state names correctly */
     @Test
     public void testAddMethods() throws Exception {
         // Create a basic state
@@ -228,9 +228,7 @@ public class StateJsonParserTestUpdated {
         state.setName("AddMethodTest");
 
         // Add a state image using addStateImage
-        StateImage image = new StateImage.Builder()
-                .setName("TestImage")
-                .build();
+        StateImage image = new StateImage.Builder().setName("TestImage").build();
         state.addStateImage(image);
 
         assertEquals(1, state.getStateImages().size());
@@ -239,10 +237,11 @@ public class StateJsonParserTestUpdated {
         assertEquals(StateObject.Type.IMAGE, image.getObjectType());
 
         // Add a state region using addStateRegion
-        StateRegion region = new StateRegion.Builder()
-                .setName("TestRegion")
-                .setSearchRegion(100, 100, 200, 200)
-                .build();
+        StateRegion region =
+                new StateRegion.Builder()
+                        .setName("TestRegion")
+                        .setSearchRegion(100, 100, 200, 200)
+                        .build();
         state.addStateRegion(region);
 
         assertEquals(1, state.getStateRegions().size());
@@ -251,10 +250,8 @@ public class StateJsonParserTestUpdated {
         assertEquals(StateObject.Type.REGION, region.getObjectType());
 
         // Add a state location using addStateLocation
-        StateLocation location = new StateLocation.Builder()
-                .setName("TestLocation")
-                .setLocation(300, 300)
-                .build();
+        StateLocation location =
+                new StateLocation.Builder().setName("TestLocation").setLocation(300, 300).build();
         state.addStateLocation(location);
 
         assertEquals(1, state.getStateLocations().size());
@@ -263,10 +260,11 @@ public class StateJsonParserTestUpdated {
         assertEquals(StateObject.Type.LOCATION, location.getObjectType());
 
         // Add a state string using addStateString
-        StateString string = new StateString.Builder()
-                .setName("TestString")
-                .setString("Test String Value")
-                .build();
+        StateString string =
+                new StateString.Builder()
+                        .setName("TestString")
+                        .setString("Test String Value")
+                        .build();
         state.addStateString(string);
 
         assertEquals(1, state.getStateStrings().size());
@@ -288,43 +286,45 @@ public class StateJsonParserTestUpdated {
         assertTrue(json.contains("TestString"), "JSON should contain the string name");
     }
 
-    /**
-     * Test verifying that StateObject implementations correctly implement the interface
-     */
+    /** Test verifying that StateObject implementations correctly implement the interface */
     @Test
     public void testStateObjectTypes() {
         // Create objects and verify types directly
-        StateImage image = new StateImage.Builder()
-                .setName("TypeTestImage")
-                .build();
+        StateImage image = new StateImage.Builder().setName("TypeTestImage").build();
         assertEquals(StateObject.Type.IMAGE, image.getObjectType());
 
-        StateRegion region = new StateRegion.Builder()
-                .setName("TypeTestRegion")
-                .setSearchRegion(100, 100, 200, 200)
-                .build();
+        StateRegion region =
+                new StateRegion.Builder()
+                        .setName("TypeTestRegion")
+                        .setSearchRegion(100, 100, 200, 200)
+                        .build();
         assertEquals(StateObject.Type.REGION, region.getObjectType());
 
-        StateLocation location = new StateLocation.Builder()
-                .setName("TypeTestLocation")
-                .setLocation(300, 300)
-                .build();
+        StateLocation location =
+                new StateLocation.Builder()
+                        .setName("TypeTestLocation")
+                        .setLocation(300, 300)
+                        .build();
         assertEquals(StateObject.Type.LOCATION, location.getObjectType());
 
         // Verify interface methods
         // Verify getIdAsString and other interface methods
-        assertNotNull(((StateObject) image).getIdAsString(), "getIdAsString should return a non-null value");
-        assertNotNull(((StateObject) region).getIdAsString(), "getIdAsString should return a non-null value");
-        assertNotNull(((StateObject) location).getIdAsString(), "getIdAsString should return a non-null value");
+        assertNotNull(
+                ((StateObject) image).getIdAsString(),
+                "getIdAsString should return a non-null value");
+        assertNotNull(
+                ((StateObject) region).getIdAsString(),
+                "getIdAsString should return a non-null value");
+        assertNotNull(
+                ((StateObject) location).getIdAsString(),
+                "getIdAsString should return a non-null value");
 
         assertEquals(StateObject.Type.IMAGE, ((StateObject) image).getObjectType());
         assertEquals(StateObject.Type.REGION, ((StateObject) region).getObjectType());
         assertEquals(StateObject.Type.LOCATION, ((StateObject) location).getObjectType());
     }
 
-    /**
-     * Test minimal state serialization
-     */
+    /** Test minimal state serialization */
     @Test
     public void testMinimalStateSerialization() throws Exception {
         State state = new State();
@@ -345,9 +345,7 @@ public class StateJsonParserTestUpdated {
         assertEquals("MinimalState", deserialized.getName());
     }
 
-    /**
-     * Test complex state with multiple objects of each type
-     */
+    /** Test complex state with multiple objects of each type */
     @Test
     public void testComplexState() throws Exception {
         State state = new State();
@@ -356,18 +354,17 @@ public class StateJsonParserTestUpdated {
 
         // Add multiple images
         for (int i = 0; i < 3; i++) {
-            StateImage image = new StateImage.Builder()
-                    .setName("Image" + i)
-                    .build();
+            StateImage image = new StateImage.Builder().setName("Image" + i).build();
             state.addStateImage(image);
         }
 
         // Add multiple regions
         for (int i = 0; i < 2; i++) {
-            StateRegion region = new StateRegion.Builder()
-                    .setName("Region" + i)
-                    .setSearchRegion(i * 100, i * 100, 100, 100)
-                    .build();
+            StateRegion region =
+                    new StateRegion.Builder()
+                            .setName("Region" + i)
+                            .setSearchRegion(i * 100, i * 100, 100, 100)
+                            .build();
             state.addStateRegion(region);
         }
 

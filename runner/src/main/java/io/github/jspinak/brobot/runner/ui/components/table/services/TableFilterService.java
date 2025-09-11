@@ -1,14 +1,14 @@
 package io.github.jspinak.brobot.runner.ui.components.table.services;
 
+import java.util.function.Function;
+import java.util.function.Predicate;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.scene.control.TextField;
-import org.springframework.stereotype.Service;
 
-import java.util.function.Function;
-import java.util.function.Predicate;
+import org.springframework.stereotype.Service;
 
 /**
  * Service for managing table filtering operations.
@@ -17,12 +17,12 @@ import java.util.function.Predicate;
  */
 @Service
 public class TableFilterService<T> {
-    
+
     private final ObjectProperty<Function<T, String>> searchProvider = new SimpleObjectProperty<>();
     private FilteredList<T> filteredItems;
     private TextField searchField;
     private Runnable onFilterChanged;
-    
+
     /**
      * Initializes the filter service with the data.
      *
@@ -33,7 +33,7 @@ public class TableFilterService<T> {
         filteredItems = new FilteredList<>(items);
         return filteredItems;
     }
-    
+
     /**
      * Sets the search field and binds the filter.
      *
@@ -41,16 +41,19 @@ public class TableFilterService<T> {
      */
     public void setSearchField(TextField searchField) {
         this.searchField = searchField;
-        
+
         // Setup search field listener
-        searchField.textProperty().addListener((obs, oldVal, newVal) -> {
-            updateFilter();
-            if (onFilterChanged != null) {
-                onFilterChanged.run();
-            }
-        });
+        searchField
+                .textProperty()
+                .addListener(
+                        (obs, oldVal, newVal) -> {
+                            updateFilter();
+                            if (onFilterChanged != null) {
+                                onFilterChanged.run();
+                            }
+                        });
     }
-    
+
     /**
      * Sets the callback for when the filter changes.
      *
@@ -59,7 +62,7 @@ public class TableFilterService<T> {
     public void setOnFilterChanged(Runnable onFilterChanged) {
         this.onFilterChanged = onFilterChanged;
     }
-    
+
     /**
      * Sets the search provider function that extracts searchable text from an item.
      *
@@ -69,7 +72,7 @@ public class TableFilterService<T> {
         this.searchProvider.set(searchProvider);
         updateFilter();
     }
-    
+
     /**
      * Gets the search provider function.
      *
@@ -78,7 +81,7 @@ public class TableFilterService<T> {
     public Function<T, String> getSearchProvider() {
         return searchProvider.get();
     }
-    
+
     /**
      * Gets the search provider property.
      *
@@ -87,28 +90,28 @@ public class TableFilterService<T> {
     public ObjectProperty<Function<T, String>> searchProviderProperty() {
         return searchProvider;
     }
-    
-    /**
-     * Updates the filter based on the search text.
-     */
+
+    /** Updates the filter based on the search text. */
     private void updateFilter() {
         if (searchField == null || filteredItems == null) {
             return;
         }
-        
+
         String searchText = searchField.getText().toLowerCase();
         Function<T, String> provider = searchProvider.get();
-        
+
         if (searchText.isEmpty()) {
             filteredItems.setPredicate(null);
         } else if (provider != null) {
-            filteredItems.setPredicate(item -> {
-                String searchString = provider.apply(item);
-                return searchString != null && searchString.toLowerCase().contains(searchText);
-            });
+            filteredItems.setPredicate(
+                    item -> {
+                        String searchString = provider.apply(item);
+                        return searchString != null
+                                && searchString.toLowerCase().contains(searchText);
+                    });
         }
     }
-    
+
     /**
      * Sets a custom filter predicate.
      *
@@ -122,10 +125,8 @@ public class TableFilterService<T> {
             }
         }
     }
-    
-    /**
-     * Clears the filter.
-     */
+
+    /** Clears the filter. */
     public void clearFilter() {
         if (searchField != null) {
             searchField.clear();
@@ -137,7 +138,7 @@ public class TableFilterService<T> {
             onFilterChanged.run();
         }
     }
-    
+
     /**
      * Gets the current filter predicate.
      *
@@ -146,7 +147,7 @@ public class TableFilterService<T> {
     public Predicate<? super T> getFilterPredicate() {
         return filteredItems != null ? filteredItems.getPredicate() : null;
     }
-    
+
     /**
      * Gets the filtered items.
      *
@@ -155,7 +156,7 @@ public class TableFilterService<T> {
     public FilteredList<T> getFilteredItems() {
         return filteredItems;
     }
-    
+
     /**
      * Gets the current search text.
      *
@@ -164,7 +165,7 @@ public class TableFilterService<T> {
     public String getSearchText() {
         return searchField != null ? searchField.getText() : "";
     }
-    
+
     /**
      * Sets the search text programmatically.
      *
@@ -175,7 +176,7 @@ public class TableFilterService<T> {
             searchField.setText(text);
         }
     }
-    
+
     /**
      * Combines multiple predicates with AND logic.
      *
@@ -193,7 +194,7 @@ public class TableFilterService<T> {
             return true;
         };
     }
-    
+
     /**
      * Combines multiple predicates with OR logic.
      *

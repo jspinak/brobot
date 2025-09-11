@@ -1,42 +1,45 @@
 package io.github.jspinak.brobot.model.element;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.github.jspinak.brobot.capture.ScreenDimensions;
-import io.github.jspinak.brobot.util.region.RegionUtils;
-import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
-import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.model.state.StateRegion;
-import lombok.Getter;
-import lombok.Setter;
-import org.bytedeco.opencv.opencv_core.Rect;
-
 import java.awt.*;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.bytedeco.opencv.opencv_core.Rect;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.capture.ScreenDimensions;
+import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.state.StateRegion;
+import io.github.jspinak.brobot.util.region.RegionUtils;
+
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Represents a rectangular area on the screen in the Brobot model-based GUI automation framework.
- * 
- * <p>A Region is a fundamental data type that defines a rectangular area using x,y coordinates 
- * for the top-left corner and width,height dimensions. It serves as the spatial foundation for 
- * GUI element location and interaction in the model-based approach.</p>
- * 
+ *
+ * <p>A Region is a fundamental data type that defines a rectangular area using x,y coordinates for
+ * the top-left corner and width,height dimensions. It serves as the spatial foundation for GUI
+ * element location and interaction in the model-based approach.
+ *
  * <p>In the context of model-based GUI automation, Regions are used to:
+ *
  * <ul>
- *   <li>Define search areas for finding GUI elements (images, text, patterns)</li>
- *   <li>Represent the boundaries of matched GUI elements</li>
- *   <li>Specify areas for mouse and keyboard interactions</li>
- *   <li>Create spatial relationships between GUI elements in States</li>
+ *   <li>Define search areas for finding GUI elements (images, text, patterns)
+ *   <li>Represent the boundaries of matched GUI elements
+ *   <li>Specify areas for mouse and keyboard interactions
+ *   <li>Create spatial relationships between GUI elements in States
  * </ul>
- * </p>
- * 
- * <p>This class extends SikuliX Region functionality with additional features for the 
- * model-based approach, including grid operations, region arithmetic, and integration 
- * with other Brobot data types like Match and Location.</p>
- * 
+ *
+ * <p>This class extends SikuliX Region functionality with additional features for the model-based
+ * approach, including grid operations, region arithmetic, and integration with other Brobot data
+ * types like Match and Location.
+ *
  * @since 1.0
  * @see Location
  * @see Match
@@ -55,10 +58,10 @@ public class Region implements Comparable<Region> {
 
     /**
      * Creates a Region representing the full screen with dynamically detected dimensions.
-     * 
-     * <p>The screen dimensions are detected from the primary screen. Falls back to
-     * environment variables SCREEN_WIDTH and SCREEN_HEIGHT if screen detection fails.
-     * If all else fails, defaults to 1920x1080.</p>
+     *
+     * <p>The screen dimensions are detected from the primary screen. Falls back to environment
+     * variables SCREEN_WIDTH and SCREEN_HEIGHT if screen detection fails. If all else fails,
+     * defaults to 1920x1080.
      */
     public Region() {
         // Use the statically initialized screen dimensions
@@ -70,31 +73,31 @@ public class Region implements Comparable<Region> {
 
     /**
      * Creates a RegionBuilder for fluent region creation with screen-size awareness.
-     * 
+     *
      * @return a new RegionBuilder instance
      */
     public static RegionBuilder builder() {
         return new RegionBuilder();
     }
-    
+
     /**
      * Creates a Region with specified coordinates and dimensions.
-     * 
+     *
      * @param x the x-coordinate of the top-left corner
      * @param y the y-coordinate of the top-left corner
      * @param w the width of the region
      * @param h the height of the region
      */
     public Region(int x, int y, int w, int h) {
-        setXYWH(x,y,w,h);
+        setXYWH(x, y, w, h);
     }
 
     /**
      * Creates a Region from a Match object.
-     * 
-     * <p>This constructor is commonly used after finding an image to create a Region 
-     * representing the matched area for further operations.</p>
-     * 
+     *
+     * <p>This constructor is commonly used after finding an image to create a Region representing
+     * the matched area for further operations.
+     *
      * @param match the Match object to convert to a Region
      */
     public Region(Match match) {
@@ -108,10 +111,10 @@ public class Region implements Comparable<Region> {
 
     /**
      * Creates a Region as the bounding box containing two Location points.
-     * 
-     * <p>The resulting Region will be the smallest rectangle that contains both locations,
-     * useful for defining areas between GUI elements.</p>
-     * 
+     *
+     * <p>The resulting Region will be the smallest rectangle that contains both locations, useful
+     * for defining areas between GUI elements.
+     *
      * @param location1 the first location point
      * @param location2 the second location point
      */
@@ -123,7 +126,9 @@ public class Region implements Comparable<Region> {
         setXYWH(r.x, r.y, r.w, r.h);
     }
 
-    public Region(org.sikuli.script.Region region) { setTo(region); }
+    public Region(org.sikuli.script.Region region) {
+        setTo(region);
+    }
 
     public Region(Rect rect) {
         setXYWH(rect.x(), rect.y(), rect.width(), rect.height());
@@ -131,21 +136,21 @@ public class Region implements Comparable<Region> {
 
     /**
      * Converts this Region to a SikuliX Region for compatibility with Sikuli operations.
-     * 
-     * <p>This method enables interoperability with the underlying SikuliX library.
-     * Returns null if SikuliX operations should be skipped (e.g., in headless mode).</p>
-     * 
+     *
+     * <p>This method enables interoperability with the underlying SikuliX library. Returns null if
+     * SikuliX operations should be skipped (e.g., in headless mode).
+     *
      * @return a SikuliX Region object, or null if SikuliX is disabled
      */
     @JsonIgnore
     public org.sikuli.script.Region sikuli() {
         ExecutionEnvironment env = ExecutionEnvironment.getInstance();
-        
+
         if (env.shouldSkipSikuliX()) {
             // Return null when SikuliX operations should be skipped
             return null;
         }
-        
+
         try {
             return new org.sikuli.script.Region(x, y, w, h);
         } catch (org.sikuli.script.SikuliXception e) {
@@ -236,27 +241,24 @@ public class Region implements Comparable<Region> {
 
     /**
      * Creates a StateRegion associated with the NULL state.
-     * 
-     * <p>The NULL state is a special state in the model-based approach that represents
-     * GUI elements not associated with any specific state. This is useful for defining
-     * regions that exist across multiple states.</p>
-     * 
+     *
+     * <p>The NULL state is a special state in the model-based approach that represents GUI elements
+     * not associated with any specific state. This is useful for defining regions that exist across
+     * multiple states.
+     *
      * @return a StateRegion owned by the NULL state
      */
     @JsonIgnore
     public StateRegion inNullState() {
-        return new StateRegion.Builder()
-                .setOwnerStateName("null")
-                .setSearchRegion(this)
-                .build();
+        return new StateRegion.Builder().setOwnerStateName("null").setSearchRegion(this).build();
     }
 
     /**
      * Checks if this Region has valid dimensions.
-     * 
-     * <p>A Region is considered defined if it has positive width and height.
-     * This is important for validating search areas and interaction targets.</p>
-     * 
+     *
+     * <p>A Region is considered defined if it has positive width and height. This is important for
+     * validating search areas and interaction targets.
+     *
      * @return true if the Region has positive width and height, false otherwise
      */
     @JsonIgnore
@@ -296,15 +298,21 @@ public class Region implements Comparable<Region> {
         org.sikuli.script.Region sikuliRegion = sikuli();
         if (sikuliRegion == null) {
             // In headless mode, calculate grid region manually using configured dimensions
-            int rows = io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig.getDefaultRows();
-            int cols = io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig.getDefaultCols();
+            int rows =
+                    io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig
+                            .getDefaultRows();
+            int cols =
+                    io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig
+                            .getDefaultCols();
             int cellWidth = w / cols;
             int cellHeight = h / rows;
             int row = RegionUtils.toRow(this, gridNumber);
             int col = RegionUtils.toCol(this, gridNumber);
             return new Region(x + col * cellWidth, y + row * cellHeight, cellWidth, cellHeight);
         }
-        return new Region(sikuliRegion.getCell(RegionUtils.toRow(this, gridNumber), RegionUtils.toCol(this, gridNumber)));
+        return new Region(
+                sikuliRegion.getCell(
+                        RegionUtils.toRow(this, gridNumber), RegionUtils.toCol(this, gridNumber)));
     }
 
     @JsonIgnore
@@ -353,14 +361,13 @@ public class Region implements Comparable<Region> {
 
     /**
      * Divides this Region into a grid and returns all grid cells as separate Regions.
-     * 
-     * <p>This method is useful for systematic searching or interaction with GUI elements
-     * arranged in a grid pattern. The cells are returned in reading order (left to right,
-     * top to bottom).</p>
-     * 
-     * <p>Note: Uses SikuliX raster with minimum cell size of 5x5 pixels. For finer
-     * control, use the Brobot Grid classes.</p>
-     * 
+     *
+     * <p>This method is useful for systematic searching or interaction with GUI elements arranged
+     * in a grid pattern. The cells are returned in reading order (left to right, top to bottom).
+     *
+     * <p>Note: Uses SikuliX raster with minimum cell size of 5x5 pixels. For finer control, use the
+     * Brobot Grid classes.
+     *
      * @param rows the number of rows (y-partitions) in the grid
      * @param columns the number of columns (x-partitions) in the grid
      * @return a list of Regions representing each grid cell
@@ -388,9 +395,7 @@ public class Region implements Comparable<Region> {
 
     @JsonIgnore
     public ObjectCollection asObjectCollection() {
-        return new ObjectCollection.Builder()
-                .withRegions(this)
-                .build();
+        return new ObjectCollection.Builder().withRegions(this).build();
     }
 
     public boolean equals(Region r) {
@@ -433,13 +438,13 @@ public class Region implements Comparable<Region> {
 
     /**
      * Calculates the areas of this Region that do not overlap with another Region.
-     * 
-     * <p>This method is useful in the model-based approach for defining search areas
-     * that exclude certain GUI elements, or for finding free space around objects.</p>
-     * 
-     * <p>Only the non-overlapping areas of this Region are returned; non-overlapping
-     * areas of the parameter Region are not included.</p>
-     * 
+     *
+     * <p>This method is useful in the model-based approach for defining search areas that exclude
+     * certain GUI elements, or for finding free space around objects.
+     *
+     * <p>Only the non-overlapping areas of this Region are returned; non-overlapping areas of the
+     * parameter Region are not included.
+     *
      * @param b the Region that may overlap with this Region
      * @return a list of Regions representing the non-overlapping areas of this Region
      */

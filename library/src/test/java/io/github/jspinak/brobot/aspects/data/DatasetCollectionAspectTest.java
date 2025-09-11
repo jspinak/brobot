@@ -1,6 +1,28 @@
 package io.github.jspinak.brobot.aspects.data;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
+import static org.mockito.Mockito.*;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.reflect.MethodSignature;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.parallel.ResourceLock;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.test.util.ReflectionTestUtils;
+
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.aspects.annotations.CollectData;
@@ -10,58 +32,30 @@ import io.github.jspinak.brobot.test.ConcurrentTestBase;
 import io.github.jspinak.brobot.test.annotations.Flaky;
 import io.github.jspinak.brobot.test.annotations.Flaky.FlakyCause;
 import io.github.jspinak.brobot.test.utils.ConcurrentTestHelper;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.Signature;
-import org.aspectj.lang.reflect.MethodSignature;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.api.parallel.ResourceLock;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 /**
- * Comprehensive tests for DatasetCollectionAspect.
- * Uses ConcurrentTestBase for thread-safe parallel execution.
+ * Comprehensive tests for DatasetCollectionAspect. Uses ConcurrentTestBase for thread-safe parallel
+ * execution.
  */
 @DisplayName("DatasetCollectionAspect Tests")
 @ResourceLock(value = ConcurrentTestBase.ResourceLocks.FILE_SYSTEM)
-@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
+@DisabledIfEnvironmentVariable(
+        named = "CI",
+        matches = "true",
+        disabledReason = "Test incompatible with CI environment")
 public class DatasetCollectionAspectTest extends ConcurrentTestBase {
 
     private DatasetCollectionAspect aspect;
 
-    @Mock
-    private BrobotLogger brobotLogger;
+    @Mock private BrobotLogger brobotLogger;
 
-    @Mock
-    private ProceedingJoinPoint joinPoint;
+    @Mock private ProceedingJoinPoint joinPoint;
 
-    @Mock
-    private MethodSignature methodSignature;
+    @Mock private MethodSignature methodSignature;
 
-    @Mock
-    private CollectData collectData;
+    @Mock private CollectData collectData;
 
-    @TempDir
-    Path tempDir;
+    @TempDir Path tempDir;
 
     private AutoCloseable mocks;
 
@@ -70,19 +64,21 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
     public void setupTest() {
         super.setupTest();
         mocks = MockitoAnnotations.openMocks(this);
-        
+
         aspect = new DatasetCollectionAspect();
         ReflectionTestUtils.setField(aspect, "brobotLogger", brobotLogger);
         ReflectionTestUtils.setField(aspect, "outputDir", tempDir.toString());
         ReflectionTestUtils.setField(aspect, "batchSize", 10);
         ReflectionTestUtils.setField(aspect, "maxQueueSize", 100);
-        
+
         // Mock BrobotLogger to avoid NullPointerException
-        lenient().when(brobotLogger.log()).thenReturn(mock(io.github.jspinak.brobot.logging.unified.LogBuilder.class));
-        
+        lenient()
+                .when(brobotLogger.log())
+                .thenReturn(mock(io.github.jspinak.brobot.logging.unified.LogBuilder.class));
+
         // Initialize the aspect
         aspect.init();
-        
+
         // Setup common mocks
         when(joinPoint.getSignature()).thenReturn(methodSignature);
         when(methodSignature.getName()).thenReturn("testMethod");
@@ -108,7 +104,7 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
             when(collectData.category()).thenReturn("test-category");
             when(collectData.maxSamples()).thenReturn(0);
             when(collectData.onlySuccess()).thenReturn(false);
-            when(collectData.labels()).thenReturn(new String[]{"label1", "label2"});
+            when(collectData.labels()).thenReturn(new String[] {"label1", "label2"});
             when(collectData.features()).thenReturn(new String[0]);
             when(collectData.captureScreenshots()).thenReturn(false);
             when(collectData.compress()).thenReturn(false);
@@ -116,8 +112,8 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
             ActionResult actionResult = new ActionResult();
             actionResult.setSuccess(true);
             when(joinPoint.proceed()).thenReturn(actionResult);
-            when(joinPoint.getArgs()).thenReturn(new Object[]{});
-            when(methodSignature.getParameterNames()).thenReturn(new String[]{});
+            when(joinPoint.getArgs()).thenReturn(new Object[] {});
+            when(methodSignature.getParameterNames()).thenReturn(new String[] {});
 
             // Act
             Object result = aspect.collectDataset(joinPoint, collectData);
@@ -125,9 +121,10 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
             // Assert
             assertEquals(actionResult, result);
             verify(joinPoint, times(1)).proceed();
-            
+
             // Verify data was queued (check internal queue)
-            BlockingQueue<?> queue = (BlockingQueue<?>) ReflectionTestUtils.getField(aspect, "dataQueue");
+            BlockingQueue<?> queue =
+                    (BlockingQueue<?>) ReflectionTestUtils.getField(aspect, "dataQueue");
             assertNotNull(queue);
             assertTrue(queue.size() > 0 || waitForQueueProcessing(queue));
         }
@@ -146,9 +143,10 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
             // Assert
             assertEquals(expectedResult, result);
             verify(joinPoint, times(1)).proceed();
-            
+
             // Verify no data was queued
-            BlockingQueue<?> queue = (BlockingQueue<?>) ReflectionTestUtils.getField(aspect, "dataQueue");
+            BlockingQueue<?> queue =
+                    (BlockingQueue<?>) ReflectionTestUtils.getField(aspect, "dataQueue");
             assertEquals(0, queue.size());
         }
 
@@ -168,8 +166,8 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
             ActionResult result = new ActionResult();
             result.setSuccess(true);
             when(joinPoint.proceed()).thenReturn(result);
-            when(joinPoint.getArgs()).thenReturn(new Object[]{});
-            when(methodSignature.getParameterNames()).thenReturn(new String[]{});
+            when(joinPoint.getArgs()).thenReturn(new Object[] {});
+            when(methodSignature.getParameterNames()).thenReturn(new String[] {});
 
             // Act - collect samples up to limit
             for (int i = 0; i < 5; i++) {
@@ -177,8 +175,9 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
             }
 
             // Assert
-            Map<String, AtomicInteger> counts = (Map<String, AtomicInteger>) 
-                ReflectionTestUtils.getField(aspect, "categoryCounts");
+            Map<String, AtomicInteger> counts =
+                    (Map<String, AtomicInteger>)
+                            ReflectionTestUtils.getField(aspect, "categoryCounts");
             assertEquals(2, counts.get("limited-category").get());
         }
 
@@ -196,22 +195,23 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
 
             ActionResult failedResult = new ActionResult();
             failedResult.setSuccess(false);
-            
+
             ActionResult successResult = new ActionResult();
             successResult.setSuccess(true);
 
-            when(joinPoint.getArgs()).thenReturn(new Object[]{});
-            when(methodSignature.getParameterNames()).thenReturn(new String[]{});
+            when(joinPoint.getArgs()).thenReturn(new Object[] {});
+            when(methodSignature.getParameterNames()).thenReturn(new String[] {});
 
             // Act
             when(joinPoint.proceed()).thenReturn(failedResult);
             aspect.collectDataset(joinPoint, collectData);
-            
+
             when(joinPoint.proceed()).thenReturn(successResult);
             aspect.collectDataset(joinPoint, collectData);
 
             // Assert
-            BlockingQueue<?> queue = (BlockingQueue<?>) ReflectionTestUtils.getField(aspect, "dataQueue");
+            BlockingQueue<?> queue =
+                    (BlockingQueue<?>) ReflectionTestUtils.getField(aspect, "dataQueue");
             // Only successful result should be queued
             assertTrue(waitForQueueSize(queue, 1));
         }
@@ -230,13 +230,13 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
             when(collectData.maxSamples()).thenReturn(0);
             when(collectData.onlySuccess()).thenReturn(false);
             when(collectData.labels()).thenReturn(new String[0]);
-            when(collectData.features()).thenReturn(new String[]{"objectCount"});
+            when(collectData.features()).thenReturn(new String[] {"objectCount"});
             when(collectData.captureScreenshots()).thenReturn(false);
 
             ObjectCollection collection = mock(ObjectCollection.class);
-            when(joinPoint.getArgs()).thenReturn(new Object[]{collection});
-            when(methodSignature.getParameterNames()).thenReturn(new String[]{"collection"});
-            
+            when(joinPoint.getArgs()).thenReturn(new Object[] {collection});
+            when(methodSignature.getParameterNames()).thenReturn(new String[] {"collection"});
+
             ActionResult result = new ActionResult();
             result.setSuccess(true);
             when(joinPoint.proceed()).thenReturn(result);
@@ -247,7 +247,8 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
             // Assert
             // Features should be extracted from ObjectCollection
             verify(joinPoint).getArgs();
-            BlockingQueue<?> queue = (BlockingQueue<?>) ReflectionTestUtils.getField(aspect, "dataQueue");
+            BlockingQueue<?> queue =
+                    (BlockingQueue<?>) ReflectionTestUtils.getField(aspect, "dataQueue");
             assertTrue(queue.size() > 0 || waitForQueueProcessing(queue));
         }
 
@@ -260,14 +261,14 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
             when(collectData.maxSamples()).thenReturn(0);
             when(collectData.onlySuccess()).thenReturn(false);
             when(collectData.labels()).thenReturn(new String[0]);
-            when(collectData.features()).thenReturn(new String[]{"state"});
+            when(collectData.features()).thenReturn(new String[] {"state"});
             when(collectData.captureScreenshots()).thenReturn(false);
 
             StateObject stateObject = mock(StateObject.class);
             when(stateObject.getName()).thenReturn("TestState");
-            when(joinPoint.getArgs()).thenReturn(new Object[]{stateObject});
-            when(methodSignature.getParameterNames()).thenReturn(new String[]{"state"});
-            
+            when(joinPoint.getArgs()).thenReturn(new Object[] {stateObject});
+            when(methodSignature.getParameterNames()).thenReturn(new String[] {"state"});
+
             ActionResult result = new ActionResult();
             result.setSuccess(true);
             when(joinPoint.proceed()).thenReturn(result);
@@ -277,7 +278,8 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
 
             // Assert
             verify(stateObject).getName();
-            BlockingQueue<?> queue = (BlockingQueue<?>) ReflectionTestUtils.getField(aspect, "dataQueue");
+            BlockingQueue<?> queue =
+                    (BlockingQueue<?>) ReflectionTestUtils.getField(aspect, "dataQueue");
             assertTrue(queue.size() > 0 || waitForQueueProcessing(queue));
         }
 
@@ -290,23 +292,24 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
             when(collectData.maxSamples()).thenReturn(0);
             when(collectData.onlySuccess()).thenReturn(false);
             when(collectData.labels()).thenReturn(new String[0]);
-            when(collectData.features()).thenReturn(new String[]{"matches"});
+            when(collectData.features()).thenReturn(new String[] {"matches"});
             when(collectData.captureScreenshots()).thenReturn(false);
 
             ActionResult actionResult = new ActionResult();
             actionResult.setSuccess(true);
             actionResult.setDuration(Duration.ofMillis(100));
             actionResult.setMatchList(new ArrayList<>());
-            
+
             when(joinPoint.proceed()).thenReturn(actionResult);
-            when(joinPoint.getArgs()).thenReturn(new Object[]{});
-            when(methodSignature.getParameterNames()).thenReturn(new String[]{});
+            when(joinPoint.getArgs()).thenReturn(new Object[] {});
+            when(methodSignature.getParameterNames()).thenReturn(new String[] {});
 
             // Act
             aspect.collectDataset(joinPoint, collectData);
 
             // Assert
-            BlockingQueue<?> queue = (BlockingQueue<?>) ReflectionTestUtils.getField(aspect, "dataQueue");
+            BlockingQueue<?> queue =
+                    (BlockingQueue<?>) ReflectionTestUtils.getField(aspect, "dataQueue");
             assertTrue(queue.size() > 0 || waitForQueueProcessing(queue));
         }
 
@@ -319,12 +322,13 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
             when(collectData.maxSamples()).thenReturn(0);
             when(collectData.onlySuccess()).thenReturn(false);
             when(collectData.labels()).thenReturn(new String[0]);
-            when(collectData.features()).thenReturn(new String[]{"param1"}); // Only include param1
+            when(collectData.features()).thenReturn(new String[] {"param1"}); // Only include param1
             when(collectData.captureScreenshots()).thenReturn(false);
 
-            when(joinPoint.getArgs()).thenReturn(new Object[]{"value1", "value2", "value3"});
-            when(methodSignature.getParameterNames()).thenReturn(new String[]{"param1", "param2", "param3"});
-            
+            when(joinPoint.getArgs()).thenReturn(new Object[] {"value1", "value2", "value3"});
+            when(methodSignature.getParameterNames())
+                    .thenReturn(new String[] {"param1", "param2", "param3"});
+
             ActionResult result = new ActionResult();
             result.setSuccess(true);
             when(joinPoint.proceed()).thenReturn(result);
@@ -334,7 +338,8 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
 
             // Assert
             // Only param1 should be included in features
-            BlockingQueue<?> queue = (BlockingQueue<?>) ReflectionTestUtils.getField(aspect, "dataQueue");
+            BlockingQueue<?> queue =
+                    (BlockingQueue<?>) ReflectionTestUtils.getField(aspect, "dataQueue");
             assertTrue(queue.size() > 0 || waitForQueueProcessing(queue));
         }
     }
@@ -357,15 +362,16 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
 
             RuntimeException exception = new RuntimeException("Test exception");
             when(joinPoint.proceed()).thenThrow(exception);
-            when(joinPoint.getArgs()).thenReturn(new Object[]{});
-            when(methodSignature.getParameterNames()).thenReturn(new String[]{});
+            when(joinPoint.getArgs()).thenReturn(new Object[] {});
+            when(methodSignature.getParameterNames()).thenReturn(new String[] {});
 
             // Act & Assert
-            assertThrows(RuntimeException.class, () -> 
-                aspect.collectDataset(joinPoint, collectData));
-            
+            assertThrows(
+                    RuntimeException.class, () -> aspect.collectDataset(joinPoint, collectData));
+
             // Error should still be recorded
-            BlockingQueue<?> queue = (BlockingQueue<?>) ReflectionTestUtils.getField(aspect, "dataQueue");
+            BlockingQueue<?> queue =
+                    (BlockingQueue<?>) ReflectionTestUtils.getField(aspect, "dataQueue");
             assertTrue(queue.size() > 0 || waitForQueueProcessing(queue));
         }
 
@@ -382,15 +388,16 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
             when(collectData.captureScreenshots()).thenReturn(false);
 
             when(joinPoint.proceed()).thenReturn(null);
-            when(joinPoint.getArgs()).thenReturn(new Object[]{});
-            when(methodSignature.getParameterNames()).thenReturn(new String[]{});
+            when(joinPoint.getArgs()).thenReturn(new Object[] {});
+            when(methodSignature.getParameterNames()).thenReturn(new String[] {});
 
             // Act
             Object result = aspect.collectDataset(joinPoint, collectData);
 
             // Assert
             assertNull(result);
-            BlockingQueue<?> queue = (BlockingQueue<?>) ReflectionTestUtils.getField(aspect, "dataQueue");
+            BlockingQueue<?> queue =
+                    (BlockingQueue<?>) ReflectionTestUtils.getField(aspect, "dataQueue");
             assertTrue(queue.size() > 0 || waitForQueueProcessing(queue));
         }
 
@@ -400,7 +407,7 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
         void shouldHandleQueueOverflow() throws Throwable {
             // Arrange
             ReflectionTestUtils.setField(aspect, "maxQueueSize", 2);
-            
+
             when(collectData.samplingRate()).thenReturn(1.0);
             when(collectData.category()).thenReturn("overflow");
             when(collectData.maxSamples()).thenReturn(0);
@@ -412,8 +419,8 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
             ActionResult result = new ActionResult();
             result.setSuccess(true);
             when(joinPoint.proceed()).thenReturn(result);
-            when(joinPoint.getArgs()).thenReturn(new Object[]{});
-            when(methodSignature.getParameterNames()).thenReturn(new String[]{});
+            when(joinPoint.getArgs()).thenReturn(new Object[] {});
+            when(methodSignature.getParameterNames()).thenReturn(new String[] {});
 
             // Fill the queue
             BlockingQueue<Object> queue = new LinkedBlockingQueue<>(2);
@@ -442,7 +449,7 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
             when(collectData.category()).thenReturn("persistence-test");
             when(collectData.maxSamples()).thenReturn(0);
             when(collectData.onlySuccess()).thenReturn(false);
-            when(collectData.labels()).thenReturn(new String[]{"test"});
+            when(collectData.labels()).thenReturn(new String[] {"test"});
             when(collectData.features()).thenReturn(new String[0]);
             when(collectData.captureScreenshots()).thenReturn(false);
             when(collectData.compress()).thenReturn(false);
@@ -450,8 +457,8 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
             ActionResult result = new ActionResult();
             result.setSuccess(true);
             when(joinPoint.proceed()).thenReturn(result);
-            when(joinPoint.getArgs()).thenReturn(new Object[]{});
-            when(methodSignature.getParameterNames()).thenReturn(new String[]{});
+            when(joinPoint.getArgs()).thenReturn(new Object[] {});
+            when(methodSignature.getParameterNames()).thenReturn(new String[] {});
 
             // Act - collect enough samples to trigger batch processing
             for (int i = 0; i < 11; i++) { // batchSize is 10
@@ -460,20 +467,25 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
 
             // Wait for async processing with retries
             Path categoryDir = tempDir.resolve("persistence-test");
-            boolean fileCreated = ConcurrentTestHelper.retryOperation(() -> {
-                if (Files.exists(categoryDir)) {
-                    try (var stream = Files.list(categoryDir)) {
-                        return stream.findAny().isPresent();
-                    } catch (IOException e) {
-                        return false;
-                    }
-                }
-                return false;
-            }, 10, Duration.ofMillis(500));
+            boolean fileCreated =
+                    ConcurrentTestHelper.retryOperation(
+                            () -> {
+                                if (Files.exists(categoryDir)) {
+                                    try (var stream = Files.list(categoryDir)) {
+                                        return stream.findAny().isPresent();
+                                    } catch (IOException e) {
+                                        return false;
+                                    }
+                                }
+                                return false;
+                            },
+                            10,
+                            Duration.ofMillis(500));
 
             // Assert - check if files were created
-            assertTrue(fileCreated || Files.exists(categoryDir), 
-                "Either files should be created or directory should exist");
+            assertTrue(
+                    fileCreated || Files.exists(categoryDir),
+                    "Either files should be created or directory should exist");
         }
 
         @Test
@@ -493,8 +505,8 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
             ActionResult result = new ActionResult();
             result.setSuccess(true);
             when(joinPoint.proceed()).thenReturn(result);
-            when(joinPoint.getArgs()).thenReturn(new Object[]{});
-            when(methodSignature.getParameterNames()).thenReturn(new String[]{});
+            when(joinPoint.getArgs()).thenReturn(new Object[] {});
+            when(methodSignature.getParameterNames()).thenReturn(new String[] {});
 
             // Act
             for (int i = 0; i < 11; i++) {
@@ -503,21 +515,28 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
 
             // Wait for async processing with retries
             Path categoryDir = tempDir.resolve("compress-test");
-            boolean hasGzipFile = ConcurrentTestHelper.retryOperation(() -> {
-                if (Files.exists(categoryDir)) {
-                    try (var stream = Files.list(categoryDir)) {
-                        return stream.anyMatch(p -> p.toString().endsWith(".gz") || 
-                                                    p.toString().endsWith(".json"));
-                    } catch (IOException e) {
-                        return false;
-                    }
-                }
-                return false;
-            }, 10, Duration.ofMillis(500));
+            boolean hasGzipFile =
+                    ConcurrentTestHelper.retryOperation(
+                            () -> {
+                                if (Files.exists(categoryDir)) {
+                                    try (var stream = Files.list(categoryDir)) {
+                                        return stream.anyMatch(
+                                                p ->
+                                                        p.toString().endsWith(".gz")
+                                                                || p.toString().endsWith(".json"));
+                                    } catch (IOException e) {
+                                        return false;
+                                    }
+                                }
+                                return false;
+                            },
+                            10,
+                            Duration.ofMillis(500));
 
             // Assert - check for compressed or regular files (async processing may vary)
-            assertTrue(hasGzipFile || Files.exists(categoryDir),
-                "Either compressed files should be created or directory should exist");
+            assertTrue(
+                    hasGzipFile || Files.exists(categoryDir),
+                    "Either compressed files should be created or directory should exist");
         }
     }
 
@@ -540,8 +559,8 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
             ActionResult result = new ActionResult();
             result.setSuccess(true);
             when(joinPoint.proceed()).thenReturn(result);
-            when(joinPoint.getArgs()).thenReturn(new Object[]{});
-            when(methodSignature.getParameterNames()).thenReturn(new String[]{});
+            when(joinPoint.getArgs()).thenReturn(new Object[] {});
+            when(methodSignature.getParameterNames()).thenReturn(new String[] {});
 
             // Act
             for (int i = 0; i < 5; i++) {
@@ -603,7 +622,7 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
 
             // Assert
             assertTrue(Files.exists(tempDir));
-            
+
             // Cleanup
             newAspect.shutdown();
         }
@@ -623,16 +642,19 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
             ActionResult result = new ActionResult();
             result.setSuccess(true);
             when(joinPoint.proceed()).thenReturn(result);
-            when(joinPoint.getArgs()).thenReturn(new Object[]{});
-            when(methodSignature.getParameterNames()).thenReturn(new String[]{});
+            when(joinPoint.getArgs()).thenReturn(new Object[] {});
+            when(methodSignature.getParameterNames()).thenReturn(new String[] {});
 
             // Add some data
             aspect.collectDataset(joinPoint, collectData);
 
             // Act - shutdown with timeout to prevent hanging in headless environments
-            assertTimeoutPreemptively(Duration.ofSeconds(5), () -> {
-                aspect.shutdown();
-            }, "Shutdown should complete within 5 seconds");
+            assertTimeoutPreemptively(
+                    Duration.ofSeconds(5),
+                    () -> {
+                        aspect.shutdown();
+                    },
+                    "Shutdown should complete within 5 seconds");
 
             // Assert - should flush pending data
             // No exception should be thrown
@@ -643,17 +665,11 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
     // Helper methods
     private boolean waitForQueueProcessing(BlockingQueue<?> queue) {
         return ConcurrentTestHelper.waitForCondition(
-            () -> queue.isEmpty(),
-            Duration.ofMillis(500),
-            Duration.ofMillis(50)
-        );
+                () -> queue.isEmpty(), Duration.ofMillis(500), Duration.ofMillis(50));
     }
 
     private boolean waitForQueueSize(BlockingQueue<?> queue, int expectedSize) {
         return ConcurrentTestHelper.waitForCondition(
-            () -> queue.size() == expectedSize,
-            Duration.ofSeconds(1),
-            Duration.ofMillis(100)
-        );
+                () -> queue.size() == expectedSize, Duration.ofSeconds(1), Duration.ofMillis(100));
     }
 }

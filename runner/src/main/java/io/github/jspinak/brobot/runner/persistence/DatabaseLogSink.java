@@ -1,12 +1,12 @@
 package io.github.jspinak.brobot.runner.persistence;
 
+import org.springframework.stereotype.Component;
+
 import io.github.jspinak.brobot.runner.persistence.entity.LogEntry;
 import io.github.jspinak.brobot.runner.persistence.mapper.LogEntityMapper;
 import io.github.jspinak.brobot.runner.persistence.repo.LogEntryRepository;
 import io.github.jspinak.brobot.tools.logging.model.LogData;
 import io.github.jspinak.brobot.tools.logging.spi.LogSink;
-
-import org.springframework.stereotype.Component;
 
 @Component // This class is the Spring bean that gets injected into the library
 public class DatabaseLogSink implements LogSink {

@@ -1,52 +1,48 @@
 package io.github.jspinak.brobot.diagnostics;
 
-import io.github.jspinak.brobot.config.core.ImagePathManager;
-import io.github.jspinak.brobot.config.core.SmartImageLoader;
-import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.sikuli.script.ImagePath;
-import org.springframework.test.util.ReflectionTestUtils;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import io.github.jspinak.brobot.config.core.ImagePathManager;
+import io.github.jspinak.brobot.config.core.SmartImageLoader;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
- * Comprehensive tests for ImageLoadingDiagnosticsRunner.
- * Tests diagnostic capabilities, environment reporting, and image loading
- * analysis.
+ * Comprehensive tests for ImageLoadingDiagnosticsRunner. Tests diagnostic capabilities, environment
+ * reporting, and image loading analysis.
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ImageLoadingDiagnosticsRunner Tests")
-@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
+@DisabledIfEnvironmentVariable(
+        named = "CI",
+        matches = "true",
+        disabledReason = "Test incompatible with CI environment")
 public class ImageLoadingDiagnosticsRunnerTest extends BrobotTestBase {
 
-    @Mock
-    private SmartImageLoader smartImageLoader;
+    @Mock private SmartImageLoader smartImageLoader;
 
-    @Mock
-    private ImagePathManager imagePathManager;
+    @Mock private ImagePathManager imagePathManager;
 
-    @Captor
-    private ArgumentCaptor<String> stringCaptor;
+    @Captor private ArgumentCaptor<String> stringCaptor;
 
     private ImageLoadingDiagnosticsRunner diagnosticsRunner;
 

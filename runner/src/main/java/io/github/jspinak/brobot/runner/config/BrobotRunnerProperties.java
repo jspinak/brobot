@@ -1,12 +1,13 @@
 package io.github.jspinak.brobot.runner.config;
 
-import lombok.Getter;
-import lombok.Setter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import lombok.Getter;
+import lombok.Setter;
 
 @Component
 @Getter
@@ -14,8 +15,7 @@ import java.nio.file.Paths;
 @ConfigurationProperties(prefix = "brobot.runner")
 public class BrobotRunnerProperties {
     private String configPath = "config";
-    @Getter
-    private String imagePath = "images";
+    @Getter private String imagePath = "images";
     private String logPath = "logs";
     private String tempPath = "temp";
 

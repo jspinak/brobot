@@ -1,33 +1,33 @@
 package io.github.jspinak.brobot.model.element;
 
-import io.github.jspinak.brobot.model.action.ActionHistory;
-import io.github.jspinak.brobot.model.action.ActionRecord;
-import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.EmptySource;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static org.mockito.Mockito.*;
 
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-import static org.mockito.Mockito.*;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EmptySource;
+import org.junit.jupiter.params.provider.NullSource;
+
+import io.github.jspinak.brobot.model.action.ActionHistory;
+import io.github.jspinak.brobot.model.action.ActionRecord;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
- * Comprehensive tests for the Pattern class which represents a visual template 
- * for pattern matching in the Brobot GUI automation framework.
+ * Comprehensive tests for the Pattern class which represents a visual template for pattern matching
+ * in the Brobot GUI automation framework.
  */
 @DisplayName("Pattern Model Tests")
 public class PatternTest extends BrobotTestBase {
@@ -44,7 +44,7 @@ public class PatternTest extends BrobotTestBase {
         testBufferedImage = new BufferedImage(100, 50, BufferedImage.TYPE_INT_RGB);
         testImage = new Image(testBufferedImage, "TestImage");
         testRegion = new Region(10, 20, 100, 50);
-        
+
         testMatch = new Match();
         testMatch.setRegion(testRegion);
         testMatch.setName("TestMatch");
@@ -56,7 +56,7 @@ public class PatternTest extends BrobotTestBase {
     void testDefaultConstructor() {
         // When
         Pattern pattern = new Pattern();
-        
+
         // Then
         assertNull(pattern.getUrl());
         assertNull(pattern.getImgpath());
@@ -82,7 +82,7 @@ public class PatternTest extends BrobotTestBase {
     void testConstructorWithBufferedImage() {
         // When
         Pattern pattern = new Pattern(testBufferedImage);
-        
+
         // Then
         assertNotNull(pattern.getImage());
         assertEquals(100, pattern.w());
@@ -94,7 +94,7 @@ public class PatternTest extends BrobotTestBase {
     void testConstructorWithImage() {
         // When
         Pattern pattern = new Pattern(testImage);
-        
+
         // Then
         assertSame(testImage, pattern.getImage());
         assertEquals("TestImage", pattern.getName());
@@ -105,13 +105,13 @@ public class PatternTest extends BrobotTestBase {
     void testConstructorWithMatch() {
         // When
         Pattern pattern = new Pattern(testMatch);
-        
+
         // Then
         assertTrue(pattern.isFixed());
         assertNotNull(pattern.getSearchRegions());
         assertEquals(testImage, pattern.getImage());
         assertEquals("TestMatch", pattern.getName());
-        
+
         // Verify the search region was set
         Region fixedRegion = pattern.getRegion();
         assertEquals(testRegion, fixedRegion);
@@ -124,10 +124,10 @@ public class PatternTest extends BrobotTestBase {
         Match matchNoImage = new Match();
         matchNoImage.setName("NoImageMatch");
         matchNoImage.setRegion(testRegion);
-        
+
         // When
         Pattern pattern = new Pattern(matchNoImage);
-        
+
         // Then
         assertTrue(pattern.isFixed());
         assertEquals("NoImageMatch", pattern.getImgpath());
@@ -141,7 +141,7 @@ public class PatternTest extends BrobotTestBase {
     void testConstructorWithInvalidPath(String path) {
         // When
         Pattern pattern = new Pattern(path);
-        
+
         // Then
         assertNull(pattern.getImage());
     }
@@ -151,7 +151,7 @@ public class PatternTest extends BrobotTestBase {
     void testWidthAndHeight() {
         // Given
         Pattern pattern = new Pattern(testImage);
-        
+
         // Then
         assertEquals(100, pattern.w());
         assertEquals(50, pattern.h());
@@ -163,7 +163,7 @@ public class PatternTest extends BrobotTestBase {
     void testWidthAndHeightWithNullImage() {
         // Given
         Pattern pattern = new Pattern();
-        
+
         // Then
         assertEquals(0, pattern.w());
         assertEquals(0, pattern.h());
@@ -177,11 +177,11 @@ public class PatternTest extends BrobotTestBase {
         Pattern pattern = new Pattern();
         Region region1 = new Region(0, 0, 50, 50);
         Region region2 = new Region(50, 50, 50, 50);
-        
+
         // When
         pattern.addSearchRegion(region1);
         pattern.addSearchRegion(region2);
-        
+
         // Then
         List<Region> regions = pattern.getRegions();
         assertTrue(regions.contains(region1) || regions.contains(region2));
@@ -194,10 +194,10 @@ public class PatternTest extends BrobotTestBase {
         Pattern pattern = new Pattern();
         Region region1 = new Region(10, 10, 30, 30);
         Region region2 = new Region(40, 40, 30, 30);
-        
+
         // When
         pattern.setSearchRegionsTo(region1, region2);
-        
+
         // Then
         List<Region> regions = pattern.getRegions();
         assertEquals(2, regions.size());
@@ -208,10 +208,10 @@ public class PatternTest extends BrobotTestBase {
     void testGetRegionsForSearchDefault() {
         // Given
         Pattern pattern = new Pattern();
-        
+
         // When
         List<Region> regions = pattern.getRegionsForSearch();
-        
+
         // Then
         assertEquals(1, regions.size());
         Region defaultRegion = regions.get(0);
@@ -225,11 +225,11 @@ public class PatternTest extends BrobotTestBase {
         // Given
         Pattern pattern = new Pattern();
         Region fixedRegion = new Region(100, 100, 50, 50);
-        
+
         // When
         pattern.setFixed(true);
         pattern.getSearchRegions().setFixedRegion(fixedRegion);
-        
+
         // Then
         assertTrue(pattern.isFixed());
         Region retrievedRegion = pattern.getRegion();
@@ -243,14 +243,15 @@ public class PatternTest extends BrobotTestBase {
         Pattern pattern = new Pattern();
         pattern.setFixed(true);
         pattern.getSearchRegions().setFixedRegion(new Region(10, 10, 10, 10));
-        
+
         // When
         pattern.resetFixedSearchRegion();
-        
+
         // Then
         // Fixed region should be reset
-        assertTrue(pattern.getSearchRegions().getRegions(true).isEmpty() || 
-                   pattern.getSearchRegions().getFixedRegion() == null);
+        assertTrue(
+                pattern.getSearchRegions().getRegions(true).isEmpty()
+                        || pattern.getSearchRegions().getFixedRegion() == null);
     }
 
     @Test
@@ -260,10 +261,10 @@ public class PatternTest extends BrobotTestBase {
         Pattern pattern = new Pattern();
         ActionRecord snapshot = new ActionRecord();
         snapshot.setActionSuccess(true);
-        
+
         // When
         pattern.addMatchSnapshot(snapshot);
-        
+
         // Then
         ActionHistory history = pattern.getMatchHistory();
         assertNotNull(history);
@@ -275,10 +276,10 @@ public class PatternTest extends BrobotTestBase {
     void testAddMatchSnapshotFromCoordinates() {
         // Given
         Pattern pattern = new Pattern();
-        
+
         // When
         pattern.addMatchSnapshot(10, 20, 30, 40);
-        
+
         // Then
         ActionHistory history = pattern.getMatchHistory();
         assertEquals(1, history.getSnapshots().size());
@@ -290,10 +291,10 @@ public class PatternTest extends BrobotTestBase {
         // Given
         Pattern pattern = new Pattern(testImage);
         pattern.setName("TestPattern");
-        
+
         // When
         StateImage stateImage = pattern.inNullState();
-        
+
         // Then
         assertNotNull(stateImage);
         assertEquals("TestPattern", stateImage.getName());
@@ -306,10 +307,10 @@ public class PatternTest extends BrobotTestBase {
     void testIsDefined() {
         // Given
         Pattern pattern = new Pattern();
-        
+
         // When not defined
         assertFalse(pattern.isDefined());
-        
+
         // When defined
         pattern.addSearchRegion(new Region(10, 10, 10, 10));
         assertTrue(pattern.isDefined());
@@ -321,7 +322,7 @@ public class PatternTest extends BrobotTestBase {
         // Given
         Pattern emptyPattern = new Pattern();
         Pattern nonEmptyPattern = new Pattern(testImage);
-        
+
         // Then
         assertTrue(emptyPattern.isEmpty());
         assertFalse(nonEmptyPattern.isEmpty());
@@ -331,42 +332,48 @@ public class PatternTest extends BrobotTestBase {
     @DisplayName("Pattern properties tests")
     Stream<DynamicTest> testPatternProperties() {
         return Stream.of(
-            dynamicTest("Should set and get URL", () -> {
-                Pattern pattern = new Pattern();
-                pattern.setUrl("http://example.com/image.png");
-                assertEquals("http://example.com/image.png", pattern.getUrl());
-            }),
-            
-            dynamicTest("Should set and get image path", () -> {
-                Pattern pattern = new Pattern();
-                pattern.setImgpath("/path/to/image.png");
-                assertEquals("/path/to/image.png", pattern.getImgpath());
-            }),
-            
-            dynamicTest("Should set and get name", () -> {
-                Pattern pattern = new Pattern();
-                pattern.setName("PatternName");
-                assertEquals("PatternName", pattern.getName());
-            }),
-            
-            dynamicTest("Should set and get dynamic flag", () -> {
-                Pattern pattern = new Pattern();
-                pattern.setDynamic(true);
-                assertTrue(pattern.isDynamic());
-            }),
-            
-            dynamicTest("Should set and get index", () -> {
-                Pattern pattern = new Pattern();
-                pattern.setIndex(42);
-                assertEquals(42, pattern.getIndex());
-            }),
-            
-            dynamicTest("Should set and get kmeans color profiles flag", () -> {
-                Pattern pattern = new Pattern();
-                pattern.setSetKmeansColorProfiles(true);
-                assertTrue(pattern.isSetKmeansColorProfiles());
-            })
-        );
+                dynamicTest(
+                        "Should set and get URL",
+                        () -> {
+                            Pattern pattern = new Pattern();
+                            pattern.setUrl("http://example.com/image.png");
+                            assertEquals("http://example.com/image.png", pattern.getUrl());
+                        }),
+                dynamicTest(
+                        "Should set and get image path",
+                        () -> {
+                            Pattern pattern = new Pattern();
+                            pattern.setImgpath("/path/to/image.png");
+                            assertEquals("/path/to/image.png", pattern.getImgpath());
+                        }),
+                dynamicTest(
+                        "Should set and get name",
+                        () -> {
+                            Pattern pattern = new Pattern();
+                            pattern.setName("PatternName");
+                            assertEquals("PatternName", pattern.getName());
+                        }),
+                dynamicTest(
+                        "Should set and get dynamic flag",
+                        () -> {
+                            Pattern pattern = new Pattern();
+                            pattern.setDynamic(true);
+                            assertTrue(pattern.isDynamic());
+                        }),
+                dynamicTest(
+                        "Should set and get index",
+                        () -> {
+                            Pattern pattern = new Pattern();
+                            pattern.setIndex(42);
+                            assertEquals(42, pattern.getIndex());
+                        }),
+                dynamicTest(
+                        "Should set and get kmeans color profiles flag",
+                        () -> {
+                            Pattern pattern = new Pattern();
+                            pattern.setSetKmeansColorProfiles(true);
+                            assertTrue(pattern.isSetKmeansColorProfiles());
+                        }));
     }
 
     @Test
@@ -376,11 +383,11 @@ public class PatternTest extends BrobotTestBase {
         Pattern pattern = new Pattern();
         Position newPosition = new Position(25, 75);
         Location newOffset = new Location(10, -10);
-        
+
         // When
         pattern.setTargetPosition(newPosition);
         pattern.setTargetOffset(newOffset);
-        
+
         // Then
         assertEquals(0.25, pattern.getTargetPosition().getPercentW());
         assertEquals(0.75, pattern.getTargetPosition().getPercentH());
@@ -395,11 +402,11 @@ public class PatternTest extends BrobotTestBase {
         Pattern pattern = new Pattern();
         Anchor anchor1 = new Anchor(Positions.Name.TOPLEFT, new Position(0, 0));
         Anchor anchor2 = new Anchor(Positions.Name.BOTTOMRIGHT, new Position(100, 100));
-        
+
         // When
         pattern.getAnchors().add(anchor1);
         pattern.getAnchors().add(anchor2);
-        
+
         // Then
         assertEquals(2, pattern.getAnchors().size());
         assertTrue(pattern.getAnchors().getAnchorList().contains(anchor1));
@@ -407,18 +414,15 @@ public class PatternTest extends BrobotTestBase {
     }
 
     @ParameterizedTest
-    @CsvSource({
-        "true,true",
-        "false,false"
-    })
+    @CsvSource({"true,true", "false,false"})
     @DisplayName("Should handle fixed pattern state correctly")
     void testFixedPatternState(boolean isFixed, boolean expected) {
         // Given
         Pattern pattern = new Pattern();
-        
+
         // When
         pattern.setFixed(isFixed);
-        
+
         // Then
         assertEquals(expected, pattern.isFixed());
     }
@@ -428,11 +432,11 @@ public class PatternTest extends BrobotTestBase {
     void testMatConversion() {
         // Given
         Pattern pattern = new Pattern(testImage);
-        
+
         // When
         Mat bgrMat = pattern.getMat();
         Mat hsvMat = pattern.getMatHSV();
-        
+
         // Then
         assertNotNull(bgrMat);
         assertNotNull(hsvMat);
@@ -444,24 +448,24 @@ public class PatternTest extends BrobotTestBase {
         // Given
         Pattern pattern1 = new Pattern(testImage);
         pattern1.setName("Pattern1");
-        
+
         Pattern pattern2 = new Pattern(testImage);
         pattern2.setName("Pattern1");
-        
+
         Pattern pattern3 = new Pattern(testImage);
         pattern3.setName("Pattern2");
-        
+
         // Then - Same object
         assertEquals(pattern1, pattern1);
         assertEquals(pattern1.hashCode(), pattern1.hashCode());
-        
+
         // Different instances with same properties
         assertEquals(pattern1, pattern2);
         assertEquals(pattern1.hashCode(), pattern2.hashCode());
-        
+
         // Different name
         assertNotEquals(pattern1, pattern3);
-        
+
         // Null safety
         assertNotEquals(pattern1, null);
         assertNotEquals(pattern1, "not a pattern");
@@ -472,7 +476,7 @@ public class PatternTest extends BrobotTestBase {
     void testComplexPatternInitialization() {
         // Given
         Pattern pattern = new Pattern(testImage);
-        
+
         // When - Configure the pattern
         pattern.setName("ComplexPattern");
         pattern.setFixed(true);
@@ -483,7 +487,7 @@ public class PatternTest extends BrobotTestBase {
         pattern.setTargetPosition(new Position(75, 25));
         pattern.setTargetOffset(new Location(5, -5));
         pattern.getAnchors().add(new Anchor(Positions.Name.TOPLEFT, new Position(0, 0)));
-        
+
         // Then
         assertEquals("ComplexPattern", pattern.getName());
         assertTrue(pattern.isFixed());

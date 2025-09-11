@@ -1,41 +1,42 @@
 package io.github.jspinak.brobot.analysis.histogram;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import static org.bytedeco.opencv.global.opencv_core.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
+
 import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.bytedeco.javacpp.indexer.UByteRawIndexer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
-import static org.bytedeco.opencv.global.opencv_core.*;
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
- * Comprehensive test suite for HistogramRegion.
- * Tests management of masks and histograms for image regions.
+ * Comprehensive test suite for HistogramRegion. Tests management of masks and histograms for image
+ * regions.
  */
 @DisplayName("HistogramRegion Tests")
 public class HistogramRegionTest extends BrobotTestBase {
-    
+
     private HistogramRegion histogramRegion;
     private Mat testMask1;
     private Mat testMask2;
     private Mat testHistogram1;
     private Mat testHistogram2;
     private Mat combinedHistogram;
-    
+
     @BeforeEach
     @Override
     public void setupTest() {
         super.setupTest();
         histogramRegion = new HistogramRegion();
-        
+
         // Create test masks (binary images)
         testMask1 = new Mat(100, 100, CV_8UC1, Scalar.all(0)); // Initialize with zeros
         // Set some pixels to white (255) to create a mask
@@ -45,7 +46,7 @@ public class HistogramRegionTest extends BrobotTestBase {
                 indexer1.put(i, j, 255);
             }
         }
-        
+
         testMask2 = new Mat(100, 100, CV_8UC1, Scalar.all(0)); // Initialize with zeros
         // Different mask pattern
         UByteRawIndexer indexer2 = testMask2.createIndexer();
@@ -54,30 +55,29 @@ public class HistogramRegionTest extends BrobotTestBase {
                 indexer2.put(i, j, 255);
             }
         }
-        
+
         // Create test histograms
         testHistogram1 = new Mat(256, 1, CV_32F);
         FloatIndexer histIndexer1 = testHistogram1.createIndexer();
         for (int i = 0; i < 256; i++) {
-            histIndexer1.put(i, 0, (float)i / 256.0f);
+            histIndexer1.put(i, 0, (float) i / 256.0f);
         }
-        
+
         testHistogram2 = new Mat(256, 1, CV_32F);
         FloatIndexer histIndexer2 = testHistogram2.createIndexer();
         for (int i = 0; i < 256; i++) {
-            histIndexer2.put(i, 0, (float)(255 - i) / 256.0f);
+            histIndexer2.put(i, 0, (float) (255 - i) / 256.0f);
         }
-        
+
         // Create combined histogram
         combinedHistogram = new Mat(256, 1, CV_32F);
         FloatIndexer combinedIndexer = combinedHistogram.createIndexer();
         for (int i = 0; i < 256; i++) {
-            float combined = (histIndexer1.get(i, 0) + 
-                            histIndexer2.get(i, 0)) / 2.0f;
+            float combined = (histIndexer1.get(i, 0) + histIndexer2.get(i, 0)) / 2.0f;
             combinedIndexer.put(i, 0, combined);
         }
     }
-    
+
     @AfterEach
     public void tearDown() {
         // Release OpenCV Mat objects to prevent memory leaks
@@ -87,16 +87,16 @@ public class HistogramRegionTest extends BrobotTestBase {
         if (testHistogram2 != null && !testHistogram2.isNull()) testHistogram2.release();
         if (combinedHistogram != null && !combinedHistogram.isNull()) combinedHistogram.release();
     }
-    
+
     @Nested
     @DisplayName("Constructor and Initialization")
     class ConstructorTests {
-        
+
         @Test
         @DisplayName("Should create empty histogram region")
         void shouldCreateEmptyHistogramRegion() {
             HistogramRegion region = new HistogramRegion();
-            
+
             assertNotNull(region);
             assertNotNull(region.getMasks());
             assertNotNull(region.getHistograms());
@@ -104,7 +104,7 @@ public class HistogramRegionTest extends BrobotTestBase {
             assertTrue(region.getHistograms().isEmpty());
             assertNull(region.getHistogram());
         }
-        
+
         @Test
         @DisplayName("Should initialize with empty lists")
         void shouldInitializeWithEmptyLists() {
@@ -112,132 +112,132 @@ public class HistogramRegionTest extends BrobotTestBase {
             assertEquals(0, histogramRegion.getHistograms().size());
         }
     }
-    
+
     @Nested
     @DisplayName("Mask Management")
     class MaskManagement {
-        
+
         @Test
         @DisplayName("Should add single mask")
         void shouldAddSingleMask() {
             histogramRegion.getMasks().add(testMask1);
-            
+
             assertEquals(1, histogramRegion.getMasks().size());
             assertEquals(testMask1, histogramRegion.getMasks().get(0));
         }
-        
+
         @Test
         @DisplayName("Should add multiple masks")
         void shouldAddMultipleMasks() {
             histogramRegion.getMasks().add(testMask1);
             histogramRegion.getMasks().add(testMask2);
-            
+
             assertEquals(2, histogramRegion.getMasks().size());
             assertEquals(testMask1, histogramRegion.getMasks().get(0));
             assertEquals(testMask2, histogramRegion.getMasks().get(1));
         }
-        
+
         @Test
         @DisplayName("Should set mask list")
         void shouldSetMaskList() {
             List<Mat> masks = List.of(testMask1, testMask2);
             histogramRegion.setMasks(masks);
-            
+
             assertEquals(2, histogramRegion.getMasks().size());
             assertTrue(histogramRegion.getMasks().contains(testMask1));
             assertTrue(histogramRegion.getMasks().contains(testMask2));
         }
-        
+
         @Test
         @DisplayName("Should clear masks")
         void shouldClearMasks() {
             histogramRegion.getMasks().add(testMask1);
             histogramRegion.getMasks().add(testMask2);
             assertEquals(2, histogramRegion.getMasks().size());
-            
+
             histogramRegion.getMasks().clear();
             assertEquals(0, histogramRegion.getMasks().size());
         }
     }
-    
+
     @Nested
     @DisplayName("Histogram Management")
     class HistogramManagement {
-        
+
         @Test
         @DisplayName("Should add single histogram")
         void shouldAddSingleHistogram() {
             histogramRegion.getHistograms().add(testHistogram1);
-            
+
             assertEquals(1, histogramRegion.getHistograms().size());
             assertEquals(testHistogram1, histogramRegion.getHistograms().get(0));
         }
-        
+
         @Test
         @DisplayName("Should add multiple histograms")
         void shouldAddMultipleHistograms() {
             histogramRegion.getHistograms().add(testHistogram1);
             histogramRegion.getHistograms().add(testHistogram2);
-            
+
             assertEquals(2, histogramRegion.getHistograms().size());
             assertEquals(testHistogram1, histogramRegion.getHistograms().get(0));
             assertEquals(testHistogram2, histogramRegion.getHistograms().get(1));
         }
-        
+
         @Test
         @DisplayName("Should set histogram list")
         void shouldSetHistogramList() {
             List<Mat> histograms = List.of(testHistogram1, testHistogram2);
             histogramRegion.setHistograms(histograms);
-            
+
             assertEquals(2, histogramRegion.getHistograms().size());
             assertTrue(histogramRegion.getHistograms().contains(testHistogram1));
             assertTrue(histogramRegion.getHistograms().contains(testHistogram2));
         }
-        
+
         @Test
         @DisplayName("Should set combined histogram")
         void shouldSetCombinedHistogram() {
             histogramRegion.setHistogram(combinedHistogram);
-            
+
             assertNotNull(histogramRegion.getHistogram());
             assertEquals(combinedHistogram, histogramRegion.getHistogram());
         }
-        
+
         @Test
         @DisplayName("Should replace combined histogram")
         void shouldReplaceCombinedHistogram() {
             histogramRegion.setHistogram(testHistogram1);
             assertEquals(testHistogram1, histogramRegion.getHistogram());
-            
+
             histogramRegion.setHistogram(combinedHistogram);
             assertEquals(combinedHistogram, histogramRegion.getHistogram());
         }
     }
-    
+
     @Nested
     @DisplayName("Complete Region Setup")
     class CompleteRegionSetup {
-        
+
         @Test
         @DisplayName("Should setup complete region with masks and histograms")
         void shouldSetupCompleteRegion() {
             // Add masks
             histogramRegion.getMasks().add(testMask1);
             histogramRegion.getMasks().add(testMask2);
-            
+
             // Add individual histograms
             histogramRegion.getHistograms().add(testHistogram1);
             histogramRegion.getHistograms().add(testHistogram2);
-            
+
             // Set combined histogram
             histogramRegion.setHistogram(combinedHistogram);
-            
+
             // Verify complete setup
             assertEquals(2, histogramRegion.getMasks().size());
             assertEquals(2, histogramRegion.getHistograms().size());
             assertNotNull(histogramRegion.getHistogram());
-            
+
             // Verify data integrity
             assertEquals(testMask1, histogramRegion.getMasks().get(0));
             assertEquals(testMask2, histogramRegion.getMasks().get(1));
@@ -245,7 +245,7 @@ public class HistogramRegionTest extends BrobotTestBase {
             assertEquals(testHistogram2, histogramRegion.getHistograms().get(1));
             assertEquals(combinedHistogram, histogramRegion.getHistogram());
         }
-        
+
         @Test
         @DisplayName("Should maintain consistency between masks and histograms count")
         void shouldMaintainConsistency() {
@@ -254,52 +254,53 @@ public class HistogramRegionTest extends BrobotTestBase {
             histogramRegion.getMasks().add(testMask2);
             histogramRegion.getHistograms().add(testHistogram1);
             histogramRegion.getHistograms().add(testHistogram2);
-            
-            assertEquals(histogramRegion.getMasks().size(), 
-                        histogramRegion.getHistograms().size(),
-                        "Should have same number of masks and histograms");
+
+            assertEquals(
+                    histogramRegion.getMasks().size(),
+                    histogramRegion.getHistograms().size(),
+                    "Should have same number of masks and histograms");
         }
     }
-    
+
     @Nested
     @DisplayName("Edge Cases")
     class EdgeCases {
-        
+
         @Test
         @DisplayName("Should handle null mask addition")
         void shouldHandleNullMask() {
             histogramRegion.getMasks().add(null);
-            
+
             assertEquals(1, histogramRegion.getMasks().size());
             assertNull(histogramRegion.getMasks().get(0));
         }
-        
+
         @Test
         @DisplayName("Should handle null histogram addition")
         void shouldHandleNullHistogram() {
             histogramRegion.getHistograms().add(null);
-            
+
             assertEquals(1, histogramRegion.getHistograms().size());
             assertNull(histogramRegion.getHistograms().get(0));
         }
-        
+
         @Test
         @DisplayName("Should handle null combined histogram")
         void shouldHandleNullCombinedHistogram() {
             histogramRegion.setHistogram(null);
-            
+
             assertNull(histogramRegion.getHistogram());
         }
-        
+
         @Test
         @DisplayName("Should handle empty Mat objects")
         void shouldHandleEmptyMats() {
             Mat emptyMat = new Mat();
-            
+
             histogramRegion.getMasks().add(emptyMat);
             histogramRegion.getHistograms().add(emptyMat);
             histogramRegion.setHistogram(emptyMat);
-            
+
             assertEquals(1, histogramRegion.getMasks().size());
             assertEquals(1, histogramRegion.getHistograms().size());
             assertTrue(histogramRegion.getMasks().get(0).empty());
@@ -307,17 +308,17 @@ public class HistogramRegionTest extends BrobotTestBase {
             assertTrue(histogramRegion.getHistogram().empty());
         }
     }
-    
+
     @Nested
     @DisplayName("Use Cases")
     class UseCases {
-        
+
         @Test
         @DisplayName("Should represent top-left corner region")
         void shouldRepresentTopLeftCorner() {
             // Create mask for top-left corner (25% of image)
             Mat topLeftMask = new Mat(100, 100, CV_8UC1, Scalar.all(0));
-            
+
             // Use indexer to set top-left quadrant to white
             UByteRawIndexer indexer = topLeftMask.createIndexer();
             for (int i = 0; i < 50; i++) {
@@ -325,10 +326,10 @@ public class HistogramRegionTest extends BrobotTestBase {
                     indexer.put(i, j, 255);
                 }
             }
-            
+
             try {
                 histogramRegion.getMasks().add(topLeftMask);
-                
+
                 // Verify mask represents top-left region
                 Mat mask = histogramRegion.getMasks().get(0);
                 UByteRawIndexer maskIndexer = mask.createIndexer();
@@ -340,18 +341,18 @@ public class HistogramRegionTest extends BrobotTestBase {
                 topLeftMask.release();
             }
         }
-        
+
         @Test
         @DisplayName("Should represent center ellipse region")
         void shouldRepresentCenterEllipse() {
             // Create a simple circular mask in center
             Mat ellipseMask = new Mat(100, 100, CV_8UC1, Scalar.all(0));
-            
+
             // Simple circle approximation
             int centerX = 50;
             int centerY = 50;
             int radius = 30;
-            
+
             // Use indexer to create circular mask
             UByteRawIndexer indexer = ellipseMask.createIndexer();
             for (int i = 0; i < 100; i++) {
@@ -363,10 +364,10 @@ public class HistogramRegionTest extends BrobotTestBase {
                     }
                 }
             }
-            
+
             try {
                 histogramRegion.getMasks().add(ellipseMask);
-                
+
                 // Verify center is white
                 Mat mask = histogramRegion.getMasks().get(0);
                 UByteRawIndexer maskIndexer = mask.createIndexer();

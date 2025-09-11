@@ -1,15 +1,14 @@
 package io.github.jspinak.brobot.runner.json.validation.crossref;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import io.github.jspinak.brobot.runner.json.validation.crossref.StateReferenceValidator;
-import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
-import io.github.jspinak.brobot.runner.json.validation.model.ValidationSeverity;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationSeverity;
 
 class StateReferenceValidatorTest2 {
 
@@ -39,13 +38,22 @@ class StateReferenceValidatorTest2 {
         // Debug output to understand what errors are being generated
         if (result.hasErrors()) {
             System.out.println("Unexpected errors found:");
-            result.getErrors().forEach(error -> 
-                System.out.println("  - " + error.errorCode() + ": " + error.message()));
+            result.getErrors()
+                    .forEach(
+                            error ->
+                                    System.out.println(
+                                            "  - " + error.errorCode() + ": " + error.message()));
         }
         if (result.hasWarnings()) {
             System.out.println("Warnings found:");
-            result.getWarnings().forEach(warning -> 
-                System.out.println("  - " + warning.errorCode() + ": " + warning.message()));
+            result.getWarnings()
+                    .forEach(
+                            warning ->
+                                    System.out.println(
+                                            "  - "
+                                                    + warning.errorCode()
+                                                    + ": "
+                                                    + warning.message()));
         }
 
         assertFalse(result.hasErrors());
@@ -53,7 +61,8 @@ class StateReferenceValidatorTest2 {
 
     @Test
     public void validateInternalReferences_withInvalidStateTransition_shouldReturnError() {
-        // Create a minimal project with a state transition that references a non-existent state ID (999)
+        // Create a minimal project with a state transition that references a non-existent state ID
+        // (999)
         Map<String, Object> project = new HashMap<>();
 
         // Valid State with ID 1
@@ -80,8 +89,10 @@ class StateReferenceValidatorTest2 {
         ValidationResult result = validator.validateInternalReferences(project);
 
         // check if the error is detected
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.message().contains("references non-existent state ID 999")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(
+                                e -> e.message().contains("references non-existent state ID 999")));
     }
 
     @Test
@@ -89,14 +100,16 @@ class StateReferenceValidatorTest2 {
         Map<String, Object> project = createValidProject();
 
         // reference to a non-existent stateImageId (999)
-        List<Map<String, Object>> transitions = (List<Map<String, Object>>) project.get("stateTransitions");
+        List<Map<String, Object>> transitions =
+                (List<Map<String, Object>>) project.get("stateTransitions");
         transitions.get(0).put("stateImageId", 999); // non-existent ID
 
         ValidationResult result = validator.validateInternalReferences(project);
 
         assertTrue(result.hasErrors());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Invalid stateImage reference")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(e -> e.errorCode().equals("Invalid stateImage reference")));
     }
 
     @Test
@@ -110,14 +123,17 @@ class StateReferenceValidatorTest2 {
         ValidationResult result = validator.validateInternalReferences(project);
 
         assertTrue(result.hasErrors());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Invalid canHide reference")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(e -> e.errorCode().equals("Invalid canHide reference")));
     }
 
     @Test
     void validateStateReferencesInFunctions_withNullProjectOrDsl_shouldReturnCriticalError() {
-        ValidationResult result1 = validator.validateStateReferencesInFunctions(null, createValidDsl());
-        ValidationResult result2 = validator.validateStateReferencesInFunctions(createValidProject(), null);
+        ValidationResult result1 =
+                validator.validateStateReferencesInFunctions(null, createValidDsl());
+        ValidationResult result2 =
+                validator.validateStateReferencesInFunctions(createValidProject(), null);
 
         assertTrue(result1.hasCriticalErrors());
         assertTrue(result2.hasCriticalErrors());
@@ -139,8 +155,10 @@ class StateReferenceValidatorTest2 {
         Map<String, Object> dsl = createValidDsl(); // Now creates state.openState(1)
 
         // Set an invalid state ID (999) in the DSL
-        List<Map<String, Object>> functions = (List<Map<String, Object>>) dsl.get("automationFunctions");
-        List<Map<String, Object>> statements = (List<Map<String, Object>>) functions.get(0).get("statements");
+        List<Map<String, Object>> functions =
+                (List<Map<String, Object>>) dsl.get("automationFunctions");
+        List<Map<String, Object>> statements =
+                (List<Map<String, Object>>) functions.get(0).get("statements");
         Map<String, Object> methodCall = statements.getFirst();
         List<Map<String, Object>> args = (List<Map<String, Object>>) methodCall.get("arguments");
         args.getFirst().put("value", 999); // non-existent state ID for openState
@@ -148,18 +166,43 @@ class StateReferenceValidatorTest2 {
         ValidationResult result = validator.validateStateReferencesInFunctions(project, dsl);
 
         // Debugging output from the test
-        if (result.getErrors().stream().noneMatch(e -> e.severity() == ValidationSeverity.ERROR)) { // Assuming hasErrors means at least one error of any type
-            System.out.println("Test validateStateReferencesInFunctions_withInvalidStateId_shouldReturnError: No errors found. Result: " + result.getErrors());
+        if (result.getErrors().stream()
+                .noneMatch(
+                        e ->
+                                e.severity()
+                                        == ValidationSeverity
+                                                .ERROR)) { // Assuming hasErrors means at least one
+            // error of any type
+            System.out.println(
+                    "Test validateStateReferencesInFunctions_withInvalidStateId_shouldReturnError:"
+                            + " No errors found. Result: "
+                            + result.getErrors());
         } else {
-            System.out.println("Test validateStateReferencesInFunctions_withInvalidStateId_shouldReturnError: Errors found:");
-            result.getErrors().forEach(error -> System.out.println("  - Message: " + error.message() + ", Code: " + error.errorCode()));
+            System.out.println(
+                    "Test validateStateReferencesInFunctions_withInvalidStateId_shouldReturnError:"
+                            + " Errors found:");
+            result.getErrors()
+                    .forEach(
+                            error ->
+                                    System.out.println(
+                                            "  - Message: "
+                                                    + error.message()
+                                                    + ", Code: "
+                                                    + error.errorCode()));
         }
 
         // Corrected assertion based on the ValidationResult model
-        assertFalse(result.isValid(), "Validation result should not be valid when there are errors.");
-        assertTrue(result.getErrors().stream()
-                        .anyMatch(e -> e.message().contains("999") &&
-                                e.errorCode().equals("Invalid state reference in function")),
+        assertFalse(
+                result.isValid(), "Validation result should not be valid when there are errors.");
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(
+                                e ->
+                                        e.message().contains("999")
+                                                && e.errorCode()
+                                                        .equals(
+                                                                "Invalid state reference in"
+                                                                        + " function")),
                 "Should contain an error about referencing non-existent state ID 999.");
     }
 

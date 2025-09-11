@@ -1,20 +1,18 @@
 package io.github.jspinak.brobot.imageUtils;
 
-import io.github.jspinak.brobot.model.element.Location;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
-import io.github.jspinak.brobot.util.image.visualization.MatBuilder;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
+import io.github.jspinak.brobot.util.image.visualization.MatBuilder;
 
-/**
- * Tests Mat operations which work in headless mode.
- */
+/** Tests Mat operations which work in headless mode. */
 class MatBuilderTest {
 
     @BeforeAll
@@ -38,8 +36,8 @@ class MatBuilderTest {
     @Test
     void addSubMat() {
         MatBuilder matBuilder = getMatBuilder();
-        Mat submat = MatrixUtilities.makeMat(new Size(20,20), 24, 100);
-        matBuilder.addSubMat(new Location(100,100), submat);
+        Mat submat = MatrixUtilities.makeMat(new Size(20, 20), 24, 100);
+        matBuilder.addSubMat(new Location(100, 100), submat);
         Mat mat = matBuilder.build();
         Double d = MatrixUtilities.getDouble(101, 101, 0, mat);
         assertEquals(100, d);

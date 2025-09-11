@@ -1,5 +1,16 @@
 package io.github.jspinak.brobot.action;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
+
+import java.util.List;
+
+import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
+
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
@@ -8,27 +19,15 @@ import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 import io.github.jspinak.brobot.test.config.MockOnlyTestConfiguration;
-import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assumptions.*;
 
 /**
- * Edge case tests for Action class to improve test coverage.
- * Focuses on untested scenarios and boundary conditions.
- * Forces mock mode to ensure tests work in headless environments.
+ * Edge case tests for Action class to improve test coverage. Focuses on untested scenarios and
+ * boundary conditions. Forces mock mode to ensure tests work in headless environments.
  */
 @DisplayName("Action Edge Case Tests")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@ContextConfiguration(initializers = { MockOnlyTestConfiguration.class })
+@ContextConfiguration(initializers = {MockOnlyTestConfiguration.class})
 public class ActionEdgeCaseTest extends BrobotIntegrationTestBase {
 
     @Autowired(required = false)
@@ -73,7 +72,8 @@ public class ActionEdgeCaseTest extends BrobotIntegrationTestBase {
         assertNotNull(result, "Result should not be null for empty collection");
         // In mock mode, action might succeed even with empty collection
         assertNotNull(result.isSuccess());
-        assertTrue(result.getMatchList().isEmpty() || !result.getMatchList().isEmpty(),
+        assertTrue(
+                result.getMatchList().isEmpty() || !result.getMatchList().isEmpty(),
                 "Match list should be handled for empty collection");
     }
 
@@ -82,18 +82,20 @@ public class ActionEdgeCaseTest extends BrobotIntegrationTestBase {
     @DisplayName("Should handle multiple regions in single action")
     void testMultipleRegions() {
         // Given
-        List<Region> regions = List.of(
-                new Region(0, 0, 100, 100),
-                new Region(200, 200, 100, 100),
-                new Region(400, 400, 100, 100));
+        List<Region> regions =
+                List.of(
+                        new Region(0, 0, 100, 100),
+                        new Region(200, 200, 100, 100),
+                        new Region(400, 400, 100, 100));
 
         ObjectCollection.Builder builder = new ObjectCollection.Builder();
         regions.forEach(builder::withRegions);
         ObjectCollection collection = builder.build();
 
-        PatternFindOptions config = new PatternFindOptions.Builder()
-                .setStrategy(PatternFindOptions.Strategy.ALL)
-                .build();
+        PatternFindOptions config =
+                new PatternFindOptions.Builder()
+                        .setStrategy(PatternFindOptions.Strategy.ALL)
+                        .build();
 
         // When
         ActionResult result = action.perform(config, collection);
@@ -108,9 +110,8 @@ public class ActionEdgeCaseTest extends BrobotIntegrationTestBase {
     @DisplayName("Should handle findWithTimeout with ObjectCollection overload")
     void testFindWithTimeoutObjectCollection() {
         // Given
-        ObjectCollection collection = new ObjectCollection.Builder()
-                .withRegions(new Region(100, 100, 50, 50))
-                .build();
+        ObjectCollection collection =
+                new ObjectCollection.Builder().withRegions(new Region(100, 100, 50, 50)).build();
 
         // When - testing the untested overload
         ActionResult result = action.findWithTimeout(1.0, collection);
@@ -131,9 +132,8 @@ public class ActionEdgeCaseTest extends BrobotIntegrationTestBase {
     void testPerformWithDescription() {
         // Given
         String description = "Test action with custom description";
-        ObjectCollection collection = new ObjectCollection.Builder()
-                .withRegions(new Region(50, 50, 100, 100))
-                .build();
+        ObjectCollection collection =
+                new ObjectCollection.Builder().withRegions(new Region(50, 50, 100, 100)).build();
         ClickOptions config = new ClickOptions.Builder().build();
 
         // When
@@ -200,7 +200,8 @@ public class ActionEdgeCaseTest extends BrobotIntegrationTestBase {
         // Then - Handle null case
         if (result != null) {
             if (result.getMatchList() != null && !result.getMatchList().isEmpty()) {
-                assertFalse(result.getMatchList().isEmpty(), "Should have match for clicked region");
+                assertFalse(
+                        result.getMatchList().isEmpty(), "Should have match for clicked region");
             } else {
                 // Match list may be empty in mock mode
                 assertTrue(true, "Match list is empty in mock mode");
@@ -252,12 +253,13 @@ public class ActionEdgeCaseTest extends BrobotIntegrationTestBase {
     @DisplayName("Should handle mixed object types in ObjectCollection")
     void testMixedObjectTypes() {
         // Given
-        ObjectCollection mixed = new ObjectCollection.Builder()
-                .withRegions(new Region(0, 0, 100, 100))
-                .withLocations(new Location(200, 200))
-                .withStrings("test text")
-                .withImages(new StateImage.Builder().setName("mixed").build())
-                .build();
+        ObjectCollection mixed =
+                new ObjectCollection.Builder()
+                        .withRegions(new Region(0, 0, 100, 100))
+                        .withLocations(new Location(200, 200))
+                        .withStrings("test text")
+                        .withImages(new StateImage.Builder().setName("mixed").build())
+                        .build();
 
         // When
         ActionResult result = action.perform(new ClickOptions.Builder().build(), mixed);
@@ -272,20 +274,20 @@ public class ActionEdgeCaseTest extends BrobotIntegrationTestBase {
     @DisplayName("Should handle perform with varargs ObjectCollections")
     void testPerformWithMultipleObjectCollections() {
         // Given
-        ObjectCollection collection1 = new ObjectCollection.Builder()
-                .withRegions(new Region(0, 0, 50, 50))
-                .build();
-        ObjectCollection collection2 = new ObjectCollection.Builder()
-                .withRegions(new Region(100, 100, 50, 50))
-                .build();
-        ObjectCollection collection3 = new ObjectCollection.Builder()
-                .withRegions(new Region(200, 200, 50, 50))
-                .build();
+        ObjectCollection collection1 =
+                new ObjectCollection.Builder().withRegions(new Region(0, 0, 50, 50)).build();
+        ObjectCollection collection2 =
+                new ObjectCollection.Builder().withRegions(new Region(100, 100, 50, 50)).build();
+        ObjectCollection collection3 =
+                new ObjectCollection.Builder().withRegions(new Region(200, 200, 50, 50)).build();
 
         // When
-        ActionResult result = action.perform(
-                new PatternFindOptions.Builder().build(),
-                collection1, collection2, collection3);
+        ActionResult result =
+                action.perform(
+                        new PatternFindOptions.Builder().build(),
+                        collection1,
+                        collection2,
+                        collection3);
 
         // Then
         assertNotNull(result);
@@ -297,10 +299,11 @@ public class ActionEdgeCaseTest extends BrobotIntegrationTestBase {
     @DisplayName("Should handle type action on ObjectCollection")
     void testTypeOnObjectCollection() {
         // Given
-        ObjectCollection collection = new ObjectCollection.Builder()
-                .withStrings("Text to type")
-                .withRegions(new Region(100, 100, 200, 30))
-                .build();
+        ObjectCollection collection =
+                new ObjectCollection.Builder()
+                        .withStrings("Text to type")
+                        .withRegions(new Region(100, 100, 200, 30))
+                        .build();
 
         // When
         ActionResult result = action.type(collection);
@@ -315,10 +318,7 @@ public class ActionEdgeCaseTest extends BrobotIntegrationTestBase {
     @DisplayName("Should handle ActionType with multiple regions")
     void testActionTypeWithMultipleRegions() {
         // Given
-        Region[] regions = {
-                new Region(0, 0, 100, 100),
-                new Region(200, 200, 100, 100)
-        };
+        Region[] regions = {new Region(0, 0, 100, 100), new Region(200, 200, 100, 100)};
 
         // When - Note: This uses deprecated method
         @SuppressWarnings("deprecation")
@@ -339,8 +339,8 @@ public class ActionEdgeCaseTest extends BrobotIntegrationTestBase {
     void testClickWithMultipleStateImages() {
         // Given
         StateImage[] images = {
-                new StateImage.Builder().setName("button1").build(),
-                new StateImage.Builder().setName("button2").build()
+            new StateImage.Builder().setName("button1").build(),
+            new StateImage.Builder().setName("button2").build()
         };
 
         // When

@@ -1,33 +1,33 @@
 package io.github.jspinak.brobot.runner.util;
 
-import lombok.Data;
-
-import javafx.application.Platform;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import javafx.application.Platform;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import lombok.Data;
 
 /**
- * Utility class for JavaFX thread handling.
- * Simplifies executing tasks on the JavaFX Application Thread and in background threads.
+ * Utility class for JavaFX thread handling. Simplifies executing tasks on the JavaFX Application
+ * Thread and in background threads.
  */
 @Data
 public class FxThreadUtils {
     private static final Logger logger = LoggerFactory.getLogger(FxThreadUtils.class);
 
-    private static final ExecutorService executor = Executors.newCachedThreadPool(r -> {
-        Thread thread = new Thread(r, "FxThreadUtils-Worker");
-        thread.setDaemon(true);
-        return thread;
-    });
+    private static final ExecutorService executor =
+            Executors.newCachedThreadPool(
+                    r -> {
+                        Thread thread = new Thread(r, "FxThreadUtils-Worker");
+                        thread.setDaemon(true);
+                        return thread;
+                    });
 
-    /**
-     * Private constructor to prevent instantiation.
-     */
+    /** Private constructor to prevent instantiation. */
     private FxThreadUtils() {
         // Utility class
     }
@@ -41,7 +41,8 @@ public class FxThreadUtils {
      * @throws InterruptedException If the thread is interrupted
      * @throws ExecutionException If an error occurs during execution
      */
-    public static <T> T runAndWait(Callable<T> action) throws InterruptedException, ExecutionException {
+    public static <T> T runAndWait(Callable<T> action)
+            throws InterruptedException, ExecutionException {
         if (Platform.isFxApplicationThread()) {
             try {
                 return action.call();
@@ -52,13 +53,14 @@ public class FxThreadUtils {
 
         final CompletableFuture<T> future = new CompletableFuture<>();
 
-        Platform.runLater(() -> {
-            try {
-                future.complete(action.call());
-            } catch (Throwable t) {
-                future.completeExceptionally(t);
-            }
-        });
+        Platform.runLater(
+                () -> {
+                    try {
+                        future.complete(action.call());
+                    } catch (Throwable t) {
+                        future.completeExceptionally(t);
+                    }
+                });
 
         return future.get();
     }
@@ -78,14 +80,15 @@ public class FxThreadUtils {
 
         final CompletableFuture<Void> future = new CompletableFuture<>();
 
-        Platform.runLater(() -> {
-            try {
-                action.run();
-                future.complete(null);
-            } catch (Throwable t) {
-                future.completeExceptionally(t);
-            }
-        });
+        Platform.runLater(
+                () -> {
+                    try {
+                        action.run();
+                        future.complete(null);
+                    } catch (Throwable t) {
+                        future.completeExceptionally(t);
+                    }
+                });
 
         future.get();
     }
@@ -99,14 +102,15 @@ public class FxThreadUtils {
     public static CompletableFuture<Void> runAsync(Runnable action) {
         CompletableFuture<Void> future = new CompletableFuture<>();
 
-        Platform.runLater(() -> {
-            try {
-                action.run();
-                future.complete(null);
-            } catch (Throwable t) {
-                future.completeExceptionally(t);
-            }
-        });
+        Platform.runLater(
+                () -> {
+                    try {
+                        action.run();
+                        future.complete(null);
+                    } catch (Throwable t) {
+                        future.completeExceptionally(t);
+                    }
+                });
 
         return future;
     }
@@ -121,13 +125,14 @@ public class FxThreadUtils {
     public static <T> CompletableFuture<T> runAsync(Callable<T> action) {
         CompletableFuture<T> future = new CompletableFuture<>();
 
-        Platform.runLater(() -> {
-            try {
-                future.complete(action.call());
-            } catch (Throwable t) {
-                future.completeExceptionally(t);
-            }
-        });
+        Platform.runLater(
+                () -> {
+                    try {
+                        future.complete(action.call());
+                    } catch (Throwable t) {
+                        future.completeExceptionally(t);
+                    }
+                });
 
         return future;
     }
@@ -142,14 +147,15 @@ public class FxThreadUtils {
     public static <T> CompletableFuture<T> runInBackground(Callable<T> task) {
         CompletableFuture<T> future = new CompletableFuture<>();
 
-        executor.submit(() -> {
-            try {
-                T result = task.call();
-                future.complete(result);
-            } catch (Throwable t) {
-                future.completeExceptionally(t);
-            }
-        });
+        executor.submit(
+                () -> {
+                    try {
+                        T result = task.call();
+                        future.complete(result);
+                    } catch (Throwable t) {
+                        future.completeExceptionally(t);
+                    }
+                });
 
         return future;
     }
@@ -163,14 +169,15 @@ public class FxThreadUtils {
     public static CompletableFuture<Void> runInBackground(Runnable task) {
         CompletableFuture<Void> future = new CompletableFuture<>();
 
-        executor.submit(() -> {
-            try {
-                task.run();
-                future.complete(null);
-            } catch (Throwable t) {
-                future.completeExceptionally(t);
-            }
-        });
+        executor.submit(
+                () -> {
+                    try {
+                        task.run();
+                        future.complete(null);
+                    } catch (Throwable t) {
+                        future.completeExceptionally(t);
+                    }
+                });
 
         return future;
     }
@@ -187,14 +194,16 @@ public class FxThreadUtils {
             Supplier<T> backgroundTask, Consumer<T> uiConsumer) {
 
         return runInBackground(backgroundTask::get)
-                .thenAcceptAsync(result -> {
-                    Platform.runLater(() -> uiConsumer.accept(result));
-                }, executor);
+                .thenAcceptAsync(
+                        result -> {
+                            Platform.runLater(() -> uiConsumer.accept(result));
+                        },
+                        executor);
     }
 
     /**
-     * Runs a task on a background thread and updates the UI when done.
-     * Allows for different return types in the background and UI tasks.
+     * Runs a task on a background thread and updates the UI when done. Allows for different return
+     * types in the background and UI tasks.
      *
      * @param backgroundTask The task to run in the background
      * @param uiMapper The function that processes the result on the UI thread
@@ -208,20 +217,23 @@ public class FxThreadUtils {
         CompletableFuture<R> future = new CompletableFuture<>();
 
         runInBackground(backgroundTask::get)
-                .thenAccept(result -> {
-                    Platform.runLater(() -> {
-                        try {
-                            R mappedResult = uiMapper.apply(result);
-                            future.complete(mappedResult);
-                        } catch (Throwable t) {
-                            future.completeExceptionally(t);
-                        }
-                    });
-                })
-                .exceptionally(ex -> {
-                    future.completeExceptionally(ex);
-                    return null;
-                });
+                .thenAccept(
+                        result -> {
+                            Platform.runLater(
+                                    () -> {
+                                        try {
+                                            R mappedResult = uiMapper.apply(result);
+                                            future.complete(mappedResult);
+                                        } catch (Throwable t) {
+                                            future.completeExceptionally(t);
+                                        }
+                                    });
+                        })
+                .exceptionally(
+                        ex -> {
+                            future.completeExceptionally(ex);
+                            return null;
+                        });
 
         return future;
     }
@@ -241,9 +253,7 @@ public class FxThreadUtils {
         }
     }
 
-    /**
-     * Shuts down the executor service.
-     */
+    /** Shuts down the executor service. */
     public static void shutdown() {
         executor.shutdown();
         try {

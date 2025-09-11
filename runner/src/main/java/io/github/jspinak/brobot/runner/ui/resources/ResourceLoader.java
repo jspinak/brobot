@@ -1,10 +1,13 @@
 package io.github.jspinak.brobot.runner.ui.resources;
 
-import lombok.Data;
-
-import io.github.jspinak.brobot.runner.events.EventBus;
-import io.github.jspinak.brobot.runner.events.LogEvent;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import javafx.scene.image.Image;
+
+import jakarta.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,15 +15,14 @@ import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import io.github.jspinak.brobot.runner.events.EventBus;
+import io.github.jspinak.brobot.runner.events.LogEvent;
+
+import lombok.Data;
 
 /**
- * Handles loading and caching of application resources such as images,
- * icons, and localized messages.
+ * Handles loading and caching of application resources such as images, icons, and localized
+ * messages.
  */
 @Component
 @Data
@@ -104,8 +106,8 @@ public class ResourceLoader {
             return image;
         } catch (Exception e) {
             logger.error("Error loading image: {}", imagePath, e);
-            eventBus.publish(LogEvent.error(this,
-                    "Failed to load image: " + imagePath, "Resources", e));
+            eventBus.publish(
+                    LogEvent.error(this, "Failed to load image: " + imagePath, "Resources", e));
             return null;
         }
     }
@@ -189,9 +191,7 @@ public class ResourceLoader {
         }
     }
 
-    /**
-     * Clears the image cache.
-     */
+    /** Clears the image cache. */
     public void clearImageCache() {
         imageCache.clear();
         logger.info("Image cache cleared");
@@ -219,7 +219,7 @@ public class ResourceLoader {
                 Locale.GERMAN,
                 Locale.FRENCH,
                 Locale.CHINESE,
-                Locale.of("es")  // Spanish
-        );
+                Locale.of("es") // Spanish
+                );
     }
 }

@@ -1,5 +1,9 @@
 package io.github.jspinak.brobot.action.basic.type;
-import io.github.jspinak.brobot.action.ActionType;
+
+import java.util.logging.Logger;
+
+import org.sikuli.script.Screen;
+import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;
@@ -7,41 +11,30 @@ import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
-import org.sikuli.basics.Settings;
-import org.sikuli.script.Key;
-import org.sikuli.script.Screen;
-import org.springframework.stereotype.Component;
-
-import java.util.logging.Logger;
 
 /**
  * Pure Type action that types text without embedded Find.
- * <p>
- * This is a "pure" action that only performs the type operation. It can type
- * text at the current cursor location or click on a provided location first.
- * It does not perform any Find operations. This separation enables better
- * testing, cleaner code, and more flexible action composition.
- * </p>
- * 
- * <p>
- * Usage patterns:
+ *
+ * <p>This is a "pure" action that only performs the type operation. It can type text at the current
+ * cursor location or click on a provided location first. It does not perform any Find operations.
+ * This separation enables better testing, cleaner code, and more flexible action composition.
+ *
+ * <p>Usage patterns:
+ *
  * <ul>
- * <li>Type at current location: {@code new TypeV2().perform(actionResult)}</li>
- * <li>Click and type: {@code new TypeV2().perform(actionResult, location)}</li>
- * <li>Type after finding: Use ConditionalActionChain</li>
+ *   <li>Type at current location: {@code new TypeV2().perform(actionResult)}
+ *   <li>Click and type: {@code new TypeV2().perform(actionResult, location)}
+ *   <li>Type after finding: Use ConditionalActionChain
  * </ul>
- * </p>
- * 
- * <p>
- * For Find-then-Type operations, use ConditionalActionChain:
- * 
+ *
+ * <p>For Find-then-Type operations, use ConditionalActionChain:
+ *
  * <pre>{@code
  * ConditionalActionChain.find(findOptions)
  *         .ifFound(new TypeOptions.Builder().withText("Hello").build())
  *         .perform(objectCollection);
  * }</pre>
- * </p>
- * 
+ *
  * @since 2.0
  * @see Type for the legacy version with embedded Find
  * @see ConditionalActionChain for chaining Find with Type
@@ -58,7 +51,9 @@ public class PureType implements ActionInterface {
             try {
                 screen = new Screen();
             } catch (Exception e) {
-                logger.warning("Failed to initialize Screen - running in headless mode: " + e.getMessage());
+                logger.warning(
+                        "Failed to initialize Screen - running in headless mode: "
+                                + e.getMessage());
                 headlessMode = true;
             }
         }
@@ -116,9 +111,7 @@ public class PureType implements ActionInterface {
         }
     }
 
-    /**
-     * Extracts the text to type from ObjectCollections.
-     */
+    /** Extracts the text to type from ObjectCollections. */
     private String extractTextToType(ObjectCollection... collections) {
         // Check ObjectCollections for strings
         for (ObjectCollection collection : collections) {
@@ -130,9 +123,7 @@ public class PureType implements ActionInterface {
         return null;
     }
 
-    /**
-     * Extracts a click location from the provided object collections.
-     */
+    /** Extracts a click location from the provided object collections. */
     private Location extractClickLocation(ObjectCollection... collections) {
         for (ObjectCollection collection : collections) {
             // Check for direct locations
@@ -152,9 +143,7 @@ public class PureType implements ActionInterface {
         return null;
     }
 
-    /**
-     * Types the specified text.
-     */
+    /** Types the specified text. */
     private boolean typeText(String text) {
         try {
             if (headlessMode) {
@@ -180,9 +169,7 @@ public class PureType implements ActionInterface {
         }
     }
 
-    /**
-     * Creates a Match object from a Location for result reporting.
-     */
+    /** Creates a Match object from a Location for result reporting. */
     private Match createMatchFromLocation(Location location) {
         Region region = new Region(location.getX() - 10, location.getY() - 10, 20, 20);
         Match match = new Match(region);

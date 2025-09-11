@@ -1,35 +1,29 @@
 package io.github.jspinak.brobot.action;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
+
+import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
+
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.action.basic.type.TypeOptions;
-import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
-import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
-import io.github.jspinak.brobot.action.composite.drag.DragOptions;
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 import io.github.jspinak.brobot.test.config.MockOnlyTestConfiguration;
-import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
-
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assumptions.*;
 
 /**
- * Comprehensive method coverage tests for Action class.
- * Targets previously untested method combinations and parameter variations.
+ * Comprehensive method coverage tests for Action class. Targets previously untested method
+ * combinations and parameter variations.
  */
 @DisplayName("Action Method Coverage Tests")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@ContextConfiguration(initializers = { MockOnlyTestConfiguration.class })
+@ContextConfiguration(initializers = {MockOnlyTestConfiguration.class})
 public class ActionMethodCoverageTest extends BrobotIntegrationTestBase {
 
     @Autowired(required = false)
@@ -59,16 +53,16 @@ public class ActionMethodCoverageTest extends BrobotIntegrationTestBase {
     @DisplayName("Test perform with null ActionConfig")
     void testPerformWithNullActionConfig() {
         // Given
-        ObjectCollection collection = new ObjectCollection.Builder()
-                .withRegions(new Region(10, 10, 50, 50))
-                .build();
+        ObjectCollection collection =
+                new ObjectCollection.Builder().withRegions(new Region(10, 10, 50, 50)).build();
 
         // When & Then - should handle null config
-        assertDoesNotThrow(() -> {
-            ActionResult result = action.perform((ActionConfig) null, collection);
-            // May return null or handle gracefully
-            assertTrue(result == null || result != null);
-        });
+        assertDoesNotThrow(
+                () -> {
+                    ActionResult result = action.perform((ActionConfig) null, collection);
+                    // May return null or handle gracefully
+                    assertTrue(result == null || result != null);
+                });
     }
 
     @Test
@@ -96,13 +90,14 @@ public class ActionMethodCoverageTest extends BrobotIntegrationTestBase {
     void testFindWithNullStateImage() {
         // Given
         StateImage validImage = new StateImage.Builder().setName("valid").build();
-        StateImage[] mixedImages = { validImage, null, validImage };
+        StateImage[] mixedImages = {validImage, null, validImage};
 
         // When & Then
-        assertDoesNotThrow(() -> {
-            ActionResult result = action.find(mixedImages);
-            // Should handle null elements
-        });
+        assertDoesNotThrow(
+                () -> {
+                    ActionResult result = action.find(mixedImages);
+                    // Should handle null elements
+                });
     }
 
     @Test
@@ -111,9 +106,8 @@ public class ActionMethodCoverageTest extends BrobotIntegrationTestBase {
     void testTypeWithSpecialCharacters() {
         // Given
         String specialText = "!@#$%^&*()_+-=[]{}|;':\",./<>?";
-        ObjectCollection collection = new ObjectCollection.Builder()
-                .withStrings(specialText)
-                .build();
+        ObjectCollection collection =
+                new ObjectCollection.Builder().withStrings(specialText).build();
 
         // When
         ActionResult result = action.type(collection);
@@ -148,18 +142,15 @@ public class ActionMethodCoverageTest extends BrobotIntegrationTestBase {
     void testPerformWithMixedNullObjects() {
         // Given
         Object[] mixedObjects = {
-                new Region(0, 0, 10, 10),
-                null,
-                "text",
-                null,
-                new Location(50, 50)
+            new Region(0, 0, 10, 10), null, "text", null, new Location(50, 50)
         };
 
         // When & Then
-        assertDoesNotThrow(() -> {
-            ActionResult result = action.perform(ActionType.FIND, mixedObjects);
-            // Should filter out nulls
-        });
+        assertDoesNotThrow(
+                () -> {
+                    ActionResult result = action.perform(ActionType.FIND, mixedObjects);
+                    // Should filter out nulls
+                });
     }
 
     @Test
@@ -261,9 +252,8 @@ public class ActionMethodCoverageTest extends BrobotIntegrationTestBase {
         // Given
         String longDescription = "This is a very long description ".repeat(100);
         ClickOptions config = new ClickOptions.Builder().build();
-        ObjectCollection collection = new ObjectCollection.Builder()
-                .withRegions(new Region(10, 10, 20, 20))
-                .build();
+        ObjectCollection collection =
+                new ObjectCollection.Builder().withRegions(new Region(10, 10, 20, 20)).build();
 
         // When
         ActionResult result = action.perform(longDescription, config, collection);
@@ -297,12 +287,7 @@ public class ActionMethodCoverageTest extends BrobotIntegrationTestBase {
     @SuppressWarnings("deprecation")
     void testPerformWithUnicodeStrings() {
         // Given
-        String[] unicodeStrings = {
-                "Hello 世界",
-                "Привет мир",
-                "مرحبا بالعالم",
-                "😀😁😂🤣"
-        };
+        String[] unicodeStrings = {"Hello 世界", "Привет мир", "مرحبا بالعالم", "😀😁😂🤣"};
 
         // When
         ActionResult result = action.perform(ActionType.TYPE, unicodeStrings);
@@ -320,13 +305,14 @@ public class ActionMethodCoverageTest extends BrobotIntegrationTestBase {
     @DisplayName("Test click with multiple null StateImages")
     void testClickWithMultipleNulls() {
         // Given
-        StateImage[] nullImages = { null, null, null };
+        StateImage[] nullImages = {null, null, null};
 
         // When & Then
-        assertDoesNotThrow(() -> {
-            ActionResult result = action.click(nullImages);
-            // Should handle all nulls gracefully
-        });
+        assertDoesNotThrow(
+                () -> {
+                    ActionResult result = action.click(nullImages);
+                    // Should handle all nulls gracefully
+                });
     }
 
     @Test
@@ -406,10 +392,12 @@ public class ActionMethodCoverageTest extends BrobotIntegrationTestBase {
 
         // When & Then - test each ActionType
         for (ActionType type : ActionType.values()) {
-            assertDoesNotThrow(() -> {
-                ActionResult result = action.perform(type, region);
-                // Each type should be handled
-            }, "Failed for ActionType: " + type);
+            assertDoesNotThrow(
+                    () -> {
+                        ActionResult result = action.perform(type, region);
+                        // Each type should be handled
+                    },
+                    "Failed for ActionType: " + type);
         }
     }
 }

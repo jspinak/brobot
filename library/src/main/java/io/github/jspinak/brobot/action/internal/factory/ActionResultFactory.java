@@ -1,39 +1,41 @@
 package io.github.jspinak.brobot.action.internal.factory;
 
-import io.github.jspinak.brobot.model.analysis.scene.SceneAnalyses;
+import java.util.Arrays;
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.internal.execution.ActionLifecycle;
 import io.github.jspinak.brobot.action.internal.find.scene.SceneAnalysisCollectionBuilder;
+import io.github.jspinak.brobot.model.analysis.scene.SceneAnalyses;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Initializes and manages ActionResult objects throughout the action lifecycle.
- * <p>
- * MatchesInitializer serves as a factory for creating properly configured ActionResult
- * instances at the start of action execution. It ensures that all necessary components
- * are initialized, including:
+ *
+ * <p>MatchesInitializer serves as a factory for creating properly configured ActionResult instances
+ * at the start of action execution. It ensures that all necessary components are initialized,
+ * including:
+ *
  * <ul>
- * <li>Action lifecycle tracking with start time and max duration</li>
- * <li>Scene analysis for color-based operations</li>
- * <li>Action configuration and description</li>
+ *   <li>Action lifecycle tracking with start time and max duration
+ *   <li>Scene analysis for color-based operations
+ *   <li>Action configuration and description
  * </ul>
- * <p>
- * This centralized initialization approach solves the complexity of ActionResult objects
- * being passed between multiple classes during execution. By establishing a consistent
- * initialization point, it ensures all actions start with properly configured result
- * containers.
- * <p>
- * <strong>Design rationale:</strong> ActionResult objects accumulate data throughout
- * action execution. Having a dedicated initializer ensures consistency and prevents
- * missing initialization steps that could cause runtime errors.
+ *
+ * <p>This centralized initialization approach solves the complexity of ActionResult objects being
+ * passed between multiple classes during execution. By establishing a consistent initialization
+ * point, it ensures all actions start with properly configured result containers.
+ *
+ * <p><strong>Design rationale:</strong> ActionResult objects accumulate data throughout action
+ * execution. Having a dedicated initializer ensures consistency and prevents missing initialization
+ * steps that could cause runtime errors.
  *
  * @see ActionResult
  * @see ActionLifecycle
@@ -53,7 +55,8 @@ public class ActionResultFactory {
      * @param getSceneAnalysisCollection Service for creating scene analysis data
      * @param time Time service for lifecycle tracking
      */
-    public ActionResultFactory(SceneAnalysisCollectionBuilder getSceneAnalysisCollection, TimeProvider time) {
+    public ActionResultFactory(
+            SceneAnalysisCollectionBuilder getSceneAnalysisCollection, TimeProvider time) {
         this.getSceneAnalysisCollection = getSceneAnalysisCollection;
         this.time = time;
     }
@@ -62,54 +65,57 @@ public class ActionResultFactory {
 
     /**
      * Creates a fully initialized ActionResult for a new action execution using ActionConfig.
-     * <p>
-     * This method sets up all required components for action execution with the new ActionConfig approach.
+     *
+     * <p>This method sets up all required components for action execution with the new ActionConfig
+     * approach.
      *
      * @param actionConfig Configuration controlling action behavior
      * @param actionDescription Human-readable description for logging
      * @param objectCollections Target objects for the action (images, regions, etc.)
      * @return Fully initialized ActionResult ready for action execution
      */
-    public ActionResult init(ActionConfig actionConfig, String actionDescription, ObjectCollection... objectCollections) {
+    public ActionResult init(
+            ActionConfig actionConfig,
+            String actionDescription,
+            ObjectCollection... objectCollections) {
         ActionResult matches = new ActionResult();
-        
+
         // Get search duration from the config if it's a find-based action
         double maxWait = 10.0; // default
         if (actionConfig instanceof io.github.jspinak.brobot.action.basic.find.BaseFindOptions) {
-            io.github.jspinak.brobot.action.basic.find.BaseFindOptions findOptions = 
-                (io.github.jspinak.brobot.action.basic.find.BaseFindOptions) actionConfig;
+            io.github.jspinak.brobot.action.basic.find.BaseFindOptions findOptions =
+                    (io.github.jspinak.brobot.action.basic.find.BaseFindOptions) actionConfig;
             maxWait = findOptions.getSearchDuration();
         }
-        
+
         matches.setActionLifecycle(new ActionLifecycle(time.now(), maxWait));
         matches.setActionConfig(actionConfig);
         matches.setActionDescription(actionDescription);
-        
+
         // For color find operations, create scene analysis
         SceneAnalyses sceneAnalysisCollection;
-        if (actionConfig instanceof io.github.jspinak.brobot.action.basic.find.color.ColorFindOptions) {
-            io.github.jspinak.brobot.action.basic.find.color.ColorFindOptions colorOptions = 
-                (io.github.jspinak.brobot.action.basic.find.color.ColorFindOptions) actionConfig;
-            sceneAnalysisCollection = getSceneAnalysisCollection.get(
-                Arrays.asList(objectCollections), 
-                1, 
-                0.0, 
-                colorOptions
-            );
+        if (actionConfig
+                instanceof io.github.jspinak.brobot.action.basic.find.color.ColorFindOptions) {
+            io.github.jspinak.brobot.action.basic.find.color.ColorFindOptions colorOptions =
+                    (io.github.jspinak.brobot.action.basic.find.color.ColorFindOptions)
+                            actionConfig;
+            sceneAnalysisCollection =
+                    getSceneAnalysisCollection.get(
+                            Arrays.asList(objectCollections), 1, 0.0, colorOptions);
         } else {
             sceneAnalysisCollection = new SceneAnalyses();
         }
-        
+
         matches.setSceneAnalysisCollection(sceneAnalysisCollection);
         return matches;
     }
 
     // Removed ActionOptions-based init methods - use ActionConfig versions instead
-    
+
     /**
      * Initializes ActionResult with ActionConfig and a list of object collections.
-     * <p>
-     * Convenience method that converts the list to varargs format.
+     *
+     * <p>Convenience method that converts the list to varargs format.
      *
      * @param actionConfig Configuration for the action
      * @param objectCollections List of target object collections
@@ -121,20 +127,20 @@ public class ActionResultFactory {
 
     /*
      * Implementation notes for action developers:
-     * 
+     *
      * Each action iteration produces matches that must be properly merged into the
      * global ActionResult. Different actions have different merging strategies:
-     * 
+     *
      * - VANISH: Records images that were previously found but now missing
      * - FIND: Adds all newly discovered match regions
      * - Others: May selectively merge specific data types
-     * 
+     *
      * SceneAnalysisCollection starts with one SceneAnalysis object containing:
      * - Current screen capture (scene)
      * - Match illustrations
      * - Match list and contours
      * - Color/histogram analysis data
-     * 
+     *
      * Most actions should modify the existing SceneAnalysis rather than creating
      * new ones, maintaining consistency in the analysis data.
      */

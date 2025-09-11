@@ -5,11 +5,11 @@ brobot:
   core:
     image-path: images/              # Images are in the project's images folder
     mock: true                       # Set to true for tutorial demonstration
-    
+
   startup:
     verify-initial-states: true      # Verify PromptState on startup
     initial-states: Prompt           # Start with Prompt state
-    
+
   # Visual feedback for tutorial
   highlight:
     enabled: true
@@ -19,20 +19,20 @@ brobot:
       duration: 1.0
     search-region:
       duration: 0.5
-      
+
   # Console logging for tutorial clarity
   console:
     actions:
       enabled: true
       level: NORMAL
       report-highlight: true
-      
+
   # Mock mode timings for smooth tutorial flow
   mock:
     time-find-first: 0.5
     time-find-all: 1.0
     time-click: 0.2
-    
+
   # Action settings
   action:
     similarity: 0.85                 # Default similarity for pattern matching

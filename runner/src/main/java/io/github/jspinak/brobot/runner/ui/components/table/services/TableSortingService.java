@@ -1,12 +1,12 @@
 package io.github.jspinak.brobot.runner.ui.components.table.services;
 
+import java.util.Comparator;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
+import org.springframework.stereotype.Service;
 
 /**
  * Service for managing table sorting operations.
@@ -15,10 +15,10 @@ import java.util.Comparator;
  */
 @Service
 public class TableSortingService<T> {
-    
+
     private SortedList<T> sortedItems;
     private TableView<T> tableView;
-    
+
     /**
      * Initializes sorting with the filtered list.
      *
@@ -29,7 +29,7 @@ public class TableSortingService<T> {
         sortedItems = new SortedList<>(filteredItems);
         return sortedItems;
     }
-    
+
     /**
      * Binds the sorted list to the table view.
      *
@@ -41,7 +41,7 @@ public class TableSortingService<T> {
             sortedItems.comparatorProperty().bind(tableView.comparatorProperty());
         }
     }
-    
+
     /**
      * Sets the sort order for the table.
      *
@@ -53,13 +53,14 @@ public class TableSortingService<T> {
         if (tableView == null) {
             return;
         }
-        
+
         tableView.getSortOrder().clear();
-        column.setSortType(ascending ? TableColumn.SortType.ASCENDING : TableColumn.SortType.DESCENDING);
+        column.setSortType(
+                ascending ? TableColumn.SortType.ASCENDING : TableColumn.SortType.DESCENDING);
         tableView.getSortOrder().add(column);
         tableView.sort();
     }
-    
+
     /**
      * Adds a column to the sort order.
      *
@@ -71,14 +72,15 @@ public class TableSortingService<T> {
         if (tableView == null) {
             return;
         }
-        
-        column.setSortType(ascending ? TableColumn.SortType.ASCENDING : TableColumn.SortType.DESCENDING);
+
+        column.setSortType(
+                ascending ? TableColumn.SortType.ASCENDING : TableColumn.SortType.DESCENDING);
         if (!tableView.getSortOrder().contains(column)) {
             tableView.getSortOrder().add(column);
         }
         tableView.sort();
     }
-    
+
     /**
      * Removes a column from the sort order.
      *
@@ -88,22 +90,20 @@ public class TableSortingService<T> {
         if (tableView == null) {
             return;
         }
-        
+
         tableView.getSortOrder().remove(column);
         tableView.sort();
     }
-    
-    /**
-     * Clears the sort order.
-     */
+
+    /** Clears the sort order. */
     public void clearSortOrder() {
         if (tableView == null) {
             return;
         }
-        
+
         tableView.getSortOrder().clear();
     }
-    
+
     /**
      * Toggles the sort order of a column.
      *
@@ -113,19 +113,21 @@ public class TableSortingService<T> {
         if (tableView == null) {
             return;
         }
-        
+
         if (tableView.getSortOrder().contains(column)) {
             // Toggle between ascending and descending
             TableColumn.SortType currentType = column.getSortType();
-            column.setSortType(currentType == TableColumn.SortType.ASCENDING ? 
-                TableColumn.SortType.DESCENDING : TableColumn.SortType.ASCENDING);
+            column.setSortType(
+                    currentType == TableColumn.SortType.ASCENDING
+                            ? TableColumn.SortType.DESCENDING
+                            : TableColumn.SortType.ASCENDING);
             tableView.sort();
         } else {
             // Add to sort order as ascending
             setSortOrder(column, true);
         }
     }
-    
+
     /**
      * Sets a custom comparator for the sorted list.
      *
@@ -136,7 +138,7 @@ public class TableSortingService<T> {
             sortedItems.setComparator(comparator);
         }
     }
-    
+
     /**
      * Gets the current sort order.
      *
@@ -145,7 +147,7 @@ public class TableSortingService<T> {
     public javafx.collections.ObservableList<TableColumn<T, ?>> getSortOrder() {
         return tableView != null ? tableView.getSortOrder() : null;
     }
-    
+
     /**
      * Checks if a column is in the sort order.
      *
@@ -155,7 +157,7 @@ public class TableSortingService<T> {
     public boolean isInSortOrder(TableColumn<T, ?> column) {
         return tableView != null && tableView.getSortOrder().contains(column);
     }
-    
+
     /**
      * Gets the sort type for a column.
      *
@@ -168,16 +170,14 @@ public class TableSortingService<T> {
         }
         return null;
     }
-    
-    /**
-     * Forces a re-sort of the table.
-     */
+
+    /** Forces a re-sort of the table. */
     public void resort() {
         if (tableView != null) {
             tableView.sort();
         }
     }
-    
+
     /**
      * Gets the sorted items.
      *

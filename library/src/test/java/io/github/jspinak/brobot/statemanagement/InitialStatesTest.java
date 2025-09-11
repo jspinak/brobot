@@ -1,39 +1,37 @@
 package io.github.jspinak.brobot.statemanagement;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.model.state.State;
-import io.github.jspinak.brobot.navigation.service.StateService;
-import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.junit.jupiter.api.BeforeEach;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.navigation.service.StateService;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
 @DisplayName("InitialStates Tests")
 @Timeout(value = 10, unit = TimeUnit.SECONDS) // Prevent CI/CD timeout
 public class InitialStatesTest extends BrobotTestBase {
 
-    @Mock
-    private StateDetector stateDetector;
+    @Mock private StateDetector stateDetector;
 
-    @Mock
-    private StateMemory stateMemory;
+    @Mock private StateMemory stateMemory;
 
-    @Mock
-    private StateService stateService;
+    @Mock private StateService stateService;
 
     private InitialStates initialStates;
     private AutoCloseable mocks;
@@ -45,7 +43,7 @@ public class InitialStatesTest extends BrobotTestBase {
         mocks = MockitoAnnotations.openMocks(this);
         initialStates = new InitialStates(stateDetector, stateMemory, stateService);
     }
-    
+
     @AfterEach
     void tearDown() throws Exception {
         // Always restore mock mode
@@ -242,7 +240,10 @@ public class InitialStatesTest extends BrobotTestBase {
 
         @Test
         @DisplayName("Should search for states in normal mode")
-        @DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Requires non-mock mode")
+        @DisabledIfEnvironmentVariable(
+                named = "CI",
+                matches = "true",
+                disabledReason = "Requires non-mock mode")
         public void testNormalModeSearch() {
             State state1 = createMockState(1L, "State1");
             State state2 = createMockState(2L, "State2");
@@ -264,7 +265,10 @@ public class InitialStatesTest extends BrobotTestBase {
 
         @Test
         @DisplayName("Should search all states if no predefined sets found")
-        @DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Requires non-mock mode")
+        @DisabledIfEnvironmentVariable(
+                named = "CI",
+                matches = "true",
+                disabledReason = "Requires non-mock mode")
         public void testSearchAllStatesIfNoneFound() {
             State state1 = createMockState(1L, "State1");
             State state2 = createMockState(2L, "State2");
@@ -289,7 +293,10 @@ public class InitialStatesTest extends BrobotTestBase {
 
         @Test
         @DisplayName("Should handle empty potential states in normal mode")
-        @DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Requires non-mock mode")
+        @DisabledIfEnvironmentVariable(
+                named = "CI",
+                matches = "true",
+                disabledReason = "Requires non-mock mode")
         public void testNormalModeEmptyPotentialStates() {
             try {
                 // No state sets defined
@@ -298,7 +305,7 @@ public class InitialStatesTest extends BrobotTestBase {
                 FrameworkSettings.mock = false;
 
                 when(stateService.getAllStateIds()).thenReturn(Arrays.asList(1L, 2L, 3L));
-                
+
                 // Configure stateDetector to return false for all searches
                 when(stateDetector.findState(anyLong())).thenReturn(false);
 
@@ -482,9 +489,11 @@ public class InitialStatesTest extends BrobotTestBase {
 
             // The current implementation will throw NPE when accessing getId() on null
             // state
-            assertThrows(NullPointerException.class, () -> {
-                initialStates.addStateSet(50, validState, null);
-            });
+            assertThrows(
+                    NullPointerException.class,
+                    () -> {
+                        initialStates.addStateSet(50, validState, null);
+                    });
         }
     }
 

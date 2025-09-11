@@ -1,62 +1,63 @@
 package io.github.jspinak.brobot.runner.dsl;
 
-import io.github.jspinak.brobot.BrobotTestApplication;
-import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
-import io.github.jspinak.brobot.test.mock.MockScreenConfig;
-import io.github.jspinak.brobot.runner.dsl.model.ActionStep;
-import io.github.jspinak.brobot.action.basic.click.ClickOptions;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
-import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.BrobotTestApplication;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.runner.dsl.model.ActionStep;
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
 /**
- * Tests for ActionStep JSON parsing with the new ActionConfig API.
- * Uses Spring Boot's configured ObjectMapper with all necessary Jackson modules.
- * 
- * Key points:
- * - ActionStep uses 'actionConfig' field instead of 'actionOptions'
- * - ActionConfig uses @type for polymorphic deserialization
- * - Specific config classes like ClickOptions are used
+ * Tests for ActionStep JSON parsing with the new ActionConfig API. Uses Spring Boot's configured
+ * ObjectMapper with all necessary Jackson modules.
+ *
+ * <p>Key points: - ActionStep uses 'actionConfig' field instead of 'actionOptions' - ActionConfig
+ * uses @type for polymorphic deserialization - Specific config classes like ClickOptions are used
  */
 @DisplayName("ActionStep JSON Parser Tests")
-@SpringBootTest(classes = BrobotTestApplication.class,
-    properties = {
-        "spring.main.lazy-initialization=true",
-        "brobot.mock.enabled=true",
-        "brobot.illustration.disabled=true",
-        "brobot.scene.analysis.disabled=true",
-        "brobot.gui-access.continue-on-error=true",
-        "brobot.gui-access.check-on-startup=false",
-        "java.awt.headless=true",
-        "spring.main.allow-bean-definition-overriding=true",
-        "brobot.test.type=unit",
-        "brobot.capture.physical-resolution=false"
-    })
-@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class,
-         io.github.jspinak.brobot.test.config.TestApplicationConfiguration.class})
+@SpringBootTest(
+        classes = BrobotTestApplication.class,
+        properties = {
+            "spring.main.lazy-initialization=true",
+            "brobot.mock.enabled=true",
+            "brobot.illustration.disabled=true",
+            "brobot.scene.analysis.disabled=true",
+            "brobot.gui-access.continue-on-error=true",
+            "brobot.gui-access.check-on-startup=false",
+            "java.awt.headless=true",
+            "spring.main.allow-bean-definition-overriding=true",
+            "brobot.test.type=unit",
+            "brobot.capture.physical-resolution=false"
+        })
+@Import({
+    MockGuiAccessConfig.class,
+    MockGuiAccessMonitor.class,
+    MockScreenConfig.class,
+    io.github.jspinak.brobot.test.config.TestApplicationConfiguration.class
+})
 @ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 class ActionStepJsonParserTest {
 
-    @Autowired
-    private ConfigurationParser jsonParser;
+    @Autowired private ConfigurationParser jsonParser;
 
     @Test
     @DisplayName("Should parse ActionStep with ClickOptions from JSON")
     void testActionStepWithClickOptionsFromJson() throws ConfigurationException {
-        String json = """
+        String json =
+                """
         {
             "actionConfig": {
                 "@type": "ClickOptions",
@@ -77,28 +78,27 @@ class ActionStepJsonParserTest {
         assertNotNull(actionStep);
         assertNotNull(actionStep.getActionConfig());
         assertTrue(actionStep.getActionConfig() instanceof ClickOptions);
-        
+
         ClickOptions clickOptions = (ClickOptions) actionStep.getActionConfig();
         assertEquals(2, clickOptions.getNumberOfClicks());
-        
+
         assertNotNull(actionStep.getObjectCollection());
         assertEquals(1, actionStep.getObjectCollection().getStateImages().size());
-        assertEquals("TestImage", actionStep.getObjectCollection().getStateImages().get(0).getName());
+        assertEquals(
+                "TestImage", actionStep.getObjectCollection().getStateImages().get(0).getName());
     }
 
     @Test
     @DisplayName("Should serialize ActionStep to JSON")
     void testActionStepToJson() throws ConfigurationException {
         // Create ActionStep programmatically
-        ClickOptions clickOptions = new ClickOptions.Builder()
-            .setNumberOfClicks(2)
-            .build();
-            
+        ClickOptions clickOptions = new ClickOptions.Builder().setNumberOfClicks(2).build();
+
         ActionStep actionStep = new ActionStep();
         actionStep.setActionConfig(clickOptions);
-        
+
         String json = jsonParser.toJson(actionStep);
-        
+
         assertNotNull(json);
         assertTrue(json.contains("\"@type\" : \"ClickOptions\""));
         assertTrue(json.contains("\"numberOfClicks\" : 2"));
@@ -107,7 +107,8 @@ class ActionStepJsonParserTest {
     @Test
     @DisplayName("Should parse ActionStep with PatternFindOptions from JSON")
     void testActionStepWithFindOptionsFromJson() throws ConfigurationException {
-        String json = """
+        String json =
+                """
         {
             "actionConfig": {
                 "@type": "PatternFindOptions",
@@ -136,12 +137,12 @@ class ActionStepJsonParserTest {
         assertNotNull(actionStep);
         assertNotNull(actionStep.getActionConfig());
         assertTrue(actionStep.getActionConfig() instanceof PatternFindOptions);
-        
+
         PatternFindOptions findOptions = (PatternFindOptions) actionStep.getActionConfig();
         assertEquals(PatternFindOptions.Strategy.FIRST, findOptions.getStrategy());
         assertEquals(0.95, findOptions.getSimilarity(), 0.01);
         assertEquals(2.0, findOptions.getSearchDuration(), 0.01);
-        
+
         assertNotNull(actionStep.getObjectCollection());
         assertEquals(1, actionStep.getObjectCollection().getStateRegions().size());
     }
@@ -149,7 +150,8 @@ class ActionStepJsonParserTest {
     @Test
     @DisplayName("Should handle empty ObjectCollection")
     void testActionStepWithEmptyObjectCollection() throws ConfigurationException {
-        String json = """
+        String json =
+                """
         {
             "actionConfig": {
                 "@type": "ClickOptions"
@@ -170,7 +172,8 @@ class ActionStepJsonParserTest {
     @Test
     @DisplayName("Should handle null ActionConfig")
     void testActionStepWithNullActionConfig() throws ConfigurationException {
-        String json = """
+        String json =
+                """
         {
             "objectCollection": {
                 "stateImages": []

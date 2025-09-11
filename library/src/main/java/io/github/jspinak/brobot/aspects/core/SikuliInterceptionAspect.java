@@ -1,11 +1,10 @@
 package io.github.jspinak.brobot.aspects.core;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.exception.ActionFailedException;
-import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.logging.unified.BrobotLogger;
-import io.github.jspinak.brobot.logging.unified.LogEvent;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
@@ -14,62 +13,60 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
+import io.github.jspinak.brobot.action.ActionInterface;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.exception.ActionFailedException;
+import io.github.jspinak.brobot.logging.unified.BrobotLogger;
+import io.github.jspinak.brobot.logging.unified.LogEvent;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * Aspect that intercepts all Sikuli method calls to provide:
- * - Centralized error handling and translation
- * - Mock mode support without wrapper modifications
- * - Automatic screenshot capture on failures
- * - Comprehensive operation logging
- * - Performance metrics collection
- * 
- * This aspect eliminates the need for repetitive error handling in wrapper
- * classes
- * and provides a single point of control for all Sikuli operations.
+ * Aspect that intercepts all Sikuli method calls to provide: - Centralized error handling and
+ * translation - Mock mode support without wrapper modifications - Automatic screenshot capture on
+ * failures - Comprehensive operation logging - Performance metrics collection
+ *
+ * <p>This aspect eliminates the need for repetitive error handling in wrapper classes and provides
+ * a single point of control for all Sikuli operations.
  */
 @Aspect
 @Component
 @Slf4j
-@ConditionalOnProperty(prefix = "brobot.aspects.sikuli", name = "enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(
+        prefix = "brobot.aspects.sikuli",
+        name = "enabled",
+        havingValue = "true",
+        matchIfMissing = true)
 public class SikuliInterceptionAspect {
 
-    @Autowired
-    private BrobotLogger brobotLogger;
+    @Autowired private BrobotLogger brobotLogger;
 
     // Screenshot capture will be implemented later
     // @Autowired(required = false)
     // private ScreenCapture screenCapture;
 
     // Metrics collection
-    private final ConcurrentHashMap<String, OperationMetrics> metricsMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, OperationMetrics> metricsMap =
+            new ConcurrentHashMap<>();
 
     // Mock implementations
     private final SikuliMockProvider mockProvider = new SikuliMockProvider();
 
-    /**
-     * Pointcut for all Sikuli public methods
-     */
+    /** Pointcut for all Sikuli public methods */
     @Pointcut("execution(public * org.sikuli.script..*(..))")
-    public void sikuliOperation() {
-    }
+    public void sikuliOperation() {}
 
     /**
-     * Pointcut for Sikuli find operations that might throw FindFailed
-     * Matches methods like find, findAll, wait, exists, etc.
+     * Pointcut for Sikuli find operations that might throw FindFailed Matches methods like find,
+     * findAll, wait, exists, etc.
      */
-    @Pointcut("execution(* org.sikuli.script..find*(..)) || " +
-            "execution(* org.sikuli.script..wait*(..)) || " +
-            "execution(* org.sikuli.script..exists(..))")
-    public void sikuliFindOperation() {
-    }
+    @Pointcut(
+            "execution(* org.sikuli.script..find*(..)) || "
+                    + "execution(* org.sikuli.script..wait*(..)) || "
+                    + "execution(* org.sikuli.script..exists(..))")
+    public void sikuliFindOperation() {}
 
-    /**
-     * Main interception for all Sikuli operations
-     */
+    /** Main interception for all Sikuli operations */
     @Around("sikuliOperation()")
     public Object interceptSikuliCall(ProceedingJoinPoint joinPoint) throws Throwable {
         String operation = joinPoint.getSignature().toShortString();
@@ -100,27 +97,29 @@ public class SikuliInterceptionAspect {
             long duration = System.currentTimeMillis() - startTime;
             handleFindFailed(joinPoint, e, duration);
             updateMetrics(operation, false, duration);
-            throw new ActionFailedException(ActionInterface.Type.FIND,
-                    "Sikuli find operation failed: " + e.getMessage(), e);
+            throw new ActionFailedException(
+                    ActionInterface.Type.FIND,
+                    "Sikuli find operation failed: " + e.getMessage(),
+                    e);
 
         } catch (Exception e) {
             // Handle other exceptions
             long duration = System.currentTimeMillis() - startTime;
             handleGeneralException(joinPoint, e, duration);
             updateMetrics(operation, false, duration);
-            throw new ActionFailedException(ActionInterface.Type.FIND, "Sikuli operation failed: " + e.getMessage(), e);
+            throw new ActionFailedException(
+                    ActionInterface.Type.FIND, "Sikuli operation failed: " + e.getMessage(), e);
         }
     }
 
-    /**
-     * Handle mock mode execution
-     */
+    /** Handle mock mode execution */
     private Object handleMockMode(ProceedingJoinPoint joinPoint) {
         String methodName = joinPoint.getSignature().getName();
         Object[] args = joinPoint.getArgs();
 
         // Log mock operation
-        brobotLogger.log()
+        brobotLogger
+                .log()
                 .type(LogEvent.Type.ACTION)
                 .level(LogEvent.Level.DEBUG)
                 .action("MOCK_" + methodName.toUpperCase())
@@ -133,14 +132,13 @@ public class SikuliInterceptionAspect {
         return mockProvider.getMockResult(methodName, args);
     }
 
-    /**
-     * Log operation start
-     */
+    /** Log operation start */
     private void logOperationStart(JoinPoint joinPoint) {
         String methodName = joinPoint.getSignature().getName();
         Object[] args = joinPoint.getArgs();
 
-        brobotLogger.log()
+        brobotLogger
+                .log()
                 .type(LogEvent.Type.ACTION)
                 .level(LogEvent.Level.DEBUG)
                 .action("SIKULI_" + methodName.toUpperCase())
@@ -150,13 +148,12 @@ public class SikuliInterceptionAspect {
                 .log();
     }
 
-    /**
-     * Log operation success
-     */
+    /** Log operation success */
     private void logOperationSuccess(JoinPoint joinPoint, Object result, long duration) {
         String methodName = joinPoint.getSignature().getName();
 
-        brobotLogger.log()
+        brobotLogger
+                .log()
                 .type(LogEvent.Type.ACTION)
                 .level(LogEvent.Level.DEBUG)
                 .action("SIKULI_" + methodName.toUpperCase() + "_SUCCESS")
@@ -167,9 +164,7 @@ public class SikuliInterceptionAspect {
                 .log();
     }
 
-    /**
-     * Handle FindFailed exceptions with screenshot capture
-     */
+    /** Handle FindFailed exceptions with screenshot capture */
     private void handleFindFailed(JoinPoint joinPoint, FindFailed e, long duration) {
         String methodName = joinPoint.getSignature().getName();
         Object[] args = joinPoint.getArgs();
@@ -186,7 +181,8 @@ public class SikuliInterceptionAspect {
         // }
 
         // Log the failure with details
-        brobotLogger.log()
+        brobotLogger
+                .log()
                 .type(LogEvent.Type.ERROR)
                 .level(LogEvent.Level.ERROR)
                 .action("SIKULI_" + methodName.toUpperCase() + "_FAILED")
@@ -201,14 +197,13 @@ public class SikuliInterceptionAspect {
                 .log();
     }
 
-    /**
-     * Handle general exceptions
-     */
+    /** Handle general exceptions */
     private void handleGeneralException(JoinPoint joinPoint, Exception e, long duration) {
         String methodName = joinPoint.getSignature().getName();
         Object[] args = joinPoint.getArgs();
 
-        brobotLogger.log()
+        brobotLogger
+                .log()
                 .type(LogEvent.Type.ERROR)
                 .level(LogEvent.Level.ERROR)
                 .action("SIKULI_" + methodName.toUpperCase() + "_ERROR")
@@ -221,22 +216,20 @@ public class SikuliInterceptionAspect {
                 .log();
     }
 
-    /**
-     * Update operation metrics
-     */
+    /** Update operation metrics */
     private void updateMetrics(String operation, boolean success, long duration) {
-        metricsMap.compute(operation, (k, v) -> {
-            if (v == null) {
-                v = new OperationMetrics(operation);
-            }
-            v.recordOperation(success, duration);
-            return v;
-        });
+        metricsMap.compute(
+                operation,
+                (k, v) -> {
+                    if (v == null) {
+                        v = new OperationMetrics(operation);
+                    }
+                    v.recordOperation(success, duration);
+                    return v;
+                });
     }
 
-    /**
-     * Sanitize arguments for logging (remove sensitive data, large objects)
-     */
+    /** Sanitize arguments for logging (remove sensitive data, large objects) */
     private String sanitizeArgs(Object[] args) {
         if (args == null || args.length == 0) {
             return "[]";
@@ -244,17 +237,14 @@ public class SikuliInterceptionAspect {
 
         StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < args.length; i++) {
-            if (i > 0)
-                sb.append(", ");
+            if (i > 0) sb.append(", ");
             sb.append(sanitizeArg(args[i]));
         }
         sb.append("]");
         return sb.toString();
     }
 
-    /**
-     * Sanitize individual argument
-     */
+    /** Sanitize individual argument */
     private String sanitizeArg(Object arg) {
         if (arg == null) {
             return "null";
@@ -271,12 +261,9 @@ public class SikuliInterceptionAspect {
         return arg.toString();
     }
 
-    /**
-     * Extract image path from arguments if present
-     */
+    /** Extract image path from arguments if present */
     private String extractImagePath(Object[] args) {
-        if (args == null)
-            return null;
+        if (args == null) return null;
 
         for (Object arg : args) {
             if (arg instanceof String) {
@@ -289,24 +276,18 @@ public class SikuliInterceptionAspect {
         return null;
     }
 
-    /**
-     * Get metrics for reporting
-     */
+    /** Get metrics for reporting */
     public ConcurrentHashMap<String, OperationMetrics> getMetrics() {
         return new ConcurrentHashMap<>(metricsMap);
     }
 
-    /**
-     * Reset metrics
-     */
+    /** Reset metrics */
     public void resetMetrics() {
         metricsMap.clear();
         log.info("Sikuli operation metrics reset");
     }
 
-    /**
-     * Inner class for tracking operation metrics
-     */
+    /** Inner class for tracking operation metrics */
     public static class OperationMetrics {
         private final String operation;
         private final AtomicInteger totalCalls = new AtomicInteger();
@@ -372,9 +353,7 @@ public class SikuliInterceptionAspect {
         }
     }
 
-    /**
-     * Inner class for providing mock results
-     */
+    /** Inner class for providing mock results */
     private static class SikuliMockProvider {
 
         public Object getMockResult(String methodName, Object[] args) {
@@ -415,9 +394,7 @@ public class SikuliInterceptionAspect {
         }
     }
 
-    /**
-     * Factory for creating mock Sikuli objects
-     */
+    /** Factory for creating mock Sikuli objects */
     private static class MockObjectFactory {
 
         public static Object createMockMatch() {

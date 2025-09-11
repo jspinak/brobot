@@ -1,15 +1,17 @@
 package io.github.jspinak.brobot.runner.persistence.entity;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-
-import io.github.jspinak.brobot.tools.logging.model.LogEventType;
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+
+import jakarta.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import io.github.jspinak.brobot.tools.logging.model.LogEventType;
+
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Getter
@@ -25,6 +27,7 @@ public class LogEntry {
 
     @Enumerated(EnumType.STRING)
     private LogEventType type;
+
     private String actionType;
     private String description;
     private Instant timestamp = Instant.now();
@@ -44,20 +47,19 @@ public class LogEntry {
     private List<Long> fromStateIds;
     private List<String> toStateNames = new ArrayList<>(); // the transition activates these states
     private List<Long> toStateIds = new ArrayList<>();
-    private List<String> beforeStateNames = new ArrayList<>(); // the active states before the transition
+    private List<String> beforeStateNames =
+            new ArrayList<>(); // the active states before the transition
     private List<Long> beforeStateIds = new ArrayList<>();
-    private List<String> afterStateNames = new ArrayList<>(); // the actives states after the transition
+    private List<String> afterStateNames =
+            new ArrayList<>(); // the actives states after the transition
     private List<Long> afterStateIds = new ArrayList<>();
 
-    @ElementCollection
-    private List<StateImageLog> stateImageLogs = new ArrayList<>();
+    @ElementCollection private List<StateImageLog> stateImageLogs = new ArrayList<>();
 
-    @Embedded
-    private PerformanceMetrics performance;
+    @Embedded private PerformanceMetrics performance;
 
     // Constructors
-    public LogEntry() {
-    }
+    public LogEntry() {}
 
     public LogEntry(String sessionId, LogEventType logType, String description) {
         this.sessionId = sessionId;

@@ -1,20 +1,20 @@
 package io.github.jspinak.brobot.runner.json.validation.model;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
-
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import io.github.jspinak.brobot.test.BrobotTestBase;
+
 /**
- * Comprehensive unit tests for ValidationError record
- * Testing immutability, equality, and toString formatting
+ * Comprehensive unit tests for ValidationError record Testing immutability, equality, and toString
+ * formatting
  */
 @DisplayName("ValidationError Tests")
 class ValidationErrorTest extends BrobotTestBase {
@@ -30,10 +30,10 @@ class ValidationErrorTest extends BrobotTestBase {
             String errorCode = "TEST001";
             String message = "Test error message";
             ValidationSeverity severity = ValidationSeverity.ERROR;
-            
+
             // When
             ValidationError error = new ValidationError(errorCode, message, severity);
-            
+
             // Then
             assertEquals(errorCode, error.errorCode());
             assertEquals(message, error.message());
@@ -46,7 +46,7 @@ class ValidationErrorTest extends BrobotTestBase {
         void shouldSupportAllSeverityLevels(ValidationSeverity severity) {
             // When
             ValidationError error = new ValidationError("CODE", "Message", severity);
-            
+
             // Then
             assertEquals(severity, error.severity());
         }
@@ -56,7 +56,7 @@ class ValidationErrorTest extends BrobotTestBase {
         void shouldHandleNullComponents() {
             // When
             ValidationError error = new ValidationError(null, null, null);
-            
+
             // Then
             assertNull(error.errorCode());
             assertNull(error.message());
@@ -68,7 +68,7 @@ class ValidationErrorTest extends BrobotTestBase {
         void shouldHandleEmptyStrings() {
             // When
             ValidationError error = new ValidationError("", "", ValidationSeverity.WARNING);
-            
+
             // Then
             assertEquals("", error.errorCode());
             assertEquals("", error.message());
@@ -84,10 +84,11 @@ class ValidationErrorTest extends BrobotTestBase {
             "Schema violation, JSON does not conform to schema at line 42, ERROR"
         })
         @DisplayName("Should handle various error code conventions")
-        void shouldHandleVariousErrorCodeConventions(String code, String msg, ValidationSeverity sev) {
+        void shouldHandleVariousErrorCodeConventions(
+                String code, String msg, ValidationSeverity sev) {
             // When
             ValidationError error = new ValidationError(code, msg, sev);
-            
+
             // Then
             assertEquals(code, error.errorCode());
             assertEquals(msg, error.message());
@@ -103,9 +104,11 @@ class ValidationErrorTest extends BrobotTestBase {
         @DisplayName("Should be equal for identical values")
         void shouldBeEqualForIdenticalValues() {
             // Given
-            ValidationError error1 = new ValidationError("CODE", "Message", ValidationSeverity.ERROR);
-            ValidationError error2 = new ValidationError("CODE", "Message", ValidationSeverity.ERROR);
-            
+            ValidationError error1 =
+                    new ValidationError("CODE", "Message", ValidationSeverity.ERROR);
+            ValidationError error2 =
+                    new ValidationError("CODE", "Message", ValidationSeverity.ERROR);
+
             // Then
             assertEquals(error1, error2);
             assertEquals(error1.hashCode(), error2.hashCode());
@@ -115,9 +118,11 @@ class ValidationErrorTest extends BrobotTestBase {
         @DisplayName("Should not be equal for different error codes")
         void shouldNotBeEqualForDifferentErrorCodes() {
             // Given
-            ValidationError error1 = new ValidationError("CODE1", "Message", ValidationSeverity.ERROR);
-            ValidationError error2 = new ValidationError("CODE2", "Message", ValidationSeverity.ERROR);
-            
+            ValidationError error1 =
+                    new ValidationError("CODE1", "Message", ValidationSeverity.ERROR);
+            ValidationError error2 =
+                    new ValidationError("CODE2", "Message", ValidationSeverity.ERROR);
+
             // Then
             assertNotEquals(error1, error2);
         }
@@ -126,9 +131,11 @@ class ValidationErrorTest extends BrobotTestBase {
         @DisplayName("Should not be equal for different messages")
         void shouldNotBeEqualForDifferentMessages() {
             // Given
-            ValidationError error1 = new ValidationError("CODE", "Message1", ValidationSeverity.ERROR);
-            ValidationError error2 = new ValidationError("CODE", "Message2", ValidationSeverity.ERROR);
-            
+            ValidationError error1 =
+                    new ValidationError("CODE", "Message1", ValidationSeverity.ERROR);
+            ValidationError error2 =
+                    new ValidationError("CODE", "Message2", ValidationSeverity.ERROR);
+
             // Then
             assertNotEquals(error1, error2);
         }
@@ -137,9 +144,11 @@ class ValidationErrorTest extends BrobotTestBase {
         @DisplayName("Should not be equal for different severities")
         void shouldNotBeEqualForDifferentSeverities() {
             // Given
-            ValidationError error1 = new ValidationError("CODE", "Message", ValidationSeverity.ERROR);
-            ValidationError error2 = new ValidationError("CODE", "Message", ValidationSeverity.WARNING);
-            
+            ValidationError error1 =
+                    new ValidationError("CODE", "Message", ValidationSeverity.ERROR);
+            ValidationError error2 =
+                    new ValidationError("CODE", "Message", ValidationSeverity.WARNING);
+
             // Then
             assertNotEquals(error1, error2);
         }
@@ -148,8 +157,9 @@ class ValidationErrorTest extends BrobotTestBase {
         @DisplayName("Should be equal to itself")
         void shouldBeEqualToItself() {
             // Given
-            ValidationError error = new ValidationError("CODE", "Message", ValidationSeverity.ERROR);
-            
+            ValidationError error =
+                    new ValidationError("CODE", "Message", ValidationSeverity.ERROR);
+
             // Then
             assertEquals(error, error);
         }
@@ -158,8 +168,9 @@ class ValidationErrorTest extends BrobotTestBase {
         @DisplayName("Should not be equal to null")
         void shouldNotBeEqualToNull() {
             // Given
-            ValidationError error = new ValidationError("CODE", "Message", ValidationSeverity.ERROR);
-            
+            ValidationError error =
+                    new ValidationError("CODE", "Message", ValidationSeverity.ERROR);
+
             // Then
             assertNotEquals(null, error);
         }
@@ -168,9 +179,10 @@ class ValidationErrorTest extends BrobotTestBase {
         @DisplayName("Should not be equal to different type")
         void shouldNotBeEqualToDifferentType() {
             // Given
-            ValidationError error = new ValidationError("CODE", "Message", ValidationSeverity.ERROR);
+            ValidationError error =
+                    new ValidationError("CODE", "Message", ValidationSeverity.ERROR);
             String notAnError = "Not an error";
-            
+
             // Then
             assertNotEquals(error, notAnError);
         }
@@ -182,7 +194,7 @@ class ValidationErrorTest extends BrobotTestBase {
             ValidationError error1 = new ValidationError(null, null, null);
             ValidationError error2 = new ValidationError(null, null, null);
             ValidationError error3 = new ValidationError("CODE", null, null);
-            
+
             // Then
             assertEquals(error1, error2);
             assertNotEquals(error1, error3);
@@ -197,15 +209,13 @@ class ValidationErrorTest extends BrobotTestBase {
         @DisplayName("Should format as [SEVERITY] code: message")
         void shouldFormatCorrectly() {
             // Given
-            ValidationError error = new ValidationError(
-                "Invalid reference",
-                "State ID 42 not found",
-                ValidationSeverity.ERROR
-            );
-            
+            ValidationError error =
+                    new ValidationError(
+                            "Invalid reference", "State ID 42 not found", ValidationSeverity.ERROR);
+
             // When
             String result = error.toString();
-            
+
             // Then
             assertEquals("[ERROR] Invalid reference: State ID 42 not found", result);
         }
@@ -216,10 +226,10 @@ class ValidationErrorTest extends BrobotTestBase {
         void shouldIncludeSeverityInToString(ValidationSeverity severity) {
             // Given
             ValidationError error = new ValidationError("CODE", "Message", severity);
-            
+
             // When
             String result = error.toString();
-            
+
             // Then
             assertTrue(result.contains("[" + severity + "]"));
             assertTrue(result.contains("CODE"));
@@ -231,10 +241,10 @@ class ValidationErrorTest extends BrobotTestBase {
         void shouldHandleNullSeverityInToString() {
             // Given
             ValidationError error = new ValidationError("CODE", "Message", null);
-            
+
             // When
             String result = error.toString();
-            
+
             // Then
             assertTrue(result.contains("[null]"));
             assertTrue(result.contains("CODE"));
@@ -246,10 +256,10 @@ class ValidationErrorTest extends BrobotTestBase {
         void shouldHandleNullFieldsInToString() {
             // Given
             ValidationError error = new ValidationError(null, null, ValidationSeverity.WARNING);
-            
+
             // When
             String result = error.toString();
-            
+
             // Then
             assertEquals("[WARNING] null: null", result);
         }
@@ -259,10 +269,10 @@ class ValidationErrorTest extends BrobotTestBase {
         void shouldHandleEmptyStringsInToString() {
             // Given
             ValidationError error = new ValidationError("", "", ValidationSeverity.INFO);
-            
+
             // When
             String result = error.toString();
-            
+
             // Then
             assertEquals("[INFO] : ", result);
         }
@@ -276,13 +286,14 @@ class ValidationErrorTest extends BrobotTestBase {
         @DisplayName("Should be immutable record")
         void shouldBeImmutableRecord() {
             // Given
-            ValidationError error = new ValidationError("CODE", "Message", ValidationSeverity.ERROR);
-            
+            ValidationError error =
+                    new ValidationError("CODE", "Message", ValidationSeverity.ERROR);
+
             // Then - Record components are final and cannot be modified
             assertEquals("CODE", error.errorCode());
             assertEquals("Message", error.message());
             assertEquals(ValidationSeverity.ERROR, error.severity());
-            
+
             // Record fields are implicitly final - no setters exist
         }
 
@@ -293,11 +304,11 @@ class ValidationErrorTest extends BrobotTestBase {
             String code = "MUTABLE";
             String message = "Test";
             ValidationSeverity severity = ValidationSeverity.ERROR;
-            
+
             // When
             ValidationError error1 = new ValidationError(code, message, severity);
             ValidationError error2 = new ValidationError(code, message, severity);
-            
+
             // Then - Same values but different instances
             assertEquals(error1, error2);
             assertNotSame(error1, error2);
@@ -313,15 +324,17 @@ class ValidationErrorTest extends BrobotTestBase {
         void shouldWorkInCollections() {
             // Given
             ValidationError error1 = new ValidationError("E1", "Error 1", ValidationSeverity.ERROR);
-            ValidationError error2 = new ValidationError("E2", "Error 2", ValidationSeverity.WARNING);
-            ValidationError duplicate = new ValidationError("E1", "Error 1", ValidationSeverity.ERROR);
-            
+            ValidationError error2 =
+                    new ValidationError("E2", "Error 2", ValidationSeverity.WARNING);
+            ValidationError duplicate =
+                    new ValidationError("E1", "Error 1", ValidationSeverity.ERROR);
+
             // When
             var set = new java.util.HashSet<ValidationError>();
             set.add(error1);
             set.add(error2);
             set.add(duplicate); // Should not add duplicate
-            
+
             // Then
             assertEquals(2, set.size());
             assertTrue(set.contains(error1));
@@ -333,17 +346,19 @@ class ValidationErrorTest extends BrobotTestBase {
         @DisplayName("Should support pattern matching")
         void shouldSupportPatternMatching() {
             // Given
-            ValidationError error = new ValidationError("TEST", "Message", ValidationSeverity.CRITICAL);
-            
+            ValidationError error =
+                    new ValidationError("TEST", "Message", ValidationSeverity.CRITICAL);
+
             // When/Then - Pattern matching with records
-            String result = switch (error.severity()) {
-                case CRITICAL -> "Critical: " + error.message();
-                case ERROR -> "Error: " + error.message();
-                case WARNING -> "Warning: " + error.message();
-                case INFO -> "Info: " + error.message();
-                case null -> "Unknown severity";
-            };
-            
+            String result =
+                    switch (error.severity()) {
+                        case CRITICAL -> "Critical: " + error.message();
+                        case ERROR -> "Error: " + error.message();
+                        case WARNING -> "Warning: " + error.message();
+                        case INFO -> "Info: " + error.message();
+                        case null -> "Unknown severity";
+                    };
+
             assertEquals("Critical: Message", result);
         }
 
@@ -351,22 +366,21 @@ class ValidationErrorTest extends BrobotTestBase {
         @DisplayName("Should work with stream operations")
         void shouldWorkWithStreamOperations() {
             // Given
-            var errors = java.util.List.of(
-                new ValidationError("E1", "Critical", ValidationSeverity.CRITICAL),
-                new ValidationError("E2", "Error", ValidationSeverity.ERROR),
-                new ValidationError("E3", "Warning", ValidationSeverity.WARNING),
-                new ValidationError("E4", "Info", ValidationSeverity.INFO)
-            );
-            
+            var errors =
+                    java.util.List.of(
+                            new ValidationError("E1", "Critical", ValidationSeverity.CRITICAL),
+                            new ValidationError("E2", "Error", ValidationSeverity.ERROR),
+                            new ValidationError("E3", "Warning", ValidationSeverity.WARNING),
+                            new ValidationError("E4", "Info", ValidationSeverity.INFO));
+
             // When
-            var criticalCount = errors.stream()
-                .filter(e -> e.severity() == ValidationSeverity.CRITICAL)
-                .count();
-            
-            var errorCodes = errors.stream()
-                .map(ValidationError::errorCode)
-                .toList();
-            
+            var criticalCount =
+                    errors.stream()
+                            .filter(e -> e.severity() == ValidationSeverity.CRITICAL)
+                            .count();
+
+            var errorCodes = errors.stream().map(ValidationError::errorCode).toList();
+
             // Then
             assertEquals(1, criticalCount);
             assertEquals(java.util.List.of("E1", "E2", "E3", "E4"), errorCodes);
@@ -378,21 +392,23 @@ class ValidationErrorTest extends BrobotTestBase {
     class EdgeCasesTests {
 
         @ParameterizedTest
-        @ValueSource(strings = {
-            "",
-            " ",
-            "\n",
-            "\t",
-            "Very long error code that exceeds typical length expectations and contains many words",
-            "Code with special chars !@#$%^&*()",
-            "Code\nwith\nnewlines",
-            "Code\twith\ttabs"
-        })
+        @ValueSource(
+                strings = {
+                    "",
+                    " ",
+                    "\n",
+                    "\t",
+                    "Very long error code that exceeds typical length expectations and contains"
+                            + " many words",
+                    "Code with special chars !@#$%^&*()",
+                    "Code\nwith\nnewlines",
+                    "Code\twith\ttabs"
+                })
         @DisplayName("Should handle various string formats")
         void shouldHandleVariousStringFormats(String text) {
             // When
             ValidationError error = new ValidationError(text, text, ValidationSeverity.ERROR);
-            
+
             // Then
             assertEquals(text, error.errorCode());
             assertEquals(text, error.message());
@@ -404,10 +420,11 @@ class ValidationErrorTest extends BrobotTestBase {
         void shouldHandleVeryLongMessages() {
             // Given
             String longMessage = "A".repeat(10000);
-            
+
             // When
-            ValidationError error = new ValidationError("CODE", longMessage, ValidationSeverity.ERROR);
-            
+            ValidationError error =
+                    new ValidationError("CODE", longMessage, ValidationSeverity.ERROR);
+
             // Then
             assertEquals(longMessage, error.message());
             assertTrue(error.toString().length() > 10000);
@@ -418,10 +435,11 @@ class ValidationErrorTest extends BrobotTestBase {
         void shouldHandleUnicodeCharacters() {
             // Given
             String unicode = "Error: 日本語 🚀 éñ";
-            
+
             // When
-            ValidationError error = new ValidationError(unicode, unicode, ValidationSeverity.WARNING);
-            
+            ValidationError error =
+                    new ValidationError(unicode, unicode, ValidationSeverity.WARNING);
+
             // Then
             assertEquals(unicode, error.errorCode());
             assertEquals(unicode, error.message());

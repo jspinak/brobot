@@ -1,12 +1,13 @@
 package io.github.jspinak.brobot.model.element;
 
-import org.junit.jupiter.api.Test;
-import io.github.jspinak.brobot.util.region.RegionUtils;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+
+import io.github.jspinak.brobot.util.region.RegionUtils;
 
 class RegionTest {
 
@@ -46,10 +47,10 @@ class RegionTest {
         List<Region> regions = getRegions();
         assertEquals(4, regions.size());
 
-        Region reg1 = new Region(2,2,3,3);
-        Region reg2 = new Region(2,5,3,5);
-        Region reg3 = new Region(5,2,5,3);
-        Region reg4 = new Region(5,5,5,5);
+        Region reg1 = new Region(2, 2, 3, 3);
+        Region reg2 = new Region(2, 5, 3, 5);
+        Region reg3 = new Region(5, 2, 5, 3);
+        Region reg4 = new Region(5, 5, 5, 5);
 
         assertTrue(reg1.equals(regions.get(0)));
         assertTrue(reg2.equals(regions.get(1)));
@@ -60,7 +61,7 @@ class RegionTest {
     @Test
     void removeRegion() {
         List<Region> regions = getRegions();
-        List<Region> removed = RegionUtils.removeRegion(regions, new Region(2,5,3,5));
+        List<Region> removed = RegionUtils.removeRegion(regions, new Region(2, 5, 3, 5));
         assertEquals(3, removed.size());
     }
 
@@ -68,13 +69,13 @@ class RegionTest {
     void mergeAdjacent() {
         List<Region> regions = getRegions();
         List<Region> merged = RegionUtils.mergeAdjacent(regions);
-        assertTrue(new Region(2,2,8,8).equals(merged.getFirst())); // all subregions should merge
+        assertTrue(new Region(2, 2, 8, 8).equals(merged.getFirst())); // all subregions should merge
     }
 
     @Test
     void mergeAdjacent2() {
         List<Region> regions = getRegions();
-        regions = RegionUtils.removeRegion(regions, new Region(2,2,3,3));
+        regions = RegionUtils.removeRegion(regions, new Region(2, 2, 3, 3));
         List<Region> merged = RegionUtils.mergeAdjacent(regions);
         System.out.println(regions);
         System.out.println(merged);

@@ -1,43 +1,37 @@
 package io.github.jspinak.brobot.action;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.model.state.StateObjectMetadata;
-import io.github.jspinak.brobot.model.element.Location;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.element.Movement;
-import io.github.jspinak.brobot.model.element.Text;
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.model.state.State;
-import io.github.jspinak.brobot.action.result.*;
-import io.github.jspinak.brobot.action.internal.execution.ActionLifecycle;
-import io.github.jspinak.brobot.model.action.ActionRecord;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import java.util.concurrent.TimeUnit;
-
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.*;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import org.junit.jupiter.api.*;
+
+import io.github.jspinak.brobot.action.internal.execution.ActionLifecycle;
+import io.github.jspinak.brobot.action.result.*;
+import io.github.jspinak.brobot.model.action.ActionRecord;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.state.StateObjectMetadata;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+
 /**
- * Tests for ActionResult's component architecture (Version 2.0).
- * Tests the delegation to specialized component classes.
+ * Tests for ActionResult's component architecture (Version 2.0). Tests the delegation to
+ * specialized component classes.
  */
 @DisplayName("ActionResult Component Tests")
 @Timeout(value = 10, unit = TimeUnit.SECONDS) // Aggressive timeout for CI/CD
 @TestInstance(TestInstance.Lifecycle.PER_CLASS) // Share setup across tests
 public class ActionResultComponentTest extends BrobotTestBase {
-    
+
     private ActionResult actionResult;
     private Match mockMatch1;
     private Match mockMatch2;
     private Match mockMatch3;
-    
+
     @BeforeAll
     void setupMocks() {
         // Pre-create mock matches to avoid timeout in individual tests
@@ -45,26 +39,26 @@ public class ActionResultComponentTest extends BrobotTestBase {
         mockMatch2 = createMockMatch(0.85);
         mockMatch3 = createMockMatch(0.75);
     }
-    
+
     @BeforeEach
     @Override
     public void setupTest() {
         super.setupTest();
         actionResult = new ActionResult();
     }
-    
+
     @Nested
     @DisplayName("MatchCollection Component")
     @Timeout(value = 5, unit = TimeUnit.SECONDS)
     class MatchCollectionComponent {
-        
+
         @Test
         @DisplayName("Should delegate match operations to MatchCollection")
         @Timeout(value = 2, unit = TimeUnit.SECONDS)
         void shouldDelegateMatchOperationsToMatchCollection() {
             // Add pre-created matches
             actionResult.add(mockMatch1, mockMatch2);
-            
+
             // Verify delegation to MatchCollection
             MatchCollection matchCollection = actionResult.getMatchCollection();
             assertNotNull(matchCollection);
@@ -72,51 +66,48 @@ public class ActionResultComponentTest extends BrobotTestBase {
             assertTrue(matchCollection.getMatches().contains(mockMatch1));
             assertTrue(matchCollection.getMatches().contains(mockMatch2));
         }
-        
+
         @Test
         @DisplayName("Should maintain initial matches separately")
         void shouldMaintainInitialMatchesSeparately() {
-            List<Match> initial = Arrays.asList(
-                createMockMatch(0.9),
-                createMockMatch(0.8)
-            );
-            
+            List<Match> initial = Arrays.asList(createMockMatch(0.9), createMockMatch(0.8));
+
             actionResult.setInitialMatchList(initial);
-            
+
             // Add more matches
             actionResult.add(createMockMatch(0.7));
-            
+
             // Initial matches should be preserved
             assertEquals(2, actionResult.getInitialMatchList().size());
             assertEquals(1, actionResult.getMatchList().size()); // Only the added match
         }
     }
-    
+
     @Nested
     @DisplayName("TimingData Component")
     class TimingDataComponent {
-        
+
         @Test
         @DisplayName("Should track timing information")
         void shouldTrackTimingInformation() {
             TimingData timing = actionResult.getTimingData();
             assertNotNull(timing);
-            
+
             // TimingData auto-starts on creation
             assertNotNull(timing.getStartTime());
-            
+
             // Stop timing
             timing.stop();
-            
+
             assertNotNull(timing.getEndTime());
             assertNotNull(timing.getTotalDuration());
         }
     }
-    
+
     @Nested
     @DisplayName("TextExtractionResult Component")
     class TextExtractionResultComponent {
-        
+
         @Test
         @DisplayName("Should have text extraction result component")
         void shouldHaveTextExtractionResultComponent() {
@@ -124,34 +115,34 @@ public class ActionResultComponentTest extends BrobotTestBase {
             assertNotNull(textResult);
         }
     }
-    
+
     @Nested
     @DisplayName("StateTracker Component")
     class StateTrackerComponent {
-        
+
         @Test
         @DisplayName("Should track state changes")
         void shouldTrackStateChanges() {
             StateTracker stateTracker = actionResult.getStateTracker();
             assertNotNull(stateTracker);
-            
+
             // Track state activations
             stateTracker.recordActiveState("State1");
             stateTracker.recordActiveState("State2");
             stateTracker.recordActiveState("State3");
-            
+
             Set<String> activeStates = stateTracker.getActiveStates();
             assertEquals(3, activeStates.size());
             assertTrue(activeStates.contains("State1"));
             assertTrue(activeStates.contains("State2"));
             assertTrue(activeStates.contains("State3"));
         }
-        
+
         @Test
         @DisplayName("Should process matches for state information")
         void shouldProcessMatchesForStateInformation() {
             StateTracker stateTracker = actionResult.getStateTracker();
-            
+
             // Create match with state information
             Match match = mock(Match.class);
             StateImage stateImage = mock(StateImage.class);
@@ -159,19 +150,19 @@ public class ActionResultComponentTest extends BrobotTestBase {
             StateObjectMetadata metadata = mock(StateObjectMetadata.class);
             when(metadata.getOwnerStateName()).thenReturn("TestState");
             when(match.getStateObjectData()).thenReturn(metadata);
-            
+
             // Process match
             stateTracker.processMatch(match);
-            
+
             // Should track the state from the match
             assertTrue(stateTracker.getActiveStates().contains("TestState"));
         }
     }
-    
+
     @Nested
     @DisplayName("RegionManager Component")
     class RegionManagerComponent {
-        
+
         @Test
         @DisplayName("Should have region manager component")
         void shouldHaveRegionManagerComponent() {
@@ -179,11 +170,11 @@ public class ActionResultComponentTest extends BrobotTestBase {
             assertNotNull(regionManager);
         }
     }
-    
+
     @Nested
     @DisplayName("MovementTracker Component")
     class MovementTrackerComponent {
-        
+
         @Test
         @DisplayName("Should have movement tracker component")
         void shouldHaveMovementTrackerComponent() {
@@ -191,11 +182,11 @@ public class ActionResultComponentTest extends BrobotTestBase {
             assertNotNull(movementTracker);
         }
     }
-    
+
     @Nested
     @DisplayName("ActionAnalysis Component")
     class ActionAnalysisComponent {
-        
+
         @Test
         @DisplayName("Should have action analysis component")
         void shouldHaveActionAnalysisComponent() {
@@ -203,11 +194,11 @@ public class ActionResultComponentTest extends BrobotTestBase {
             assertNotNull(analysis);
         }
     }
-    
+
     @Nested
     @DisplayName("ExecutionHistory Component")
     class ExecutionHistoryComponent {
-        
+
         @Test
         @DisplayName("Should have execution history component")
         void shouldHaveExecutionHistoryComponent() {
@@ -215,46 +206,46 @@ public class ActionResultComponentTest extends BrobotTestBase {
             assertNotNull(history);
         }
     }
-    
+
     @Nested
     @DisplayName("ActionLifecycle Integration")
     class ActionLifecycleIntegration {
-        
+
         @Test
         @DisplayName("Should integrate with ActionLifecycle")
         void shouldIntegrateWithActionLifecycle() {
             ActionLifecycle lifecycle = mock(ActionLifecycle.class);
             actionResult.setActionLifecycle(lifecycle);
-            
+
             assertEquals(lifecycle, actionResult.getActionLifecycle());
         }
     }
-    
+
     @Nested
     @DisplayName("Complex Scenarios")
     @Timeout(value = 5, unit = TimeUnit.SECONDS)
     class ComplexScenarios {
-        
+
         @Test
         @DisplayName("Should handle complete action workflow")
         void shouldHandleCompleteActionWorkflow() {
             // Setup action configuration
             ActionConfig config = mock(ActionConfig.class);
             actionResult.setActionConfig(config);
-            
+
             // Add pre-created matches
             actionResult.add(mockMatch1, mockMatch2, mockMatch3);
-            
+
             // Track state
             actionResult.getStateTracker().recordActiveState("TestState");
-            
+
             // Complete timing
             actionResult.getTimingData().stop();
-            
+
             // Set success
             actionResult.setSuccess(true);
             actionResult.setActionDescription("Complex action completed");
-            
+
             // Verify complete state
             assertTrue(actionResult.isSuccess());
             assertEquals(3, actionResult.size());
@@ -262,7 +253,7 @@ public class ActionResultComponentTest extends BrobotTestBase {
             assertNotNull(actionResult.getTimingData().getEndTime());
         }
     }
-    
+
     // Helper methods
     private Match createMockMatch(double score) {
         Match match = mock(Match.class);

@@ -1,5 +1,9 @@
 package io.github.jspinak.brobot.action;
-import io.github.jspinak.brobot.action.ActionType;
+
+import java.util.Map;
+import java.util.function.Function;
+
+import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
@@ -17,18 +21,13 @@ import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.action.basic.vanish.VanishOptions;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
 import io.github.jspinak.brobot.tools.logging.model.LogEventType;
-import org.springframework.stereotype.Component;
-
-import java.util.Map;
-import java.util.function.Function;
 
 /**
  * Factory for creating ActionConfig instances based on action type.
- * <p>
- * This factory centralizes the creation logic for all ActionConfig subclasses,
- * providing a single point of configuration and reducing coupling between
- * actions and their configuration creation.
- * </p>
+ *
+ * <p>This factory centralizes the creation logic for all ActionConfig subclasses, providing a
+ * single point of configuration and reducing coupling between actions and their configuration
+ * creation.
  */
 @Component
 public class ActionConfigFactory {
@@ -38,23 +37,27 @@ public class ActionConfigFactory {
 
     public ActionConfigFactory() {
         // Initialize the map of action types to their factory functions
-        this.factories = Map.ofEntries(
-                Map.entry(ActionInterface.Type.CLICK, this::createClickOptions),
-                Map.entry(ActionInterface.Type.DRAG, this::createDragOptions),
-                Map.entry(ActionInterface.Type.FIND, this::createPatternFindOptions),
-                Map.entry(ActionInterface.Type.TYPE, this::createTypeOptions),
-                Map.entry(ActionInterface.Type.MOVE, this::createMouseMoveOptions),
-                Map.entry(ActionInterface.Type.VANISH, this::createVanishOptions),
-                Map.entry(ActionInterface.Type.HIGHLIGHT, this::createHighlightOptions),
-                Map.entry(ActionInterface.Type.SCROLL_MOUSE_WHEEL, this::createScrollOptions),
-                Map.entry(ActionInterface.Type.MOUSE_DOWN, this::createMouseDownOptions),
-                Map.entry(ActionInterface.Type.MOUSE_UP, this::createMouseUpOptions),
-                Map.entry(ActionInterface.Type.KEY_DOWN, this::createKeyDownOptions),
-                Map.entry(ActionInterface.Type.KEY_UP, this::createKeyUpOptions),
-                Map.entry(ActionInterface.Type.CLASSIFY, this::createColorClassifyOptions),
-                Map.entry(ActionInterface.Type.CLICK_UNTIL, this::createClickUntilOptions), // Deprecated but supported for backward compatibility
-                Map.entry(ActionInterface.Type.DEFINE, this::createDefineRegionOptions)
-        );
+        this.factories =
+                Map.ofEntries(
+                        Map.entry(ActionInterface.Type.CLICK, this::createClickOptions),
+                        Map.entry(ActionInterface.Type.DRAG, this::createDragOptions),
+                        Map.entry(ActionInterface.Type.FIND, this::createPatternFindOptions),
+                        Map.entry(ActionInterface.Type.TYPE, this::createTypeOptions),
+                        Map.entry(ActionInterface.Type.MOVE, this::createMouseMoveOptions),
+                        Map.entry(ActionInterface.Type.VANISH, this::createVanishOptions),
+                        Map.entry(ActionInterface.Type.HIGHLIGHT, this::createHighlightOptions),
+                        Map.entry(
+                                ActionInterface.Type.SCROLL_MOUSE_WHEEL, this::createScrollOptions),
+                        Map.entry(ActionInterface.Type.MOUSE_DOWN, this::createMouseDownOptions),
+                        Map.entry(ActionInterface.Type.MOUSE_UP, this::createMouseUpOptions),
+                        Map.entry(ActionInterface.Type.KEY_DOWN, this::createKeyDownOptions),
+                        Map.entry(ActionInterface.Type.KEY_UP, this::createKeyUpOptions),
+                        Map.entry(ActionInterface.Type.CLASSIFY, this::createColorClassifyOptions),
+                        Map.entry(
+                                ActionInterface.Type.CLICK_UNTIL,
+                                this::createClickUntilOptions), // Deprecated but supported for
+                        // backward compatibility
+                        Map.entry(ActionInterface.Type.DEFINE, this::createDefineRegionOptions));
     }
 
     /**
@@ -69,10 +72,10 @@ public class ActionConfigFactory {
     }
 
     /**
-     * Creates an ActionConfig instance for the specified action type, optionally
-     * applying user-provided overrides.
+     * Creates an ActionConfig instance for the specified action type, optionally applying
+     * user-provided overrides.
      *
-     * @param actionType    The type of action for which to create a config
+     * @param actionType The type of action for which to create a config
      * @param userOverrides Optional map of property names to values for overriding defaults
      * @return A new ActionConfig instance with applied settings
      * @throws IllegalArgumentException if the action type is not supported
@@ -81,27 +84,28 @@ public class ActionConfigFactory {
         if (actionType == null) {
             throw new IllegalArgumentException("Action type cannot be null");
         }
-        
+
         Function<Map<String, Object>, ActionConfig> factory = factories.get(actionType);
         if (factory == null) {
-            throw new IllegalArgumentException("No ActionConfig factory available for type: " + actionType);
+            throw new IllegalArgumentException(
+                    "No ActionConfig factory available for type: " + actionType);
         }
 
         return factory.apply(userOverrides);
     }
 
     /**
-     * Creates an ActionConfig instance by copying settings from an existing config
-     * and optionally applying overrides.
+     * Creates an ActionConfig instance by copying settings from an existing config and optionally
+     * applying overrides.
      *
      * @param existingConfig The config to copy settings from
-     * @param userOverrides  Optional map of property names to values for overriding
+     * @param userOverrides Optional map of property names to values for overriding
      * @return A new ActionConfig instance with copied and overridden settings
      */
     public ActionConfig createFrom(ActionConfig existingConfig, Map<String, Object> userOverrides) {
         // Determine the action type from the config class
         ActionInterface.Type actionType = getActionTypeFromConfig(existingConfig);
-        
+
         // Create a new config with overrides, using the existing config as base
         // This is a simplified implementation - in practice, you might want to
         // deep copy the existing config values
@@ -131,7 +135,7 @@ public class ActionConfigFactory {
         }
         // ClickUntilOptions removed - use ClickOptions with success criteria
         if (config instanceof DefineRegionOptions) return ActionInterface.Type.DEFINE;
-        
+
         throw new IllegalArgumentException("Unknown config type: " + config.getClass().getName());
     }
 
@@ -140,7 +144,7 @@ public class ActionConfigFactory {
     private ClickOptions createClickOptions(Map<String, Object> overrides) {
         ClickOptions.Builder builder = new ClickOptions.Builder();
         applyCommonOverrides(builder, overrides);
-        
+
         if (overrides != null) {
             if (overrides.containsKey("numberOfClicks")) {
                 builder.setNumberOfClicks((Integer) overrides.get("numberOfClicks"));
@@ -149,23 +153,24 @@ public class ActionConfigFactory {
                 builder.setPressOptions((MousePressOptions) overrides.get("mousePressOptions"));
             }
         }
-        
+
         return builder.build();
     }
 
     private DragOptions createDragOptions(Map<String, Object> overrides) {
         DragOptions.Builder builder = new DragOptions.Builder();
         applyCommonOverrides(builder, overrides);
-        
+
         if (overrides != null) {
             if (overrides.containsKey("delayBetweenMouseDownAndMove")) {
-                builder.setDelayBetweenMouseDownAndMove((Double) overrides.get("delayBetweenMouseDownAndMove"));
+                builder.setDelayBetweenMouseDownAndMove(
+                        (Double) overrides.get("delayBetweenMouseDownAndMove"));
             }
             if (overrides.containsKey("delayAfterDrag")) {
                 builder.setDelayAfterDrag((Double) overrides.get("delayAfterDrag"));
             }
         }
-        
+
         return builder.build();
     }
 
@@ -178,7 +183,7 @@ public class ActionConfigFactory {
     private TypeOptions createTypeOptions(Map<String, Object> overrides) {
         TypeOptions.Builder builder = new TypeOptions.Builder();
         applyCommonOverrides(builder, overrides);
-        
+
         if (overrides != null) {
             if (overrides.containsKey("typeDelay")) {
                 builder.setTypeDelay((Double) overrides.get("typeDelay"));
@@ -187,7 +192,7 @@ public class ActionConfigFactory {
                 builder.setModifiers((String) overrides.get("modifiers"));
             }
         }
-        
+
         return builder.build();
     }
 
@@ -241,25 +246,26 @@ public class ActionConfigFactory {
 
     /**
      * Creates ClickOptions for CLICK_UNTIL action type.
-     * @deprecated Use ClickOptions with success criteria instead.
-     * See action/composite/repeat/CLICK_UNTIL_MIGRATION.md for migration guide.
+     *
+     * @deprecated Use ClickOptions with success criteria instead. See
+     *     action/composite/repeat/CLICK_UNTIL_MIGRATION.md for migration guide.
      */
     @Deprecated
     private ClickOptions createClickUntilOptions(Map<String, Object> overrides) {
         ClickOptions.Builder builder = new ClickOptions.Builder();
         applyCommonOverrides(builder, overrides);
-        
+
         // Set a default success criteria that mimics old CLICK_UNTIL behavior
         if (overrides == null || !overrides.containsKey("successCriteria")) {
             // Default: stop when target vanishes (common CLICK_UNTIL use case)
             builder.setSuccessCriteria(result -> result.getMatchList().isEmpty());
         }
-        
+
         // Set a reasonable max clicks to prevent infinite loops
         if (overrides == null || !overrides.containsKey("numberOfClicks")) {
             builder.setNumberOfClicks(10); // Default safety limit
         }
-        
+
         return builder.build();
     }
 
@@ -276,12 +282,11 @@ public class ActionConfigFactory {
         return builder.build();
     }
 
-    /**
-     * Applies common ActionConfig overrides to any builder.
-     */
-    private void applyCommonOverrides(ActionConfig.Builder<?> builder, Map<String, Object> overrides) {
+    /** Applies common ActionConfig overrides to any builder. */
+    private void applyCommonOverrides(
+            ActionConfig.Builder<?> builder, Map<String, Object> overrides) {
         if (overrides == null) return;
-        
+
         if (overrides.containsKey("pauseBeforeBegin")) {
             builder.setPauseBeforeBegin((Double) overrides.get("pauseBeforeBegin"));
         }
@@ -296,7 +301,8 @@ public class ActionConfigFactory {
         }
         if (overrides.containsKey("successCriteria")) {
             @SuppressWarnings("unchecked")
-            var criteria = (java.util.function.Predicate<ActionResult>) overrides.get("successCriteria");
+            var criteria =
+                    (java.util.function.Predicate<ActionResult>) overrides.get("successCriteria");
             builder.setSuccessCriteria(criteria);
         }
     }

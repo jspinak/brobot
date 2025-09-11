@@ -1,13 +1,19 @@
 package io.github.jspinak.brobot.aspects.monitoring;
 
-import io.github.jspinak.brobot.logging.unified.BrobotLogger;
-import io.github.jspinak.brobot.logging.unified.LogBuilder;
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
+
+import java.time.Duration;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
-import io.github.jspinak.brobot.test.annotations.Flaky;
-import io.github.jspinak.brobot.test.annotations.Flaky.FlakyCause;
-import io.github.jspinak.brobot.test.utils.ConcurrentTestHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,34 +24,25 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.time.Duration;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.lenient;
+import io.github.jspinak.brobot.logging.unified.BrobotLogger;
+import io.github.jspinak.brobot.logging.unified.LogBuilder;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.annotations.Flaky;
+import io.github.jspinak.brobot.test.annotations.Flaky.FlakyCause;
+import io.github.jspinak.brobot.test.utils.ConcurrentTestHelper;
 
 @ExtendWith(MockitoExtension.class)
 public class PerformanceMonitoringAspectTest extends BrobotTestBase {
 
     private PerformanceMonitoringAspect aspect;
 
-    @Mock
-    private BrobotLogger brobotLogger;
+    @Mock private BrobotLogger brobotLogger;
 
-    @Mock
-    private LogBuilder logBuilder;
+    @Mock private LogBuilder logBuilder;
 
-    @Mock
-    private ProceedingJoinPoint joinPoint;
+    @Mock private ProceedingJoinPoint joinPoint;
 
-    @Mock
-    private Signature signature;
+    @Mock private Signature signature;
 
     @BeforeEach
     @Override
@@ -65,7 +62,7 @@ public class PerformanceMonitoringAspectTest extends BrobotTestBase {
         lenient().when(logBuilder.duration(anyLong())).thenReturn(logBuilder);
         lenient().when(logBuilder.metadata(anyString(), any())).thenReturn(logBuilder);
         lenient().when(logBuilder.observation(anyString())).thenReturn(logBuilder);
-        
+
         // Mock the void log() method
         lenient().doNothing().when(logBuilder).log();
 
@@ -95,12 +92,14 @@ public class PerformanceMonitoringAspectTest extends BrobotTestBase {
 
         // Assert
         assertEquals(expectedResult, result);
-        
+
         // Verify performance data was recorded
-        Map<String, PerformanceMonitoringAspect.MethodPerformanceStats> stats = aspect.getPerformanceStats();
+        Map<String, PerformanceMonitoringAspect.MethodPerformanceStats> stats =
+                aspect.getPerformanceStats();
         assertTrue(stats.containsKey("TestClass.testMethod()"));
-        
-        PerformanceMonitoringAspect.MethodPerformanceStats methodStats = stats.get("TestClass.testMethod()");
+
+        PerformanceMonitoringAspect.MethodPerformanceStats methodStats =
+                stats.get("TestClass.testMethod()");
         assertEquals(1, methodStats.getTotalCalls());
         assertEquals(1, methodStats.getSuccessfulCalls());
         assertEquals(100.0, methodStats.getSuccessRate(), 0.01);
@@ -116,15 +115,15 @@ public class PerformanceMonitoringAspectTest extends BrobotTestBase {
         when(joinPoint.proceed()).thenThrow(exception);
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> 
-            aspect.monitorPerformance(joinPoint)
-        );
+        assertThrows(RuntimeException.class, () -> aspect.monitorPerformance(joinPoint));
 
         // Verify performance data was recorded for failure
-        Map<String, PerformanceMonitoringAspect.MethodPerformanceStats> stats = aspect.getPerformanceStats();
+        Map<String, PerformanceMonitoringAspect.MethodPerformanceStats> stats =
+                aspect.getPerformanceStats();
         assertTrue(stats.containsKey("TestClass.failingMethod()"));
-        
-        PerformanceMonitoringAspect.MethodPerformanceStats methodStats = stats.get("TestClass.failingMethod()");
+
+        PerformanceMonitoringAspect.MethodPerformanceStats methodStats =
+                stats.get("TestClass.failingMethod()");
         assertEquals(1, methodStats.getTotalCalls());
         assertEquals(0, methodStats.getSuccessfulCalls());
         assertEquals(0.0, methodStats.getSuccessRate(), 0.01);
@@ -136,11 +135,13 @@ public class PerformanceMonitoringAspectTest extends BrobotTestBase {
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toShortString()).thenReturn("TestClass.slowMethod()");
         when(signature.getName()).thenReturn("slowMethod");
-        when(joinPoint.getArgs()).thenReturn(new Object[]{"arg1", "arg2"});
-        when(joinPoint.proceed()).thenAnswer(invocation -> {
-            Thread.sleep(150); // Exceed threshold of 100ms
-            return new Object();
-        });
+        when(joinPoint.getArgs()).thenReturn(new Object[] {"arg1", "arg2"});
+        when(joinPoint.proceed())
+                .thenAnswer(
+                        invocation -> {
+                            Thread.sleep(150); // Exceed threshold of 100ms
+                            return new Object();
+                        });
 
         // Act
         aspect.monitorPerformance(joinPoint);
@@ -189,13 +190,16 @@ public class PerformanceMonitoringAspectTest extends BrobotTestBase {
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toShortString()).thenReturn("TestClass.recursiveMethod()");
         when(signature.getName()).thenReturn("recursiveMethod");
-        
+
         // Simulate recursive call within the same thread
-        when(joinPoint.proceed()).thenAnswer(invocation -> {
-            // Instead of calling the aspect recursively (which would cause infinite loop),
-            // just return a simple value to test that the recursion guard works
-            return "nested-call-result";
-        });
+        when(joinPoint.proceed())
+                .thenAnswer(
+                        invocation -> {
+                            // Instead of calling the aspect recursively (which would cause infinite
+                            // loop),
+                            // just return a simple value to test that the recursion guard works
+                            return "nested-call-result";
+                        });
 
         // Act - This should not cause issues
         Object result = aspect.monitorPerformance(joinPoint);
@@ -203,17 +207,18 @@ public class PerformanceMonitoringAspectTest extends BrobotTestBase {
         // Assert - Should work without stack overflow
         assertNotNull(result);
         assertEquals("nested-call-result", result);
-        
+
         // Verify performance data was recorded
-        Map<String, PerformanceMonitoringAspect.MethodPerformanceStats> stats = aspect.getPerformanceStats();
+        Map<String, PerformanceMonitoringAspect.MethodPerformanceStats> stats =
+                aspect.getPerformanceStats();
         assertTrue(stats.containsKey("TestClass.recursiveMethod()"));
     }
 
     @Test
     public void testMethodPerformanceStats() {
         // Arrange
-        PerformanceMonitoringAspect.MethodPerformanceStats stats = 
-            new PerformanceMonitoringAspect.MethodPerformanceStats("testMethod");
+        PerformanceMonitoringAspect.MethodPerformanceStats stats =
+                new PerformanceMonitoringAspect.MethodPerformanceStats("testMethod");
 
         // Act - Record multiple executions
         stats.recordExecution(100, true, 1000);
@@ -236,8 +241,8 @@ public class PerformanceMonitoringAspectTest extends BrobotTestBase {
     @Test
     public void testPercentileCalculation() {
         // Arrange
-        PerformanceMonitoringAspect.MethodPerformanceStats stats = 
-            new PerformanceMonitoringAspect.MethodPerformanceStats("testMethod");
+        PerformanceMonitoringAspect.MethodPerformanceStats stats =
+                new PerformanceMonitoringAspect.MethodPerformanceStats("testMethod");
 
         // Add 100 execution times
         for (int i = 1; i <= 100; i++) {
@@ -280,19 +285,23 @@ public class PerformanceMonitoringAspectTest extends BrobotTestBase {
 
         // First 10 executions are fast
         for (int i = 0; i < 10; i++) {
-            when(joinPoint.proceed()).thenAnswer(invocation -> {
-                Thread.sleep(10);
-                return new Object();
-            });
+            when(joinPoint.proceed())
+                    .thenAnswer(
+                            invocation -> {
+                                Thread.sleep(10);
+                                return new Object();
+                            });
             aspect.monitorPerformance(joinPoint);
         }
 
         // Next 10 executions are slow (degradation)
         for (int i = 0; i < 10; i++) {
-            when(joinPoint.proceed()).thenAnswer(invocation -> {
-                Thread.sleep(30); // 3x slower
-                return new Object();
-            });
+            when(joinPoint.proceed())
+                    .thenAnswer(
+                            invocation -> {
+                                Thread.sleep(30); // 3x slower
+                                return new Object();
+                            });
             aspect.monitorPerformance(joinPoint);
         }
 
@@ -310,7 +319,7 @@ public class PerformanceMonitoringAspectTest extends BrobotTestBase {
         when(signature.toShortString()).thenReturn("TestClass.testMethod()");
         when(signature.getName()).thenReturn("testMethod");
         when(joinPoint.proceed()).thenReturn(new Object());
-        
+
         aspect.monitorPerformance(joinPoint);
         assertFalse(aspect.getPerformanceStats().isEmpty());
 
@@ -328,36 +337,43 @@ public class PerformanceMonitoringAspectTest extends BrobotTestBase {
         // Arrange
         int threadCount = 10;
         CountDownLatch latch = new CountDownLatch(threadCount);
-        
+
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toShortString()).thenReturn("TestClass.concurrentMethod()");
         when(signature.getName()).thenReturn("concurrentMethod");
-        when(joinPoint.proceed()).thenAnswer(invocation -> {
-            Thread.sleep(10); // Simple delay instead of waitFor
-            return new Object();
-        });
+        when(joinPoint.proceed())
+                .thenAnswer(
+                        invocation -> {
+                            Thread.sleep(10); // Simple delay instead of waitFor
+                            return new Object();
+                        });
 
         // Act - create executor for this test
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         for (int i = 0; i < threadCount; i++) {
-            executor.submit(() -> {
-                try {
-                    aspect.monitorPerformance(joinPoint);
-                } catch (Throwable e) {
-                    fail("Unexpected exception: " + e);
-                } finally {
-                    latch.countDown();
-                }
-            });
+            executor.submit(
+                    () -> {
+                        try {
+                            aspect.monitorPerformance(joinPoint);
+                        } catch (Throwable e) {
+                            fail("Unexpected exception: " + e);
+                        } finally {
+                            latch.countDown();
+                        }
+                    });
         }
 
         // Assert
-        assertTrue(ConcurrentTestHelper.awaitLatch(latch, Duration.ofSeconds(5), "Concurrent monitoring"));
+        assertTrue(
+                ConcurrentTestHelper.awaitLatch(
+                        latch, Duration.ofSeconds(5), "Concurrent monitoring"));
         executor.shutdown();
         executor.awaitTermination(5, TimeUnit.SECONDS);
-        
-        Map<String, PerformanceMonitoringAspect.MethodPerformanceStats> stats = aspect.getPerformanceStats();
-        PerformanceMonitoringAspect.MethodPerformanceStats methodStats = stats.get("TestClass.concurrentMethod()");
+
+        Map<String, PerformanceMonitoringAspect.MethodPerformanceStats> stats =
+                aspect.getPerformanceStats();
+        PerformanceMonitoringAspect.MethodPerformanceStats methodStats =
+                stats.get("TestClass.concurrentMethod()");
         assertEquals(threadCount, methodStats.getTotalCalls());
     }
 
@@ -365,22 +381,26 @@ public class PerformanceMonitoringAspectTest extends BrobotTestBase {
     public void testMemoryTracking() throws Throwable {
         // Arrange
         ReflectionTestUtils.setField(aspect, "trackMemoryUsage", true);
-        
+
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toShortString()).thenReturn("TestClass.memoryMethod()");
         when(signature.getName()).thenReturn("memoryMethod");
-        when(joinPoint.proceed()).thenAnswer(invocation -> {
-            // Allocate some memory
-            byte[] data = new byte[1024 * 1024]; // 1MB
-            return data;
-        });
+        when(joinPoint.proceed())
+                .thenAnswer(
+                        invocation -> {
+                            // Allocate some memory
+                            byte[] data = new byte[1024 * 1024]; // 1MB
+                            return data;
+                        });
 
         // Act
         aspect.monitorPerformance(joinPoint);
 
         // Assert
-        Map<String, PerformanceMonitoringAspect.MethodPerformanceStats> stats = aspect.getPerformanceStats();
-        PerformanceMonitoringAspect.MethodPerformanceStats methodStats = stats.get("TestClass.memoryMethod()");
+        Map<String, PerformanceMonitoringAspect.MethodPerformanceStats> stats =
+                aspect.getPerformanceStats();
+        PerformanceMonitoringAspect.MethodPerformanceStats methodStats =
+                stats.get("TestClass.memoryMethod()");
         assertNotNull(methodStats);
         // Memory tracking is enabled but exact values depend on JVM state
         assertTrue(methodStats.getTotalCalls() > 0);
@@ -389,8 +409,8 @@ public class PerformanceMonitoringAspectTest extends BrobotTestBase {
     @Test
     public void testMethodPerformanceStats_EdgeCases() {
         // Arrange
-        PerformanceMonitoringAspect.MethodPerformanceStats stats = 
-            new PerformanceMonitoringAspect.MethodPerformanceStats("edgeMethod");
+        PerformanceMonitoringAspect.MethodPerformanceStats stats =
+                new PerformanceMonitoringAspect.MethodPerformanceStats("edgeMethod");
 
         // Assert - Empty stats
         assertEquals(0, stats.getTotalCalls());

@@ -1,15 +1,16 @@
 package io.github.jspinak.brobot.action.composite;
 
 import io.github.jspinak.brobot.action.ActionConfig;
+
 import lombok.Getter;
 
 /**
  * Configuration for recording and playback actions.
- * <p>
- * This class encapsulates all parameters for controlling the playback of a recorded
- * automation sequence, including the start time and duration.
- * <p>
- * It is an immutable object and must be constructed using its inner {@link Builder}.
+ *
+ * <p>This class encapsulates all parameters for controlling the playback of a recorded automation
+ * sequence, including the start time and duration.
+ *
+ * <p>It is an immutable object and must be constructed using its inner {@link Builder}.
  *
  * @see ActionConfig
  */
@@ -25,22 +26,18 @@ public final class PlaybackOptions extends ActionConfig {
         this.playbackDuration = builder.playbackDuration;
     }
 
-    /**
-     * Builder for constructing {@link PlaybackOptions} with a fluent API.
-     */
+    /** Builder for constructing {@link PlaybackOptions} with a fluent API. */
     public static class Builder extends ActionConfig.Builder<Builder> {
 
         private double startPlayback = -1;
         private double playbackDuration = 5.0;
 
-        /**
-         * Default constructor for creating a new PlaybackOptions configuration.
-         */
+        /** Default constructor for creating a new PlaybackOptions configuration. */
         public Builder() {}
 
         /**
-         * Creates a new Builder instance pre-populated with values from an existing
-         * PlaybackOptions object.
+         * Creates a new Builder instance pre-populated with values from an existing PlaybackOptions
+         * object.
          *
          * @param original The PlaybackOptions instance to copy.
          */
@@ -52,10 +49,9 @@ public final class PlaybackOptions extends ActionConfig {
 
         /**
          * Sets the start point in the recording, in seconds, to begin the playback.
-         * <p>
-         * A value of -1 (the default) indicates that the start point should be
-         * determined dynamically, for example, by matching the current screen
-         * against scenes in the recording.
+         *
+         * <p>A value of -1 (the default) indicates that the start point should be determined
+         * dynamically, for example, by matching the current screen against scenes in the recording.
          *
          * @param startPlayback The start time in seconds, or -1 for dynamic start.
          * @return this Builder instance for chaining.

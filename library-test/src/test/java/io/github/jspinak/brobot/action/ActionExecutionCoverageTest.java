@@ -1,33 +1,32 @@
 package io.github.jspinak.brobot.action;
 
-import io.github.jspinak.brobot.action.basic.click.ClickOptions;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.action.ActionConfig;
-import io.github.jspinak.brobot.model.element.Location;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
-import io.github.jspinak.brobot.test.config.MockOnlyTestConfiguration;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
+
+import java.util.Arrays;
+import java.util.concurrent.*;
+
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.util.Arrays;
-import java.util.concurrent.*;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assumptions.*;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
+import io.github.jspinak.brobot.test.config.MockOnlyTestConfiguration;
 
 /**
- * Test coverage for ActionExecution flow and complex scenarios.
- * Tests conditional chains, parallel execution, and error recovery.
+ * Test coverage for ActionExecution flow and complex scenarios. Tests conditional chains, parallel
+ * execution, and error recovery.
  */
 @DisplayName("Action Execution Coverage Tests")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@ContextConfiguration(initializers = { MockOnlyTestConfiguration.class })
+@ContextConfiguration(initializers = {MockOnlyTestConfiguration.class})
 public class ActionExecutionCoverageTest extends BrobotIntegrationTestBase {
 
     @Autowired(required = false)
@@ -57,13 +56,10 @@ public class ActionExecutionCoverageTest extends BrobotIntegrationTestBase {
     @DisplayName("Test conditional action chain - if found then click")
     void testConditionalChainIfFoundClick() {
         // Given
-        StateImage targetImage = new StateImage.Builder()
-                .setName("target")
-                .build();
+        StateImage targetImage = new StateImage.Builder().setName("target").build();
 
-        ObjectCollection collection = new ObjectCollection.Builder()
-                .withImages(targetImage)
-                .build();
+        ObjectCollection collection =
+                new ObjectCollection.Builder().withImages(targetImage).build();
 
         // When - simulate conditional execution
         ActionResult findResult = action.find(targetImage);
@@ -97,10 +93,11 @@ public class ActionExecutionCoverageTest extends BrobotIntegrationTestBase {
         ActionResult moveBackResult = action.perform(ActionType.MOVE, region2);
 
         // Then - verify chain execution
-        assertDoesNotThrow(() -> {
-            // All actions should complete without exception
-            assertTrue(true, "Multi-step chain completed");
-        });
+        assertDoesNotThrow(
+                () -> {
+                    // All actions should complete without exception
+                    assertTrue(true, "Multi-step chain completed");
+                });
     }
 
     @Test
@@ -116,29 +113,35 @@ public class ActionExecutionCoverageTest extends BrobotIntegrationTestBase {
         CountDownLatch latch = new CountDownLatch(3);
 
         // When - execute actions in parallel
-        Future<ActionResult> future1 = executor.submit(() -> {
-            try {
-                return action.find(image1);
-            } finally {
-                latch.countDown();
-            }
-        });
+        Future<ActionResult> future1 =
+                executor.submit(
+                        () -> {
+                            try {
+                                return action.find(image1);
+                            } finally {
+                                latch.countDown();
+                            }
+                        });
 
-        Future<ActionResult> future2 = executor.submit(() -> {
-            try {
-                return action.find(image2);
-            } finally {
-                latch.countDown();
-            }
-        });
+        Future<ActionResult> future2 =
+                executor.submit(
+                        () -> {
+                            try {
+                                return action.find(image2);
+                            } finally {
+                                latch.countDown();
+                            }
+                        });
 
-        Future<ActionResult> future3 = executor.submit(() -> {
-            try {
-                return action.find(image3);
-            } finally {
-                latch.countDown();
-            }
-        });
+        Future<ActionResult> future3 =
+                executor.submit(
+                        () -> {
+                            try {
+                                return action.find(image3);
+                            } finally {
+                                latch.countDown();
+                            }
+                        });
 
         // Then
         assertTrue(latch.await(5, TimeUnit.SECONDS), "Parallel execution completed");
@@ -150,9 +153,7 @@ public class ActionExecutionCoverageTest extends BrobotIntegrationTestBase {
     @DisplayName("Test action retry on failure")
     void testActionRetryLogic() {
         // Given
-        StateImage difficultImage = new StateImage.Builder()
-                .setName("difficult-to-find")
-                .build();
+        StateImage difficultImage = new StateImage.Builder().setName("difficult-to-find").build();
 
         int maxRetries = 3;
         ActionResult finalResult = null;
@@ -186,7 +187,7 @@ public class ActionExecutionCoverageTest extends BrobotIntegrationTestBase {
     void testCustomTimeoutStrategy() {
         // Given
         StateImage image = new StateImage.Builder().setName("timeout-test").build();
-        double[] timeouts = { 0.1, 0.5, 1.0, 2.0, 5.0 };
+        double[] timeouts = {0.1, 0.5, 1.0, 2.0, 5.0};
 
         // When - test different timeout values
         for (double timeout : timeouts) {
@@ -208,29 +209,32 @@ public class ActionExecutionCoverageTest extends BrobotIntegrationTestBase {
         // Given
         Region originalRegion = new Region(0, 0, 500, 500);
         Region modifiedRegion = new Region(100, 100, 300, 300);
-        StateImage image = new StateImage.Builder()
-                .setName("region-test")
-                .build();
+        StateImage image = new StateImage.Builder().setName("region-test").build();
 
         // When - test with different search regions
-        ObjectCollection originalCollection = new ObjectCollection.Builder()
-                .withImages(image)
-                .withRegions(originalRegion)
-                .build();
+        ObjectCollection originalCollection =
+                new ObjectCollection.Builder()
+                        .withImages(image)
+                        .withRegions(originalRegion)
+                        .build();
 
-        ObjectCollection modifiedCollection = new ObjectCollection.Builder()
-                .withImages(image)
-                .withRegions(modifiedRegion)
-                .build();
+        ObjectCollection modifiedCollection =
+                new ObjectCollection.Builder()
+                        .withImages(image)
+                        .withRegions(modifiedRegion)
+                        .build();
 
-        ActionResult originalResult = action.perform(new PatternFindOptions.Builder().build(), originalCollection);
-        ActionResult modifiedResult = action.perform(new PatternFindOptions.Builder().build(), modifiedCollection);
+        ActionResult originalResult =
+                action.perform(new PatternFindOptions.Builder().build(), originalCollection);
+        ActionResult modifiedResult =
+                action.perform(new PatternFindOptions.Builder().build(), modifiedCollection);
 
         // Then
-        assertDoesNotThrow(() -> {
-            // Both searches should complete
-            assertTrue(true, "Search region modification handled");
-        });
+        assertDoesNotThrow(
+                () -> {
+                    // Both searches should complete
+                    assertTrue(true, "Search region modification handled");
+                });
     }
 
     @Test
@@ -263,21 +267,18 @@ public class ActionExecutionCoverageTest extends BrobotIntegrationTestBase {
     @DisplayName("Test action with different similarity thresholds")
     void testSimilarityThresholds() {
         // Given
-        StateImage image = new StateImage.Builder()
-                .setName("similarity-test")
-                .build();
+        StateImage image = new StateImage.Builder().setName("similarity-test").build();
 
-        double[] similarities = { 0.5, 0.7, 0.9, 0.95, 0.99 };
+        double[] similarities = {0.5, 0.7, 0.9, 0.95, 0.99};
 
         // When
         for (double similarity : similarities) {
-            PatternFindOptions options = new PatternFindOptions.Builder()
-                    .setStrategy(PatternFindOptions.Strategy.FIRST)
-                    .build();
+            PatternFindOptions options =
+                    new PatternFindOptions.Builder()
+                            .setStrategy(PatternFindOptions.Strategy.FIRST)
+                            .build();
 
-            ObjectCollection collection = new ObjectCollection.Builder()
-                    .withImages(image)
-                    .build();
+            ObjectCollection collection = new ObjectCollection.Builder().withImages(image).build();
 
             ActionResult result = action.perform(options, collection);
 
@@ -294,15 +295,14 @@ public class ActionExecutionCoverageTest extends BrobotIntegrationTestBase {
     void testActionResultAggregation() {
         // Given
         StateImage[] images = {
-                new StateImage.Builder().setName("img1").build(),
-                new StateImage.Builder().setName("img2").build(),
-                new StateImage.Builder().setName("img3").build()
+            new StateImage.Builder().setName("img1").build(),
+            new StateImage.Builder().setName("img2").build(),
+            new StateImage.Builder().setName("img3").build()
         };
 
         // When - collect multiple results
-        ActionResult[] results = Arrays.stream(images)
-                .map(img -> action.find(img))
-                .toArray(ActionResult[]::new);
+        ActionResult[] results =
+                Arrays.stream(images).map(img -> action.find(img)).toArray(ActionResult[]::new);
 
         // Then - aggregate results
         int successCount = 0;
@@ -310,8 +310,7 @@ public class ActionExecutionCoverageTest extends BrobotIntegrationTestBase {
 
         for (ActionResult result : results) {
             if (result != null) {
-                if (result.isSuccess())
-                    successCount++;
+                if (result.isSuccess()) successCount++;
                 if (result.getMatchList() != null) {
                     totalMatches += result.getMatchList().size();
                 }
@@ -327,12 +326,8 @@ public class ActionExecutionCoverageTest extends BrobotIntegrationTestBase {
     @DisplayName("Test action with state transition")
     void testActionWithStateTransition() {
         // Given - simulate state transition
-        StateImage fromState = new StateImage.Builder()
-                .setName("from-state")
-                .build();
-        StateImage toState = new StateImage.Builder()
-                .setName("to-state")
-                .build();
+        StateImage fromState = new StateImage.Builder().setName("from-state").build();
+        StateImage toState = new StateImage.Builder().setName("to-state").build();
 
         // When - perform transition action
         ActionResult findFromResult = action.find(fromState);
@@ -353,9 +348,10 @@ public class ActionExecutionCoverageTest extends BrobotIntegrationTestBase {
         }
 
         // Then
-        assertDoesNotThrow(() -> {
-            assertTrue(true, "State transition completed");
-        });
+        assertDoesNotThrow(
+                () -> {
+                    assertTrue(true, "State transition completed");
+                });
     }
 
     @Test
@@ -363,9 +359,7 @@ public class ActionExecutionCoverageTest extends BrobotIntegrationTestBase {
     @DisplayName("Test action with dynamic wait")
     void testDynamicWait() {
         // Given
-        StateImage waitImage = new StateImage.Builder()
-                .setName("wait-image")
-                .build();
+        StateImage waitImage = new StateImage.Builder().setName("wait-image").build();
 
         long startTime = System.currentTimeMillis();
 
@@ -396,22 +390,22 @@ public class ActionExecutionCoverageTest extends BrobotIntegrationTestBase {
     void testOffsetAdjustments() {
         // Given
         Location baseLocation = new Location(100, 100);
-        int[] xOffsets = { -10, 0, 10, 20 };
-        int[] yOffsets = { -10, 0, 10, 20 };
+        int[] xOffsets = {-10, 0, 10, 20};
+        int[] yOffsets = {-10, 0, 10, 20};
 
         // When
         for (int xOffset : xOffsets) {
             for (int yOffset : yOffsets) {
-                Location adjusted = new Location(
-                        baseLocation.getX() + xOffset,
-                        baseLocation.getY() + yOffset);
+                Location adjusted =
+                        new Location(baseLocation.getX() + xOffset, baseLocation.getY() + yOffset);
 
                 ActionResult result = action.perform(ActionType.MOVE, adjusted);
 
                 // Then
-                assertDoesNotThrow(() -> {
-                    // All offset combinations should be handled
-                });
+                assertDoesNotThrow(
+                        () -> {
+                            // All offset combinations should be handled
+                        });
             }
         }
     }
@@ -421,29 +415,28 @@ public class ActionExecutionCoverageTest extends BrobotIntegrationTestBase {
     @DisplayName("Test action with pattern rotation")
     void testPatternRotation() {
         // Given - simulate rotated patterns
-        StateImage baseImage = new StateImage.Builder()
-                .setName("rotation-test")
-                .build();
+        StateImage baseImage = new StateImage.Builder().setName("rotation-test").build();
 
-        double[] rotations = { 0, 90, 180, 270 };
+        double[] rotations = {0, 90, 180, 270};
 
         // When
         for (double rotation : rotations) {
             // Note: Actual rotation would be in PatternFindOptions
-            PatternFindOptions options = new PatternFindOptions.Builder()
-                    .setStrategy(PatternFindOptions.Strategy.BEST)
-                    .build();
+            PatternFindOptions options =
+                    new PatternFindOptions.Builder()
+                            .setStrategy(PatternFindOptions.Strategy.BEST)
+                            .build();
 
-            ObjectCollection collection = new ObjectCollection.Builder()
-                    .withImages(baseImage)
-                    .build();
+            ObjectCollection collection =
+                    new ObjectCollection.Builder().withImages(baseImage).build();
 
             ActionResult result = action.perform(options, collection);
 
             // Then
-            assertDoesNotThrow(() -> {
-                // Rotation handling
-            });
+            assertDoesNotThrow(
+                    () -> {
+                        // Rotation handling
+                    });
         }
     }
 
@@ -452,9 +445,7 @@ public class ActionExecutionCoverageTest extends BrobotIntegrationTestBase {
     @DisplayName("Test action performance metrics")
     void testActionPerformanceMetrics() {
         // Given
-        StateImage image = new StateImage.Builder()
-                .setName("performance-test")
-                .build();
+        StateImage image = new StateImage.Builder().setName("performance-test").build();
 
         int iterations = 10;
         long totalTime = 0;
@@ -484,9 +475,7 @@ public class ActionExecutionCoverageTest extends BrobotIntegrationTestBase {
 
         // When - perform multiple actions
         for (int i = 0; i < 100; i++) {
-            StateImage image = new StateImage.Builder()
-                    .setName("memory-test-" + i)
-                    .build();
+            StateImage image = new StateImage.Builder().setName("memory-test-" + i).build();
             ActionResult result = action.find(image);
         }
 

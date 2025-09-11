@@ -1,23 +1,23 @@
 package io.github.jspinak.brobot.runner.fileassociation;
 
-import lombok.Data;
-import io.github.jspinak.brobot.runner.events.EventBus;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.stereotype.Component;
-
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.stereotype.Component;
+
+import io.github.jspinak.brobot.runner.events.EventBus;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 /**
- * Handles file associations for opening configuration files.
- * Processes command line arguments to open files passed to the application.
+ * Handles file associations for opening configuration files. Processes command line arguments to
+ * open files passed to the application.
  */
 @Slf4j
 @Component
@@ -25,70 +25,64 @@ import java.util.Optional;
 public class FileAssociationHandler implements ApplicationRunner {
 
     private final EventBus eventBus;
-    
+
     @Override
     public void run(ApplicationArguments args) throws Exception {
         // Check for files passed as arguments
         List<String> nonOptionArgs = args.getNonOptionArgs();
-        
+
         for (String arg : nonOptionArgs) {
             processFileArgument(arg);
         }
-        
+
         // Also check for protocol URLs (brobot://open?file=...)
         Optional<String> protocolFile = extractProtocolFile(args);
         protocolFile.ifPresent(this::processFileArgument);
     }
-    
-    /**
-     * Process a file argument to open it if it's a valid configuration.
-     */
+
+    /** Process a file argument to open it if it's a valid configuration. */
     private void processFileArgument(String filePath) {
         try {
             Path path = Paths.get(filePath);
-            
+
             // Check if it's a file and exists
             if (!Files.exists(path) || !Files.isRegularFile(path)) {
                 log.debug("Argument is not a valid file: {}", filePath);
                 return;
             }
-            
+
             // Check if it's a JSON file
             if (!filePath.toLowerCase().endsWith(".json")) {
                 log.debug("File is not a JSON configuration: {}", filePath);
                 return;
             }
-            
+
             log.info("Opening configuration file from file association: {}", filePath);
-            
+
             // Configuration loading will be handled by the application's configuration service
             // when file association events are properly integrated
-            
+
             log.info("Configuration file identified: {}", filePath);
-            
+
         } catch (Exception e) {
             log.error("Failed to open file from association: {}", filePath, e);
         }
     }
-    
-    /**
-     * Extract file path from protocol URL.
-     */
+
+    /** Extract file path from protocol URL. */
     private Optional<String> extractProtocolFile(ApplicationArguments args) {
         // Look for protocol URLs like brobot://open?file=/path/to/config.json
-        return args.getOptionValues("url") != null 
-            ? args.getOptionValues("url").stream()
-                .filter(url -> url.startsWith("brobot://"))
-                .map(this::parseProtocolUrl)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .findFirst()
-            : Optional.empty();
+        return args.getOptionValues("url") != null
+                ? args.getOptionValues("url").stream()
+                        .filter(url -> url.startsWith("brobot://"))
+                        .map(this::parseProtocolUrl)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .findFirst()
+                : Optional.empty();
     }
-    
-    /**
-     * Parse protocol URL to extract file path.
-     */
+
+    /** Parse protocol URL to extract file path. */
     private Optional<String> parseProtocolUrl(String url) {
         try {
             // Simple parsing for brobot://open?file=...
@@ -103,13 +97,11 @@ public class FileAssociationHandler implements ApplicationRunner {
         }
         return Optional.empty();
     }
-    
-    /**
-     * Register file associations programmatically (platform-specific).
-     */
+
+    /** Register file associations programmatically (platform-specific). */
     public static void registerFileAssociations() {
         String os = System.getProperty("os.name").toLowerCase();
-        
+
         try {
             if (os.contains("win")) {
                 registerWindowsAssociations();
@@ -122,38 +114,32 @@ public class FileAssociationHandler implements ApplicationRunner {
             log.error("Failed to register file associations", e);
         }
     }
-    
-    /**
-     * Register Windows file associations.
-     */
+
+    /** Register Windows file associations. */
     private static void registerWindowsAssociations() {
         log.info("Windows file associations are configured during installation");
         // Registry modifications are handled by the installer
     }
-    
-    /**
-     * Register macOS file associations.
-     */
+
+    /** Register macOS file associations. */
     private static void registerMacOSAssociations() {
         log.info("macOS file associations are configured in Info.plist");
         // Info.plist handles file associations on macOS
     }
-    
-    /**
-     * Register Linux file associations.
-     */
+
+    /** Register Linux file associations. */
     private static void registerLinuxAssociations() {
         try {
             // Check if running from installed location
             Path desktopFile = Paths.get("/usr/share/applications/brobot-runner.desktop");
             if (Files.exists(desktopFile)) {
                 // Update MIME database
-                ProcessBuilder pb = new ProcessBuilder(
-                    "xdg-mime", "default", "brobot-runner.desktop", "application/json"
-                );
+                ProcessBuilder pb =
+                        new ProcessBuilder(
+                                "xdg-mime", "default", "brobot-runner.desktop", "application/json");
                 Process process = pb.start();
                 int exitCode = process.waitFor();
-                
+
                 if (exitCode == 0) {
                     log.info("Linux file associations registered successfully");
                 } else {
@@ -164,13 +150,11 @@ public class FileAssociationHandler implements ApplicationRunner {
             log.error("Error registering Linux file associations", e);
         }
     }
-    
-    /**
-     * Check if file associations are properly configured.
-     */
+
+    /** Check if file associations are properly configured. */
     public static boolean areFileAssociationsConfigured() {
         String os = System.getProperty("os.name").toLowerCase();
-        
+
         try {
             if (os.contains("win")) {
                 return checkWindowsAssociations();
@@ -182,16 +166,14 @@ public class FileAssociationHandler implements ApplicationRunner {
         } catch (Exception e) {
             log.error("Failed to check file associations", e);
         }
-        
+
         return false;
     }
-    
+
     private static boolean checkWindowsAssociations() {
         try {
             // Check registry for .json association
-            ProcessBuilder pb = new ProcessBuilder(
-                "reg", "query", "HKCR\\.json", "/ve"
-            );
+            ProcessBuilder pb = new ProcessBuilder("reg", "query", "HKCR\\.json", "/ve");
             Process process = pb.start();
             int exitCode = process.waitFor();
             return exitCode == 0;
@@ -199,21 +181,20 @@ public class FileAssociationHandler implements ApplicationRunner {
             return false;
         }
     }
-    
+
     private static boolean checkMacOSAssociations() {
         // On macOS, associations are handled by Launch Services
         // This is configured in Info.plist during packaging
         return true;
     }
-    
+
     private static boolean checkLinuxAssociations() {
         try {
-            ProcessBuilder pb = new ProcessBuilder(
-                "xdg-mime", "query", "default", "application/json"
-            );
+            ProcessBuilder pb =
+                    new ProcessBuilder("xdg-mime", "query", "default", "application/json");
             Process process = pb.start();
             int exitCode = process.waitFor();
-            
+
             if (exitCode == 0) {
                 // Read output to check if it's our application
                 String output = new String(process.getInputStream().readAllBytes());

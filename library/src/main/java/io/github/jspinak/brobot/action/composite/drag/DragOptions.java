@@ -1,57 +1,55 @@
 package io.github.jspinak.brobot.action.composite.drag;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
 import io.github.jspinak.brobot.model.action.MouseButton;
+
 import lombok.Getter;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Configuration for drag actions.
- * <p>
- * DragOptions configures a drag operation which is implemented as a chain of 6 actions:
- * Find source → Find target → MouseMove to source → MouseDown → MouseMove to target → MouseUp
- * </p>
+ *
+ * <p>DragOptions configures a drag operation which is implemented as a chain of 6 actions: Find
+ * source → Find target → MouseMove to source → MouseDown → MouseMove to target → MouseUp
  */
 @Getter
 @JsonDeserialize(builder = DragOptions.Builder.class)
 public final class DragOptions extends ActionConfig {
-    
+
     private final MousePressOptions mousePressOptions;
     private final double delayBetweenMouseDownAndMove;
     private final double delayAfterDrag;
-    
+
     private DragOptions(Builder builder) {
         super(builder);
         this.mousePressOptions = builder.mousePressOptions;
         this.delayBetweenMouseDownAndMove = builder.delayBetweenMouseDownAndMove;
         this.delayAfterDrag = builder.delayAfterDrag;
     }
-    
-    /**
-     * Builder for constructing DragOptions with a fluent API.
-     */
+
+    /** Builder for constructing DragOptions with a fluent API. */
     @JsonPOJOBuilder(withPrefix = "set")
     public static class Builder extends ActionConfig.Builder<Builder> {
-        
+
         @JsonProperty("mousePressOptions")
-        private MousePressOptions mousePressOptions = MousePressOptions.builder()
-            .setButton(MouseButton.LEFT)
-            .build();
+        private MousePressOptions mousePressOptions =
+                MousePressOptions.builder().setButton(MouseButton.LEFT).build();
+
         @JsonProperty("delayBetweenMouseDownAndMove")
         private double delayBetweenMouseDownAndMove = 0.5;
+
         @JsonProperty("delayAfterDrag")
         private double delayAfterDrag = 0.5;
-        
-        /**
-         * Default constructor for creating a new DragOptions configuration.
-         */
+
+        /** Default constructor for creating a new DragOptions configuration. */
         @JsonCreator
         public Builder() {}
-        
+
         /**
          * Sets the mouse press options for the drag operation.
          *
@@ -62,7 +60,7 @@ public final class DragOptions extends ActionConfig {
             this.mousePressOptions = mousePressOptions;
             return self();
         }
-        
+
         /**
          * Sets the delay between mouse down and the drag movement.
          *
@@ -73,7 +71,7 @@ public final class DragOptions extends ActionConfig {
             this.delayBetweenMouseDownAndMove = seconds;
             return self();
         }
-        
+
         /**
          * Sets the delay after completing the drag operation.
          *
@@ -84,7 +82,7 @@ public final class DragOptions extends ActionConfig {
             this.delayAfterDrag = seconds;
             return self();
         }
-        
+
         /**
          * Builds the immutable DragOptions object.
          *
@@ -93,7 +91,7 @@ public final class DragOptions extends ActionConfig {
         public DragOptions build() {
             return new DragOptions(this);
         }
-        
+
         @Override
         protected Builder self() {
             return this;

@@ -1,10 +1,12 @@
 package io.github.jspinak.brobot.model.state;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.basic.region.DefineRegionOptions.DefineAs;
 import io.github.jspinak.brobot.model.action.ActionHistory;
 import io.github.jspinak.brobot.model.action.ActionRecord;
 import io.github.jspinak.brobot.model.element.Anchor;
@@ -13,62 +15,61 @@ import io.github.jspinak.brobot.model.element.CrossStateAnchor;
 import io.github.jspinak.brobot.model.element.Position;
 import io.github.jspinak.brobot.model.element.Positions;
 import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.state.StateObject;
-import io.github.jspinak.brobot.action.basic.region.DefineRegionOptions.DefineAs;
+
 import lombok.Data;
 
 /**
  * Represents a meaningful screen area associated with a specific state in Brobot.
- * 
- * <p>StateRegion encapsulates a rectangular area that has contextual significance within 
- * a particular state. Unlike simple Region objects, StateRegion maintains state ownership, 
- * interaction history, and behavioral properties that make it suitable for sophisticated 
- * GUI automation scenarios where screen areas have state-specific meanings and behaviors.</p>
- * 
+ *
+ * <p>StateRegion encapsulates a rectangular area that has contextual significance within a
+ * particular state. Unlike simple Region objects, StateRegion maintains state ownership,
+ * interaction history, and behavioral properties that make it suitable for sophisticated GUI
+ * automation scenarios where screen areas have state-specific meanings and behaviors.
+ *
  * <p>Key features:
+ *
  * <ul>
- *   <li><b>State Association</b>: Bound to a specific state for contextual relevance</li>
- *   <li><b>Interaction Tracking</b>: Records how many times the region has been acted upon</li>
- *   <li><b>Click Positioning</b>: Configurable target position within the region (default center)</li>
- *   <li><b>Visibility Persistence</b>: Tracks likelihood of remaining visible after interaction</li>
- *   <li><b>Existence Probability</b>: Statistical measure of finding actionable content</li>
- *   <li><b>Anchor Support</b>: Relative positioning based on other screen elements</li>
- *   <li><b>Mock Text</b>: Simulated text content for testing and mocking</li>
+ *   <li><b>State Association</b>: Bound to a specific state for contextual relevance
+ *   <li><b>Interaction Tracking</b>: Records how many times the region has been acted upon
+ *   <li><b>Click Positioning</b>: Configurable target position within the region (default center)
+ *   <li><b>Visibility Persistence</b>: Tracks likelihood of remaining visible after interaction
+ *   <li><b>Existence Probability</b>: Statistical measure of finding actionable content
+ *   <li><b>Anchor Support</b>: Relative positioning based on other screen elements
+ *   <li><b>Mock Text</b>: Simulated text content for testing and mocking
  * </ul>
- * </p>
- * 
+ *
  * <p>Common use cases:
+ *
  * <ul>
- *   <li>Text input fields that appear only in specific states</li>
- *   <li>Dynamic content areas with state-specific behavior</li>
- *   <li>Button or control regions that change meaning by state</li>
- *   <li>Areas for text extraction or verification</li>
- *   <li>Regions that trigger state transitions when clicked</li>
+ *   <li>Text input fields that appear only in specific states
+ *   <li>Dynamic content areas with state-specific behavior
+ *   <li>Button or control regions that change meaning by state
+ *   <li>Areas for text extraction or verification
+ *   <li>Regions that trigger state transitions when clicked
  * </ul>
- * </p>
- * 
+ *
  * <p>Behavioral properties:
+ *
  * <ul>
- *   <li><b>staysVisibleAfterClicked</b>: Probability (0-100) the region remains after interaction</li>
- *   <li><b>probabilityExists</b>: Likelihood (0-100) of finding actionable content</li>
- *   <li><b>position</b>: Target point within region for clicks (0-1 scale)</li>
+ *   <li><b>staysVisibleAfterClicked</b>: Probability (0-100) the region remains after interaction
+ *   <li><b>probabilityExists</b>: Likelihood (0-100) of finding actionable content
+ *   <li><b>position</b>: Target point within region for clicks (0-1 scale)
  * </ul>
- * </p>
- * 
+ *
  * <p>Integration features:
+ *
  * <ul>
- *   <li>Maintains MatchHistory for learning and mocking</li>
- *   <li>Converts to ObjectCollection for action execution</li>
- *   <li>Supports anchoring for dynamic positioning</li>
- *   <li>Provides convenience methods for coordinate access</li>
+ *   <li>Maintains MatchHistory for learning and mocking
+ *   <li>Converts to ObjectCollection for action execution
+ *   <li>Supports anchoring for dynamic positioning
+ *   <li>Provides convenience methods for coordinate access
  * </ul>
- * </p>
- * 
- * <p>In the model-based approach, StateRegion enables fine-grained control over screen 
- * areas that have different meanings in different states. This is essential for handling 
- * complex GUIs where the same screen location may serve different purposes depending on 
- * the application's current state, such as multi-purpose panels or context-sensitive areas.</p>
- * 
+ *
+ * <p>In the model-based approach, StateRegion enables fine-grained control over screen areas that
+ * have different meanings in different states. This is essential for handling complex GUIs where
+ * the same screen location may serve different purposes depending on the application's current
+ * state, such as multi-purpose panels or context-sensitive areas.
+ *
  * @since 1.0
  * @see StateObject
  * @see Region
@@ -92,13 +93,18 @@ public class StateRegion implements StateObject {
     private Anchors anchors = new Anchors();
     private String mockText = "mock text";
     private ActionHistory matchHistory = new ActionHistory();
-    
+
     // Cross-state anchor support
     private List<CrossStateAnchor> crossStateAnchors = new ArrayList<>();
     private DefineAs defineStrategy = DefineAs.OUTSIDE_ANCHORS;
 
     public String getIdAsString() {
-        return objectType.name() + name + searchRegion.x() + searchRegion.y() + searchRegion.w() + searchRegion.h();
+        return objectType.name()
+                + name
+                + searchRegion.x()
+                + searchRegion.y()
+                + searchRegion.w()
+                + searchRegion.h();
     }
 
     public int x() {
@@ -130,9 +136,7 @@ public class StateRegion implements StateObject {
     }
 
     public ObjectCollection asObjectCollection() {
-        return new ObjectCollection.Builder()
-                .withRegions(this)
-                .build();
+        return new ObjectCollection.Builder().withRegions(this).build();
     }
 
     public static class Builder {
@@ -190,7 +194,8 @@ public class StateRegion implements StateObject {
             return this;
         }
 
-        public Builder addAnchor(Positions.Name definedRegionBorder, Positions.Name positionInThisRegion) {
+        public Builder addAnchor(
+                Positions.Name definedRegionBorder, Positions.Name positionInThisRegion) {
             this.anchors.add(new Anchor(definedRegionBorder, new Position(positionInThisRegion)));
             return this;
         }
@@ -219,17 +224,17 @@ public class StateRegion implements StateObject {
             this.matchHistory = matchHistory;
             return this;
         }
-        
+
         public Builder addCrossStateAnchor(CrossStateAnchor anchor) {
             this.crossStateAnchors.add(anchor);
             return this;
         }
-        
+
         public Builder setCrossStateAnchors(List<CrossStateAnchor> anchors) {
             this.crossStateAnchors = anchors;
             return this;
         }
-        
+
         public Builder setDefineStrategy(DefineAs strategy) {
             this.defineStrategy = strategy;
             return this;

@@ -1,22 +1,23 @@
 package io.github.jspinak.brobot.model.state.special;
 
-import io.github.jspinak.brobot.model.state.State;
-import io.github.jspinak.brobot.model.state.StateEnum;
-import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.api.DynamicTest;
-
-import java.util.stream.Stream;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
+
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.state.StateEnum;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+
 /**
- * Comprehensive tests for the NullState class which provides a container 
- * for stateless objects in the Brobot framework.
+ * Comprehensive tests for the NullState class which provides a container for stateless objects in
+ * the Brobot framework.
  */
 @DisplayName("NullState Special State Tests")
 public class NullStateTest extends BrobotTestBase {
@@ -44,7 +45,7 @@ public class NullStateTest extends BrobotTestBase {
     void testNameEnumImplementsStateEnum() {
         // When
         NullState.Name nullName = NullState.Name.NULL;
-        
+
         // Then
         assertNotNull(nullName);
         assertTrue(nullName instanceof StateEnum);
@@ -56,7 +57,7 @@ public class NullStateTest extends BrobotTestBase {
     void testGetState() {
         // When
         State state = nullState.getState();
-        
+
         // Then
         assertNotNull(state);
         assertEquals("null", state.getName());
@@ -70,10 +71,10 @@ public class NullStateTest extends BrobotTestBase {
         // Given
         State originalState = nullState.getState();
         String originalName = originalState.getName();
-        
+
         // When - Try to modify state (if setter exists)
         // The state is final, so we can't replace it
-        
+
         // Then
         assertSame(originalState, nullState.getState());
         assertEquals(originalName, nullState.getState().getName());
@@ -85,7 +86,7 @@ public class NullStateTest extends BrobotTestBase {
         // Given
         NullState nullState1 = new NullState();
         NullState nullState2 = new NullState();
-        
+
         // Then - Different instances but same state name
         assertNotSame(nullState1, nullState2);
         assertNotSame(nullState1.getState(), nullState2.getState());
@@ -98,7 +99,7 @@ public class NullStateTest extends BrobotTestBase {
         // Given
         NullState.Name name1 = NullState.Name.NULL;
         NullState.Name name2 = NullState.Name.NULL;
-        
+
         // Then
         assertSame(name1, name2); // Enum constants are singletons
         assertEquals(name1, name2);
@@ -109,41 +110,45 @@ public class NullStateTest extends BrobotTestBase {
     @DisplayName("NullState usage scenarios")
     Stream<DynamicTest> testUsageScenarios() {
         return Stream.of(
-            dynamicTest("Use for temporary dialog handling", () -> {
-                // Simulate handling a temporary dialog
-                NullState tempState = new NullState();
-                State dialogState = tempState.getState();
-                
-                assertNotNull(dialogState);
-                assertEquals("null", dialogState.getName());
-                // Can be used for stateless dialog operations
-            }),
-            
-            dynamicTest("Use for utility objects", () -> {
-                // Simulate utility objects that appear across states
-                NullState utilityState = new NullState();
-                
-                assertNotNull(utilityState.getState());
-                // Utility objects can be processed without state context
-            }),
-            
-            dynamicTest("Use during state transitions", () -> {
-                // Objects that appear during transitions
-                NullState transitionState = new NullState();
-                State state = transitionState.getState();
-                
-                assertEquals("null", state.getName());
-                // Can handle objects that don't belong to source or target state
-            }),
-            
-            dynamicTest("Use for testing individual patterns", () -> {
-                // Test patterns without state infrastructure
-                NullState testState = new NullState();
-                
-                assertNotNull(testState.getState());
-                // Patterns can be tested in isolation
-            })
-        );
+                dynamicTest(
+                        "Use for temporary dialog handling",
+                        () -> {
+                            // Simulate handling a temporary dialog
+                            NullState tempState = new NullState();
+                            State dialogState = tempState.getState();
+
+                            assertNotNull(dialogState);
+                            assertEquals("null", dialogState.getName());
+                            // Can be used for stateless dialog operations
+                        }),
+                dynamicTest(
+                        "Use for utility objects",
+                        () -> {
+                            // Simulate utility objects that appear across states
+                            NullState utilityState = new NullState();
+
+                            assertNotNull(utilityState.getState());
+                            // Utility objects can be processed without state context
+                        }),
+                dynamicTest(
+                        "Use during state transitions",
+                        () -> {
+                            // Objects that appear during transitions
+                            NullState transitionState = new NullState();
+                            State state = transitionState.getState();
+
+                            assertEquals("null", state.getName());
+                            // Can handle objects that don't belong to source or target state
+                        }),
+                dynamicTest(
+                        "Use for testing individual patterns",
+                        () -> {
+                            // Test patterns without state infrastructure
+                            NullState testState = new NullState();
+
+                            assertNotNull(testState.getState());
+                            // Patterns can be tested in isolation
+                        }));
     }
 
     @Test
@@ -151,7 +156,7 @@ public class NullStateTest extends BrobotTestBase {
     void testStateEnumInterface() {
         // Given
         StateEnum stateEnum = NullState.Name.NULL;
-        
+
         // Then
         assertNotNull(stateEnum);
         assertEquals("NULL", stateEnum.toString());
@@ -163,7 +168,7 @@ public class NullStateTest extends BrobotTestBase {
         // When
         String nullStateString = nullState.toString();
         String stateString = nullState.getState().toString();
-        
+
         // Then
         assertNotNull(nullStateString);
         assertNotNull(stateString);
@@ -175,7 +180,7 @@ public class NullStateTest extends BrobotTestBase {
     void testNameEnumSingleValue() {
         // When
         NullState.Name[] values = NullState.Name.values();
-        
+
         // Then
         assertEquals(1, values.length);
         assertEquals(NullState.Name.NULL, values[0]);
@@ -186,13 +191,12 @@ public class NullStateTest extends BrobotTestBase {
     void testNameEnumValueOf() {
         // When
         NullState.Name name = NullState.Name.valueOf("NULL");
-        
+
         // Then
         assertEquals(NullState.Name.NULL, name);
-        
+
         // Invalid name should throw exception
-        assertThrows(IllegalArgumentException.class, 
-            () -> NullState.Name.valueOf("INVALID"));
+        assertThrows(IllegalArgumentException.class, () -> NullState.Name.valueOf("INVALID"));
     }
 
     @Test
@@ -200,11 +204,11 @@ public class NullStateTest extends BrobotTestBase {
     void testNullStateSemantics() {
         // Given
         State state = nullState.getState();
-        
+
         // Then
         // The state should represent "no state" or "null state"
         assertEquals("null", state.getName());
-        
+
         // Should not have complex state properties
         // (assuming State has default values for other properties)
         assertNotNull(state.getStateImages());
@@ -218,11 +222,11 @@ public class NullStateTest extends BrobotTestBase {
         // Given - Multiple contexts might need different null states
         NullState context1 = new NullState();
         NullState context2 = new NullState();
-        
+
         // Then - Not singletons, allowing multiple contexts
         assertNotSame(context1, context2);
         assertNotSame(context1.getState(), context2.getState());
-        
+
         // But semantically equivalent
         assertEquals(context1.getState().getName(), context2.getState().getName());
     }
@@ -232,13 +236,13 @@ public class NullStateTest extends BrobotTestBase {
     void testRepositoryExclusion() {
         // This test documents the expected behavior
         // NullState should not be added to the state repository
-        
+
         State state = nullState.getState();
-        
+
         // The state name "null" should indicate it's not for repository storage
         assertEquals("null", state.getName());
-        
-        // This is a documentation test - actual repository behavior 
+
+        // This is a documentation test - actual repository behavior
         // would be tested in repository tests
     }
 
@@ -248,11 +252,11 @@ public class NullStateTest extends BrobotTestBase {
         // Given
         State regularState = new State.Builder("regular").build();
         State nullStateInstance = nullState.getState();
-        
+
         // Then - Both are State types
         assertTrue(regularState instanceof State);
         assertTrue(nullStateInstance instanceof State);
-        
+
         // Can be used interchangeably where State is expected
         State[] states = {regularState, nullStateInstance};
         assertEquals(2, states.length);
@@ -262,12 +266,12 @@ public class NullStateTest extends BrobotTestBase {
     @DisplayName("Should handle edge cases properly")
     void testEdgeCases() {
         // Test that NullState handles edge cases gracefully
-        
+
         // Multiple gets return same instance
         State state1 = nullState.getState();
         State state2 = nullState.getState();
         assertSame(state1, state2);
-        
+
         // State name is always "null"
         assertEquals("null", state1.getName());
         assertEquals("null", state2.getName());

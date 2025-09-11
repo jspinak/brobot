@@ -1,7 +1,6 @@
 package io.github.jspinak.brobot.runner.ui.navigation;
 
-import io.github.jspinak.brobot.runner.events.EventBus;
-import io.github.jspinak.brobot.runner.events.LogEvent;
+import java.util.*;
 import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.TranslateTransition;
@@ -10,45 +9,48 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
-import lombok.Setter;
+
+import jakarta.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
-import java.util.*;
+import io.github.jspinak.brobot.runner.events.EventBus;
+import io.github.jspinak.brobot.runner.events.LogEvent;
+
+import lombok.Setter;
 
 /**
  * Manages navigation between screens in the application.
- * 
- * <p>The NavigationManager provides a centralized navigation system for the JavaFX
- * application, supporting screen transitions with animations, navigation history,
- * and event notifications. It implements a browser-like navigation model with
- * back/forward functionality.</p>
- * 
+ *
+ * <p>The NavigationManager provides a centralized navigation system for the JavaFX application,
+ * supporting screen transitions with animations, navigation history, and event notifications. It
+ * implements a browser-like navigation model with back/forward functionality.
+ *
  * <p>Key features:
+ *
  * <ul>
- *   <li>Screen registration and lifecycle management</li>
- *   <li>Animated transitions between screens (fade, slide)</li>
- *   <li>Navigation history with back/forward support</li>
- *   <li>Navigation event notifications for observers</li>
- *   <li>Context passing between screens</li>
- *   <li>Breadcrumb trail generation</li>
+ *   <li>Screen registration and lifecycle management
+ *   <li>Animated transitions between screens (fade, slide)
+ *   <li>Navigation history with back/forward support
+ *   <li>Navigation event notifications for observers
+ *   <li>Context passing between screens
+ *   <li>Breadcrumb trail generation
  * </ul>
- * </p>
- * 
+ *
  * <p>Navigation flow:
+ *
  * <ol>
- *   <li>Screen requests navigation via navigateTo()</li>
- *   <li>Current screen is animated out</li>
- *   <li>New screen is created with context</li>
- *   <li>New screen is animated in</li>
- *   <li>History is updated</li>
- *   <li>Listeners are notified</li>
+ *   <li>Screen requests navigation via navigateTo()
+ *   <li>Current screen is animated out
+ *   <li>New screen is created with context
+ *   <li>New screen is animated in
+ *   <li>History is updated
+ *   <li>Listeners are notified
  * </ol>
- * </p>
- * 
+ *
  * @see IScreen
  * @see NavigationContext
  * @see ScreenRegistry
@@ -62,8 +64,7 @@ public class NavigationManager {
     private final ScreenRegistry screenRegistry;
 
     // The container where screens will be displayed
-    @Setter
-    private Pane contentContainer;
+    @Setter private Pane contentContainer;
 
     // Current screen property
     private final ObjectProperty<Screen> currentScreen = new SimpleObjectProperty<>();
@@ -126,7 +127,8 @@ public class NavigationManager {
      * @param transitionType The type of transition to use
      * @return true if navigation was successful, false otherwise
      */
-    public boolean navigateTo(String screenId, NavigationContext context, TransitionType transitionType) {
+    public boolean navigateTo(
+            String screenId, NavigationContext context, TransitionType transitionType) {
         if (contentContainer == null) {
             logger.error("Content container not set");
             return false;
@@ -203,7 +205,8 @@ public class NavigationManager {
         }
 
         // Navigate to the previous screen
-        return navigateTo(previousScreen.getId(), NavigationContext.empty(), TransitionType.SLIDE_RIGHT);
+        return navigateTo(
+                previousScreen.getId(), NavigationContext.empty(), TransitionType.SLIDE_RIGHT);
     }
 
     /**
@@ -298,8 +301,12 @@ public class NavigationManager {
      * @param context The navigation context
      * @param transitionType The type of transition to use
      */
-    private void performTransition(Screen previousScreen, Screen newScreen, Node newContent,
-                                   NavigationContext context, TransitionType transitionType) {
+    private void performTransition(
+            Screen previousScreen,
+            Screen newScreen,
+            Node newContent,
+            NavigationContext context,
+            TransitionType transitionType) {
         // If there's no previous screen, just show the new content
         if (previousScreen == null) {
             contentContainer.getChildren().clear();
@@ -338,16 +345,18 @@ public class NavigationManager {
                     FadeTransition fadeOut = new FadeTransition(Duration.millis(150), oldContent);
                     fadeOut.setFromValue(1.0);
                     fadeOut.setToValue(0.0);
-                    fadeOut.setOnFinished(e -> {
-                        container.getChildren().clear();
-                        container.getChildren().add(newContent);
-                        newContent.setOpacity(0.0);
+                    fadeOut.setOnFinished(
+                            e -> {
+                                container.getChildren().clear();
+                                container.getChildren().add(newContent);
+                                newContent.setOpacity(0.0);
 
-                        FadeTransition fadeIn = new FadeTransition(Duration.millis(150), newContent);
-                        fadeIn.setFromValue(0.0);
-                        fadeIn.setToValue(1.0);
-                        fadeIn.play();
-                    });
+                                FadeTransition fadeIn =
+                                        new FadeTransition(Duration.millis(150), newContent);
+                                fadeIn.setFromValue(0.0);
+                                fadeIn.setToValue(1.0);
+                                fadeIn.play();
+                            });
                     fadeOut.play();
                 } else {
                     container.getChildren().clear();
@@ -366,18 +375,22 @@ public class NavigationManager {
                 container.getChildren().add(newContent);
                 newContent.setTranslateX(container.getWidth());
 
-                TranslateTransition slideOutLeft = new TranslateTransition(Duration.millis(200), oldContent);
+                TranslateTransition slideOutLeft =
+                        new TranslateTransition(Duration.millis(200), oldContent);
                 slideOutLeft.setToX(-container.getWidth());
 
-                TranslateTransition slideInRight = new TranslateTransition(Duration.millis(200), newContent);
+                TranslateTransition slideInRight =
+                        new TranslateTransition(Duration.millis(200), newContent);
                 slideInRight.setToX(0);
 
                 ParallelTransition transition = new ParallelTransition(slideOutLeft, slideInRight);
-                transition.setOnFinished(e -> {
-                    if (oldContent != null && container.getChildren().contains(oldContent)) {
-                        container.getChildren().remove(oldContent);
-                    }
-                });
+                transition.setOnFinished(
+                        e -> {
+                            if (oldContent != null
+                                    && container.getChildren().contains(oldContent)) {
+                                container.getChildren().remove(oldContent);
+                            }
+                        });
                 transition.play();
                 break;
 
@@ -386,36 +399,36 @@ public class NavigationManager {
                 container.getChildren().add(newContent);
                 newContent.setTranslateX(-container.getWidth());
 
-                TranslateTransition slideOutRight = new TranslateTransition(Duration.millis(200), oldContent);
+                TranslateTransition slideOutRight =
+                        new TranslateTransition(Duration.millis(200), oldContent);
                 slideOutRight.setToX(container.getWidth());
 
-                TranslateTransition slideInLeft = new TranslateTransition(Duration.millis(200), newContent);
+                TranslateTransition slideInLeft =
+                        new TranslateTransition(Duration.millis(200), newContent);
                 slideInLeft.setToX(0);
 
                 ParallelTransition transition2 = new ParallelTransition(slideOutRight, slideInLeft);
-                transition2.setOnFinished(e -> {
-                    if (oldContent != null && container.getChildren().contains(oldContent)) {
-                        container.getChildren().remove(oldContent);
-                    }
-                });
+                transition2.setOnFinished(
+                        e -> {
+                            if (oldContent != null
+                                    && container.getChildren().contains(oldContent)) {
+                                container.getChildren().remove(oldContent);
+                            }
+                        });
                 transition2.play();
                 break;
         }
     }
 
-    /**
-     * Types of transitions for screen navigation.
-     */
+    /** Types of transitions for screen navigation. */
     public enum TransitionType {
-        NONE,       // No transition
-        FADE,       // Fade out old screen, fade in new screen
+        NONE, // No transition
+        FADE, // Fade out old screen, fade in new screen
         SLIDE_LEFT, // Slide out to the left, slide in from the right
         SLIDE_RIGHT // Slide out to the right, slide in from the left
     }
 
-    /**
-     * Listener interface for navigation events.
-     */
+    /** Listener interface for navigation events. */
     public interface INavigationListener {
         void onNavigated(Screen previousScreen, Screen newScreen, NavigationContext context);
     }

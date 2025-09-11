@@ -1,40 +1,41 @@
 package io.github.jspinak.brobot.util.image.io;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.model.element.Scene;
-import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.model.element.Scene;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
- * Comprehensive test suite for SceneCreator - screenshot to Scene conversion
- * utility.
- * Tests directory scanning, file filtering, and Scene object creation.
+ * Comprehensive test suite for SceneCreator - screenshot to Scene conversion utility. Tests
+ * directory scanning, file filtering, and Scene object creation.
  */
 @DisplayName("SceneCreator Tests")
-@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
+@DisabledIfEnvironmentVariable(
+        named = "CI",
+        matches = "true",
+        disabledReason = "Test incompatible with CI environment")
 public class SceneCreatorTest extends BrobotTestBase {
 
     private SceneCreator sceneCreator;
     private String originalScreenshotPath;
 
-    @TempDir
-    Path tempDir;
+    @TempDir Path tempDir;
 
     @BeforeEach
     @Override
@@ -71,9 +72,14 @@ public class SceneCreatorTest extends BrobotTestBase {
             assertEquals(3, scenes.size());
 
             // Verify scene paths
-            List<String> paths = scenes.stream()
-                    .map(scene -> scene.getPattern() != null ? scene.getPattern().getName() : "")
-                    .collect(Collectors.toList());
+            List<String> paths =
+                    scenes.stream()
+                            .map(
+                                    scene ->
+                                            scene.getPattern() != null
+                                                    ? scene.getPattern().getName()
+                                                    : "")
+                            .collect(Collectors.toList());
 
             assertTrue(paths.stream().anyMatch(p -> p.contains("screenshot1")));
             assertTrue(paths.stream().anyMatch(p -> p.contains("screenshot2")));
@@ -98,8 +104,9 @@ public class SceneCreatorTest extends BrobotTestBase {
 
             assertNotNull(scenes);
             assertEquals(1, scenes.size());
-            assertTrue(scenes.get(0).getPattern() != null &&
-                    scenes.get(0).getPattern().getName().contains("single"));
+            assertTrue(
+                    scenes.get(0).getPattern() != null
+                            && scenes.get(0).getPattern().getName().contains("single"));
         }
     }
 
@@ -120,8 +127,9 @@ public class SceneCreatorTest extends BrobotTestBase {
 
             assertNotNull(scenes);
             assertEquals(1, scenes.size());
-            assertTrue(scenes.get(0).getPattern() != null &&
-                    scenes.get(0).getPattern().getName().contains("image"));
+            assertTrue(
+                    scenes.get(0).getPattern() != null
+                            && scenes.get(0).getPattern().getName().contains("image"));
         }
 
         @Test
@@ -138,8 +146,9 @@ public class SceneCreatorTest extends BrobotTestBase {
 
             assertNotNull(scenes);
             assertEquals(1, scenes.size()); // Only PNG processed
-            assertTrue(scenes.get(0).getPattern() != null &&
-                    scenes.get(0).getPattern().getName().contains("screenshot"));
+            assertTrue(
+                    scenes.get(0).getPattern() != null
+                            && scenes.get(0).getPattern().getName().contains("screenshot"));
         }
 
         @Test
@@ -165,8 +174,9 @@ public class SceneCreatorTest extends BrobotTestBase {
 
             assertNotNull(scenes);
             assertEquals(1, scenes.size());
-            assertTrue(scenes.get(0).getPattern() != null &&
-                    scenes.get(0).getPattern().getName().contains("file"));
+            assertTrue(
+                    scenes.get(0).getPattern() != null
+                            && scenes.get(0).getPattern().getName().contains("file"));
         }
     }
 
@@ -184,7 +194,8 @@ public class SceneCreatorTest extends BrobotTestBase {
             assertNotNull(scenes);
             assertEquals(1, scenes.size());
 
-            String path = scenes.get(0).getPattern() != null ? scenes.get(0).getPattern().getName() : "";
+            String path =
+                    scenes.get(0).getPattern() != null ? scenes.get(0).getPattern().getName() : "";
             // The path should contain the filename without extension
             assertTrue(path.contains("test"));
             assertFalse(path.endsWith(".png")); // Extension removed
@@ -200,20 +211,22 @@ public class SceneCreatorTest extends BrobotTestBase {
             assertNotNull(scenes);
             assertEquals(1, scenes.size());
 
-            String path = scenes.get(0).getPattern() != null ? scenes.get(0).getPattern().getName() : "";
+            String path =
+                    scenes.get(0).getPattern() != null ? scenes.get(0).getPattern().getName() : "";
             assertFalse(path.contains(".png"));
             assertTrue(path.endsWith("screenshot"));
         }
 
         @ParameterizedTest
         @CsvSource({
-                "simple.png, simple",
-                "with.dots.in.name.png, with.dots.in",
-                "multiple...dots.png, multiple..",
-                "ends.with.dot..png, ends.with.dot"
+            "simple.png, simple",
+            "with.dots.in.name.png, with.dots.in",
+            "multiple...dots.png, multiple..",
+            "ends.with.dot..png, ends.with.dot"
         })
         @DisplayName("Complex filename handling")
-        public void testComplexFilenames(String filename, String expectedNamePart) throws IOException {
+        public void testComplexFilenames(String filename, String expectedNamePart)
+                throws IOException {
             Files.createFile(tempDir.resolve(filename));
 
             List<Scene> scenes = sceneCreator.createScenesFromScreenshots();
@@ -222,8 +235,9 @@ public class SceneCreatorTest extends BrobotTestBase {
             assertEquals(1, scenes.size());
             // The regex removes everything from the last dot, so "with.dots.in.name.png"
             // becomes "with.dots.in"
-            assertTrue(scenes.get(0).getPattern() != null &&
-                    scenes.get(0).getPattern().getName().contains(expectedNamePart));
+            assertTrue(
+                    scenes.get(0).getPattern() != null
+                            && scenes.get(0).getPattern().getName().contains(expectedNamePart));
         }
     }
 
@@ -240,8 +254,9 @@ public class SceneCreatorTest extends BrobotTestBase {
 
             assertNotNull(scenes);
             assertEquals(1, scenes.size());
-            assertTrue(scenes.get(0).getPattern() != null &&
-                    scenes.get(0).getPattern().getName().contains("screen shot"));
+            assertTrue(
+                    scenes.get(0).getPattern() != null
+                            && scenes.get(0).getPattern().getName().contains("screen shot"));
         }
 
         @Test
@@ -253,8 +268,9 @@ public class SceneCreatorTest extends BrobotTestBase {
 
             assertNotNull(scenes);
             assertEquals(1, scenes.size());
-            assertTrue(scenes.get(0).getPattern() != null &&
-                    scenes.get(0).getPattern().getName().contains("screen-shot_001"));
+            assertTrue(
+                    scenes.get(0).getPattern() != null
+                            && scenes.get(0).getPattern().getName().contains("screen-shot_001"));
         }
 
         @Test
@@ -266,8 +282,9 @@ public class SceneCreatorTest extends BrobotTestBase {
 
             assertNotNull(scenes);
             assertEquals(1, scenes.size());
-            assertTrue(scenes.get(0).getPattern() != null &&
-                    scenes.get(0).getPattern().getName().contains("截图_测试"));
+            assertTrue(
+                    scenes.get(0).getPattern() != null
+                            && scenes.get(0).getPattern().getName().contains("截图_测试"));
         }
 
         @Test
@@ -279,8 +296,12 @@ public class SceneCreatorTest extends BrobotTestBase {
 
             assertNotNull(scenes);
             assertEquals(1, scenes.size());
-            assertTrue(scenes.get(0).getPattern() != null &&
-                    scenes.get(0).getPattern().getName().contains("screenshot_2024-01-15_143022"));
+            assertTrue(
+                    scenes.get(0).getPattern() != null
+                            && scenes.get(0)
+                                    .getPattern()
+                                    .getName()
+                                    .contains("screenshot_2024-01-15_143022"));
         }
     }
 
@@ -318,10 +339,11 @@ public class SceneCreatorTest extends BrobotTestBase {
             FrameworkSettings.screenshotPath = "";
 
             // Should handle gracefully
-            assertDoesNotThrow(() -> {
-                List<Scene> scenes = sceneCreator.createScenesFromScreenshots();
-                assertNotNull(scenes);
-            });
+            assertDoesNotThrow(
+                    () -> {
+                        List<Scene> scenes = sceneCreator.createScenesFromScreenshots();
+                        assertNotNull(scenes);
+                    });
         }
 
         @Test
@@ -330,9 +352,11 @@ public class SceneCreatorTest extends BrobotTestBase {
             FrameworkSettings.screenshotPath = null;
 
             // Should handle gracefully
-            assertThrows(NullPointerException.class, () -> {
-                sceneCreator.createScenesFromScreenshots();
-            });
+            assertThrows(
+                    NullPointerException.class,
+                    () -> {
+                        sceneCreator.createScenesFromScreenshots();
+                    });
         }
     }
 
@@ -356,8 +380,14 @@ public class SceneCreatorTest extends BrobotTestBase {
             // Verify all files processed
             for (int i = 1; i <= 20; i++) {
                 final int num = i;
-                assertTrue(scenes.stream().anyMatch(s -> s.getPattern() != null &&
-                        s.getPattern().getName().contains("screenshot_" + num)));
+                assertTrue(
+                        scenes.stream()
+                                .anyMatch(
+                                        s ->
+                                                s.getPattern() != null
+                                                        && s.getPattern()
+                                                                .getName()
+                                                                .contains("screenshot_" + num)));
             }
         }
 
@@ -393,9 +423,14 @@ public class SceneCreatorTest extends BrobotTestBase {
             assertEquals(4, scenes.size());
 
             // All should be distinct
-            List<String> paths = scenes.stream()
-                    .map(scene -> scene.getPattern() != null ? scene.getPattern().getName() : "")
-                    .collect(Collectors.toList());
+            List<String> paths =
+                    scenes.stream()
+                            .map(
+                                    scene ->
+                                            scene.getPattern() != null
+                                                    ? scene.getPattern().getName()
+                                                    : "")
+                            .collect(Collectors.toList());
             assertEquals(4, paths.stream().distinct().count());
         }
     }
@@ -420,7 +455,8 @@ public class SceneCreatorTest extends BrobotTestBase {
             assertEquals(100, scenes.size());
 
             // Should complete quickly
-            assertTrue(endTime - startTime < 1000, "Processing took " + (endTime - startTime) + "ms");
+            assertTrue(
+                    endTime - startTime < 1000, "Processing took " + (endTime - startTime) + "ms");
         }
 
         @Test
@@ -460,10 +496,22 @@ public class SceneCreatorTest extends BrobotTestBase {
             assertEquals(5, scenes.size());
 
             // Verify all test screenshots captured
-            assertTrue(scenes.stream().anyMatch(s -> s.getPattern() != null &&
-                    s.getPattern().getName().contains("login_page_initial")));
-            assertTrue(scenes.stream().anyMatch(s -> s.getPattern() != null &&
-                    s.getPattern().getName().contains("dashboard_loaded")));
+            assertTrue(
+                    scenes.stream()
+                            .anyMatch(
+                                    s ->
+                                            s.getPattern() != null
+                                                    && s.getPattern()
+                                                            .getName()
+                                                            .contains("login_page_initial")));
+            assertTrue(
+                    scenes.stream()
+                            .anyMatch(
+                                    s ->
+                                            s.getPattern() != null
+                                                    && s.getPattern()
+                                                            .getName()
+                                                            .contains("dashboard_loaded")));
         }
 
         @Test
@@ -482,12 +530,23 @@ public class SceneCreatorTest extends BrobotTestBase {
             assertEquals(5, scenes.size());
 
             // All game states should be captured
-            List<String> expectedStates = List.of("main_menu", "level_1_start",
-                    "level_1_checkpoint", "level_1_complete", "game_over");
+            List<String> expectedStates =
+                    List.of(
+                            "main_menu",
+                            "level_1_start",
+                            "level_1_checkpoint",
+                            "level_1_complete",
+                            "game_over");
 
             for (String state : expectedStates) {
-                assertTrue(scenes.stream().anyMatch(s -> s.getPattern() != null &&
-                        s.getPattern().getName().contains(state)));
+                assertTrue(
+                        scenes.stream()
+                                .anyMatch(
+                                        s ->
+                                                s.getPattern() != null
+                                                        && s.getPattern()
+                                                                .getName()
+                                                                .contains(state)));
             }
         }
 
@@ -506,8 +565,14 @@ public class SceneCreatorTest extends BrobotTestBase {
             assertEquals(4, scenes.size());
 
             // All timestamps preserved in scene paths
-            assertTrue(scenes.stream().allMatch(s -> s.getPattern() != null &&
-                    s.getPattern().getName().contains("202401")));
+            assertTrue(
+                    scenes.stream()
+                            .allMatch(
+                                    s ->
+                                            s.getPattern() != null
+                                                    && s.getPattern()
+                                                            .getName()
+                                                            .contains("202401")));
         }
     }
 }

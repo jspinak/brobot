@@ -1,67 +1,57 @@
 package io.github.jspinak.brobot.navigation;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.navigation.transition.StateNavigator;
-import io.github.jspinak.brobot.navigation.transition.StateTransitions;
-import io.github.jspinak.brobot.navigation.transition.JavaStateTransition;
-import io.github.jspinak.brobot.statemanagement.StateDetector;
-import io.github.jspinak.brobot.statemanagement.ActiveStateSet;
-import io.github.jspinak.brobot.model.state.State;
-import io.github.jspinak.brobot.model.state.StateEnum;
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.model.state.StateRegion;
-import io.github.jspinak.brobot.model.state.StateLocation;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.element.Location;
-import io.github.jspinak.brobot.model.element.Pattern;
-import io.github.jspinak.brobot.model.state.StateStore;
-import io.github.jspinak.brobot.model.transition.StateTransitionStore;
-import io.github.jspinak.brobot.BrobotTestApplication;
-import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.awt.image.BufferedImage;
+import java.util.Optional;
+import java.util.Set;
+
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
-import java.awt.image.BufferedImage;
-import java.util.Optional;
-import java.util.Set;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
-
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.BrobotTestApplication;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.state.StateEnum;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.state.StateLocation;
+import io.github.jspinak.brobot.model.state.StateRegion;
+import io.github.jspinak.brobot.model.state.StateStore;
+import io.github.jspinak.brobot.model.transition.StateTransitionStore;
+import io.github.jspinak.brobot.navigation.transition.JavaStateTransition;
+import io.github.jspinak.brobot.navigation.transition.StateNavigator;
+import io.github.jspinak.brobot.navigation.transition.StateTransitions;
+import io.github.jspinak.brobot.statemanagement.ActiveStateSet;
+import io.github.jspinak.brobot.statemanagement.StateDetector;
+import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 
 /**
  * Integration tests for the State Management system.
- * 
- * These tests verify the integration between:
- * - State creation and storage
- * - State transitions and navigation
- * - State detection
- * - Active state management
- * - Spring context and dependency injection
+ *
+ * <p>These tests verify the integration between: - State creation and storage - State transitions
+ * and navigation - State detection - Active state management - Spring context and dependency
+ * injection
  */
 @SpringBootTest(classes = BrobotTestApplication.class)
-@TestPropertySource(properties = {
-        "spring.main.lazy-initialization=true",
-        "brobot.mock.enabled=true"
-})
+@TestPropertySource(
+        properties = {"spring.main.lazy-initialization=true", "brobot.mock.enabled=true"})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class StateManagementIntegrationTest extends BrobotIntegrationTestBase {
 
-    @Autowired
-    private StateStore stateStore;
+    @Autowired private StateStore stateStore;
 
-    @Autowired
-    private StateTransitionStore stateTransitionStore;
+    @Autowired private StateTransitionStore stateTransitionStore;
 
-    @Autowired
-    private StateNavigator stateNavigator;
+    @Autowired private StateNavigator stateNavigator;
 
-    @Autowired
-    private StateDetector stateDetector;
+    @Autowired private StateDetector stateDetector;
 
-    @Autowired
-    private ActiveStateSet activeStateSet;
+    @Autowired private ActiveStateSet activeStateSet;
 
     private State homeState;
     private State settingsState;
@@ -103,68 +93,81 @@ class StateManagementIntegrationTest extends BrobotIntegrationTestBase {
         BufferedImage dummyImage = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
 
         // Home State with StateImage and StateRegion
-        StateImage homeButtonImage = new StateImage.Builder()
-                .setName("homeButton")
-                .addPattern(new Pattern.Builder()
-                        .setName("homeButtonPattern")
-                        .setBufferedImage(dummyImage)
-                        .build())
-                .build();
+        StateImage homeButtonImage =
+                new StateImage.Builder()
+                        .setName("homeButton")
+                        .addPattern(
+                                new Pattern.Builder()
+                                        .setName("homeButtonPattern")
+                                        .setBufferedImage(dummyImage)
+                                        .build())
+                        .build();
 
-        StateRegion homeRegion = new StateRegion.Builder()
-                .setName("homeRegion")
-                .setSearchRegion(new Region(10, 10, 50, 50))
-                .build();
+        StateRegion homeRegion =
+                new StateRegion.Builder()
+                        .setName("homeRegion")
+                        .setSearchRegion(new Region(10, 10, 50, 50))
+                        .build();
 
-        homeState = new State.Builder(TestStates.HOME.toString())
-                .withImages(homeButtonImage)
-                .withRegions(homeRegion)
-                .build();
+        homeState =
+                new State.Builder(TestStates.HOME.toString())
+                        .withImages(homeButtonImage)
+                        .withRegions(homeRegion)
+                        .build();
         stateStore.save(homeState);
 
         // Settings State with multiple regions
-        StateImage settingsButtonImage = new StateImage.Builder()
-                .setName("settingsButton")
-                .addPattern(new Pattern.Builder()
-                        .setName("settingsButtonPattern")
-                        .setBufferedImage(dummyImage)
-                        .build())
-                .build();
+        StateImage settingsButtonImage =
+                new StateImage.Builder()
+                        .setName("settingsButton")
+                        .addPattern(
+                                new Pattern.Builder()
+                                        .setName("settingsButtonPattern")
+                                        .setBufferedImage(dummyImage)
+                                        .build())
+                        .build();
 
-        StateRegion settingsButtonRegion = new StateRegion.Builder()
-                .setName("settingsButtonRegion")
-                .setSearchRegion(new Region(100, 10, 50, 50))
-                .build();
+        StateRegion settingsButtonRegion =
+                new StateRegion.Builder()
+                        .setName("settingsButtonRegion")
+                        .setSearchRegion(new Region(100, 10, 50, 50))
+                        .build();
 
-        StateRegion settingsTitleRegion = new StateRegion.Builder()
-                .setName("settingsTitleRegion")
-                .setSearchRegion(new Region(200, 50, 200, 40))
-                .build();
+        StateRegion settingsTitleRegion =
+                new StateRegion.Builder()
+                        .setName("settingsTitleRegion")
+                        .setSearchRegion(new Region(200, 50, 200, 40))
+                        .build();
 
-        settingsState = new State.Builder(TestStates.SETTINGS.toString())
-                .withImages(settingsButtonImage)
-                .withRegions(settingsButtonRegion, settingsTitleRegion)
-                .build();
+        settingsState =
+                new State.Builder(TestStates.SETTINGS.toString())
+                        .withImages(settingsButtonImage)
+                        .withRegions(settingsButtonRegion, settingsTitleRegion)
+                        .build();
         stateStore.save(settingsState);
 
         // Profile State
-        StateImage profileIconImage = new StateImage.Builder()
-                .setName("profileIcon")
-                .addPattern(new Pattern.Builder()
-                        .setName("profileIconPattern")
-                        .setBufferedImage(dummyImage)
-                        .build())
-                .build();
+        StateImage profileIconImage =
+                new StateImage.Builder()
+                        .setName("profileIcon")
+                        .addPattern(
+                                new Pattern.Builder()
+                                        .setName("profileIconPattern")
+                                        .setBufferedImage(dummyImage)
+                                        .build())
+                        .build();
 
-        StateLocation profileLocation = new StateLocation.Builder()
-                .setName("profileLocation")
-                .setLocation(new Location(300, 10))
-                .build();
+        StateLocation profileLocation =
+                new StateLocation.Builder()
+                        .setName("profileLocation")
+                        .setLocation(new Location(300, 10))
+                        .build();
 
-        profileState = new State.Builder(TestStates.PROFILE.toString())
-                .withImages(profileIconImage)
-                .withLocations(profileLocation)
-                .build();
+        profileState =
+                new State.Builder(TestStates.PROFILE.toString())
+                        .withImages(profileIconImage)
+                        .withLocations(profileLocation)
+                        .build();
         stateStore.save(profileState);
     }
 
@@ -192,11 +195,15 @@ class StateManagementIntegrationTest extends BrobotIntegrationTestBase {
 
         // Verify state properties
         assertEquals(TestStates.HOME.toString(), retrievedHome.get().getName());
-        assertFalse(retrievedHome.get().getStateImages().isEmpty(), "Home state should have images");
-        assertFalse(retrievedHome.get().getStateRegions().isEmpty(), "Home state should have regions");
+        assertFalse(
+                retrievedHome.get().getStateImages().isEmpty(), "Home state should have images");
+        assertFalse(
+                retrievedHome.get().getStateRegions().isEmpty(), "Home state should have regions");
 
         // Settings state should have multiple regions
-        assertEquals(2, retrievedSettings.get().getStateRegions().size(),
+        assertEquals(
+                2,
+                retrievedSettings.get().getStateRegions().size(),
                 "Settings state should have 2 regions");
     }
 
@@ -209,19 +216,21 @@ class StateManagementIntegrationTest extends BrobotIntegrationTestBase {
         homeTransitions.setStateName(homeState.getName());
 
         // Create transition to Settings
-        JavaStateTransition toSettings = new JavaStateTransition.Builder()
-                .setFunction(() -> true) // Always succeeds in mock mode
-                .addToActivate(settingsState.getName())
-                .setScore(1) // Lower score = higher priority
-                .build();
+        JavaStateTransition toSettings =
+                new JavaStateTransition.Builder()
+                        .setFunction(() -> true) // Always succeeds in mock mode
+                        .addToActivate(settingsState.getName())
+                        .setScore(1) // Lower score = higher priority
+                        .build();
         homeTransitions.addTransition(toSettings);
 
         // Create transition to Profile
-        JavaStateTransition toProfile = new JavaStateTransition.Builder()
-                .setFunction(() -> true)
-                .addToActivate(profileState.getName())
-                .setScore(2)
-                .build();
+        JavaStateTransition toProfile =
+                new JavaStateTransition.Builder()
+                        .setFunction(() -> true)
+                        .addToActivate(profileState.getName())
+                        .setScore(2)
+                        .build();
         homeTransitions.addTransition(toProfile);
 
         // Save transitions to store
@@ -232,26 +241,31 @@ class StateManagementIntegrationTest extends BrobotIntegrationTestBase {
         settingsTransitions.setStateId(settingsState.getId());
         settingsTransitions.setStateName(settingsState.getName());
 
-        JavaStateTransition toHome = new JavaStateTransition.Builder()
-                .setFunction(() -> true)
-                .addToActivate(homeState.getName())
-                .setScore(1)
-                .build();
+        JavaStateTransition toHome =
+                new JavaStateTransition.Builder()
+                        .setFunction(() -> true)
+                        .addToActivate(homeState.getName())
+                        .setScore(1)
+                        .build();
         settingsTransitions.addTransition(toHome);
 
-        JavaStateTransition toProfileFromSettings = new JavaStateTransition.Builder()
-                .setFunction(() -> true)
-                .addToActivate(profileState.getName())
-                .setScore(3)
-                .build();
+        JavaStateTransition toProfileFromSettings =
+                new JavaStateTransition.Builder()
+                        .setFunction(() -> true)
+                        .addToActivate(profileState.getName())
+                        .setScore(3)
+                        .build();
         settingsTransitions.addTransition(toProfileFromSettings);
 
         stateTransitionStore.add(settingsTransitions);
 
         // Verify transitions are stored
-        Optional<StateTransitions> retrievedHomeTransitions = stateTransitionStore.get(homeState.getId());
+        Optional<StateTransitions> retrievedHomeTransitions =
+                stateTransitionStore.get(homeState.getId());
         assertTrue(retrievedHomeTransitions.isPresent(), "Home transitions should be stored");
-        assertEquals(2, retrievedHomeTransitions.get().getTransitions().size(),
+        assertEquals(
+                2,
+                retrievedHomeTransitions.get().getTransitions().size(),
                 "Home should have 2 transitions");
     }
 
@@ -288,11 +302,12 @@ class StateManagementIntegrationTest extends BrobotIntegrationTestBase {
         homeTransitions.setStateId(homeState.getId());
         homeTransitions.setStateName(homeState.getName());
 
-        JavaStateTransition toSettings = new JavaStateTransition.Builder()
-                .setFunction(() -> true)
-                .addToActivate(settingsState.getName())
-                .setScore(1)
-                .build();
+        JavaStateTransition toSettings =
+                new JavaStateTransition.Builder()
+                        .setFunction(() -> true)
+                        .addToActivate(settingsState.getName())
+                        .setScore(1)
+                        .build();
         homeTransitions.addTransition(toSettings);
         stateTransitionStore.add(homeTransitions);
 

@@ -1,36 +1,39 @@
 package io.github.jspinak.brobot.model.element;
 
-import io.github.jspinak.brobot.capture.ScreenDimensions;
-import lombok.extern.slf4j.Slf4j;
 import static io.github.jspinak.brobot.model.element.Positions.Name.*;
+
+import io.github.jspinak.brobot.capture.ScreenDimensions;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Builder for creating Region objects with screen-size awareness and flexible adjustments.
- * 
+ *
  * <p>This builder provides multiple ways to define regions:
+ *
  * <ul>
- *   <li>Absolute coordinates and dimensions</li>
- *   <li>Percentage-based positioning relative to screen size</li>
- *   <li>Anchor-based positioning (center, corners, edges)</li>
- *   <li>Adjustments to existing regions</li>
- *   <li>Screen-relative sizing with aspect ratio preservation</li>
+ *   <li>Absolute coordinates and dimensions
+ *   <li>Percentage-based positioning relative to screen size
+ *   <li>Anchor-based positioning (center, corners, edges)
+ *   <li>Adjustments to existing regions
+ *   <li>Screen-relative sizing with aspect ratio preservation
  * </ul>
- * </p>
- * 
+ *
  * <p>Example usage:
+ *
  * <pre>{@code
  * // Create a region in the center of the screen, 50% of screen size
  * Region centerRegion = new RegionBuilder()
  *     .withScreenPercentage(0.5, 0.5)
  *     .centerOnScreen()
  *     .build();
- * 
+ *
  * // Create a region with specific coordinates
  * Region searchArea = new RegionBuilder()
  *     .x(100).y(100)
  *     .width(200).height(150)
  *     .build();
- * 
+ *
  * // Create a region with adjustments
  * Region expanded = new RegionBuilder()
  *     .fromRegion(existingRegion)
@@ -40,57 +43,54 @@ import static io.github.jspinak.brobot.model.element.Positions.Name.*;
  *     .adjustHeight(20)
  *     .build();
  * }</pre>
- * </p>
- * 
+ *
  * @since 1.2.0
  */
 @Slf4j
 public class RegionBuilder {
-    
+
     private Integer x;
     private Integer y;
     private Integer width;
     private Integer height;
-    
+
     // Screen-relative positioning
     private Double xPercent;
     private Double yPercent;
     private Double widthPercent;
     private Double heightPercent;
-    
+
     // Adjustments
     private int xAdjustment = 0;
     private int yAdjustment = 0;
     private int widthAdjustment = 0;
     private int heightAdjustment = 0;
-    
+
     // Current screen dimensions (for percentage calculations only)
     private int currentScreenWidth = 0;
     private int currentScreenHeight = 0;
-    
+
     // Anchor positioning using Position
     private Position anchorPosition = null;
     private Positions.Name anchorName = null;
-    
+
     // Position-based placement
     private Position relativePosition = null;
     private Region relativeToRegion = null;
-    
+
     // Constraints
     private boolean constrainToScreen = true;
     private boolean maintainAspectRatio = false;
     private double aspectRatio = 0;
-    
-    /**
-     * Creates a new RegionBuilder with current screen dimensions detected.
-     */
+
+    /** Creates a new RegionBuilder with current screen dimensions detected. */
     public RegionBuilder() {
         detectCurrentScreenSize();
     }
-    
+
     /**
      * Sets the base region using absolute coordinates.
-     * 
+     *
      * @param x the x-coordinate
      * @param y the y-coordinate
      * @param width the width
@@ -105,10 +105,10 @@ public class RegionBuilder {
         log.debug("withRegion set: x={}, y={}, width={}, height={}", x, y, width, height);
         return this;
     }
-    
+
     /**
      * Creates a builder from an existing region.
-     * 
+     *
      * @param region the source region
      * @return this builder
      */
@@ -121,10 +121,10 @@ public class RegionBuilder {
         }
         return this;
     }
-    
+
     /**
      * Sets the position using absolute coordinates.
-     * 
+     *
      * @param x the x-coordinate
      * @param y the y-coordinate
      * @return this builder
@@ -134,10 +134,10 @@ public class RegionBuilder {
         this.y = y;
         return this;
     }
-    
+
     /**
      * Sets the size using absolute dimensions.
-     * 
+     *
      * @param width the width
      * @param height the height
      * @return this builder
@@ -150,10 +150,10 @@ public class RegionBuilder {
         }
         return this;
     }
-    
+
     /**
      * Sets the width directly.
-     * 
+     *
      * @param width the width
      * @return this builder
      */
@@ -164,10 +164,10 @@ public class RegionBuilder {
         }
         return this;
     }
-    
+
     /**
      * Sets the height directly.
-     * 
+     *
      * @param height the height
      * @return this builder
      */
@@ -178,10 +178,10 @@ public class RegionBuilder {
         }
         return this;
     }
-    
+
     /**
      * Sets the position using screen percentage (0.0 to 1.0).
-     * 
+     *
      * @param xPercent x position as percentage of screen width
      * @param yPercent y position as percentage of screen height
      * @return this builder
@@ -191,10 +191,10 @@ public class RegionBuilder {
         this.yPercent = yPercent;
         return this;
     }
-    
+
     /**
      * Sets the size using screen percentage (0.0 to 1.0).
-     * 
+     *
      * @param widthPercent width as percentage of screen width
      * @param heightPercent height as percentage of screen height
      * @return this builder
@@ -204,28 +204,28 @@ public class RegionBuilder {
         this.heightPercent = heightPercent;
         return this;
     }
-    
+
     /**
      * Sets both position and size using screen percentages.
-     * 
+     *
      * @param xPercent x position as percentage
      * @param yPercent y position as percentage
      * @param widthPercent width as percentage
      * @param heightPercent height as percentage
      * @return this builder
      */
-    public RegionBuilder withScreenPercentage(double xPercent, double yPercent, 
-                                             double widthPercent, double heightPercent) {
+    public RegionBuilder withScreenPercentage(
+            double xPercent, double yPercent, double widthPercent, double heightPercent) {
         this.xPercent = xPercent;
         this.yPercent = yPercent;
         this.widthPercent = widthPercent;
         this.heightPercent = heightPercent;
         return this;
     }
-    
+
     /**
      * Convenience method to set size using screen percentage.
-     * 
+     *
      * @param widthPercent width as percentage of screen
      * @param heightPercent height as percentage of screen
      * @return this builder
@@ -235,10 +235,10 @@ public class RegionBuilder {
         this.heightPercent = heightPercent;
         return this;
     }
-    
+
     /**
      * Adds an adjustment to the x-coordinate.
-     * 
+     *
      * @param adjustment pixels to add (negative to subtract)
      * @return this builder
      */
@@ -246,10 +246,10 @@ public class RegionBuilder {
         this.xAdjustment = adjustment;
         return this;
     }
-    
+
     /**
      * Adds an adjustment to the y-coordinate.
-     * 
+     *
      * @param adjustment pixels to add (negative to subtract)
      * @return this builder
      */
@@ -257,10 +257,10 @@ public class RegionBuilder {
         this.yAdjustment = adjustment;
         return this;
     }
-    
+
     /**
      * Adds an adjustment to the width.
-     * 
+     *
      * @param adjustment pixels to add (negative to subtract)
      * @return this builder
      */
@@ -268,10 +268,10 @@ public class RegionBuilder {
         this.widthAdjustment = adjustment;
         return this;
     }
-    
+
     /**
      * Adds an adjustment to the height.
-     * 
+     *
      * @param adjustment pixels to add (negative to subtract)
      * @return this builder
      */
@@ -279,10 +279,10 @@ public class RegionBuilder {
         this.heightAdjustment = adjustment;
         return this;
     }
-    
+
     /**
      * Adds adjustments to all dimensions.
-     * 
+     *
      * @param x x adjustment
      * @param y y adjustment
      * @param width width adjustment
@@ -296,10 +296,10 @@ public class RegionBuilder {
         this.heightAdjustment = height;
         return this;
     }
-    
+
     /**
      * Expands or contracts the region by the specified amount on all sides.
-     * 
+     *
      * @param pixels pixels to expand (negative to contract)
      * @return this builder
      */
@@ -310,11 +310,10 @@ public class RegionBuilder {
         this.heightAdjustment = pixels * 2;
         return this;
     }
-    
-    
+
     /**
      * Sets the anchor point using Positions.Name enum.
-     * 
+     *
      * @param anchorName the anchor point from Positions.Name
      * @return this builder
      */
@@ -323,10 +322,10 @@ public class RegionBuilder {
         this.anchorPosition = new Position(anchorName);
         return this;
     }
-    
+
     /**
      * Sets the anchor point using a custom Position.
-     * 
+     *
      * @param position the custom position for anchoring (0.0 to 1.0 relative positioning)
      * @return this builder
      */
@@ -335,11 +334,11 @@ public class RegionBuilder {
         this.anchorName = null;
         return this;
     }
-    
+
     /**
-     * Positions this region relative to another region using a Position.
-     * The Position determines where in the reference region this region's anchor point will be placed.
-     * 
+     * Positions this region relative to another region using a Position. The Position determines
+     * where in the reference region this region's anchor point will be placed.
+     *
      * @param referenceRegion the region to position relative to
      * @param position the position within the reference region (0.0 to 1.0 relative positioning)
      * @return this builder
@@ -349,10 +348,10 @@ public class RegionBuilder {
         this.relativePosition = position;
         return this;
     }
-    
+
     /**
      * Positions this region relative to another region using a named position.
-     * 
+     *
      * @param referenceRegion the region to position relative to
      * @param positionName the named position from Positions.Name
      * @return this builder
@@ -360,10 +359,10 @@ public class RegionBuilder {
     public RegionBuilder positionRelativeTo(Region referenceRegion, Positions.Name positionName) {
         return positionRelativeTo(referenceRegion, new Position(positionName));
     }
-    
+
     /**
      * Creates a region at a specific position within the screen using Position percentages.
-     * 
+     *
      * @param position the position defining where to place the region (0.0 to 1.0 scale)
      * @return this builder
      */
@@ -374,20 +373,20 @@ public class RegionBuilder {
         }
         return this;
     }
-    
+
     /**
      * Creates a region at a named position on the screen.
-     * 
+     *
      * @param positionName the named position from Positions.Name
      * @return this builder
      */
     public RegionBuilder withPosition(Positions.Name positionName) {
         return withPosition(new Position(positionName));
     }
-    
+
     /**
      * Centers the region on the screen.
-     * 
+     *
      * @return this builder
      */
     public RegionBuilder centerOnScreen() {
@@ -395,10 +394,10 @@ public class RegionBuilder {
         this.anchorPosition = new Position(MIDDLEMIDDLE);
         return this;
     }
-    
+
     /**
      * Positions the region at the top-left of the screen.
-     * 
+     *
      * @return this builder
      */
     public RegionBuilder topLeft() {
@@ -406,10 +405,10 @@ public class RegionBuilder {
         this.anchorPosition = new Position(TOPLEFT);
         return this;
     }
-    
+
     /**
      * Positions the region at the top-right of the screen.
-     * 
+     *
      * @return this builder
      */
     public RegionBuilder topRight() {
@@ -417,10 +416,10 @@ public class RegionBuilder {
         this.anchorPosition = new Position(TOPRIGHT);
         return this;
     }
-    
+
     /**
      * Positions the region at the bottom-left of the screen.
-     * 
+     *
      * @return this builder
      */
     public RegionBuilder bottomLeft() {
@@ -428,10 +427,10 @@ public class RegionBuilder {
         this.anchorPosition = new Position(BOTTOMLEFT);
         return this;
     }
-    
+
     /**
      * Positions the region at the bottom-right of the screen.
-     * 
+     *
      * @return this builder
      */
     public RegionBuilder bottomRight() {
@@ -439,10 +438,10 @@ public class RegionBuilder {
         this.anchorPosition = new Position(BOTTOMRIGHT);
         return this;
     }
-    
+
     /**
      * Positions the region at the top-center of the screen.
-     * 
+     *
      * @return this builder
      */
     public RegionBuilder topCenter() {
@@ -450,10 +449,10 @@ public class RegionBuilder {
         this.anchorPosition = new Position(TOPMIDDLE);
         return this;
     }
-    
+
     /**
      * Positions the region at the bottom-center of the screen.
-     * 
+     *
      * @return this builder
      */
     public RegionBuilder bottomCenter() {
@@ -461,10 +460,10 @@ public class RegionBuilder {
         this.anchorPosition = new Position(BOTTOMMIDDLE);
         return this;
     }
-    
+
     /**
      * Positions the region at the left-center of the screen.
-     * 
+     *
      * @return this builder
      */
     public RegionBuilder leftCenter() {
@@ -472,10 +471,10 @@ public class RegionBuilder {
         this.anchorPosition = new Position(MIDDLELEFT);
         return this;
     }
-    
+
     /**
      * Positions the region at the right-center of the screen.
-     * 
+     *
      * @return this builder
      */
     public RegionBuilder rightCenter() {
@@ -483,10 +482,10 @@ public class RegionBuilder {
         this.anchorPosition = new Position(MIDDLERIGHT);
         return this;
     }
-    
+
     /**
      * Ensures the region stays within screen bounds.
-     * 
+     *
      * @param constrain true to constrain to screen
      * @return this builder
      */
@@ -494,10 +493,10 @@ public class RegionBuilder {
         this.constrainToScreen = constrain;
         return this;
     }
-    
+
     /**
      * Maintains the aspect ratio when resizing.
-     * 
+     *
      * @param maintain true to maintain aspect ratio
      * @return this builder
      */
@@ -508,10 +507,10 @@ public class RegionBuilder {
         }
         return this;
     }
-    
+
     /**
      * Creates a region covering the full screen.
-     * 
+     *
      * @return this builder
      */
     public RegionBuilder fullScreen() {
@@ -521,10 +520,10 @@ public class RegionBuilder {
         this.height = currentScreenHeight;
         return this;
     }
-    
+
     /**
      * Creates a region for the top half of the screen.
-     * 
+     *
      * @return this builder
      */
     public RegionBuilder topHalf() {
@@ -534,10 +533,10 @@ public class RegionBuilder {
         this.height = currentScreenHeight / 2;
         return this;
     }
-    
+
     /**
      * Creates a region for the bottom half of the screen.
-     * 
+     *
      * @return this builder
      */
     public RegionBuilder bottomHalf() {
@@ -547,10 +546,10 @@ public class RegionBuilder {
         this.height = currentScreenHeight / 2;
         return this;
     }
-    
+
     /**
      * Creates a region for the left half of the screen.
-     * 
+     *
      * @return this builder
      */
     public RegionBuilder leftHalf() {
@@ -560,10 +559,10 @@ public class RegionBuilder {
         this.height = currentScreenHeight;
         return this;
     }
-    
+
     /**
      * Creates a region for the right half of the screen.
-     * 
+     *
      * @return this builder
      */
     public RegionBuilder rightHalf() {
@@ -573,10 +572,10 @@ public class RegionBuilder {
         this.height = currentScreenHeight;
         return this;
     }
-    
+
     /**
      * Builds the Region with all specified parameters.
-     * 
+     *
      * @return the constructed Region
      */
     public Region build() {
@@ -585,32 +584,40 @@ public class RegionBuilder {
         int finalY = calculateY();
         int finalWidth = calculateWidth();
         int finalHeight = calculateHeight();
-        
+
         // Calculated initial position and size
-        
+
         // Apply relative positioning if specified
         if (relativeToRegion != null && relativePosition != null) {
-            finalX = (int) Math.round(relativeToRegion.getX() + 
-                                     relativeToRegion.getW() * relativePosition.getPercentW());
-            finalY = (int) Math.round(relativeToRegion.getY() + 
-                                     relativeToRegion.getH() * relativePosition.getPercentH());
+            finalX =
+                    (int)
+                            Math.round(
+                                    relativeToRegion.getX()
+                                            + relativeToRegion.getW()
+                                                    * relativePosition.getPercentW());
+            finalY =
+                    (int)
+                            Math.round(
+                                    relativeToRegion.getY()
+                                            + relativeToRegion.getH()
+                                                    * relativePosition.getPercentH());
         }
-        
+
         // Apply adjustments
         finalX += xAdjustment;
         finalY += yAdjustment;
         finalWidth += widthAdjustment;
         finalHeight += heightAdjustment;
-        
+
         // Applied adjustments
-        
+
         // Apply anchor positioning
         int[] anchored = applyAnchor(finalX, finalY, finalWidth, finalHeight);
         finalX = anchored[0];
         finalY = anchored[1];
-        
+
         // Applied anchor positioning
-        
+
         // Constrain to screen if needed
         if (constrainToScreen) {
             finalX = Math.max(0, Math.min(finalX, currentScreenWidth - finalWidth));
@@ -618,16 +625,16 @@ public class RegionBuilder {
             finalWidth = Math.min(finalWidth, currentScreenWidth - finalX);
             finalHeight = Math.min(finalHeight, currentScreenHeight - finalY);
         }
-        
+
         // Ensure positive dimensions
         finalWidth = Math.max(1, finalWidth);
         finalHeight = Math.max(1, finalHeight);
-        
+
         log.debug("Region: [{},{} {}x{}]", finalX, finalY, finalWidth, finalHeight);
-        
+
         return new Region(finalX, finalY, finalWidth, finalHeight);
     }
-    
+
     private int calculateX() {
         // Calculate X position
         if (xPercent != null) {
@@ -635,14 +642,14 @@ public class RegionBuilder {
         }
         return x != null ? x : 0;
     }
-    
+
     private int calculateY() {
         if (yPercent != null) {
             return (int) Math.round(currentScreenHeight * yPercent);
         }
         return y != null ? y : 0;
     }
-    
+
     private int calculateWidth() {
         if (widthPercent != null) {
             return (int) Math.round(currentScreenWidth * widthPercent);
@@ -653,7 +660,7 @@ public class RegionBuilder {
         // Default to 100x100 if no size specified
         return 100;
     }
-    
+
     private int calculateHeight() {
         if (heightPercent != null) {
             return (int) Math.round(currentScreenHeight * heightPercent);
@@ -668,36 +675,38 @@ public class RegionBuilder {
         // Default to 100x100 if no size specified
         return 100;
     }
-    
+
     private int[] applyAnchor(int x, int y, int width, int height) {
         // Only apply anchor if it's explicitly set
         if (anchorName == null && anchorPosition == null) {
-            return new int[]{x, y};
+            return new int[] {x, y};
         }
-        
+
         // Use Position-based anchoring
         Position anchor = anchorPosition != null ? anchorPosition : new Position(anchorName);
-        
+
         // Calculate position based on anchor percentages
         double anchorX = anchor.getPercentW();
         double anchorY = anchor.getPercentH();
-        
+
         // Adjust position based on anchor point
         int newX = (int) Math.round((currentScreenWidth - width) * anchorX);
         int newY = (int) Math.round((currentScreenHeight - height) * anchorY);
-        
-        return new int[]{newX, newY};
+
+        return new int[] {newX, newY};
     }
-    
+
     private void detectCurrentScreenSize() {
         // Use the statically initialized screen dimensions
         // These are set once during startup based on the capture provider
         currentScreenWidth = ScreenDimensions.getWidth();
         currentScreenHeight = ScreenDimensions.getHeight();
-        
+
         if (!ScreenDimensions.isInitialized()) {
-            log.debug("ScreenDimensions not yet initialized, using defaults: {}x{}", 
-                     currentScreenWidth, currentScreenHeight);
+            log.debug(
+                    "ScreenDimensions not yet initialized, using defaults: {}x{}",
+                    currentScreenWidth,
+                    currentScreenHeight);
         }
     }
 }

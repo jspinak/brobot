@@ -1,12 +1,10 @@
 package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.capture;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.model.element.Location;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
-import org.springframework.stereotype.Component;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.FileSystems;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -17,11 +15,14 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.FileSystems;
-import java.util.List;
+
+import org.springframework.stereotype.Component;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
 @Component
 public class WriteXmlDomScenes {
@@ -48,13 +49,19 @@ public class WriteXmlDomScenes {
     public void addScene(SceneAndObjectsForXML sceneObjects) {
         int sceneNumber = Integer.parseInt(sceneObjects.getSceneName());
         int time = sceneNumber * FrameworkSettings.captureFrequency * 1000;
-        addSceneAndObjects(sceneNumber, time, sceneObjects.getObjectsNames(), sceneObjects.getObjectsLocations());
+        addSceneAndObjects(
+                sceneNumber,
+                time,
+                sceneObjects.getObjectsNames(),
+                sceneObjects.getObjectsLocations());
     }
 
-    public void addSceneAndObjects(int sceneNumber, int timelapseFromStart, List<String> objectNames,
+    public void addSceneAndObjects(
+            int sceneNumber,
+            int timelapseFromStart,
+            List<String> objectNames,
             List<Location> objectLocations) {
-        if (doc == null || rootElement == null)
-            return;
+        if (doc == null || rootElement == null) return;
 
         Element child = doc.createElement("scene");
         rootElement.appendChild(child);
@@ -80,9 +87,9 @@ public class WriteXmlDomScenes {
         }
     }
 
-    public void writeXmlToFile(String filename) throws TransformerException { // ParserConfigurationException,
-        if (doc == null)
-            return;
+    public void writeXmlToFile(String filename)
+            throws TransformerException { // ParserConfigurationException,
+        if (doc == null) return;
         // write dom document to a file
         String path = FileSystems.getDefault().getPath(".") + "\\" + filename;
         ConsoleReporter.println("Writing XML to file: " + path);
@@ -94,9 +101,7 @@ public class WriteXmlDomScenes {
     }
 
     // write doc to output stream
-    private static void writeXml(Document doc,
-            OutputStream output)
-            throws TransformerException {
+    private static void writeXml(Document doc, OutputStream output) throws TransformerException {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes"); // makes it look nice

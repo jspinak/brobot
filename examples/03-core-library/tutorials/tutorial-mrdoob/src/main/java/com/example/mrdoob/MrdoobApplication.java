@@ -1,11 +1,11 @@
 package com.example.mrdoob;
 
-import io.github.jspinak.brobot.statemanagement.InitialStates;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
+
+import io.github.jspinak.brobot.statemanagement.InitialStates;
 
 @SpringBootApplication
 @ComponentScan(basePackages = {"io.github.jspinak.brobot", "com.example.mrdoob"})
@@ -21,8 +21,8 @@ public class MrdoobApplication {
         initialStates.addStateSet(100, "homepage");
         initialStates.findIntialStates();
 
-        AutomationInstructions automationInstructions = context.getBean(AutomationInstructions.class);
+        AutomationInstructions automationInstructions =
+                context.getBean(AutomationInstructions.class);
         automationInstructions.doAutomation();
     }
-
 }

@@ -1,7 +1,8 @@
 package com.example.mrdoob;
 
-import io.github.jspinak.brobot.navigation.transition.StateNavigator;
 import org.springframework.stereotype.Component;
+
+import io.github.jspinak.brobot.navigation.transition.StateNavigator;
 
 @Component
 public class AutomationInstructions {

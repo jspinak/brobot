@@ -1,36 +1,36 @@
 package io.github.jspinak.brobot.startup.orchestration;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.startup.verification.InitialStateVerifier;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.TimeUnit;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.startup.verification.InitialStateVerifier;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Automatically verifies initial states on application startup.
- * 
- * <p>
- * This runner executes after Spring context initialization and performs
- * initial state verification based on configuration. It's enabled by setting
- * {@code brobot.startup.verify-initial-states=true}.
- * </p>
- * 
- * <p>
- * The runner respects the configured startup delay and initial states list,
- * making it easy to ensure the application starts in a known state without
- * writing boilerplate code.
- * </p>
- * 
+ *
+ * <p>This runner executes after Spring context initialization and performs initial state
+ * verification based on configuration. It's enabled by setting {@code
+ * brobot.startup.verify-initial-states=true}.
+ *
+ * <p>The runner respects the configured startup delay and initial states list, making it easy to
+ * ensure the application starts in a known state without writing boilerplate code.
+ *
  * @since 1.1.0
  */
 @Component
-@ConditionalOnProperty(prefix = "brobot.startup", name = "verify-initial-states", havingValue = "true")
+@ConditionalOnProperty(
+        prefix = "brobot.startup",
+        name = "verify-initial-states",
+        havingValue = "true")
 @Order(1) // Run early in the startup sequence
 @RequiredArgsConstructor
 @Slf4j
@@ -48,11 +48,14 @@ public class StartupRunner implements ApplicationRunner {
 
         // Apply startup delay if configured (skip in test mode)
         String testType = System.getProperty("brobot.test.type");
-        boolean isTestMode = "unit".equals(testType) || "true".equals(System.getProperty("brobot.test.mode"))
-                || FrameworkSettings.mock;
+        boolean isTestMode =
+                "unit".equals(testType)
+                        || "true".equals(System.getProperty("brobot.test.mode"))
+                        || FrameworkSettings.mock;
 
         if (!isTestMode && configuration.getStartupDelay() > 0) {
-            log.info("Waiting {} seconds before initial state verification",
+            log.info(
+                    "Waiting {} seconds before initial state verification",
                     configuration.getStartupDelay());
             TimeUnit.SECONDS.sleep(configuration.getStartupDelay());
         } else if (isTestMode) {
@@ -60,14 +63,17 @@ public class StartupRunner implements ApplicationRunner {
         }
 
         // Perform verification
-        log.info("Performing initial state verification for states: {}",
+        log.info(
+                "Performing initial state verification for states: {}",
                 configuration.getInitialStates());
 
-        boolean verified = stateVerifier.builder()
-                .withStates(configuration.getInitialStates().toArray(new String[0]))
-                .withFallbackSearch(configuration.isFallbackSearch())
-                .activateFirstOnly(configuration.isActivateFirstOnly())
-                .verify();
+        boolean verified =
+                stateVerifier
+                        .builder()
+                        .withStates(configuration.getInitialStates().toArray(new String[0]))
+                        .withFallbackSearch(configuration.isFallbackSearch())
+                        .activateFirstOnly(configuration.isActivateFirstOnly())
+                        .verify();
 
         if (!verified) {
             log.error("Initial state verification failed - no configured states found");

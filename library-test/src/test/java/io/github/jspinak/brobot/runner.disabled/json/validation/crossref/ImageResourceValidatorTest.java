@@ -1,5 +1,12 @@
 package io.github.jspinak.brobot.json.schemaValidation.resource;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,20 +19,12 @@ import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
 import io.github.jspinak.brobot.runner.json.validation.model.ValidationSeverity;
 import io.github.jspinak.brobot.runner.json.validation.resource.ImageResourceValidator;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 @ExtendWith(MockitoExtension.class)
 class ImageResourceValidatorTest {
 
     private ImageResourceValidator validator;
 
-    @TempDir
-    Path tempDir;
+    @TempDir Path tempDir;
 
     private Path imageDir;
     private Path validImageFile;
@@ -41,12 +40,15 @@ class ImageResourceValidatorTest {
 
         // Create a valid image file (PNG)
         validImageFile = imageDir.resolve("test-image.png");
-        Files.write(validImageFile, new byte[]{
-                (byte) 0x89, 'P', 'N', 'G', '\r', '\n', 0x1a, '\n'  // PNG-Header
-        });
+        Files.write(
+                validImageFile,
+                new byte[] {
+                    (byte) 0x89, 'P', 'N', 'G', '\r', '\n', 0x1a, '\n' // PNG-Header
+                });
 
         // Create a valid project JSON object
-        String projectJson = """
+        String projectJson =
+                """
         {
             "id": 1,
             "name": "Test Project",
@@ -110,15 +112,17 @@ class ImageResourceValidatorTest {
         assertFalse(result.isValid());
 
         // Check if the error message is as expected
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Invalid image base path")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(e -> e.errorCode().equals("Invalid image base path")));
     }
 
     @Test
     void validateImageResources_withMissingImage_shouldReturnError() {
         // Create a project with a non-existing image
         JSONObject projectWithMissingImage = new JSONObject(validProject.toString());
-        projectWithMissingImage.getJSONArray("states")
+        projectWithMissingImage
+                .getJSONArray("states")
                 .getJSONObject(0)
                 .getJSONArray("stateImages")
                 .getJSONObject(0)
@@ -126,11 +130,13 @@ class ImageResourceValidatorTest {
                 .getJSONObject(0)
                 .put("imgPath", "non-existent.png");
 
-        ValidationResult result = validator.validateImageResources(projectWithMissingImage, imageDir);
+        ValidationResult result =
+                validator.validateImageResources(projectWithMissingImage, imageDir);
 
         assertFalse(result.isValid());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Missing image resource")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(e -> e.errorCode().equals("Missing image resource")));
     }
 
     @Test
@@ -141,7 +147,8 @@ class ImageResourceValidatorTest {
 
         // Create a project with an invalid image
         JSONObject projectWithInvalidImage = new JSONObject(validProject.toString());
-        projectWithInvalidImage.getJSONArray("states")
+        projectWithInvalidImage
+                .getJSONArray("states")
                 .getJSONObject(0)
                 .getJSONArray("stateImages")
                 .getJSONObject(0)
@@ -149,19 +156,20 @@ class ImageResourceValidatorTest {
                 .getJSONObject(0)
                 .put("imgPath", invalidImageFile.getFileName().toString());
 
-        ValidationResult result = validator.validateImageResources(projectWithInvalidImage, imageDir);
+        ValidationResult result =
+                validator.validateImageResources(projectWithInvalidImage, imageDir);
 
         assertTrue(result.hasWarnings());
         System.out.println(result.getWarnings());
-        assertTrue(result.getWarnings().stream()
-                .anyMatch(e -> e.errorCode().equals("Invalid image format")));
+        assertTrue(
+                result.getWarnings().stream()
+                        .anyMatch(e -> e.errorCode().equals("Invalid image format")));
     }
 
     @Test
     void validateImageResources_withoutStates_shouldReturnValidResult() {
-        JSONObject projectWithoutStates = new JSONObject()
-                .put("id", 1)
-                .put("name", "Project without States");
+        JSONObject projectWithoutStates =
+                new JSONObject().put("id", 1).put("name", "Project without States");
 
         ValidationResult result = validator.validateImageResources(projectWithoutStates, imageDir);
 
@@ -180,10 +188,12 @@ class ImageResourceValidatorTest {
 
     @Test
     void validateImageResources_withNonExistingPath_shouldReturnError() {
-        ValidationResult result = validator.validateImageResources(validProject, Path.of("non-existent-path"));
+        ValidationResult result =
+                validator.validateImageResources(validProject, Path.of("non-existent-path"));
 
         assertFalse(result.isValid());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Invalid image base path")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(e -> e.errorCode().equals("Invalid image base path")));
     }
 }

@@ -1,14 +1,12 @@
 package io.github.jspinak.brobot.runner.project;
 
-import lombok.Builder;
-import lombok.Data;
-
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 
-/**
- * Lightweight project information for display and selection.
- */
+import lombok.Builder;
+import lombok.Data;
+
+/** Lightweight project information for display and selection. */
 @Data
 @Builder
 public class ProjectInfo {

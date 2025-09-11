@@ -5,16 +5,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * Jackson mixin for Brobot's Region class to control JSON serialization.
- * <p>
- * This mixin prevents circular reference issues and infinite recursion during
- * JSON serialization by ignoring properties that would create object graph cycles.
- * It specifically excludes Sikuli-related objects and location references that
- * could lead to serialization failures.
- * <p>
- * Properties handled:
+ *
+ * <p>This mixin prevents circular reference issues and infinite recursion during JSON serialization
+ * by ignoring properties that would create object graph cycles. It specifically excludes
+ * Sikuli-related objects and location references that could lead to serialization failures.
+ *
+ * <p>Properties handled:
+ *
  * <ul>
- * <li>Ignored via @JsonIgnoreProperties: location, sikuli, javaRect</li>
- * <li>Explicitly ignored methods: sikuli(), getLocation()</li>
+ *   <li>Ignored via @JsonIgnoreProperties: location, sikuli, javaRect
+ *   <li>Explicitly ignored methods: sikuli(), getLocation()
  * </ul>
  *
  * @see io.github.jspinak.brobot.model.element.Region
@@ -24,8 +24,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties({"location", "sikuli", "javaRect"})
 public abstract class RegionMixin {
     @JsonIgnore
-    abstract public org.sikuli.script.Region sikuli();
+    public abstract org.sikuli.script.Region sikuli();
 
     @JsonIgnore
-    abstract public org.sikuli.script.Location getLocation();
+    public abstract org.sikuli.script.Location getLocation();
 }

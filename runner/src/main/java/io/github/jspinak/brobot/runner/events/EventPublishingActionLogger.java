@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.runner.events;
 
-import lombok.Data;
+import java.awt.*;
+import java.io.IOException;
+import java.util.Set;
 
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
@@ -10,13 +12,11 @@ import io.github.jspinak.brobot.tools.logging.SessionLifecycleLogger;
 import io.github.jspinak.brobot.tools.logging.model.LogData;
 import io.github.jspinak.brobot.tools.logging.model.LogEventType;
 
-import java.awt.*;
-import java.io.IOException;
-import java.util.Set;
+import lombok.Data;
 
 /**
- * Decorator that implements both ActionLogger and TestSessionLogger interfaces,
- * adding event publishing behavior to all logging operations.
+ * Decorator that implements both ActionLogger and TestSessionLogger interfaces, adding event
+ * publishing behavior to all logging operations.
  */
 @Data
 public class EventPublishingActionLogger implements ActionLogger, SessionLifecycleLogger {
@@ -24,9 +24,8 @@ public class EventPublishingActionLogger implements ActionLogger, SessionLifecyc
     private final SessionLifecycleLogger sessionLogger;
     private final EventBus eventBus;
 
-    public EventPublishingActionLogger(ActionLogger actionLogger,
-                                       SessionLifecycleLogger sessionLogger,
-                                       EventBus eventBus) {
+    public EventPublishingActionLogger(
+            ActionLogger actionLogger, SessionLifecycleLogger sessionLogger, EventBus eventBus) {
         this.actionLogger = actionLogger;
         this.sessionLogger = sessionLogger;
         this.eventBus = eventBus;
@@ -37,7 +36,8 @@ public class EventPublishingActionLogger implements ActionLogger, SessionLifecyc
     //
 
     @Override
-    public LogData logAction(String sessionId, ActionResult matches, ObjectCollection objectCollection) {
+    public LogData logAction(
+            String sessionId, ActionResult matches, ObjectCollection objectCollection) {
         LogData logData = actionLogger.logAction(sessionId, matches, objectCollection);
         publishLogEntryEvent(logData);
 
@@ -50,23 +50,29 @@ public class EventPublishingActionLogger implements ActionLogger, SessionLifecyc
     }
 
     @Override
-    public LogData logStateTransition(String sessionId, Set<State> fromStates,
-                                      Set<State> toStates,
-                                      Set<State> beforeStates,
-                                      boolean success, long transitionTime) {
-        LogData logData = actionLogger.logStateTransition(
-                sessionId, fromStates, toStates, beforeStates, success, transitionTime);
+    public LogData logStateTransition(
+            String sessionId,
+            Set<State> fromStates,
+            Set<State> toStates,
+            Set<State> beforeStates,
+            boolean success,
+            long transitionTime) {
+        LogData logData =
+                actionLogger.logStateTransition(
+                        sessionId, fromStates, toStates, beforeStates, success, transitionTime);
         publishLogEntryEvent(logData);
 
         // For failed transitions, also publish an error event
         if (!success) {
-            ErrorEvent errorEvent = ErrorEvent.medium(
-                    this,
-                    "State transition failed from " + getStateSetNames(fromStates) +
-                            " to " + getStateSetNames(toStates),
-                    null,
-                    "StateTransitionManager"
-            );
+            ErrorEvent errorEvent =
+                    ErrorEvent.medium(
+                            this,
+                            "State transition failed from "
+                                    + getStateSetNames(fromStates)
+                                    + " to "
+                                    + getStateSetNames(toStates),
+                            null,
+                            "StateTransitionManager");
             eventBus.publish(errorEvent);
         }
 
@@ -74,19 +80,20 @@ public class EventPublishingActionLogger implements ActionLogger, SessionLifecyc
     }
 
     @Override
-    public LogData logObservation(String sessionId, String observationType,
-                                  String description, String severity) {
-        LogData logData = actionLogger.logObservation(
-                sessionId, observationType, description, severity);
+    public LogData logObservation(
+            String sessionId, String observationType, String description, String severity) {
+        LogData logData =
+                actionLogger.logObservation(sessionId, observationType, description, severity);
         publishLogEntryEvent(logData);
         return logData;
     }
 
     @Override
-    public LogData logPerformanceMetrics(String sessionId, long actionDuration,
-                                         long pageLoadTime, long totalTestDuration) {
-        LogData logData = actionLogger.logPerformanceMetrics(
-                sessionId, actionDuration, pageLoadTime, totalTestDuration);
+    public LogData logPerformanceMetrics(
+            String sessionId, long actionDuration, long pageLoadTime, long totalTestDuration) {
+        LogData logData =
+                actionLogger.logPerformanceMetrics(
+                        sessionId, actionDuration, pageLoadTime, totalTestDuration);
         publishLogEntryEvent(logData);
         return logData;
     }
@@ -97,12 +104,7 @@ public class EventPublishingActionLogger implements ActionLogger, SessionLifecyc
         publishLogEntryEvent(logData);
 
         // Also publish an error event
-        ErrorEvent errorEvent = ErrorEvent.high(
-                this,
-                errorMessage,
-                null,
-                "Automation"
-        );
+        ErrorEvent errorEvent = ErrorEvent.high(this, errorMessage, null, "Automation");
         eventBus.publish(errorEvent);
 
         return logData;
@@ -131,11 +133,11 @@ public class EventPublishingActionLogger implements ActionLogger, SessionLifecyc
         String sessionId = sessionLogger.startSession(applicationUnderTest);
 
         // Publish session start event
-        LogEvent logEvent = LogEvent.info(
-                this,
-                "Started session for " + applicationUnderTest + " with ID " + sessionId,
-                "Session"
-        );
+        LogEvent logEvent =
+                LogEvent.info(
+                        this,
+                        "Started session for " + applicationUnderTest + " with ID " + sessionId,
+                        "Session");
         eventBus.publish(logEvent);
 
         return sessionId;
@@ -146,11 +148,7 @@ public class EventPublishingActionLogger implements ActionLogger, SessionLifecyc
         sessionLogger.endSession(sessionId);
 
         // Publish session end event
-        LogEvent logEvent = LogEvent.info(
-                this,
-                "Ended session with ID " + sessionId,
-                "Session"
-        );
+        LogEvent logEvent = LogEvent.info(this, "Ended session with ID " + sessionId, "Session");
         eventBus.publish(logEvent);
     }
 
@@ -159,11 +157,11 @@ public class EventPublishingActionLogger implements ActionLogger, SessionLifecyc
         sessionLogger.setCurrentState(sessionId, stateName, stateDescription);
 
         // Publish state change event
-        LogEvent logEvent = LogEvent.info(
-                this,
-                "State changed to: " + stateName + " - " + stateDescription,
-                "StateManagement"
-        );
+        LogEvent logEvent =
+                LogEvent.info(
+                        this,
+                        "State changed to: " + stateName + " - " + stateDescription,
+                        "StateManagement");
         eventBus.publish(logEvent);
     }
 
@@ -180,33 +178,36 @@ public class EventPublishingActionLogger implements ActionLogger, SessionLifecyc
 
         // Also publish a corresponding log event for better integration
         LogEvent.LogLevel level = getLogLevelForEntry(logData);
-        LogEvent logEvent = new LogEvent(
-                BrobotEvent.EventType.LOG_MESSAGE,
-                this,
-                logData.getDescription(),
-                level,
-                logData.getType() != null ? logData.getType().toString() : "UNKNOWN",
-                null
-        );
+        LogEvent logEvent =
+                new LogEvent(
+                        BrobotEvent.EventType.LOG_MESSAGE,
+                        this,
+                        logData.getDescription(),
+                        level,
+                        logData.getType() != null ? logData.getType().toString() : "UNKNOWN",
+                        null);
         eventBus.publish(logEvent);
     }
 
     private void publishErrorForFailedAction(ActionResult matches, LogData logData) {
-        ErrorEvent errorEvent = ErrorEvent.medium(
-                this,
-                "Action failed: " + matches.getActionConfig().getClass().getSimpleName() +
-                        " - " + matches.getOutputText(),
-                null,
-                "ActionExecution"
-        );
+        ErrorEvent errorEvent =
+                ErrorEvent.medium(
+                        this,
+                        "Action failed: "
+                                + matches.getActionConfig().getClass().getSimpleName()
+                                + " - "
+                                + matches.getOutputText(),
+                        null,
+                        "ActionExecution");
         eventBus.publish(errorEvent);
     }
 
     private LogEvent.LogLevel getLogLevelForEntry(LogData logData) {
         if (logData.getType() == LogEventType.ERROR) {
             return LogEvent.LogLevel.ERROR;
-        } else if (!logData.isSuccess() &&
-                (logData.getType() == LogEventType.ACTION || logData.getType() == LogEventType.TRANSITION)) {
+        } else if (!logData.isSuccess()
+                && (logData.getType() == LogEventType.ACTION
+                        || logData.getType() == LogEventType.TRANSITION)) {
             return LogEvent.LogLevel.WARNING;
         } else {
             return LogEvent.LogLevel.INFO;

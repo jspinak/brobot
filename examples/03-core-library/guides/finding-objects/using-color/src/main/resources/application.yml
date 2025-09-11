@@ -4,8 +4,8 @@ brobot:
     image-path: images/     # Path to image resources
   screenshot:
     save-history: true      # Save illustrated screenshots
-    save-snapshots: false   
-    path: screenshots/      
+    save-snapshots: false
+    path: screenshots/
     history-path: history/  # See color analysis visualizations here
   illustration:
     draw-find: true

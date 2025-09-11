@@ -1,5 +1,11 @@
 package io.github.jspinak.brobot.action.basic.click;
-import io.github.jspinak.brobot.action.ActionType;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
+
+import org.springframework.stereotype.Component;
+
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
@@ -9,40 +15,30 @@ import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateLocation;
 import io.github.jspinak.brobot.model.state.StateRegion;
-import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Performs click operations on GUI elements without embedded Find operations.
- * 
- * <p>Click is a pure action that only performs the click operation on provided
- * locations, regions, or matches. It does not perform any Find operations.
- * This separation enables better testing, cleaner code, and more flexible
- * action composition through action chains.</p>
- * 
+ *
+ * <p>Click is a pure action that only performs the click operation on provided locations, regions,
+ * or matches. It does not perform any Find operations. This separation enables better testing,
+ * cleaner code, and more flexible action composition through action chains.
+ *
  * <p>Usage patterns:
+ *
  * <ul>
- * <li>Click on a specific location:
- * {@code new Click().perform(actionResult, location)}</li>
- * <li>Click on a region's center:
- * {@code new Click().perform(actionResult, region)}</li>
- * <li>Click on matches from a previous Find:
- * {@code new Click().perform(actionResult, matches)}</li>
+ *   <li>Click on a specific location: {@code new Click().perform(actionResult, location)}
+ *   <li>Click on a region's center: {@code new Click().perform(actionResult, region)}
+ *   <li>Click on matches from a previous Find: {@code new Click().perform(actionResult, matches)}
  * </ul>
- * </p>
- * 
+ *
  * <p>For Find-then-Click operations, use ConditionalActionChain:
- * 
+ *
  * <pre>{@code
  * ConditionalActionChain.find(findOptions)
  *         .ifFoundClick()
  *         .perform(objectCollection);
  * }</pre>
- * </p>
- * 
+ *
  * @since 2.0
  * @see ConditionalActionChain for chaining Find with Click
  */
@@ -63,7 +59,7 @@ public class Click implements ActionInterface {
             logger.warning("Click: ActionResult is null, cannot proceed");
             return;
         }
-        
+
         actionResult.setSuccess(false);
 
         try {
@@ -85,7 +81,9 @@ public class Click implements ActionInterface {
             }
 
             actionResult.setSuccess(successCount > 0);
-            logger.info(String.format("Click: Clicked %d of %d locations", successCount, locations.size()));
+            logger.info(
+                    String.format(
+                            "Click: Clicked %d of %d locations", successCount, locations.size()));
 
         } catch (Exception e) {
             logger.severe("Error in Click: " + e.getMessage());
@@ -94,12 +92,12 @@ public class Click implements ActionInterface {
     }
 
     /**
-     * Extracts clickable locations from the provided object collections.
-     * Supports Location, Region, and Match objects.
+     * Extracts clickable locations from the provided object collections. Supports Location, Region,
+     * and Match objects.
      */
     private List<Location> extractClickableLocations(ObjectCollection... collections) {
         List<Location> locations = new ArrayList<>();
-        
+
         // Handle null or empty collections array
         if (collections == null || collections.length == 0) {
             return locations;
@@ -110,7 +108,7 @@ public class Click implements ActionInterface {
             if (collection == null) {
                 continue;
             }
-            
+
             // Extract from Locations
             for (StateLocation stateLoc : collection.getStateLocations()) {
                 if (stateLoc != null && stateLoc.getLocation() != null) {
@@ -136,16 +134,14 @@ public class Click implements ActionInterface {
         return locations;
     }
 
-    /**
-     * Performs the actual click operation at the specified location.
-     */
+    /** Performs the actual click operation at the specified location. */
     private boolean performClick(Location location) {
         // Handle null location
         if (location == null) {
             logger.warning("Cannot click null location");
             return false;
         }
-        
+
         try {
             // In mock mode, simulate the click without actual SikuliX operations
             if (MockModeManager.isMockMode()) {
@@ -154,7 +150,7 @@ public class Click implements ActionInterface {
                 Thread.sleep(1);
                 return true;
             }
-            
+
             // Perform the actual click in non-mock mode
             org.sikuli.script.Location sikuliLoc = location.sikuli();
             sikuliLoc.click();
@@ -171,9 +167,7 @@ public class Click implements ActionInterface {
         }
     }
 
-    /**
-     * Creates a Match object from a Location for result reporting.
-     */
+    /** Creates a Match object from a Location for result reporting. */
     private Match createMatchFromLocation(Location location) {
         // Create a small region around the click point
         Region region = new Region(location.getX() - 5, location.getY() - 5, 10, 10);

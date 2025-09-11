@@ -12,7 +12,7 @@ brobot:
     mock: true
     # Enable verbose logging to see illustration decisions
     verbose: true
-    
+
   # Basic illustration settings (legacy)
   illustration:
     # These are overridden by advanced configuration
@@ -20,10 +20,10 @@ brobot:
     draw-click: true
     draw-move: false
     save-history: true
-    
+
   # Advanced illustration configuration is done in code
   # See the config classes for examples
-    
+
 # Illustration output directory
 illustration:
   output-dir: illustrations
@@ -31,14 +31,14 @@ illustration:
   format: png
   # Quality for jpg format (1-100)
   quality: 95
-  
+
 # Performance settings
 performance:
   # Maximum concurrent illustrations
   max-concurrent: 5
   # Thread pool size for illustration processing
   thread-pool-size: 3
-  
+
 # Logging configuration
 logging:
   level:

@@ -1,11 +1,6 @@
 package io.github.jspinak.brobot.runner.session.lifecycle;
 
-import io.github.jspinak.brobot.runner.common.diagnostics.DiagnosticInfo;
-import io.github.jspinak.brobot.runner.session.Session;
-import io.github.jspinak.brobot.runner.session.context.SessionContext;
-import io.github.jspinak.brobot.runner.session.context.SessionOptions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.*;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -14,7 +9,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static org.assertj.core.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import io.github.jspinak.brobot.runner.common.diagnostics.DiagnosticInfo;
+import io.github.jspinak.brobot.runner.session.Session;
+import io.github.jspinak.brobot.runner.session.context.SessionContext;
+import io.github.jspinak.brobot.runner.session.context.SessionOptions;
 
 class SessionLifecycleServiceTest {
 
@@ -28,13 +29,14 @@ class SessionLifecycleServiceTest {
     @Test
     void testStartSession_CreatesNewSession() {
         // Given
-        SessionContext context = SessionContext.builder()
-                .sessionName("Test Session")
-                .projectName("Test Project")
-                .configPath("/config/test.json")
-                .imagePath("/images")
-                .options(SessionOptions.defaultOptions())
-                .build();
+        SessionContext context =
+                SessionContext.builder()
+                        .sessionName("Test Session")
+                        .projectName("Test Project")
+                        .configPath("/config/test.json")
+                        .imagePath("/images")
+                        .options(SessionOptions.defaultOptions())
+                        .build();
 
         // When
         Session session = lifecycleService.startSession(context);
@@ -52,13 +54,13 @@ class SessionLifecycleServiceTest {
     @Test
     void testStartSession_FromLegacyMethod() {
         // When
-        SessionContext context = lifecycleService.startSession(
-                "Test Session",
-                "Test Project",
-                "/config/test.json",
-                "/images",
-                SessionOptions.defaultOptions()
-        );
+        SessionContext context =
+                lifecycleService.startSession(
+                        "Test Session",
+                        "Test Project",
+                        "/config/test.json",
+                        "/images",
+                        SessionOptions.defaultOptions());
 
         // Then
         assertThat(context).isNotNull();
@@ -70,13 +72,14 @@ class SessionLifecycleServiceTest {
     @Test
     void testEndSession_MarksSessionInactive() {
         // Given
-        SessionContext context = SessionContext.builder()
-                .sessionName("Test Session")
-                .projectName("Test Project")
-                .configPath("/config/test.json")
-                .imagePath("/images")
-                .options(SessionOptions.defaultOptions())
-                .build();
+        SessionContext context =
+                SessionContext.builder()
+                        .sessionName("Test Session")
+                        .projectName("Test Project")
+                        .configPath("/config/test.json")
+                        .imagePath("/images")
+                        .options(SessionOptions.defaultOptions())
+                        .build();
         Session session = lifecycleService.startSession(context);
 
         // When
@@ -98,13 +101,14 @@ class SessionLifecycleServiceTest {
     @Test
     void testIsSessionActive_ReturnsTrueForActiveSession() {
         // Given
-        SessionContext context = SessionContext.builder()
-                .sessionName("Test Session")
-                .projectName("Test Project")
-                .configPath("/config/test.json")
-                .imagePath("/images")
-                .options(SessionOptions.defaultOptions())
-                .build();
+        SessionContext context =
+                SessionContext.builder()
+                        .sessionName("Test Session")
+                        .projectName("Test Project")
+                        .configPath("/config/test.json")
+                        .imagePath("/images")
+                        .options(SessionOptions.defaultOptions())
+                        .build();
         Session session = lifecycleService.startSession(context);
 
         // When/Then
@@ -115,21 +119,23 @@ class SessionLifecycleServiceTest {
     @Test
     void testGetCurrentSession_ReturnsLatestActiveSession() {
         // Given
-        SessionContext context1 = SessionContext.builder()
-                .sessionName("Session 1")
-                .projectName("Project 1")
-                .configPath("/config1.json")
-                .imagePath("/images1")
-                .options(SessionOptions.defaultOptions())
-                .build();
-        
-        SessionContext context2 = SessionContext.builder()
-                .sessionName("Session 2")
-                .projectName("Project 2")
-                .configPath("/config2.json")
-                .imagePath("/images2")
-                .options(SessionOptions.defaultOptions())
-                .build();
+        SessionContext context1 =
+                SessionContext.builder()
+                        .sessionName("Session 1")
+                        .projectName("Project 1")
+                        .configPath("/config1.json")
+                        .imagePath("/images1")
+                        .options(SessionOptions.defaultOptions())
+                        .build();
+
+        SessionContext context2 =
+                SessionContext.builder()
+                        .sessionName("Session 2")
+                        .projectName("Project 2")
+                        .configPath("/config2.json")
+                        .imagePath("/images2")
+                        .options(SessionOptions.defaultOptions())
+                        .build();
 
         lifecycleService.startSession(context1);
         Session session2 = lifecycleService.startSession(context2);
@@ -145,13 +151,14 @@ class SessionLifecycleServiceTest {
     @Test
     void testActivateSession_ReplacesCurrentSession() {
         // Given
-        SessionContext context = SessionContext.builder()
-                .sessionName("Original Session")
-                .projectName("Original Project")
-                .configPath("/original.json")
-                .imagePath("/original")
-                .options(SessionOptions.defaultOptions())
-                .build();
+        SessionContext context =
+                SessionContext.builder()
+                        .sessionName("Original Session")
+                        .projectName("Original Project")
+                        .configPath("/original.json")
+                        .imagePath("/original")
+                        .options(SessionOptions.defaultOptions())
+                        .build();
         lifecycleService.startSession(context);
 
         Session restoredSession = new Session();
@@ -166,7 +173,8 @@ class SessionLifecycleServiceTest {
 
         // Then
         assertThat(lifecycleService.getCurrentSession()).isPresent();
-        assertThat(lifecycleService.getCurrentSession().get().getId()).isEqualTo("restored-session-id");
+        assertThat(lifecycleService.getCurrentSession().get().getId())
+                .isEqualTo("restored-session-id");
         assertThat(restoredSession.isActive()).isTrue();
     }
 
@@ -180,18 +188,20 @@ class SessionLifecycleServiceTest {
     @Test
     void testStateTransitions() {
         // Given
-        SessionContext context = SessionContext.builder()
-                .sessionName("Test Session")
-                .projectName("Test Project")
-                .configPath("/config.json")
-                .imagePath("/images")
-                .options(SessionOptions.defaultOptions())
-                .build();
+        SessionContext context =
+                SessionContext.builder()
+                        .sessionName("Test Session")
+                        .projectName("Test Project")
+                        .configPath("/config.json")
+                        .imagePath("/images")
+                        .options(SessionOptions.defaultOptions())
+                        .build();
         Session session = lifecycleService.startSession(context);
 
         // When - Valid transition
-        SessionLifecycleService.SessionTransition pauseResult = 
-                lifecycleService.transitionTo(session.getId(), SessionLifecycleService.SessionState.PAUSED);
+        SessionLifecycleService.SessionTransition pauseResult =
+                lifecycleService.transitionTo(
+                        session.getId(), SessionLifecycleService.SessionState.PAUSED);
 
         // Then
         assertThat(pauseResult.success()).isTrue();
@@ -199,8 +209,9 @@ class SessionLifecycleServiceTest {
                 .isEqualTo(SessionLifecycleService.SessionState.PAUSED);
 
         // When - Invalid transition
-        SessionLifecycleService.SessionTransition invalidResult = 
-                lifecycleService.transitionTo(session.getId(), SessionLifecycleService.SessionState.ACTIVE);
+        SessionLifecycleService.SessionTransition invalidResult =
+                lifecycleService.transitionTo(
+                        session.getId(), SessionLifecycleService.SessionState.ACTIVE);
 
         // Then
         assertThat(invalidResult.success()).isFalse();
@@ -217,20 +228,22 @@ class SessionLifecycleServiceTest {
         // When
         for (int i = 0; i < threadCount; i++) {
             final int index = i;
-            executor.submit(() -> {
-                try {
-                    SessionContext context = SessionContext.builder()
-                            .sessionName("Session " + index)
-                            .projectName("Project " + index)
-                            .configPath("/config" + index + ".json")
-                            .imagePath("/images" + index)
-                            .options(SessionOptions.defaultOptions())
-                            .build();
-                    lifecycleService.startSession(context);
-                } finally {
-                    latch.countDown();
-                }
-            });
+            executor.submit(
+                    () -> {
+                        try {
+                            SessionContext context =
+                                    SessionContext.builder()
+                                            .sessionName("Session " + index)
+                                            .projectName("Project " + index)
+                                            .configPath("/config" + index + ".json")
+                                            .imagePath("/images" + index)
+                                            .options(SessionOptions.defaultOptions())
+                                            .build();
+                            lifecycleService.startSession(context);
+                        } finally {
+                            latch.countDown();
+                        }
+                    });
         }
 
         // Then
@@ -243,13 +256,14 @@ class SessionLifecycleServiceTest {
     @Test
     void testDiagnosticInfo() {
         // Given
-        SessionContext context = SessionContext.builder()
-                .sessionName("Test Session")
-                .projectName("Test Project")
-                .configPath("/config.json")
-                .imagePath("/images")
-                .options(SessionOptions.defaultOptions())
-                .build();
+        SessionContext context =
+                SessionContext.builder()
+                        .sessionName("Test Session")
+                        .projectName("Test Project")
+                        .configPath("/config.json")
+                        .imagePath("/images")
+                        .options(SessionOptions.defaultOptions())
+                        .build();
         lifecycleService.startSession(context);
 
         // When
@@ -257,7 +271,8 @@ class SessionLifecycleServiceTest {
 
         // Then
         assertThat(diagnosticInfo.getComponent()).isEqualTo("SessionLifecycleService");
-        assertThat(diagnosticInfo.getStates()).containsKeys("activeSessions", "totalSessionsStarted", "totalSessionsEnded");
+        assertThat(diagnosticInfo.getStates())
+                .containsKeys("activeSessions", "totalSessionsStarted", "totalSessionsEnded");
         assertThat(diagnosticInfo.getStates().get("activeSessions")).isEqualTo(1);
     }
 

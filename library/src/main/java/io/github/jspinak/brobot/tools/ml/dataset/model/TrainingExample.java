@@ -1,31 +1,32 @@
 package io.github.jspinak.brobot.tools.ml.dataset.model;
 
-import lombok.Getter;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 
 import io.github.jspinak.brobot.tools.ml.dataset.io.TrainingExampleReader;
 import io.github.jspinak.brobot.tools.ml.dataset.io.TrainingExampleWriter;
 
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
+import lombok.Getter;
 
 /**
  * Serializable container for machine learning training data.
- * <p>
- * TrainingExample encapsulates all information needed to train a neural network on GUI automation tasks.
- * Each instance represents a single training example consisting of an action vector, descriptive text,
- * and associated screenshots showing the state before and after the action.
- * <p>
- * The class implements custom serialization to efficiently handle {@link BufferedImage} objects,
+ *
+ * <p>TrainingExample encapsulates all information needed to train a neural network on GUI
+ * automation tasks. Each instance represents a single training example consisting of an action
+ * vector, descriptive text, and associated screenshots showing the state before and after the
+ * action.
+ *
+ * <p>The class implements custom serialization to efficiently handle {@link BufferedImage} objects,
  * which are marked as transient and manually serialized as PNG byte arrays.
- * <p>
- * <strong>Screenshot flexibility:</strong><br>
+ *
+ * <p><strong>Screenshot flexibility:</strong><br>
  * Screenshots are stored in a list rather than a fixed-size array to support various training
- * scenarios. For example, researchers might want to include multiple "after" screenshots to
- * capture different stages of an action's effect.
+ * scenarios. For example, researchers might want to include multiple "after" screenshots to capture
+ * different stages of an action's effect.
  *
  * @see ActionVector
  * @see TrainingExampleWriter
@@ -50,8 +51,8 @@ public class TrainingExample implements Serializable {
     }
 
     /**
-     * Builder for creating TrainingExample instances.
-     * Provides a fluent interface for constructing training examples with validation.
+     * Builder for creating TrainingExample instances. Provides a fluent interface for constructing
+     * training examples with validation.
      */
     public static class Builder {
         private short[] vector;
@@ -60,7 +61,7 @@ public class TrainingExample implements Serializable {
 
         /**
          * Sets the action vector for this training example.
-         * 
+         *
          * @param vector The action vector (must not be null)
          * @return This builder instance for method chaining
          */
@@ -74,7 +75,7 @@ public class TrainingExample implements Serializable {
 
         /**
          * Sets the action vector from an ActionVector instance.
-         * 
+         *
          * @param actionVector The ActionVector to extract data from
          * @return This builder instance for method chaining
          */
@@ -87,7 +88,7 @@ public class TrainingExample implements Serializable {
 
         /**
          * Sets the descriptive text for this training example.
-         * 
+         *
          * @param text The action description (must not be null or empty)
          * @return This builder instance for method chaining
          */
@@ -101,7 +102,7 @@ public class TrainingExample implements Serializable {
 
         /**
          * Adds a single screenshot to this training example.
-         * 
+         *
          * @param screenshot The screenshot to add (must not be null)
          * @return This builder instance for method chaining
          */
@@ -115,7 +116,7 @@ public class TrainingExample implements Serializable {
 
         /**
          * Sets all screenshots for this training example.
-         * 
+         *
          * @param screenshots List of screenshots (must not be null or empty)
          * @return This builder instance for method chaining
          */
@@ -128,9 +129,8 @@ public class TrainingExample implements Serializable {
         }
 
         /**
-         * Builds the TrainingExample instance.
-         * Validates that all required fields have been set.
-         * 
+         * Builds the TrainingExample instance. Validates that all required fields have been set.
+         *
          * @return A new TrainingExample instance
          * @throws IllegalStateException if required fields are missing
          */
@@ -142,7 +142,8 @@ public class TrainingExample implements Serializable {
                 throw new IllegalStateException("Text must be set before building");
             }
             if (screenshots.isEmpty()) {
-                throw new IllegalStateException("At least one screenshot must be added before building");
+                throw new IllegalStateException(
+                        "At least one screenshot must be added before building");
             }
             return new TrainingExample(vector, text, screenshots);
         }
@@ -150,7 +151,12 @@ public class TrainingExample implements Serializable {
 
     // Override the toString method to display the data
     public String toString() {
-        return "Vector: " + Arrays.toString(vector) + "\nText: " + text + "\nScreenshots: " + screenshots.size();
+        return "Vector: "
+                + Arrays.toString(vector)
+                + "\nText: "
+                + text
+                + "\nScreenshots: "
+                + screenshots.size();
     }
 
     // Implement a custom writeObject method to handle the serialization of the screenshots
@@ -196,5 +202,4 @@ public class TrainingExample implements Serializable {
             screenshots.add(screenshot);
         }
     }
-
 }

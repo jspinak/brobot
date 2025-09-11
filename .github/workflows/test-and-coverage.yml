@@ -20,34 +20,34 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Set up JDK
       uses: actions/setup-java@v4
       with:
         java-version: ${{ env.JAVA_VERSION }}
         distribution: 'temurin'
         cache: 'gradle'
-        
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
-      
+
     - name: Build library module
       run: |
         # Build the library module without tests
         ./gradlew :library:build -x test --no-daemon
         echo "✅ Library build successful"
-      
+
     - name: Upload unit test results
       if: always()
       uses: actions/upload-artifact@v4
       with:
         name: unit-test-results
         path: library/build/reports/tests/test/
-        
+
     - name: Upload unit test coverage
       uses: actions/upload-artifact@v4
       with:
@@ -58,27 +58,27 @@ jobs:
     name: Integration Tests
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Set up JDK
       uses: actions/setup-java@v4
       with:
         java-version: ${{ env.JAVA_VERSION }}
         distribution: 'temurin'
         cache: 'gradle'
-        
+
     - name: Install Tesseract OCR
       run: |
         sudo apt-get update
         sudo apt-get install -y tesseract-ocr tesseract-ocr-eng
         tesseract --version
-        
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
-      
+
     - name: Build library-test module
       run: |
         # Build the library-test module without running tests
@@ -86,14 +86,14 @@ jobs:
         echo "✅ Library-test build successful"
       env:
         TESSDATA_PREFIX: /usr/share/tesseract-ocr/4.00/tessdata
-      
+
     - name: Upload integration test results
       if: always()
       uses: actions/upload-artifact@v4
       with:
         name: integration-test-results
         path: library-test/build/reports/tests/integrationTest/
-        
+
     - name: Upload integration coverage
       uses: actions/upload-artifact@v4
       with:
@@ -107,40 +107,40 @@ jobs:
     timeout-minutes: 15
     # Temporarily disabled until tests are stabilized
     if: false
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Set up JDK
       uses: actions/setup-java@v4
       with:
         java-version: ${{ env.JAVA_VERSION }}
         distribution: 'temurin'
         cache: 'gradle'
-        
+
     - name: Download unit coverage
       uses: actions/download-artifact@v4
       with:
         name: unit-coverage-report
         path: library/build/reports/jacoco/test/
-        
+
     - name: Download integration coverage
       uses: actions/download-artifact@v4
       with:
         name: integration-coverage-report
         path: library-test/build/reports/jacoco/test/
-        
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
-      
+
     - name: Generate aggregate coverage report
       run: ./gradlew jacocoAggregatedReport
-      
+
     - name: Verify coverage thresholds
       run: ./gradlew jacocoTestCoverageVerification
       continue-on-error: true
-      
+
     - name: Upload aggregate coverage to Codecov
       uses: codecov/codecov-action@v4
       with:
@@ -149,13 +149,13 @@ jobs:
         flags: unittests,integrationtests
         name: brobot-coverage
         fail_ci_if_error: false
-        
+
     - name: Upload aggregate coverage report
       uses: actions/upload-artifact@v4
       with:
         name: aggregate-coverage-report
         path: build/reports/jacoco/aggregate/
-        
+
     - name: Comment PR with coverage
       if: github.event_name == 'pull_request'
       uses: actions/github-script@v7
@@ -163,7 +163,7 @@ jobs:
         script: |
           const fs = require('fs');
           const csvPath = './build/reports/jacoco/aggregate/jacocoTestReport.csv';
-          
+
           if (fs.existsSync(csvPath)) {
             const csv = fs.readFileSync(csvPath, 'utf8');
             const lines = csv.split('\n');
@@ -173,24 +173,24 @@ jobs:
               const instructionCovered = parseInt(totals[3]);
               const branchMissed = parseInt(totals[4]);
               const branchCovered = parseInt(totals[5]);
-              
+
               const instructionTotal = instructionMissed + instructionCovered;
               const branchTotal = branchMissed + branchCovered;
-              
-              const instructionCoverage = instructionTotal > 0 ? 
+
+              const instructionCoverage = instructionTotal > 0 ?
                 (instructionCovered * 100.0 / instructionTotal).toFixed(2) : 0;
-              const branchCoverage = branchTotal > 0 ? 
+              const branchCoverage = branchTotal > 0 ?
                 (branchCovered * 100.0 / branchTotal).toFixed(2) : 0;
-              
+
               const comment = `## Coverage Report
-              
+
               | Type | Coverage | Threshold | Status |
               |------|----------|-----------|--------|
               | Instructions | ${instructionCoverage}% | 60% | ${instructionCoverage >= 60 ? '✅' : '❌'} |
               | Branches | ${branchCoverage}% | 50% | ${branchCoverage >= 50 ? '✅' : '❌'} |
-              
+
               View detailed report in the [workflow artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}).`;
-              
+
               github.rest.issues.createComment({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
@@ -205,27 +205,27 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     if: github.event_name == 'schedule' || contains(github.event.head_commit.message, '[perf]')
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Set up JDK
       uses: actions/setup-java@v4
       with:
         java-version: ${{ env.JAVA_VERSION }}
         distribution: 'temurin'
         cache: 'gradle'
-        
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
-      
+
     - name: Run tests with Python script
       run: |
         # Skip library-test temporarily - compilation timeout issue
         echo "WARNING: Skipping library-test Performance tests to unblock CI/CD"
         # python3 library/scripts/run-all-tests.py library-test --mode sequential --timeout 60 --retry-failed --pattern "Performance"
-      
+
     - name: Upload performance results
       uses: actions/upload-artifact@v4
       with:
@@ -241,22 +241,22 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Set up JDK ${{ matrix.java }}
       uses: actions/setup-java@v4
       with:
         java-version: ${{ matrix.java }}
         distribution: 'temurin'
         cache: 'gradle'
-        
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
       if: runner.os != 'Windows'
-      
+
     - name: Build project only (tests temporarily disabled)
       shell: bash
       run: |
@@ -267,7 +267,7 @@ jobs:
           ./gradlew build -x test --no-daemon
         fi
         echo "Build successful on ${{ matrix.os }} with Java ${{ matrix.java }}"
-      
+
     - name: Upload test results
       if: failure()
       uses: actions/upload-artifact@v4
@@ -282,26 +282,26 @@ jobs:
     needs: coverage-aggregation
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Download coverage history
       uses: actions/download-artifact@v4
       with:
         name: aggregate-coverage-report
         path: current-coverage/
-        
+
     - name: Store coverage metrics
       run: |
         mkdir -p coverage-history
         DATE=$(date +%Y%m%d-%H%M%S)
         cp current-coverage/jacocoTestReport.csv coverage-history/coverage-${DATE}.csv
-        
+
         # Keep only last 30 days of history
         find coverage-history -name "coverage-*.csv" -mtime +30 -delete
-        
+
     - name: Generate trend report
       run: |
         echo "# Coverage Trend Report" > coverage-trend.md
@@ -310,13 +310,13 @@ jobs:
         echo "" >> coverage-trend.md
         echo "| Date | Instruction % | Branch % |" >> coverage-trend.md
         echo "|------|---------------|----------|" >> coverage-trend.md
-        
+
         for file in $(ls -t coverage-history/coverage-*.csv | head -7); do
           DATE=$(basename $file | sed 's/coverage-//' | sed 's/.csv//')
           COVERAGE=$(awk -F',' 'NR==2 {printf "%.2f | %.2f", ($4/($3+$4))*100, ($6/($5+$6))*100}' $file)
           echo "| $DATE | $COVERAGE |" >> coverage-trend.md
         done
-        
+
     - name: Upload trend report
       uses: actions/upload-artifact@v4
       with:
@@ -329,7 +329,7 @@ jobs:
   #   needs: [unit-tests, integration-tests, coverage-aggregation]
   #   runs-on: ubuntu-latest
   #   if: always() && github.ref == 'refs/heads/main'
-  #   
+  #
   #   steps:
   #   - name: Notify build status
   #     uses: 8398a7/action-slack@v3

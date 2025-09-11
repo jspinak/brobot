@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.execution;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -7,34 +9,29 @@ import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
+
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.AccessLevel;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 /**
  * Panel component for displaying state transition history in a table format.
- * 
- * <p>This panel shows a table of state transitions that occurred during
- * automation execution, including source state, target state, trigger,
- * and timestamp information.</p>
+ *
+ * <p>This panel shows a table of state transitions that occurred during automation execution,
+ * including source state, target state, trigger, and timestamp information.
  */
 @Getter
 @Setter(AccessLevel.PRIVATE)
 public class StateTransitionTablePanel extends TitledPane {
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
 
-    @Getter
-    private TableView<StateTransitionRecord> stateTransitionTable;
-    
-    @Getter
-    private final ObservableList<StateTransitionRecord> stateTransitions = FXCollections.observableArrayList();
+    @Getter private TableView<StateTransitionRecord> stateTransitionTable;
 
-    /**
-     * Creates a new StateTransitionTablePanel.
-     */
+    @Getter
+    private final ObservableList<StateTransitionRecord> stateTransitions =
+            FXCollections.observableArrayList();
+
+    /** Creates a new StateTransitionTablePanel. */
     public StateTransitionTablePanel() {
         super("State Transitions", null);
         setCollapsible(true);
@@ -81,7 +78,9 @@ public class StateTransitionTablePanel extends TitledPane {
         durationColumn.setCellValueFactory(new PropertyValueFactory<>("duration"));
         durationColumn.setPrefWidth(80);
 
-        stateTransitionTable.getColumns().addAll(timeColumn, fromColumn, toColumn, triggerColumn, durationColumn);
+        stateTransitionTable
+                .getColumns()
+                .addAll(timeColumn, fromColumn, toColumn, triggerColumn, durationColumn);
 
         content.getChildren().addAll(descriptionLabel, stateTransitionTable);
     }
@@ -94,27 +93,20 @@ public class StateTransitionTablePanel extends TitledPane {
      * @param trigger The trigger that caused the transition
      * @param duration The duration of the transition in milliseconds
      */
-    public void addStateTransition(String fromState, String toState, String trigger, long duration) {
-        StateTransitionRecord record = new StateTransitionRecord(
-            LocalDateTime.now(),
-            fromState,
-            toState,
-            trigger,
-            duration
-        );
+    public void addStateTransition(
+            String fromState, String toState, String trigger, long duration) {
+        StateTransitionRecord record =
+                new StateTransitionRecord(
+                        LocalDateTime.now(), fromState, toState, trigger, duration);
         stateTransitions.add(0, record); // Add to beginning for most recent first
     }
 
-    /**
-     * Clears all state transition records.
-     */
+    /** Clears all state transition records. */
     public void clear() {
         stateTransitions.clear();
     }
 
-    /**
-     * Record class for state transitions.
-     */
+    /** Record class for state transitions. */
     @Getter
     public static class StateTransitionRecord {
         private final SimpleStringProperty time;
@@ -123,8 +115,12 @@ public class StateTransitionTablePanel extends TitledPane {
         private final SimpleStringProperty trigger;
         private final SimpleStringProperty duration;
 
-        public StateTransitionRecord(LocalDateTime timestamp, String fromState, String toState, 
-                                   String trigger, long durationMs) {
+        public StateTransitionRecord(
+                LocalDateTime timestamp,
+                String fromState,
+                String toState,
+                String trigger,
+                long durationMs) {
             this.time = new SimpleStringProperty(timestamp.format(TIME_FORMATTER));
             this.fromState = new SimpleStringProperty(fromState);
             this.toState = new SimpleStringProperty(toState);
@@ -133,10 +129,24 @@ public class StateTransitionTablePanel extends TitledPane {
         }
 
         // Property getters for TableView
-        public String getTime() { return time.get(); }
-        public String getFromState() { return fromState.get(); }
-        public String getToState() { return toState.get(); }
-        public String getTrigger() { return trigger.get(); }
-        public String getDuration() { return duration.get(); }
+        public String getTime() {
+            return time.get();
+        }
+
+        public String getFromState() {
+            return fromState.get();
+        }
+
+        public String getToState() {
+            return toState.get();
+        }
+
+        public String getTrigger() {
+            return trigger.get();
+        }
+
+        public String getDuration() {
+            return duration.get();
+        }
     }
 }

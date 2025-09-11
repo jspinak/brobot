@@ -1,21 +1,20 @@
 package io.github.jspinak.brobot.model.element;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
  * Tests for Location JSON parsing.
- * 
- * Key points:
- * - Location can be defined by x,y coordinates or region+position
- * - Supports offsets and anchors
- * - Has multiple constructors for different use cases
+ *
+ * <p>Key points: - Location can be defined by x,y coordinates or region+position - Supports offsets
+ * and anchors - Has multiple constructors for different use cases
  */
 @DisplayName("Location JSON Parser Tests")
 class LocationJsonParserTest extends BrobotTestBase {
@@ -27,13 +26,16 @@ class LocationJsonParserTest extends BrobotTestBase {
     public void setupTest() {
         super.setupTest();
         objectMapper = new ObjectMapper();
-        objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.configure(
+                com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+                false);
     }
 
     @Test
     @DisplayName("Should parse Location with x,y coordinates from JSON")
     void testParseLocationWithXY() throws Exception {
-        String json = """
+        String json =
+                """
         {
             "name": "XYLocation",
             "x": 100,
@@ -57,7 +59,8 @@ class LocationJsonParserTest extends BrobotTestBase {
     @Test
     @DisplayName("Should parse Location with region and position from JSON")
     void testParseLocationWithRegionAndPosition() throws Exception {
-        String json = """
+        String json =
+                """
         {
             "name": "RegionLocation",
             "region": {
@@ -248,13 +251,14 @@ class LocationJsonParserTest extends BrobotTestBase {
     @DisplayName("Should test Builder pattern")
     void testBuilder() throws Exception {
         // Create a location with builder
-        Location location = new Location.Builder()
-                .called("BuilderLocation")
-                .setXY(100, 200)
-                .setOffsetX(10)
-                .setOffsetY(20)
-                .setAnchor(Positions.Name.TOPLEFT)
-                .build();
+        Location location =
+                new Location.Builder()
+                        .called("BuilderLocation")
+                        .setXY(100, 200)
+                        .setOffsetX(10)
+                        .setOffsetY(20)
+                        .setAnchor(Positions.Name.TOPLEFT)
+                        .build();
 
         // Serialize
         String json = objectMapper.writeValueAsString(location);
@@ -277,7 +281,8 @@ class LocationJsonParserTest extends BrobotTestBase {
     @DisplayName("Should parse Location with position name from JSON")
     void testParseLocationWithPositionName() throws Exception {
         // The Location class uses Positions.Name directly, not in Position object
-        String json = """
+        String json =
+                """
         {
             "name": "PositionNameLocation",
             "anchor": "TOPLEFT"
@@ -298,7 +303,7 @@ class LocationJsonParserTest extends BrobotTestBase {
     void testScreenCenterLocation() {
         // Test creating location at screen center
         Location center = new Location(Positions.Name.MIDDLEMIDDLE);
-        
+
         assertNotNull(center);
         assertNotNull(center.getPosition());
         assertEquals(0.5, center.getPosition().getPercentW(), 0.001);

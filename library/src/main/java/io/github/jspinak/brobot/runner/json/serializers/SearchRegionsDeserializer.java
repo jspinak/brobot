@@ -1,44 +1,48 @@
 package io.github.jspinak.brobot.runner.json.serializers;
 
+import java.io.IOException;
+
+import org.springframework.stereotype.Component;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
+
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.element.SearchRegions;
-import org.springframework.stereotype.Component;
-
-import java.io.IOException;
 
 /**
- * Custom deserializer for {@link SearchRegions} objects that handles flexible JSON formats
- * and filters out invalid or default region data during deserialization.
- * 
- * <p>This deserializer addresses several challenges when deserializing SearchRegions:</p>
+ * Custom deserializer for {@link SearchRegions} objects that handles flexible JSON formats and
+ * filters out invalid or default region data during deserialization.
+ *
+ * <p>This deserializer addresses several challenges when deserializing SearchRegions:
+ *
  * <ul>
- *   <li><b>Format Flexibility:</b> SearchRegions may be serialized with different field
- *       names depending on the serialization context (regions, regionsMutable, allRegions).
- *       This deserializer checks multiple possible field names for compatibility.</li>
- *   <li><b>Invalid Data Filtering:</b> Automatically filters out "empty" regions that
- *       represent defaults or invalid states (e.g., zero dimensions or full-screen defaults
- *       like 1920x1080).</li>
- *   <li><b>Backward Compatibility:</b> Supports multiple JSON formats to maintain
- *       compatibility with different versions of the serialized data.</li>
- *   <li><b>Data Validation:</b> Ensures only valid regions with meaningful dimensions
- *       are added to the SearchRegions object.</li>
+ *   <li><b>Format Flexibility:</b> SearchRegions may be serialized with different field names
+ *       depending on the serialization context (regions, regionsMutable, allRegions). This
+ *       deserializer checks multiple possible field names for compatibility.
+ *   <li><b>Invalid Data Filtering:</b> Automatically filters out "empty" regions that represent
+ *       defaults or invalid states (e.g., zero dimensions or full-screen defaults like 1920x1080).
+ *   <li><b>Backward Compatibility:</b> Supports multiple JSON formats to maintain compatibility
+ *       with different versions of the serialized data.
+ *   <li><b>Data Validation:</b> Ensures only valid regions with meaningful dimensions are added to
+ *       the SearchRegions object.
  * </ul>
- * 
- * <p><b>Deserialization Strategy:</b></p>
+ *
+ * <p><b>Deserialization Strategy:</b>
+ *
  * <ol>
  *   <li>Attempts to read regions from multiple possible field names in order of preference:
- *       "regions" → "regionsMutable" → "allRegions"</li>
- *   <li>Filters out invalid regions (zero dimensions or default full-screen values)</li>
- *   <li>Handles the optional fixedRegion field separately</li>
- *   <li>Constructs Region objects from valid JSON data</li>
+ *       "regions" → "regionsMutable" → "allRegions"
+ *   <li>Filters out invalid regions (zero dimensions or default full-screen values)
+ *   <li>Handles the optional fixedRegion field separately
+ *   <li>Constructs Region objects from valid JSON data
  * </ol>
- * 
- * <p><b>Expected JSON Formats:</b></p>
+ *
+ * <p><b>Expected JSON Formats:</b>
+ *
  * <pre>{@code
  * // Format 1: Direct regions array
  * {
@@ -48,27 +52,29 @@ import java.io.IOException;
  *   ],
  *   "fixedRegion": {"x": 0, "y": 0, "w": 800, "h": 600}
  * }
- * 
+ *
  * // Format 2: Mutable regions (legacy)
  * {
  *   "regionsMutable": [...],
  *   "fixedRegion": {...}
  * }
- * 
+ *
  * // Format 3: All regions (fallback)
  * {
  *   "allRegions": [...],
  *   "fixedRegion": {...}
  * }
  * }</pre>
- * 
- * <p><b>Empty Region Detection:</b></p>
- * <p>Regions are considered "empty" and filtered out if they have:</p>
+ *
+ * <p><b>Empty Region Detection:</b>
+ *
+ * <p>Regions are considered "empty" and filtered out if they have:
+ *
  * <ul>
- *   <li>Width or height of 0</li>
- *   <li>Default full-screen dimensions (0,0,1920,1080) which often indicate uninitialized regions</li>
+ *   <li>Width or height of 0
+ *   <li>Default full-screen dimensions (0,0,1920,1080) which often indicate uninitialized regions
  * </ul>
- * 
+ *
  * @see SearchRegions
  * @see Region
  * @see JsonDeserializer
@@ -76,24 +82,26 @@ import java.io.IOException;
 @Component
 public class SearchRegionsDeserializer extends JsonDeserializer<SearchRegions> {
     /**
-     * Deserializes JSON content into a SearchRegions object, handling multiple
-     * possible field names and filtering out invalid regions.
-     * 
-     * <p><b>Processing Order:</b></p>
+     * Deserializes JSON content into a SearchRegions object, handling multiple possible field names
+     * and filtering out invalid regions.
+     *
+     * <p><b>Processing Order:</b>
+     *
      * <ol>
-     *   <li>Creates an empty SearchRegions object</li>
-     *   <li>Checks for regions in order: "regions", "regionsMutable", "allRegions"</li>
-     *   <li>Populates valid regions while filtering out empty ones</li>
-     *   <li>Sets the fixed region if present and valid</li>
+     *   <li>Creates an empty SearchRegions object
+     *   <li>Checks for regions in order: "regions", "regionsMutable", "allRegions"
+     *   <li>Populates valid regions while filtering out empty ones
+     *   <li>Sets the fixed region if present and valid
      * </ol>
-     * 
+     *
      * @param jp the JsonParser positioned at the SearchRegions JSON object
      * @param ctxt the deserialization context
      * @return a new SearchRegions object populated with valid regions
      * @throws IOException if there's an error reading the JSON content
      */
     @Override
-    public SearchRegions deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
+    public SearchRegions deserialize(JsonParser jp, DeserializationContext ctxt)
+            throws IOException {
         ObjectCodec oc = jp.getCodec();
         JsonNode node = oc.readTree(jp);
 
@@ -106,8 +114,7 @@ public class SearchRegionsDeserializer extends JsonDeserializer<SearchRegions> {
         // If no direct regions field, fall back to regionsMutable or allRegions
         else if (node.has("regionsMutable") && node.get("regionsMutable").isArray()) {
             populateRegionsFromArray(searchRegions, node.get("regionsMutable"));
-        }
-        else if (node.has("allRegions") && node.get("allRegions").isArray()) {
+        } else if (node.has("allRegions") && node.get("allRegions").isArray()) {
             JsonNode regionsArray = node.get("allRegions");
             // Only use allRegions if it contains actual regions (not just an empty region)
             if (!regionsArray.isEmpty() && !isEmptyRegion(regionsArray.get(0))) {
@@ -132,13 +139,12 @@ public class SearchRegionsDeserializer extends JsonDeserializer<SearchRegions> {
     }
 
     /**
-     * Populates a SearchRegions object with regions from a JSON array, filtering
-     * out any empty or invalid regions.
-     * 
-     * <p>Iterates through each region in the array, validates it using
-     * {@link #isEmptyRegion(JsonNode)}, and adds only valid regions to the
-     * SearchRegions object.</p>
-     * 
+     * Populates a SearchRegions object with regions from a JSON array, filtering out any empty or
+     * invalid regions.
+     *
+     * <p>Iterates through each region in the array, validates it using {@link
+     * #isEmptyRegion(JsonNode)}, and adds only valid regions to the SearchRegions object.
+     *
      * @param searchRegions the SearchRegions object to populate
      * @param regionsArray the JSON array containing region data
      */
@@ -156,42 +162,42 @@ public class SearchRegionsDeserializer extends JsonDeserializer<SearchRegions> {
     }
 
     /**
-     * Determines whether a region should be considered "empty" and thus filtered out
-     * during deserialization.
-     * 
-     * <p>A region is considered empty if it meets any of these criteria:</p>
+     * Determines whether a region should be considered "empty" and thus filtered out during
+     * deserialization.
+     *
+     * <p>A region is considered empty if it meets any of these criteria:
+     *
      * <ul>
-     *   <li>Has a width of 0</li>
-     *   <li>Has a height of 0</li>
-     *   <li>Matches the default full-screen dimensions (0,0,1920,1080), which often
-     *       indicates an uninitialized or default region that shouldn't be included</li>
+     *   <li>Has a width of 0
+     *   <li>Has a height of 0
+     *   <li>Matches the default full-screen dimensions (0,0,1920,1080), which often indicates an
+     *       uninitialized or default region that shouldn't be included
      * </ul>
-     * 
-     * <p>This filtering helps ensure that only meaningful regions with actual
-     * search areas are included in the deserialized SearchRegions object.</p>
-     * 
+     *
+     * <p>This filtering helps ensure that only meaningful regions with actual search areas are
+     * included in the deserialized SearchRegions object.
+     *
      * @param regionNode the JSON node representing a region
      * @return true if the region should be filtered out, false if it's valid
      */
     private boolean isEmptyRegion(JsonNode regionNode) {
         if (regionNode == null) return true;
-        
+
         JsonNode xNode = regionNode.get("x");
         JsonNode yNode = regionNode.get("y");
         JsonNode wNode = regionNode.get("w");
         JsonNode hNode = regionNode.get("h");
-        
+
         // If any required field is missing, consider it empty
         if (xNode == null || yNode == null || wNode == null || hNode == null) {
             return true;
         }
-        
+
         int x = xNode.asInt();
         int y = yNode.asInt();
         int w = wNode.asInt();
         int h = hNode.asInt();
-        
-        return w == 0 || h == 0 ||
-                (x == 0 && y == 0 && w == 1920 && h == 1080);
+
+        return w == 0 || h == 0 || (x == 0 && y == 0 && w == 1920 && h == 1080);
     }
 }

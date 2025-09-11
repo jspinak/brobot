@@ -4,47 +4,42 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Configuration for persistence module.
- * Supports different persistence types and their settings.
+ * Configuration for persistence module. Supports different persistence types and their settings.
  */
 @Data
 @NoArgsConstructor
 public class PersistenceConfiguration {
-    
-    /**
-     * Type of persistence backend to use.
-     */
+
+    /** Type of persistence backend to use. */
     public enum PersistenceType {
-        FILE,       // File-based persistence (JSON/CSV)
-        DATABASE,   // Database persistence (JPA)
-        MEMORY,     // In-memory persistence (for testing)
-        CUSTOM      // Custom implementation
+        FILE, // File-based persistence (JSON/CSV)
+        DATABASE, // Database persistence (JPA)
+        MEMORY, // In-memory persistence (for testing)
+        CUSTOM // Custom implementation
     }
-    
-    /**
-     * File format for file-based persistence.
-     */
+
+    /** File format for file-based persistence. */
     public enum FileFormat {
         JSON,
         CSV,
         XML
     }
-    
+
     private PersistenceType type = PersistenceType.FILE;
     private String name = "Default";
-    
+
     // File-based persistence settings
     private FileSettings file = new FileSettings();
-    
+
     // Database persistence settings
     private DatabaseSettings database = new DatabaseSettings();
-    
+
     // Memory persistence settings
     private MemorySettings memory = new MemorySettings();
-    
+
     // Performance settings
     private PerformanceSettings performance = new PerformanceSettings();
-    
+
     @Data
     @NoArgsConstructor
     public static class FileSettings {
@@ -56,7 +51,7 @@ public class PersistenceConfiguration {
         private boolean autoRotate = true;
         private String encoding = "UTF-8";
     }
-    
+
     @Data
     @NoArgsConstructor
     public static class DatabaseSettings {
@@ -68,7 +63,7 @@ public class PersistenceConfiguration {
         private int connectionPoolSize = 5;
         private int batchSize = 100;
     }
-    
+
     @Data
     @NoArgsConstructor
     public static class MemorySettings {
@@ -77,7 +72,7 @@ public class PersistenceConfiguration {
         private boolean persistOnShutdown = false;
         private String shutdownExportPath = "./brobot-history/shutdown-export";
     }
-    
+
     @Data
     @NoArgsConstructor
     public static class PerformanceSettings {
@@ -88,26 +83,20 @@ public class PersistenceConfiguration {
         private int queueCapacity = 1000;
         private boolean batchOperations = true;
     }
-    
-    /**
-     * Create default configuration for file-based persistence.
-     */
+
+    /** Create default configuration for file-based persistence. */
     public static PersistenceConfiguration fileDefault() {
         return new PersistenceConfiguration();
     }
-    
-    /**
-     * Create default configuration for database persistence.
-     */
+
+    /** Create default configuration for database persistence. */
     public static PersistenceConfiguration databaseDefault() {
         PersistenceConfiguration config = new PersistenceConfiguration();
         config.setType(PersistenceType.DATABASE);
         return config;
     }
-    
-    /**
-     * Create default configuration for in-memory persistence.
-     */
+
+    /** Create default configuration for in-memory persistence. */
     public static PersistenceConfiguration memoryDefault() {
         PersistenceConfiguration config = new PersistenceConfiguration();
         config.setType(PersistenceType.MEMORY);

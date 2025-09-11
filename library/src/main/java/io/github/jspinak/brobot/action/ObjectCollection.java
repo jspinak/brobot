@@ -1,8 +1,15 @@
 package io.github.jspinak.brobot.action;
 
+import static io.github.jspinak.brobot.model.element.Positions.Name.TOPLEFT;
+
+import java.util.*;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Position;
+import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.State;
@@ -11,48 +18,42 @@ import io.github.jspinak.brobot.model.state.StateLocation;
 import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.model.state.StateString;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-import io.github.jspinak.brobot.model.element.Location;
-import io.github.jspinak.brobot.model.element.Position;
-import io.github.jspinak.brobot.model.element.Region;
+
 import lombok.Getter;
 import lombok.Setter;
 
-import static io.github.jspinak.brobot.model.element.Positions.Name.TOPLEFT;
-
-import java.util.*;
-
 /**
  * Container for GUI elements that serve as targets for automation actions in Brobot.
- * 
- * <p>ObjectCollection is a fundamental data structure in the model-based approach that 
- * aggregates different types of GUI elements that can be acted upon. It provides a 
- * unified way to pass multiple heterogeneous targets to actions, supporting the 
- * framework's flexibility in handling various GUI interaction scenarios.</p>
- * 
+ *
+ * <p>ObjectCollection is a fundamental data structure in the model-based approach that aggregates
+ * different types of GUI elements that can be acted upon. It provides a unified way to pass
+ * multiple heterogeneous targets to actions, supporting the framework's flexibility in handling
+ * various GUI interaction scenarios.
+ *
  * <p>Supported element types:
+ *
  * <ul>
- *   <li><b>StateImages</b>: Visual patterns to find and interact with</li>
- *   <li><b>StateLocations</b>: Specific points for precise interactions</li>
- *   <li><b>StateRegions</b>: Rectangular areas for spatial operations</li>
- *   <li><b>StateStrings</b>: Text strings for keyboard input</li>
- *   <li><b>ActionResult</b>: Results from previous find operations that can be reused</li>
- *   <li><b>Scenes</b>: Screenshots for offline processing instead of live screen capture</li>
+ *   <li><b>StateImages</b>: Visual patterns to find and interact with
+ *   <li><b>StateLocations</b>: Specific points for precise interactions
+ *   <li><b>StateRegions</b>: Rectangular areas for spatial operations
+ *   <li><b>StateStrings</b>: Text strings for keyboard input
+ *   <li><b>ActionResult</b>: Results from previous find operations that can be reused
+ *   <li><b>Scenes</b>: Screenshots for offline processing instead of live screen capture
  * </ul>
- * </p>
- * 
+ *
  * <p>Key features:
+ *
  * <ul>
- *   <li>Supports multiple objects of each type for batch operations</li>
- *   <li>Tracks interaction counts for each object (timesActedOn)</li>
- *   <li>Enables offline automation using stored screenshots (Scenes)</li>
- *   <li>Provides builder pattern for convenient construction</li>
+ *   <li>Supports multiple objects of each type for batch operations
+ *   <li>Tracks interaction counts for each object (timesActedOn)
+ *   <li>Enables offline automation using stored screenshots (Scenes)
+ *   <li>Provides builder pattern for convenient construction
  * </ul>
- * </p>
- * 
- * <p>This design allows actions to be polymorphic - the same action (e.g., Click) can 
- * operate on images, regions, locations, or previous matches, making automation code 
- * more flexible and reusable.</p>
- * 
+ *
+ * <p>This design allows actions to be polymorphic - the same action (e.g., Click) can operate on
+ * images, regions, locations, or previous matches, making automation code more flexible and
+ * reusable.
+ *
  * @since 1.0
  * @see StateImage
  * @see StateRegion
@@ -68,9 +69,9 @@ public class ObjectCollection {
     private List<StateImage> stateImages = new ArrayList<>();
     private List<StateRegion> stateRegions = new ArrayList<>();
     private List<StateString> stateStrings = new ArrayList<>();
-    
+
     private List<ActionResult> matches = new ArrayList<>();
-    
+
     private List<Scene> scenes = new ArrayList<>();
 
     public ObjectCollection() {} // public for mapping
@@ -85,10 +86,9 @@ public class ObjectCollection {
     }
 
     /**
-     * Sets the timesActedOn variable to 0 for all objects, including those
-     * found in the ActionResult variable. Knowing how many times an object Match
-     * was acted on is valuable for understanding the actual automation as
-     * well as for performing mocks.
+     * Sets the timesActedOn variable to 0 for all objects, including those found in the
+     * ActionResult variable. Knowing how many times an object Match was acted on is valuable for
+     * understanding the actual automation as well as for performing mocks.
      */
     public void resetTimesActedOn() {
         stateImages.forEach(sio -> sio.setTimesActedOn(0));
@@ -101,7 +101,7 @@ public class ObjectCollection {
     public String getFirstObjectName() {
         if (!stateImages.isEmpty()) {
             if (!stateImages.get(0).getName().isEmpty()) return stateImages.get(0).getName();
-            else if (!stateImages.get(0).getPatterns().isEmpty() 
+            else if (!stateImages.get(0).getPatterns().isEmpty()
                     && !stateImages.get(0).getPatterns().get(0).getImgpath().isEmpty())
                 return stateImages.get(0).getPatterns().get(0).getImgpath();
         }
@@ -136,42 +136,44 @@ public class ObjectCollection {
         return matches.contains(m);
     }
 
-    public boolean contains(Scene sc) { return scenes.contains(sc); }
+    public boolean contains(Scene sc) {
+        return scenes.contains(sc);
+    }
 
     public boolean equals(ObjectCollection objectCollection) {
         for (StateImage si : stateImages) {
             if (!objectCollection.contains(si)) {
-                //Report.println(si.getName()+" is not in the objectCollection. ");
+                // Report.println(si.getName()+" is not in the objectCollection. ");
                 return false;
             }
         }
         for (StateRegion sr : stateRegions) {
             if (!objectCollection.contains(sr)) {
-                //Report.println(" regions different ");
+                // Report.println(" regions different ");
                 return false;
             }
         }
         for (StateLocation sl : stateLocations) {
             if (!objectCollection.contains(sl)) {
-                //Report.println(" locations different ");
+                // Report.println(" locations different ");
                 return false;
             }
         }
         for (StateString ss : stateStrings) {
             if (!objectCollection.contains(ss)) {
-                //Report.println(" strings different ");
+                // Report.println(" strings different ");
                 return false;
             }
         }
         for (ActionResult m : matches) {
             if (!objectCollection.contains(m)) {
-                //Report.println(" matches different ");
+                // Report.println(" matches different ");
                 return false;
             }
         }
         for (Scene sc : scenes) {
             if (!objectCollection.contains(sc)) {
-                //Report.println(" matches different ");
+                // Report.println(" matches different ");
                 return false;
             }
         }
@@ -195,18 +197,24 @@ public class ObjectCollection {
 
     @Override
     public String toString() {
-        return "ObjectCollection{" +
-                "stateLocations=" + stateLocations.size() +
-                ", stateImages=" + stateImages.size() +
-                ", stateRegions=" + stateRegions.size() +
-                ", stateStrings=" + stateStrings.size() +
-                ", matches=" + matches.size() +
-                ", scenes=" + scenes.size() +
-                '}';
+        return "ObjectCollection{"
+                + "stateLocations="
+                + stateLocations.size()
+                + ", stateImages="
+                + stateImages.size()
+                + ", stateRegions="
+                + stateRegions.size()
+                + ", stateStrings="
+                + stateStrings.size()
+                + ", matches="
+                + matches.size()
+                + ", scenes="
+                + scenes.size()
+                + '}';
     }
 
     public static class Builder {
-        //private int lastId = 0; // currently id is given only to images
+        // private int lastId = 0; // currently id is given only to images
         private List<StateLocation> stateLocations = new ArrayList<>();
         private List<StateImage> stateImages = new ArrayList<>();
         private List<StateRegion> stateRegions = new ArrayList<>();
@@ -233,10 +241,10 @@ public class ObjectCollection {
             return this;
         }
 
-        //private Builder addImage(StateImage img) {
+        // private Builder addImage(StateImage img) {
         //    img.
         //    this.stateImages.add()
-        //}
+        // }
 
         public Builder withImages(StateImage... stateImages) {
             this.stateImages.addAll(Arrays.asList(stateImages));
@@ -305,7 +313,8 @@ public class ObjectCollection {
             return this;
         }
 
-        // should the State info be kept if it's a subregion? this is not clear, so we're sticking with NullState for now
+        // should the State info be kept if it's a subregion? this is not clear, so we're sticking
+        // with NullState for now
         public Builder withGridSubregions(int rows, int columns, StateRegion... regions) {
             for (StateRegion region : regions) {
                 for (Region gridRegion : region.getSearchRegion().getGridRegions(rows, columns))
@@ -315,7 +324,8 @@ public class ObjectCollection {
         }
 
         public Builder withStrings(String... strings) {
-            for (String string : strings) this.stateStrings.add(new StateString.InNullState().withString(string));
+            for (String string : strings)
+                this.stateStrings.add(new StateString.InNullState().withString(string));
             return this;
         }
 
@@ -341,10 +351,11 @@ public class ObjectCollection {
 
         public Builder withMatchObjectsAsRegions(Match... matches) {
             for (Match match : matches) {
-                this.stateRegions.add(new StateRegion.Builder()
-                        .setSearchRegion(match.getRegion())
-                        .setOwnerStateName("null")
-                        .build());
+                this.stateRegions.add(
+                        new StateRegion.Builder()
+                                .setSearchRegion(match.getRegion())
+                                .setOwnerStateName("null")
+                                .build());
             }
             return this;
         }

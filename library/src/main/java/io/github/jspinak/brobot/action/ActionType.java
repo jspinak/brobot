@@ -1,13 +1,13 @@
 package io.github.jspinak.brobot.action;
-import io.github.jspinak.brobot.action.ActionType;
 
 /**
  * Enumerates all available action types in the Brobot framework.
- * <p>
- * Actions are categorized into:
+ *
+ * <p>Actions are categorized into:
+ *
  * <ul>
- *   <li><b>Basic Actions</b>: Simple, atomic operations like finding patterns or clicking</li>
- *   <li><b>Composite Actions</b>: Complex operations that combine multiple basic actions</li>
+ *   <li><b>Basic Actions</b>: Simple, atomic operations like finding patterns or clicking
+ *   <li><b>Composite Actions</b>: Complex operations that combine multiple basic actions
  * </ul>
  *
  * @since 2.0
@@ -54,7 +54,7 @@ public enum ActionType {
     KEY_UP,
     /** Classifies images using machine learning */
     CLASSIFY,
-    
+
     // Composite Actions
     /** Repeatedly clicks until a condition is met */
     CLICK_UNTIL,

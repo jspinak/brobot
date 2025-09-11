@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.json.validation.crossref;
 
+import java.util.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -8,57 +10,57 @@ import io.github.jspinak.brobot.runner.json.validation.model.ValidationError;
 import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
 import io.github.jspinak.brobot.runner.json.validation.model.ValidationSeverity;
 
-import java.util.*;
-
 /**
  * Validates all references related to automation functions in Brobot configurations.
- * 
+ *
  * <p>This validator ensures that all function-related references are valid and consistent
- * throughout the DSL and project configurations. It validates function calls, parameter
- * usage, variable references, and API method calls to prevent runtime errors and ensure
- * code quality.</p>
- * 
+ * throughout the DSL and project configurations. It validates function calls, parameter usage,
+ * variable references, and API method calls to prevent runtime errors and ensure code quality.
+ *
  * <h2>Function Reference Types:</h2>
+ *
  * <ul>
- *   <li><b>Function Calls</b> - Functions calling other functions</li>
- *   <li><b>Variable References</b> - Variables used within function scope</li>
- *   <li><b>Method Calls</b> - API object method invocations</li>
- *   <li><b>Button-Function Links</b> - UI buttons referencing automation functions</li>
+ *   <li><b>Function Calls</b> - Functions calling other functions
+ *   <li><b>Variable References</b> - Variables used within function scope
+ *   <li><b>Method Calls</b> - API object method invocations
+ *   <li><b>Button-Function Links</b> - UI buttons referencing automation functions
  * </ul>
- * 
+ *
  * <h2>Validation Approach:</h2>
- * <p>The validator uses static analysis techniques to trace variable scope,
- * validate function signatures, and ensure all references resolve correctly.
- * It maintains context about defined variables and functions while traversing
- * the abstract syntax tree of function statements.</p>
- * 
+ *
+ * <p>The validator uses static analysis techniques to trace variable scope, validate function
+ * signatures, and ensure all references resolve correctly. It maintains context about defined
+ * variables and functions while traversing the abstract syntax tree of function statements.
+ *
  * <h2>Common Issues Detected:</h2>
+ *
  * <ul>
- *   <li>Calling non-existent functions</li>
- *   <li>Using undefined variables</li>
- *   <li>Invalid API method calls</li>
- *   <li>Parameter mismatches between buttons and functions</li>
- *   <li>Duplicate function names</li>
+ *   <li>Calling non-existent functions
+ *   <li>Using undefined variables
+ *   <li>Invalid API method calls
+ *   <li>Parameter mismatches between buttons and functions
+ *   <li>Duplicate function names
  * </ul>
- * 
+ *
  * <h2>Usage Example:</h2>
+ *
  * <pre>{@code
  * FunctionReferenceValidator validator = new FunctionReferenceValidator();
- * 
+ *
  * // Validate internal DSL references
  * ValidationResult dslResult = validator.validateInternalReferences(dsl);
- * 
+ *
  * // Validate button-to-function references
  * ValidationResult buttonResult = validator.validateButtonFunctionReferences(
  *     project, dsl);
- * 
+ *
  * // Check for critical errors
  * if (dslResult.hasErrors()) {
- *     logger.error("Function reference errors: {}", 
+ *     logger.error("Function reference errors: {}",
  *         dslResult.getFormattedErrors());
  * }
  * }</pre>
- * 
+ *
  * @see ReferenceValidator for the parent validation coordinator
  * @see StateReferenceValidator for state-related references
  * @see ValidationResult for interpreting validation outcomes
@@ -70,44 +72,45 @@ public class FunctionReferenceValidator {
 
     /**
      * Validates all internal references within the DSL model.
-     * 
-     * <p>This method performs comprehensive validation of references that exist
-     * entirely within the DSL configuration. It ensures functions are well-formed
-     * with valid variable usage, proper function calls, and correct API usage.</p>
-     * 
+     *
+     * <p>This method performs comprehensive validation of references that exist entirely within the
+     * DSL configuration. It ensures functions are well-formed with valid variable usage, proper
+     * function calls, and correct API usage.
+     *
      * <h3>Validation Phases:</h3>
+     *
      * <ol>
-     *   <li><b>Function References</b> - Validates function-to-function calls and checks
-     *       for duplicate function names</li>
-     *   <li><b>Variable References</b> - Ensures all variables are defined before use
-     *       with proper scoping rules</li>
-     *   <li><b>Method Calls</b> - Validates API object methods against known interfaces</li>
+     *   <li><b>Function References</b> - Validates function-to-function calls and checks for
+     *       duplicate function names
+     *   <li><b>Variable References</b> - Ensures all variables are defined before use with proper
+     *       scoping rules
+     *   <li><b>Method Calls</b> - Validates API object methods against known interfaces
      * </ol>
-     * 
+     *
      * <h3>Scope Handling:</h3>
-     * <p>The validator maintains variable scope context while traversing statements,
-     * properly handling:</p>
+     *
+     * <p>The validator maintains variable scope context while traversing statements, properly
+     * handling:
+     *
      * <ul>
-     *   <li>Function parameters</li>
-     *   <li>Local variable declarations</li>
-     *   <li>Block scope in if/else branches</li>
-     *   <li>Loop variable scope in forEach statements</li>
+     *   <li>Function parameters
+     *   <li>Local variable declarations
+     *   <li>Block scope in if/else branches
+     *   <li>Loop variable scope in forEach statements
      * </ul>
-     * 
-     * @param dslModel Parsed DSL model containing automation function definitions.
-     *                 Expected to be a Map with an "automationFunctions" array
-     * @return ValidationResult containing all discovered reference errors with
-     *         appropriate severity levels
+     *
+     * @param dslModel Parsed DSL model containing automation function definitions. Expected to be a
+     *     Map with an "automationFunctions" array
+     * @return ValidationResult containing all discovered reference errors with appropriate severity
+     *     levels
      */
     public ValidationResult validateInternalReferences(Object dslModel) {
         ValidationResult result = new ValidationResult();
 
         if (dslModel == null) {
-            result.addError(new ValidationError(
-                    "Invalid DSL model",
-                    "DSL model is null",
-                    ValidationSeverity.CRITICAL
-            ));
+            result.addError(
+                    new ValidationError(
+                            "Invalid DSL model", "DSL model is null", ValidationSeverity.CRITICAL));
             return result;
         }
 
@@ -125,18 +128,18 @@ public class FunctionReferenceValidator {
 
         } catch (ClassCastException e) {
             logger.error("DSL model is not a valid type", e);
-            result.addError(new ValidationError(
-                    "Invalid DSL model type",
-                    "DSL model could not be processed: " + e.getMessage(),
-                    ValidationSeverity.CRITICAL
-            ));
+            result.addError(
+                    new ValidationError(
+                            "Invalid DSL model type",
+                            "DSL model could not be processed: " + e.getMessage(),
+                            ValidationSeverity.CRITICAL));
         } catch (Exception e) {
             logger.error("Error during function reference validation", e);
-            result.addError(new ValidationError(
-                    "Validation error",
-                    "Error validating function references: " + e.getMessage(),
-                    ValidationSeverity.ERROR
-            ));
+            result.addError(
+                    new ValidationError(
+                            "Validation error",
+                            "Error validating function references: " + e.getMessage(),
+                            ValidationSeverity.ERROR));
         }
 
         return result;
@@ -144,53 +147,55 @@ public class FunctionReferenceValidator {
 
     /**
      * Validates function references from UI buttons in the project configuration.
-     * 
-     * <p>This method ensures that all buttons in the UI configuration reference
-     * valid automation functions and that the parameters they provide match the
-     * function signatures. This cross-model validation is crucial for preventing
-     * runtime errors when users interact with the UI.</p>
-     * 
+     *
+     * <p>This method ensures that all buttons in the UI configuration reference valid automation
+     * functions and that the parameters they provide match the function signatures. This
+     * cross-model validation is crucial for preventing runtime errors when users interact with the
+     * UI.
+     *
      * <h3>Validation Checks:</h3>
+     *
      * <ol>
-     *   <li><b>Function Existence</b> - Button references an actual function in DSL</li>
-     *   <li><b>Parameter Matching</b> - Button provides all required parameters</li>
-     *   <li><b>Parameter Validity</b> - No extraneous parameters are provided</li>
-     *   <li><b>Type Compatibility</b> - Parameter types match (when type info available)</li>
+     *   <li><b>Function Existence</b> - Button references an actual function in DSL
+     *   <li><b>Parameter Matching</b> - Button provides all required parameters
+     *   <li><b>Parameter Validity</b> - No extraneous parameters are provided
+     *   <li><b>Type Compatibility</b> - Parameter types match (when type info available)
      * </ol>
-     * 
+     *
      * <h3>Button-Function Integration:</h3>
-     * <p>Buttons serve as the primary interface between users and automation functions.
-     * A button configuration specifies:</p>
+     *
+     * <p>Buttons serve as the primary interface between users and automation functions. A button
+     * configuration specifies:
+     *
      * <ul>
-     *   <li>The function name to invoke</li>
-     *   <li>Parameters to pass to the function</li>
-     *   <li>UI properties (label, position, etc.)</li>
+     *   <li>The function name to invoke
+     *   <li>Parameters to pass to the function
+     *   <li>UI properties (label, position, etc.)
      * </ul>
-     * 
-     * @param projectModel Project model containing button definitions in the
-     *                     automation.buttons array
-     * @param dslModel DSL model containing the automation functions that buttons
-     *                 reference
-     * @return ValidationResult containing errors for invalid function references
-     *         and warnings for parameter mismatches
+     *
+     * @param projectModel Project model containing button definitions in the automation.buttons
+     *     array
+     * @param dslModel DSL model containing the automation functions that buttons reference
+     * @return ValidationResult containing errors for invalid function references and warnings for
+     *     parameter mismatches
      */
     public ValidationResult validateButtonFunctionReferences(Object projectModel, Object dslModel) {
         ValidationResult result = new ValidationResult();
 
         if (projectModel == null || dslModel == null) {
             if (projectModel == null) {
-                result.addError(new ValidationError(
-                        "Invalid project model",
-                        "Project model is null",
-                        ValidationSeverity.CRITICAL
-                ));
+                result.addError(
+                        new ValidationError(
+                                "Invalid project model",
+                                "Project model is null",
+                                ValidationSeverity.CRITICAL));
             }
             if (dslModel == null) {
-                result.addError(new ValidationError(
-                        "Invalid DSL model",
-                        "DSL model is null",
-                        ValidationSeverity.CRITICAL
-                ));
+                result.addError(
+                        new ValidationError(
+                                "Invalid DSL model",
+                                "DSL model is null",
+                                ValidationSeverity.CRITICAL));
             }
             return result;
         }
@@ -203,27 +208,29 @@ public class FunctionReferenceValidator {
             Set<String> functionNames = extractFunctionNames(dsl);
 
             // Check button references to functions
-            if (project.containsKey("automation") &&
-                    ((Map<String, Object>) project.get("automation")).containsKey("buttons")) {
+            if (project.containsKey("automation")
+                    && ((Map<String, Object>) project.get("automation")).containsKey("buttons")) {
 
-                List<Map<String, Object>> buttons = (List<Map<String, Object>>)
-                        ((Map<String, Object>) project.get("automation")).get("buttons");
+                List<Map<String, Object>> buttons =
+                        (List<Map<String, Object>>)
+                                ((Map<String, Object>) project.get("automation")).get("buttons");
 
                 for (Map<String, Object> button : buttons) {
-                    String buttonId = button.containsKey("id")
-                            ? (String) button.get("id")
-                            : "unknown";
+                    String buttonId =
+                            button.containsKey("id") ? (String) button.get("id") : "unknown";
 
                     if (button.containsKey("functionName")) {
                         String functionName = (String) button.get("functionName");
 
                         if (!functionNames.contains(functionName)) {
-                            result.addError(new ValidationError(
-                                    "Invalid function reference",
-                                    String.format("Button '%s' references non-existent function: %s",
-                                            buttonId, functionName),
-                                    ValidationSeverity.ERROR
-                            ));
+                            result.addError(
+                                    new ValidationError(
+                                            "Invalid function reference",
+                                            String.format(
+                                                    "Button '%s' references non-existent function:"
+                                                            + " %s",
+                                                    buttonId, functionName),
+                                            ValidationSeverity.ERROR));
                         }
 
                         // Check parameter compatibility
@@ -233,8 +240,7 @@ public class FunctionReferenceValidator {
                                     functionName,
                                     dsl,
                                     buttonId,
-                                    result
-                            );
+                                    result);
                         }
                     }
                 }
@@ -242,18 +248,18 @@ public class FunctionReferenceValidator {
 
         } catch (ClassCastException e) {
             logger.error("Model is not a valid type", e);
-            result.addError(new ValidationError(
-                    "Invalid model type",
-                    "Model could not be processed: " + e.getMessage(),
-                    ValidationSeverity.CRITICAL
-            ));
+            result.addError(
+                    new ValidationError(
+                            "Invalid model type",
+                            "Model could not be processed: " + e.getMessage(),
+                            ValidationSeverity.CRITICAL));
         } catch (Exception e) {
             logger.error("Error during button function reference validation", e);
-            result.addError(new ValidationError(
-                    "Validation error",
-                    "Error validating button function references: " + e.getMessage(),
-                    ValidationSeverity.ERROR
-            ));
+            result.addError(
+                    new ValidationError(
+                            "Validation error",
+                            "Error validating button function references: " + e.getMessage(),
+                            ValidationSeverity.ERROR));
         }
 
         return result;
@@ -269,7 +275,8 @@ public class FunctionReferenceValidator {
         Set<String> functionNames = new HashSet<>();
 
         if (dsl.containsKey("automationFunctions")) {
-            List<Map<String, Object>> functions = (List<Map<String, Object>>) dsl.get("automationFunctions");
+            List<Map<String, Object>> functions =
+                    (List<Map<String, Object>>) dsl.get("automationFunctions");
 
             for (Map<String, Object> function : functions) {
                 if (function.containsKey("name")) {
@@ -301,13 +308,15 @@ public class FunctionReferenceValidator {
             return;
         }
 
-        List<Map<String, Object>> functions = (List<Map<String, Object>>) dsl.get("automationFunctions");
+        List<Map<String, Object>> functions =
+                (List<Map<String, Object>>) dsl.get("automationFunctions");
 
         for (Map<String, Object> function : functions) {
             if (function.containsKey("name") && function.get("name").equals(functionName)) {
                 // Found the function, check parameters
                 if (function.containsKey("parameters")) {
-                    List<Map<String, Object>> functionParams = (List<Map<String, Object>>) function.get("parameters");
+                    List<Map<String, Object>> functionParams =
+                            (List<Map<String, Object>>) function.get("parameters");
                     Set<String> requiredParams = new HashSet<>();
 
                     for (Map<String, Object> param : functionParams) {
@@ -317,12 +326,14 @@ public class FunctionReferenceValidator {
 
                             // Check if required parameter is provided
                             if (!buttonParams.containsKey(paramName)) {
-                                result.addError(new ValidationError(
-                                        "Missing parameter",
-                                        String.format("Button '%s' is missing required parameter '%s' for function '%s'",
-                                                buttonId, paramName, functionName),
-                                        ValidationSeverity.WARNING
-                                ));
+                                result.addError(
+                                        new ValidationError(
+                                                "Missing parameter",
+                                                String.format(
+                                                        "Button '%s' is missing required parameter"
+                                                                + " '%s' for function '%s'",
+                                                        buttonId, paramName, functionName),
+                                                ValidationSeverity.WARNING));
                             }
                         }
                     }
@@ -330,22 +341,26 @@ public class FunctionReferenceValidator {
                     // Check for extraneous parameters
                     for (String paramName : buttonParams.keySet()) {
                         if (!requiredParams.contains(paramName)) {
-                            result.addError(new ValidationError(
-                                    "Unknown parameter",
-                                    String.format("Button '%s' provides unknown parameter '%s' for function '%s'",
-                                            buttonId, paramName, functionName),
-                                    ValidationSeverity.WARNING
-                            ));
+                            result.addError(
+                                    new ValidationError(
+                                            "Unknown parameter",
+                                            String.format(
+                                                    "Button '%s' provides unknown parameter '%s'"
+                                                            + " for function '%s'",
+                                                    buttonId, paramName, functionName),
+                                            ValidationSeverity.WARNING));
                         }
                     }
                 } else if (!buttonParams.isEmpty()) {
                     // Function doesn't take parameters but button provides them
-                    result.addError(new ValidationError(
-                            "Unexpected parameters",
-                            String.format("Button '%s' provides parameters for function '%s' which doesn't accept any",
-                                    buttonId, functionName),
-                            ValidationSeverity.WARNING
-                    ));
+                    result.addError(
+                            new ValidationError(
+                                    "Unexpected parameters",
+                                    String.format(
+                                            "Button '%s' provides parameters for function '%s'"
+                                                    + " which doesn't accept any",
+                                            buttonId, functionName),
+                                    ValidationSeverity.WARNING));
                 }
 
                 break;
@@ -355,29 +370,32 @@ public class FunctionReferenceValidator {
 
     /**
      * Validates function-to-function references and name uniqueness.
-     * 
-     * <p>This method ensures that all function calls within the DSL reference
-     * valid functions and that function names are unique. Duplicate function
-     * names would cause ambiguity about which function to execute.</p>
-     * 
+     *
+     * <p>This method ensures that all function calls within the DSL reference valid functions and
+     * that function names are unique. Duplicate function names would cause ambiguity about which
+     * function to execute.
+     *
      * <h3>Validation Process:</h3>
+     *
      * <ol>
-     *   <li><b>Name Collection</b> - First pass collects all function names and
-     *       checks for duplicates</li>
-     *   <li><b>Call Validation</b> - Second pass validates all function calls
-     *       against the collected names</li>
+     *   <li><b>Name Collection</b> - First pass collects all function names and checks for
+     *       duplicates
+     *   <li><b>Call Validation</b> - Second pass validates all function calls against the collected
+     *       names
      * </ol>
-     * 
+     *
      * <h3>Function Call Patterns:</h3>
-     * <p>Function calls in the DSL appear as method calls with no object:</p>
+     *
+     * <p>Function calls in the DSL appear as method calls with no object:
+     *
      * <pre>{@code
      * // Direct function call
      * functionName(param1, param2);
-     * 
+     *
      * // Function call in expression
      * var result = helperFunction();
      * }</pre>
-     * 
+     *
      * @param dsl DSL model containing function definitions
      * @param result ValidationResult to accumulate function reference errors
      */
@@ -386,7 +404,8 @@ public class FunctionReferenceValidator {
             return;
         }
 
-        List<Map<String, Object>> functions = (List<Map<String, Object>>) dsl.get("automationFunctions");
+        List<Map<String, Object>> functions =
+                (List<Map<String, Object>>) dsl.get("automationFunctions");
         Set<String> functionNames = new HashSet<>();
 
         // First pass: collect function names
@@ -395,11 +414,12 @@ public class FunctionReferenceValidator {
                 String name = (String) function.get("name");
 
                 if (functionNames.contains(name)) {
-                    result.addError(new ValidationError(
-                            "Duplicate function name",
-                            String.format("Function name '%s' is defined multiple times", name),
-                            ValidationSeverity.ERROR
-                    ));
+                    result.addError(
+                            new ValidationError(
+                                    "Duplicate function name",
+                                    String.format(
+                                            "Function name '%s' is defined multiple times", name),
+                                    ValidationSeverity.ERROR));
                 } else {
                     functionNames.add(name);
                 }
@@ -408,46 +428,46 @@ public class FunctionReferenceValidator {
 
         // Second pass: validate function calls
         for (Map<String, Object> function : functions) {
-            String functionName = function.containsKey("name")
-                    ? (String) function.get("name")
-                    : "unknown";
+            String functionName =
+                    function.containsKey("name") ? (String) function.get("name") : "unknown";
 
             if (function.containsKey("statements")) {
                 validateStatementsForFunctionCalls(
                         (List<Map<String, Object>>) function.get("statements"),
                         functionNames,
                         functionName,
-                        result
-                );
+                        result);
             }
         }
     }
 
     /**
      * Validates variable references with proper scope tracking.
-     * 
-     * <p>This method performs static analysis of variable usage within functions,
-     * ensuring all variables are defined before use and respecting scope boundaries.
-     * This prevents runtime "undefined variable" errors.</p>
-     * 
+     *
+     * <p>This method performs static analysis of variable usage within functions, ensuring all
+     * variables are defined before use and respecting scope boundaries. This prevents runtime
+     * "undefined variable" errors.
+     *
      * <h3>Scope Rules Enforced:</h3>
+     *
      * <ul>
-     *   <li><b>Function Parameters</b> - Available throughout function body</li>
-     *   <li><b>Local Variables</b> - Available after declaration</li>
-     *   <li><b>Block Scope</b> - Variables in if/else branches have limited scope</li>
-     *   <li><b>Loop Variables</b> - forEach variables only available in loop body</li>
+     *   <li><b>Function Parameters</b> - Available throughout function body
+     *   <li><b>Local Variables</b> - Available after declaration
+     *   <li><b>Block Scope</b> - Variables in if/else branches have limited scope
+     *   <li><b>Loop Variables</b> - forEach variables only available in loop body
      * </ul>
-     * 
+     *
      * <h3>Variable Definition Tracking:</h3>
-     * <p>The validator maintains a set of defined variables while traversing
-     * statements, adding variables as they're declared and checking references
-     * against this set. Special handling for:</p>
+     *
+     * <p>The validator maintains a set of defined variables while traversing statements, adding
+     * variables as they're declared and checking references against this set. Special handling for:
+     *
      * <ul>
-     *   <li>Variables defined in both if/else branches (available after)</li>
-     *   <li>Loop variables (scoped to loop body only)</li>
-     *   <li>Function parameters (available immediately)</li>
+     *   <li>Variables defined in both if/else branches (available after)
+     *   <li>Loop variables (scoped to loop body only)
+     *   <li>Function parameters (available immediately)
      * </ul>
-     * 
+     *
      * @param dsl DSL model containing function definitions to validate
      * @param result ValidationResult to accumulate undefined variable errors
      */
@@ -456,19 +476,20 @@ public class FunctionReferenceValidator {
             return;
         }
 
-        List<Map<String, Object>> functions = (List<Map<String, Object>>) dsl.get("automationFunctions");
+        List<Map<String, Object>> functions =
+                (List<Map<String, Object>>) dsl.get("automationFunctions");
 
         for (Map<String, Object> function : functions) {
-            String functionName = function.containsKey("name")
-                    ? (String) function.get("name")
-                    : "unknown";
+            String functionName =
+                    function.containsKey("name") ? (String) function.get("name") : "unknown";
 
             // Create a set to track defined variables for this function
             Set<String> definedVariables = new HashSet<>();
 
             // Add function parameters to defined variables
             if (function.containsKey("parameters")) {
-                List<Map<String, Object>> params = (List<Map<String, Object>>) function.get("parameters");
+                List<Map<String, Object>> params =
+                        (List<Map<String, Object>>) function.get("parameters");
 
                 for (Map<String, Object> param : params) {
                     if (param.containsKey("name")) {
@@ -483,38 +504,39 @@ public class FunctionReferenceValidator {
                         (List<Map<String, Object>>) function.get("statements"),
                         definedVariables,
                         functionName,
-                        result
-                );
+                        result);
             }
         }
     }
 
     /**
      * Validates API method calls for correct object and method names.
-     * 
-     * <p>This method ensures that all API method calls use valid objects and
-     * methods from the Brobot automation API. Invalid API calls would cause
-     * runtime errors, so catching them during validation is crucial.</p>
-     * 
+     *
+     * <p>This method ensures that all API method calls use valid objects and methods from the
+     * Brobot automation API. Invalid API calls would cause runtime errors, so catching them during
+     * validation is crucial.
+     *
      * <h3>Known API Objects:</h3>
+     *
      * <ul>
-     *   <li><b>action</b> - Core automation actions (find, click, type, perform)</li>
-     *   <li><b>stateTransitionsManagement</b> - State control (openState, isStateActive)</li>
+     *   <li><b>action</b> - Core automation actions (find, click, type, perform)
+     *   <li><b>stateTransitionsManagement</b> - State control (openState, isStateActive)
      * </ul>
-     * 
+     *
      * <h3>Validation Approach:</h3>
-     * <p>The validator maintains a map of valid API objects and their methods.
-     * This is a simplified approach - in production, this would be generated
-     * from API documentation or type definitions.</p>
-     * 
+     *
+     * <p>The validator maintains a map of valid API objects and their methods. This is a simplified
+     * approach - in production, this would be generated from API documentation or type definitions.
+     *
      * <h3>Future Enhancements:</h3>
+     *
      * <ul>
-     *   <li>Dynamic API discovery from classpath</li>
-     *   <li>Parameter count and type validation</li>
-     *   <li>Return type checking</li>
-     *   <li>Deprecation warnings</li>
+     *   <li>Dynamic API discovery from classpath
+     *   <li>Parameter count and type validation
+     *   <li>Return type checking
+     *   <li>Deprecation warnings
      * </ul>
-     * 
+     *
      * @param dsl DSL model containing functions with API method calls
      * @param result ValidationResult to accumulate invalid method call errors
      */
@@ -524,25 +546,27 @@ public class FunctionReferenceValidator {
         }
 
         // Define valid API objects and their methods
-        // This is a simplistic approach - in a real implementation, this would be more sophisticated
+        // This is a simplistic approach - in a real implementation, this would be more
+        // sophisticated
         Map<String, Set<String>> apiObjects = new HashMap<>();
         apiObjects.put("action", new HashSet<>(Arrays.asList("perform", "find", "click", "type")));
-        apiObjects.put("stateTransitionsManagement", new HashSet<>(Arrays.asList("openState", "isStateActive")));
+        apiObjects.put(
+                "stateTransitionsManagement",
+                new HashSet<>(Arrays.asList("openState", "isStateActive")));
 
-        List<Map<String, Object>> functions = (List<Map<String, Object>>) dsl.get("automationFunctions");
+        List<Map<String, Object>> functions =
+                (List<Map<String, Object>>) dsl.get("automationFunctions");
 
         for (Map<String, Object> function : functions) {
-            String functionName = function.containsKey("name")
-                    ? (String) function.get("name")
-                    : "unknown";
+            String functionName =
+                    function.containsKey("name") ? (String) function.get("name") : "unknown";
 
             if (function.containsKey("statements")) {
                 validateStatementsForMethodCalls(
                         (List<Map<String, Object>>) function.get("statements"),
                         apiObjects,
                         functionName,
-                        result
-                );
+                        result);
             }
         }
     }
@@ -562,25 +586,28 @@ public class FunctionReferenceValidator {
             ValidationResult result) {
 
         for (Map<String, Object> statement : statements) {
-            String statementType = statement.containsKey("statementType")
-                    ? (String) statement.get("statementType")
-                    : "";
+            String statementType =
+                    statement.containsKey("statementType")
+                            ? (String) statement.get("statementType")
+                            : "";
 
             switch (statementType) {
                 case "methodCall":
                     // Check if it's a function call
-                    if (statement.containsKey("object") && statement.get("object") == null &&
-                            statement.containsKey("method")) {
+                    if (statement.containsKey("object")
+                            && statement.get("object") == null
+                            && statement.containsKey("method")) {
 
                         String calledFunction = (String) statement.get("method");
 
                         if (!validFunctions.contains(calledFunction)) {
-                            result.addError(new ValidationError(
-                                    "Invalid function call",
-                                    String.format("Function '%s' calls non-existent function: %s",
-                                            functionName, calledFunction),
-                                    ValidationSeverity.ERROR
-                            ));
+                            result.addError(
+                                    new ValidationError(
+                                            "Invalid function call",
+                                            String.format(
+                                                    "Function '%s' calls non-existent function: %s",
+                                                    functionName, calledFunction),
+                                            ValidationSeverity.ERROR));
                         }
                     }
                     break;
@@ -592,8 +619,7 @@ public class FunctionReferenceValidator {
                                 (List<Map<String, Object>>) statement.get("thenStatements"),
                                 validFunctions,
                                 functionName,
-                                result
-                        );
+                                result);
                     }
 
                     if (statement.containsKey("elseStatements")) {
@@ -601,8 +627,7 @@ public class FunctionReferenceValidator {
                                 (List<Map<String, Object>>) statement.get("elseStatements"),
                                 validFunctions,
                                 functionName,
-                                result
-                        );
+                                result);
                     }
                     break;
 
@@ -613,8 +638,7 @@ public class FunctionReferenceValidator {
                                 (List<Map<String, Object>>) statement.get("statements"),
                                 validFunctions,
                                 functionName,
-                                result
-                        );
+                                result);
                     }
                     break;
             }
@@ -636,9 +660,10 @@ public class FunctionReferenceValidator {
             ValidationResult result) {
 
         for (Map<String, Object> statement : statements) {
-            String statementType = statement.containsKey("statementType")
-                    ? (String) statement.get("statementType")
-                    : "";
+            String statementType =
+                    statement.containsKey("statementType")
+                            ? (String) statement.get("statementType")
+                            : "";
 
             switch (statementType) {
                 case "variableDeclaration":
@@ -653,8 +678,7 @@ public class FunctionReferenceValidator {
                                 (Map<String, Object>) statement.get("value"),
                                 definedVariables,
                                 functionName,
-                                result
-                        );
+                                result);
                     }
                     break;
 
@@ -664,12 +688,14 @@ public class FunctionReferenceValidator {
                         String variable = (String) statement.get("variable");
 
                         if (!definedVariables.contains(variable)) {
-                            result.addError(new ValidationError(
-                                    "Undefined variable",
-                                    String.format("Function '%s' references undefined variable: %s",
-                                            functionName, variable),
-                                    ValidationSeverity.ERROR
-                            ));
+                            result.addError(
+                                    new ValidationError(
+                                            "Undefined variable",
+                                            String.format(
+                                                    "Function '%s' references undefined variable:"
+                                                            + " %s",
+                                                    functionName, variable),
+                                            ValidationSeverity.ERROR));
                         }
                     }
 
@@ -679,18 +705,19 @@ public class FunctionReferenceValidator {
                                 (Map<String, Object>) statement.get("value"),
                                 definedVariables,
                                 functionName,
-                                result
-                        );
+                                result);
                     }
                     break;
 
                 case "methodCall":
                     // Check arguments
                     if (statement.containsKey("arguments")) {
-                        List<Map<String, Object>> args = (List<Map<String, Object>>) statement.get("arguments");
+                        List<Map<String, Object>> args =
+                                (List<Map<String, Object>>) statement.get("arguments");
 
                         for (Map<String, Object> arg : args) {
-                            validateExpressionForVariableReferences(arg, definedVariables, functionName, result);
+                            validateExpressionForVariableReferences(
+                                    arg, definedVariables, functionName, result);
                         }
                     }
                     break;
@@ -702,8 +729,7 @@ public class FunctionReferenceValidator {
                                 (Map<String, Object>) statement.get("condition"),
                                 definedVariables,
                                 functionName,
-                                result
-                        );
+                                result);
                     }
 
                     // Create a copy of defined variables for each branch
@@ -716,8 +742,7 @@ public class FunctionReferenceValidator {
                                 (List<Map<String, Object>>) statement.get("thenStatements"),
                                 thenVars,
                                 functionName,
-                                result
-                        );
+                                result);
                     }
 
                     // Check else branch
@@ -726,8 +751,7 @@ public class FunctionReferenceValidator {
                                 (List<Map<String, Object>>) statement.get("elseStatements"),
                                 elseVars,
                                 functionName,
-                                result
-                        );
+                                result);
                     }
 
                     // Add variables that are defined in both branches to the outer scope
@@ -750,10 +774,10 @@ public class FunctionReferenceValidator {
                     if (statement.containsKey("collection")) {
                         validateExpressionForVariableReferences(
                                 (Map<String, Object>) statement.get("collection"),
-                                definedVariables, // Not loopVars, as loop variable isn't defined yet
+                                definedVariables, // Not loopVars, as loop variable isn't defined
+                                // yet
                                 functionName,
-                                result
-                        );
+                                result);
                     }
 
                     // Check loop body
@@ -762,8 +786,7 @@ public class FunctionReferenceValidator {
                                 (List<Map<String, Object>>) statement.get("statements"),
                                 loopVars,
                                 functionName,
-                                result
-                        );
+                                result);
                     }
                     break;
 
@@ -774,8 +797,7 @@ public class FunctionReferenceValidator {
                                 (Map<String, Object>) statement.get("value"),
                                 definedVariables,
                                 functionName,
-                                result
-                        );
+                                result);
                     }
                     break;
             }
@@ -796,9 +818,10 @@ public class FunctionReferenceValidator {
             String functionName,
             ValidationResult result) {
 
-        String expressionType = expression.containsKey("expressionType")
-                ? (String) expression.get("expressionType")
-                : "";
+        String expressionType =
+                expression.containsKey("expressionType")
+                        ? (String) expression.get("expressionType")
+                        : "";
 
         switch (expressionType) {
             case "variable":
@@ -806,12 +829,13 @@ public class FunctionReferenceValidator {
                     String varName = (String) expression.get("name");
 
                     if (!definedVariables.contains(varName)) {
-                        result.addError(new ValidationError(
-                                "Undefined variable",
-                                String.format("Function '%s' references undefined variable: %s",
-                                        functionName, varName),
-                                ValidationSeverity.ERROR
-                        ));
+                        result.addError(
+                                new ValidationError(
+                                        "Undefined variable",
+                                        String.format(
+                                                "Function '%s' references undefined variable: %s",
+                                                functionName, varName),
+                                        ValidationSeverity.ERROR));
                     }
                 }
                 break;
@@ -819,10 +843,12 @@ public class FunctionReferenceValidator {
             case "methodCall":
                 // Check arguments
                 if (expression.containsKey("arguments")) {
-                    List<Map<String, Object>> args = (List<Map<String, Object>>) expression.get("arguments");
+                    List<Map<String, Object>> args =
+                            (List<Map<String, Object>>) expression.get("arguments");
 
                     for (Map<String, Object> arg : args) {
-                        validateExpressionForVariableReferences(arg, definedVariables, functionName, result);
+                        validateExpressionForVariableReferences(
+                                arg, definedVariables, functionName, result);
                     }
                 }
                 break;
@@ -834,8 +860,7 @@ public class FunctionReferenceValidator {
                             (Map<String, Object>) expression.get("left"),
                             definedVariables,
                             functionName,
-                            result
-                    );
+                            result);
                 }
 
                 if (expression.containsKey("right")) {
@@ -843,27 +868,24 @@ public class FunctionReferenceValidator {
                             (Map<String, Object>) expression.get("right"),
                             definedVariables,
                             functionName,
-                            result
-                    );
+                            result);
                 }
                 break;
 
             case "builder":
                 // Check method arguments
                 if (expression.containsKey("methods")) {
-                    List<Map<String, Object>> methods = (List<Map<String, Object>>) expression.get("methods");
+                    List<Map<String, Object>> methods =
+                            (List<Map<String, Object>>) expression.get("methods");
 
                     for (Map<String, Object> method : methods) {
                         if (method.containsKey("arguments")) {
-                            List<Map<String, Object>> args = (List<Map<String, Object>>) method.get("arguments");
+                            List<Map<String, Object>> args =
+                                    (List<Map<String, Object>>) method.get("arguments");
 
                             for (Map<String, Object> arg : args) {
                                 validateExpressionForVariableReferences(
-                                        arg,
-                                        definedVariables,
-                                        functionName,
-                                        result
-                                );
+                                        arg, definedVariables, functionName, result);
                             }
                         }
                     }
@@ -887,9 +909,10 @@ public class FunctionReferenceValidator {
             ValidationResult result) {
 
         for (Map<String, Object> statement : statements) {
-            String statementType = statement.containsKey("statementType")
-                    ? (String) statement.get("statementType")
-                    : "";
+            String statementType =
+                    statement.containsKey("statementType")
+                            ? (String) statement.get("statementType")
+                            : "";
 
             switch (statementType) {
                 case "methodCall":
@@ -898,16 +921,18 @@ public class FunctionReferenceValidator {
 
                 case "if":
                     // Check condition
-                    if (statement.containsKey("condition") &&
-                            ((Map<String, Object>) statement.get("condition")).containsKey("expressionType") &&
-                            ((Map<String, Object>) statement.get("condition")).get("expressionType").equals("methodCall")) {
+                    if (statement.containsKey("condition")
+                            && ((Map<String, Object>) statement.get("condition"))
+                                    .containsKey("expressionType")
+                            && ((Map<String, Object>) statement.get("condition"))
+                                    .get("expressionType")
+                                    .equals("methodCall")) {
 
                         validateMethodCall(
                                 (Map<String, Object>) statement.get("condition"),
                                 apiObjects,
                                 functionName,
-                                result
-                        );
+                                result);
                     }
 
                     // Check then and else branches
@@ -916,8 +941,7 @@ public class FunctionReferenceValidator {
                                 (List<Map<String, Object>>) statement.get("thenStatements"),
                                 apiObjects,
                                 functionName,
-                                result
-                        );
+                                result);
                     }
 
                     if (statement.containsKey("elseStatements")) {
@@ -925,23 +949,24 @@ public class FunctionReferenceValidator {
                                 (List<Map<String, Object>>) statement.get("elseStatements"),
                                 apiObjects,
                                 functionName,
-                                result
-                        );
+                                result);
                     }
                     break;
 
                 case "forEach":
                     // Check collection
-                    if (statement.containsKey("collection") &&
-                            ((Map<String, Object>) statement.get("collection")).containsKey("expressionType") &&
-                            ((Map<String, Object>) statement.get("collection")).get("expressionType").equals("methodCall")) {
+                    if (statement.containsKey("collection")
+                            && ((Map<String, Object>) statement.get("collection"))
+                                    .containsKey("expressionType")
+                            && ((Map<String, Object>) statement.get("collection"))
+                                    .get("expressionType")
+                                    .equals("methodCall")) {
 
                         validateMethodCall(
                                 (Map<String, Object>) statement.get("collection"),
                                 apiObjects,
                                 functionName,
-                                result
-                        );
+                                result);
                     }
 
                     // Check body statements
@@ -950,39 +975,42 @@ public class FunctionReferenceValidator {
                                 (List<Map<String, Object>>) statement.get("statements"),
                                 apiObjects,
                                 functionName,
-                                result
-                        );
+                                result);
                     }
                     break;
 
                 case "variableDeclaration":
                 case "assignment":
                     // Check value expression
-                    if (statement.containsKey("value") &&
-                            ((Map<String, Object>) statement.get("value")).containsKey("expressionType") &&
-                            ((Map<String, Object>) statement.get("value")).get("expressionType").equals("methodCall")) {
+                    if (statement.containsKey("value")
+                            && ((Map<String, Object>) statement.get("value"))
+                                    .containsKey("expressionType")
+                            && ((Map<String, Object>) statement.get("value"))
+                                    .get("expressionType")
+                                    .equals("methodCall")) {
 
                         validateMethodCall(
                                 (Map<String, Object>) statement.get("value"),
                                 apiObjects,
                                 functionName,
-                                result
-                        );
+                                result);
                     }
                     break;
 
                 case "return":
                     // Check return value
-                    if (statement.containsKey("value") &&
-                            ((Map<String, Object>) statement.get("value")).containsKey("expressionType") &&
-                            ((Map<String, Object>) statement.get("value")).get("expressionType").equals("methodCall")) {
+                    if (statement.containsKey("value")
+                            && ((Map<String, Object>) statement.get("value"))
+                                    .containsKey("expressionType")
+                            && ((Map<String, Object>) statement.get("value"))
+                                    .get("expressionType")
+                                    .equals("methodCall")) {
 
                         validateMethodCall(
                                 (Map<String, Object>) statement.get("value"),
                                 apiObjects,
                                 functionName,
-                                result
-                        );
+                                result);
                     }
                     break;
             }
@@ -1016,22 +1044,26 @@ public class FunctionReferenceValidator {
             if (apiObjects.containsKey(object)) {
                 // Check if method is valid for this object
                 if (!apiObjects.get(object).contains(method)) {
-                    result.addError(new ValidationError(
-                            "Invalid method call",
-                            String.format("Function '%s' calls invalid method '%s' on object '%s'",
-                                    functionName, method, object),
-                            ValidationSeverity.ERROR
-                    ));
+                    result.addError(
+                            new ValidationError(
+                                    "Invalid method call",
+                                    String.format(
+                                            "Function '%s' calls invalid method '%s' on object"
+                                                    + " '%s'",
+                                            functionName, method, object),
+                                    ValidationSeverity.ERROR));
                 }
             }
         }
 
         // Recursively check arguments for method calls
         if (methodCallObj.containsKey("arguments")) {
-            List<Map<String, Object>> args = (List<Map<String, Object>>) methodCallObj.get("arguments");
+            List<Map<String, Object>> args =
+                    (List<Map<String, Object>>) methodCallObj.get("arguments");
 
             for (Map<String, Object> arg : args) {
-                if (arg.containsKey("expressionType") && arg.get("expressionType").equals("methodCall")) {
+                if (arg.containsKey("expressionType")
+                        && arg.get("expressionType").equals("methodCall")) {
                     validateMethodCall(arg, apiObjects, functionName, result);
                 }
             }

@@ -1,24 +1,22 @@
 package io.github.jspinak.brobot.action;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+
 import io.github.jspinak.brobot.model.element.Location;
-import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.state.StateLocation;
 import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.model.state.StateString;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-/**
- * Simple JSON serialization test for ObjectCollection without Spring context.
- */
+/** Simple JSON serialization test for ObjectCollection without Spring context. */
 class ObjectCollectionSimpleJsonTest extends BrobotTestBase {
 
     private ObjectMapper objectMapper;
@@ -30,22 +28,32 @@ class ObjectCollectionSimpleJsonTest extends BrobotTestBase {
         objectMapper = new ObjectMapper();
         // Configure ObjectMapper for Brobot classes
         objectMapper.findAndRegisterModules();
-        
+
         // Create a custom module to handle OpenCV Mat serialization issues
         SimpleModule module = new SimpleModule();
         // Ignore Mat class completely to avoid conflicting setter issues
-        module.addSerializer(org.bytedeco.opencv.opencv_core.Mat.class, new com.fasterxml.jackson.databind.ser.std.ToStringSerializer());
-        module.addDeserializer(org.bytedeco.opencv.opencv_core.Mat.class, new com.fasterxml.jackson.databind.deser.std.FromStringDeserializer<org.bytedeco.opencv.opencv_core.Mat>(org.bytedeco.opencv.opencv_core.Mat.class) {
-            @Override
-            protected org.bytedeco.opencv.opencv_core.Mat _deserialize(String value, com.fasterxml.jackson.databind.DeserializationContext ctxt) {
-                // Return null for Mat deserialization as these fields should be ignored
-                return null;
-            }
-        });
+        module.addSerializer(
+                org.bytedeco.opencv.opencv_core.Mat.class,
+                new com.fasterxml.jackson.databind.ser.std.ToStringSerializer());
+        module.addDeserializer(
+                org.bytedeco.opencv.opencv_core.Mat.class,
+                new com.fasterxml.jackson.databind.deser.std.FromStringDeserializer<
+                        org.bytedeco.opencv.opencv_core.Mat>(
+                        org.bytedeco.opencv.opencv_core.Mat.class) {
+                    @Override
+                    protected org.bytedeco.opencv.opencv_core.Mat _deserialize(
+                            String value,
+                            com.fasterxml.jackson.databind.DeserializationContext ctxt) {
+                        // Return null for Mat deserialization as these fields should be ignored
+                        return null;
+                    }
+                });
         objectMapper.registerModule(module);
-        
+
         // Configure to ignore unknown properties and avoid failures
-        objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.configure(
+                com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+                false);
     }
 
     @Test
@@ -59,7 +67,8 @@ class ObjectCollectionSimpleJsonTest extends BrobotTestBase {
         assertFalse(json.isEmpty());
 
         // Deserialize back to ObjectCollection
-        ObjectCollection deserializedCollection = objectMapper.readValue(json, ObjectCollection.class);
+        ObjectCollection deserializedCollection =
+                objectMapper.readValue(json, ObjectCollection.class);
 
         // Verify the object was correctly deserialized
         assertNotNull(deserializedCollection);
@@ -75,23 +84,25 @@ class ObjectCollectionSimpleJsonTest extends BrobotTestBase {
     @Test
     void testSerializeAndDeserializeWithBasicData() throws Exception {
         // Create an ObjectCollection with various data
-        ObjectCollection collection = new ObjectCollection.Builder()
-                .withLocations(new Location(10, 20), new Location(30, 40))
-                .withRegions(new Region(50, 60, 100, 80))
-                .withStrings("Test String 1", "Test String 2")
-                .build();
+        ObjectCollection collection =
+                new ObjectCollection.Builder()
+                        .withLocations(new Location(10, 20), new Location(30, 40))
+                        .withRegions(new Region(50, 60, 100, 80))
+                        .withStrings("Test String 1", "Test String 2")
+                        .build();
 
         // Serialize to JSON
         String json = objectMapper.writeValueAsString(collection);
         assertNotNull(json);
         assertFalse(json.isEmpty());
-        
+
         // Verify JSON contains expected values
         assertTrue(json.contains("Test String 1"));
         assertTrue(json.contains("Test String 2"));
 
         // Deserialize back to ObjectCollection
-        ObjectCollection deserializedCollection = objectMapper.readValue(json, ObjectCollection.class);
+        ObjectCollection deserializedCollection =
+                objectMapper.readValue(json, ObjectCollection.class);
 
         // Verify the object was correctly deserialized
         assertNotNull(deserializedCollection);
@@ -120,29 +131,32 @@ class ObjectCollectionSimpleJsonTest extends BrobotTestBase {
     @Test
     void testSerializeAndDeserializeWithStateObjects() throws Exception {
         // Create a comprehensive ObjectCollection using state objects
-        ObjectCollection collection = new ObjectCollection.Builder()
-                // Add locations
-                .withLocations(new StateLocation.Builder()
-                        .setOwnerStateName("LocationState")
-                        .setName("TestLocation")
-                        .setLocation(new Location(100, 200))
-                        .build())
+        ObjectCollection collection =
+                new ObjectCollection.Builder()
+                        // Add locations
+                        .withLocations(
+                                new StateLocation.Builder()
+                                        .setOwnerStateName("LocationState")
+                                        .setName("TestLocation")
+                                        .setLocation(new Location(100, 200))
+                                        .build())
 
-                // Add regions
-                .withRegions(new StateRegion.Builder()
-                        .setOwnerStateName("RegionState")
-                        .setName("TestRegion")
-                        .setSearchRegion(new Region(300, 400, 200, 150))
-                        .build())
+                        // Add regions
+                        .withRegions(
+                                new StateRegion.Builder()
+                                        .setOwnerStateName("RegionState")
+                                        .setName("TestRegion")
+                                        .setSearchRegion(new Region(300, 400, 200, 150))
+                                        .build())
 
-                // Add strings
-                .withStrings(new StateString.Builder()
-                        .setOwnerStateName("StringState")
-                        .setName("TestString")
-                        .setString("Lorem ipsum")
-                        .build())
-
-                .build();
+                        // Add strings
+                        .withStrings(
+                                new StateString.Builder()
+                                        .setOwnerStateName("StringState")
+                                        .setName("TestString")
+                                        .setString("Lorem ipsum")
+                                        .build())
+                        .build();
 
         // Serialize to JSON
         String json = objectMapper.writeValueAsString(collection);
@@ -159,7 +173,8 @@ class ObjectCollectionSimpleJsonTest extends BrobotTestBase {
         assertTrue(json.contains("Lorem ipsum"));
 
         // Deserialize back to ObjectCollection
-        ObjectCollection deserializedCollection = objectMapper.readValue(json, ObjectCollection.class);
+        ObjectCollection deserializedCollection =
+                objectMapper.readValue(json, ObjectCollection.class);
 
         // Verify the object was correctly deserialized
         assertNotNull(deserializedCollection);
@@ -167,15 +182,19 @@ class ObjectCollectionSimpleJsonTest extends BrobotTestBase {
 
         // Verify all parts of the collection
         assertEquals(1, deserializedCollection.getStateLocations().size());
-        assertEquals("LocationState", deserializedCollection.getStateLocations().get(0).getOwnerStateName());
+        assertEquals(
+                "LocationState",
+                deserializedCollection.getStateLocations().get(0).getOwnerStateName());
         assertEquals("TestLocation", deserializedCollection.getStateLocations().get(0).getName());
 
         assertEquals(1, deserializedCollection.getStateRegions().size());
-        assertEquals("RegionState", deserializedCollection.getStateRegions().get(0).getOwnerStateName());
+        assertEquals(
+                "RegionState", deserializedCollection.getStateRegions().get(0).getOwnerStateName());
         assertEquals("TestRegion", deserializedCollection.getStateRegions().get(0).getName());
 
         assertEquals(1, deserializedCollection.getStateStrings().size());
-        assertEquals("StringState", deserializedCollection.getStateStrings().get(0).getOwnerStateName());
+        assertEquals(
+                "StringState", deserializedCollection.getStateStrings().get(0).getOwnerStateName());
         assertEquals("TestString", deserializedCollection.getStateStrings().get(0).getName());
         assertEquals("Lorem ipsum", deserializedCollection.getStateStrings().get(0).getString());
     }
@@ -185,11 +204,11 @@ class ObjectCollectionSimpleJsonTest extends BrobotTestBase {
         // Create ObjectCollection with some null fields
         ObjectCollection collection = new ObjectCollection.Builder().build();
         collection.getStateImages().add(new StateImage());
-        
+
         // Serialize
         String json = objectMapper.writeValueAsString(collection);
         assertNotNull(json);
-        
+
         // Deserialize
         ObjectCollection deserialized = objectMapper.readValue(json, ObjectCollection.class);
         assertNotNull(deserialized);

@@ -22,13 +22,13 @@ brobot:
       # Lower thresholds for performance warnings
       performance-warn-threshold: 500
       performance-error-threshold: 2000
-  
+
   # Visual highlighting - all features enabled
   highlight:
     enabled: true
     auto-highlight-finds: true
     auto-highlight-search-regions: true
-    
+
     # Find highlighting - bright green with flash
     find:
       color: "#00FF00"
@@ -37,7 +37,7 @@ brobot:
       flash: true
       flash-count: 2
       flash-interval: 300
-    
+
     # Search region highlighting - blue with dimensions
     search-region:
       color: "#0066FF"
@@ -46,14 +46,14 @@ brobot:
       opacity: 0.3
       filled: true
       show-dimensions: true
-    
+
     # Error highlighting - red with cross mark
     error:
       enabled: true
       color: "#FF0000"
       duration: 4.0
       show-cross-mark: true
-    
+
     # Click highlighting - yellow with ripple
     click:
       enabled: true
@@ -61,7 +61,7 @@ brobot:
       duration: 1.0
       radius: 25
       ripple-effect: true
-  
+
   # GUI access monitoring - verbose with solutions
   gui-access:
     report-problems: true

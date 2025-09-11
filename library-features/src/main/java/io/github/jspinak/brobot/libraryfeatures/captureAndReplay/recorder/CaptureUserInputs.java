@@ -1,26 +1,25 @@
 package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.recorder;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.apache.commons.lang3.StringUtils;
+import org.sikuli.basics.Settings;
+import org.springframework.stereotype.Component;
+import org.w3c.dom.Document;
+
 import com.github.kwhat.jnativehook.*;
 import com.github.kwhat.jnativehook.keyboard.*;
 import com.github.kwhat.jnativehook.mouse.*;
 
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
-//import org.jnativehook.GlobalScreen;
-//import org.jnativehook.NativeHookException;
-//import org.jnativehook.keyboard.NativeKeyEvent;
-//import org.jnativehook.keyboard.NativeKeyListener;
-//import org.jnativehook.mouse.*;
-import org.sikuli.basics.Settings;
-import org.springframework.stereotype.Component;
-import org.w3c.dom.Document;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 @Component
-public class CaptureUserInputs implements NativeKeyListener, NativeMouseListener, NativeMouseMotionListener, NativeMouseWheelListener {
+public class CaptureUserInputs
+        implements NativeKeyListener,
+                NativeMouseListener,
+                NativeMouseMotionListener,
+                NativeMouseWheelListener {
 
     private RecordInputs recordInputs;
 
@@ -28,9 +27,7 @@ public class CaptureUserInputs implements NativeKeyListener, NativeMouseListener
         this.recordInputs = recordInputs;
     }
 
-    /**
-     * Setting the level to OFF disables console logs.
-     */
+    /** Setting the level to OFF disables console logs. */
     private void registerNativeHook() {
         try {
             Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
@@ -43,9 +40,8 @@ public class CaptureUserInputs implements NativeKeyListener, NativeMouseListener
     }
 
     /**
-     * The NativeHook in Windows blocks some special keys when registered.
-     * Unregistering it on Linux terminates the JVM.
-     * Leaving the hook registered on Mac and Linux is not a problem.
+     * The NativeHook in Windows blocks some special keys when registered. Unregistering it on Linux
+     * terminates the JVM. Leaving the hook registered on Mac and Linux is not a problem.
      */
     public void unregisterNativeHook() {
         if (Settings.isWindows()) {
@@ -79,7 +75,7 @@ public class CaptureUserInputs implements NativeKeyListener, NativeMouseListener
      * @see NativeKeyListener#nativeKeyPressed(NativeKeyEvent)
      */
     public void nativeKeyPressed(NativeKeyEvent e) {
-        String key = StringUtils.substringAfterLast(e.paramString(),"rawCode=");
+        String key = StringUtils.substringAfterLast(e.paramString(), "rawCode=");
         recordInputs.addElement("KEY_DOWN", key, e.paramString());
     }
 
@@ -87,7 +83,7 @@ public class CaptureUserInputs implements NativeKeyListener, NativeMouseListener
      * @see NativeKeyListener#nativeKeyReleased(NativeKeyEvent)
      */
     public void nativeKeyReleased(NativeKeyEvent e) {
-        String key = StringUtils.substringAfterLast(e.paramString(),"rawCode=");
+        String key = StringUtils.substringAfterLast(e.paramString(), "rawCode=");
         recordInputs.addElement("KEY_UP", key, e.paramString());
     }
 
@@ -95,7 +91,7 @@ public class CaptureUserInputs implements NativeKeyListener, NativeMouseListener
      * @see NativeKeyListener#nativeKeyTyped(NativeKeyEvent)
      */
     public void nativeKeyTyped(NativeKeyEvent e) {
-        String keyPressedAsNumber = StringUtils.substringAfterLast(e.paramString(),"rawCode=");
+        String keyPressedAsNumber = StringUtils.substringAfterLast(e.paramString(), "rawCode=");
         recordInputs.addElement("TYPE", keyPressedAsNumber, e.paramString());
     }
 
@@ -103,7 +99,7 @@ public class CaptureUserInputs implements NativeKeyListener, NativeMouseListener
      * @see NativeMouseListener#nativeMouseClicked(NativeMouseEvent)
      */
     public void nativeMouseClicked(NativeMouseEvent e) {
-        recordInputs.addElement("CLICK","", e.paramString());
+        recordInputs.addElement("CLICK", "", e.paramString());
     }
 
     /**
@@ -131,7 +127,7 @@ public class CaptureUserInputs implements NativeKeyListener, NativeMouseListener
      * @see NativeMouseMotionListener#nativeMouseDragged(NativeMouseEvent)
      */
     public void nativeMouseDragged(NativeMouseEvent e) {
-        recordInputs.addElement("DRAG","", e.paramString());
+        recordInputs.addElement("DRAG", "", e.paramString());
     }
 
     /**
@@ -140,6 +136,4 @@ public class CaptureUserInputs implements NativeKeyListener, NativeMouseListener
     public void nativeMouseWheelMoved(NativeMouseWheelEvent e) {
         recordInputs.addElement("WHEEL", "", e.paramString());
     }
-
-
 }

@@ -1,44 +1,44 @@
 package io.github.jspinak.brobot.core.services;
 
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+import java.awt.*;
+import java.awt.GraphicsEnvironment;
+import java.awt.event.InputEvent;
+
+import org.sikuli.script.Button;
 import org.sikuli.script.Location;
 import org.sikuli.script.Mouse;
-import org.sikuli.script.Region;
-import org.sikuli.script.Button;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
-import java.awt.*;
-import java.awt.event.InputEvent;
-import java.awt.GraphicsEnvironment;
+import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
 /**
  * Sikuli-based implementation of the MouseController interface.
- * 
- * <p>This implementation uses Sikuli's mouse control capabilities,
- * which provide cross-platform mouse automation. It is completely
- * independent of the Find action and other high-level Brobot components.</p>
- * 
+ *
+ * <p>This implementation uses Sikuli's mouse control capabilities, which provide cross-platform
+ * mouse automation. It is completely independent of the Find action and other high-level Brobot
+ * components.
+ *
  * <p>Key characteristics:
+ *
  * <ul>
- *   <li>No dependencies on Find or Action classes</li>
- *   <li>Thread-safe through synchronized operations</li>
- *   <li>Cross-platform compatibility</li>
- *   <li>Uses hover() instead of mouseMove() for stability</li>
+ *   <li>No dependencies on Find or Action classes
+ *   <li>Thread-safe through synchronized operations
+ *   <li>Cross-platform compatibility
+ *   <li>Uses hover() instead of mouseMove() for stability
  * </ul>
- * </p>
- * 
+ *
  * @since 2.0.0
  */
 @Component("sikuliMouseController")
 @Primary
 public class SikuliMouseController implements MouseController {
-    
+
     // Button constants for Sikuli
     private static final int SIKULI_LEFT = java.awt.event.InputEvent.BUTTON1_DOWN_MASK;
     private static final int SIKULI_RIGHT = java.awt.event.InputEvent.BUTTON3_DOWN_MASK;
     private static final int SIKULI_MIDDLE = java.awt.event.InputEvent.BUTTON2_DOWN_MASK;
-    
+
     @Override
     public synchronized boolean moveTo(int x, int y) {
         try {
@@ -46,20 +46,22 @@ public class SikuliMouseController implements MouseController {
             // Use hover() instead of mouseMove() for better stability
             Location result = location.hover();
             boolean success = result != null;
-            
+
             if (success) {
                 ConsoleReporter.println("[SikuliMouseController] Moved to: " + x + ", " + y);
             } else {
-                ConsoleReporter.println("[SikuliMouseController] Failed to move to: " + x + ", " + y);
+                ConsoleReporter.println(
+                        "[SikuliMouseController] Failed to move to: " + x + ", " + y);
             }
-            
+
             return success;
         } catch (Exception e) {
-            ConsoleReporter.println("[SikuliMouseController] Error moving mouse: " + e.getMessage());
+            ConsoleReporter.println(
+                    "[SikuliMouseController] Error moving mouse: " + e.getMessage());
             return false;
         }
     }
-    
+
     @Override
     public synchronized boolean click(int x, int y, MouseButton button) {
         try {
@@ -67,16 +69,16 @@ public class SikuliMouseController implements MouseController {
             if (!moveTo(x, y)) {
                 return false;
             }
-            
+
             // Move to the location first
             if (!moveTo(x, y)) {
                 return false;
             }
-            
+
             // Use Sikuli's click method
             Location location = new Location(x, y);
             boolean success = false;
-            
+
             if (button == MouseButton.LEFT) {
                 location.click();
                 success = true;
@@ -90,20 +92,22 @@ public class SikuliMouseController implements MouseController {
                 Mouse.up(Button.MIDDLE);
                 success = true;
             }
-            
+
             if (success) {
-                ConsoleReporter.println("[SikuliMouseController] Clicked " + button + " at: " + x + ", " + y);
+                ConsoleReporter.println(
+                        "[SikuliMouseController] Clicked " + button + " at: " + x + ", " + y);
             } else {
-                ConsoleReporter.println("[SikuliMouseController] Failed to click at: " + x + ", " + y);
+                ConsoleReporter.println(
+                        "[SikuliMouseController] Failed to click at: " + x + ", " + y);
             }
-            
+
             return success;
         } catch (Exception e) {
             ConsoleReporter.println("[SikuliMouseController] Error clicking: " + e.getMessage());
             return false;
         }
     }
-    
+
     @Override
     public synchronized boolean doubleClick(int x, int y, MouseButton button) {
         try {
@@ -111,7 +115,7 @@ public class SikuliMouseController implements MouseController {
             if (!moveTo(x, y)) {
                 return false;
             }
-            
+
             // Sikuli's doubleClick only supports left button
             // For other buttons, simulate with two clicks
             if (button == MouseButton.LEFT) {
@@ -123,17 +127,18 @@ public class SikuliMouseController implements MouseController {
                 // Simulate double-click for other buttons
                 boolean firstClick = click(x, y, button);
                 if (!firstClick) return false;
-                
+
                 // Small delay between clicks
                 Thread.sleep(50);
                 return click(x, y, button);
             }
         } catch (Exception e) {
-            ConsoleReporter.println("[SikuliMouseController] Error double-clicking: " + e.getMessage());
+            ConsoleReporter.println(
+                    "[SikuliMouseController] Error double-clicking: " + e.getMessage());
             return false;
         }
     }
-    
+
     @Override
     public synchronized boolean mouseDown(MouseButton button) {
         try {
@@ -142,11 +147,12 @@ public class SikuliMouseController implements MouseController {
             ConsoleReporter.println("[SikuliMouseController] Mouse " + button + " down");
             return true;
         } catch (Exception e) {
-            ConsoleReporter.println("[SikuliMouseController] Error pressing mouse button: " + e.getMessage());
+            ConsoleReporter.println(
+                    "[SikuliMouseController] Error pressing mouse button: " + e.getMessage());
             return false;
         }
     }
-    
+
     @Override
     public synchronized boolean mouseUp(MouseButton button) {
         try {
@@ -155,44 +161,53 @@ public class SikuliMouseController implements MouseController {
             ConsoleReporter.println("[SikuliMouseController] Mouse " + button + " up");
             return true;
         } catch (Exception e) {
-            ConsoleReporter.println("[SikuliMouseController] Error releasing mouse button: " + e.getMessage());
+            ConsoleReporter.println(
+                    "[SikuliMouseController] Error releasing mouse button: " + e.getMessage());
             return false;
         }
     }
-    
+
     @Override
-    public synchronized boolean drag(int startX, int startY, int endX, int endY, MouseButton button) {
+    public synchronized boolean drag(
+            int startX, int startY, int endX, int endY, MouseButton button) {
         try {
             Location startLoc = new Location(startX, startY);
             Location endLoc = new Location(endX, endY);
-            
+
             // Move to start location
             if (!moveTo(startX, startY)) {
                 return false;
             }
-            
+
             // Press button
             if (!mouseDown(button)) {
                 return false;
             }
-            
+
             // Drag to end location
             // Move to end location while holding button
             moveTo(endX, endY);
             int result = 1; // Assume success since we got this far
-            
+
             // Note: dragDrop automatically releases the button
             boolean success = result > 0;
-            
+
             if (success) {
-                ConsoleReporter.println("[SikuliMouseController] Dragged from " + 
-                    startX + "," + startY + " to " + endX + "," + endY);
+                ConsoleReporter.println(
+                        "[SikuliMouseController] Dragged from "
+                                + startX
+                                + ","
+                                + startY
+                                + " to "
+                                + endX
+                                + ","
+                                + endY);
             } else {
                 ConsoleReporter.println("[SikuliMouseController] Drag failed");
                 // Try to release button if drag failed
                 mouseUp(button);
             }
-            
+
             return success;
         } catch (Exception e) {
             ConsoleReporter.println("[SikuliMouseController] Error dragging: " + e.getMessage());
@@ -201,7 +216,7 @@ public class SikuliMouseController implements MouseController {
             return false;
         }
     }
-    
+
     @Override
     public synchronized boolean scroll(int wheelAmt) {
         try {
@@ -210,24 +225,25 @@ public class SikuliMouseController implements MouseController {
             if (currentLoc == null) {
                 return false;
             }
-            
+
             // Use Sikuli's wheel method for scrolling
             Location location = Mouse.at();
             if (location == null) {
                 location = new Location(0, 0);
             }
-            
+
             // Create a small region at the mouse location for wheel operation
-            org.sikuli.script.Region region = new org.sikuli.script.Region(location.x, location.y, 1, 1);
-            
+            org.sikuli.script.Region region =
+                    new org.sikuli.script.Region(location.x, location.y, 1, 1);
+
             // Sikuli wheel method: positive = down, negative = up
-            // Robot's mouseWheel: positive = down, negative = up  
+            // Robot's mouseWheel: positive = down, negative = up
             // Direction: -1 for up, 1 for down
             int direction = wheelAmt > 0 ? 1 : -1;
             int steps = Math.abs(wheelAmt);
-            
+
             region.wheel(direction, steps);
-            
+
             ConsoleReporter.println("[SikuliMouseController] Scrolled " + wheelAmt + " units");
             return true;
         } catch (Exception e) {
@@ -235,7 +251,7 @@ public class SikuliMouseController implements MouseController {
             return false;
         }
     }
-    
+
     @Override
     public int[] getPosition() {
         try {
@@ -243,13 +259,14 @@ public class SikuliMouseController implements MouseController {
             if (currentLoc == null) {
                 return null;
             }
-            return new int[] { currentLoc.x, currentLoc.y };
+            return new int[] {currentLoc.x, currentLoc.y};
         } catch (Exception e) {
-            ConsoleReporter.println("[SikuliMouseController] Error getting mouse position: " + e.getMessage());
+            ConsoleReporter.println(
+                    "[SikuliMouseController] Error getting mouse position: " + e.getMessage());
             return null;
         }
     }
-    
+
     @Override
     public boolean isAvailable() {
         try {
@@ -257,19 +274,19 @@ public class SikuliMouseController implements MouseController {
             if (GraphicsEnvironment.isHeadless()) {
                 return false;
             }
-            
+
             // Try to get mouse position as a test
             return Mouse.at() != null;
         } catch (Exception e) {
             return false;
         }
     }
-    
+
     @Override
     public String getImplementationName() {
         return "Sikuli";
     }
-    
+
     private int convertButton(MouseButton button) {
         switch (button) {
             case RIGHT:
@@ -281,7 +298,7 @@ public class SikuliMouseController implements MouseController {
                 return SIKULI_LEFT;
         }
     }
-    
+
     private int getButtonMask(MouseButton button) {
         switch (button) {
             case RIGHT:

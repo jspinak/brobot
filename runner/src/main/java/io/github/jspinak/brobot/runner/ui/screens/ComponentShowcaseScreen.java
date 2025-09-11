@@ -1,12 +1,5 @@
 package io.github.jspinak.brobot.runner.ui.screens;
 
-import lombok.Getter;
-import lombok.EqualsAndHashCode;
-
-import io.github.jspinak.brobot.runner.ui.components.BreadcrumbBar;
-import io.github.jspinak.brobot.runner.ui.components.EnhancedTable;
-import io.github.jspinak.brobot.runner.ui.components.StatusBar;
-import io.github.jspinak.brobot.runner.ui.theme.ThemeManager;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -16,9 +9,17 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
+import io.github.jspinak.brobot.runner.ui.components.BreadcrumbBar;
+import io.github.jspinak.brobot.runner.ui.components.EnhancedTable;
+import io.github.jspinak.brobot.runner.ui.components.StatusBar;
+import io.github.jspinak.brobot.runner.ui.theme.ThemeManager;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+
 /**
- * A showcase screen that demonstrates the custom UI components available in the application.
- * This serves as both documentation and a visual test for the components.
+ * A showcase screen that demonstrates the custom UI components available in the application. This
+ * serves as both documentation and a visual test for the components.
  */
 @Getter
 @EqualsAndHashCode(callSuper = false)
@@ -47,7 +48,7 @@ public class ComponentShowcaseScreen extends BorderPane {
 
     public ComponentShowcaseScreen(ThemeManager themeManager) {
         this.themeManager = themeManager;
-        
+
         // Add CSS class for specific styling
         getStyleClass().add("component-showcase-screen");
 
@@ -67,7 +68,8 @@ public class ComponentShowcaseScreen extends BorderPane {
         // Create breadcrumb navigation
         BreadcrumbBar breadcrumbBar = new BreadcrumbBar();
         breadcrumbBar.addItem("Home", item -> statusBar.setStatusMessage("Home clicked"));
-        breadcrumbBar.addItem("Components", item -> statusBar.setStatusMessage("Components clicked"));
+        breadcrumbBar.addItem(
+                "Components", item -> statusBar.setStatusMessage("Components clicked"));
         breadcrumbBar.addItem("Showcase", null);
 
         // Create content with scroll pane for better layout
@@ -81,7 +83,7 @@ public class ComponentShowcaseScreen extends BorderPane {
         for (DemoSection section : DemoSection.values()) {
             content.getChildren().add(createSection(section));
         }
-        
+
         // Wrap content in scroll pane
         javafx.scene.control.ScrollPane scrollPane = new javafx.scene.control.ScrollPane(content);
         scrollPane.getStyleClass().add("scroll-pane");
@@ -150,10 +152,10 @@ public class ComponentShowcaseScreen extends BorderPane {
         // Standard buttons section
         VBox standardSection = new VBox(12);
         standardSection.getStyleClass().add("demo-section");
-        
+
         Label standardLabel = new Label("Standard Buttons");
         standardLabel.getStyleClass().add("demo-title");
-        
+
         javafx.scene.layout.FlowPane standardButtons = new javafx.scene.layout.FlowPane(12, 12);
         standardButtons.setAlignment(Pos.CENTER_LEFT);
 
@@ -172,18 +174,19 @@ public class ComponentShowcaseScreen extends BorderPane {
         dangerButton.getStyleClass().add("button-danger");
         dangerButton.setOnAction(e -> statusBar.setStatusMessage("Danger button clicked"));
 
-        standardButtons.getChildren().addAll(
-                defaultButton, primaryButton, secondaryButton, dangerButton);
-        
+        standardButtons
+                .getChildren()
+                .addAll(defaultButton, primaryButton, secondaryButton, dangerButton);
+
         standardSection.getChildren().addAll(standardLabel, standardButtons);
 
         // Toggle buttons section
         VBox toggleSection = new VBox(12);
         toggleSection.getStyleClass().add("demo-section");
-        
+
         Label toggleLabel = new Label("Toggle Buttons");
         toggleLabel.getStyleClass().add("demo-title");
-        
+
         HBox toggleButtons = new HBox(12);
         toggleButtons.setAlignment(Pos.CENTER_LEFT);
 
@@ -192,7 +195,7 @@ public class ComponentShowcaseScreen extends BorderPane {
         toggleButton2.setSelected(true);
 
         toggleButtons.getChildren().addAll(toggleButton1, toggleButton2);
-        
+
         toggleSection.getChildren().addAll(toggleLabel, toggleButtons);
 
         container.getChildren().addAll(standardSection, toggleSection);
@@ -210,14 +213,18 @@ public class ComponentShowcaseScreen extends BorderPane {
         // Cards and Panels section
         VBox cardsSection = new VBox(12);
         cardsSection.getStyleClass().add("demo-section");
-        
+
         Label cardsLabel = new Label("Cards and Panels");
         cardsLabel.getStyleClass().add("demo-title");
 
         // Card demo
-        io.github.jspinak.brobot.runner.ui.components.Card card = new io.github.jspinak.brobot.runner.ui.components.Card("Sample Card");
+        io.github.jspinak.brobot.runner.ui.components.Card card =
+                new io.github.jspinak.brobot.runner.ui.components.Card("Sample Card");
         card.getStyleClass().add("showcase-card");
-        Label cardContent = new Label("This is a card component that can contain any content. Cards are useful for displaying grouped information.");
+        Label cardContent =
+                new Label(
+                        "This is a card component that can contain any content. Cards are useful"
+                                + " for displaying grouped information.");
         cardContent.setWrapText(true);
         card.setContent(cardContent);
 
@@ -226,11 +233,15 @@ public class ComponentShowcaseScreen extends BorderPane {
         card.addAction(cardAction);
 
         // Panel demo
-        io.github.jspinak.brobot.runner.ui.components.Panel panel = new io.github.jspinak.brobot.runner.ui.components.Panel("Sample Panel");
+        io.github.jspinak.brobot.runner.ui.components.Panel panel =
+                new io.github.jspinak.brobot.runner.ui.components.Panel("Sample Panel");
         panel.getStyleClass().add("showcase-panel");
         panel.setCollapsible(true);
 
-        Label panelContent = new Label("This is a panel component that can be collapsed. Panels are useful for sections that need to be toggled on and off.");
+        Label panelContent =
+                new Label(
+                        "This is a panel component that can be collapsed. Panels are useful for"
+                                + " sections that need to be toggled on and off.");
         panelContent.setWrapText(true);
         panel.setContent(panelContent);
 
@@ -240,7 +251,7 @@ public class ComponentShowcaseScreen extends BorderPane {
         javafx.scene.layout.FlowPane cardsLayout = new javafx.scene.layout.FlowPane(20, 20);
         cardsLayout.setAlignment(Pos.TOP_LEFT);
         cardsLayout.getChildren().addAll(card, panel);
-        
+
         cardsSection.getChildren().addAll(cardsLabel, cardsLayout);
         container.getChildren().add(cardsSection);
 
@@ -259,14 +270,12 @@ public class ComponentShowcaseScreen extends BorderPane {
         BreadcrumbBar breadcrumb = new BreadcrumbBar();
         breadcrumb.addItem("Home", item -> statusBar.setStatusMessage("Home clicked"));
         breadcrumb.addItem("Products", item -> statusBar.setStatusMessage("Products clicked"));
-        breadcrumb.addItem("Electronics", item -> statusBar.setStatusMessage("Electronics clicked"));
+        breadcrumb.addItem(
+                "Electronics", item -> statusBar.setStatusMessage("Electronics clicked"));
         breadcrumb.addItem("Smartphones", null);
 
         // Add descriptions
-        container.getChildren().addAll(
-                new Label("Breadcrumb Navigation:"),
-                breadcrumb
-        );
+        container.getChildren().addAll(new Label("Breadcrumb Navigation:"), breadcrumb);
 
         return container;
     }
@@ -286,16 +295,18 @@ public class ComponentShowcaseScreen extends BorderPane {
         table.addColumn("Description", "description");
 
         // Set search provider
-        table.setSearchProvider(item -> item.getId() + " " + item.getName() + " " + item.getDescription());
+        table.setSearchProvider(
+                item -> item.getId() + " " + item.getName() + " " + item.getDescription());
 
         // Add sample data
-        javafx.collections.ObservableList<DemoItem> items = javafx.collections.FXCollections.observableArrayList();
+        javafx.collections.ObservableList<DemoItem> items =
+                javafx.collections.FXCollections.observableArrayList();
         for (int i = 1; i <= 100; i++) {
-            items.add(new DemoItem(
-                    String.format("ITEM-%03d", i),
-                    "Item " + i,
-                    "Description for item " + i
-            ));
+            items.add(
+                    new DemoItem(
+                            String.format("ITEM-%03d", i),
+                            "Item " + i,
+                            "Description for item " + i));
         }
         table.setItems(items);
 
@@ -303,10 +314,9 @@ public class ComponentShowcaseScreen extends BorderPane {
         table.setPrefHeight(300);
 
         // Add descriptions
-        container.getChildren().addAll(
-                new Label("Enhanced Table with Filtering and Pagination:"),
-                table
-        );
+        container
+                .getChildren()
+                .addAll(new Label("Enhanced Table with Filtering and Pagination:"), table);
 
         return container;
     }
@@ -324,34 +334,40 @@ public class ComponentShowcaseScreen extends BorderPane {
         demoStatusBar.setStatusMessage("Status message example");
 
         Button updateStatusButton = new Button("Update Status");
-        updateStatusButton.setOnAction(e -> {
-            demoStatusBar.setStatusMessage("Status updated at " + java.time.LocalTime.now().toString());
-        });
+        updateStatusButton.setOnAction(
+                e -> {
+                    demoStatusBar.setStatusMessage(
+                            "Status updated at " + java.time.LocalTime.now().toString());
+                });
 
         Button showProgressButton = new Button("Show Progress");
-        showProgressButton.setOnAction(e -> {
-            demoStatusBar.setProgress(0.0);
+        showProgressButton.setOnAction(
+                e -> {
+                    demoStatusBar.setProgress(0.0);
 
-            // Simulate progress
-            javafx.animation.Timeline timeline = new javafx.animation.Timeline();
-            for (int i = 0; i <= 10; i++) {
-                final int step = i;
-                javafx.animation.KeyFrame keyFrame = new javafx.animation.KeyFrame(
-                        javafx.util.Duration.seconds(i * 0.5),
-                        event -> demoStatusBar.setProgress(step / 10.0)
-                );
-                timeline.getKeyFrames().add(keyFrame);
-            }
-            timeline.play();
-        });
+                    // Simulate progress
+                    javafx.animation.Timeline timeline = new javafx.animation.Timeline();
+                    for (int i = 0; i <= 10; i++) {
+                        final int step = i;
+                        javafx.animation.KeyFrame keyFrame =
+                                new javafx.animation.KeyFrame(
+                                        javafx.util.Duration.seconds(i * 0.5),
+                                        event -> demoStatusBar.setProgress(step / 10.0));
+                        timeline.getKeyFrames().add(keyFrame);
+                    }
+                    timeline.play();
+                });
 
         Button addIndicatorButton = new Button("Add Indicator");
-        addIndicatorButton.setOnAction(e -> {
-            demoStatusBar.addStatusIndicator("Sample", "warning");
-        });
+        addIndicatorButton.setOnAction(
+                e -> {
+                    demoStatusBar.addStatusIndicator("Sample", "warning");
+                });
 
         HBox statusControls = new HBox(10);
-        statusControls.getChildren().addAll(updateStatusButton, showProgressButton, addIndicatorButton);
+        statusControls
+                .getChildren()
+                .addAll(updateStatusButton, showProgressButton, addIndicatorButton);
 
         // Alert boxes
         HBox alertBoxes = new HBox(20);
@@ -373,20 +389,19 @@ public class ComponentShowcaseScreen extends BorderPane {
         }
 
         // Add descriptions
-        container.getChildren().addAll(
-                new Label("Status Bar:"),
-                demoStatusBar,
-                statusControls,
-                new Label("Alert Boxes:"),
-                alertBoxes
-        );
+        container
+                .getChildren()
+                .addAll(
+                        new Label("Status Bar:"),
+                        demoStatusBar,
+                        statusControls,
+                        new Label("Alert Boxes:"),
+                        alertBoxes);
 
         return container;
     }
 
-    /**
-     * Sample data class for the table demo.
-     */
+    /** Sample data class for the table demo. */
     public static class DemoItem {
         private final String id;
         private final String name;

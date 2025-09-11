@@ -2,18 +2,19 @@ package io.github.jspinak.brobot.model.element;
 
 import io.github.jspinak.brobot.action.basic.find.MatchAdjustmentOptions;
 import io.github.jspinak.brobot.model.state.StateObject;
+
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Enhanced anchor that can reference matches from other states.
- * This allows regions to be defined using reference points from objects
- * in different states, enabling more flexible and dynamic region definitions.
+ * Enhanced anchor that can reference matches from other states. This allows regions to be defined
+ * using reference points from objects in different states, enabling more flexible and dynamic
+ * region definitions.
  */
 @Getter
 @Setter
 public class CrossStateAnchor extends Anchor {
-    
+
     private String sourceStateName;
     private String sourceObjectName;
     private StateObject.Type sourceType;
@@ -24,13 +25,15 @@ public class CrossStateAnchor extends Anchor {
         this.adjustments = MatchAdjustmentOptions.builder().build();
     }
 
-    public CrossStateAnchor(Positions.Name anchorInNewDefinedRegion, Positions.Name positionInMatch) {
+    public CrossStateAnchor(
+            Positions.Name anchorInNewDefinedRegion, Positions.Name positionInMatch) {
         super(anchorInNewDefinedRegion, new Position(positionInMatch));
         this.adjustments = MatchAdjustmentOptions.builder().build();
     }
 
     /**
      * Creates a Location from a match, applying adjustments.
+     *
      * @param matchLocation The location of the matched object
      * @param matchRegion The region of the matched object
      * @return The adjusted location for this anchor
@@ -39,12 +42,9 @@ public class CrossStateAnchor extends Anchor {
         // Calculate the anchor location based on position within the match
         double x = matchRegion.getX() + (matchRegion.getW() * getPositionInMatch().getPercentW());
         double y = matchRegion.getY() + (matchRegion.getH() * getPositionInMatch().getPercentH());
-        
+
         // Apply adjustments
-        return new Location(
-            (int)(x + adjustments.getAddX()),
-            (int)(y + adjustments.getAddY())
-        );
+        return new Location((int) (x + adjustments.getAddX()), (int) (y + adjustments.getAddY()));
     }
 
     public static class Builder {
@@ -86,10 +86,7 @@ public class CrossStateAnchor extends Anchor {
         }
 
         public Builder adjustments(int x, int y) {
-            anchor.adjustments = MatchAdjustmentOptions.builder()
-                .setAddX(x)
-                .setAddY(y)
-                .build();
+            anchor.adjustments = MatchAdjustmentOptions.builder().setAddX(x).setAddY(y).build();
             return this;
         }
 

@@ -1,60 +1,53 @@
 package io.github.jspinak.brobot.startup.verification;
 
+import java.util.*;
+
+import org.springframework.stereotype.Component;
+
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.state.StateEnum;
 import io.github.jspinak.brobot.navigation.service.StateService;
-import io.github.jspinak.brobot.statemanagement.StateMemory;
 import io.github.jspinak.brobot.statemanagement.StateDetector;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+import io.github.jspinak.brobot.statemanagement.StateMemory;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Modern approach to initial state verification for Brobot applications.
- * 
- * <p>
- * This component provides a clean API for verifying and establishing initial
- * states
- * when automation begins. It supports both real execution and mock testing
- * scenarios.
- * </p>
- * 
- * <p>
- * Key features:
+ *
+ * <p>This component provides a clean API for verifying and establishing initial states when
+ * automation begins. It supports both real execution and mock testing scenarios.
+ *
+ * <p>Key features:
+ *
  * <ul>
- * <li>Simple, fluent API for state verification</li>
- * <li>Type-safe StateEnum support</li>
- * <li>Automatic state activation upon successful verification</li>
- * <li>Mock support with optional probability weights</li>
- * <li>Fallback to comprehensive state search if needed</li>
+ *   <li>Simple, fluent API for state verification
+ *   <li>Type-safe StateEnum support
+ *   <li>Automatic state activation upon successful verification
+ *   <li>Mock support with optional probability weights
+ *   <li>Fallback to comprehensive state search if needed
  * </ul>
- * </p>
- * 
- * <p>
- * Example usage:
- * 
+ *
+ * <p>Example usage:
+ *
  * <pre>{@code
  * // Simple verification of expected states
  * initialStateVerifier.verify(HomePage.Name.HOME, LoginPage.Name.LOGIN);
- * 
+ *
  * // With custom configuration
  * initialStateVerifier.builder()
  *         .withStates(HomePage.Name.HOME, Dashboard.Name.MAIN)
  *         .withFallbackSearch(true)
  *         .verify();
- * 
+ *
  * // For mock testing with probabilities
  * initialStateVerifier.builder()
  *         .withState(HomePage.Name.HOME, 70) // 70% probability
  *         .withState(LoginPage.Name.LOGIN, 30) // 30% probability
  *         .verify();
  * }</pre>
- * </p>
- * 
+ *
  * @since 1.1.0
  */
 @Component
@@ -67,9 +60,9 @@ public class InitialStateVerifier {
     private final StateService stateService;
 
     /**
-     * Verifies that currently active states are still visible.
-     * This is a convenience method that delegates to StateDetector.
-     * 
+     * Verifies that currently active states are still visible. This is a convenience method that
+     * delegates to StateDetector.
+     *
      * @return Set of state IDs that remain active
      */
     public Set<Long> verifyActiveStates() {
@@ -79,9 +72,9 @@ public class InitialStateVerifier {
     }
 
     /**
-     * Rebuilds the active state list when context is uncertain.
-     * This is a convenience method that delegates to StateDetector.
-     * 
+     * Rebuilds the active state list when context is uncertain. This is a convenience method that
+     * delegates to StateDetector.
+     *
      * @return Set of state IDs that are now active
      */
     public Set<Long> rebuildActiveStates() {
@@ -91,9 +84,8 @@ public class InitialStateVerifier {
     }
 
     /**
-     * Performs a complete refresh of active states.
-     * Clears all states and searches from scratch.
-     * 
+     * Performs a complete refresh of active states. Clears all states and searches from scratch.
+     *
      * @return Set of state IDs that were found
      */
     public Set<Long> refreshActiveStates() {
@@ -103,45 +95,37 @@ public class InitialStateVerifier {
 
     /**
      * Verifies that one of the specified states is currently active.
-     * 
-     * <p>
-     * In normal mode, searches for the states on screen in the order provided.
-     * In mock mode, randomly selects one state with equal probability.
-     * </p>
-     * 
+     *
+     * <p>In normal mode, searches for the states on screen in the order provided. In mock mode,
+     * randomly selects one state with equal probability.
+     *
      * @param stateEnums Variable number of state enums to verify
      * @return true if at least one state was found and activated
      */
     public boolean verify(StateEnum... stateEnums) {
-        return builder()
-                .withStates(stateEnums)
-                .verify();
+        return builder().withStates(stateEnums).verify();
     }
 
     /**
      * Verifies that one of the specified states is currently active.
-     * 
+     *
      * @param stateNames Variable number of state names to verify
      * @return true if at least one state was found and activated
      */
     public boolean verify(String... stateNames) {
-        return builder()
-                .withStates(stateNames)
-                .verify();
+        return builder().withStates(stateNames).verify();
     }
 
     /**
      * Creates a builder for more complex verification scenarios.
-     * 
+     *
      * @return A new verification builder
      */
     public VerificationBuilder builder() {
         return new VerificationBuilder();
     }
 
-    /**
-     * Fluent builder for configuring state verification.
-     */
+    /** Fluent builder for configuring state verification. */
     public class VerificationBuilder {
         private final Map<Long, Integer> stateProbabilities = new LinkedHashMap<>();
         private boolean fallbackToAllStates = false;
@@ -150,7 +134,7 @@ public class InitialStateVerifier {
 
         /**
          * Adds states to verify with equal probability.
-         * 
+         *
          * @param stateEnums States to verify
          * @return This builder for chaining
          */
@@ -163,7 +147,7 @@ public class InitialStateVerifier {
 
         /**
          * Adds states to verify with equal probability.
-         * 
+         *
          * @param stateNames State names to verify
          * @return This builder for chaining
          */
@@ -176,8 +160,8 @@ public class InitialStateVerifier {
 
         /**
          * Adds a state with specific probability weight (for mock mode).
-         * 
-         * @param stateEnum   State to verify
+         *
+         * @param stateEnum State to verify
          * @param probability Probability weight (relative to other states)
          * @return This builder for chaining
          */
@@ -190,25 +174,28 @@ public class InitialStateVerifier {
 
         /**
          * Adds a state with specific probability weight (for mock mode).
-         * 
-         * @param stateName   State name to verify
+         *
+         * @param stateName State name to verify
          * @param probability Probability weight (relative to other states)
          * @return This builder for chaining
          */
         public VerificationBuilder withState(String stateName, int probability) {
-            stateService.getState(stateName).ifPresent(state -> {
-                if (probability > 0) {
-                    totalProbability += probability;
-                    stateProbabilities.put(state.getId(), totalProbability);
-                }
-            });
+            stateService
+                    .getState(stateName)
+                    .ifPresent(
+                            state -> {
+                                if (probability > 0) {
+                                    totalProbability += probability;
+                                    stateProbabilities.put(state.getId(), totalProbability);
+                                }
+                            });
             return this;
         }
 
         /**
-         * Enables fallback search of all registered states if none of the
-         * specified states are found.
-         * 
+         * Enables fallback search of all registered states if none of the specified states are
+         * found.
+         *
          * @param enabled Whether to enable fallback search
          * @return This builder for chaining
          */
@@ -218,9 +205,9 @@ public class InitialStateVerifier {
         }
 
         /**
-         * When multiple states are found, activate only the first one.
-         * Default is to activate all found states.
-         * 
+         * When multiple states are found, activate only the first one. Default is to activate all
+         * found states.
+         *
          * @param firstOnly Whether to activate only the first found state
          * @return This builder for chaining
          */
@@ -231,7 +218,7 @@ public class InitialStateVerifier {
 
         /**
          * Executes the verification with the configured options.
-         * 
+         *
          * @return true if at least one state was verified and activated
          */
         public boolean verify() {
@@ -242,9 +229,7 @@ public class InitialStateVerifier {
                 return false;
             }
 
-            boolean result = FrameworkSettings.mock
-                    ? verifyMock()
-                    : verifyReal();
+            boolean result = FrameworkSettings.mock ? verifyMock() : verifyReal();
 
             if (!result && fallbackToAllStates) {
                 log.info("Primary verification failed, attempting fallback search");
@@ -262,11 +247,17 @@ public class InitialStateVerifier {
             for (Map.Entry<Long, Integer> entry : stateProbabilities.entrySet()) {
                 if (randomValue <= entry.getValue()) {
                     Long stateId = entry.getKey();
-                    stateService.getState(stateId).ifPresent(state -> {
-                        stateMemory.addActiveState(stateId, true);
-                        state.setProbabilityToBaseProbability();
-                        log.info("Mock: Activated state '{}' (ID: {})", state.getName(), stateId);
-                    });
+                    stateService
+                            .getState(stateId)
+                            .ifPresent(
+                                    state -> {
+                                        stateMemory.addActiveState(stateId, true);
+                                        state.setProbabilityToBaseProbability();
+                                        log.info(
+                                                "Mock: Activated state '{}' (ID: {})",
+                                                state.getName(),
+                                                stateId);
+                                    });
                     return true;
                 }
             }
@@ -287,11 +278,19 @@ public class InitialStateVerifier {
             }
 
             // Activate found states
-            foundStates.forEach(stateId -> {
-                stateMemory.addActiveState(stateId);
-                stateService.getState(stateId).ifPresent(
-                        state -> log.info("Verified and activated state '{}' (ID: {})", state.getName(), stateId));
-            });
+            foundStates.forEach(
+                    stateId -> {
+                        stateMemory.addActiveState(stateId);
+                        stateService
+                                .getState(stateId)
+                                .ifPresent(
+                                        state ->
+                                                log.info(
+                                                        "Verified and activated state '{}' (ID:"
+                                                                + " {})",
+                                                        state.getName(),
+                                                        stateId));
+                    });
 
             return !foundStates.isEmpty();
         }
@@ -308,11 +307,17 @@ public class InitialStateVerifier {
                 }
             }
 
-            foundStates.forEach(stateId -> {
-                stateMemory.addActiveState(stateId);
-                stateService.getState(stateId)
-                        .ifPresent(state -> log.info("Found state '{}' during fallback search", state.getName()));
-            });
+            foundStates.forEach(
+                    stateId -> {
+                        stateMemory.addActiveState(stateId);
+                        stateService
+                                .getState(stateId)
+                                .ifPresent(
+                                        state ->
+                                                log.info(
+                                                        "Found state '{}' during fallback search",
+                                                        state.getName()));
+                    });
 
             return !foundStates.isEmpty();
         }
@@ -320,7 +325,8 @@ public class InitialStateVerifier {
         private void logVerificationResult(boolean success) {
             if (success) {
                 List<String> activeStates = stateMemory.getActiveStateNames();
-                log.info("Initial state verification complete. Active states: {}",
+                log.info(
+                        "Initial state verification complete. Active states: {}",
                         String.join(", ", activeStates));
             } else {
                 log.warn("Initial state verification failed - no states found");

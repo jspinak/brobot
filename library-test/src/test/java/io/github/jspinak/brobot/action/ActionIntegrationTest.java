@@ -1,38 +1,34 @@
 package io.github.jspinak.brobot.action;
 
-import org.junit.jupiter.api.Disabled;
-import io.github.jspinak.brobot.action.basic.click.ClickOptions;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.action.basic.type.TypeOptions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.model.element.Location;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
-import io.github.jspinak.brobot.test.config.MockOnlyTestConfiguration;
-import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assumptions.*;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Disabled;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
+
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
+import io.github.jspinak.brobot.test.config.MockOnlyTestConfiguration;
 
 /**
- * Integration tests for complex Action workflows.
- * Tests realistic scenarios with multiple actions, state transitions, and
- * chained operations.
+ * Integration tests for complex Action workflows. Tests realistic scenarios with multiple actions,
+ * state transitions, and chained operations.
  */
 @DisplayName("Action Integration Tests")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@ContextConfiguration(initializers = { MockOnlyTestConfiguration.class })
+@ContextConfiguration(initializers = {MockOnlyTestConfiguration.class})
 @Disabled("Failing in CI - temporarily disabled for CI/CD")
 public class ActionIntegrationTest extends BrobotIntegrationTestBase {
 
@@ -63,15 +59,9 @@ public class ActionIntegrationTest extends BrobotIntegrationTestBase {
     @DisplayName("Test login workflow simulation")
     void testLoginWorkflow() {
         // Given - simulate login UI elements
-        StateImage usernameField = new StateImage.Builder()
-                .setName("username-field")
-                .build();
-        StateImage passwordField = new StateImage.Builder()
-                .setName("password-field")
-                .build();
-        StateImage loginButton = new StateImage.Builder()
-                .setName("login-button")
-                .build();
+        StateImage usernameField = new StateImage.Builder().setName("username-field").build();
+        StateImage passwordField = new StateImage.Builder().setName("password-field").build();
+        StateImage loginButton = new StateImage.Builder().setName("login-button").build();
 
         // When - execute login workflow
         ActionResult findUsername = action.find(usernameField);
@@ -104,9 +94,10 @@ public class ActionIntegrationTest extends BrobotIntegrationTestBase {
         }
 
         // Then - verify workflow completion
-        assertDoesNotThrow(() -> {
-            assertTrue(true, "Login workflow completed");
-        });
+        assertDoesNotThrow(
+                () -> {
+                    assertTrue(true, "Login workflow completed");
+                });
     }
 
     @Test
@@ -118,9 +109,7 @@ public class ActionIntegrationTest extends BrobotIntegrationTestBase {
         List<String> fieldValues = new ArrayList<>();
 
         for (int i = 0; i < 5; i++) {
-            formFields.add(new StateImage.Builder()
-                    .setName("field-" + i)
-                    .build());
+            formFields.add(new StateImage.Builder().setName("field-" + i).build());
             fieldValues.add("Value " + i);
         }
 
@@ -154,9 +143,7 @@ public class ActionIntegrationTest extends BrobotIntegrationTestBase {
         // Given
         Region sourceRegion = new Region(50, 50, 100, 100);
         Region targetRegion = new Region(300, 300, 100, 100);
-        StateImage draggableItem = new StateImage.Builder()
-                .setName("draggable")
-                .build();
+        StateImage draggableItem = new StateImage.Builder().setName("draggable").build();
 
         // When - simulate drag and drop
         ActionResult findSource = action.find(draggableItem);
@@ -181,11 +168,11 @@ public class ActionIntegrationTest extends BrobotIntegrationTestBase {
     void testNavigationWorkflow() {
         // Given - menu items to navigate
         StateImage[] menuItems = {
-                new StateImage.Builder().setName("File").build(),
-                new StateImage.Builder().setName("Edit").build(),
-                new StateImage.Builder().setName("View").build(),
-                new StateImage.Builder().setName("Tools").build(),
-                new StateImage.Builder().setName("Help").build()
+            new StateImage.Builder().setName("File").build(),
+            new StateImage.Builder().setName("Edit").build(),
+            new StateImage.Builder().setName("View").build(),
+            new StateImage.Builder().setName("Tools").build(),
+            new StateImage.Builder().setName("Help").build()
         };
 
         // When - navigate through menu
@@ -216,13 +203,9 @@ public class ActionIntegrationTest extends BrobotIntegrationTestBase {
     @DisplayName("Test search and select workflow")
     void testSearchSelectWorkflow() {
         // Given
-        StateImage searchField = new StateImage.Builder()
-                .setName("search-field")
-                .build();
+        StateImage searchField = new StateImage.Builder().setName("search-field").build();
         String searchTerm = "test item";
-        StateImage resultItem = new StateImage.Builder()
-                .setName("search-result")
-                .build();
+        StateImage resultItem = new StateImage.Builder().setName("search-result").build();
 
         // When - search and select
         ActionResult findSearch = action.find(searchField);
@@ -252,9 +235,10 @@ public class ActionIntegrationTest extends BrobotIntegrationTestBase {
         }
 
         // Then
-        assertDoesNotThrow(() -> {
-            assertTrue(true, "Search and select completed");
-        });
+        assertDoesNotThrow(
+                () -> {
+                    assertTrue(true, "Search and select completed");
+                });
     }
 
     @Test
@@ -270,29 +254,32 @@ public class ActionIntegrationTest extends BrobotIntegrationTestBase {
         // When - execute workflows in parallel
         for (int i = 0; i < numWorkflows; i++) {
             final int workflowId = i;
-            executor.submit(() -> {
-                try {
-                    // Each workflow finds and clicks a different element
-                    StateImage element = new StateImage.Builder()
-                            .setName("element-" + workflowId)
-                            .build();
+            executor.submit(
+                    () -> {
+                        try {
+                            // Each workflow finds and clicks a different element
+                            StateImage element =
+                                    new StateImage.Builder()
+                                            .setName("element-" + workflowId)
+                                            .build();
 
-                    ActionResult findResult = action.find(element);
-                    if (findResult != null && findResult.isSuccess()) {
-                        ActionResult clickResult = action.click(element);
-                        if (clickResult != null) {
-                            completedWorkflows.incrementAndGet();
+                            ActionResult findResult = action.find(element);
+                            if (findResult != null && findResult.isSuccess()) {
+                                ActionResult clickResult = action.click(element);
+                                if (clickResult != null) {
+                                    completedWorkflows.incrementAndGet();
+                                }
+                            }
+                        } finally {
+                            latch.countDown();
                         }
-                    }
-                } finally {
-                    latch.countDown();
-                }
-            });
+                    });
         }
 
         // Then
         assertTrue(latch.await(5, TimeUnit.SECONDS), "All workflows completed");
-        assertTrue(completedWorkflows.get() >= 0,
+        assertTrue(
+                completedWorkflows.get() >= 0,
                 "Completed " + completedWorkflows.get() + " workflows");
         executor.shutdown();
     }
@@ -302,12 +289,8 @@ public class ActionIntegrationTest extends BrobotIntegrationTestBase {
     @DisplayName("Test retry workflow with fallback")
     void testRetryWithFallback() {
         // Given
-        StateImage primaryTarget = new StateImage.Builder()
-                .setName("primary-target")
-                .build();
-        StateImage fallbackTarget = new StateImage.Builder()
-                .setName("fallback-target")
-                .build();
+        StateImage primaryTarget = new StateImage.Builder().setName("primary-target").build();
+        StateImage fallbackTarget = new StateImage.Builder().setName("fallback-target").build();
 
         int maxRetries = 3;
         ActionResult finalResult = null;
@@ -342,15 +325,9 @@ public class ActionIntegrationTest extends BrobotIntegrationTestBase {
     @DisplayName("Test conditional workflow branching")
     void testConditionalBranching() {
         // Given
-        StateImage checkboxElement = new StateImage.Builder()
-                .setName("checkbox")
-                .build();
-        StateImage enabledPath = new StateImage.Builder()
-                .setName("enabled-option")
-                .build();
-        StateImage disabledPath = new StateImage.Builder()
-                .setName("disabled-option")
-                .build();
+        StateImage checkboxElement = new StateImage.Builder().setName("checkbox").build();
+        StateImage enabledPath = new StateImage.Builder().setName("enabled-option").build();
+        StateImage disabledPath = new StateImage.Builder().setName("disabled-option").build();
 
         // When - check checkbox state and branch
         ActionResult checkboxResult = action.find(checkboxElement);
@@ -368,9 +345,10 @@ public class ActionIntegrationTest extends BrobotIntegrationTestBase {
         }
 
         // Then
-        assertDoesNotThrow(() -> {
-            assertTrue(true, "Conditional branching executed");
-        });
+        assertDoesNotThrow(
+                () -> {
+                    assertTrue(true, "Conditional branching executed");
+                });
     }
 
     @Test
@@ -378,12 +356,8 @@ public class ActionIntegrationTest extends BrobotIntegrationTestBase {
     @DisplayName("Test workflow with cleanup")
     void testWorkflowWithCleanup() {
         // Given
-        StateImage workElement = new StateImage.Builder()
-                .setName("work-element")
-                .build();
-        StateImage cleanupElement = new StateImage.Builder()
-                .setName("cleanup-element")
-                .build();
+        StateImage workElement = new StateImage.Builder().setName("work-element").build();
+        StateImage cleanupElement = new StateImage.Builder().setName("cleanup-element").build();
 
         AtomicBoolean workCompleted = new AtomicBoolean(false);
         AtomicBoolean cleanupCompleted = new AtomicBoolean(false);
@@ -407,8 +381,7 @@ public class ActionIntegrationTest extends BrobotIntegrationTestBase {
         }
 
         // Then
-        assertTrue(cleanupCompleted.get() || !cleanupCompleted.get(),
-                "Cleanup attempted");
+        assertTrue(cleanupCompleted.get() || !cleanupCompleted.get(), "Cleanup attempted");
     }
 
     @Test
@@ -416,14 +389,12 @@ public class ActionIntegrationTest extends BrobotIntegrationTestBase {
     @DisplayName("Test complex multi-step validation workflow")
     void testMultiStepValidation() {
         // Given - multi-step form with validation
-        String[] steps = { "Step1", "Step2", "Step3", "Step4", "Complete" };
+        String[] steps = {"Step1", "Step2", "Step3", "Step4", "Complete"};
         List<ActionResult> stepResults = new ArrayList<>();
 
         // When - navigate through all steps
         for (String step : steps) {
-            StateImage stepElement = new StateImage.Builder()
-                    .setName(step)
-                    .build();
+            StateImage stepElement = new StateImage.Builder().setName(step).build();
 
             // Find current step
             ActionResult findResult = action.find(stepElement);
@@ -433,9 +404,7 @@ public class ActionIntegrationTest extends BrobotIntegrationTestBase {
                 stepResults.add(fillResult);
 
                 // Click next
-                StateImage nextButton = new StateImage.Builder()
-                        .setName("Next")
-                        .build();
+                StateImage nextButton = new StateImage.Builder().setName("Next").build();
                 ActionResult nextResult = action.click(nextButton);
 
                 if (nextResult == null && step.equals("Complete")) {
@@ -462,9 +431,7 @@ public class ActionIntegrationTest extends BrobotIntegrationTestBase {
         long startTime = System.currentTimeMillis();
 
         for (int i = 0; i < iterations; i++) {
-            StateImage element = new StateImage.Builder()
-                    .setName("perf-test-" + i)
-                    .build();
+            StateImage element = new StateImage.Builder().setName("perf-test-" + i).build();
 
             ActionResult result = action.find(element);
             // Quick operation, no delays
@@ -473,7 +440,8 @@ public class ActionIntegrationTest extends BrobotIntegrationTestBase {
         long elapsedTime = System.currentTimeMillis() - startTime;
 
         // Then
-        assertTrue(elapsedTime < maxAcceptableTime,
+        assertTrue(
+                elapsedTime < maxAcceptableTime,
                 "Performance acceptable: " + elapsedTime + "ms for " + iterations + " iterations");
 
         double avgTime = (double) elapsedTime / iterations;
@@ -485,12 +453,8 @@ public class ActionIntegrationTest extends BrobotIntegrationTestBase {
     @DisplayName("Test workflow with state persistence")
     void testStatePersistence() {
         // Given
-        StateImage saveButton = new StateImage.Builder()
-                .setName("save")
-                .build();
-        StateImage loadButton = new StateImage.Builder()
-                .setName("load")
-                .build();
+        StateImage saveButton = new StateImage.Builder().setName("save").build();
+        StateImage loadButton = new StateImage.Builder().setName("load").build();
 
         String dataToSave = "Important data";
 
@@ -508,9 +472,10 @@ public class ActionIntegrationTest extends BrobotIntegrationTestBase {
         ActionResult loadResult = action.click(loadButton);
 
         // Then
-        assertDoesNotThrow(() -> {
-            assertTrue(true, "State persistence workflow completed");
-        });
+        assertDoesNotThrow(
+                () -> {
+                    assertTrue(true, "State persistence workflow completed");
+                });
     }
 
     @Test
@@ -524,9 +489,7 @@ public class ActionIntegrationTest extends BrobotIntegrationTestBase {
         try {
             // When - execute steps
             for (int i = 1; i <= 5; i++) {
-                StateImage step = new StateImage.Builder()
-                        .setName("step-" + i)
-                        .build();
+                StateImage step = new StateImage.Builder().setName("step-" + i).build();
 
                 ActionResult result = action.find(step);
                 if (result != null && result.isSuccess()) {
@@ -542,9 +505,8 @@ public class ActionIntegrationTest extends BrobotIntegrationTestBase {
             // Rollback completed steps
             for (int i = completedSteps.size() - 1; i >= 0; i--) {
                 String step = completedSteps.get(i);
-                StateImage rollbackElement = new StateImage.Builder()
-                        .setName("rollback-" + step)
-                        .build();
+                StateImage rollbackElement =
+                        new StateImage.Builder().setName("rollback-" + step).build();
 
                 ActionResult rollbackResult = action.find(rollbackElement);
                 if (rollbackResult != null) {
@@ -554,8 +516,8 @@ public class ActionIntegrationTest extends BrobotIntegrationTestBase {
         }
 
         // Then
-        assertEquals(completedSteps.size(), rollbackSteps.size(),
-                "All completed steps rolled back");
+        assertEquals(
+                completedSteps.size(), rollbackSteps.size(), "All completed steps rolled back");
     }
 
     @Test
@@ -563,12 +525,8 @@ public class ActionIntegrationTest extends BrobotIntegrationTestBase {
     @DisplayName("Test workflow with dynamic wait conditions")
     void testDynamicWaitWorkflow() {
         // Given
-        StateImage loadingIndicator = new StateImage.Builder()
-                .setName("loading")
-                .build();
-        StateImage contentReady = new StateImage.Builder()
-                .setName("content")
-                .build();
+        StateImage loadingIndicator = new StateImage.Builder().setName("loading").build();
+        StateImage contentReady = new StateImage.Builder().setName("content").build();
 
         // When - wait for loading to disappear
         int maxWaitIterations = 10;
@@ -643,7 +601,8 @@ public class ActionIntegrationTest extends BrobotIntegrationTestBase {
         }
 
         // Then
-        assertTrue(stepsCompleted.get() >= 0,
+        assertTrue(
+                stepsCompleted.get() >= 0,
                 "Completed " + stepsCompleted.get() + " of 5 workflow steps");
     }
 }

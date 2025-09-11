@@ -1,9 +1,9 @@
 package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.capture;
 
-import lombok.Getter;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import lombok.Getter;
 
 @Getter
 public class SceneObjectCollectionForXML {

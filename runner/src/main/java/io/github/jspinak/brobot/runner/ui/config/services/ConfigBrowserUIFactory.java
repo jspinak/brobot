@@ -1,24 +1,21 @@
 package io.github.jspinak.brobot.runner.ui.config.services;
 
-import io.github.jspinak.brobot.runner.ui.config.ConfigBrowserPanel;
+import java.util.Objects;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
+import io.github.jspinak.brobot.runner.ui.config.ConfigBrowserPanel;
 
-/**
- * Factory service for creating UI components for the configuration browser.
- */
+/** Factory service for creating UI components for the configuration browser. */
 @Service
 public class ConfigBrowserUIFactory {
-    
-    /**
-     * Configuration for UI component creation.
-     */
+
+    /** Configuration for UI component creation. */
     public static class UIConfiguration {
         private int imagePreviewHeight = 200;
         private int imagePreviewWidth = 200;
@@ -29,59 +26,85 @@ public class ConfigBrowserUIFactory {
         private int treeBoxSpacing = 5;
         private int detailsBoxSpacing = 5;
         private int toolbarSpacing = 10;
-        
+
         // Builder pattern
         public static Builder builder() {
             return new Builder();
         }
-        
+
         public static class Builder {
             private final UIConfiguration config = new UIConfiguration();
-            
+
             public Builder imagePreviewHeight(int height) {
                 config.imagePreviewHeight = height;
                 return this;
             }
-            
+
             public Builder imagePreviewWidth(int width) {
                 config.imagePreviewWidth = width;
                 return this;
             }
-            
+
             public Builder splitPaneDividerPosition(double position) {
                 config.splitPaneDividerPosition = position;
                 return this;
             }
-            
+
             public Builder previewPanelPadding(Insets padding) {
                 config.previewPanelPadding = padding;
                 return this;
             }
-            
+
             public Builder toolbarPadding(Insets padding) {
                 config.toolbarPadding = padding;
                 return this;
             }
-            
+
             public UIConfiguration build() {
                 return config;
             }
         }
-        
+
         // Getters
-        public int getImagePreviewHeight() { return imagePreviewHeight; }
-        public int getImagePreviewWidth() { return imagePreviewWidth; }
-        public double getSplitPaneDividerPosition() { return splitPaneDividerPosition; }
-        public Insets getPreviewPanelPadding() { return previewPanelPadding; }
-        public Insets getToolbarPadding() { return toolbarPadding; }
-        public int getPreviewPanelSpacing() { return previewPanelSpacing; }
-        public int getTreeBoxSpacing() { return treeBoxSpacing; }
-        public int getDetailsBoxSpacing() { return detailsBoxSpacing; }
-        public int getToolbarSpacing() { return toolbarSpacing; }
+        public int getImagePreviewHeight() {
+            return imagePreviewHeight;
+        }
+
+        public int getImagePreviewWidth() {
+            return imagePreviewWidth;
+        }
+
+        public double getSplitPaneDividerPosition() {
+            return splitPaneDividerPosition;
+        }
+
+        public Insets getPreviewPanelPadding() {
+            return previewPanelPadding;
+        }
+
+        public Insets getToolbarPadding() {
+            return toolbarPadding;
+        }
+
+        public int getPreviewPanelSpacing() {
+            return previewPanelSpacing;
+        }
+
+        public int getTreeBoxSpacing() {
+            return treeBoxSpacing;
+        }
+
+        public int getDetailsBoxSpacing() {
+            return detailsBoxSpacing;
+        }
+
+        public int getToolbarSpacing() {
+            return toolbarSpacing;
+        }
     }
-    
+
     private UIConfiguration configuration = new UIConfiguration();
-    
+
     /**
      * Sets the UI configuration.
      *
@@ -90,7 +113,7 @@ public class ConfigBrowserUIFactory {
     public void setConfiguration(UIConfiguration configuration) {
         this.configuration = configuration;
     }
-    
+
     /**
      * Creates the tree view for configuration browsing.
      *
@@ -103,7 +126,7 @@ public class ConfigBrowserUIFactory {
         treeView.setCellFactory(tv -> new ConfigTreeCell());
         return treeView;
     }
-    
+
     /**
      * Creates the details text area.
      *
@@ -115,7 +138,7 @@ public class ConfigBrowserUIFactory {
         detailsTextArea.setWrapText(true);
         return detailsTextArea;
     }
-    
+
     /**
      * Creates the image preview component.
      *
@@ -128,7 +151,7 @@ public class ConfigBrowserUIFactory {
         imagePreview.setPreserveRatio(true);
         return imagePreview;
     }
-    
+
     /**
      * Creates the preview panel.
      *
@@ -138,14 +161,11 @@ public class ConfigBrowserUIFactory {
     public VBox createPreviewPanel(ImageView imagePreview) {
         VBox previewPanel = new VBox(configuration.getPreviewPanelSpacing());
         previewPanel.setPadding(configuration.getPreviewPanelPadding());
-        previewPanel.getChildren().addAll(
-            new Label("Preview"),
-            imagePreview
-        );
+        previewPanel.getChildren().addAll(new Label("Preview"), imagePreview);
         previewPanel.setVisible(false);
         return previewPanel;
     }
-    
+
     /**
      * Creates the tree box containing the tree view.
      *
@@ -154,13 +174,10 @@ public class ConfigBrowserUIFactory {
      */
     public VBox createTreeBox(TreeView<ConfigBrowserPanel.ConfigItem> configTree) {
         VBox treeBox = new VBox(configuration.getTreeBoxSpacing());
-        treeBox.getChildren().addAll(
-            new Label("Configuration Structure"),
-            configTree
-        );
+        treeBox.getChildren().addAll(new Label("Configuration Structure"), configTree);
         return treeBox;
     }
-    
+
     /**
      * Creates the details box containing the text area.
      *
@@ -169,14 +186,11 @@ public class ConfigBrowserUIFactory {
      */
     public VBox createDetailsBox(TextArea detailsTextArea) {
         VBox detailsBox = new VBox(configuration.getDetailsBoxSpacing());
-        detailsBox.getChildren().addAll(
-            new Label("Details"),
-            detailsTextArea
-        );
+        detailsBox.getChildren().addAll(new Label("Details"), detailsTextArea);
         VBox.setVgrow(detailsTextArea, Priority.ALWAYS);
         return detailsBox;
     }
-    
+
     /**
      * Creates the split pane for tree and details.
      *
@@ -190,7 +204,7 @@ public class ConfigBrowserUIFactory {
         splitPane.setDividerPositions(configuration.getSplitPaneDividerPosition());
         return splitPane;
     }
-    
+
     /**
      * Creates the search field.
      *
@@ -201,7 +215,7 @@ public class ConfigBrowserUIFactory {
         searchField.setPromptText("Search configuration...");
         return searchField;
     }
-    
+
     /**
      * Creates the toolbar.
      *
@@ -211,44 +225,43 @@ public class ConfigBrowserUIFactory {
     public HBox createToolbar(TextField searchField) {
         HBox toolbar = new HBox(configuration.getToolbarSpacing());
         toolbar.setPadding(configuration.getToolbarPadding());
-        toolbar.getChildren().addAll(
-            new Label("Search:"),
-            searchField
-        );
+        toolbar.getChildren().addAll(new Label("Search:"), searchField);
         HBox.setHgrow(searchField, Priority.ALWAYS);
         return toolbar;
     }
-    
-    /**
-     * Custom tree cell for configuration items.
-     */
+
+    /** Custom tree cell for configuration items. */
     private static class ConfigTreeCell extends TreeCell<ConfigBrowserPanel.ConfigItem> {
         @Override
         protected void updateItem(ConfigBrowserPanel.ConfigItem item, boolean empty) {
             super.updateItem(item, empty);
-            
+
             if (empty || item == null) {
                 setText(null);
                 setGraphic(null);
                 return;
             }
-            
+
             setText(item.getName());
-            
+
             // Set icon based on item type
-            String iconPath = switch (item.getType()) {
-                case ROOT -> "/icons/16/home.png";
-                case FOLDER -> "/icons/16/folder.png";
-                case PROJECT_CONFIG, DSL_CONFIG -> "/icons/16/file.png";
-                case STATE -> "/icons/16/state.png";
-                case STATE_IMAGE -> "/icons/16/image.png";
-                case AUTOMATION_BUTTON -> "/icons/16/button.png";
-                case METADATA -> "/icons/16/info.png";
-            };
-            
+            String iconPath =
+                    switch (item.getType()) {
+                        case ROOT -> "/icons/16/home.png";
+                        case FOLDER -> "/icons/16/folder.png";
+                        case PROJECT_CONFIG, DSL_CONFIG -> "/icons/16/file.png";
+                        case STATE -> "/icons/16/state.png";
+                        case STATE_IMAGE -> "/icons/16/image.png";
+                        case AUTOMATION_BUTTON -> "/icons/16/button.png";
+                        case METADATA -> "/icons/16/info.png";
+                    };
+
             try {
-                ImageView icon = new ImageView(
-                    new Image(Objects.requireNonNull(getClass().getResourceAsStream(iconPath))));
+                ImageView icon =
+                        new ImageView(
+                                new Image(
+                                        Objects.requireNonNull(
+                                                getClass().getResourceAsStream(iconPath))));
                 icon.setFitHeight(16);
                 icon.setFitWidth(16);
                 setGraphic(icon);

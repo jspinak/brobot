@@ -1,19 +1,21 @@
 package io.github.jspinak.brobot.monitor;
 
-import io.github.jspinak.brobot.config.core.BrobotProperties;
-import lombok.extern.slf4j.Slf4j;
-import org.sikuli.script.Screen;
-import org.springframework.stereotype.Component;
-
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.sikuli.script.Screen;
+import org.springframework.stereotype.Component;
+
+import io.github.jspinak.brobot.config.core.BrobotProperties;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * Manages multi-monitor support for Brobot automation framework.
- * Provides methods to detect, select, and work with multiple monitors.
+ * Manages multi-monitor support for Brobot automation framework. Provides methods to detect,
+ * select, and work with multiple monitors.
  */
 @Slf4j
 @Component
@@ -33,9 +35,7 @@ public class MonitorManager {
         }
     }
 
-    /**
-     * Detect the primary monitor based on position and Windows settings
-     */
+    /** Detect the primary monitor based on position and Windows settings */
     private int detectPrimaryMonitor(GraphicsDevice[] devices, GraphicsEnvironment ge) {
         // Method 1: Check if GraphicsEnvironment default device matches
         GraphicsDevice defaultDevice = ge.getDefaultScreenDevice();
@@ -63,9 +63,7 @@ public class MonitorManager {
         return closestIndex; // Primary monitor is closest to (0,0)
     }
 
-    /**
-     * Initialize monitor information and cache available monitors
-     */
+    /** Initialize monitor information and cache available monitors */
     private void initializeMonitors() {
         // First check if headless mode is forced via system property
         String headlessProperty = System.getProperty("java.awt.headless");
@@ -107,9 +105,9 @@ public class MonitorManager {
                 MonitorInfo info = new MonitorInfo(i, bounds, device.getIDstring());
                 monitorCache.put(i, info);
 
-                if (monitorSummary.length() > 0)
-                    monitorSummary.append(", ");
-                monitorSummary.append(String.format("Monitor %d: %dx%d", i, bounds.width, bounds.height));
+                if (monitorSummary.length() > 0) monitorSummary.append(", ");
+                monitorSummary.append(
+                        String.format("Monitor %d: %dx%d", i, bounds.width, bounds.height));
             }
             log.info(monitorSummary.toString());
 
@@ -117,8 +115,9 @@ public class MonitorManager {
             primaryMonitorIndex = detectPrimaryMonitor(devices, ge);
 
             if (devices.length > 1 && !properties.getMonitor().isMultiMonitorEnabled()) {
-                log.warn("Multiple monitors detected but multi-monitor support is disabled. " +
-                        "Enable it in configuration: brobot.monitor.multi-monitor-enabled=true");
+                log.warn(
+                        "Multiple monitors detected but multi-monitor support is disabled. Enable"
+                            + " it in configuration: brobot.monitor.multi-monitor-enabled=true");
             }
         } catch (HeadlessException e) {
             log.warn("HeadlessException caught. Creating default monitor for headless mode.", e);
@@ -127,7 +126,8 @@ public class MonitorManager {
             MonitorInfo info = new MonitorInfo(0, bounds, "headless-default");
             monitorCache.put(0, info);
         } catch (Exception e) {
-            log.error("Unexpected error during monitor initialization. Creating default monitor.", e);
+            log.error(
+                    "Unexpected error during monitor initialization. Creating default monitor.", e);
             Rectangle bounds = new Rectangle(0, 0, 1920, 1080);
             MonitorInfo info = new MonitorInfo(0, bounds, "error-default");
             monitorCache.put(0, info);
@@ -136,7 +136,7 @@ public class MonitorManager {
 
     /**
      * Get Screen object for specified monitor index
-     * 
+     *
      * @param monitorIndex The monitor index (0-based)
      * @return Screen object for the specified monitor
      */
@@ -173,7 +173,7 @@ public class MonitorManager {
 
     /**
      * Get Screen object based on configuration and operation context
-     * 
+     *
      * @param operationName Optional operation name for specific monitor assignment
      * @return Appropriate Screen object
      */
@@ -211,7 +211,7 @@ public class MonitorManager {
 
     /**
      * Get all available screens for multi-monitor search
-     * 
+     *
      * @return List of all Screen objects
      */
     public List<Screen> getAllScreens() {
@@ -233,57 +233,45 @@ public class MonitorManager {
         return screens;
     }
 
-    /**
-     * Check if monitor index is valid
-     */
+    /** Check if monitor index is valid */
     public boolean isValidMonitorIndex(int index) {
         return index >= 0 && index < getMonitorCount();
     }
 
-    /**
-     * Get total number of monitors
-     */
+    /** Get total number of monitors */
     public int getMonitorCount() {
         return monitorCache.size();
     }
 
-    /**
-     * Get the index of the primary monitor
-     */
+    /** Get the index of the primary monitor */
     public int getPrimaryMonitorIndex() {
         return primaryMonitorIndex;
     }
 
-    /**
-     * Get monitor information
-     */
+    /** Get monitor information */
     public MonitorInfo getMonitorInfo(int index) {
         return monitorCache.get(index);
     }
 
-    /**
-     * Get all monitor information
-     */
+    /** Get all monitor information */
     public List<MonitorInfo> getAllMonitorInfo() {
         return new ArrayList<>(monitorCache.values());
     }
 
-    /**
-     * Set monitor for specific operation
-     */
+    /** Set monitor for specific operation */
     public void setOperationMonitor(String operationName, int monitorIndex) {
         if (isValidMonitorIndex(monitorIndex)) {
             operationMonitorMap.put(operationName, monitorIndex);
             log.info("Assigned operation '{}' to monitor {}", operationName, monitorIndex);
         } else {
-            log.error("Cannot assign operation '{}' to invalid monitor index: {}",
-                    operationName, monitorIndex);
+            log.error(
+                    "Cannot assign operation '{}' to invalid monitor index: {}",
+                    operationName,
+                    monitorIndex);
         }
     }
 
-    /**
-     * Get the monitor containing a specific point
-     */
+    /** Get the monitor containing a specific point */
     public int getMonitorAtPoint(Point point) {
         for (MonitorInfo info : monitorCache.values()) {
             if (info.getBounds().contains(point)) {
@@ -293,9 +281,7 @@ public class MonitorManager {
         return 0; // Default to primary if not found
     }
 
-    /**
-     * Convert global coordinates to monitor-relative coordinates
-     */
+    /** Convert global coordinates to monitor-relative coordinates */
     public Point toMonitorCoordinates(Point globalPoint, int monitorIndex) {
         MonitorInfo info = monitorCache.get(monitorIndex);
         if (info == null) {
@@ -306,9 +292,7 @@ public class MonitorManager {
         return new Point(globalPoint.x - bounds.x, globalPoint.y - bounds.y);
     }
 
-    /**
-     * Convert monitor-relative coordinates to global coordinates
-     */
+    /** Convert monitor-relative coordinates to global coordinates */
     public Point toGlobalCoordinates(Point monitorPoint, int monitorIndex) {
         MonitorInfo info = monitorCache.get(monitorIndex);
         if (info == null) {
@@ -319,9 +303,7 @@ public class MonitorManager {
         return new Point(monitorPoint.x + bounds.x, monitorPoint.y + bounds.y);
     }
 
-    /**
-     * Information about a monitor
-     */
+    /** Information about a monitor */
     public static class MonitorInfo {
         private final int index;
         private final Rectangle bounds;

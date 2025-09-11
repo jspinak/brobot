@@ -1,16 +1,22 @@
 package io.github.jspinak.brobot.model.element;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.model.state.State;
-import io.github.jspinak.brobot.config.core.ImagePathManager;
-import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
-import io.github.jspinak.brobot.config.core.EarlyImagePathInitializer;
-import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.imageio.ImageIO;
+
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -18,35 +24,29 @@ import org.mockito.MockitoAnnotations;
 import org.sikuli.script.ImagePath;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import io.github.jspinak.brobot.config.core.EarlyImagePathInitializer;
+import io.github.jspinak.brobot.config.core.ImagePathManager;
+import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 
 /**
- * Tests to ensure that image paths are correctly set and identified
- * before images are loaded to Pattern objects.
+ * Tests to ensure that image paths are correctly set and identified before images are loaded to
+ * Pattern objects.
  */
 @DisplayName("Pattern Loading Tests")
-@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
+@DisabledIfEnvironmentVariable(
+        named = "CI",
+        matches = "true",
+        disabledReason = "Test incompatible with CI environment")
 public class PatternLoadingTest extends BrobotTestBase {
 
-    @Mock
-    private ImagePathManager imagePathManager;
+    @Mock private ImagePathManager imagePathManager;
 
-    @Mock
-    private EarlyImagePathInitializer earlyInitializer;
+    @Mock private EarlyImagePathInitializer earlyInitializer;
 
-    @TempDir
-    Path tempDir;
+    @TempDir Path tempDir;
 
     private BufferedImage testImage;
 
@@ -91,14 +91,18 @@ public class PatternLoadingTest extends BrobotTestBase {
             ExecutionEnvironment env = ExecutionEnvironment.getInstance();
             ReflectionTestUtils.setField(env, "mockMode", false);
 
-            try (MockedStatic<BufferedImageUtilities> utilsMock = mockStatic(BufferedImageUtilities.class)) {
-                utilsMock.when(() -> BufferedImageUtilities.getBuffImgFromFile(anyString()))
+            try (MockedStatic<BufferedImageUtilities> utilsMock =
+                    mockStatic(BufferedImageUtilities.class)) {
+                utilsMock
+                        .when(() -> BufferedImageUtilities.getBuffImgFromFile(anyString()))
                         .thenReturn(null);
 
                 // When/Then - Pattern creation should fail
-                assertThrows(IllegalStateException.class, () -> {
-                    new Pattern("nonexistent.png");
-                });
+                assertThrows(
+                        IllegalStateException.class,
+                        () -> {
+                            new Pattern("nonexistent.png");
+                        });
             }
         }
 
@@ -135,8 +139,10 @@ public class PatternLoadingTest extends BrobotTestBase {
             Path imageFile = tempDir.resolve("absolute.png");
             ImageIO.write(testImage, "png", imageFile.toFile());
 
-            try (MockedStatic<BufferedImageUtilities> utilsMock = mockStatic(BufferedImageUtilities.class)) {
-                utilsMock.when(() -> BufferedImageUtilities.getBuffImgFromFile(imageFile.toString()))
+            try (MockedStatic<BufferedImageUtilities> utilsMock =
+                    mockStatic(BufferedImageUtilities.class)) {
+                utilsMock
+                        .when(() -> BufferedImageUtilities.getBuffImgFromFile(imageFile.toString()))
                         .thenReturn(testImage);
 
                 ExecutionEnvironment env = ExecutionEnvironment.getInstance();
@@ -162,10 +168,12 @@ public class PatternLoadingTest extends BrobotTestBase {
             ImageIO.write(testImage, "png", imageFile.toFile());
 
             try (MockedStatic<ImagePath> imagePathMock = mockStatic(ImagePath.class);
-                    MockedStatic<BufferedImageUtilities> utilsMock = mockStatic(BufferedImageUtilities.class)) {
+                    MockedStatic<BufferedImageUtilities> utilsMock =
+                            mockStatic(BufferedImageUtilities.class)) {
 
                 imagePathMock.when(ImagePath::getBundlePath).thenReturn(imagesDir.toString());
-                utilsMock.when(() -> BufferedImageUtilities.getBuffImgFromFile("relative.png"))
+                utilsMock
+                        .when(() -> BufferedImageUtilities.getBuffImgFromFile("relative.png"))
                         .thenReturn(testImage);
 
                 ExecutionEnvironment env = ExecutionEnvironment.getInstance();
@@ -187,8 +195,10 @@ public class PatternLoadingTest extends BrobotTestBase {
             // Given
             String classpathImage = "classpath:test-image.png";
 
-            try (MockedStatic<BufferedImageUtilities> utilsMock = mockStatic(BufferedImageUtilities.class)) {
-                utilsMock.when(() -> BufferedImageUtilities.getBuffImgFromFile(classpathImage))
+            try (MockedStatic<BufferedImageUtilities> utilsMock =
+                    mockStatic(BufferedImageUtilities.class)) {
+                utilsMock
+                        .when(() -> BufferedImageUtilities.getBuffImgFromFile(classpathImage))
                         .thenReturn(testImage);
 
                 ExecutionEnvironment env = ExecutionEnvironment.getInstance();
@@ -209,9 +219,11 @@ public class PatternLoadingTest extends BrobotTestBase {
             // Given
             String jarImage = "jar-image.png";
 
-            try (MockedStatic<BufferedImageUtilities> utilsMock = mockStatic(BufferedImageUtilities.class)) {
+            try (MockedStatic<BufferedImageUtilities> utilsMock =
+                    mockStatic(BufferedImageUtilities.class)) {
                 // Simulate JAR resource loading
-                utilsMock.when(() -> BufferedImageUtilities.getBuffImgFromFile(jarImage))
+                utilsMock
+                        .when(() -> BufferedImageUtilities.getBuffImgFromFile(jarImage))
                         .thenReturn(testImage);
 
                 ExecutionEnvironment env = ExecutionEnvironment.getInstance();
@@ -251,7 +263,8 @@ public class PatternLoadingTest extends BrobotTestBase {
             ImageIO.write(secondaryImg, "png", secondaryImage.toFile());
 
             try (MockedStatic<ImagePath> imagePathMock = mockStatic(ImagePath.class);
-                    MockedStatic<BufferedImageUtilities> utilsMock = mockStatic(BufferedImageUtilities.class)) {
+                    MockedStatic<BufferedImageUtilities> utilsMock =
+                            mockStatic(BufferedImageUtilities.class)) {
 
                 imagePathMock.when(ImagePath::getBundlePath).thenReturn(primaryPath.toString());
                 // Mock ImagePath.getPaths() to return a list (correct return type)
@@ -259,7 +272,8 @@ public class PatternLoadingTest extends BrobotTestBase {
                 imagePathMock.when(ImagePath::getPaths).thenReturn(pathList);
 
                 // Should load from primary path
-                utilsMock.when(() -> BufferedImageUtilities.getBuffImgFromFile("test.png"))
+                utilsMock
+                        .when(() -> BufferedImageUtilities.getBuffImgFromFile("test.png"))
                         .thenReturn(primaryImg);
 
                 ExecutionEnvironment env = ExecutionEnvironment.getInstance();
@@ -287,14 +301,16 @@ public class PatternLoadingTest extends BrobotTestBase {
             ImageIO.write(testImage, "png", secondaryImage.toFile());
 
             try (MockedStatic<ImagePath> imagePathMock = mockStatic(ImagePath.class);
-                    MockedStatic<BufferedImageUtilities> utilsMock = mockStatic(BufferedImageUtilities.class)) {
+                    MockedStatic<BufferedImageUtilities> utilsMock =
+                            mockStatic(BufferedImageUtilities.class)) {
 
                 // Mock ImagePath.getPaths() to return a list (correct return type)
                 List pathList = new ArrayList();
                 imagePathMock.when(ImagePath::getPaths).thenReturn(pathList);
 
                 // First call returns null (not in primary), second returns image
-                utilsMock.when(() -> BufferedImageUtilities.getBuffImgFromFile(anyString()))
+                utilsMock
+                        .when(() -> BufferedImageUtilities.getBuffImgFromFile(anyString()))
                         .thenReturn(null) // Not found in primary
                         .thenReturn(testImage); // Found in secondary
 
@@ -310,7 +326,8 @@ public class PatternLoadingTest extends BrobotTestBase {
                 }
 
                 // Verify search attempted
-                utilsMock.verify(() -> BufferedImageUtilities.getBuffImgFromFile(anyString()),
+                utilsMock.verify(
+                        () -> BufferedImageUtilities.getBuffImgFromFile(anyString()),
                         atLeastOnce());
             }
         }
@@ -327,14 +344,19 @@ public class PatternLoadingTest extends BrobotTestBase {
             ExecutionEnvironment env = ExecutionEnvironment.getInstance();
             ReflectionTestUtils.setField(env, "mockMode", false);
 
-            try (MockedStatic<BufferedImageUtilities> utilsMock = mockStatic(BufferedImageUtilities.class)) {
-                utilsMock.when(() -> BufferedImageUtilities.getBuffImgFromFile("missing.png"))
+            try (MockedStatic<BufferedImageUtilities> utilsMock =
+                    mockStatic(BufferedImageUtilities.class)) {
+                utilsMock
+                        .when(() -> BufferedImageUtilities.getBuffImgFromFile("missing.png"))
                         .thenReturn(null);
 
                 // When/Then
-                IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
-                    new Pattern("missing.png");
-                });
+                IllegalStateException exception =
+                        assertThrows(
+                                IllegalStateException.class,
+                                () -> {
+                                    new Pattern("missing.png");
+                                });
 
                 assertTrue(exception.getMessage().contains("Failed to load image"));
                 assertTrue(exception.getMessage().contains("missing.png"));
@@ -348,17 +370,24 @@ public class PatternLoadingTest extends BrobotTestBase {
             Path unsupportedFile = tempDir.resolve("test.txt");
             Files.writeString(unsupportedFile, "Not an image");
 
-            try (MockedStatic<BufferedImageUtilities> utilsMock = mockStatic(BufferedImageUtilities.class)) {
-                utilsMock.when(() -> BufferedImageUtilities.getBuffImgFromFile(unsupportedFile.toString()))
+            try (MockedStatic<BufferedImageUtilities> utilsMock =
+                    mockStatic(BufferedImageUtilities.class)) {
+                utilsMock
+                        .when(
+                                () ->
+                                        BufferedImageUtilities.getBuffImgFromFile(
+                                                unsupportedFile.toString()))
                         .thenReturn(null); // Simulating unsupported format
 
                 ExecutionEnvironment env = ExecutionEnvironment.getInstance();
                 ReflectionTestUtils.setField(env, "mockMode", false);
 
                 // When/Then
-                assertThrows(IllegalStateException.class, () -> {
-                    new Pattern(unsupportedFile.toString());
-                });
+                assertThrows(
+                        IllegalStateException.class,
+                        () -> {
+                            new Pattern(unsupportedFile.toString());
+                        });
             }
         }
 
@@ -420,8 +449,10 @@ public class PatternLoadingTest extends BrobotTestBase {
             BufferedImage realImage = new BufferedImage(200, 150, BufferedImage.TYPE_INT_RGB);
             ImageIO.write(realImage, "png", imageFile.toFile());
 
-            try (MockedStatic<BufferedImageUtilities> utilsMock = mockStatic(BufferedImageUtilities.class)) {
-                utilsMock.when(() -> BufferedImageUtilities.getBuffImgFromFile(imageFile.toString()))
+            try (MockedStatic<BufferedImageUtilities> utilsMock =
+                    mockStatic(BufferedImageUtilities.class)) {
+                utilsMock
+                        .when(() -> BufferedImageUtilities.getBuffImgFromFile(imageFile.toString()))
                         .thenReturn(realImage);
 
                 ExecutionEnvironment env = ExecutionEnvironment.getInstance();
@@ -449,14 +480,19 @@ public class PatternLoadingTest extends BrobotTestBase {
             ExecutionEnvironment env = ExecutionEnvironment.getInstance();
             ReflectionTestUtils.setField(env, "mockMode", false);
 
-            try (MockedStatic<BufferedImageUtilities> utilsMock = mockStatic(BufferedImageUtilities.class)) {
-                utilsMock.when(() -> BufferedImageUtilities.getBuffImgFromFile("missing-button.png"))
+            try (MockedStatic<BufferedImageUtilities> utilsMock =
+                    mockStatic(BufferedImageUtilities.class)) {
+                utilsMock
+                        .when(() -> BufferedImageUtilities.getBuffImgFromFile("missing-button.png"))
                         .thenReturn(null);
 
                 // When/Then
-                IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
-                    new Pattern("missing-button.png");
-                });
+                IllegalStateException exception =
+                        assertThrows(
+                                IllegalStateException.class,
+                                () -> {
+                                    new Pattern("missing-button.png");
+                                });
 
                 String message = exception.getMessage();
                 assertTrue(message.contains("Failed to load image"));
@@ -475,8 +511,10 @@ public class PatternLoadingTest extends BrobotTestBase {
             Path imageFile = dirWithSpaces.resolve("test image.png");
             ImageIO.write(testImage, "png", imageFile.toFile());
 
-            try (MockedStatic<BufferedImageUtilities> utilsMock = mockStatic(BufferedImageUtilities.class)) {
-                utilsMock.when(() -> BufferedImageUtilities.getBuffImgFromFile(imageFile.toString()))
+            try (MockedStatic<BufferedImageUtilities> utilsMock =
+                    mockStatic(BufferedImageUtilities.class)) {
+                utilsMock
+                        .when(() -> BufferedImageUtilities.getBuffImgFromFile(imageFile.toString()))
                         .thenReturn(testImage);
 
                 ExecutionEnvironment env = ExecutionEnvironment.getInstance();
@@ -500,8 +538,10 @@ public class PatternLoadingTest extends BrobotTestBase {
             Path imageFile = specialDir.resolve("button_v1.2.png");
             ImageIO.write(testImage, "png", imageFile.toFile());
 
-            try (MockedStatic<BufferedImageUtilities> utilsMock = mockStatic(BufferedImageUtilities.class)) {
-                utilsMock.when(() -> BufferedImageUtilities.getBuffImgFromFile(imageFile.toString()))
+            try (MockedStatic<BufferedImageUtilities> utilsMock =
+                    mockStatic(BufferedImageUtilities.class)) {
+                utilsMock
+                        .when(() -> BufferedImageUtilities.getBuffImgFromFile(imageFile.toString()))
                         .thenReturn(testImage);
 
                 ExecutionEnvironment env = ExecutionEnvironment.getInstance();
@@ -529,9 +569,8 @@ public class PatternLoadingTest extends BrobotTestBase {
             ReflectionTestUtils.setField(env, "mockMode", true);
 
             // When
-            StateImage stateImage = new StateImage.Builder()
-                    .addPattern("state-pattern.png")
-                    .build();
+            StateImage stateImage =
+                    new StateImage.Builder().addPattern("state-pattern.png").build();
 
             // Then
             assertFalse(stateImage.getPatterns().isEmpty());
@@ -547,9 +586,10 @@ public class PatternLoadingTest extends BrobotTestBase {
             ReflectionTestUtils.setField(env, "mockMode", true);
 
             // When
-            StateImage stateImage = new StateImage.Builder()
-                    .addPatterns("button1.png", "button2.png", "button3.png")
-                    .build();
+            StateImage stateImage =
+                    new StateImage.Builder()
+                            .addPatterns("button1.png", "button2.png", "button3.png")
+                            .build();
 
             // Then
             assertEquals(3, stateImage.getPatterns().size());

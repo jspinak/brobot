@@ -5,117 +5,91 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 
 /**
- * Jackson Mix-in classes for Brobot model objects.
- * These provide Jackson annotations without modifying the original classes.
+ * Jackson Mix-in classes for Brobot model objects. These provide Jackson annotations without
+ * modifying the original classes.
  */
 public class BrobotJacksonMixins {
 
     /**
-     * Mix-in for classes with Lombok @Builder that need Jackson deserialization.
-     * Apply this to classes that use @Builder but don't have @JsonDeserialize annotation.
+     * Mix-in for classes with Lombok @Builder that need Jackson deserialization. Apply this to
+     * classes that use @Builder but don't have @JsonDeserialize annotation.
      */
     @JsonDeserialize(builder = GenericBuilder.class)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static abstract class BuilderMixin {
-    }
+    public abstract static class BuilderMixin {}
 
-    /**
-     * Generic builder mix-in for Jackson deserialization of Lombok builders.
-     */
+    /** Generic builder mix-in for Jackson deserialization of Lombok builders. */
     @JsonPOJOBuilder(withPrefix = "")
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class GenericBuilder {
-    }
+    public static class GenericBuilder {}
 
-    /**
-     * Mix-in for ActionRecord class
-     */
+    /** Mix-in for ActionRecord class */
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static abstract class ActionRecordMixin {
+    public abstract static class ActionRecordMixin {
         // Ensures LocalDateTime is handled properly
     }
 
-    /**
-     * Mix-in for StateImage class
-     */
+    /** Mix-in for StateImage class */
     @JsonDeserialize(builder = io.github.jspinak.brobot.model.state.StateImage.Builder.class)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static abstract class StateImageMixin {
-    }
+    public abstract static class StateImageMixin {}
 
     /**
-     * Mix-in for StateImage.Builder class
-     * This configures how Jackson should handle the StateImage.Builder
+     * Mix-in for StateImage.Builder class This configures how Jackson should handle the
+     * StateImage.Builder
      */
     @JsonPOJOBuilder(withPrefix = "set", buildMethodName = "build")
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static abstract class StateImageBuilderMixin {
-    }
+    public abstract static class StateImageBuilderMixin {}
 
-    /**
-     * Mix-in for Match class
-     */
+    /** Mix-in for Match class */
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static abstract class MatchMixin {
-    }
+    public abstract static class MatchMixin {}
 
-    /**
-     * Mix-in for Pattern class
-     */
+    /** Mix-in for Pattern class */
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static abstract class PatternMixin {
-    }
+    public abstract static class PatternMixin {}
 
-    /**
-     * Mix-in for Region class
-     */
+    /** Mix-in for Region class */
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static abstract class RegionMixin {
-    }
+    public abstract static class RegionMixin {}
 
-    /**
-     * Mix-in for Location class
-     */
+    /** Mix-in for Location class */
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static abstract class LocationMixin {
-    }
+    public abstract static class LocationMixin {}
 
-    /**
-     * Mix-in for Image class
-     */
+    /** Mix-in for Image class */
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static abstract class ImageMixin {
+    public abstract static class ImageMixin {
         // BufferedImage field should be ignored
     }
 
-    /**
-     * Mix-in for Scene class
-     */
+    /** Mix-in for Scene class */
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static abstract class SceneMixin {
-    }
+    public abstract static class SceneMixin {}
 
-    /**
-     * Mix-in for SearchRegions class
-     */
+    /** Mix-in for SearchRegions class */
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static abstract class SearchRegionsMixin {
-    }
+    public abstract static class SearchRegionsMixin {}
 
-    /**
-     * Registers all mix-ins with an ObjectMapper
-     */
+    /** Registers all mix-ins with an ObjectMapper */
     public static void registerMixins(com.fasterxml.jackson.databind.ObjectMapper mapper) {
         // Register mix-ins for model classes
-        mapper.addMixIn(io.github.jspinak.brobot.model.action.ActionRecord.class, ActionRecordMixin.class);
-        mapper.addMixIn(io.github.jspinak.brobot.model.state.StateImage.class, StateImageMixin.class);
-        mapper.addMixIn(io.github.jspinak.brobot.model.state.StateImage.Builder.class, StateImageBuilderMixin.class);
+        mapper.addMixIn(
+                io.github.jspinak.brobot.model.action.ActionRecord.class, ActionRecordMixin.class);
+        mapper.addMixIn(
+                io.github.jspinak.brobot.model.state.StateImage.class, StateImageMixin.class);
+        mapper.addMixIn(
+                io.github.jspinak.brobot.model.state.StateImage.Builder.class,
+                StateImageBuilderMixin.class);
         mapper.addMixIn(io.github.jspinak.brobot.model.match.Match.class, MatchMixin.class);
         mapper.addMixIn(io.github.jspinak.brobot.model.element.Pattern.class, PatternMixin.class);
         mapper.addMixIn(io.github.jspinak.brobot.model.element.Region.class, RegionMixin.class);
         mapper.addMixIn(io.github.jspinak.brobot.model.element.Location.class, LocationMixin.class);
         mapper.addMixIn(io.github.jspinak.brobot.model.element.Image.class, ImageMixin.class);
         mapper.addMixIn(io.github.jspinak.brobot.model.element.Scene.class, SceneMixin.class);
-        mapper.addMixIn(io.github.jspinak.brobot.model.element.SearchRegions.class, SearchRegionsMixin.class);
+        mapper.addMixIn(
+                io.github.jspinak.brobot.model.element.SearchRegions.class,
+                SearchRegionsMixin.class);
     }
 }

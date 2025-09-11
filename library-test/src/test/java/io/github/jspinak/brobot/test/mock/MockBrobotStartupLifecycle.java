@@ -1,15 +1,15 @@
 package io.github.jspinak.brobot.test.mock;
 
-import io.github.jspinak.brobot.config.core.FrameworkInitializer;
-import io.github.jspinak.brobot.startup.orchestration.FrameworkLifecycleManager;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
+import io.github.jspinak.brobot.config.core.BrobotProperties;
+import io.github.jspinak.brobot.config.core.FrameworkInitializer;
+import io.github.jspinak.brobot.startup.orchestration.FrameworkLifecycleManager;
+
 /**
- * Mock implementation of BrobotStartupLifecycle for tests.
- * This prevents the actual startup lifecycle from running and
- * attempting to initialize SikuliX in headless environments.
+ * Mock implementation of BrobotStartupLifecycle for tests. This prevents the actual startup
+ * lifecycle from running and attempting to initialize SikuliX in headless environments.
  */
 @Component
 @Primary

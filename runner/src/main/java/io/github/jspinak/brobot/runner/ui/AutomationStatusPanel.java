@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.runner.ui;
 
-import io.github.jspinak.brobot.runner.execution.ExecutionState;
-import io.github.jspinak.brobot.runner.execution.ExecutionStatus;
-import io.github.jspinak.brobot.runner.hotkeys.HotkeyManager;
+import java.time.Duration;
+import java.time.format.DateTimeFormatter;
+import java.util.Map;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -10,22 +10,23 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Separator;
 import javafx.scene.layout.*;
-import io.github.jspinak.brobot.runner.ui.components.base.BrobotCard;
-import atlantafx.base.theme.Styles;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
-import java.time.Duration;
-import java.time.format.DateTimeFormatter;
-import java.util.Map;
+import io.github.jspinak.brobot.runner.execution.ExecutionState;
+import io.github.jspinak.brobot.runner.execution.ExecutionStatus;
+import io.github.jspinak.brobot.runner.hotkeys.HotkeyManager;
+import io.github.jspinak.brobot.runner.ui.components.base.BrobotCard;
+
+import atlantafx.base.theme.Styles;
 
 /**
- * Enhanced status panel that displays automation state with visual indicators
- * and hotkey information.
+ * Enhanced status panel that displays automation state with visual indicators and hotkey
+ * information.
  */
 public class AutomationStatusPanel extends BrobotCard {
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
-    
+
     private final Label stateLabel;
     private final Label currentOperationLabel;
     private final Label durationLabel;
@@ -33,7 +34,7 @@ public class AutomationStatusPanel extends BrobotCard {
     private final Circle statusIndicator;
     private final VBox hotkeyInfoBox;
     private final HotkeyManager hotkeyManager;
-    
+
     // Colors for different states
     private static final Color COLOR_IDLE = Color.GRAY;
     private static final Color COLOR_RUNNING = Color.GREEN;
@@ -41,159 +42,166 @@ public class AutomationStatusPanel extends BrobotCard {
     private static final Color COLOR_STOPPED = Color.RED;
     private static final Color COLOR_ERROR = Color.DARKRED;
     private static final Color COLOR_COMPLETED = Color.DARKGREEN;
-    
+
     public AutomationStatusPanel(HotkeyManager hotkeyManager) {
         super("Automation Status");
         this.hotkeyManager = hotkeyManager;
         getStyleClass().add("automation-status-panel");
-        
+
         VBox contentBox = new VBox(10);
         contentBox.setPadding(new Insets(16));
-        
+
         // Main status display
         HBox statusRow = new HBox(15);
         statusRow.setAlignment(Pos.CENTER_LEFT);
-        
+
         // Status indicator circle
         statusIndicator = new Circle(15);
         statusIndicator.setFill(COLOR_IDLE);
         statusIndicator.setStroke(Color.BLACK);
         statusIndicator.setStrokeWidth(2);
-        
+
         // State label
         stateLabel = new Label("IDLE");
         stateLabel.getStyleClass().addAll(Styles.TITLE_2, Styles.TEXT_BOLD);
-        
+
         // Duration label
         durationLabel = new Label("00:00:00");
         durationLabel.getStyleClass().addAll(Styles.TITLE_3, "monospace");
         durationLabel.setStyle("-fx-font-family: monospace;");
-        
+
         statusRow.getChildren().addAll(statusIndicator, stateLabel, createSpacer(), durationLabel);
-        
+
         // Current operation label
         currentOperationLabel = new Label("Ready");
         currentOperationLabel.getStyleClass().add(Styles.TEXT_MUTED);
         currentOperationLabel.setWrapText(true);
-        
+
         // Progress bar
         progressBar = new ProgressBar(0);
         progressBar.setPrefHeight(20);
         progressBar.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(progressBar, Priority.ALWAYS);
-        
+
         // Hotkey info
         hotkeyInfoBox = createHotkeyInfoBox();
-        
+
         // Add all components to content box
-        contentBox.getChildren().addAll(
-            statusRow,
-            currentOperationLabel,
-            progressBar,
-            new Separator(),
-            hotkeyInfoBox
-        );
-        
+        contentBox
+                .getChildren()
+                .addAll(
+                        statusRow,
+                        currentOperationLabel,
+                        progressBar,
+                        new Separator(),
+                        hotkeyInfoBox);
+
         // Add content box to card
         addContent(contentBox);
     }
-    
+
     private Region createSpacer() {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         return spacer;
     }
-    
+
     private VBox createHotkeyInfoBox() {
         VBox box = new VBox(5);
         box.setPadding(new Insets(10, 0, 0, 0));
-        
+
         Label title = new Label("Hotkeys:");
         title.getStyleClass().addAll(Styles.TITLE_4, Styles.TEXT_BOLD);
         box.getChildren().add(title);
-        
+
         updateHotkeyDisplay();
-        
+
         return box;
     }
-    
-    /**
-     * Updates the hotkey display with current mappings
-     */
+
+    /** Updates the hotkey display with current mappings */
     public void updateHotkeyDisplay() {
-        Platform.runLater(() -> {
-            // Clear existing hotkey labels (except title)
-            if (hotkeyInfoBox.getChildren().size() > 1) {
-                hotkeyInfoBox.getChildren().subList(1, hotkeyInfoBox.getChildren().size()).clear();
-            }
-            
-            // Add current hotkey mappings
-            Map<HotkeyManager.HotkeyAction, javafx.scene.input.KeyCombination> hotkeys = hotkeyManager.getAllHotkeys();
-            
-            for (Map.Entry<HotkeyManager.HotkeyAction, javafx.scene.input.KeyCombination> entry : hotkeys.entrySet()) {
-                HotkeyManager.HotkeyAction action = entry.getKey();
-                String keyCombo = hotkeyManager.getHotkeyDisplayString(action);
-                
-                HBox hotkeyRow = new HBox(10);
-                hotkeyRow.setAlignment(Pos.CENTER_LEFT);
-                
-                Label actionLabel = new Label(action.getDisplayName() + ":");
-                actionLabel.setMinWidth(150);
-                actionLabel.setStyle("-fx-font-size: 12px;");
-                
-                Label keyLabel = new Label(keyCombo);
-                keyLabel.setStyle("-fx-font-size: 12px; -fx-font-family: monospace; -fx-font-weight: bold;");
-                
-                hotkeyRow.getChildren().addAll(actionLabel, keyLabel);
-                hotkeyInfoBox.getChildren().add(hotkeyRow);
-            }
-        });
+        Platform.runLater(
+                () -> {
+                    // Clear existing hotkey labels (except title)
+                    if (hotkeyInfoBox.getChildren().size() > 1) {
+                        hotkeyInfoBox
+                                .getChildren()
+                                .subList(1, hotkeyInfoBox.getChildren().size())
+                                .clear();
+                    }
+
+                    // Add current hotkey mappings
+                    Map<HotkeyManager.HotkeyAction, javafx.scene.input.KeyCombination> hotkeys =
+                            hotkeyManager.getAllHotkeys();
+
+                    for (Map.Entry<HotkeyManager.HotkeyAction, javafx.scene.input.KeyCombination>
+                            entry : hotkeys.entrySet()) {
+                        HotkeyManager.HotkeyAction action = entry.getKey();
+                        String keyCombo = hotkeyManager.getHotkeyDisplayString(action);
+
+                        HBox hotkeyRow = new HBox(10);
+                        hotkeyRow.setAlignment(Pos.CENTER_LEFT);
+
+                        Label actionLabel = new Label(action.getDisplayName() + ":");
+                        actionLabel.setMinWidth(150);
+                        actionLabel.setStyle("-fx-font-size: 12px;");
+
+                        Label keyLabel = new Label(keyCombo);
+                        keyLabel.setStyle(
+                                "-fx-font-size: 12px; -fx-font-family: monospace; -fx-font-weight:"
+                                        + " bold;");
+
+                        hotkeyRow.getChildren().addAll(actionLabel, keyLabel);
+                        hotkeyInfoBox.getChildren().add(hotkeyRow);
+                    }
+                });
     }
-    
-    /**
-     * Updates the status display based on execution status
-     */
+
+    /** Updates the status display based on execution status */
     public void updateStatus(ExecutionStatus status) {
-        Platform.runLater(() -> {
-            ExecutionState state = status.getState();
-            
-            // Update state label and color
-            stateLabel.setText(state.name());
-            statusIndicator.setFill(getColorForState(state));
-            
-            // Animate the indicator for running state
-            if (state == ExecutionState.RUNNING) {
-                statusIndicator.setOpacity(0.8);
-                // Could add pulse animation here
-            } else {
-                statusIndicator.setOpacity(1.0);
-            }
-            
-            // Update operation label
-            String operation = status.getCurrentOperation();
-            if (operation != null && !operation.isEmpty()) {
-                currentOperationLabel.setText(operation);
-            } else {
-                currentOperationLabel.setText(getDefaultMessageForState(state));
-            }
-            
-            // Update progress
-            progressBar.setProgress(status.getProgress());
-            
-            // Update duration
-            Duration duration = status.getDuration();
-            if (duration != null) {
-                long hours = duration.toHours();
-                long minutes = duration.toMinutesPart();
-                long seconds = duration.toSecondsPart();
-                durationLabel.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
-            }
-            
-            // Style the progress bar based on state
-            updateProgressBarStyle(state);
-        });
+        Platform.runLater(
+                () -> {
+                    ExecutionState state = status.getState();
+
+                    // Update state label and color
+                    stateLabel.setText(state.name());
+                    statusIndicator.setFill(getColorForState(state));
+
+                    // Animate the indicator for running state
+                    if (state == ExecutionState.RUNNING) {
+                        statusIndicator.setOpacity(0.8);
+                        // Could add pulse animation here
+                    } else {
+                        statusIndicator.setOpacity(1.0);
+                    }
+
+                    // Update operation label
+                    String operation = status.getCurrentOperation();
+                    if (operation != null && !operation.isEmpty()) {
+                        currentOperationLabel.setText(operation);
+                    } else {
+                        currentOperationLabel.setText(getDefaultMessageForState(state));
+                    }
+
+                    // Update progress
+                    progressBar.setProgress(status.getProgress());
+
+                    // Update duration
+                    Duration duration = status.getDuration();
+                    if (duration != null) {
+                        long hours = duration.toHours();
+                        long minutes = duration.toMinutesPart();
+                        long seconds = duration.toSecondsPart();
+                        durationLabel.setText(
+                                String.format("%02d:%02d:%02d", hours, minutes, seconds));
+                    }
+
+                    // Style the progress bar based on state
+                    updateProgressBarStyle(state);
+                });
     }
-    
+
     private Color getColorForState(ExecutionState state) {
         switch (state) {
             case IDLE:
@@ -216,7 +224,7 @@ public class AutomationStatusPanel extends BrobotCard {
                 return COLOR_IDLE;
         }
     }
-    
+
     private String getDefaultMessageForState(ExecutionState state) {
         switch (state) {
             case IDLE:
@@ -243,10 +251,12 @@ public class AutomationStatusPanel extends BrobotCard {
                 return state.name();
         }
     }
-    
+
     private void updateProgressBarStyle(ExecutionState state) {
-        progressBar.getStyleClass().removeAll("progress-bar-success", "progress-bar-warning", "progress-bar-error");
-        
+        progressBar
+                .getStyleClass()
+                .removeAll("progress-bar-success", "progress-bar-warning", "progress-bar-error");
+
         switch (state) {
             case RUNNING:
             case COMPLETED:
@@ -262,17 +272,16 @@ public class AutomationStatusPanel extends BrobotCard {
                 break;
         }
     }
-    
-    /**
-     * Resets the display to initial state
-     */
+
+    /** Resets the display to initial state */
     public void reset() {
-        Platform.runLater(() -> {
-            stateLabel.setText("IDLE");
-            statusIndicator.setFill(COLOR_IDLE);
-            currentOperationLabel.setText("Ready");
-            progressBar.setProgress(0);
-            durationLabel.setText("00:00:00");
-        });
+        Platform.runLater(
+                () -> {
+                    stateLabel.setText("IDLE");
+                    statusIndicator.setFill(COLOR_IDLE);
+                    currentOperationLabel.setText("Ready");
+                    progressBar.setProgress(0);
+                    durationLabel.setText("00:00:00");
+                });
     }
 }

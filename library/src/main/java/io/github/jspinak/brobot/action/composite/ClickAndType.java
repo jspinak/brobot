@@ -1,28 +1,27 @@
 package io.github.jspinak.brobot.action.composite;
 
+import org.springframework.stereotype.Component;
+
+import io.github.jspinak.brobot.action.ActionChainOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.action.ActionConfig;
-import io.github.jspinak.brobot.action.ActionChainOptions;
 import io.github.jspinak.brobot.action.internal.execution.ActionChainExecutor;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.action.basic.click.ClickOptions;
-import io.github.jspinak.brobot.action.basic.type.TypeOptions;
-import org.springframework.stereotype.Component;
 
 /**
  * Modern implementation of Click and Type composite action using the fluent API.
- * 
+ *
  * <p>This composite action performs the common pattern of:
+ *
  * <ol>
- *   <li>Finding a target element (e.g., text field)</li>
- *   <li>Clicking on it to focus</li>
- *   <li>Typing text into it</li>
+ *   <li>Finding a target element (e.g., text field)
+ *   <li>Clicking on it to focus
+ *   <li>Typing text into it
  * </ol>
- * </p>
- * 
+ *
  * <p>Usage:
+ *
  * <pre>{@code
  * // Create the configuration
  * ClickAndTypeOptions options = new ClickAndTypeOptions.Builder()
@@ -36,16 +35,15 @@ import org.springframework.stereotype.Component;
  *         .setPauseBeforeBegin(0.5)
  *         .build())
  *     .build();
- * 
+ *
  * // Use with Action
- * action.perform(options, 
+ * action.perform(options,
  *     new ObjectCollection.Builder()
  *         .withImages(textFieldImage)
  *         .withStrings("text to type")
  *         .build());
  * }</pre>
- * </p>
- * 
+ *
  * @since 2.0
  */
 @Component
@@ -71,22 +69,25 @@ public class ClickAndType implements ActionInterface {
 
         // Get the configuration
         ActionConfig config = matches.getActionConfig();
-        ClickAndTypeOptions options = (config instanceof ClickAndTypeOptions) ?
-            (ClickAndTypeOptions) config : new ClickAndTypeOptions.Builder().build();
+        ClickAndTypeOptions options =
+                (config instanceof ClickAndTypeOptions)
+                        ? (ClickAndTypeOptions) config
+                        : new ClickAndTypeOptions.Builder().build();
 
         // Extract the object collection
         ObjectCollection collection = objectCollections[0];
 
         // Build the action chain: Find → Click → Type
-        ActionChainOptions chainOptions = new ActionChainOptions.Builder(options.getFindOptions())
-            .setStrategy(ActionChainOptions.ChainingStrategy.NESTED)
-            .then(options.getClickOptions())
-            .then(options.getTypeOptions())
-            .build();
+        ActionChainOptions chainOptions =
+                new ActionChainOptions.Builder(options.getFindOptions())
+                        .setStrategy(ActionChainOptions.ChainingStrategy.NESTED)
+                        .then(options.getClickOptions())
+                        .then(options.getTypeOptions())
+                        .build();
 
         // Execute the chain
         ActionResult result = actionChainExecutor.executeChain(chainOptions, matches, collection);
-        
+
         // Copy results back to matches
         matches.setSuccess(result.isSuccess());
         matches.addAll(result.getMatchList());

@@ -1,6 +1,12 @@
 package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.recorder;
 
-import lombok.Getter;
+import java.time.Duration;
+import java.time.LocalDateTime;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.sikuli.script.Mouse;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
@@ -9,11 +15,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.time.Duration;
-import java.time.LocalDateTime;
+import lombok.Getter;
 
 @Primary
 @Component
@@ -41,6 +43,7 @@ public class RecordInputsXML implements RecordInputs {
 
     /**
      * Add recorded action to xml document
+     *
      * @param name - name of the element
      * @param key - key of the Native Event output
      * @param value - the full output of the Native Event
@@ -53,11 +56,15 @@ public class RecordInputsXML implements RecordInputs {
         child.setAttribute("x", Mouse.at().x + "");
         child.setAttribute("y", Mouse.at().y + "");
         child.setAttribute("key", key);
-        child.setAttribute("millis", String.valueOf(Duration.between(startTime, LocalDateTime.now()).toMillis()));
+        child.setAttribute(
+                "millis",
+                String.valueOf(Duration.between(startTime, LocalDateTime.now()).toMillis()));
         child.setAttribute("nativeEventOutput", value);
     }
 
-    /** Copy the action details to a new child elemnt in this doc
+    /**
+     * Copy the action details to a new child elemnt in this doc
+     *
      * @param other the action node to copy
      */
     public void addElement(Node other) {
@@ -69,7 +76,7 @@ public class RecordInputsXML implements RecordInputs {
         child.setAttribute("y", nodeMap.getNamedItem("y").getNodeValue());
         child.setAttribute("key", nodeMap.getNamedItem("key").getNodeValue());
         child.setAttribute("millis", nodeMap.getNamedItem("millis").getNodeValue());
-        child.setAttribute("nativeEventOutput", nodeMap.getNamedItem("nativeEventOutput").getNodeValue());
+        child.setAttribute(
+                "nativeEventOutput", nodeMap.getNamedItem("nativeEventOutput").getNodeValue());
     }
-
 }

@@ -1,6 +1,12 @@
 package io.github.jspinak.brobot.exception;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -9,16 +15,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.stream.Stream;
-
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
- * Comprehensive tests for BrobotRuntimeException.
- * Achieves 100% coverage of all constructors and methods.
+ * Comprehensive tests for BrobotRuntimeException. Achieves 100% coverage of all constructors and
+ * methods.
  */
 @DisplayName("BrobotRuntimeException Tests")
 public class BrobotRuntimeExceptionTest extends BrobotTestBase {
@@ -28,10 +29,10 @@ public class BrobotRuntimeExceptionTest extends BrobotTestBase {
     void testExceptionWithMessage() {
         // Given
         String message = "Test error message";
-        
+
         // When
         BrobotRuntimeException exception = new BrobotRuntimeException(message);
-        
+
         // Then
         assertEquals(message, exception.getMessage());
         assertNull(exception.getCause());
@@ -45,10 +46,10 @@ public class BrobotRuntimeExceptionTest extends BrobotTestBase {
         // Given
         String message = "Wrapper exception message";
         IOException cause = new IOException("IO operation failed");
-        
+
         // When
         BrobotRuntimeException exception = new BrobotRuntimeException(message, cause);
-        
+
         // Then
         assertEquals(message, exception.getMessage());
         assertEquals(cause, exception.getCause());
@@ -61,10 +62,10 @@ public class BrobotRuntimeExceptionTest extends BrobotTestBase {
     void testExceptionWithCauseOnly() {
         // Given
         IllegalArgumentException cause = new IllegalArgumentException("Invalid argument");
-        
+
         // When
         BrobotRuntimeException exception = new BrobotRuntimeException(cause);
-        
+
         // Then
         assertEquals(cause, exception.getCause());
         assertSame(cause, exception.getCause());
@@ -80,7 +81,7 @@ public class BrobotRuntimeExceptionTest extends BrobotTestBase {
     void testVariousMessageFormats(String message) {
         // When
         BrobotRuntimeException exception = new BrobotRuntimeException(message);
-        
+
         // Then
         assertEquals(message, exception.getMessage());
         assertNull(exception.getCause());
@@ -91,10 +92,10 @@ public class BrobotRuntimeExceptionTest extends BrobotTestBase {
     void testNullCauseWithMessage() {
         // Given
         String message = "Exception with null cause";
-        
+
         // When
         BrobotRuntimeException exception = new BrobotRuntimeException(message, null);
-        
+
         // Then
         assertEquals(message, exception.getMessage());
         assertNull(exception.getCause());
@@ -105,7 +106,7 @@ public class BrobotRuntimeExceptionTest extends BrobotTestBase {
     void testNullCauseOnly() {
         // When
         BrobotRuntimeException exception = new BrobotRuntimeException((Throwable) null);
-        
+
         // Then
         assertNull(exception.getCause());
         assertNull(exception.getMessage());
@@ -118,10 +119,10 @@ public class BrobotRuntimeExceptionTest extends BrobotTestBase {
         Exception root = new Exception("Root cause");
         RuntimeException middle = new RuntimeException("Middle exception", root);
         BrobotRuntimeException top = new BrobotRuntimeException("Top level", middle);
-        
+
         // When
         Throwable rootCause = getRootCause(top);
-        
+
         // Then
         assertEquals(middle, top.getCause());
         assertEquals(root, middle.getCause());
@@ -133,15 +134,19 @@ public class BrobotRuntimeExceptionTest extends BrobotTestBase {
     void testThrowAndCatch() {
         // Given
         String message = "Thrown exception";
-        
+
         // When/Then
-        assertThrows(RuntimeException.class, () -> {
-            throw new BrobotRuntimeException(message);
-        });
-        
-        assertThrows(BrobotRuntimeException.class, () -> {
-            throw new BrobotRuntimeException(message);
-        });
+        assertThrows(
+                RuntimeException.class,
+                () -> {
+                    throw new BrobotRuntimeException(message);
+                });
+
+        assertThrows(
+                BrobotRuntimeException.class,
+                () -> {
+                    throw new BrobotRuntimeException(message);
+                });
     }
 
     @Test
@@ -149,13 +154,13 @@ public class BrobotRuntimeExceptionTest extends BrobotTestBase {
     void testStackTraceSerialization() {
         // Given
         BrobotRuntimeException exception = new BrobotRuntimeException("Test stack trace");
-        
+
         // When
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         exception.printStackTrace(pw);
         String stackTrace = sw.toString();
-        
+
         // Then
         assertTrue(stackTrace.contains("BrobotRuntimeException"));
         assertTrue(stackTrace.contains("Test stack trace"));
@@ -168,18 +173,17 @@ public class BrobotRuntimeExceptionTest extends BrobotTestBase {
     void testInheritanceHierarchy(Class<?> expectedSuperclass) {
         // Given
         BrobotRuntimeException exception = new BrobotRuntimeException("Test");
-        
+
         // Then
         assertTrue(expectedSuperclass.isInstance(exception));
     }
 
     private static Stream<Arguments> provideExceptionHierarchy() {
         return Stream.of(
-            Arguments.of(RuntimeException.class),
-            Arguments.of(Exception.class),
-            Arguments.of(Throwable.class),
-            Arguments.of(Object.class)
-        );
+                Arguments.of(RuntimeException.class),
+                Arguments.of(Exception.class),
+                Arguments.of(Throwable.class),
+                Arguments.of(Object.class));
     }
 
     @Test
@@ -189,11 +193,11 @@ public class BrobotRuntimeExceptionTest extends BrobotTestBase {
         BrobotRuntimeException main = new BrobotRuntimeException("Main exception");
         Exception suppressed1 = new Exception("Suppressed 1");
         Exception suppressed2 = new Exception("Suppressed 2");
-        
+
         // When
         main.addSuppressed(suppressed1);
         main.addSuppressed(suppressed2);
-        
+
         // Then
         Throwable[] suppressed = main.getSuppressed();
         assertEquals(2, suppressed.length);
@@ -207,10 +211,10 @@ public class BrobotRuntimeExceptionTest extends BrobotTestBase {
         // Given
         BrobotRuntimeException exception = new BrobotRuntimeException("Test fillInStackTrace");
         int originalLength = exception.getStackTrace().length;
-        
+
         // When
         Throwable filled = exception.fillInStackTrace();
-        
+
         // Then
         assertSame(exception, filled);
         assertTrue(exception.getStackTrace().length >= originalLength);
@@ -222,10 +226,10 @@ public class BrobotRuntimeExceptionTest extends BrobotTestBase {
         // Given
         String message = "Localized message test";
         BrobotRuntimeException exception = new BrobotRuntimeException(message);
-        
+
         // When
         String localizedMessage = exception.getLocalizedMessage();
-        
+
         // Then
         assertEquals(message, localizedMessage);
     }

@@ -1,13 +1,18 @@
 package io.github.jspinak.brobot.runner.ui.log;
 
-import io.github.jspinak.brobot.runner.events.BrobotEvent;
-import io.github.jspinak.brobot.runner.events.EventBus;
-import io.github.jspinak.brobot.runner.events.LogEntryEvent;
-import io.github.jspinak.brobot.runner.events.LogEvent;
-import io.github.jspinak.brobot.runner.persistence.LogQueryService;
-import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
-import io.github.jspinak.brobot.tools.logging.model.LogData;
-import io.github.jspinak.brobot.tools.logging.model.LogEventType;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -28,39 +33,34 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.FileChooser;
-import lombok.Getter;
-import lombok.Setter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
+import io.github.jspinak.brobot.runner.events.BrobotEvent;
+import io.github.jspinak.brobot.runner.events.EventBus;
+import io.github.jspinak.brobot.runner.events.LogEntryEvent;
+import io.github.jspinak.brobot.runner.events.LogEvent;
+import io.github.jspinak.brobot.runner.persistence.LogQueryService;
+import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
+import io.github.jspinak.brobot.tools.logging.model.LogData;
+import io.github.jspinak.brobot.tools.logging.model.LogEventType;
+
+import lombok.Getter;
+import lombok.Setter;
 
 public class LogViewerPanel extends BorderPane implements AutoCloseable {
     private static final Logger logger = LoggerFactory.getLogger(LogViewerPanel.class);
-    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+    private static final DateTimeFormatter TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
     private static final int MAX_LOG_ENTRIES = 10000;
 
     private final EventBus eventBus;
     private final IconRegistry iconRegistry;
     private final LogQueryService logQueryService;
 
-    private final ObservableList<LogEntryViewModel> logEntries = FXCollections.observableArrayList();
+    private final ObservableList<LogEntryViewModel> logEntries =
+            FXCollections.observableArrayList();
     private final FilteredList<LogEntryViewModel> filteredLogs;
     private TableView<LogEntryViewModel> logTable;
     private LogEntryViewModel selectedLogEntry;
@@ -70,10 +70,8 @@ public class LogViewerPanel extends BorderPane implements AutoCloseable {
     private StateVisualizationPanel stateVisualizationPanel;
 
     private TextField searchField;
-    @Getter
-    private ComboBox<String> logTypeFilter;
-    @Getter
-    private ComboBox<String> logLevelFilter;
+    @Getter private ComboBox<String> logTypeFilter;
+    @Getter private ComboBox<String> logLevelFilter;
     private DatePicker startDatePicker;
     private DatePicker endDatePicker;
     private CheckBox autoScrollCheckBox;
@@ -81,7 +79,8 @@ public class LogViewerPanel extends BorderPane implements AutoCloseable {
     private final Consumer<BrobotEvent> eventHandler;
     private final Map<String, Image> imageCache = new ConcurrentHashMap<>();
 
-    public LogViewerPanel(LogQueryService logQueryService, EventBus eventBus, IconRegistry iconRegistry) {
+    public LogViewerPanel(
+            LogQueryService logQueryService, EventBus eventBus, IconRegistry iconRegistry) {
         this.logQueryService = logQueryService;
         this.eventBus = eventBus;
         this.iconRegistry = iconRegistry;
@@ -141,15 +140,21 @@ public class LogViewerPanel extends BorderPane implements AutoCloseable {
         autoScrollCheckBox.setSelected(true);
         Button clearFiltersButton = new Button("Clear Filters");
         clearFiltersButton.setOnAction(e -> clearFilters());
-        filterBar.getChildren().addAll(
-                new Label("Search:"), searchField,
-                new Label("Type:"), logTypeFilter,
-                new Label("Level:"), logLevelFilter,
-                new Label("From:"), startDatePicker,
-                new Label("To:"), endDatePicker,
-                autoScrollCheckBox,
-                clearFiltersButton
-        );
+        filterBar
+                .getChildren()
+                .addAll(
+                        new Label("Search:"),
+                        searchField,
+                        new Label("Type:"),
+                        logTypeFilter,
+                        new Label("Level:"),
+                        logLevelFilter,
+                        new Label("From:"),
+                        startDatePicker,
+                        new Label("To:"),
+                        endDatePicker,
+                        autoScrollCheckBox,
+                        clearFiltersButton);
         topSection.getChildren().addAll(titleLabel, filterBar);
         return topSection;
     }
@@ -169,22 +174,24 @@ public class LogViewerPanel extends BorderPane implements AutoCloseable {
     private void setupLogTable() {
         logTable = new TableView<>();
         logTable.setPlaceholder(new Label("No logs available"));
-        logTable.setRowFactory(tv -> new TableRow<>() {
-            @Override
-            protected void updateItem(LogEntryViewModel item, boolean empty) {
-                super.updateItem(item, empty);
-                getStyleClass().removeAll("log-error", "log-warning", "log-debug");
-                if (empty || item == null) {
-                    setStyle("");
-                } else {
-                    switch (item.getLevel()) {
-                        case "ERROR" -> getStyleClass().add("log-error");
-                        case "WARNING" -> getStyleClass().add("log-warning");
-                        case "DEBUG" -> getStyleClass().add("log-debug");
-                    }
-                }
-            }
-        });
+        logTable.setRowFactory(
+                tv ->
+                        new TableRow<>() {
+                            @Override
+                            protected void updateItem(LogEntryViewModel item, boolean empty) {
+                                super.updateItem(item, empty);
+                                getStyleClass().removeAll("log-error", "log-warning", "log-debug");
+                                if (empty || item == null) {
+                                    setStyle("");
+                                } else {
+                                    switch (item.getLevel()) {
+                                        case "ERROR" -> getStyleClass().add("log-error");
+                                        case "WARNING" -> getStyleClass().add("log-warning");
+                                        case "DEBUG" -> getStyleClass().add("log-debug");
+                                    }
+                                }
+                            }
+                        });
 
         TableColumn<LogEntryViewModel, String> timeColumn = new TableColumn<>("Time");
         timeColumn.setCellValueFactory(param -> param.getValue().timeProperty());
@@ -192,24 +199,29 @@ public class LogViewerPanel extends BorderPane implements AutoCloseable {
 
         TableColumn<LogEntryViewModel, String> levelColumn = new TableColumn<>("Level");
         levelColumn.setCellValueFactory(param -> param.getValue().levelProperty());
-        levelColumn.setCellFactory(column -> new TableCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                    setGraphic(null);
-                } else {
-                    setText(item);
-                    ImageView icon = switch (item) {
-                        case "ERROR" -> iconRegistry.getIconView("error", 16);
-                        case "WARNING" -> iconRegistry.getIconView("warning", 16);
-                        default -> iconRegistry.getIconView("info", 16);
-                    };
-                    setGraphic(icon);
-                }
-            }
-        });
+        levelColumn.setCellFactory(
+                column ->
+                        new TableCell<>() {
+                            @Override
+                            protected void updateItem(String item, boolean empty) {
+                                super.updateItem(item, empty);
+                                if (empty || item == null) {
+                                    setText(null);
+                                    setGraphic(null);
+                                } else {
+                                    setText(item);
+                                    ImageView icon =
+                                            switch (item) {
+                                                case "ERROR" ->
+                                                        iconRegistry.getIconView("error", 16);
+                                                case "WARNING" ->
+                                                        iconRegistry.getIconView("warning", 16);
+                                                default -> iconRegistry.getIconView("info", 16);
+                                            };
+                                    setGraphic(icon);
+                                }
+                            }
+                        });
         levelColumn.setPrefWidth(100);
 
         TableColumn<LogEntryViewModel, String> typeColumn = new TableColumn<>("Type");
@@ -223,10 +235,13 @@ public class LogViewerPanel extends BorderPane implements AutoCloseable {
         logTable.getColumns().addAll(timeColumn, levelColumn, typeColumn, messageColumn);
         logTable.setItems(filteredLogs);
 
-        logTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            selectedLogEntry = newVal;
-            updateDetailPanel(newVal);
-        });
+        logTable.getSelectionModel()
+                .selectedItemProperty()
+                .addListener(
+                        (obs, oldVal, newVal) -> {
+                            selectedLogEntry = newVal;
+                            updateDetailPanel(newVal);
+                        });
     }
 
     private VBox createDetailPanel() {
@@ -254,13 +269,17 @@ public class LogViewerPanel extends BorderPane implements AutoCloseable {
         statusBar.setAlignment(Pos.CENTER_LEFT);
         Label logCountLabel = new Label("Total Logs: 0");
         Label filteredCountLabel = new Label("Filtered: 0");
-        logEntries.addListener((javafx.collections.ListChangeListener<LogEntryViewModel>) c -> {
-            logCountLabel.setText("Total Logs: " + logEntries.size());
-            filteredCountLabel.setText("Filtered: " + filteredLogs.size());
-        });
-        filteredLogs.predicateProperty().addListener((obs, oldVal, newVal) ->
-                filteredCountLabel.setText("Filtered: " + filteredLogs.size())
-        );
+        logEntries.addListener(
+                (javafx.collections.ListChangeListener<LogEntryViewModel>)
+                        c -> {
+                            logCountLabel.setText("Total Logs: " + logEntries.size());
+                            filteredCountLabel.setText("Filtered: " + filteredLogs.size());
+                        });
+        filteredLogs
+                .predicateProperty()
+                .addListener(
+                        (obs, oldVal, newVal) ->
+                                filteredCountLabel.setText("Filtered: " + filteredLogs.size()));
         statusBar.getChildren().addAll(logCountLabel, filteredCountLabel);
         return statusBar;
     }
@@ -272,25 +291,28 @@ public class LogViewerPanel extends BorderPane implements AutoCloseable {
     }
 
     private void handleEvent(BrobotEvent event) {
-        Platform.runLater(() -> {
-            if (event instanceof LogEntryEvent logEntryEvent) {
-                if (logEntryEvent.getLogEntry() != null) addLogEntry(logEntryEvent.getLogEntry());
-            } else if (event instanceof LogEvent logEvent) {
-                addLogEntry(logEvent);
-            }
-        });
+        Platform.runLater(
+                () -> {
+                    if (event instanceof LogEntryEvent logEntryEvent) {
+                        if (logEntryEvent.getLogEntry() != null)
+                            addLogEntry(logEntryEvent.getLogEntry());
+                    } else if (event instanceof LogEvent logEvent) {
+                        addLogEntry(logEvent);
+                    }
+                });
     }
 
     public void refreshLogs() {
-        Platform.runLater(() -> {
-            clearLogDisplay();
-            List<LogData> recentLogs = logQueryService.getRecentLogs(200);
-            List<LogEntryViewModel> newViewModels = new ArrayList<>();
-            for (LogData logData : recentLogs) {
-                newViewModels.add(new LogEntryViewModel(logData));
-            }
-            logEntries.addAll(newViewModels);
-        });
+        Platform.runLater(
+                () -> {
+                    clearLogDisplay();
+                    List<LogData> recentLogs = logQueryService.getRecentLogs(200);
+                    List<LogEntryViewModel> newViewModels = new ArrayList<>();
+                    for (LogData logData : recentLogs) {
+                        newViewModels.add(new LogEntryViewModel(logData));
+                    }
+                    logEntries.addAll(newViewModels);
+                });
     }
 
     private void clearLogDisplay() {
@@ -347,35 +369,44 @@ public class LogViewerPanel extends BorderPane implements AutoCloseable {
     }
 
     private void applyFilters() {
-        String searchText = searchField.getText() != null ? searchField.getText().toLowerCase() : "";
+        String searchText =
+                searchField.getText() != null ? searchField.getText().toLowerCase() : "";
         String selectedType = logTypeFilter.getValue();
         String selectedLevel = logLevelFilter.getValue();
         java.time.LocalDate startDate = startDatePicker.getValue();
         java.time.LocalDate endDate = endDatePicker.getValue();
 
-        Predicate<LogEntryViewModel> predicate = entry -> {
-            if (!searchText.isEmpty() && !entry.getMessage().toLowerCase().contains(searchText) && !entry.getType().toLowerCase().contains(searchText)) {
-                return false;
-            }
-            if (selectedType != null && !"All Types".equals(selectedType) && !entry.getType().equals(selectedType)) {
-                return false;
-            }
-            if (selectedLevel != null && !"All Levels".equals(selectedLevel) && !entry.getLevel().equals(selectedLevel)) {
-                return false;
-            }
-            try {
-                LocalDateTime entryTime = LocalDateTime.parse(entry.getTime(), TIME_FORMATTER);
-                if (startDate != null && entryTime.toLocalDate().isBefore(startDate)) {
-                    return false;
-                }
-                if (endDate != null && entryTime.toLocalDate().isAfter(endDate)) {
-                    return false;
-                }
-            } catch (Exception e) {
-                return true;
-            }
-            return true;
-        };
+        Predicate<LogEntryViewModel> predicate =
+                entry -> {
+                    if (!searchText.isEmpty()
+                            && !entry.getMessage().toLowerCase().contains(searchText)
+                            && !entry.getType().toLowerCase().contains(searchText)) {
+                        return false;
+                    }
+                    if (selectedType != null
+                            && !"All Types".equals(selectedType)
+                            && !entry.getType().equals(selectedType)) {
+                        return false;
+                    }
+                    if (selectedLevel != null
+                            && !"All Levels".equals(selectedLevel)
+                            && !entry.getLevel().equals(selectedLevel)) {
+                        return false;
+                    }
+                    try {
+                        LocalDateTime entryTime =
+                                LocalDateTime.parse(entry.getTime(), TIME_FORMATTER);
+                        if (startDate != null && entryTime.toLocalDate().isBefore(startDate)) {
+                            return false;
+                        }
+                        if (endDate != null && entryTime.toLocalDate().isAfter(endDate)) {
+                            return false;
+                        }
+                    } catch (Exception e) {
+                        return true;
+                    }
+                    return true;
+                };
         filteredLogs.setPredicate(predicate);
     }
 
@@ -391,22 +422,29 @@ public class LogViewerPanel extends BorderPane implements AutoCloseable {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Clear Logs");
         alert.setHeaderText("Clear all logs?");
-        alert.setContentText("This will remove all logs from the viewer. This operation cannot be undone.");
-        alert.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
-                clearLogDisplay();
-            }
-        });
+        alert.setContentText(
+                "This will remove all logs from the viewer. This operation cannot be undone.");
+        alert.showAndWait()
+                .ifPresent(
+                        response -> {
+                            if (response == ButtonType.OK) {
+                                clearLogDisplay();
+                            }
+                        });
     }
 
     protected void exportLogs() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Export Logs");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Text Files", "*.txt"),
-                new FileChooser.ExtensionFilter("CSV Files", "*.csv")
-        );
-        fileChooser.setInitialFileName("logs_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".txt");
+        fileChooser
+                .getExtensionFilters()
+                .addAll(
+                        new FileChooser.ExtensionFilter("Text Files", "*.txt"),
+                        new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+        fileChooser.setInitialFileName(
+                "logs_"
+                        + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"))
+                        + ".txt");
         File file = fileChooser.showSaveDialog(getScene().getWindow());
         if (file != null) {
             if (file.getName().toLowerCase().endsWith(".csv")) {
@@ -434,12 +472,20 @@ public class LogViewerPanel extends BorderPane implements AutoCloseable {
             writer.println("Time,Level,Type,Success,Message");
             for (LogEntryViewModel entry : filteredLogs) {
                 writer.println(
-                        "\"" + entry.getTime() + "\"," +
-                                "\"" + entry.getLevel() + "\"," +
-                                "\"" + entry.getType() + "\"," +
-                                (entry.isSuccess() ? "Yes" : "No") + "," +
-                                "\"" + entry.getMessage().replace("\"", "\"\"") + "\""
-                );
+                        "\""
+                                + entry.getTime()
+                                + "\","
+                                + "\""
+                                + entry.getLevel()
+                                + "\","
+                                + "\""
+                                + entry.getType()
+                                + "\","
+                                + (entry.isSuccess() ? "Yes" : "No")
+                                + ","
+                                + "\""
+                                + entry.getMessage().replace("\"", "\"\"")
+                                + "\"");
             }
             showExportSuccessMessage(file.getAbsolutePath());
         } catch (IOException e) {
@@ -448,14 +494,22 @@ public class LogViewerPanel extends BorderPane implements AutoCloseable {
     }
 
     protected void showExportSuccessMessage(String filePath) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION, "Logs exported to:\n" + filePath, ButtonType.OK);
+        Alert alert =
+                new Alert(
+                        Alert.AlertType.INFORMATION,
+                        "Logs exported to:\n" + filePath,
+                        ButtonType.OK);
         alert.setTitle("Export Successful");
         alert.setHeaderText(null);
         alert.showAndWait();
     }
 
     protected void showExportErrorMessage(String errorMessage) {
-        Alert alert = new Alert(Alert.AlertType.ERROR, "Error exporting logs:\n" + errorMessage, ButtonType.OK);
+        Alert alert =
+                new Alert(
+                        Alert.AlertType.ERROR,
+                        "Error exporting logs:\n" + errorMessage,
+                        ButtonType.OK);
         alert.setTitle("Export Error");
         alert.setHeaderText(null);
         alert.showAndWait();
@@ -478,14 +532,14 @@ public class LogViewerPanel extends BorderPane implements AutoCloseable {
         private final SimpleStringProperty type = new SimpleStringProperty();
         private final SimpleStringProperty message = new SimpleStringProperty();
         private final SimpleBooleanProperty success = new SimpleBooleanProperty();
-        @Getter @Setter
-        private LogData rawLogData;
+        @Getter @Setter private LogData rawLogData;
 
         public LogEntryViewModel() {}
 
         public LogEntryViewModel(LogData logData) {
             this.rawLogData = logData;
-            LocalDateTime timestamp = LocalDateTime.ofInstant(logData.getTimestamp(), ZoneId.systemDefault());
+            LocalDateTime timestamp =
+                    LocalDateTime.ofInstant(logData.getTimestamp(), ZoneId.systemDefault());
             this.time.set(timestamp.format(TIME_FORMATTER));
             this.type.set(logData.getType() != null ? logData.getType().toString() : "UNKNOWN");
             this.message.set(logData.getDescription());
@@ -501,7 +555,9 @@ public class LogViewerPanel extends BorderPane implements AutoCloseable {
 
         public LogEntryViewModel(LogEvent logEvent) {
             this.level.set(logEvent.getLevel().name());
-            this.success.set(logEvent.getLevel() == LogEvent.LogLevel.INFO || logEvent.getLevel() == LogEvent.LogLevel.DEBUG);
+            this.success.set(
+                    logEvent.getLevel() == LogEvent.LogLevel.INFO
+                            || logEvent.getLevel() == LogEvent.LogLevel.DEBUG);
             this.message.set(logEvent.getMessage());
             LogData tempLogData = new LogData();
             tempLogData.setSuccess(isSuccess());
@@ -512,31 +568,72 @@ public class LogViewerPanel extends BorderPane implements AutoCloseable {
             }
             this.rawLogData = tempLogData;
             try {
-                this.type.set(LogEventType.valueOf(logEvent.getCategory().toUpperCase()).toString());
+                this.type.set(
+                        LogEventType.valueOf(logEvent.getCategory().toUpperCase()).toString());
             } catch (Exception e) {
                 this.type.set(LogEventType.SYSTEM.toString());
             }
         }
 
-        public String getTime() { return time.get(); }
-        public void setTime(String value) { time.set(value); }
-        public SimpleStringProperty timeProperty() { return time; }
+        public String getTime() {
+            return time.get();
+        }
 
-        public String getLevel() { return level.get(); }
-        public void setLevel(String value) { level.set(value); }
-        public SimpleStringProperty levelProperty() { return level; }
+        public void setTime(String value) {
+            time.set(value);
+        }
 
-        public String getType() { return type.get(); }
-        public void setType(String value) { type.set(value); }
-        public SimpleStringProperty typeProperty() { return type; }
+        public SimpleStringProperty timeProperty() {
+            return time;
+        }
 
-        public String getMessage() { return message.get(); }
-        public void setMessage(String value) { message.set(value); }
-        public SimpleStringProperty messageProperty() { return message; }
+        public String getLevel() {
+            return level.get();
+        }
 
-        public boolean isSuccess() { return success.get(); }
-        public void setSuccess(boolean value) { success.set(value); }
-        public SimpleBooleanProperty successProperty() { return success; }
+        public void setLevel(String value) {
+            level.set(value);
+        }
+
+        public SimpleStringProperty levelProperty() {
+            return level;
+        }
+
+        public String getType() {
+            return type.get();
+        }
+
+        public void setType(String value) {
+            type.set(value);
+        }
+
+        public SimpleStringProperty typeProperty() {
+            return type;
+        }
+
+        public String getMessage() {
+            return message.get();
+        }
+
+        public void setMessage(String value) {
+            message.set(value);
+        }
+
+        public SimpleStringProperty messageProperty() {
+            return message;
+        }
+
+        public boolean isSuccess() {
+            return success.get();
+        }
+
+        public void setSuccess(boolean value) {
+            success.set(value);
+        }
+
+        public SimpleBooleanProperty successProperty() {
+            return success;
+        }
 
         public String getDetailedText() {
             if (rawLogData == null) return "No raw data available.";
@@ -546,13 +643,18 @@ public class LogViewerPanel extends BorderPane implements AutoCloseable {
             sb.append("Type: ").append(getType()).append("\n");
             sb.append("Success: ").append(isSuccess()).append("\n\n");
             sb.append("Message: ").append(getMessage()).append("\n\n");
-            if (rawLogData.getActionType() != null) sb.append("Action Type: ").append(rawLogData.getActionType()).append("\n");
-            if (rawLogData.getErrorMessage() != null) sb.append("Error: ").append(rawLogData.getErrorMessage()).append("\n");
+            if (rawLogData.getActionType() != null)
+                sb.append("Action Type: ").append(rawLogData.getActionType()).append("\n");
+            if (rawLogData.getErrorMessage() != null)
+                sb.append("Error: ").append(rawLogData.getErrorMessage()).append("\n");
             if (rawLogData.getCurrentStateName() != null) {
                 sb.append("Current State: ").append(rawLogData.getCurrentStateName()).append("\n");
             }
-            if (rawLogData.getPerformance() != null && rawLogData.getPerformance().getActionDuration() > 0) {
-                sb.append("Action Duration: ").append(rawLogData.getPerformance().getActionDuration()).append(" ms\n");
+            if (rawLogData.getPerformance() != null
+                    && rawLogData.getPerformance().getActionDuration() > 0) {
+                sb.append("Action Duration: ")
+                        .append(rawLogData.getPerformance().getActionDuration())
+                        .append(" ms\n");
             }
             return sb.toString();
         }
@@ -569,37 +671,54 @@ public class LogViewerPanel extends BorderPane implements AutoCloseable {
             titleLabel.setFont(Font.font("System", FontWeight.BOLD, 14));
             stateCanvas = new Pane();
             stateCanvas.setMinHeight(200);
-            stateCanvas.setStyle("-fx-border-color: #cccccc; -fx-border-radius: 5; -fx-background-color: white;");
+            stateCanvas.setStyle(
+                    "-fx-border-color: #cccccc; -fx-border-radius: 5; -fx-background-color:"
+                            + " white;");
             getChildren().addAll(titleLabel, stateCanvas);
         }
 
         public void setStates(List<String> fromStates, List<String> toStates) {
-            Platform.runLater(() -> {
-                stateCanvas.getChildren().clear();
-                titleLabel.setText("State Transition: " + String.join(", ", fromStates) + " → " + String.join(", ", toStates));
-                double canvasWidth = stateCanvas.getWidth() > 0 ? stateCanvas.getWidth() : 600;
-                double canvasHeight = stateCanvas.getHeight() > 0 ? stateCanvas.getHeight() : 200;
-                drawStateGroup(fromStates, canvasWidth * 0.2, canvasHeight / 2);
-                drawStateGroup(toStates, canvasWidth * 0.8, canvasHeight / 2);
-                drawArrow(canvasWidth * 0.2 + 35, canvasHeight / 2, canvasWidth * 0.8 - 35, canvasHeight / 2);
-            });
+            Platform.runLater(
+                    () -> {
+                        stateCanvas.getChildren().clear();
+                        titleLabel.setText(
+                                "State Transition: "
+                                        + String.join(", ", fromStates)
+                                        + " → "
+                                        + String.join(", ", toStates));
+                        double canvasWidth =
+                                stateCanvas.getWidth() > 0 ? stateCanvas.getWidth() : 600;
+                        double canvasHeight =
+                                stateCanvas.getHeight() > 0 ? stateCanvas.getHeight() : 200;
+                        drawStateGroup(fromStates, canvasWidth * 0.2, canvasHeight / 2);
+                        drawStateGroup(toStates, canvasWidth * 0.8, canvasHeight / 2);
+                        drawArrow(
+                                canvasWidth * 0.2 + 35,
+                                canvasHeight / 2,
+                                canvasWidth * 0.8 - 35,
+                                canvasHeight / 2);
+                    });
         }
 
         public void setCurrentState(String stateName) {
-            Platform.runLater(() -> {
-                stateCanvas.getChildren().clear();
-                titleLabel.setText("Current State: " + stateName);
-                double canvasWidth = stateCanvas.getWidth() > 0 ? stateCanvas.getWidth() : 600;
-                double canvasHeight = stateCanvas.getHeight() > 0 ? stateCanvas.getHeight() : 200;
-                drawState(stateName, canvasWidth / 2, canvasHeight / 2);
-            });
+            Platform.runLater(
+                    () -> {
+                        stateCanvas.getChildren().clear();
+                        titleLabel.setText("Current State: " + stateName);
+                        double canvasWidth =
+                                stateCanvas.getWidth() > 0 ? stateCanvas.getWidth() : 600;
+                        double canvasHeight =
+                                stateCanvas.getHeight() > 0 ? stateCanvas.getHeight() : 200;
+                        drawState(stateName, canvasWidth / 2, canvasHeight / 2);
+                    });
         }
 
         public void clearStates() {
-            Platform.runLater(() -> {
-                stateCanvas.getChildren().clear();
-                titleLabel.setText("State Visualization");
-            });
+            Platform.runLater(
+                    () -> {
+                        stateCanvas.getChildren().clear();
+                        titleLabel.setText("State Visualization");
+                    });
         }
 
         private void drawStateGroup(List<String> stateNames, double x, double y) {
@@ -629,11 +748,15 @@ public class LogViewerPanel extends BorderPane implements AutoCloseable {
             double angle = Math.atan2(endY - startY, endX - startX);
             double arrowHeadSize = 10;
             Polygon arrowHead = new Polygon();
-            arrowHead.getPoints().addAll(
-                    endX, endY,
-                    endX - arrowHeadSize * Math.cos(angle - Math.PI / 6), endY - arrowHeadSize * Math.sin(angle - Math.PI / 6),
-                    endX - arrowHeadSize * Math.cos(angle + Math.PI / 6), endY - arrowHeadSize * Math.sin(angle + Math.PI / 6)
-            );
+            arrowHead
+                    .getPoints()
+                    .addAll(
+                            endX,
+                            endY,
+                            endX - arrowHeadSize * Math.cos(angle - Math.PI / 6),
+                            endY - arrowHeadSize * Math.sin(angle - Math.PI / 6),
+                            endX - arrowHeadSize * Math.cos(angle + Math.PI / 6),
+                            endY - arrowHeadSize * Math.sin(angle + Math.PI / 6));
             stateCanvas.getChildren().addAll(line, arrowHead);
         }
     }

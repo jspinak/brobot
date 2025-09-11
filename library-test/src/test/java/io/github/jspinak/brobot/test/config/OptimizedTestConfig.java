@@ -1,19 +1,20 @@
 package io.github.jspinak.brobot.test.config;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
+
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 
 /**
- * Optimized test configuration for integration tests.
- * Reduces initialization overhead and optimizes resource usage.
+ * Optimized test configuration for integration tests. Reduces initialization overhead and optimizes
+ * resource usage.
  */
 @TestConfiguration
 public class OptimizedTestConfig implements BeforeAllCallback {
@@ -46,13 +47,14 @@ public class OptimizedTestConfig implements BeforeAllCallback {
         FrameworkSettings.mockTimeClassify = 0.03;
 
         // Configure thread pools for optimal test performance
-        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
+        System.setProperty(
+                "java.util.concurrent.ForkJoinPool.common.parallelism",
                 String.valueOf(Runtime.getRuntime().availableProcessors()));
     }
 
     /**
-     * Provide a shared executor service for test operations.
-     * This reduces the overhead of creating new thread pools for each test.
+     * Provide a shared executor service for test operations. This reduces the overhead of creating
+     * new thread pools for each test.
      */
     @Bean
     @Primary
@@ -61,9 +63,7 @@ public class OptimizedTestConfig implements BeforeAllCallback {
         return Executors.newFixedThreadPool(Math.max(2, cores / 2));
     }
 
-    /**
-     * Provide an optimized ForkJoinPool for parallel operations.
-     */
+    /** Provide an optimized ForkJoinPool for parallel operations. */
     @Bean
     public ForkJoinPool testForkJoinPool() {
         int parallelism = Math.max(2, Runtime.getRuntime().availableProcessors() / 2);

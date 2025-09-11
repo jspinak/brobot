@@ -1,22 +1,23 @@
 package io.github.jspinak.brobot.action.basic.mouse;
 
-import io.github.jspinak.brobot.action.ActionConfig;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import lombok.Getter;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+
+import lombok.Getter;
 
 /**
  * Configuration for Move Mouse actions.
- * <p>
- * This class encapsulates parameters for controlling the mouse movement speed.
- * It is an immutable object and must be constructed using its inner
- * {@link Builder}.
- * <p>
- * This specialized configuration enhances API clarity by only exposing options
- * relevant to mouse movement.
+ *
+ * <p>This class encapsulates parameters for controlling the mouse movement speed. It is an
+ * immutable object and must be constructed using its inner {@link Builder}.
+ *
+ * <p>This specialized configuration enhances API clarity by only exposing options relevant to mouse
+ * movement.
  *
  * @see ActionConfig
  * @see io.github.jspinak.brobot.action.basic.mouse.MoveMouse
@@ -32,21 +33,16 @@ public final class MouseMoveOptions extends ActionConfig {
         this.moveMouseDelay = builder.moveMouseDelay;
     }
 
-    /**
-     * Builder for constructing {@link MouseMoveOptions} with a fluent API.
-     */
+    /** Builder for constructing {@link MouseMoveOptions} with a fluent API. */
     @JsonPOJOBuilder(withPrefix = "set")
     public static class Builder extends ActionConfig.Builder<Builder> {
 
         @JsonProperty("moveMouseDelay")
         private float moveMouseDelay = FrameworkSettings.moveMouseDelay;
 
-        /**
-         * Default constructor for creating a new MouseMoveOptions configuration.
-         */
+        /** Default constructor for creating a new MouseMoveOptions configuration. */
         @JsonCreator
-        public Builder() {
-        }
+        public Builder() {}
 
         /**
          * Creates a new Builder instance pre-populated with values from an existing
@@ -60,9 +56,8 @@ public final class MouseMoveOptions extends ActionConfig {
         }
 
         /**
-         * Sets the delay for each step of the mouse movement, effectively controlling
-         * the speed of the mouse. A higher value results in a slower mouse movement.
-         * The value is in seconds.
+         * Sets the delay for each step of the mouse movement, effectively controlling the speed of
+         * the mouse. A higher value results in a slower mouse movement. The value is in seconds.
          *
          * @param moveMouseDelay The delay in seconds for each mouse movement step.
          * @return this Builder instance for chaining.

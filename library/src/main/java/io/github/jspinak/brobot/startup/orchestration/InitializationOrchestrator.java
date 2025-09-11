@@ -1,23 +1,13 @@
 package io.github.jspinak.brobot.startup.orchestration;
 
-import io.github.jspinak.brobot.annotations.AnnotationProcessor;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
-import io.github.jspinak.brobot.config.core.BrobotPropertiesInitializer;
-import io.github.jspinak.brobot.config.dpi.AutoScalingConfiguration;
-import io.github.jspinak.brobot.config.environment.ExecutionEnvironmentConfig;
-import io.github.jspinak.brobot.config.logging.SikuliXLoggingConfig;
-import io.github.jspinak.brobot.config.mock.MockConfiguration;
-import io.github.jspinak.brobot.startup.state.InitialStateAutoConfiguration;
-import io.github.jspinak.brobot.config.core.FrameworkSettingsConfig;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.config.core.EarlyImagePathInitializer;
-import io.github.jspinak.brobot.statemanagement.InitialStates;
-import io.github.jspinak.brobot.statemanagement.SearchRegionDependencyInitializer;
-import io.github.jspinak.brobot.statemanagement.StateMemory;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporterInitializer;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import jakarta.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -30,42 +20,49 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
+import io.github.jspinak.brobot.annotations.AnnotationProcessor;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
+import io.github.jspinak.brobot.config.core.BrobotPropertiesInitializer;
+import io.github.jspinak.brobot.config.core.EarlyImagePathInitializer;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.FrameworkSettingsConfig;
+import io.github.jspinak.brobot.config.dpi.AutoScalingConfiguration;
+import io.github.jspinak.brobot.config.environment.ExecutionEnvironmentConfig;
+import io.github.jspinak.brobot.config.logging.SikuliXLoggingConfig;
+import io.github.jspinak.brobot.config.mock.MockConfiguration;
+import io.github.jspinak.brobot.startup.state.InitialStateAutoConfiguration;
+import io.github.jspinak.brobot.statemanagement.InitialStates;
+import io.github.jspinak.brobot.statemanagement.SearchRegionDependencyInitializer;
+import io.github.jspinak.brobot.statemanagement.StateMemory;
+import io.github.jspinak.brobot.tools.logging.ConsoleReporterInitializer;
+
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Central orchestrator for Brobot's critical initialization path.
- * 
- * <p>
- * This orchestrator provides:
- * </p>
+ *
+ * <p>This orchestrator provides:
+ *
  * <ul>
- * <li>Clear visibility of initialization phases and their order</li>
- * <li>Centralized error handling and recovery</li>
- * <li>Performance monitoring of initialization steps</li>
- * <li>Health check status for each phase</li>
- * <li>Conditional initialization based on configuration</li>
+ *   <li>Clear visibility of initialization phases and their order
+ *   <li>Centralized error handling and recovery
+ *   <li>Performance monitoring of initialization steps
+ *   <li>Health check status for each phase
+ *   <li>Conditional initialization based on configuration
  * </ul>
- * 
- * <p>
- * Initialization Phases:
- * </p>
+ *
+ * <p>Initialization Phases:
+ *
  * <ol>
- * <li><b>Phase 0: Early Core</b> - Logging suppression, DPI settings</li>
- * <li><b>Phase 1: Core Configuration</b> - Properties, framework settings, mock
- * mode</li>
- * <li><b>Phase 2: Environment Setup</b> - Execution environment, auto-scaling,
- * image paths</li>
- * <li><b>Phase 3: Component Initialization</b> - State dependencies,
- * annotations, reporters</li>
- * <li><b>Phase 4: State Activation</b> - Initial state discovery and
- * activation</li>
+ *   <li><b>Phase 0: Early Core</b> - Logging suppression, DPI settings
+ *   <li><b>Phase 1: Core Configuration</b> - Properties, framework settings, mock mode
+ *   <li><b>Phase 2: Environment Setup</b> - Execution environment, auto-scaling, image paths
+ *   <li><b>Phase 3: Component Initialization</b> - State dependencies, annotations, reporters
+ *   <li><b>Phase 4: State Activation</b> - Initial state discovery and activation
  * </ol>
- * 
+ *
  * @since 1.3.0
  */
 @Slf4j
@@ -99,32 +96,32 @@ public class InitializationOrchestrator {
 
     @Autowired(required = false)
     private EarlyImagePathInitializer imagePathInitializer;
-    
+
     // Capture services
     @Autowired(required = false)
     private io.github.jspinak.brobot.capture.ScreenResolutionManager screenResolutionManager;
-    
+
     @Autowired(required = false)
     private io.github.jspinak.brobot.capture.UnifiedCaptureService unifiedCaptureService;
-    
+
     @Autowired(required = false)
     private io.github.jspinak.brobot.capture.BrobotCaptureService brobotCaptureService;
-    
+
     @Autowired(required = false)
     private io.github.jspinak.brobot.capture.BrobotScreenCapture brobotScreenCapture;
-    
+
     // DPI Configuration
     @Autowired(required = false)
     private io.github.jspinak.brobot.config.dpi.DPIConfiguration dpiConfiguration;
-    
+
     // Utilities
     @Autowired(required = false)
     private io.github.jspinak.brobot.util.image.core.BufferedImageUtilities bufferedImageUtilities;
-    
+
     // Property verification
     @Autowired(required = false)
     private io.github.jspinak.brobot.config.core.BrobotPropertyVerifier propertyVerifier;
-    
+
     // Diagnostics
     @Autowired(required = false)
     private io.github.jspinak.brobot.config.environment.HeadlessDiagnostics headlessDiagnostics;
@@ -134,7 +131,8 @@ public class InitializationOrchestrator {
     private SearchRegionDependencyInitializer searchRegionInitializer;
 
     @Autowired(required = false)
-    private io.github.jspinak.brobot.initialization.StateInitializationOrchestrator stateInitializationOrchestrator;
+    private io.github.jspinak.brobot.initialization.StateInitializationOrchestrator
+            stateInitializationOrchestrator;
 
     @Autowired(required = false)
     private AnnotationProcessor annotationProcessor;
@@ -162,14 +160,11 @@ public class InitializationOrchestrator {
     private InitialStateAutoConfiguration initialStateAutoConfiguration;
 
     // Initialization tracking
-    @Getter
-    private final Map<String, PhaseStatus> phaseStatuses = new ConcurrentHashMap<>();
+    @Getter private final Map<String, PhaseStatus> phaseStatuses = new ConcurrentHashMap<>();
     private final AtomicBoolean initializationComplete = new AtomicBoolean(false);
     private Instant startTime;
 
-    /**
-     * Phase status tracking for health checks and debugging.
-     */
+    /** Phase status tracking for health checks and debugging. */
     @Getter
     public static class PhaseStatus {
         private final String name;
@@ -206,8 +201,8 @@ public class InitializationOrchestrator {
     }
 
     /**
-     * Phase 0: Early core initialization - runs immediately after bean creation.
-     * Critical for suppressing unwanted logs and setting up core framework.
+     * Phase 0: Early core initialization - runs immediately after bean creation. Critical for
+     * suppressing unwanted logs and setting up core framework.
      */
     @PostConstruct
     public void initializeEarlyCore() {
@@ -242,10 +237,7 @@ public class InitializationOrchestrator {
         }
     }
 
-    /**
-     * Phase 1: Core configuration - triggered when application environment is
-     * prepared.
-     */
+    /** Phase 1: Core configuration - triggered when application environment is prepared. */
     @EventListener(ApplicationEnvironmentPreparedEvent.class)
     @Order(1)
     public void initializeCoreConfiguration(ApplicationEnvironmentPreparedEvent event) {
@@ -279,7 +271,8 @@ public class InitializationOrchestrator {
             }
 
             phase.markCompleted(true, Duration.between(phaseStart, Instant.now()));
-            log.info("✅ Phase 1: Core Configuration - COMPLETED in {}ms",
+            log.info(
+                    "✅ Phase 1: Core Configuration - COMPLETED in {}ms",
                     phase.getDuration().toMillis());
 
         } catch (Exception e) {
@@ -290,9 +283,7 @@ public class InitializationOrchestrator {
         }
     }
 
-    /**
-     * Phase 2: Environment setup - triggered when application starts.
-     */
+    /** Phase 2: Environment setup - triggered when application starts. */
     @EventListener(ApplicationStartedEvent.class)
     @Order(2)
     public void initializeEnvironmentSetup(ApplicationStartedEvent event) {
@@ -323,7 +314,7 @@ public class InitializationOrchestrator {
                 phase.addCompletedStep("Image paths configured");
                 log.debug("Image paths initialized");
             }
-            
+
             // Initialize DPI Configuration
             if (dpiConfiguration != null) {
                 try {
@@ -335,10 +326,10 @@ public class InitializationOrchestrator {
                     phase.addCompletedStep("DPI configuration skipped");
                 }
             }
-            
+
             // Initialize Capture Services
             initializeCaptureServices(phase);
-            
+
             // Image Utilities are initialized via @PostConstruct (empty method)
             // Just verify the bean is available
             if (bufferedImageUtilities != null) {
@@ -347,7 +338,8 @@ public class InitializationOrchestrator {
             }
 
             phase.markCompleted(true, Duration.between(phaseStart, Instant.now()));
-            log.info("✅ Phase 2: Environment Setup - COMPLETED in {}ms",
+            log.info(
+                    "✅ Phase 2: Environment Setup - COMPLETED in {}ms",
                     phase.getDuration().toMillis());
 
         } catch (Exception e) {
@@ -358,9 +350,7 @@ public class InitializationOrchestrator {
         }
     }
 
-    /**
-     * Phase 3: Component initialization - triggered when context is refreshed.
-     */
+    /** Phase 3: Component initialization - triggered when context is refreshed. */
     @EventListener(ContextRefreshedEvent.class)
     @Order(3)
     public void initializeComponents(ContextRefreshedEvent event) {
@@ -393,7 +383,7 @@ public class InitializationOrchestrator {
                 // Verify listener registration
                 verifyListenerRegistration(phase);
             }
-            
+
             // Run headless diagnostics if in headless environment
             if (java.awt.GraphicsEnvironment.isHeadless()) {
                 if (headlessDiagnostics != null) {
@@ -407,7 +397,7 @@ public class InitializationOrchestrator {
                     }
                 }
             }
-            
+
             // Verify properties configuration
             if (propertyVerifier != null) {
                 try {
@@ -421,7 +411,8 @@ public class InitializationOrchestrator {
             }
 
             phase.markCompleted(true, Duration.between(phaseStart, Instant.now()));
-            log.info("✅ Phase 3: Component Initialization - COMPLETED in {}ms",
+            log.info(
+                    "✅ Phase 3: Component Initialization - COMPLETED in {}ms",
                     phase.getDuration().toMillis());
 
         } catch (Exception e) {
@@ -431,9 +422,7 @@ public class InitializationOrchestrator {
         }
     }
 
-    /**
-     * Phase 4: State activation - triggered when application is fully ready.
-     */
+    /** Phase 4: State activation - triggered when application is fully ready. */
     @EventListener(ApplicationReadyEvent.class)
     @Order(4)
     public void activateStates(ApplicationReadyEvent event) {
@@ -451,25 +440,26 @@ public class InitializationOrchestrator {
                 annotationProcessor.processAnnotations();
                 phase.addCompletedStep("Annotations processed");
             }
-            
+
             // Initialize state dependencies and search regions
             if (stateInitializationOrchestrator != null) {
                 log.info("Initializing state dependencies and search regions");
                 // Manually trigger the state initialization since we're doing it explicitly here
-                io.github.jspinak.brobot.annotations.StatesRegisteredEvent statesEvent = 
-                    new io.github.jspinak.brobot.annotations.StatesRegisteredEvent(
-                        this, 
-                        initialStates != null ? initialStates.getRegisteredInitialStates().size() : 0,
-                        0
-                    );
+                io.github.jspinak.brobot.annotations.StatesRegisteredEvent statesEvent =
+                        new io.github.jspinak.brobot.annotations.StatesRegisteredEvent(
+                                this,
+                                initialStates != null
+                                        ? initialStates.getRegisteredInitialStates().size()
+                                        : 0,
+                                0);
                 stateInitializationOrchestrator.orchestrateInitialization(statesEvent);
                 phase.addCompletedStep("State dependencies and search regions initialized");
             }
 
             // Auto-activate initial states if configured
-            if (initialStateAutoConfiguration != null &&
-                    initialStates != null &&
-                    initialStates.hasRegisteredInitialStates()) {
+            if (initialStateAutoConfiguration != null
+                    && initialStates != null
+                    && initialStates.hasRegisteredInitialStates()) {
 
                 initialStateAutoConfiguration.autoActivateInitialStates(event);
                 phase.addCompletedStep("Initial states activated");
@@ -481,7 +471,8 @@ public class InitializationOrchestrator {
             }
 
             phase.markCompleted(true, Duration.between(phaseStart, Instant.now()));
-            log.info("✅ Phase 4: State Activation - COMPLETED in {}ms",
+            log.info(
+                    "✅ Phase 4: State Activation - COMPLETED in {}ms",
                     phase.getDuration().toMillis());
 
         } catch (Exception e) {
@@ -492,7 +483,7 @@ public class InitializationOrchestrator {
 
         // Final summary
         finalizeInitialization();
-        
+
         // Generate and log detailed initialization report
         if (log.isInfoEnabled()) {
             String report = generateInitializationReport();
@@ -500,9 +491,7 @@ public class InitializationOrchestrator {
         }
     }
 
-    /**
-     * Verify that event listeners are properly registered.
-     */
+    /** Verify that event listeners are properly registered. */
     private void verifyListenerRegistration(PhaseStatus phase) {
         try {
             if (eventMulticaster == null) {
@@ -512,15 +501,17 @@ public class InitializationOrchestrator {
 
             // Check for specific Brobot event listeners
             String[] importantListeners = {
-                    "SearchRegionDependencyInitializer",
-                    "StateInitializationOrchestrator",
-                    "AutoStartupVerifier"
+                "SearchRegionDependencyInitializer",
+                "StateInitializationOrchestrator",
+                "AutoStartupVerifier"
             };
 
             for (String listenerName : importantListeners) {
                 try {
-                    Object bean = applicationContext.getBean(listenerName.substring(0, 1).toLowerCase() +
-                            listenerName.substring(1));
+                    Object bean =
+                            applicationContext.getBean(
+                                    listenerName.substring(0, 1).toLowerCase()
+                                            + listenerName.substring(1));
                     if (bean != null) {
                         log.debug("[LISTENER VERIFY] ✓ Found listener bean: {}", listenerName);
                     }
@@ -537,9 +528,7 @@ public class InitializationOrchestrator {
         }
     }
 
-    /**
-     * Finalize initialization and provide summary.
-     */
+    /** Finalize initialization and provide summary. */
     private void finalizeInitialization() {
         initializationComplete.set(true);
         Duration totalDuration = Duration.between(startTime, Instant.now());
@@ -549,9 +538,8 @@ public class InitializationOrchestrator {
         log.info("╚══════════════════════════════════════════════════════════════════╝");
 
         // Summary statistics
-        long successfulPhases = phaseStatuses.values().stream()
-                .filter(PhaseStatus::isSuccessful)
-                .count();
+        long successfulPhases =
+                phaseStatuses.values().stream().filter(PhaseStatus::isSuccessful).count();
 
         log.info("Initialization Summary:");
         log.info("  Total Duration: {}ms", totalDuration.toMillis());
@@ -561,116 +549,152 @@ public class InitializationOrchestrator {
         // Phase details
         phaseStatuses.values().stream()
                 .sorted(Comparator.comparingInt(PhaseStatus::getOrder))
-                .forEach(phase -> {
-                    String status = phase.isSuccessful() ? "✅" : "❌";
-                    log.info("  {} Phase {}: {} - {}ms",
-                            status, phase.getOrder(), phase.getName(),
-                            phase.getDuration() != null ? phase.getDuration().toMillis() : "N/A");
+                .forEach(
+                        phase -> {
+                            String status = phase.isSuccessful() ? "✅" : "❌";
+                            log.info(
+                                    "  {} Phase {}: {} - {}ms",
+                                    status,
+                                    phase.getOrder(),
+                                    phase.getName(),
+                                    phase.getDuration() != null
+                                            ? phase.getDuration().toMillis()
+                                            : "N/A");
 
-                    if (!phase.isSuccessful() && phase.getErrorMessage() != null) {
-                        log.warn("    Error: {}", phase.getErrorMessage());
-                    }
-                });
+                            if (!phase.isSuccessful() && phase.getErrorMessage() != null) {
+                                log.warn("    Error: {}", phase.getErrorMessage());
+                            }
+                        });
 
         // Warnings for critical failures
         if (successfulPhases < phaseStatuses.size()) {
-            log.warn("⚠️ Some initialization phases failed. Application may not function correctly.");
+            log.warn(
+                    "⚠️ Some initialization phases failed. Application may not function"
+                            + " correctly.");
             log.warn("Check the logs above for details on failed phases.");
         }
     }
 
     /**
-     * Generate a detailed initialization report.
-     * This can be called via JMX or a health endpoint.
+     * Generate a detailed initialization report. This can be called via JMX or a health endpoint.
      */
     public String generateInitializationReport() {
         StringBuilder report = new StringBuilder();
         report.append("\n╔════════════════════════════════════════════════════════════════════╗\n");
         report.append("║                    BROBOT INITIALIZATION REPORT                    ║\n");
         report.append("╚════════════════════════════════════════════════════════════════════╝\n\n");
-        
+
         // Overall Status
-        boolean allPhasesSuccessful = phaseStatuses.values().stream()
-            .allMatch(PhaseStatus::isSuccessful);
+        boolean allPhasesSuccessful =
+                phaseStatuses.values().stream().allMatch(PhaseStatus::isSuccessful);
         String overallStatus = allPhasesSuccessful ? "✅ SUCCESS" : "⚠️ PARTIAL SUCCESS";
         report.append("Overall Status: ").append(overallStatus).append("\n");
-        
+
         if (startTime != null) {
             Duration totalTime = Duration.between(startTime, Instant.now());
-            report.append("Total Initialization Time: ").append(totalTime.toMillis()).append("ms\n");
+            report.append("Total Initialization Time: ")
+                    .append(totalTime.toMillis())
+                    .append("ms\n");
         }
-        
+
         // Configuration Summary
         report.append("\n📋 Configuration Summary:\n");
-        report.append("  • Mock Mode: ").append(FrameworkSettings.mock ? "ENABLED" : "DISABLED").append("\n");
+        report.append("  • Mock Mode: ")
+                .append(FrameworkSettings.mock ? "ENABLED" : "DISABLED")
+                .append("\n");
         if (brobotProperties != null && brobotProperties.getCore() != null) {
-            report.append("  • Headless: ").append(brobotProperties.getCore().isHeadless()).append("\n");
+            report.append("  • Headless: ")
+                    .append(brobotProperties.getCore().isHeadless())
+                    .append("\n");
         }
-        report.append("  • Environment: ").append(java.awt.GraphicsEnvironment.isHeadless() ? "HEADLESS" : "DISPLAY").append("\n");
-        
+        report.append("  • Environment: ")
+                .append(java.awt.GraphicsEnvironment.isHeadless() ? "HEADLESS" : "DISPLAY")
+                .append("\n");
+
         // Phase Details
         report.append("\n📊 Initialization Phases:\n");
         phaseStatuses.values().stream()
-            .sorted(Comparator.comparingInt(PhaseStatus::getOrder))
-            .forEach(phase -> {
-                String icon = phase.isSuccessful() ? "✅" : "❌";
-                report.append("\n").append(icon).append(" Phase ").append(phase.getOrder())
-                      .append(": ").append(phase.getName()).append("\n");
-                
-                if (phase.getDuration() != null) {
-                    report.append("   Duration: ").append(phase.getDuration().toMillis()).append("ms\n");
-                }
-                
-                // Completed steps
-                if (!phase.getCompletedSteps().isEmpty()) {
-                    report.append("   Completed:\n");
-                    phase.getCompletedSteps().forEach(step -> 
-                        report.append("     • ").append(step).append("\n"));
-                }
-                
-                // Failed steps
-                if (!phase.getFailedSteps().isEmpty()) {
-                    report.append("   Failed:\n");
-                    phase.getFailedSteps().forEach(step -> 
-                        report.append("     ✗ ").append(step).append("\n"));
-                }
-            });
-        
+                .sorted(Comparator.comparingInt(PhaseStatus::getOrder))
+                .forEach(
+                        phase -> {
+                            String icon = phase.isSuccessful() ? "✅" : "❌";
+                            report.append("\n")
+                                    .append(icon)
+                                    .append(" Phase ")
+                                    .append(phase.getOrder())
+                                    .append(": ")
+                                    .append(phase.getName())
+                                    .append("\n");
+
+                            if (phase.getDuration() != null) {
+                                report.append("   Duration: ")
+                                        .append(phase.getDuration().toMillis())
+                                        .append("ms\n");
+                            }
+
+                            // Completed steps
+                            if (!phase.getCompletedSteps().isEmpty()) {
+                                report.append("   Completed:\n");
+                                phase.getCompletedSteps()
+                                        .forEach(
+                                                step ->
+                                                        report.append("     • ")
+                                                                .append(step)
+                                                                .append("\n"));
+                            }
+
+                            // Failed steps
+                            if (!phase.getFailedSteps().isEmpty()) {
+                                report.append("   Failed:\n");
+                                phase.getFailedSteps()
+                                        .forEach(
+                                                step ->
+                                                        report.append("     ✗ ")
+                                                                .append(step)
+                                                                .append("\n"));
+                            }
+                        });
+
         // Critical Services Status
         report.append("\n🔧 Critical Services:\n");
-        report.append("  • Capture Services: ").append(
-            unifiedCaptureService != null ? "✅ Available" : "❌ Not Available").append("\n");
-        report.append("  • State Management: ").append(
-            stateInitializationOrchestrator != null ? "✅ Available" : "❌ Not Available").append("\n");
-        report.append("  • Console Reporter: ").append(
-            consoleReporterInitializer != null ? "✅ Available" : "❌ Not Available").append("\n");
-        
+        report.append("  • Capture Services: ")
+                .append(unifiedCaptureService != null ? "✅ Available" : "❌ Not Available")
+                .append("\n");
+        report.append("  • State Management: ")
+                .append(stateInitializationOrchestrator != null ? "✅ Available" : "❌ Not Available")
+                .append("\n");
+        report.append("  • Console Reporter: ")
+                .append(consoleReporterInitializer != null ? "✅ Available" : "❌ Not Available")
+                .append("\n");
+
         // Warnings and Recommendations
         if (!allPhasesSuccessful) {
             report.append("\n⚠️ Warnings:\n");
             phaseStatuses.values().stream()
-                .filter(phase -> !phase.isSuccessful())
-                .forEach(phase -> {
-                    report.append("  • Phase '").append(phase.getName())
-                          .append("' failed");
-                    if (phase.getErrorMessage() != null) {
-                        report.append(": ").append(phase.getErrorMessage());
-                    }
-                    report.append("\n");
-                });
+                    .filter(phase -> !phase.isSuccessful())
+                    .forEach(
+                            phase -> {
+                                report.append("  • Phase '")
+                                        .append(phase.getName())
+                                        .append("' failed");
+                                if (phase.getErrorMessage() != null) {
+                                    report.append(": ").append(phase.getErrorMessage());
+                                }
+                                report.append("\n");
+                            });
         }
-        
+
         report.append("\n════════════════════════════════════════════════════════════════════\n");
         return report.toString();
     }
-    
+
     /**
-     * Initialize capture services in the correct order.
-     * This replaces the individual @PostConstruct methods for better control.
+     * Initialize capture services in the correct order. This replaces the individual @PostConstruct
+     * methods for better control.
      */
     private void initializeCaptureServices(PhaseStatus phase) {
         log.debug("Initializing capture services stack...");
-        
+
         try {
             // 1. Screen Resolution Manager (foundation)
             if (screenResolutionManager != null) {
@@ -678,31 +702,32 @@ public class InitializationOrchestrator {
                 phase.addCompletedStep("Screen resolution manager initialized");
                 log.debug("Screen resolution detection ready");
             }
-            
+
             // 2. Brobot Screen Capture (core capture)
             if (brobotScreenCapture != null) {
                 brobotScreenCapture.init();
                 phase.addCompletedStep("Screen capture service initialized");
                 log.debug("Core screen capture ready");
             }
-            
+
             // 3. Brobot Capture Service (provider management)
             if (brobotCaptureService != null) {
                 brobotCaptureService.init();
                 phase.addCompletedStep("Capture provider service initialized");
-                io.github.jspinak.brobot.capture.provider.CaptureProvider provider = brobotCaptureService.getActiveProvider();
+                io.github.jspinak.brobot.capture.provider.CaptureProvider provider =
+                        brobotCaptureService.getActiveProvider();
                 log.debug("Capture provider selected: {}", provider.getClass().getSimpleName());
             }
-            
+
             // 4. Unified Capture Service (top-level API)
             if (unifiedCaptureService != null) {
                 unifiedCaptureService.init();
                 phase.addCompletedStep("Unified capture service initialized");
                 log.debug("Capture service stack ready");
             }
-            
+
             log.info("Capture services initialized successfully");
-            
+
         } catch (Exception e) {
             log.error("Failed to initialize capture services", e);
             phase.addFailedStep("Capture services", e.getMessage());
@@ -712,10 +737,10 @@ public class InitializationOrchestrator {
             }
         }
     }
-    
+
     /**
      * Health check endpoint data.
-     * 
+     *
      * @return Map containing initialization status and phase details
      */
     public Map<String, Object> getInitializationStatus() {
@@ -746,7 +771,7 @@ public class InitializationOrchestrator {
 
     /**
      * Check if initialization is complete and successful.
-     * 
+     *
      * @return true if all critical phases completed successfully
      */
     public boolean isInitializationSuccessful() {
@@ -758,13 +783,13 @@ public class InitializationOrchestrator {
         PhaseStatus coreConfig = phaseStatuses.get("core-config");
         PhaseStatus components = phaseStatuses.get("components");
 
-        return coreConfig != null && coreConfig.isSuccessful() &&
-                components != null && components.isSuccessful();
+        return coreConfig != null
+                && coreConfig.isSuccessful()
+                && components != null
+                && components.isSuccessful();
     }
 
-    /**
-     * Reset initialization state (mainly for testing).
-     */
+    /** Reset initialization state (mainly for testing). */
     public void resetInitialization() {
         phaseStatuses.clear();
         initializationComplete.set(false);

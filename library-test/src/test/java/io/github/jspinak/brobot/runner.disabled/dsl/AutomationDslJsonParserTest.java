@@ -1,71 +1,72 @@
 package io.github.jspinak.brobot.runner.dsl;
 
-import io.github.jspinak.brobot.BrobotTestApplication;
-import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
-import io.github.jspinak.brobot.test.mock.MockScreenConfig;
-import io.github.jspinak.brobot.runner.dsl.InstructionSet;
-import io.github.jspinak.brobot.runner.dsl.BusinessTask;
-import io.github.jspinak.brobot.runner.dsl.expressions.Expression;
-import io.github.jspinak.brobot.runner.dsl.expressions.LiteralExpression;
-import io.github.jspinak.brobot.runner.dsl.expressions.VariableExpression;
-import io.github.jspinak.brobot.runner.dsl.statements.MethodCallStatement;
-import io.github.jspinak.brobot.runner.dsl.statements.ReturnStatement;
-import io.github.jspinak.brobot.runner.dsl.statements.Statement;
-import io.github.jspinak.brobot.runner.dsl.statements.VariableDeclarationStatement;
-import io.github.jspinak.brobot.runner.dsl.model.Parameter;
-import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
-import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.Test;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.BrobotTestApplication;
+import io.github.jspinak.brobot.runner.dsl.expressions.Expression;
+import io.github.jspinak.brobot.runner.dsl.expressions.LiteralExpression;
+import io.github.jspinak.brobot.runner.dsl.expressions.VariableExpression;
+import io.github.jspinak.brobot.runner.dsl.model.Parameter;
+import io.github.jspinak.brobot.runner.dsl.statements.MethodCallStatement;
+import io.github.jspinak.brobot.runner.dsl.statements.ReturnStatement;
+import io.github.jspinak.brobot.runner.dsl.statements.Statement;
+import io.github.jspinak.brobot.runner.dsl.statements.VariableDeclarationStatement;
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
 /**
- * Tests for AutomationDsl (InstructionSet) JSON parsing with Spring context.
- * Uses Spring Boot's configured ObjectMapper with all necessary Jackson modules.
- * 
- * Key points:
- * - InstructionSet is the root data structure for DSL
- * - Contains list of BusinessTask (automation functions)
- * - Each BusinessTask has parameters and statements
- * - Statements are polymorphic with statementType discriminator
+ * Tests for AutomationDsl (InstructionSet) JSON parsing with Spring context. Uses Spring Boot's
+ * configured ObjectMapper with all necessary Jackson modules.
+ *
+ * <p>Key points: - InstructionSet is the root data structure for DSL - Contains list of
+ * BusinessTask (automation functions) - Each BusinessTask has parameters and statements -
+ * Statements are polymorphic with statementType discriminator
  */
 @DisplayName("AutomationDsl JSON Parser Tests")
-@SpringBootTest(classes = BrobotTestApplication.class,
-    properties = {
-        "spring.main.lazy-initialization=true",
-        "brobot.mock.enabled=true",
-        "brobot.illustration.disabled=true",
-        "brobot.scene.analysis.disabled=true",
-        "brobot.gui-access.continue-on-error=true",
-        "brobot.gui-access.check-on-startup=false",
-        "java.awt.headless=true",
-        "spring.main.allow-bean-definition-overriding=true",
-        "brobot.test.type=unit",
-        "brobot.capture.physical-resolution=false"
-    })
-@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class,
-         io.github.jspinak.brobot.test.config.TestApplicationConfiguration.class})
+@SpringBootTest(
+        classes = BrobotTestApplication.class,
+        properties = {
+            "spring.main.lazy-initialization=true",
+            "brobot.mock.enabled=true",
+            "brobot.illustration.disabled=true",
+            "brobot.scene.analysis.disabled=true",
+            "brobot.gui-access.continue-on-error=true",
+            "brobot.gui-access.check-on-startup=false",
+            "java.awt.headless=true",
+            "spring.main.allow-bean-definition-overriding=true",
+            "brobot.test.type=unit",
+            "brobot.capture.physical-resolution=false"
+        })
+@Import({
+    MockGuiAccessConfig.class,
+    MockGuiAccessMonitor.class,
+    MockScreenConfig.class,
+    io.github.jspinak.brobot.test.config.TestApplicationConfiguration.class
+})
 @ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 class AutomationDslJsonParserTest {
 
-    @Autowired
-    private ConfigurationParser jsonParser;
+    @Autowired private ConfigurationParser jsonParser;
 
     @Test
     @DisplayName("Should parse simple InstructionSet from JSON")
     void testParseSimpleAutomationDsl() throws ConfigurationException {
-        String json = """
+        String json =
+                """
         {
             "automationFunctions": [
                 {
@@ -95,7 +96,8 @@ class AutomationDslJsonParserTest {
     @Test
     @DisplayName("Should parse complex InstructionSet with multiple functions")
     void testParseComplexAutomationDsl() throws ConfigurationException {
-        String json = """
+        String json =
+                """
         {
             "automationFunctions": [
                 {
@@ -195,7 +197,9 @@ class AutomationDslJsonParserTest {
         assertNotNull(function2.getStatements());
         assertEquals(1, function2.getStatements().size());
         assertTrue(function2.getStatements().get(0) instanceof MethodCallStatement);
-        assertEquals("clickLogout", ((MethodCallStatement) function2.getStatements().get(0)).getMethod());
+        assertEquals(
+                "clickLogout",
+                ((MethodCallStatement) function2.getStatements().get(0)).getMethod());
     }
 
     @Test
@@ -279,7 +283,9 @@ class AutomationDslJsonParserTest {
 
         assertNotNull(deserializedFunction.getStatements());
         assertEquals(2, deserializedFunction.getStatements().size());
-        assertTrue(deserializedFunction.getStatements().get(0) instanceof VariableDeclarationStatement);
+        assertTrue(
+                deserializedFunction.getStatements().get(0)
+                        instanceof VariableDeclarationStatement);
         assertTrue(deserializedFunction.getStatements().get(1) instanceof MethodCallStatement);
     }
 
@@ -302,7 +308,8 @@ class AutomationDslJsonParserTest {
     @Test
     @DisplayName("Should handle InstructionSet with null fields")
     void testInstructionSetWithNullFields() throws ConfigurationException {
-        String json = """
+        String json =
+                """
         {
             "automationFunctions": [
                 {

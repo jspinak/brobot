@@ -1,8 +1,5 @@
 package io.github.jspinak.brobot.runner.ui.components;
 
-import lombok.Getter;
-import lombok.EqualsAndHashCode;
-
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -16,9 +13,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+
 /**
- * A card component for displaying content with a title and optional actions.
- * Useful for dashboard items, list items, etc.
+ * A card component for displaying content with a title and optional actions. Useful for dashboard
+ * items, list items, etc.
  */
 @Getter
 @EqualsAndHashCode(callSuper = false)
@@ -33,9 +33,7 @@ public class Card extends VBox {
     private final VBox contentBox;
     private final HBox footerBox;
 
-    /**
-     * Creates a new Card.
-     */
+    /** Creates a new Card. */
     public Card() {
         // Set CSS class for styling
         getStyleClass().add("card");
@@ -86,59 +84,61 @@ public class Card extends VBox {
         setContent(content);
     }
 
-    /**
-     * Sets up property bindings.
-     */
+    /** Sets up property bindings. */
     private void setupBindings() {
         // Update header when header property changes
-        header.addListener((obs, oldVal, newVal) -> {
-            headerBox.getChildren().clear();
-            if (newVal != null) {
-                headerBox.getChildren().add(newVal);
-                headerBox.setVisible(true);
-                headerBox.setManaged(true);
-            } else {
-                headerBox.setVisible(false);
-                headerBox.setManaged(false);
-            }
-        });
+        header.addListener(
+                (obs, oldVal, newVal) -> {
+                    headerBox.getChildren().clear();
+                    if (newVal != null) {
+                        headerBox.getChildren().add(newVal);
+                        headerBox.setVisible(true);
+                        headerBox.setManaged(true);
+                    } else {
+                        headerBox.setVisible(false);
+                        headerBox.setManaged(false);
+                    }
+                });
 
         // Update content when content property changes
-        content.addListener((obs, oldVal, newVal) -> {
-            contentBox.getChildren().clear();
-            if (newVal != null) {
-                contentBox.getChildren().add(newVal);
-                contentBox.setVisible(true);
-                contentBox.setManaged(true);
-            } else {
-                contentBox.setVisible(false);
-                contentBox.setManaged(false);
-            }
-        });
+        content.addListener(
+                (obs, oldVal, newVal) -> {
+                    contentBox.getChildren().clear();
+                    if (newVal != null) {
+                        contentBox.getChildren().add(newVal);
+                        contentBox.setVisible(true);
+                        contentBox.setManaged(true);
+                    } else {
+                        contentBox.setVisible(false);
+                        contentBox.setManaged(false);
+                    }
+                });
 
         // Update footer when footer property changes
-        footer.addListener((obs, oldVal, newVal) -> {
-            if (newVal != footerBox) {
-                footerBox.getChildren().clear();
-                if (newVal != null) {
-                    footerBox.getChildren().add(newVal);
-                    footerBox.setVisible(true);
-                    footerBox.setManaged(true);
-                } else {
-                    footerBox.setVisible(false);
-                    footerBox.setManaged(false);
-                }
-            }
-        });
+        footer.addListener(
+                (obs, oldVal, newVal) -> {
+                    if (newVal != footerBox) {
+                        footerBox.getChildren().clear();
+                        if (newVal != null) {
+                            footerBox.getChildren().add(newVal);
+                            footerBox.setVisible(true);
+                            footerBox.setManaged(true);
+                        } else {
+                            footerBox.setVisible(false);
+                            footerBox.setManaged(false);
+                        }
+                    }
+                });
 
         // Update elevation style when elevated property changes
-        elevated.addListener((obs, oldVal, newVal) -> {
-            if (newVal) {
-                getStyleClass().add("card-elevated");
-            } else {
-                getStyleClass().remove("card-elevated");
-            }
-        });
+        elevated.addListener(
+                (obs, oldVal, newVal) -> {
+                    if (newVal) {
+                        getStyleClass().add("card-elevated");
+                    } else {
+                        getStyleClass().remove("card-elevated");
+                    }
+                });
     }
 
     /**
@@ -269,7 +269,7 @@ public class Card extends VBox {
         if (action != null) {
             // Add the action to the footerBox
             footerBox.getChildren().add(action);
-            
+
             // Make sure the footer is visible and managed
             footerBox.setVisible(true);
             footerBox.setManaged(true);
@@ -287,9 +287,7 @@ public class Card extends VBox {
         }
     }
 
-    /**
-     * Clears all action buttons from the card footer.
-     */
+    /** Clears all action buttons from the card footer. */
     public void clearActions() {
         if (footer.get() instanceof HBox) {
             ((HBox) footer.get()).getChildren().clear();

@@ -1,30 +1,29 @@
 package io.github.jspinak.brobot.core.services;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.test.DisabledInCI;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
 /**
- * Tests for MouseController interface implementations.
- * Tests the contract defined by the MouseController interface.
+ * Tests for MouseController interface implementations. Tests the contract defined by the
+ * MouseController interface.
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("MouseController Interface Tests")
-
 @DisabledInCI
 public class MouseControllerTest extends BrobotTestBase {
 
-    @Mock
-    private MouseController mouseController;
+    @Mock private MouseController mouseController;
 
     @BeforeEach
     @Override
@@ -106,7 +105,8 @@ public class MouseControllerTest extends BrobotTestBase {
     @DisplayName("Should perform double-click at specified coordinates")
     void testDoubleClick() {
         // Arrange
-        when(mouseController.doubleClick(200, 300, MouseController.MouseButton.LEFT)).thenReturn(true);
+        when(mouseController.doubleClick(200, 300, MouseController.MouseButton.LEFT))
+                .thenReturn(true);
 
         // Act
         boolean result = mouseController.doubleClick(200, 300, MouseController.MouseButton.LEFT);
@@ -120,7 +120,8 @@ public class MouseControllerTest extends BrobotTestBase {
     @DisplayName("Should use default left button for parameterless double-click")
     void testDoubleClickDefault() {
         // Arrange
-        when(mouseController.doubleClick(100, 200, MouseController.MouseButton.LEFT)).thenReturn(true);
+        when(mouseController.doubleClick(100, 200, MouseController.MouseButton.LEFT))
+                .thenReturn(true);
         when(mouseController.doubleClick(100, 200)).thenCallRealMethod();
 
         // Act
@@ -163,7 +164,8 @@ public class MouseControllerTest extends BrobotTestBase {
     @DisplayName("Should perform drag operation from start to end")
     void testDrag() {
         // Arrange
-        when(mouseController.drag(10, 20, 100, 200, MouseController.MouseButton.LEFT)).thenReturn(true);
+        when(mouseController.drag(10, 20, 100, 200, MouseController.MouseButton.LEFT))
+                .thenReturn(true);
 
         // Act
         boolean result = mouseController.drag(10, 20, 100, 200, MouseController.MouseButton.LEFT);
@@ -177,7 +179,8 @@ public class MouseControllerTest extends BrobotTestBase {
     @DisplayName("Should use default left button for parameterless drag")
     void testDragDefault() {
         // Arrange
-        when(mouseController.drag(50, 50, 150, 150, MouseController.MouseButton.LEFT)).thenReturn(true);
+        when(mouseController.drag(50, 50, 150, 150, MouseController.MouseButton.LEFT))
+                .thenReturn(true);
         when(mouseController.drag(50, 50, 150, 150)).thenCallRealMethod();
 
         // Act

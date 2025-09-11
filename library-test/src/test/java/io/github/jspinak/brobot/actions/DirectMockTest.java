@@ -1,12 +1,12 @@
 package io.github.jspinak.brobot.actions;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Direct test to verify mock mode settings.
- */
+import org.junit.jupiter.api.Test;
+
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+
+/** Direct test to verify mock mode settings. */
 class DirectMockTest {
 
     @Test

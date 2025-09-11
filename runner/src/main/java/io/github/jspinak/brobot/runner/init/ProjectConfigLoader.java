@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.runner.init;
 
-import lombok.Data;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,13 +12,9 @@ import io.github.jspinak.brobot.runner.json.validation.ConfigurationValidator;
 import io.github.jspinak.brobot.runner.json.validation.exception.ConfigValidationException;
 import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import lombok.Data;
 
-/**
- * Loads and validates project and DSL configuration files.
- */
+/** Loads and validates project and DSL configuration files. */
 @Component
 @Data
 public class ProjectConfigLoader {
@@ -39,7 +37,8 @@ public class ProjectConfigLoader {
      * @throws IOException Reports any IO errors that occur while reading the files
      * @throws ConfigValidationException for any validation errors
      */
-    public ValidationResult loadAndValidate(Path projectConfigPath, Path dslConfigPath, Path imageBasePath)
+    public ValidationResult loadAndValidate(
+            Path projectConfigPath, Path dslConfigPath, Path imageBasePath)
             throws IOException, ConfigValidationException {
 
         String projectJson = Files.readString(projectConfigPath);
@@ -47,7 +46,8 @@ public class ProjectConfigLoader {
 
         logger.info("Validate project and dsl config...");
 
-        ValidationResult result = configValidator.validateConfiguration(projectJson, dslJson, imageBasePath);
+        ValidationResult result =
+                configValidator.validateConfiguration(projectJson, dslJson, imageBasePath);
 
         logger.info("Validation completed, number of errors found: {}", result.getErrors().size());
         return result;

@@ -1,23 +1,22 @@
 package io.github.jspinak.brobot.runner.ui.navigation;
 
-import lombok.Data;
-
-import io.github.jspinak.brobot.runner.events.EventBus;
-import io.github.jspinak.brobot.runner.events.LogEvent;
-import jakarta.annotation.PostConstruct;
+import java.util.*;
+import java.util.function.Function;
 import javafx.scene.Node;
+
+import jakarta.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
-import java.util.function.Function;
+import io.github.jspinak.brobot.runner.events.EventBus;
+import io.github.jspinak.brobot.runner.events.LogEvent;
 
-/**
- * Registry for all screens in the application.
- * Manages screen creation and lifecycle.
- */
+import lombok.Data;
+
+/** Registry for all screens in the application. Manages screen creation and lifecycle. */
 @Component
 @Data
 public class ScreenRegistry {
@@ -67,37 +66,43 @@ public class ScreenRegistry {
      * @param title The title of the screen
      * @param factory The factory function to create the screen content
      */
-    public void registerScreenFactory(String screenId, String title, Function<NavigationContext, Node> factory) {
+    public void registerScreenFactory(
+            String screenId, String title, Function<NavigationContext, Node> factory) {
         if (screenId == null || factory == null) {
             logger.warn("Attempted to register null screen ID or factory");
             return;
         }
 
         // Create a screen that uses the factory to create its content
-        Screen screen = new Screen() {
-            @Override
-            public String getId() {
-                return screenId;
-            }
+        Screen screen =
+                new Screen() {
+                    @Override
+                    public String getId() {
+                        return screenId;
+                    }
 
-            @Override
-            public String getTitle() {
-                return title != null ? title : screenId;
-            }
+                    @Override
+                    public String getTitle() {
+                        return title != null ? title : screenId;
+                    }
 
-            @Override
-            public Optional<Node> getContent(NavigationContext context) {
-                try {
-                    Node content = factory.apply(context);
-                    return Optional.ofNullable(content);
-                } catch (Exception e) {
-                    logger.error("Error creating content for screen: {}", screenId, e);
-                    eventBus.publish(LogEvent.error(this,
-                            "Failed to create screen content: " + screenId, "Navigation", e));
-                    return Optional.empty();
-                }
-            }
-        };
+                    @Override
+                    public Optional<Node> getContent(NavigationContext context) {
+                        try {
+                            Node content = factory.apply(context);
+                            return Optional.ofNullable(content);
+                        } catch (Exception e) {
+                            logger.error("Error creating content for screen: {}", screenId, e);
+                            eventBus.publish(
+                                    LogEvent.error(
+                                            this,
+                                            "Failed to create screen content: " + screenId,
+                                            "Navigation",
+                                            e));
+                            return Optional.empty();
+                        }
+                    }
+                };
 
         registerScreen(screen);
         screenFactories.put(screenId, factory);

@@ -1,5 +1,10 @@
 package io.github.jspinak.brobot.runner.ui.components;
 
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -16,14 +21,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
-import lombok.Getter;
-import atlantafx.base.theme.Styles;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import atlantafx.base.theme.Styles;
+import lombok.Getter;
 
 /**
  * An enhanced table component with filtering, sorting, and pagination.
@@ -33,12 +33,10 @@ import java.util.function.Predicate;
 public class EnhancedTable<T> extends VBox {
 
     // The underlying TableView
-    @Getter
-    private final TableView<T> tableView;
+    @Getter private final TableView<T> tableView;
 
     // Data and filtered/sorted wrappers
-    @Getter
-    private final ObservableList<T> items = FXCollections.observableArrayList();
+    @Getter private final ObservableList<T> items = FXCollections.observableArrayList();
     private final FilteredList<T> filteredItems = new FilteredList<>(items);
     private final SortedList<T> sortedItems = new SortedList<>(filteredItems);
 
@@ -52,14 +50,13 @@ public class EnhancedTable<T> extends VBox {
     private final ObjectProperty<Function<T, String>> searchProvider = new SimpleObjectProperty<>();
 
     // Selection mode
-    private final ObjectProperty<SelectionMode> selectionMode = new SimpleObjectProperty<>(SelectionMode.SINGLE);
+    private final ObjectProperty<SelectionMode> selectionMode =
+            new SimpleObjectProperty<>(SelectionMode.SINGLE);
 
     // Column configuration helpers
     private final Map<TableColumn<T, ?>, StringProperty> columnTitles = new HashMap<>();
 
-    /**
-     * Creates a new EnhancedTable.
-     */
+    /** Creates a new EnhancedTable. */
     public EnhancedTable() {
         // Create the table view
         tableView = new TableView<>();
@@ -69,10 +66,13 @@ public class EnhancedTable<T> extends VBox {
         // Setup search field
         searchField = new TextField();
         searchField.setPromptText("Search...");
-        searchField.textProperty().addListener((obs, oldVal, newVal) -> {
-            updateFilter();
-            goToFirstPage();
-        });
+        searchField
+                .textProperty()
+                .addListener(
+                        (obs, oldVal, newVal) -> {
+                            updateFilter();
+                            goToFirstPage();
+                        });
 
         // Setup page size selector
         pageSizeSelector = new ComboBox<>();
@@ -84,7 +84,9 @@ public class EnhancedTable<T> extends VBox {
         // Setup pagination
         pagination = new Pagination();
         pagination.setPageCount(1);
-        pagination.currentPageIndexProperty().addListener((obs, oldVal, newVal) -> updateTableItems());
+        pagination
+                .currentPageIndexProperty()
+                .addListener((obs, oldVal, newVal) -> updateTableItems());
 
         // Setup layouts
         HBox toolBar = new HBox(10);
@@ -113,11 +115,12 @@ public class EnhancedTable<T> extends VBox {
         sortedItems.comparatorProperty().bind(tableView.comparatorProperty());
 
         // Setup selection mode binding
-        selectionMode.addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) {
-                tableView.getSelectionModel().setSelectionMode(newVal);
-            }
-        });
+        selectionMode.addListener(
+                (obs, oldVal, newVal) -> {
+                    if (newVal != null) {
+                        tableView.getSelectionModel().setSelectionMode(newVal);
+                    }
+                });
 
         // Initialize with current selection mode
         tableView.getSelectionModel().setSelectionMode(selectionMode.get());
@@ -252,7 +255,10 @@ public class EnhancedTable<T> extends VBox {
      * @param cellFactory The cell factory for the column
      * @return The created column
      */
-    public <S> TableColumn<T, S> addColumn(String title, Callback<TableColumn.CellDataFeatures<T, S>, javafx.beans.value.ObservableValue<S>> cellFactory) {
+    public <S> TableColumn<T, S> addColumn(
+            String title,
+            Callback<TableColumn.CellDataFeatures<T, S>, javafx.beans.value.ObservableValue<S>>
+                    cellFactory) {
         TableColumn<T, S> column = new TableColumn<>();
 
         // Create a property for the title to allow dynamic updates
@@ -277,9 +283,11 @@ public class EnhancedTable<T> extends VBox {
      * @param cellFactory The cell factory
      * @return The created column
      */
-    public <S> TableColumn<T, S> addColumn(String title,
-                                           Callback<TableColumn.CellDataFeatures<T, S>, javafx.beans.value.ObservableValue<S>> valueFactory,
-                                           Callback<TableColumn<T, S>, TableCell<T, S>> cellFactory) {
+    public <S> TableColumn<T, S> addColumn(
+            String title,
+            Callback<TableColumn.CellDataFeatures<T, S>, javafx.beans.value.ObservableValue<S>>
+                    valueFactory,
+            Callback<TableColumn<T, S>, TableCell<T, S>> cellFactory) {
         TableColumn<T, S> column = addColumn(title, valueFactory);
         column.setCellFactory(cellFactory);
         return column;
@@ -308,9 +316,7 @@ public class EnhancedTable<T> extends VBox {
         columnTitles.remove(column);
     }
 
-    /**
-     * Clears all columns from the table.
-     */
+    /** Clears all columns from the table. */
     public void clearColumns() {
         tableView.getColumns().clear();
         columnTitles.clear();
@@ -343,9 +349,7 @@ public class EnhancedTable<T> extends VBox {
         return tableView.getSelectionModel().getSelectedItems();
     }
 
-    /**
-     * Updates the filter based on the search text.
-     */
+    /** Updates the filter based on the search text. */
     private void updateFilter() {
         String searchText = searchField.getText().toLowerCase();
         Function<T, String> provider = searchProvider.get();
@@ -353,10 +357,12 @@ public class EnhancedTable<T> extends VBox {
         if (searchText.isEmpty()) {
             filteredItems.setPredicate(null);
         } else if (provider != null) {
-            filteredItems.setPredicate(item -> {
-                String searchString = provider.apply(item);
-                return searchString != null && searchString.toLowerCase().contains(searchText);
-            });
+            filteredItems.setPredicate(
+                    item -> {
+                        String searchString = provider.apply(item);
+                        return searchString != null
+                                && searchString.toLowerCase().contains(searchText);
+                    });
         }
 
         updatePagination();
@@ -372,18 +378,14 @@ public class EnhancedTable<T> extends VBox {
         updatePagination();
     }
 
-    /**
-     * Clears the filter.
-     */
+    /** Clears the filter. */
     public void clearFilter() {
         searchField.clear();
         filteredItems.setPredicate(null);
         updatePagination();
     }
 
-    /**
-     * Updates the pagination based on the current number of filtered items.
-     */
+    /** Updates the pagination based on the current number of filtered items. */
     private void updatePagination() {
         int itemCount = filteredItems.size();
         int pageCount = itemCount / pageSize.get();
@@ -401,9 +403,7 @@ public class EnhancedTable<T> extends VBox {
         updateTableItems();
     }
 
-    /**
-     * Updates the items shown in the table based on the current page.
-     */
+    /** Updates the items shown in the table based on the current page. */
     private void updateTableItems() {
         int pageIndex = pagination.getCurrentPageIndex();
         int fromIndex = pageIndex * pageSize.get();
@@ -412,8 +412,7 @@ public class EnhancedTable<T> extends VBox {
         // Create a list view of the current page
         ObservableList<T> pageItems;
         if (fromIndex < toIndex) {
-            pageItems = FXCollections.observableArrayList(
-                    sortedItems.subList(fromIndex, toIndex));
+            pageItems = FXCollections.observableArrayList(sortedItems.subList(fromIndex, toIndex));
         } else {
             pageItems = FXCollections.observableArrayList();
         }
@@ -429,7 +428,8 @@ public class EnhancedTable<T> extends VBox {
      */
     public <S> void setSortOrder(TableColumn<T, S> column, boolean ascending) {
         tableView.getSortOrder().clear();
-        column.setSortType(ascending ? TableColumn.SortType.ASCENDING : TableColumn.SortType.DESCENDING);
+        column.setSortType(
+                ascending ? TableColumn.SortType.ASCENDING : TableColumn.SortType.DESCENDING);
         tableView.getSortOrder().add(column);
         tableView.sort();
     }
@@ -444,16 +444,12 @@ public class EnhancedTable<T> extends VBox {
         column.setComparator(comparator);
     }
 
-    /**
-     * Goes to the first page of the pagination.
-     */
+    /** Goes to the first page of the pagination. */
     public void goToFirstPage() {
         pagination.setCurrentPageIndex(0);
     }
 
-    /**
-     * Goes to the last page of the pagination.
-     */
+    /** Goes to the last page of the pagination. */
     public void goToLastPage() {
         pagination.setCurrentPageIndex(pagination.getPageCount() - 1);
     }
@@ -469,9 +465,7 @@ public class EnhancedTable<T> extends VBox {
         }
     }
 
-    /**
-     * Refreshes the table display.
-     */
+    /** Refreshes the table display. */
     public void refresh() {
         tableView.refresh();
     }

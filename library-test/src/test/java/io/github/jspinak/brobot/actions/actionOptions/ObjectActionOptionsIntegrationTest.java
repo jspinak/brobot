@@ -1,26 +1,19 @@
 package io.github.jspinak.brobot.actions.actionOptions;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.model.element.Location;
-import io.github.jspinak.brobot.model.element.Region;
 // Removed: ObjectActionOptions no longer exists
-
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.sikuli.basics.Settings;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ContextConfiguration;
-import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
-import io.github.jspinak.brobot.test.mock.MockScreenConfig;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.springframework.boot.test.context.SpringBootTest;
+
 @SpringBootTest
-@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Integration test requires non-CI environment")
+@DisabledIfEnvironmentVariable(
+        named = "CI",
+        matches = "true",
+        disabledReason = "Integration test requires non-CI environment")
 public class ObjectActionOptionsIntegrationTest {
 
     @BeforeAll
@@ -32,7 +25,9 @@ public class ObjectActionOptionsIntegrationTest {
     void testCreationInSpringContext() {
         // This test uses the old ObjectActionOptions API which has been replaced by
         // ActionConfig classes
-        System.out.println("ObjectActionOptions test skipped - API has been replaced with ActionConfig classes");
+        System.out.println(
+                "ObjectActionOptions test skipped - API has been replaced with ActionConfig"
+                        + " classes");
 
         /*
          * Original test commented out since ObjectActionOptions was removed:
@@ -47,7 +42,7 @@ public class ObjectActionOptionsIntegrationTest {
          * .setMoveMouseAfterActionTo(new Location(100, 200))
          * .addSearchRegion(new Region(0, 0, 50, 50))
          * .build();
-         * 
+         *
          * assertNotNull(options,
          * "ObjectActionOptions object should not be null when created in a Spring context."
          * );
@@ -61,7 +56,9 @@ public class ObjectActionOptionsIntegrationTest {
     void testDefaultPauseLogicInSpringContext() {
         // This test uses the old ObjectActionOptions API which has been replaced by
         // ActionConfig classes
-        System.out.println("Default pause logic test skipped - API has been replaced with ActionConfig classes");
+        System.out.println(
+                "Default pause logic test skipped - API has been replaced with ActionConfig"
+                        + " classes");
 
         /*
          * Original test commented out since ObjectActionOptions was removed:
@@ -70,17 +67,17 @@ public class ObjectActionOptionsIntegrationTest {
          * ObjectActionOptions dragOptions = new ActionOptions.Builder()
          * .setAction(ObjectActionOptions.Action.DRAG)
          * .build();
-         * 
+         *
          * // CORRECTED ASSERTION: Check against the library constant directly, not a
          * magic number.
          * assertEquals(Settings.DelayValue, dragOptions.getPauseAfterMouseDown());
-         * 
+         *
          * // For a CLICK action, pauseAfterMouseDown should be
          * FrameworkSettings.pauseAfterMouseDown.
          * ObjectActionOptions clickOptions = new ActionOptions.Builder()
          * .setAction(ObjectActionOptions.Action.CLICK)
          * .build();
-         * 
+         *
          * // CORRECTED ASSERTION: Check against the application's settings constant
          * directly.
          * assertEquals(FrameworkSettings.pauseAfterMouseDown,

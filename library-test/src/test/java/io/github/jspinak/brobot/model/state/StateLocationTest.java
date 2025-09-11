@@ -1,20 +1,13 @@
 package io.github.jspinak.brobot.model.state;
 
-import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.model.element.Positions;
-import io.github.jspinak.brobot.model.state.StateLocation;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ContextConfiguration;
-import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
-import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.model.element.Positions;
 
 @SpringBootTest
 public class StateLocationTest {
@@ -23,14 +16,15 @@ public class StateLocationTest {
 
     @BeforeAll
     public static void setUp() {
-        stateLocation = new StateLocation.Builder()
-                .setName("testLocation")
-                .setLocation(10, 20)
-                .setOwnerStateName("testState")
-                .setProbabilityExists(90)
-                .setTimesActedOn(5)
-                .setPosition(Positions.Name.TOPLEFT)
-                .build();
+        stateLocation =
+                new StateLocation.Builder()
+                        .setName("testLocation")
+                        .setLocation(10, 20)
+                        .setOwnerStateName("testState")
+                        .setProbabilityExists(90)
+                        .setTimesActedOn(5)
+                        .setPosition(Positions.Name.TOPLEFT)
+                        .build();
     }
 
     @Test

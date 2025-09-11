@@ -1,22 +1,16 @@
 package io.github.jspinak.brobot.model.state.special;
 
-import io.github.jspinak.brobot.model.element.Region;
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ContextConfiguration;
-import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
-import io.github.jspinak.brobot.test.mock.MockScreenConfig;
-import io.github.jspinak.brobot.model.state.special.StateText;
 
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.model.element.Region;
 
 @SpringBootTest
 public class StateTextTest {
-    
+
     @BeforeAll
     static void setupHeadlessMode() {
         System.setProperty("java.awt.headless", "true");
@@ -24,12 +18,13 @@ public class StateTextTest {
 
     @Test
     public void testBuilder() {
-        StateText stateText = new StateText.Builder()
-                .setName("testText")
-                .setSearchRegion(new Region(1, 2, 3, 4))
-                .setOwnerStateName("textOwner")
-                .setText("some text")
-                .build();
+        StateText stateText =
+                new StateText.Builder()
+                        .setName("testText")
+                        .setSearchRegion(new Region(1, 2, 3, 4))
+                        .setOwnerStateName("textOwner")
+                        .setText("some text")
+                        .build();
 
         assertEquals("testText", stateText.getName());
         assertEquals(1, stateText.getSearchRegion().getX());

@@ -1,19 +1,17 @@
 package io.github.jspinak.brobot.integration;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import static org.junit.jupiter.api.Assertions.*;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
-/**
- * Test to verify that configuration logging is working properly.
- */
+/** Test to verify that configuration logging is working properly. */
 @SpringBootTest
 @ExtendWith(OutputCaptureExtension.class)
 public class ConfigurationLoggingTest extends BrobotTestBase {
@@ -42,7 +40,11 @@ public class ConfigurationLoggingTest extends BrobotTestBase {
 
         // Verify FrameworkSettings are actually set
         assertTrue(FrameworkSettings.mock, "Mock mode should be enabled");
-        assertEquals(0.01, FrameworkSettings.mockTimeFindFirst, 0.001, "Mock timing should be configured");
+        assertEquals(
+                0.01,
+                FrameworkSettings.mockTimeFindFirst,
+                0.001,
+                "Mock timing should be configured");
 
         System.out.println("\n✅ Configuration logging is working properly!");
     }

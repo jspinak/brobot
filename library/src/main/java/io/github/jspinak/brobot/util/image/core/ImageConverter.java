@@ -1,42 +1,45 @@
 package io.github.jspinak.brobot.util.image.core;
 
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.sikuli.script.Image;
-
 import java.awt.image.BufferedImage;
 import java.util.Optional;
 
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.sikuli.script.Image;
+
 /**
  * Static utility methods for image format conversions and operations.
- * <p>
- * This class provides convenient static methods for converting between different
- * image representations used in Brobot: Sikuli Image objects, OpenCV Mat objects,
- * BufferedImages, and byte arrays. It serves as a facade over lower-level
- * conversion utilities, providing a simplified API.
- * <p>
- * Supported conversions:
+ *
+ * <p>This class provides convenient static methods for converting between different image
+ * representations used in Brobot: Sikuli Image objects, OpenCV Mat objects, BufferedImages, and
+ * byte arrays. It serves as a facade over lower-level conversion utilities, providing a simplified
+ * API.
+ *
+ * <p>Supported conversions:
+ *
  * <ul>
- * <li>Image ↔ byte array (for serialization)</li>
- * <li>Mat → Image (for OpenCV to Sikuli conversion)</li>
- * <li>Image/BufferedImage → Mat (BGR format)</li>
- * <li>Image/BufferedImage → Mat (HSV format)</li>
+ *   <li>Image ↔ byte array (for serialization)
+ *   <li>Mat → Image (for OpenCV to Sikuli conversion)
+ *   <li>Image/BufferedImage → Mat (BGR format)
+ *   <li>Image/BufferedImage → Mat (HSV format)
  * </ul>
- * <p>
- * Color space notes:
+ *
+ * <p>Color space notes:
+ *
  * <ul>
- * <li>BGR: OpenCV's default color format (Blue-Green-Red)</li>
- * <li>HSV: Hue-Saturation-Value, useful for color-based detection</li>
- * <li>Conversions handle format changes automatically</li>
+ *   <li>BGR: OpenCV's default color format (Blue-Green-Red)
+ *   <li>HSV: Hue-Saturation-Value, useful for color-based detection
+ *   <li>Conversions handle format changes automatically
  * </ul>
- * <p>
- * Error handling:
+ *
+ * <p>Error handling:
+ *
  * <ul>
- * <li>Conversion failures return empty Mat objects</li>
- * <li>Null inputs are handled gracefully</li>
- * <li>No exceptions thrown from public methods</li>
+ *   <li>Conversion failures return empty Mat objects
+ *   <li>Null inputs are handled gracefully
+ *   <li>No exceptions thrown from public methods
  * </ul>
- * <p>
- * Thread safety: All methods are stateless and thread-safe.
+ *
+ * <p>Thread safety: All methods are stateless and thread-safe.
  *
  * @see BufferedImageUtilities
  * @see MatrixUtilities
@@ -47,9 +50,9 @@ public class ImageConverter {
 
     /**
      * Converts a Sikuli Image to a byte array.
-     * <p>
-     * Useful for serialization, network transmission, or storage.
-     * The image is encoded using the default format (typically PNG).
+     *
+     * <p>Useful for serialization, network transmission, or storage. The image is encoded using the
+     * default format (typically PNG).
      *
      * @param image Sikuli Image to convert
      * @return byte array representation of the image
@@ -60,9 +63,9 @@ public class ImageConverter {
 
     /**
      * Creates a Sikuli Image from a byte array.
-     * <p>
-     * Reconstructs an Image from its byte representation,
-     * typically used for deserialization or loading from storage.
+     *
+     * <p>Reconstructs an Image from its byte representation, typically used for deserialization or
+     * loading from storage.
      *
      * @param bytes byte array containing encoded image data
      * @return Sikuli Image object
@@ -73,9 +76,9 @@ public class ImageConverter {
 
     /**
      * Converts an OpenCV Mat to a Sikuli Image.
-     * <p>
-     * Enables use of OpenCV-processed images in Sikuli operations.
-     * The Mat is expected to be in BGR format.
+     *
+     * <p>Enables use of OpenCV-processed images in Sikuli operations. The Mat is expected to be in
+     * BGR format.
      *
      * @param mat OpenCV Mat to convert
      * @return Sikuli Image object
@@ -86,12 +89,12 @@ public class ImageConverter {
 
     /**
      * Converts a Sikuli Image to OpenCV Mat in BGR format.
-     * <p>
-     * BGR (Blue-Green-Red) is OpenCV's default color format.
-     * This conversion enables OpenCV operations on Sikuli images.
-     * <p>
-     * Error handling: Returns an empty Mat if conversion fails,
-     * allowing operations to continue without null checks.
+     *
+     * <p>BGR (Blue-Green-Red) is OpenCV's default color format. This conversion enables OpenCV
+     * operations on Sikuli images.
+     *
+     * <p>Error handling: Returns an empty Mat if conversion fails, allowing operations to continue
+     * without null checks.
      *
      * @param image Sikuli Image to convert
      * @return Mat in BGR format, or empty Mat on conversion failure
@@ -102,9 +105,9 @@ public class ImageConverter {
 
     /**
      * Converts a BufferedImage to OpenCV Mat in BGR format.
-     * <p>
-     * Direct conversion from Java's BufferedImage to OpenCV's Mat.
-     * Handles the conversion through MatOps utility.
+     *
+     * <p>Direct conversion from Java's BufferedImage to OpenCV's Mat. Handles the conversion
+     * through MatOps utility.
      *
      * @param bufferedImage Java BufferedImage to convert
      * @return Mat in BGR format, or empty Mat on conversion failure
@@ -116,13 +119,12 @@ public class ImageConverter {
 
     /**
      * Converts a Sikuli Image to OpenCV Mat in HSV format.
-     * <p>
-     * HSV (Hue-Saturation-Value) format is useful for color-based
-     * image processing as it separates color information (hue) from
-     * intensity (value), making color detection more robust to
-     * lighting changes.
-     * <p>
-     * The conversion path: Image → BufferedImage → Mat (BGR) → Mat (HSV)
+     *
+     * <p>HSV (Hue-Saturation-Value) format is useful for color-based image processing as it
+     * separates color information (hue) from intensity (value), making color detection more robust
+     * to lighting changes.
+     *
+     * <p>The conversion path: Image → BufferedImage → Mat (BGR) → Mat (HSV)
      *
      * @param image Sikuli Image to convert
      * @return Mat in HSV format, or empty Mat on conversion failure
@@ -133,11 +135,12 @@ public class ImageConverter {
 
     /**
      * Converts a BufferedImage to OpenCV Mat in HSV format.
-     * <p>
-     * Two-step conversion process:
+     *
+     * <p>Two-step conversion process:
+     *
      * <ol>
-     * <li>BufferedImage → Mat (BGR)</li>
-     * <li>Mat (BGR) → Mat (HSV)</li>
+     *   <li>BufferedImage → Mat (BGR)
+     *   <li>Mat (BGR) → Mat (HSV)
      * </ol>
      *
      * @param bufferedImage Java BufferedImage to convert
@@ -152,9 +155,9 @@ public class ImageConverter {
 
     /**
      * Checks if a Sikuli Image contains no image data.
-     * <p>
-     * An Image is considered empty if its underlying BufferedImage
-     * is null. This can occur with uninitialized or failed image loads.
+     *
+     * <p>An Image is considered empty if its underlying BufferedImage is null. This can occur with
+     * uninitialized or failed image loads.
      *
      * @param image Sikuli Image to check
      * @return true if the image contains no data, false otherwise

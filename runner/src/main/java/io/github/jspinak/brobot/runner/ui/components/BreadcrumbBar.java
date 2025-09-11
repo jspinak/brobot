@@ -1,5 +1,8 @@
 package io.github.jspinak.brobot.runner.ui.components;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -11,31 +14,24 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
+
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-
 /**
- * A breadcrumb navigation component showing the path to the current screen.
- * Allows navigation back to previous screens in the path.
+ * A breadcrumb navigation component showing the path to the current screen. Allows navigation back
+ * to previous screens in the path.
  */
 public class BreadcrumbBar extends HBox {
 
     private final ObservableList<BreadcrumbItem> items = FXCollections.observableArrayList();
     private final ObjectProperty<BreadcrumbItem> activeItem = new SimpleObjectProperty<>();
 
-    /**
-     * Creates a new BreadcrumbBar.
-     */
+    /** Creates a new BreadcrumbBar. */
     public BreadcrumbBar() {
         initialize();
     }
 
-    /**
-     * Initialize the breadcrumb bar.
-     */
+    /** Initialize the breadcrumb bar. */
     private void initialize() {
         getStyleClass().add("breadcrumb-bar");
         setAlignment(Pos.CENTER_LEFT);
@@ -43,19 +39,20 @@ public class BreadcrumbBar extends HBox {
         setSpacing(5);
 
         // Listen for changes to the items list
-        items.addListener((ListChangeListener<BreadcrumbItem>) change -> {
-            refreshBreadcrumbs();
-        });
+        items.addListener(
+                (ListChangeListener<BreadcrumbItem>)
+                        change -> {
+                            refreshBreadcrumbs();
+                        });
 
         // Listen for changes to the active item
-        activeItem.addListener((obs, oldItem, newItem) -> {
-            refreshBreadcrumbs();
-        });
+        activeItem.addListener(
+                (obs, oldItem, newItem) -> {
+                    refreshBreadcrumbs();
+                });
     }
 
-    /**
-     * Refreshes the breadcrumb display.
-     */
+    /** Refreshes the breadcrumb display. */
     private void refreshBreadcrumbs() {
         getChildren().clear();
 
@@ -202,9 +199,7 @@ public class BreadcrumbBar extends HBox {
         }
     }
 
-    /**
-     * Removes all breadcrumb items.
-     */
+    /** Removes all breadcrumb items. */
     public void clearItems() {
         items.clear();
         activeItem.set(null);
@@ -244,17 +239,13 @@ public class BreadcrumbBar extends HBox {
         }
     }
 
-    /**
-     * Represents a single item in the breadcrumb path.
-     */
+    /** Represents a single item in the breadcrumb path. */
     public static class BreadcrumbItem {
         private final String text;
         private final Consumer<BreadcrumbItem> onClick;
-        /**
-         *  The data associated with the item.
-         */
-        @Setter
-        private Object data;
+
+        /** The data associated with the item. */
+        @Setter private Object data;
 
         /**
          * Creates a new BreadcrumbItem.
@@ -306,6 +297,5 @@ public class BreadcrumbBar extends HBox {
         public Object getData() {
             return data;
         }
-
     }
 }

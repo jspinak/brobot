@@ -1,77 +1,66 @@
 package io.github.jspinak.brobot.util.image.core;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.config.core.SmartImageLoader;
-import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
-import io.github.jspinak.brobot.monitor.MonitorManager;
-import io.github.jspinak.brobot.model.element.Region;
-import org.bytedeco.opencv.opencv_core.Mat;
-import io.github.jspinak.brobot.test.MockMatFactory;
-import org.junit.jupiter.api.BeforeEach;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.MockitoAnnotations;
-import org.sikuli.script.Pattern;
-import org.sikuli.script.Screen;
-import org.sikuli.script.ScreenImage;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Base64;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import javax.imageio.ImageIO;
+
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.sikuli.script.Pattern;
+import org.sikuli.script.Screen;
+import org.sikuli.script.ScreenImage;
+
+import io.github.jspinak.brobot.config.core.BrobotProperties;
+import io.github.jspinak.brobot.config.core.SmartImageLoader;
+import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.monitor.MonitorManager;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.MockMatFactory;
 
 /**
- * Comprehensive test suite for BufferedImageUtilities - image operations
- * utility.
- * Tests file operations, screen capture, format conversions, and platform
- * abstraction.
+ * Comprehensive test suite for BufferedImageUtilities - image operations utility. Tests file
+ * operations, screen capture, format conversions, and platform abstraction.
  */
 @DisplayName("BufferedImageUtilities Tests")
 public class BufferedImageUtilitiesTest extends BrobotTestBase {
 
     private BufferedImageUtilities imageUtils;
 
-    @Mock
-    private MonitorManager mockMonitorManager;
+    @Mock private MonitorManager mockMonitorManager;
 
-    @Mock
-    private BrobotProperties mockProperties;
+    @Mock private BrobotProperties mockProperties;
 
-    @Mock
-    private SmartImageLoader mockSmartImageLoader;
+    @Mock private SmartImageLoader mockSmartImageLoader;
 
-    @Mock
-    private Screen mockScreen;
+    @Mock private Screen mockScreen;
 
-    @Mock
-    private ScreenImage mockScreenImage;
+    @Mock private ScreenImage mockScreenImage;
 
-    @Mock
-    private Pattern mockPattern;
+    @Mock private Pattern mockPattern;
 
-    @Mock
-    private ExecutionEnvironment mockEnvironment;
+    @Mock private ExecutionEnvironment mockEnvironment;
 
-    @TempDir
-    Path tempDir;
+    @TempDir Path tempDir;
 
     @BeforeEach
     @Override
@@ -116,7 +105,8 @@ public class BufferedImageUtilitiesTest extends BrobotTestBase {
             ImageIO.write(testImage, "png", tempFile);
 
             // getBuffImgDirectly doesn't check mock mode, reads file directly
-            BufferedImage result = BufferedImageUtilities.getBuffImgDirectly(tempFile.getAbsolutePath());
+            BufferedImage result =
+                    BufferedImageUtilities.getBuffImgDirectly(tempFile.getAbsolutePath());
 
             assertNotNull(result);
             assertEquals(50, result.getWidth());
@@ -126,7 +116,8 @@ public class BufferedImageUtilitiesTest extends BrobotTestBase {
         @Test
         @DisplayName("Load non-existent file returns null")
         public void testLoadNonExistentFile() {
-            BufferedImage result = BufferedImageUtilities.getBuffImgDirectly("/non/existent/file.png");
+            BufferedImage result =
+                    BufferedImageUtilities.getBuffImgDirectly("/non/existent/file.png");
 
             assertNull(result);
         }
@@ -140,7 +131,8 @@ public class BufferedImageUtilitiesTest extends BrobotTestBase {
         @DisplayName("Capture full screen")
         public void testCaptureFullScreen() {
             // In mock mode, returns dummy image with requested dimensions
-            BufferedImage result = BufferedImageUtilities.getBufferedImageFromScreen(new Region(0, 0, 1920, 1080));
+            BufferedImage result =
+                    BufferedImageUtilities.getBufferedImageFromScreen(new Region(0, 0, 1920, 1080));
 
             assertNotNull(result);
             assertEquals(1920, result.getWidth());
@@ -174,7 +166,8 @@ public class BufferedImageUtilitiesTest extends BrobotTestBase {
         @DisplayName("Capture with null screen returns dummy image")
         public void testCaptureWithNullScreen() {
             // In mock mode, always returns a dummy image, never null
-            BufferedImage result = BufferedImageUtilities.getBufferedImageFromScreen(new Region(0, 0, 1920, 1080));
+            BufferedImage result =
+                    BufferedImageUtilities.getBufferedImageFromScreen(new Region(0, 0, 1920, 1080));
 
             assertNotNull(result); // In mock mode, should never be null
             assertEquals(1920, result.getWidth());
@@ -315,12 +308,13 @@ public class BufferedImageUtilitiesTest extends BrobotTestBase {
     class ImageTypeConversions {
 
         @ParameterizedTest
-        @ValueSource(ints = {
-                BufferedImage.TYPE_INT_RGB,
-                BufferedImage.TYPE_INT_ARGB,
-                BufferedImage.TYPE_BYTE_GRAY,
-                BufferedImage.TYPE_3BYTE_BGR
-        })
+        @ValueSource(
+                ints = {
+                    BufferedImage.TYPE_INT_RGB,
+                    BufferedImage.TYPE_INT_ARGB,
+                    BufferedImage.TYPE_BYTE_GRAY,
+                    BufferedImage.TYPE_3BYTE_BGR
+                })
         @DisplayName("Convert various image types")
         public void testConvertImageTypes(int imageType) {
             BufferedImage original = new BufferedImage(30, 30, imageType);
@@ -386,14 +380,15 @@ public class BufferedImageUtilitiesTest extends BrobotTestBase {
 
         @ParameterizedTest
         @CsvSource({
-                "test.png, png",
-                "test.jpg, jpg",
-                "test.jpeg, jpeg",
-                "test.gif, gif",
-                "test.bmp, bmp"
+            "test.png, png",
+            "test.jpg, jpg",
+            "test.jpeg, jpeg",
+            "test.gif, gif",
+            "test.bmp, bmp"
         })
         @DisplayName("Save with different formats")
-        public void testSaveWithDifferentFormats(String filename, String format) throws IOException {
+        public void testSaveWithDifferentFormats(String filename, String format)
+                throws IOException {
             BufferedImage image = new BufferedImage(20, 20, BufferedImage.TYPE_INT_RGB);
             File outputFile = new File(tempDir.toFile(), filename);
 
@@ -438,7 +433,9 @@ public class BufferedImageUtilitiesTest extends BrobotTestBase {
         @DisplayName("Convert Mat to BufferedImage")
         public void testMatToBufferedImage() {
             // Use MockMatFactory for safe Mat creation
-            Mat mat = MockMatFactory.createSafeMat(60, 60, org.bytedeco.opencv.global.opencv_core.CV_8UC3);
+            Mat mat =
+                    MockMatFactory.createSafeMat(
+                            60, 60, org.bytedeco.opencv.global.opencv_core.CV_8UC3);
 
             BufferedImage image;
             try {
@@ -462,7 +459,7 @@ public class BufferedImageUtilitiesTest extends BrobotTestBase {
                 // Try native conversion
                 Mat mat = new io.github.jspinak.brobot.model.element.Image(original).getMatBGR();
                 BufferedImage restored = BufferedImageUtilities.fromMat(mat);
-                
+
                 assertNotNull(restored);
                 assertEquals(original.getWidth(), restored.getWidth());
                 assertEquals(original.getHeight(), restored.getHeight());
@@ -504,9 +501,11 @@ public class BufferedImageUtilitiesTest extends BrobotTestBase {
         public void testValidateZeroDimensionImage() {
             // Note: Creating 0-dimension BufferedImage throws exception
             // This test documents expected behavior
-            assertThrows(IllegalArgumentException.class, () -> {
-                new BufferedImage(0, 0, BufferedImage.TYPE_INT_RGB);
-            });
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> {
+                        new BufferedImage(0, 0, BufferedImage.TYPE_INT_RGB);
+                    });
         }
     }
 
@@ -532,7 +531,8 @@ public class BufferedImageUtilitiesTest extends BrobotTestBase {
             BufferedImage tiny = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
             tiny.setRGB(0, 0, Color.RED.getRGB());
 
-            BufferedImage subImage = BufferedImageUtilities.getSubImage(tiny, new Region(0, 0, 1, 1));
+            BufferedImage subImage =
+                    BufferedImageUtilities.getSubImage(tiny, new Region(0, 0, 1, 1));
 
             assertNotNull(subImage);
             assertEquals(1, subImage.getWidth());

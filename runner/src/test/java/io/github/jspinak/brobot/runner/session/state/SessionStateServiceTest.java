@@ -1,28 +1,26 @@
 package io.github.jspinak.brobot.runner.session.state;
 
-import io.github.jspinak.brobot.model.state.State;
-import io.github.jspinak.brobot.model.transition.StateTransitionStore;
-import io.github.jspinak.brobot.navigation.transition.StateTransitions;
-import io.github.jspinak.brobot.runner.common.diagnostics.DiagnosticInfo;
-import io.github.jspinak.brobot.runner.session.Session;
-import io.github.jspinak.brobot.runner.session.SessionEvent;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.time.LocalDateTime;
+import java.util.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.time.LocalDateTime;
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import io.github.jspinak.brobot.model.transition.StateTransitionStore;
+import io.github.jspinak.brobot.navigation.transition.StateTransitions;
+import io.github.jspinak.brobot.runner.common.diagnostics.DiagnosticInfo;
+import io.github.jspinak.brobot.runner.session.Session;
 
 class SessionStateServiceTest {
 
     private SessionStateService stateService;
-    
-    @Mock
-    private StateTransitionStore stateTransitionStore;
+
+    @Mock private StateTransitionStore stateTransitionStore;
 
     @BeforeEach
     void setUp() {
@@ -33,10 +31,8 @@ class SessionStateServiceTest {
     @Test
     void testCaptureCurrentState_ReturnsApplicationState() {
         // Given
-        List<StateTransitions> mockTransitions = Arrays.asList(
-                mock(StateTransitions.class),
-                mock(StateTransitions.class)
-        );
+        List<StateTransitions> mockTransitions =
+                Arrays.asList(mock(StateTransitions.class), mock(StateTransitions.class));
         when(stateTransitionStore.getAllStateTransitionsAsCopy()).thenReturn(mockTransitions);
 
         // When
@@ -70,24 +66,22 @@ class SessionStateServiceTest {
     @Test
     void testCaptureState_WithNullSession_ReturnsEarly() {
         // When/Then - should not throw
-        assertThatCode(() -> stateService.captureState(null))
-                .doesNotThrowAnyException();
+        assertThatCode(() -> stateService.captureState(null)).doesNotThrowAnyException();
     }
 
     @Test
     void testRestoreState_FromApplicationState() {
         // Given
-        List<StateTransitions> transitions = Arrays.asList(
-                mock(StateTransitions.class),
-                mock(StateTransitions.class)
-        );
+        List<StateTransitions> transitions =
+                Arrays.asList(mock(StateTransitions.class), mock(StateTransitions.class));
         Set<Long> activeStateIds = new HashSet<>(Arrays.asList(1L, 2L, 3L));
-        
-        ApplicationState appState = ApplicationState.builder()
-                .stateTransitions(transitions)
-                .activeStateIds(activeStateIds)
-                .lastModified(LocalDateTime.now())
-                .build();
+
+        ApplicationState appState =
+                ApplicationState.builder()
+                        .stateTransitions(transitions)
+                        .activeStateIds(activeStateIds)
+                        .lastModified(LocalDateTime.now())
+                        .build();
 
         // When
         stateService.restoreState(appState);
@@ -103,7 +97,7 @@ class SessionStateServiceTest {
         Session session = createTestSession();
         List<StateTransitions> transitions = Arrays.asList(mock(StateTransitions.class));
         Set<Long> activeStateIds = new HashSet<>(Arrays.asList(1L, 2L));
-        
+
         session.setStateTransitions(transitions);
         session.setActiveStateIds(activeStateIds);
 
@@ -120,9 +114,8 @@ class SessionStateServiceTest {
     @Test
     void testRestoreState_WithNullSession_ReturnsEarly() {
         // When/Then - should not throw
-        assertThatCode(() -> stateService.restoreState((Session) null))
-                .doesNotThrowAnyException();
-        
+        assertThatCode(() -> stateService.restoreState((Session) null)).doesNotThrowAnyException();
+
         verify(stateTransitionStore, never()).emptyRepos();
     }
 
@@ -229,10 +222,13 @@ class SessionStateServiceTest {
         // When - create snapshots concurrently
         for (int i = 0; i < threadCount; i++) {
             final int index = i;
-            threads[i] = new Thread(() -> {
-                StateSnapshot snapshot = stateService.createSnapshot("Concurrent snapshot " + index);
-                snapshotIds.add(snapshot.getId());
-            });
+            threads[i] =
+                    new Thread(
+                            () -> {
+                                StateSnapshot snapshot =
+                                        stateService.createSnapshot("Concurrent snapshot " + index);
+                                snapshotIds.add(snapshot.getId());
+                            });
             threads[i].start();
         }
 
@@ -250,16 +246,20 @@ class SessionStateServiceTest {
     void testDiagnosticInfo() {
         // Given
         stateService.createSnapshot("Test snapshot");
-        when(stateTransitionStore.getAllStateTransitionsAsCopy()).thenReturn(Arrays.asList(mock(StateTransitions.class)));
+        when(stateTransitionStore.getAllStateTransitionsAsCopy())
+                .thenReturn(Arrays.asList(mock(StateTransitions.class)));
 
         // When
         DiagnosticInfo diagnosticInfo = stateService.getDiagnosticInfo();
 
         // Then
         assertThat(diagnosticInfo.getComponent()).isEqualTo("SessionStateService");
-        assertThat(diagnosticInfo.getStates()).containsKeys(
-                "snapshotCount", "currentActiveStates", "stateTransitionCount", "estimatedMemoryUsageKB"
-        );
+        assertThat(diagnosticInfo.getStates())
+                .containsKeys(
+                        "snapshotCount",
+                        "currentActiveStates",
+                        "stateTransitionCount",
+                        "estimatedMemoryUsageKB");
         assertThat(diagnosticInfo.getStates().get("snapshotCount")).isEqualTo(1);
     }
 
@@ -284,16 +284,16 @@ class SessionStateServiceTest {
     @Test
     void testStateRestoration_WithNullTransitions() {
         // Given
-        ApplicationState appState = ApplicationState.builder()
-                .stateTransitions(null)
-                .activeStateIds(null)
-                .lastModified(LocalDateTime.now())
-                .build();
+        ApplicationState appState =
+                ApplicationState.builder()
+                        .stateTransitions(null)
+                        .activeStateIds(null)
+                        .lastModified(LocalDateTime.now())
+                        .build();
 
         // When/Then - should handle gracefully
-        assertThatCode(() -> stateService.restoreState(appState))
-                .doesNotThrowAnyException();
-        
+        assertThatCode(() -> stateService.restoreState(appState)).doesNotThrowAnyException();
+
         verify(stateTransitionStore).emptyRepos();
         verify(stateTransitionStore, never()).add(any());
     }

@@ -1,12 +1,5 @@
 package io.github.jspinak.brobot.runner.cache;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
-import io.github.jspinak.brobot.runner.events.EventBus;
-import io.github.jspinak.brobot.runner.events.LogEvent;
-import io.github.jspinak.brobot.runner.resources.ResourceManager;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -15,9 +8,14 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-/**
- * A generic cache implementation using LRU (Least Recently Used) policy
- */
+import io.github.jspinak.brobot.runner.events.EventBus;
+import io.github.jspinak.brobot.runner.events.LogEvent;
+import io.github.jspinak.brobot.runner.resources.ResourceManager;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+/** A generic cache implementation using LRU (Least Recently Used) policy */
 @Data
 @EqualsAndHashCode(exclude = "resourceManager")
 public class LRUCache<K, V> implements AutoCloseable {
@@ -35,30 +33,39 @@ public class LRUCache<K, V> implements AutoCloseable {
     // The cache is implemented using a LinkedHashMap with access-order
     private final Map<K, V> cache;
 
-    public LRUCache(EventBus eventBus, String cacheName, int maxSize, ResourceManager resourceManager) {
+    public LRUCache(
+            EventBus eventBus, String cacheName, int maxSize, ResourceManager resourceManager) {
         this.eventBus = eventBus;
         this.cacheName = cacheName;
         this.maxSize = maxSize;
         this.resourceManager = resourceManager;
 
         // Create LRU cache using LinkedHashMap with access order
-        this.cache = Collections.synchronizedMap(new LinkedHashMap<K, V>(maxSize + 1, 0.75f, true) {
-            @Override
-            protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
-                boolean shouldRemove = size() > maxSize;
-                if (shouldRemove) {
-                    eventBus.publish(LogEvent.debug(LRUCache.this,
-                            cacheName + " cache evicting entry: " + eldest.getKey(), "Cache"));
-                }
-                return shouldRemove;
-            }
-        });
+        this.cache =
+                Collections.synchronizedMap(
+                        new LinkedHashMap<K, V>(maxSize + 1, 0.75f, true) {
+                            @Override
+                            protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+                                boolean shouldRemove = size() > maxSize;
+                                if (shouldRemove) {
+                                    eventBus.publish(
+                                            LogEvent.debug(
+                                                    LRUCache.this,
+                                                    cacheName
+                                                            + " cache evicting entry: "
+                                                            + eldest.getKey(),
+                                                    "Cache"));
+                                }
+                                return shouldRemove;
+                            }
+                        });
 
         resourceManager.registerResource(this, cacheName + " Cache");
     }
 
     /**
      * Gets a value from the cache
+     *
      * @param key The key to look up
      * @return The value, or null if not found
      */
@@ -70,12 +77,12 @@ public class LRUCache<K, V> implements AutoCloseable {
             V value = cache.get(key);
             if (value != null) {
                 hits.incrementAndGet();
-                eventBus.publish(LogEvent.debug(this,
-                        cacheName + " cache hit for: " + key, "Cache"));
+                eventBus.publish(
+                        LogEvent.debug(this, cacheName + " cache hit for: " + key, "Cache"));
             } else {
                 misses.incrementAndGet();
-                eventBus.publish(LogEvent.debug(this,
-                        cacheName + " cache miss for: " + key, "Cache"));
+                eventBus.publish(
+                        LogEvent.debug(this, cacheName + " cache miss for: " + key, "Cache"));
             }
             return value;
         } finally {
@@ -85,6 +92,7 @@ public class LRUCache<K, V> implements AutoCloseable {
 
     /**
      * Stores a value in the cache
+     *
      * @param key The key
      * @param value The value
      */
@@ -95,8 +103,7 @@ public class LRUCache<K, V> implements AutoCloseable {
         try {
             cache.put(key, value);
             puts.incrementAndGet();
-            eventBus.publish(LogEvent.debug(this,
-                    cacheName + " cache stored: " + key, "Cache"));
+            eventBus.publish(LogEvent.debug(this, cacheName + " cache stored: " + key, "Cache"));
         } finally {
             lock.writeLock().unlock();
         }
@@ -104,6 +111,7 @@ public class LRUCache<K, V> implements AutoCloseable {
 
     /**
      * Gets a value if present, otherwise computes and stores it
+     *
      * @param key The key
      * @param supplier Function to compute the value if not present
      * @return The value
@@ -131,8 +139,9 @@ public class LRUCache<K, V> implements AutoCloseable {
             if (value != null) {
                 cache.put(key, value);
                 puts.incrementAndGet();
-                eventBus.publish(LogEvent.debug(this,
-                        cacheName + " cache computed and stored: " + key, "Cache"));
+                eventBus.publish(
+                        LogEvent.debug(
+                                this, cacheName + " cache computed and stored: " + key, "Cache"));
             }
             return value;
         } finally {
@@ -142,6 +151,7 @@ public class LRUCache<K, V> implements AutoCloseable {
 
     /**
      * Removes a value from the cache
+     *
      * @param key The key to remove
      */
     public void invalidate(K key) {
@@ -151,32 +161,31 @@ public class LRUCache<K, V> implements AutoCloseable {
         try {
             V removed = cache.remove(key);
             if (removed != null) {
-                eventBus.publish(LogEvent.debug(this,
-                        cacheName + " cache invalidated: " + key, "Cache"));
+                eventBus.publish(
+                        LogEvent.debug(this, cacheName + " cache invalidated: " + key, "Cache"));
             }
         } finally {
             lock.writeLock().unlock();
         }
     }
 
-    /**
-     * Clears the entire cache
-     */
+    /** Clears the entire cache */
     public void invalidateAll() {
         lock.writeLock().lock();
         try {
             int size = cache.size();
             cache.clear();
-            eventBus.publish(LogEvent.info(this,
-                    cacheName + " cache completely invalidated (" + size + " entries)", "Cache"));
+            eventBus.publish(
+                    LogEvent.info(
+                            this,
+                            cacheName + " cache completely invalidated (" + size + " entries)",
+                            "Cache"));
         } finally {
             lock.writeLock().unlock();
         }
     }
 
-    /**
-     * Gets the number of entries in the cache
-     */
+    /** Gets the number of entries in the cache */
     public int size() {
         lock.readLock().lock();
         try {
@@ -186,9 +195,7 @@ public class LRUCache<K, V> implements AutoCloseable {
         }
     }
 
-    /**
-     * Gets the cache statistics
-     */
+    /** Gets the cache statistics */
     public Map<String, Long> getStats() {
         Map<String, Long> stats = new HashMap<>();
         stats.put("hits", hits.get());
@@ -209,10 +216,17 @@ public class LRUCache<K, V> implements AutoCloseable {
     @Override
     public void close() {
         invalidateAll();
-        eventBus.publish(LogEvent.info(this,
-                cacheName + " cache closed (hits: " + hits.get() +
-                        ", misses: " + misses.get() +
-                        ", hit ratio: " + calculateHitRatio() + "%)",
-                "Resources"));
+        eventBus.publish(
+                LogEvent.info(
+                        this,
+                        cacheName
+                                + " cache closed (hits: "
+                                + hits.get()
+                                + ", misses: "
+                                + misses.get()
+                                + ", hit ratio: "
+                                + calculateHitRatio()
+                                + "%)",
+                        "Resources"));
     }
 }

@@ -1,7 +1,13 @@
 package io.github.jspinak.brobot.monitor;
 
-import io.github.jspinak.brobot.config.core.BrobotProperties;
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.awt.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -10,31 +16,21 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.sikuli.script.Screen;
 
-import java.awt.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.test.DisabledInCI;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
-import static org.mockito.Mockito.*;
-
 /**
- * Comprehensive test suite for MonitorManager - manages multi-monitor support.
- * Tests monitor detection, selection, coordinate conversion, and operation
- * mapping.
+ * Comprehensive test suite for MonitorManager - manages multi-monitor support. Tests monitor
+ * detection, selection, coordinate conversion, and operation mapping.
  */
 @DisplayName("MonitorManager Tests")
-
 @DisabledInCI
 public class MonitorManagerTest extends BrobotTestBase {
 
-    @Mock
-    private BrobotProperties mockProperties;
+    @Mock private BrobotProperties mockProperties;
 
-    @Mock
-    private BrobotProperties.Monitor mockMonitorProperties;
+    @Mock private BrobotProperties.Monitor mockMonitorProperties;
 
     private MonitorManager monitorManager;
 
@@ -215,11 +211,12 @@ public class MonitorManagerTest extends BrobotTestBase {
             Screen screen3 = monitorManager.getScreen("operation3");
 
             // All should be mapped - verify no exceptions
-            assertDoesNotThrow(() -> {
-                monitorManager.getScreen("operation1");
-                monitorManager.getScreen("operation2");
-                monitorManager.getScreen("operation3");
-            });
+            assertDoesNotThrow(
+                    () -> {
+                        monitorManager.getScreen("operation1");
+                        monitorManager.getScreen("operation2");
+                        monitorManager.getScreen("operation3");
+                    });
         }
     }
 
@@ -236,9 +233,7 @@ public class MonitorManagerTest extends BrobotTestBase {
         @DisplayName("Should convert global to monitor coordinates")
         void shouldConvertGlobalToMonitorCoordinates() {
             MonitorManager.MonitorInfo info = monitorManager.getMonitorInfo(0);
-            Point globalPoint = new Point(
-                    info.getX() + 100,
-                    info.getY() + 50);
+            Point globalPoint = new Point(info.getX() + 100, info.getY() + 50);
 
             Point monitorPoint = monitorManager.toMonitorCoordinates(globalPoint, 0);
 
@@ -259,12 +254,7 @@ public class MonitorManagerTest extends BrobotTestBase {
         }
 
         @ParameterizedTest
-        @CsvSource({
-                "0, 0",
-                "100, 50",
-                "500, 300",
-                "1920, 1080"
-        })
+        @CsvSource({"0, 0", "100, 50", "500, 300", "1920, 1080"})
         @DisplayName("Should handle various coordinate conversions")
         void shouldHandleVariousCoordinateConversions(int x, int y) {
             Point monitorPoint = new Point(x, y);
@@ -302,9 +292,9 @@ public class MonitorManagerTest extends BrobotTestBase {
         @DisplayName("Should find monitor containing point")
         void shouldFindMonitorContainingPoint() {
             MonitorManager.MonitorInfo info = monitorManager.getMonitorInfo(0);
-            Point pointInMonitor = new Point(
-                    info.getX() + info.getWidth() / 2,
-                    info.getY() + info.getHeight() / 2);
+            Point pointInMonitor =
+                    new Point(
+                            info.getX() + info.getWidth() / 2, info.getY() + info.getHeight() / 2);
 
             int monitorIndex = monitorManager.getMonitorAtPoint(pointInMonitor);
 
@@ -322,7 +312,7 @@ public class MonitorManagerTest extends BrobotTestBase {
         }
 
         @ParameterizedTest
-        @ValueSource(ints = { -100, -50, 0, 50, 100 })
+        @ValueSource(ints = {-100, -50, 0, 50, 100})
         @DisplayName("Should handle edge points")
         void shouldHandleEdgePoints(int offset) {
             MonitorManager.MonitorInfo info = monitorManager.getMonitorInfo(0);
@@ -466,8 +456,8 @@ public class MonitorManagerTest extends BrobotTestBase {
         @DisplayName("Should provide monitor dimensions")
         void shouldProvideMonitorDimensions() {
             Rectangle bounds = new Rectangle(100, 200, 1920, 1080);
-            MonitorManager.MonitorInfo info = new MonitorManager.MonitorInfo(
-                    1, bounds, "test-device");
+            MonitorManager.MonitorInfo info =
+                    new MonitorManager.MonitorInfo(1, bounds, "test-device");
 
             assertEquals(1, info.getIndex());
             assertEquals(bounds, info.getBounds());
@@ -480,16 +470,17 @@ public class MonitorManagerTest extends BrobotTestBase {
 
         @ParameterizedTest
         @CsvSource({
-                "0, 0, 0, 1920, 1080",
-                "1, 1920, 0, 1920, 1080",
-                "2, -1920, 0, 1920, 1080",
-                "3, 0, 1080, 1920, 1080"
+            "0, 0, 0, 1920, 1080",
+            "1, 1920, 0, 1920, 1080",
+            "2, -1920, 0, 1920, 1080",
+            "3, 0, 1080, 1920, 1080"
         })
         @DisplayName("Should handle various monitor configurations")
-        void shouldHandleVariousMonitorConfigurations(int index, int x, int y, int width, int height) {
+        void shouldHandleVariousMonitorConfigurations(
+                int index, int x, int y, int width, int height) {
             Rectangle bounds = new Rectangle(x, y, width, height);
-            MonitorManager.MonitorInfo info = new MonitorManager.MonitorInfo(
-                    index, bounds, "device-" + index);
+            MonitorManager.MonitorInfo info =
+                    new MonitorManager.MonitorInfo(index, bounds, "device-" + index);
 
             assertEquals(index, info.getIndex());
             assertEquals(x, info.getX());

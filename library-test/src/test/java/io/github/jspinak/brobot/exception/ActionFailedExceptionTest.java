@@ -1,20 +1,20 @@
 package io.github.jspinak.brobot.exception;
 
-import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
-
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import io.github.jspinak.brobot.action.ActionInterface;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+
 /**
- * Unit tests for ActionFailedException
- * Testing action-specific exception handling and context preservation
+ * Unit tests for ActionFailedException Testing action-specific exception handling and context
+ * preservation
  */
 @DisplayName("ActionFailedException Tests")
 class ActionFailedExceptionTest extends BrobotTestBase {
@@ -29,17 +29,18 @@ class ActionFailedExceptionTest extends BrobotTestBase {
             // Given
             ActionInterface.Type actionType = ActionInterface.Type.CLICK;
             String message = "Element not found on button.png";
-            
+
             // When
             ActionFailedException exception = new ActionFailedException(actionType, message);
-            
+
             // Then
             assertNotNull(exception);
             assertEquals(actionType, exception.getActionType());
             assertEquals(message, exception.getActionDetails());
             assertTrue(exception.getMessage().contains("CLICK"));
             assertTrue(exception.getMessage().contains("Element not found"));
-            assertEquals("Action CLICK failed: Element not found on button.png", exception.getMessage());
+            assertEquals(
+                    "Action CLICK failed: Element not found on button.png", exception.getMessage());
         }
 
         @ParameterizedTest
@@ -48,10 +49,10 @@ class ActionFailedExceptionTest extends BrobotTestBase {
         void shouldHandleAllActionTypes(ActionInterface.Type actionType) {
             // Given
             String message = "Action failed for target_element";
-            
+
             // When
             ActionFailedException exception = new ActionFailedException(actionType, message);
-            
+
             // Then
             assertNotNull(exception);
             assertEquals(actionType, exception.getActionType());
@@ -67,10 +68,10 @@ class ActionFailedExceptionTest extends BrobotTestBase {
             ActionInterface.Type actionType = ActionInterface.Type.TYPE;
             String message = "Failed to type text";
             Exception cause = new IllegalStateException("Keyboard locked");
-            
+
             // When
             ActionFailedException exception = new ActionFailedException(actionType, message, cause);
-            
+
             // Then
             assertNotNull(exception);
             assertEquals(actionType, exception.getActionType());
@@ -84,10 +85,10 @@ class ActionFailedExceptionTest extends BrobotTestBase {
         void shouldHandleNullMessage() {
             // Given
             ActionInterface.Type actionType = ActionInterface.Type.FIND;
-            
+
             // When
             ActionFailedException exception = new ActionFailedException(actionType, null);
-            
+
             // Then
             assertNotNull(exception);
             assertEquals(actionType, exception.getActionType());
@@ -101,10 +102,10 @@ class ActionFailedExceptionTest extends BrobotTestBase {
             // Given
             ActionInterface.Type actionType = ActionInterface.Type.MOVE;
             String message = "";
-            
+
             // When
             ActionFailedException exception = new ActionFailedException(actionType, message);
-            
+
             // Then
             assertNotNull(exception);
             assertEquals(actionType, exception.getActionType());
@@ -113,20 +114,21 @@ class ActionFailedExceptionTest extends BrobotTestBase {
         }
 
         @ParameterizedTest
-        @ValueSource(strings = {
-            "Simple error message",
-            "Error with special chars: !@#$%^&*()",
-            "Multi\nline\nerror",
-            "Error with unicode: 测试 エラー"
-        })
+        @ValueSource(
+                strings = {
+                    "Simple error message",
+                    "Error with special chars: !@#$%^&*()",
+                    "Multi\nline\nerror",
+                    "Error with unicode: 测试 エラー"
+                })
         @DisplayName("Should handle various message formats")
         void shouldHandleVariousMessageFormats(String message) {
             // Given
             ActionInterface.Type actionType = ActionInterface.Type.DRAG;
-            
+
             // When
             ActionFailedException exception = new ActionFailedException(actionType, message);
-            
+
             // Then
             assertNotNull(exception);
             assertEquals(message, exception.getActionDetails());
@@ -139,14 +141,12 @@ class ActionFailedExceptionTest extends BrobotTestBase {
             // Given
             Exception cause = new RuntimeException("Root cause");
             cause.fillInStackTrace();
-            
+
             // When
-            ActionFailedException exception = new ActionFailedException(
-                ActionInterface.Type.HIGHLIGHT, 
-                "Highlight failed", 
-                cause
-            );
-            
+            ActionFailedException exception =
+                    new ActionFailedException(
+                            ActionInterface.Type.HIGHLIGHT, "Highlight failed", cause);
+
             // Then
             assertNotNull(exception.getStackTrace());
             assertTrue(exception.getStackTrace().length > 0);
@@ -164,13 +164,11 @@ class ActionFailedExceptionTest extends BrobotTestBase {
         void shouldHandleClickFailures() {
             // Given
             String details = "Button not found at coordinates (100, 200)";
-            
+
             // When
-            ActionFailedException exception = new ActionFailedException(
-                ActionInterface.Type.CLICK, 
-                details
-            );
-            
+            ActionFailedException exception =
+                    new ActionFailedException(ActionInterface.Type.CLICK, details);
+
             // Then
             assertEquals(ActionInterface.Type.CLICK, exception.getActionType());
             assertTrue(exception.getMessage().contains("CLICK"));
@@ -182,13 +180,11 @@ class ActionFailedExceptionTest extends BrobotTestBase {
         void shouldHandleFindFailures() {
             // Given
             String details = "Pattern 'login_button.png' not found with similarity 0.8";
-            
+
             // When
-            ActionFailedException exception = new ActionFailedException(
-                ActionInterface.Type.FIND, 
-                details
-            );
-            
+            ActionFailedException exception =
+                    new ActionFailedException(ActionInterface.Type.FIND, details);
+
             // Then
             assertEquals(ActionInterface.Type.FIND, exception.getActionType());
             assertTrue(exception.getMessage().contains("FIND"));
@@ -201,13 +197,11 @@ class ActionFailedExceptionTest extends BrobotTestBase {
         void shouldHandleTypeFailures() {
             // Given
             String details = "Failed to type 'password123' - field not focused";
-            
+
             // When
-            ActionFailedException exception = new ActionFailedException(
-                ActionInterface.Type.TYPE, 
-                details
-            );
-            
+            ActionFailedException exception =
+                    new ActionFailedException(ActionInterface.Type.TYPE, details);
+
             // Then
             assertEquals(ActionInterface.Type.TYPE, exception.getActionType());
             assertTrue(exception.getMessage().contains("TYPE"));
@@ -219,13 +213,11 @@ class ActionFailedExceptionTest extends BrobotTestBase {
         void shouldHandleDragFailures() {
             // Given
             String details = "Drag operation from (50, 50) to (300, 300) interrupted";
-            
+
             // When
-            ActionFailedException exception = new ActionFailedException(
-                ActionInterface.Type.DRAG, 
-                details
-            );
-            
+            ActionFailedException exception =
+                    new ActionFailedException(ActionInterface.Type.DRAG, details);
+
             // Then
             assertEquals(ActionInterface.Type.DRAG, exception.getActionType());
             assertTrue(exception.getMessage().contains("DRAG"));
@@ -237,13 +229,11 @@ class ActionFailedExceptionTest extends BrobotTestBase {
         void shouldHandleVanishFailures() {
             // Given
             String details = "Element still visible after 30 seconds timeout";
-            
+
             // When
-            ActionFailedException exception = new ActionFailedException(
-                ActionInterface.Type.VANISH, 
-                details
-            );
-            
+            ActionFailedException exception =
+                    new ActionFailedException(ActionInterface.Type.VANISH, details);
+
             // Then
             assertEquals(ActionInterface.Type.VANISH, exception.getActionType());
             assertTrue(exception.getMessage().contains("VANISH"));
@@ -261,18 +251,18 @@ class ActionFailedExceptionTest extends BrobotTestBase {
             // Given
             Exception rootCause = new IllegalArgumentException("Invalid coordinates");
             Exception middleCause = new RuntimeException("Mouse operation failed", rootCause);
-            
+
             // When
-            ActionFailedException exception = new ActionFailedException(
-                ActionInterface.Type.CLICK,
-                "Click failed at invalid position",
-                middleCause
-            );
-            
+            ActionFailedException exception =
+                    new ActionFailedException(
+                            ActionInterface.Type.CLICK,
+                            "Click failed at invalid position",
+                            middleCause);
+
             // Then
             assertEquals(middleCause, exception.getCause());
             assertEquals(rootCause, middleCause.getCause());
-            
+
             // Verify chain integrity
             Throwable current = exception;
             int depth = 0;
@@ -288,12 +278,9 @@ class ActionFailedExceptionTest extends BrobotTestBase {
         @DisplayName("Should handle null cause")
         void shouldHandleNullCause() {
             // When
-            ActionFailedException exception = new ActionFailedException(
-                ActionInterface.Type.MOVE,
-                "Move failed",
-                null
-            );
-            
+            ActionFailedException exception =
+                    new ActionFailedException(ActionInterface.Type.MOVE, "Move failed", null);
+
             // Then
             assertNull(exception.getCause());
             assertNotNull(exception.getMessage());
@@ -310,13 +297,11 @@ class ActionFailedExceptionTest extends BrobotTestBase {
         void shouldPreserveActionDetailsSeparately() {
             // Given
             String details = "Complex error with multiple lines\nand special formatting";
-            
+
             // When
-            ActionFailedException exception = new ActionFailedException(
-                ActionInterface.Type.DEFINE,
-                details
-            );
-            
+            ActionFailedException exception =
+                    new ActionFailedException(ActionInterface.Type.DEFINE, details);
+
             // Then
             assertEquals(details, exception.getActionDetails());
             assertEquals("Action DEFINE failed: " + details, exception.getMessage());
@@ -327,14 +312,15 @@ class ActionFailedExceptionTest extends BrobotTestBase {
         void shouldMaintainActionTypeThroughLifecycle() {
             // Given
             ActionInterface.Type originalType = ActionInterface.Type.SCROLL_MOUSE_WHEEL;
-            
+
             // When
-            ActionFailedException exception = new ActionFailedException(originalType, "Scroll failed");
-            
+            ActionFailedException exception =
+                    new ActionFailedException(originalType, "Scroll failed");
+
             // Simulate passing through multiple layers
             RuntimeException wrapper1 = new RuntimeException("Layer 1", exception);
             RuntimeException wrapper2 = new RuntimeException("Layer 2", wrapper1);
-            
+
             // Then - Original exception still maintains its type
             ActionFailedException original = (ActionFailedException) wrapper2.getCause().getCause();
             assertEquals(originalType, original.getActionType());
@@ -345,18 +331,17 @@ class ActionFailedExceptionTest extends BrobotTestBase {
         @DisplayName("Should provide detailed context for debugging")
         void shouldProvideDetailedContextForDebugging() {
             // Given
-            String detailedContext = "Failed to find element 'submit_button'\n" +
-                                    "Search region: (0, 0, 1920, 1080)\n" +
-                                    "Similarity threshold: 0.85\n" +
-                                    "Timeout: 30 seconds\n" +
-                                    "Last match score: 0.72";
-            
+            String detailedContext =
+                    "Failed to find element 'submit_button'\n"
+                            + "Search region: (0, 0, 1920, 1080)\n"
+                            + "Similarity threshold: 0.85\n"
+                            + "Timeout: 30 seconds\n"
+                            + "Last match score: 0.72";
+
             // When
-            ActionFailedException exception = new ActionFailedException(
-                ActionInterface.Type.FIND,
-                detailedContext
-            );
-            
+            ActionFailedException exception =
+                    new ActionFailedException(ActionInterface.Type.FIND, detailedContext);
+
             // Then
             assertEquals(detailedContext, exception.getActionDetails());
             assertTrue(exception.getMessage().contains("Search region"));
@@ -373,13 +358,11 @@ class ActionFailedExceptionTest extends BrobotTestBase {
                 largeMessage.append("Line ").append(i).append(" of error details. ");
             }
             String details = largeMessage.toString();
-            
+
             // When
-            ActionFailedException exception = new ActionFailedException(
-                ActionInterface.Type.CLASSIFY,
-                details
-            );
-            
+            ActionFailedException exception =
+                    new ActionFailedException(ActionInterface.Type.CLASSIFY, details);
+
             // Then
             assertEquals(details, exception.getActionDetails());
             assertEquals(ActionInterface.Type.CLASSIFY, exception.getActionType());
@@ -395,11 +378,9 @@ class ActionFailedExceptionTest extends BrobotTestBase {
         @DisplayName("Should be serializable")
         void shouldBeSerializable() {
             // Given
-            ActionFailedException exception = new ActionFailedException(
-                ActionInterface.Type.KEY_DOWN,
-                "Key press failed"
-            );
-            
+            ActionFailedException exception =
+                    new ActionFailedException(ActionInterface.Type.KEY_DOWN, "Key press failed");
+
             // Then - Just verify the exception can be created and has expected properties
             // Actual serialization testing would require ObjectOutputStream
             assertNotNull(exception);

@@ -1,37 +1,36 @@
 package io.github.jspinak.brobot.tools.testing.mock.time;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.lang.reflect.Field;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Stream;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
 
 /**
- * Comprehensive tests for ActionDurations mock timing configuration.
- * Tests action duration mappings, strategy durations, and FrameworkSettings
- * integration.
+ * Comprehensive tests for ActionDurations mock timing configuration. Tests action duration
+ * mappings, strategy durations, and FrameworkSettings integration.
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ActionDurations Tests")
-@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
+@DisabledIfEnvironmentVariable(
+        named = "CI",
+        matches = "true",
+        disabledReason = "Test incompatible with CI environment")
 public class ActionDurationsTest extends BrobotTestBase {
 
     private ActionDurations actionDurations;
@@ -120,18 +119,17 @@ public class ActionDurationsTest extends BrobotTestBase {
         void shouldReturnZeroForUnmappedActionTypes() {
             // Test action types that aren't in the map
             ActionType[] unmappedTypes = {
-                    ActionType.FIND,
-                    ActionType.TYPE,
-                    ActionType.VANISH,
-                    ActionType.HIGHLIGHT,
-                    ActionType.SCROLL_DOWN,
-                    ActionType.DEFINE
+                ActionType.FIND,
+                ActionType.TYPE,
+                ActionType.VANISH,
+                ActionType.HIGHLIGHT,
+                ActionType.SCROLL_DOWN,
+                ActionType.DEFINE
             };
 
             for (ActionType actionType : unmappedTypes) {
                 double duration = actionDurations.getActionDuration(actionType);
-                assertEquals(0.0, duration,
-                        actionType + " should return 0.0 when not mapped");
+                assertEquals(0.0, duration, actionType + " should return 0.0 when not mapped");
             }
         }
 
@@ -147,8 +145,7 @@ public class ActionDurationsTest extends BrobotTestBase {
         @DisplayName("Should return non-negative duration for all action types")
         void shouldReturnNonNegativeDurationForAllTypes(ActionType actionType) {
             double duration = actionDurations.getActionDuration(actionType);
-            assertTrue(duration >= 0,
-                    actionType + " should have non-negative duration");
+            assertTrue(duration >= 0, actionType + " should have non-negative duration");
         }
     }
 
@@ -159,8 +156,8 @@ public class ActionDurationsTest extends BrobotTestBase {
         @Test
         @DisplayName("Should return correct duration for FIRST strategy")
         void shouldReturnFirstStrategyDuration() {
-            double duration = actionDurations.getFindStrategyDuration(
-                    PatternFindOptions.Strategy.FIRST);
+            double duration =
+                    actionDurations.getFindStrategyDuration(PatternFindOptions.Strategy.FIRST);
             assertEquals(FrameworkSettings.mockTimeFindFirst, duration);
             assertEquals(0.1, duration);
         }
@@ -168,8 +165,8 @@ public class ActionDurationsTest extends BrobotTestBase {
         @Test
         @DisplayName("Should return correct duration for EACH strategy")
         void shouldReturnEachStrategyDuration() {
-            double duration = actionDurations.getFindStrategyDuration(
-                    PatternFindOptions.Strategy.EACH);
+            double duration =
+                    actionDurations.getFindStrategyDuration(PatternFindOptions.Strategy.EACH);
             assertEquals(FrameworkSettings.mockTimeFindFirst, duration);
             assertEquals(0.1, duration);
         }
@@ -177,8 +174,8 @@ public class ActionDurationsTest extends BrobotTestBase {
         @Test
         @DisplayName("Should return correct duration for ALL strategy")
         void shouldReturnAllStrategyDuration() {
-            double duration = actionDurations.getFindStrategyDuration(
-                    PatternFindOptions.Strategy.ALL);
+            double duration =
+                    actionDurations.getFindStrategyDuration(PatternFindOptions.Strategy.ALL);
             assertEquals(FrameworkSettings.mockTimeFindAll, duration);
             assertEquals(0.2, duration);
         }
@@ -186,8 +183,8 @@ public class ActionDurationsTest extends BrobotTestBase {
         @Test
         @DisplayName("Should return correct duration for BEST strategy")
         void shouldReturnBestStrategyDuration() {
-            double duration = actionDurations.getFindStrategyDuration(
-                    PatternFindOptions.Strategy.BEST);
+            double duration =
+                    actionDurations.getFindStrategyDuration(PatternFindOptions.Strategy.BEST);
             assertEquals(FrameworkSettings.mockTimeFindAll, duration);
             assertEquals(0.2, duration);
         }
@@ -202,35 +199,31 @@ public class ActionDurationsTest extends BrobotTestBase {
         @ParameterizedTest
         @EnumSource(PatternFindOptions.Strategy.class)
         @DisplayName("Should return non-negative duration for all strategies")
-        void shouldReturnNonNegativeDurationForAllStrategies(
-                PatternFindOptions.Strategy strategy) {
+        void shouldReturnNonNegativeDurationForAllStrategies(PatternFindOptions.Strategy strategy) {
             double duration = actionDurations.getFindStrategyDuration(strategy);
-            assertTrue(duration >= 0,
-                    strategy + " should have non-negative duration");
+            assertTrue(duration >= 0, strategy + " should have non-negative duration");
         }
 
         @Test
         @DisplayName("Should map FIRST and EACH to same duration")
         void shouldMapFirstAndEachToSameDuration() {
-            double firstDuration = actionDurations.getFindStrategyDuration(
-                    PatternFindOptions.Strategy.FIRST);
-            double eachDuration = actionDurations.getFindStrategyDuration(
-                    PatternFindOptions.Strategy.EACH);
+            double firstDuration =
+                    actionDurations.getFindStrategyDuration(PatternFindOptions.Strategy.FIRST);
+            double eachDuration =
+                    actionDurations.getFindStrategyDuration(PatternFindOptions.Strategy.EACH);
 
-            assertEquals(firstDuration, eachDuration,
-                    "FIRST and EACH should use same duration");
+            assertEquals(firstDuration, eachDuration, "FIRST and EACH should use same duration");
         }
 
         @Test
         @DisplayName("Should map ALL and BEST to same duration")
         void shouldMapAllAndBestToSameDuration() {
-            double allDuration = actionDurations.getFindStrategyDuration(
-                    PatternFindOptions.Strategy.ALL);
-            double bestDuration = actionDurations.getFindStrategyDuration(
-                    PatternFindOptions.Strategy.BEST);
+            double allDuration =
+                    actionDurations.getFindStrategyDuration(PatternFindOptions.Strategy.ALL);
+            double bestDuration =
+                    actionDurations.getFindStrategyDuration(PatternFindOptions.Strategy.BEST);
 
-            assertEquals(allDuration, bestDuration,
-                    "ALL and BEST should use same duration");
+            assertEquals(allDuration, bestDuration, "ALL and BEST should use same duration");
         }
     }
 
@@ -268,14 +261,14 @@ public class ActionDurationsTest extends BrobotTestBase {
             ActionDurations newDurations = new ActionDurations();
 
             // Verify find strategies use the custom values
-            assertEquals(5.5, newDurations.getFindStrategyDuration(
-                    PatternFindOptions.Strategy.FIRST));
-            assertEquals(5.5, newDurations.getFindStrategyDuration(
-                    PatternFindOptions.Strategy.EACH));
-            assertEquals(6.5, newDurations.getFindStrategyDuration(
-                    PatternFindOptions.Strategy.ALL));
-            assertEquals(6.5, newDurations.getFindStrategyDuration(
-                    PatternFindOptions.Strategy.BEST));
+            assertEquals(
+                    5.5, newDurations.getFindStrategyDuration(PatternFindOptions.Strategy.FIRST));
+            assertEquals(
+                    5.5, newDurations.getFindStrategyDuration(PatternFindOptions.Strategy.EACH));
+            assertEquals(
+                    6.5, newDurations.getFindStrategyDuration(PatternFindOptions.Strategy.ALL));
+            assertEquals(
+                    6.5, newDurations.getFindStrategyDuration(PatternFindOptions.Strategy.BEST));
         }
 
         @Test
@@ -289,7 +282,9 @@ public class ActionDurationsTest extends BrobotTestBase {
 
             // Duration should remain unchanged
             double afterChangeClick = actionDurations.getActionDuration(ActionType.CLICK);
-            assertEquals(initialClick, afterChangeClick,
+            assertEquals(
+                    initialClick,
+                    afterChangeClick,
                     "Duration should not change after FrameworkSettings modification");
             assertNotEquals(99.9, afterChangeClick);
         }
@@ -325,8 +320,8 @@ public class ActionDurationsTest extends BrobotTestBase {
             mapField.setAccessible(true);
 
             @SuppressWarnings("unchecked")
-            Map<PatternFindOptions.Strategy, Double> map = (Map<PatternFindOptions.Strategy, Double>) mapField
-                    .get(actionDurations);
+            Map<PatternFindOptions.Strategy, Double> map =
+                    (Map<PatternFindOptions.Strategy, Double>) mapField.get(actionDurations);
 
             assertNotNull(map);
             assertEquals(4, map.size(), "Should have exactly 4 mapped strategies");
@@ -361,8 +356,9 @@ public class ActionDurationsTest extends BrobotTestBase {
         @Test
         @DisplayName("Should be annotated as Spring Component")
         void shouldBeAnnotatedAsSpringComponent() {
-            assertTrue(ActionDurations.class.isAnnotationPresent(
-                    org.springframework.stereotype.Component.class),
+            assertTrue(
+                    ActionDurations.class.isAnnotationPresent(
+                            org.springframework.stereotype.Component.class),
                     "ActionDurations should be annotated with @Component");
         }
 
@@ -401,8 +397,8 @@ public class ActionDurationsTest extends BrobotTestBase {
             ActionDurations negativeDurations = new ActionDurations();
 
             double duration = negativeDurations.getActionDuration(ActionType.CLICK);
-            assertEquals(-1.0, duration,
-                    "Should pass through negative values without modification");
+            assertEquals(
+                    -1.0, duration, "Should pass through negative values without modification");
         }
 
         @Test
@@ -444,8 +440,7 @@ public class ActionDurationsTest extends BrobotTestBase {
             long endTime = System.nanoTime();
             long durationMs = (endTime - startTime) / 1_000_000;
 
-            assertTrue(durationMs < 100,
-                    "Should handle 1M lookups in less than 100ms");
+            assertTrue(durationMs < 100, "Should handle 1M lookups in less than 100ms");
         }
 
         @Test
@@ -467,8 +462,7 @@ public class ActionDurationsTest extends BrobotTestBase {
             long endTime = System.nanoTime();
             long durationMs = (endTime - startTime) / 1_000_000;
 
-            assertTrue(durationMs < 100,
-                    "Should handle mixed lookups efficiently");
+            assertTrue(durationMs < 100, "Should handle mixed lookups efficiently");
         }
     }
 
@@ -488,17 +482,18 @@ public class ActionDurationsTest extends BrobotTestBase {
             }
 
             // Document which types have durations
-            assertThat(supportedTypes, hasItems(
-                    ActionType.CLICK,
-                    ActionType.DRAG,
-                    ActionType.MOVE,
-                    ActionType.CLASSIFY));
+            assertThat(
+                    supportedTypes,
+                    hasItems(
+                            ActionType.CLICK,
+                            ActionType.DRAG,
+                            ActionType.MOVE,
+                            ActionType.CLASSIFY));
 
             // These should NOT have durations (return 0.0)
-            assertThat(supportedTypes, not(hasItems(
-                    ActionType.FIND,
-                    ActionType.TYPE,
-                    ActionType.VANISH)));
+            assertThat(
+                    supportedTypes,
+                    not(hasItems(ActionType.FIND, ActionType.TYPE, ActionType.VANISH)));
         }
 
         @Test
@@ -507,8 +502,7 @@ public class ActionDurationsTest extends BrobotTestBase {
             // All strategies should have a duration (even if 0)
             for (PatternFindOptions.Strategy strategy : PatternFindOptions.Strategy.values()) {
                 double duration = actionDurations.getFindStrategyDuration(strategy);
-                assertTrue(duration >= 0,
-                        strategy + " should have non-negative duration");
+                assertTrue(duration >= 0, strategy + " should have non-negative duration");
             }
         }
     }

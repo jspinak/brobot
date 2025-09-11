@@ -1,78 +1,76 @@
 package io.github.jspinak.brobot.util.region;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
+
+import org.bytedeco.opencv.opencv_core.Rect;
+
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.element.RegionBuilder;
 import io.github.jspinak.brobot.model.match.Match;
 
-import org.bytedeco.opencv.opencv_core.Rect;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
-
 /**
  * Comprehensive utility methods for Region manipulation and analysis in Brobot.
- * 
- * <p>RegionUtils provides a rich set of static methods for working with Region objects, 
- * including spatial calculations, transformations, comparisons, and grid operations. 
- * These utilities form the foundation for complex region-based operations throughout 
- * the framework, enabling sophisticated spatial reasoning about GUI elements.</p>
- * 
+ *
+ * <p>RegionUtils provides a rich set of static methods for working with Region objects, including
+ * spatial calculations, transformations, comparisons, and grid operations. These utilities form the
+ * foundation for complex region-based operations throughout the framework, enabling sophisticated
+ * spatial reasoning about GUI elements.
+ *
  * <p>Operation categories:
+ *
  * <ul>
- *   <li><b>Conversions</b>: Transform between Region, Match, Location, and Rect types</li>
- *   <li><b>Spatial Analysis</b>: Overlap detection, containment checks, bounding boxes</li>
- *   <li><b>Boundary Operations</b>: Adjust edges, calculate endpoints, union regions</li>
- *   <li><b>Grid Operations</b>: Divide regions into grids, map locations to cells</li>
- *   <li><b>Set Operations</b>: Subtract regions, merge adjacent areas, find intersections</li>
+ *   <li><b>Conversions</b>: Transform between Region, Match, Location, and Rect types
+ *   <li><b>Spatial Analysis</b>: Overlap detection, containment checks, bounding boxes
+ *   <li><b>Boundary Operations</b>: Adjust edges, calculate endpoints, union regions
+ *   <li><b>Grid Operations</b>: Divide regions into grids, map locations to cells
+ *   <li><b>Set Operations</b>: Subtract regions, merge adjacent areas, find intersections
  * </ul>
- * </p>
- * 
+ *
  * <p>Key spatial methods:
+ *
  * <ul>
- *   <li>{@code overlaps()}: Detect if two regions share any area</li>
- *   <li>{@code contains()}: Check if one region fully contains another</li>
- *   <li>{@code getOverlappingRegion()}: Find the intersection of two regions</li>
- *   <li>{@code getUnion()}: Create smallest region containing both inputs</li>
- *   <li>{@code minus()}: Subtract one region from another</li>
+ *   <li>{@code overlaps()}: Detect if two regions share any area
+ *   <li>{@code contains()}: Check if one region fully contains another
+ *   <li>{@code getOverlappingRegion()}: Find the intersection of two regions
+ *   <li>{@code getUnion()}: Create smallest region containing both inputs
+ *   <li>{@code minus()}: Subtract one region from another
  * </ul>
- * </p>
- * 
+ *
  * <p>Grid functionality:
+ *
  * <ul>
- *   <li>Divide regions into row/column grids for systematic processing</li>
- *   <li>Map locations to grid cell numbers</li>
- *   <li>Convert between grid coordinates and cell indices</li>
- *   <li>Support for SikuliX raster operations (minimum 5x5 cells)</li>
+ *   <li>Divide regions into row/column grids for systematic processing
+ *   <li>Map locations to grid cell numbers
+ *   <li>Convert between grid coordinates and cell indices
+ *   <li>Support for SikuliX raster operations (minimum 5x5 cells)
  * </ul>
- * </p>
- * 
+ *
  * <p>Advanced operations:
+ *
  * <ul>
- *   <li><b>Region Merging</b>: Combine adjacent regions to simplify collections</li>
- *   <li><b>Boundary Points</b>: Extract significant x/y coordinates for subdivision</li>
- *   <li><b>Random Locations</b>: Generate random points within regions for testing</li>
- *   <li><b>Definition Checking</b>: Validate regions have meaningful dimensions</li>
+ *   <li><b>Region Merging</b>: Combine adjacent regions to simplify collections
+ *   <li><b>Boundary Points</b>: Extract significant x/y coordinates for subdivision
+ *   <li><b>Random Locations</b>: Generate random points within regions for testing
+ *   <li><b>Definition Checking</b>: Validate regions have meaningful dimensions
  * </ul>
- * </p>
- * 
+ *
  * <p>Integration notes:
+ *
  * <ul>
- *   <li>Works with both Brobot and SikuliX region representations</li>
- *   <li>Supports JavaCV Rect for OpenCV operations</li>
- *   <li>Handles edge cases like zero-sized or screen-sized regions</li>
- *   <li>Thread-safe through stateless design</li>
+ *   <li>Works with both Brobot and SikuliX region representations
+ *   <li>Supports JavaCV Rect for OpenCV operations
+ *   <li>Handles edge cases like zero-sized or screen-sized regions
+ *   <li>Thread-safe through stateless design
  * </ul>
- * </p>
- * 
- * <p>In the model-based approach, RegionUtils enables sophisticated spatial reasoning 
- * about GUI elements. These utilities are essential for implementing features like 
- * smart search areas, collision detection, layout analysis, and dynamic region 
- * adjustment based on screen content.</p>
- * 
+ *
+ * <p>In the model-based approach, RegionUtils enables sophisticated spatial reasoning about GUI
+ * elements. These utilities are essential for implementing features like smart search areas,
+ * collision detection, layout analysis, and dynamic region adjustment based on screen content.
+ *
  * @since 1.0
  * @see Region
  * @see Location
@@ -86,7 +84,7 @@ public class RegionUtils {
     }
 
     public static int[] extractRegionFromSikuli(org.sikuli.script.Match match) {
-        return new int[] { match.x, match.y, match.w, match.h };
+        return new int[] {match.x, match.y, match.w, match.h};
     }
 
     public static int[] calculateBoundingBox(Location loc1, Location loc2) {
@@ -94,7 +92,7 @@ public class RegionUtils {
         int y = Math.min(loc1.getCalculatedY(), loc2.getCalculatedY());
         int x2 = Math.max(loc1.getCalculatedX(), loc2.getCalculatedX());
         int y2 = Math.max(loc1.getCalculatedY(), loc2.getCalculatedY());
-        return new int[] { x, y, x2 - x, y2 - y };
+        return new int[] {x, y, x2 - x, y2 - y};
     }
 
     public static int x2(Region region) {
@@ -107,6 +105,7 @@ public class RegionUtils {
 
     /**
      * Sets x2 with respect to x and not to w (adjusts the width)
+     *
      * @param x2 the right boundary of the region
      */
     public static void adjustX2(Region region, int x2) {
@@ -115,6 +114,7 @@ public class RegionUtils {
 
     /**
      * Sets y2 with respect to y and not to h (adjusts the height)
+     *
      * @param y2 the lower boundary of the region
      */
     public static void adjustY2(Region region, int y2) {
@@ -143,8 +143,10 @@ public class RegionUtils {
         // in the sense of being a specific, user-set region.
         int defaultWidth = Integer.parseInt(System.getenv().getOrDefault("SCREEN_WIDTH", "1920"));
         int defaultHeight = Integer.parseInt(System.getenv().getOrDefault("SCREEN_HEIGHT", "1080"));
-        if (region.getX() == 0 && region.getY() == 0 &&
-                region.getW() == defaultWidth && region.getH() == defaultHeight) {
+        if (region.getX() == 0
+                && region.getY() == 0
+                && region.getW() == defaultWidth
+                && region.getH() == defaultHeight) {
             return false;
         }
 
@@ -186,10 +188,12 @@ public class RegionUtils {
     }
 
     public static boolean contains(Region outer, Region inner) {
-        return contains(outer, new Location(inner.getX(), inner.getY())) &&
-               contains(outer, new Location(inner.getX() + inner.getW(), inner.getY())) &&
-               contains(outer, new Location(inner.getX(), inner.getY() + inner.getH())) &&
-               contains(outer, new Location(inner.getX() + inner.getW(), inner.getY() + inner.getH()));
+        return contains(outer, new Location(inner.getX(), inner.getY()))
+                && contains(outer, new Location(inner.getX() + inner.getW(), inner.getY()))
+                && contains(outer, new Location(inner.getX(), inner.getY() + inner.getH()))
+                && contains(
+                        outer,
+                        new Location(inner.getX() + inner.getW(), inner.getY() + inner.getH()));
     }
 
     public static boolean contains(Rect rect1, Rect rect2) {
@@ -201,11 +205,13 @@ public class RegionUtils {
     }
 
     public static boolean containsX(Region region, Location loc) {
-        return loc.getCalculatedX() >= region.getX() && loc.getCalculatedX() <= region.getX() + region.getW();
+        return loc.getCalculatedX() >= region.getX()
+                && loc.getCalculatedX() <= region.getX() + region.getW();
     }
 
     public static boolean containsY(Region region, Location loc) {
-        return loc.getCalculatedY() >= region.getY() && loc.getCalculatedY() <= region.getY() + region.getH();
+        return loc.getCalculatedY() >= region.getY()
+                && loc.getCalculatedY() <= region.getY() + region.getH();
     }
 
     // Grid & Raster Functions
@@ -214,15 +220,19 @@ public class RegionUtils {
         org.sikuli.script.Region sikuliRegion = region.sikuli();
         if (sikuliRegion == null) {
             // In mock/headless mode, calculate grid number using default grid
-            int rows = io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig.getDefaultRows();
-            int cols = io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig.getDefaultCols();
+            int rows =
+                    io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig
+                            .getDefaultRows();
+            int cols =
+                    io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig
+                            .getDefaultCols();
             int cellWidth = region.getW() / cols;
             int cellHeight = region.getH() / rows;
-            
+
             // Calculate which cell the location falls into
             int col = (location.getCalculatedX() - region.getX()) / cellWidth;
             int row = (location.getCalculatedY() - region.getY()) / cellHeight;
-            
+
             // Bounds checking
             if (col >= 0 && col < cols && row >= 0 && row < rows) {
                 return Optional.of(row * cols + col);
@@ -236,20 +246,25 @@ public class RegionUtils {
         return Optional.of(toGridNumber(region, row, col));
     }
 
-    public static Optional<Integer> getGridNumber(Region region, org.sikuli.script.Location location) {
+    public static Optional<Integer> getGridNumber(
+            Region region, org.sikuli.script.Location location) {
         if (!region.contains(location)) return Optional.empty();
         org.sikuli.script.Region sikuliRegion = region.sikuli();
         if (sikuliRegion == null) {
             // In mock/headless mode, calculate grid number using default grid
-            int rows = io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig.getDefaultRows();
-            int cols = io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig.getDefaultCols();
+            int rows =
+                    io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig
+                            .getDefaultRows();
+            int cols =
+                    io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig
+                            .getDefaultCols();
             int cellWidth = region.getW() / cols;
             int cellHeight = region.getH() / rows;
-            
+
             // Calculate which cell the location falls into
             int col = (location.getX() - region.getX()) / cellWidth;
             int row = (location.getY() - region.getY()) / cellHeight;
-            
+
             // Bounds checking
             if (col >= 0 && col < cols && row >= 0 && row < rows) {
                 return Optional.of(row * cols + col);
@@ -272,7 +287,9 @@ public class RegionUtils {
         org.sikuli.script.Region sikuliRegion = region.sikuli();
         if (sikuliRegion == null) {
             // In headless mode, use configured grid dimensions
-            int cols = io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig.getDefaultCols();
+            int cols =
+                    io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig
+                            .getDefaultCols();
             return row * cols + col;
         }
         return row * sikuliRegion.getCols() + col;
@@ -282,7 +299,9 @@ public class RegionUtils {
         org.sikuli.script.Region sikuliRegion = region.sikuli();
         if (sikuliRegion == null) {
             // In headless mode, use configured grid dimensions
-            int cols = io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig.getDefaultCols();
+            int cols =
+                    io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig
+                            .getDefaultCols();
             return gridNumber / cols;
         }
         return gridNumber / sikuliRegion.getCols();
@@ -292,7 +311,9 @@ public class RegionUtils {
         org.sikuli.script.Region sikuliRegion = region.sikuli();
         if (sikuliRegion == null) {
             // In headless mode, use configured grid dimensions
-            int cols = io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig.getDefaultCols();
+            int cols =
+                    io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig
+                            .getDefaultCols();
             return gridNumber % cols;
         }
         return gridNumber % sikuliRegion.getCols();
@@ -341,8 +362,10 @@ public class RegionUtils {
     }
 
     public static boolean equals(Region r1, Region r2) {
-        return r1.getX() == r2.getX() && r1.getY() == r2.getY() &&
-                r1.getW() == r2.getW() && r1.getH() == r2.getH();
+        return r1.getX() == r2.getX()
+                && r1.getY() == r2.getY()
+                && r1.getW() == r2.getW()
+                && r1.getH() == r2.getH();
     }
 
     public static Rect getJavaCVRect(Region region) {
@@ -370,12 +393,13 @@ public class RegionUtils {
     }
 
     /**
-     * Region uses the SikuliX raster (setRaster), which has a min cell size of 5x5.
-     * For smaller cell sizes, or more in-depth work with grids, use the
-     * Brobot Grid classes.
+     * Region uses the SikuliX raster (setRaster), which has a min cell size of 5x5. For smaller
+     * cell sizes, or more in-depth work with grids, use the Brobot Grid classes.
+     *
      * @param rows the y-partitions
      * @param columns the x-partitions
-     * @return a list of regions (cells of the grid), added in order of left to right and then up to down
+     * @return a list of regions (cells of the grid), added in order of left to right and then up to
+     *     down
      */
     public static List<Region> getGridRegions(Region region, int rows, int columns) {
         org.sikuli.script.Region sikuliRegion = region.sikuli();
@@ -393,19 +417,21 @@ public class RegionUtils {
             }
             return gridRegions;
         }
-        sikuliRegion.setRaster(rows, columns); // SikuliX raster (setRaster) has a min cell size of 5x5
+        sikuliRegion.setRaster(
+                rows, columns); // SikuliX raster (setRaster) has a min cell size of 5x5
         List<Region> regions = new ArrayList<>();
-        for (int i=0; i<rows; i++) {
-            for (int j=0; j<columns; j++) {
-                regions.add(new Region(sikuliRegion.getCell(i,j)));
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
+                regions.add(new Region(sikuliRegion.getCell(i, j)));
             }
         }
         return regions;
     }
 
     /**
-     * Finds the areas of region that do not overlap with the parameter region.
-     * Non-overlapping areas of the parameter region are not considered.
+     * Finds the areas of region that do not overlap with the parameter region. Non-overlapping
+     * areas of the parameter region are not considered.
+     *
      * @param a the main region
      * @param b the region that may overlap
      * @return a collection of Region objects comprising the non-overlapping areas.
@@ -423,6 +449,7 @@ public class RegionUtils {
 
     /**
      * Return a list of all subregions created by the x and y points.
+     *
      * @param xPoints points along the x-axis
      * @param yPoints points along the y-axis
      * @return all regions created with these points as edges
@@ -430,13 +457,13 @@ public class RegionUtils {
     public static List<Region> getSubRegions(List<Integer> xPoints, List<Integer> yPoints) {
         if (xPoints.size() < 2 || yPoints.size() < 2) return new ArrayList<>();
         List<Region> subRegions = new ArrayList<>();
-        for (int i=0; i<xPoints.size()-1; i++) {
-            for (int j=0; j<yPoints.size()-1; j++) {
+        for (int i = 0; i < xPoints.size() - 1; i++) {
+            for (int j = 0; j < yPoints.size() - 1; j++) {
                 int x1 = xPoints.get(i);
-                int x2 = xPoints.get(i+1);
+                int x2 = xPoints.get(i + 1);
                 int y1 = yPoints.get(j);
-                int y2 = yPoints.get(j+1);
-                subRegions.add(new Region(x1, y1, x2-x1, y2-y1));
+                int y2 = yPoints.get(j + 1);
+                subRegions.add(new Region(x1, y1, x2 - x1, y2 - y1));
             }
         }
         return subRegions;
@@ -444,9 +471,10 @@ public class RegionUtils {
 
     public static List<Region> removeRegion(List<Region> regions, Region toRemove) {
         List<Region> newRegions = new ArrayList<>();
-        regions.forEach(region -> {
-            if (!equals(region, toRemove)) newRegions.add(region);
-        });
+        regions.forEach(
+                region -> {
+                    if (!equals(region, toRemove)) newRegions.add(region);
+                });
         return newRegions;
     }
 
@@ -466,8 +494,8 @@ public class RegionUtils {
         if (regions.size() <= 1) return regions;
         List<Region> merged = new ArrayList<>();
         Region m = new Region(regions.getFirst());
-        for (int i=1; i<=regions.size(); i++) {
-            if (i==regions.size()) { // we've checked all regions
+        for (int i = 1; i <= regions.size(); i++) {
+            if (i == regions.size()) { // we've checked all regions
                 merged.add(m);
                 break;
             }
@@ -483,11 +511,10 @@ public class RegionUtils {
         }
         return merged;
     }
-    
-    
+
     /**
      * Creates a region as a percentage of the screen size.
-     * 
+     *
      * @param xPercent x position as percentage (0.0 to 1.0)
      * @param yPercent y position as percentage (0.0 to 1.0)
      * @param widthPercent width as percentage (0.0 to 1.0)
@@ -496,36 +523,39 @@ public class RegionUtils {
      * @param screenHeight the screen height
      * @return a new region based on screen percentages
      */
-    public static Region fromScreenPercentage(double xPercent, double yPercent,
-                                             double widthPercent, double heightPercent,
-                                             int screenWidth, int screenHeight) {
+    public static Region fromScreenPercentage(
+            double xPercent,
+            double yPercent,
+            double widthPercent,
+            double heightPercent,
+            int screenWidth,
+            int screenHeight) {
         int x = (int) Math.round(screenWidth * xPercent);
         int y = (int) Math.round(screenHeight * yPercent);
         int width = (int) Math.round(screenWidth * widthPercent);
         int height = (int) Math.round(screenHeight * heightPercent);
-        
+
         return new Region(x, y, width, height);
     }
-    
+
     /**
      * Creates a centered region with the specified size.
-     * 
+     *
      * @param width the region width
      * @param height the region height
      * @param screenWidth the screen width
      * @param screenHeight the screen height
      * @return a new region centered on the screen
      */
-    public static Region centerOnScreen(int width, int height,
-                                       int screenWidth, int screenHeight) {
+    public static Region centerOnScreen(int width, int height, int screenWidth, int screenHeight) {
         int x = (screenWidth - width) / 2;
         int y = (screenHeight - height) / 2;
         return new Region(x, y, width, height);
     }
-    
+
     /**
      * Adjusts a region by the specified offsets.
-     * 
+     *
      * @param region the region to adjust
      * @param xOffset offset to add to x
      * @param yOffset offset to add to y
@@ -533,21 +563,20 @@ public class RegionUtils {
      * @param heightOffset offset to add to height
      * @return a new adjusted region
      */
-    public static Region adjust(Region region, int xOffset, int yOffset,
-                               int widthOffset, int heightOffset) {
+    public static Region adjust(
+            Region region, int xOffset, int yOffset, int widthOffset, int heightOffset) {
         if (region == null) return null;
-        
+
         return new Region(
-            region.getX() + xOffset,
-            region.getY() + yOffset,
-            Math.max(1, region.getW() + widthOffset),
-            Math.max(1, region.getH() + heightOffset)
-        );
+                region.getX() + xOffset,
+                region.getY() + yOffset,
+                Math.max(1, region.getW() + widthOffset),
+                Math.max(1, region.getH() + heightOffset));
     }
-    
+
     /**
      * Expands or contracts a region by the specified amount on all sides.
-     * 
+     *
      * @param region the region to expand
      * @param pixels pixels to expand (negative to contract)
      * @return a new expanded/contracted region
@@ -555,10 +584,10 @@ public class RegionUtils {
     public static Region expand(Region region, int pixels) {
         return adjust(region, -pixels, -pixels, pixels * 2, pixels * 2);
     }
-    
+
     /**
      * Constrains a region to fit within screen bounds.
-     * 
+     *
      * @param region the region to constrain
      * @param screenWidth the screen width
      * @param screenHeight the screen height
@@ -566,18 +595,18 @@ public class RegionUtils {
      */
     public static Region constrainToScreen(Region region, int screenWidth, int screenHeight) {
         if (region == null) return null;
-        
+
         int x = Math.max(0, Math.min(region.getX(), screenWidth - region.getW()));
         int y = Math.max(0, Math.min(region.getY(), screenHeight - region.getH()));
         int width = Math.min(region.getW(), screenWidth - x);
         int height = Math.min(region.getH(), screenHeight - y);
-        
+
         return new Region(x, y, Math.max(1, width), Math.max(1, height));
     }
-    
+
     /**
      * Creates a RegionBuilder for fluent region creation.
-     * 
+     *
      * @return a new RegionBuilder instance
      */
     public static RegionBuilder builder() {

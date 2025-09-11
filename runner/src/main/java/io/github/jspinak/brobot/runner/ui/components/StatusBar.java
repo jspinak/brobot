@@ -14,11 +14,12 @@ import javafx.scene.control.Separator;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+
 import lombok.Getter;
 
 /**
- * A status bar component for displaying application status information.
- * Can include status messages, progress indicators, and additional status items.
+ * A status bar component for displaying application status information. Can include status
+ * messages, progress indicators, and additional status items.
  */
 public class StatusBar extends HBox {
 
@@ -26,20 +27,18 @@ public class StatusBar extends HBox {
     private final ObjectProperty<String> statusMessage = new SimpleObjectProperty<>("Ready");
 
     // Progress indicator
-    private final ObjectProperty<Double> progress = new SimpleObjectProperty<>(-1.0); // -1 = indeterminate
+    private final ObjectProperty<Double> progress =
+            new SimpleObjectProperty<>(-1.0); // -1 = indeterminate
 
     // Status items on the right side
-    @Getter
-    private final ObservableList<Node> statusItems = FXCollections.observableArrayList();
+    @Getter private final ObservableList<Node> statusItems = FXCollections.observableArrayList();
 
     // UI components
     private final Label messageLabel;
     private final ProgressBar progressBar;
     private final HBox itemsBox;
 
-    /**
-     * Creates a new StatusBar.
-     */
+    /** Creates a new StatusBar. */
     public StatusBar() {
         // Setup layout
         getStyleClass().add("status-bar");
@@ -73,16 +72,19 @@ public class StatusBar extends HBox {
         getChildren().addAll(messageLabel, progressBar, spacer, itemsBox);
 
         // Bind visibility of progress bar to progress value
-        progress.addListener((obs, oldVal, newVal) -> {
-            boolean visible = newVal != null && newVal >= 0;
-            progressBar.setVisible(visible);
-            progressBar.setManaged(visible);
-        });
+        progress.addListener(
+                (obs, oldVal, newVal) -> {
+                    boolean visible = newVal != null && newVal >= 0;
+                    progressBar.setVisible(visible);
+                    progressBar.setManaged(visible);
+                });
 
         // Listen for changes to status items
-        statusItems.addListener((ListChangeListener<Node>) change -> {
-            refreshStatusItems();
-        });
+        statusItems.addListener(
+                (ListChangeListener<Node>)
+                        change -> {
+                            refreshStatusItems();
+                        });
     }
 
     /**
@@ -139,18 +141,14 @@ public class StatusBar extends HBox {
         return progress;
     }
 
-    /**
-     * Shows the progress bar in indeterminate mode.
-     */
+    /** Shows the progress bar in indeterminate mode. */
     public void showIndeterminateProgress() {
         progress.set(-1.0);
         progressBar.setVisible(true);
         progressBar.setManaged(true);
     }
 
-    /**
-     * Hides the progress bar.
-     */
+    /** Hides the progress bar. */
     public void hideProgress() {
         progressBar.setVisible(false);
         progressBar.setManaged(false);
@@ -190,16 +188,12 @@ public class StatusBar extends HBox {
         statusItems.remove(item);
     }
 
-    /**
-     * Clears all status items.
-     */
+    /** Clears all status items. */
     public void clearStatusItems() {
         statusItems.clear();
     }
 
-    /**
-     * Refreshes the status items display.
-     */
+    /** Refreshes the status items display. */
     private void refreshStatusItems() {
         itemsBox.getChildren().clear();
 
@@ -241,12 +235,11 @@ public class StatusBar extends HBox {
         memoryLabel.getStyleClass().add("status-indicator");
 
         // Update memory usage periodically
-        javafx.animation.Timeline timeline = new javafx.animation.Timeline(
-                new javafx.animation.KeyFrame(
-                        javafx.util.Duration.seconds(2),
-                        event -> updateMemoryUsage(memoryLabel)
-                )
-        );
+        javafx.animation.Timeline timeline =
+                new javafx.animation.Timeline(
+                        new javafx.animation.KeyFrame(
+                                javafx.util.Duration.seconds(2),
+                                event -> updateMemoryUsage(memoryLabel)));
         timeline.setCycleCount(javafx.animation.Animation.INDEFINITE);
         timeline.play();
 
@@ -281,7 +274,8 @@ public class StatusBar extends HBox {
         Label warningLabel = addStatusIndicator(message, "warning");
 
         // Make the label disappear after a certain time (if desired)
-        javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(10));
+        javafx.animation.PauseTransition pause =
+                new javafx.animation.PauseTransition(javafx.util.Duration.seconds(10));
         pause.setOnFinished(event -> removeStatusItem(warningLabel));
         pause.play();
 

@@ -1,48 +1,50 @@
 package io.github.jspinak.brobot.runner.json.serializers;
 
+import java.io.IOException;
+
+import org.springframework.stereotype.Component;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
 import io.github.jspinak.brobot.action.ObjectCollection;
 
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-
 /**
- * Custom serializer for {@link ObjectCollection} that provides controlled serialization
- * of complex state management objects while preventing circular references and handling
- * native resources.
- * 
- * <p>This serializer addresses several critical challenges when serializing ObjectCollection:</p>
+ * Custom serializer for {@link ObjectCollection} that provides controlled serialization of complex
+ * state management objects while preventing circular references and handling native resources.
+ *
+ * <p>This serializer addresses several critical challenges when serializing ObjectCollection:
+ *
  * <ul>
  *   <li><b>Circular References:</b> ObjectCollection contains various state objects that may
- *       reference each other or back to the collection itself, creating circular dependencies
- *       that would cause infinite recursion during standard serialization.</li>
- *   <li><b>Native Resources:</b> The collection contains Scene objects with BufferedImages
- *       and Mat (OpenCV matrix) objects that hold native memory references which cannot be
- *       meaningfully serialized to JSON.</li>
- *   <li><b>Complex Object Graphs:</b> The collection aggregates multiple types of state
- *       objects (locations, images, regions, strings, matches, scenes) that each have their
- *       own serialization requirements.</li>
- *   <li><b>Performance:</b> Full serialization of all nested objects would be extremely
- *       slow and produce very large JSON documents.</li>
+ *       reference each other or back to the collection itself, creating circular dependencies that
+ *       would cause infinite recursion during standard serialization.
+ *   <li><b>Native Resources:</b> The collection contains Scene objects with BufferedImages and Mat
+ *       (OpenCV matrix) objects that hold native memory references which cannot be meaningfully
+ *       serialized to JSON.
+ *   <li><b>Complex Object Graphs:</b> The collection aggregates multiple types of state objects
+ *       (locations, images, regions, strings, matches, scenes) that each have their own
+ *       serialization requirements.
+ *   <li><b>Performance:</b> Full serialization of all nested objects would be extremely slow and
+ *       produce very large JSON documents.
  * </ul>
- * 
- * <p><b>Serialization Strategy:</b></p>
- * <p>This serializer carefully orchestrates the serialization of each component:</p>
+ *
+ * <p><b>Serialization Strategy:</b>
+ *
+ * <p>This serializer carefully orchestrates the serialization of each component:
+ *
  * <ul>
- *   <li><b>State Components:</b> Directly serializes stateLocations, stateImages,
- *       stateRegions, and stateStrings as these are typically simple objects.</li>
- *   <li><b>Matches:</b> Uses the provider's default serialization for Match objects,
- *       which have their own custom serializer to handle their complexity.</li>
- *   <li><b>Scenes:</b> Delegates to custom serializers that skip BufferedImage and
- *       Mat fields to avoid native memory serialization issues.</li>
+ *   <li><b>State Components:</b> Directly serializes stateLocations, stateImages, stateRegions, and
+ *       stateStrings as these are typically simple objects.
+ *   <li><b>Matches:</b> Uses the provider's default serialization for Match objects, which have
+ *       their own custom serializer to handle their complexity.
+ *   <li><b>Scenes:</b> Delegates to custom serializers that skip BufferedImage and Mat fields to
+ *       avoid native memory serialization issues.
  * </ul>
- * 
- * <p><b>Output Format:</b></p>
+ *
+ * <p><b>Output Format:</b>
+ *
  * <pre>{@code
  * {
  *   "stateLocations": [...],
@@ -53,7 +55,7 @@ import java.io.IOException;
  *   "scenes": [...]
  * }
  * }</pre>
- * 
+ *
  * @see ObjectCollection
  * @see MatchesSerializer
  * @see ImageSerializer
@@ -62,32 +64,36 @@ import java.io.IOException;
 @Component
 public class ObjectCollectionSerializer extends JsonSerializer<ObjectCollection> {
     /**
-     * Serializes an ObjectCollection instance to JSON format, carefully handling each
-     * component type to avoid circular references and native resource issues.
-     * 
-     * <p><b>Serialization Process:</b></p>
+     * Serializes an ObjectCollection instance to JSON format, carefully handling each component
+     * type to avoid circular references and native resource issues.
+     *
+     * <p><b>Serialization Process:</b>
+     *
      * <ol>
-     *   <li>Opens a JSON object</li>
-     *   <li>Writes state components (locations, images, regions, strings) directly</li>
-     *   <li>Serializes matches array using the provider's serialization mechanism</li>
-     *   <li>Writes scenes with special handling for BufferedImage/Mat exclusion</li>
-     *   <li>Closes the JSON object</li>
+     *   <li>Opens a JSON object
+     *   <li>Writes state components (locations, images, regions, strings) directly
+     *   <li>Serializes matches array using the provider's serialization mechanism
+     *   <li>Writes scenes with special handling for BufferedImage/Mat exclusion
+     *   <li>Closes the JSON object
      * </ol>
-     * 
-     * <p><b>Special Handling:</b></p>
+     *
+     * <p><b>Special Handling:</b>
+     *
      * <ul>
-     *   <li>Matches are serialized individually to ensure each gets proper treatment
-     *       from the MatchesSerializer</li>
-     *   <li>Scenes rely on custom serializers registered for their image/mat fields</li>
+     *   <li>Matches are serialized individually to ensure each gets proper treatment from the
+     *       MatchesSerializer
+     *   <li>Scenes rely on custom serializers registered for their image/mat fields
      * </ul>
-     * 
+     *
      * @param collection the ObjectCollection to serialize
      * @param gen the JsonGenerator used to write JSON content
      * @param provider the SerializerProvider used to access other serializers
      * @throws IOException if there's an error writing to the JsonGenerator
      */
     @Override
-    public void serialize(ObjectCollection collection, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(
+            ObjectCollection collection, JsonGenerator gen, SerializerProvider provider)
+            throws IOException {
         gen.writeStartObject();
 
         // Write state locations
@@ -116,4 +122,3 @@ public class ObjectCollectionSerializer extends JsonSerializer<ObjectCollection>
         gen.writeEndObject();
     }
 }
-

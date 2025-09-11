@@ -1,10 +1,26 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.AccessLevel;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.github.jspinak.brobot.runner.config.ApplicationConfig;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
@@ -15,32 +31,14 @@ import io.github.jspinak.brobot.runner.ui.components.Card;
 import io.github.jspinak.brobot.runner.ui.components.EnhancedTable;
 import io.github.jspinak.brobot.runner.ui.management.LabelManager;
 import io.github.jspinak.brobot.runner.ui.management.UIUpdateManager;
-import javafx.application.Platform;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import atlantafx.base.theme.Styles;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-
-/**
- * Panel for selecting recent configurations and managing configuration history.
- */
+/** Panel for selecting recent configurations and managing configuration history. */
 @Slf4j
 @Getter
 @Setter(AccessLevel.PRIVATE)
@@ -48,7 +46,8 @@ public class ConfigSelectionPanel extends VBox {
     private static final Logger logger = LoggerFactory.getLogger(ConfigSelectionPanel.class);
     private static final int MAX_RECENT_CONFIGS = 10;
     private static final String RECENT_CONFIGS_KEY = "recentConfigurations";
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    private static final DateTimeFormatter DATE_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     private final EventBus eventBus;
     private final BrobotRunnerProperties runnerProperties;
@@ -60,10 +59,11 @@ public class ConfigSelectionPanel extends VBox {
 
     private RefactoredConfigDetailsPanel detailsPanel;
 
-    public ConfigSelectionPanel(EventBus eventBus,
-                                BrobotRunnerProperties runnerProperties,
-                                BrobotLibraryInitializer libraryInitializer,
-                                ApplicationConfig appConfig) {
+    public ConfigSelectionPanel(
+            EventBus eventBus,
+            BrobotRunnerProperties runnerProperties,
+            BrobotLibraryInitializer libraryInitializer,
+            ApplicationConfig appConfig) {
         this.eventBus = eventBus;
         this.runnerProperties = runnerProperties;
         this.libraryInitializer = libraryInitializer;
@@ -142,56 +142,62 @@ public class ConfigSelectionPanel extends VBox {
 
     private void setupRecentConfigsTable() {
         TableView<ConfigEntry> tableView = recentConfigsTable.getTableView();
-        
+
         // Configure table to auto-resize columns
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
 
         TableColumn<ConfigEntry, String> nameColumn = new TableColumn<>("Name");
-        nameColumn.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getName()));
+        nameColumn.setCellValueFactory(
+                cellData -> new SimpleStringProperty(cellData.getValue().getName()));
         nameColumn.setMinWidth(100);
         nameColumn.setPrefWidth(150);
         nameColumn.setMaxWidth(250);
         tableView.getColumns().add(nameColumn);
 
         TableColumn<ConfigEntry, String> projectColumn = new TableColumn<>("Project");
-        projectColumn.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getProject()));
+        projectColumn.setCellValueFactory(
+                cellData -> new SimpleStringProperty(cellData.getValue().getProject()));
         projectColumn.setMinWidth(100);
         projectColumn.setPrefWidth(150);
         projectColumn.setMaxWidth(250);
         tableView.getColumns().add(projectColumn);
 
         TableColumn<ConfigEntry, String> lastModifiedColumn = new TableColumn<>("Last Modified");
-        lastModifiedColumn.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getLastModified().format(DATE_FORMATTER)));
+        lastModifiedColumn.setCellValueFactory(
+                cellData ->
+                        new SimpleStringProperty(
+                                cellData.getValue().getLastModified().format(DATE_FORMATTER)));
         lastModifiedColumn.setMinWidth(120);
         lastModifiedColumn.setPrefWidth(140);
         lastModifiedColumn.setMaxWidth(160);
         tableView.getColumns().add(lastModifiedColumn);
 
         TableColumn<ConfigEntry, String> pathColumn = new TableColumn<>("Path");
-        pathColumn.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getProjectConfigPath().toString()));
+        pathColumn.setCellValueFactory(
+                cellData ->
+                        new SimpleStringProperty(
+                                cellData.getValue().getProjectConfigPath().toString()));
         pathColumn.setMinWidth(150);
         pathColumn.setPrefWidth(300);
         // Setup custom cell factory for text truncation with tooltip
-        pathColumn.setCellFactory(column -> new TableCell<ConfigEntry, String>() {
-            @Override
-            protected void updateItem(String path, boolean empty) {
-                super.updateItem(path, empty);
-                if (empty || path == null) {
-                    setText(null);
-                    setTooltip(null);
-                } else {
-                    setText(path);
-                    setStyle("-fx-text-overrun: ellipsis;");
-                    // Add tooltip for full path
-                    Tooltip tooltip = new Tooltip(path);
-                    setTooltip(tooltip);
-                }
-            }
-        });
+        pathColumn.setCellFactory(
+                column ->
+                        new TableCell<ConfigEntry, String>() {
+                            @Override
+                            protected void updateItem(String path, boolean empty) {
+                                super.updateItem(path, empty);
+                                if (empty || path == null) {
+                                    setText(null);
+                                    setTooltip(null);
+                                } else {
+                                    setText(path);
+                                    setStyle("-fx-text-overrun: ellipsis;");
+                                    // Add tooltip for full path
+                                    Tooltip tooltip = new Tooltip(path);
+                                    setTooltip(tooltip);
+                                }
+                            }
+                        });
         tableView.getColumns().add(pathColumn);
 
         // Add action column with load and delete buttons
@@ -199,69 +205,82 @@ public class ConfigSelectionPanel extends VBox {
         actionColumn.setMinWidth(120);
         actionColumn.setPrefWidth(140);
         actionColumn.setMaxWidth(160);
-        actionColumn.setCellFactory(param -> new TableCell<>() {
-            private final Button loadButton = new Button("Load");
-            private final Button deleteButton = new Button("Delete");
-            private final HBox buttonBox = new HBox(5, loadButton, deleteButton);
+        actionColumn.setCellFactory(
+                param ->
+                        new TableCell<>() {
+                            private final Button loadButton = new Button("Load");
+                            private final Button deleteButton = new Button("Delete");
+                            private final HBox buttonBox = new HBox(5, loadButton, deleteButton);
 
-            {
-                loadButton.getStyleClass().add(Styles.ACCENT);
-                loadButton.setOnAction(event -> {
-                    ConfigEntry entry = getTableView().getItems().get(getIndex());
-                    loadConfiguration(entry);
-                });
+                            {
+                                loadButton.getStyleClass().add(Styles.ACCENT);
+                                loadButton.setOnAction(
+                                        event -> {
+                                            ConfigEntry entry =
+                                                    getTableView().getItems().get(getIndex());
+                                            loadConfiguration(entry);
+                                        });
 
-                deleteButton.getStyleClass().add(Styles.DANGER);
-                deleteButton.setOnAction(event -> {
-                    ConfigEntry entry = getTableView().getItems().get(getIndex());
-                    removeConfiguration(entry);
-                });
+                                deleteButton.getStyleClass().add(Styles.DANGER);
+                                deleteButton.setOnAction(
+                                        event -> {
+                                            ConfigEntry entry =
+                                                    getTableView().getItems().get(getIndex());
+                                            removeConfiguration(entry);
+                                        });
 
-                buttonBox.setAlignment(Pos.CENTER);
-            }
+                                buttonBox.setAlignment(Pos.CENTER);
+                            }
 
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                setGraphic(empty ? null : buttonBox);
-            }
-        });
+                            @Override
+                            protected void updateItem(Void item, boolean empty) {
+                                super.updateItem(item, empty);
+                                setGraphic(empty ? null : buttonBox);
+                            }
+                        });
 
         recentConfigsTable.getTableView().getColumns().add(actionColumn);
 
         // Set row selection to update details view
-        recentConfigsTable.getTableView().getSelectionModel().selectedItemProperty().addListener(
-                (obs, oldVal, newVal) -> {
-                    if (newVal != null) {
-                        showConfigDetails(newVal);
-                    }
-                });
+        recentConfigsTable
+                .getTableView()
+                .getSelectionModel()
+                .selectedItemProperty()
+                .addListener(
+                        (obs, oldVal, newVal) -> {
+                            if (newVal != null) {
+                                showConfigDetails(newVal);
+                            }
+                        });
     }
 
     private void showImportDialog() {
-        ConfigImportDialog dialog = new ConfigImportDialog(
-                libraryInitializer,
-                runnerProperties,
-                eventBus
-        );
+        ConfigImportDialog dialog =
+                new ConfigImportDialog(libraryInitializer, runnerProperties, eventBus);
 
-        dialog.showAndWait().ifPresent(importedConfig -> {
-            // Add to recent configs
-            addRecentConfiguration(importedConfig);
+        dialog.showAndWait()
+                .ifPresent(
+                        importedConfig -> {
+                            // Add to recent configs
+                            addRecentConfiguration(importedConfig);
 
-            // Select the newly imported config
-            recentConfigsTable.getTableView().getSelectionModel().select(importedConfig);
+                            // Select the newly imported config
+                            recentConfigsTable
+                                    .getTableView()
+                                    .getSelectionModel()
+                                    .select(importedConfig);
 
-            // Show details
-            showConfigDetails(importedConfig);
-        });
+                            // Show details
+                            showConfigDetails(importedConfig);
+                        });
     }
 
     private void browseForConfiguration() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select Project Configuration File");
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("JSON Files", "*.json"));
+        fileChooser
+                .getExtensionFilters()
+                .add(new FileChooser.ExtensionFilter("JSON Files", "*.json"));
 
         File file = fileChooser.showOpenDialog(getScene().getWindow());
         if (file != null) {
@@ -270,9 +289,13 @@ public class ConfigSelectionPanel extends VBox {
 
                 // Try to find related DSL config in the same directory
                 Path parentDir = projectConfigPath.getParent();
-                List<Path> jsonFiles = Files.list(parentDir)
-                        .filter(p -> p.toString().endsWith(".json") && !p.equals(projectConfigPath))
-                        .toList();
+                List<Path> jsonFiles =
+                        Files.list(parentDir)
+                                .filter(
+                                        p ->
+                                                p.toString().endsWith(".json")
+                                                        && !p.equals(projectConfigPath))
+                                .toList();
 
                 Path dslConfigPath = null;
 
@@ -303,14 +326,14 @@ public class ConfigSelectionPanel extends VBox {
 
                 if (dslConfigPath != null) {
                     // Create a new config entry
-                    ConfigEntry entry = new ConfigEntry(
-                            projectConfigPath.getFileName().toString(),
-                            "Unknown", // Will be updated when loaded
-                            projectConfigPath,
-                            dslConfigPath,
-                            Paths.get(runnerProperties.getImagePath()),
-                            LocalDateTime.now()
-                    );
+                    ConfigEntry entry =
+                            new ConfigEntry(
+                                    projectConfigPath.getFileName().toString(),
+                                    "Unknown", // Will be updated when loaded
+                                    projectConfigPath,
+                                    dslConfigPath,
+                                    Paths.get(runnerProperties.getImagePath()),
+                                    LocalDateTime.now());
 
                     // Add to recent configs
                     addRecentConfiguration(entry);
@@ -321,14 +344,16 @@ public class ConfigSelectionPanel extends VBox {
                     // Show details
                     showConfigDetails(entry);
                 } else {
-                    showAlert(Alert.AlertType.WARNING,
+                    showAlert(
+                            Alert.AlertType.WARNING,
                             "DSL Configuration",
                             "No DSL configuration file selected",
                             "Please select both project and DSL configuration files.");
                 }
             } catch (IOException e) {
                 logger.error("Error browsing for configuration", e);
-                showAlert(Alert.AlertType.ERROR,
+                showAlert(
+                        Alert.AlertType.ERROR,
                         "File Error",
                         "Error browsing for configuration",
                         e.getMessage());
@@ -345,10 +370,9 @@ public class ConfigSelectionPanel extends VBox {
     private void loadConfiguration(ConfigEntry entry) {
         if (entry != null) {
             try {
-                boolean success = libraryInitializer.initializeWithConfig(
-                        entry.getProjectConfigPath(),
-                        entry.getDslConfigPath()
-                );
+                boolean success =
+                        libraryInitializer.initializeWithConfig(
+                                entry.getProjectConfigPath(), entry.getDslConfigPath());
 
                 if (success) {
                     // Update last modified date
@@ -368,20 +392,23 @@ public class ConfigSelectionPanel extends VBox {
                     String message = "Configuration loaded successfully: " + entry.getName();
                     eventBus.publish(LogEvent.info(this, message, "Configuration"));
 
-                    showAlert(Alert.AlertType.INFORMATION,
+                    showAlert(
+                            Alert.AlertType.INFORMATION,
                             "Configuration Loaded",
                             "Configuration loaded successfully",
                             "Project: " + entry.getProject());
                 } else {
                     String errorMessage = libraryInitializer.getLastErrorMessage();
-                    showAlert(Alert.AlertType.ERROR,
+                    showAlert(
+                            Alert.AlertType.ERROR,
                             "Load Failed",
                             "Failed to load configuration",
                             errorMessage != null ? errorMessage : "Unknown error");
                 }
             } catch (Exception e) {
                 logger.error("Error loading configuration", e);
-                showAlert(Alert.AlertType.ERROR,
+                showAlert(
+                        Alert.AlertType.ERROR,
                         "Load Error",
                         "Error loading configuration",
                         e.getMessage());
@@ -395,29 +422,34 @@ public class ConfigSelectionPanel extends VBox {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Remove Configuration");
             alert.setHeaderText("Remove configuration from recent list?");
-            alert.setContentText("This will only remove the entry from the recent list, not delete the files.");
+            alert.setContentText(
+                    "This will only remove the entry from the recent list, not delete the files.");
 
-            alert.showAndWait().ifPresent(response -> {
-                if (response == ButtonType.OK) {
-                    // Remove from list
-                    recentConfigs.remove(entry);
+            alert.showAndWait()
+                    .ifPresent(
+                            response -> {
+                                if (response == ButtonType.OK) {
+                                    // Remove from list
+                                    recentConfigs.remove(entry);
 
-                    // Save recent configs
-                    saveRecentConfigurations();
+                                    // Save recent configs
+                                    saveRecentConfigurations();
 
-                    // Refresh table
-                    refreshTable();
+                                    // Refresh table
+                                    refreshTable();
 
-                    // Clear details if the removed entry was selected
-                    if (detailsPanel.getConfiguration() == entry) {
-                        detailsPanel.clearConfiguration();
-                    }
+                                    // Clear details if the removed entry was selected
+                                    if (detailsPanel.getConfiguration() == entry) {
+                                        detailsPanel.clearConfiguration();
+                                    }
 
-                    // Log removal
-                    String message = "Removed configuration from recent list: " + entry.getName();
-                    eventBus.publish(LogEvent.info(this, message, "Configuration"));
-                }
-            });
+                                    // Log removal
+                                    String message =
+                                            "Removed configuration from recent list: "
+                                                    + entry.getName();
+                                    eventBus.publish(LogEvent.info(this, message, "Configuration"));
+                                }
+                            });
         }
     }
 
@@ -440,14 +472,14 @@ public class ConfigSelectionPanel extends VBox {
                     Path dslConfigPath = Paths.get("config", "dsl" + i + ".json");
                     Path imagePath = Paths.get(runnerProperties.getImagePath());
 
-                    ConfigEntry entry = new ConfigEntry(
-                            "Project " + i,
-                            "Demo Project " + i,
-                            projectConfigPath,
-                            dslConfigPath,
-                            imagePath,
-                            LocalDateTime.now().minusDays(i)
-                    );
+                    ConfigEntry entry =
+                            new ConfigEntry(
+                                    "Project " + i,
+                                    "Demo Project " + i,
+                                    projectConfigPath,
+                                    dslConfigPath,
+                                    imagePath,
+                                    LocalDateTime.now().minusDays(i));
 
                     recentConfigs.add(entry);
                 }
@@ -458,7 +490,8 @@ public class ConfigSelectionPanel extends VBox {
 
         } catch (Exception e) {
             logger.error("Error loading recent configurations", e);
-            showAlert(Alert.AlertType.ERROR,
+            showAlert(
+                    Alert.AlertType.ERROR,
                     "Load Error",
                     "Error loading recent configurations",
                     e.getMessage());
@@ -492,16 +525,19 @@ public class ConfigSelectionPanel extends VBox {
     }
 
     private void refreshTable() {
-        Platform.runLater(() -> {
-            recentConfigsTable.setItems(javafx.collections.FXCollections.observableArrayList(recentConfigs));
-        });
+        Platform.runLater(
+                () -> {
+                    recentConfigsTable.setItems(
+                            javafx.collections.FXCollections.observableArrayList(recentConfigs));
+                });
     }
 
     void addRecentConfiguration(ConfigEntry entry) {
         // Remove if already exists
-        recentConfigs.removeIf(c ->
-                c.getProjectConfigPath().equals(entry.getProjectConfigPath()) &&
-                        c.getDslConfigPath().equals(entry.getDslConfigPath()));
+        recentConfigs.removeIf(
+                c ->
+                        c.getProjectConfigPath().equals(entry.getProjectConfigPath())
+                                && c.getDslConfigPath().equals(entry.getDslConfigPath()));
 
         // Add to beginning of list
         recentConfigs.addFirst(entry);
@@ -514,12 +550,13 @@ public class ConfigSelectionPanel extends VBox {
     }
 
     private void showAlert(Alert.AlertType type, String title, String header, String content) {
-        Platform.runLater(() -> {
-            Alert alert = new Alert(type);
-            alert.setTitle(title);
-            alert.setHeaderText(header);
-            alert.setContentText(content);
-            alert.showAndWait();
-        });
+        Platform.runLater(
+                () -> {
+                    Alert alert = new Alert(type);
+                    alert.setTitle(title);
+                    alert.setHeaderText(header);
+                    alert.setContentText(content);
+                    alert.showAndWait();
+                });
     }
 }

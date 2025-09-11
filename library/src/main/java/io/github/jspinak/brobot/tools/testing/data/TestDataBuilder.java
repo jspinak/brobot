@@ -1,28 +1,28 @@
 package io.github.jspinak.brobot.tools.testing.data;
 
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.model.state.StateObject;
-import io.github.jspinak.brobot.model.state.StateString;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.state.StateObjectMetadata;
-import org.springframework.stereotype.Component;
-
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.stereotype.Component;
+
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.StateImage;
+
 /**
  * Builder for structured test data with versioning and variation support.
- * <p>
- * This builder provides a fluent interface for creating comprehensive test scenarios
- * with baseline data and controlled variations. It supports:
+ *
+ * <p>This builder provides a fluent interface for creating comprehensive test scenarios with
+ * baseline data and controlled variations. It supports:
+ *
  * <ul>
- * <li>Baseline test data with known good configurations</li>
- * <li>Systematic variations for edge case testing</li>
- * <li>Version control for test data evolution</li>
- * <li>Reusable components for common test patterns</li>
+ *   <li>Baseline test data with known good configurations
+ *   <li>Systematic variations for edge case testing
+ *   <li>Version control for test data evolution
+ *   <li>Reusable components for common test patterns
  * </ul>
- * <p>
- * Example usage:
+ *
+ * <p>Example usage:
+ *
  * <pre>{@code
  * TestScenario scenario = testDataBuilder.scenario("login_flow")
  *     .withBaselineData()
@@ -41,11 +41,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Component
 public class TestDataBuilder {
-    
+
     private final Map<String, TestScenario> baselineScenarios = new ConcurrentHashMap<>();
     private static final String NULL_KEY = "__null_key__";
-    private static final TestScenario NULL_SCENARIO = TestScenario.builder().name("__null_scenario__").build();
-    
+    private static final TestScenario NULL_SCENARIO =
+            TestScenario.builder().name("__null_scenario__").build();
+
     /**
      * Creates a new test scenario builder with the specified name.
      *
@@ -55,7 +56,7 @@ public class TestDataBuilder {
     public TestScenario.Builder scenario(String name) {
         return new TestScenario.Builder(name, this);
     }
-    
+
     /**
      * Gets a previously created baseline scenario.
      *
@@ -67,7 +68,7 @@ public class TestDataBuilder {
         TestScenario scenario = baselineScenarios.get(key);
         return scenario == NULL_SCENARIO ? null : scenario;
     }
-    
+
     /**
      * Stores a baseline scenario for reuse.
      *
@@ -79,7 +80,7 @@ public class TestDataBuilder {
         TestScenario value = scenario == null ? NULL_SCENARIO : scenario;
         baselineScenarios.put(key, value);
     }
-    
+
     /**
      * Creates a quick scenario with common login elements.
      *
@@ -87,14 +88,14 @@ public class TestDataBuilder {
      */
     public TestScenario.Builder loginScenario() {
         return scenario("login_flow")
-            .withStateImage("username_field", "username_input.png")
-            .withStateImage("password_field", "password_input.png")
-            .withStateImage("login_button", "login_btn.png")
-            .withStateString("username_text", "Username:")
-            .withStateString("password_text", "Password:")
-            .withRegion("login_form", new Region(300, 200, 400, 300));
+                .withStateImage("username_field", "username_input.png")
+                .withStateImage("password_field", "password_input.png")
+                .withStateImage("login_button", "login_btn.png")
+                .withStateString("username_text", "Username:")
+                .withStateString("password_text", "Password:")
+                .withRegion("login_form", new Region(300, 200, 400, 300));
     }
-    
+
     /**
      * Creates a quick scenario with navigation elements.
      *
@@ -102,12 +103,12 @@ public class TestDataBuilder {
      */
     public TestScenario.Builder navigationScenario() {
         return scenario("navigation_flow")
-            .withStateImage("back_button", "back_arrow.png")
-            .withStateImage("forward_button", "forward_arrow.png")
-            .withStateImage("menu_button", "hamburger_menu.png")
-            .withRegion("nav_bar", new Region(0, 0, 1200, 80));
+                .withStateImage("back_button", "back_arrow.png")
+                .withStateImage("forward_button", "forward_arrow.png")
+                .withStateImage("menu_button", "hamburger_menu.png")
+                .withRegion("nav_bar", new Region(0, 0, 1200, 80));
     }
-    
+
     /**
      * Creates a quick scenario for form testing.
      *
@@ -115,12 +116,12 @@ public class TestDataBuilder {
      */
     public TestScenario.Builder formScenario() {
         return scenario("form_flow")
-            .withStateImage("submit_button", "submit_btn.png")
-            .withStateImage("cancel_button", "cancel_btn.png")
-            .withStateImage("reset_button", "reset_btn.png")
-            .withRegion("form_area", new Region(200, 150, 600, 500));
+                .withStateImage("submit_button", "submit_btn.png")
+                .withStateImage("cancel_button", "cancel_btn.png")
+                .withStateImage("reset_button", "reset_btn.png")
+                .withRegion("form_area", new Region(200, 150, 600, 500));
     }
-    
+
     /**
      * Creates common variations that can be applied to any scenario.
      *
@@ -128,39 +129,55 @@ public class TestDataBuilder {
      */
     public Map<String, TestVariation.Builder> commonVariations() {
         Map<String, TestVariation.Builder> variations = new HashMap<>();
-        
-        variations.put("small_screen", new TestVariation.Builder("small_screen")
-            .withDescription("Mobile or small screen layout")
-            .withTransformation("scale_down", (name, obj) -> {
-                if (obj instanceof StateImage) {
-                    // TODO: StateImage doesn't have toBuilder() or getSimilarity() methods
-                    // Need to update this transformation once the API is clarified
-                    return obj;
-                }
-                return obj;
-            }));
-            
-        variations.put("high_dpi", new TestVariation.Builder("high_dpi")
-            .withDescription("High DPI display testing")
-            .withTransformation("adjust_similarity", (name, obj) -> {
-                if (obj instanceof StateImage) {
-                    // TODO: StateImage doesn't have toBuilder() or getSimilarity() methods
-                    // Need to update this transformation once the API is clarified
-                    return obj;
-                }
-                return obj;
-            }));
-            
-        variations.put("slow_system", new TestVariation.Builder("slow_system")
-            .withDescription("Slow system response simulation")
-            .withTransformation("increase_timeouts", (name, obj) -> {
-                // Could modify timeout-related properties if available
-                return obj;
-            }));
-            
+
+        variations.put(
+                "small_screen",
+                new TestVariation.Builder("small_screen")
+                        .withDescription("Mobile or small screen layout")
+                        .withTransformation(
+                                "scale_down",
+                                (name, obj) -> {
+                                    if (obj instanceof StateImage) {
+                                        // TODO: StateImage doesn't have toBuilder() or
+                                        // getSimilarity() methods
+                                        // Need to update this transformation once the API is
+                                        // clarified
+                                        return obj;
+                                    }
+                                    return obj;
+                                }));
+
+        variations.put(
+                "high_dpi",
+                new TestVariation.Builder("high_dpi")
+                        .withDescription("High DPI display testing")
+                        .withTransformation(
+                                "adjust_similarity",
+                                (name, obj) -> {
+                                    if (obj instanceof StateImage) {
+                                        // TODO: StateImage doesn't have toBuilder() or
+                                        // getSimilarity() methods
+                                        // Need to update this transformation once the API is
+                                        // clarified
+                                        return obj;
+                                    }
+                                    return obj;
+                                }));
+
+        variations.put(
+                "slow_system",
+                new TestVariation.Builder("slow_system")
+                        .withDescription("Slow system response simulation")
+                        .withTransformation(
+                                "increase_timeouts",
+                                (name, obj) -> {
+                                    // Could modify timeout-related properties if available
+                                    return obj;
+                                }));
+
         return variations;
     }
-    
+
     /**
      * Validates that all required test data elements are present.
      *
@@ -169,31 +186,35 @@ public class TestDataBuilder {
      */
     public List<String> validateScenario(TestScenario scenario) {
         List<String> errors = new ArrayList<>();
-        
+
         if (scenario.getName() == null || scenario.getName().trim().isEmpty()) {
             errors.add("Scenario name is required");
         }
-        
-        if (scenario.getStateImages().isEmpty() && 
-            scenario.getStateStrings().isEmpty() && 
-            scenario.getRegions().isEmpty()) {
+
+        if (scenario.getStateImages().isEmpty()
+                && scenario.getStateStrings().isEmpty()
+                && scenario.getRegions().isEmpty()) {
             errors.add("Scenario must contain at least one test element");
         }
-        
+
         // Validate state images have patterns
-        scenario.getStateImages().forEach((name, image) -> {
-            if (image.getPatterns() == null || image.getPatterns().isEmpty()) {
-                errors.add("StateImage '" + name + "' missing patterns");
-            }
-        });
-        
+        scenario.getStateImages()
+                .forEach(
+                        (name, image) -> {
+                            if (image.getPatterns() == null || image.getPatterns().isEmpty()) {
+                                errors.add("StateImage '" + name + "' missing patterns");
+                            }
+                        });
+
         // Validate regions have valid dimensions
-        scenario.getRegions().forEach((name, region) -> {
-            if (region.w() <= 0 || region.h() <= 0) {
-                errors.add("Region '" + name + "' has invalid dimensions");
-            }
-        });
-        
+        scenario.getRegions()
+                .forEach(
+                        (name, region) -> {
+                            if (region.w() <= 0 || region.h() <= 0) {
+                                errors.add("Region '" + name + "' has invalid dimensions");
+                            }
+                        });
+
         return errors;
     }
 }

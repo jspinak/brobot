@@ -1,29 +1,29 @@
 package io.github.jspinak.brobot.state.unit;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.model.state.State;
-import io.github.jspinak.brobot.model.state.StateStore;
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.navigation.service.StateService;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.util.*;
+
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.state.StateStore;
+import io.github.jspinak.brobot.navigation.service.StateService;
 
 /**
- * Unit tests for StateService that don't require Spring context.
- * These tests verify the service logic without integration complexity.
+ * Unit tests for StateService that don't require Spring context. These tests verify the service
+ * logic without integration complexity.
  */
 @ExtendWith(MockitoExtension.class)
 class StateServiceUnitTest {
 
-    @Mock
-    private StateStore mockStateStore;
+    @Mock private StateStore mockStateStore;
 
     private StateService stateService;
 
@@ -45,9 +45,7 @@ class StateServiceUnitTest {
         testState.setBaseProbabilityExists(90);
 
         // Create StateImage without loading actual image file
-        testImage = new StateImage.Builder()
-                .setName("test-image")
-                .build();
+        testImage = new StateImage.Builder().setName("test-image").build();
         testState.addStateImage(testImage);
     }
 

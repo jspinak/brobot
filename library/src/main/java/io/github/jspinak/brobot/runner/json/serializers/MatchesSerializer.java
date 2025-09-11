@@ -1,5 +1,11 @@
 package io.github.jspinak.brobot.runner.json.serializers;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -7,51 +13,50 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateObjectMetadata;
-import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
- * Custom serializer for {@link ActionResult} objects (formerly Matches) that provides
- * safe serialization by handling circular references and complex object graphs.
- * 
- * <p>This serializer addresses several critical challenges when serializing ActionResult:</p>
+ * Custom serializer for {@link ActionResult} objects (formerly Matches) that provides safe
+ * serialization by handling circular references and complex object graphs.
+ *
+ * <p>This serializer addresses several critical challenges when serializing ActionResult:
+ *
  * <ul>
- *   <li><b>Circular References:</b> ActionResult contains Match objects that may reference
- *       back to parent objects or contain StateObjectData with circular dependencies,
- *       potentially causing infinite recursion.</li>
+ *   <li><b>Circular References:</b> ActionResult contains Match objects that may reference back to
+ *       parent objects or contain StateObjectData with circular dependencies, potentially causing
+ *       infinite recursion.
  *   <li><b>Complex State Management:</b> Match objects contain StateObjectData that tracks
- *       ownership relationships between states and objects, which can create complex
- *       reference graphs.</li>
- *   <li><b>Native Resources:</b> ActionResult may contain references to mask images,
- *       scene analysis data, and other objects with native memory that cannot be
- *       serialized directly.</li>
- *   <li><b>Large Data Structures:</b> Fields like sceneAnalysisCollection and actionLifecycle
- *       can be very large and contain redundant or circular data.</li>
+ *       ownership relationships between states and objects, which can create complex reference
+ *       graphs.
+ *   <li><b>Native Resources:</b> ActionResult may contain references to mask images, scene analysis
+ *       data, and other objects with native memory that cannot be serialized directly.
+ *   <li><b>Large Data Structures:</b> Fields like sceneAnalysisCollection and actionLifecycle can
+ *       be very large and contain redundant or circular data.
  * </ul>
- * 
- * <p><b>Serialization Strategy:</b></p>
- * <p>This serializer carefully selects which fields to include:</p>
+ *
+ * <p><b>Serialization Strategy:</b>
+ *
+ * <p>This serializer carefully selects which fields to include:
+ *
  * <ul>
- *   <li><b>Basic Fields:</b> Includes all simple fields like success flags, timing data,
- *       text results, and state names</li>
- *   <li><b>Match List:</b> Creates sanitized copies of Match objects that exclude
- *       problematic fields while preserving essential match data</li>
- *   <li><b>Excluded Fields:</b> Skips mask, sceneAnalysisCollection, actionLifecycle,
- *       and actionConfig to avoid serialization issues</li>
+ *   <li><b>Basic Fields:</b> Includes all simple fields like success flags, timing data, text
+ *       results, and state names
+ *   <li><b>Match List:</b> Creates sanitized copies of Match objects that exclude problematic
+ *       fields while preserving essential match data
+ *   <li><b>Excluded Fields:</b> Skips mask, sceneAnalysisCollection, actionLifecycle, and
+ *       actionConfig to avoid serialization issues
  * </ul>
- * 
- * <p><b>Match Sanitization Process:</b></p>
+ *
+ * <p><b>Match Sanitization Process:</b>
+ *
  * <ol>
- *   <li>Creates new Match objects using the Builder pattern</li>
- *   <li>Copies only safe fields: region, score, name</li>
- *   <li>Carefully reconstructs StateObjectData with only essential fields</li>
- *   <li>Avoids copying any fields that could contain circular references</li>
+ *   <li>Creates new Match objects using the Builder pattern
+ *   <li>Copies only safe fields: region, score, name
+ *   <li>Carefully reconstructs StateObjectData with only essential fields
+ *   <li>Avoids copying any fields that could contain circular references
  * </ol>
- * 
- * <p><b>Output Format Example:</b></p>
+ *
+ * <p><b>Output Format Example:</b>
+ *
  * <pre>{@code
  * {
  *   "actionDescription": "Click on button",
@@ -73,7 +78,7 @@ import java.util.List;
  *   ]
  * }
  * }</pre>
- * 
+ *
  * @see ActionResult
  * @see Match
  * @see StateObjectMetadata
@@ -82,41 +87,46 @@ import java.util.List;
 @Component
 public class MatchesSerializer extends JsonSerializer<ActionResult> {
     /**
-     * Serializes an ActionResult object to JSON format, carefully handling complex
-     * fields and avoiding circular references.
-     * 
-     * <p><b>Serialization Process:</b></p>
+     * Serializes an ActionResult object to JSON format, carefully handling complex fields and
+     * avoiding circular references.
+     *
+     * <p><b>Serialization Process:</b>
+     *
      * <ol>
-     *   <li>Writes all simple fields directly (strings, booleans, timestamps)</li>
-     *   <li>Handles optional text field with null checking</li>
-     *   <li>Creates sanitized copies of Match objects to avoid circular references</li>
-     *   <li>Skips problematic fields that could cause serialization failures</li>
+     *   <li>Writes all simple fields directly (strings, booleans, timestamps)
+     *   <li>Handles optional text field with null checking
+     *   <li>Creates sanitized copies of Match objects to avoid circular references
+     *   <li>Skips problematic fields that could cause serialization failures
      * </ol>
-     * 
-     * <p><b>Match List Handling:</b></p>
-     * <p>Each Match in the matchList is reconstructed using a Builder to include only:</p>
+     *
+     * <p><b>Match List Handling:</b>
+     *
+     * <p>Each Match in the matchList is reconstructed using a Builder to include only:
+     *
      * <ul>
-     *   <li>Region data (position and dimensions)</li>
-     *   <li>Similarity score</li>
-     *   <li>Object name</li>
-     *   <li>Minimal StateObjectData (owner state and object names only)</li>
+     *   <li>Region data (position and dimensions)
+     *   <li>Similarity score
+     *   <li>Object name
+     *   <li>Minimal StateObjectData (owner state and object names only)
      * </ul>
-     * 
-     * <p><b>Excluded Fields:</b></p>
+     *
+     * <p><b>Excluded Fields:</b>
+     *
      * <ul>
-     *   <li>{@code mask} - Contains image data that's too large for JSON</li>
-     *   <li>{@code sceneAnalysisCollection} - Complex object with circular references</li>
-     *   <li>{@code actionLifecycle} - Contains execution state that may reference parent objects</li>
-     *   <li>{@code actionConfig} - Has its own serializer to handle its complexity</li>
+     *   <li>{@code mask} - Contains image data that's too large for JSON
+     *   <li>{@code sceneAnalysisCollection} - Complex object with circular references
+     *   <li>{@code actionLifecycle} - Contains execution state that may reference parent objects
+     *   <li>{@code actionConfig} - Has its own serializer to handle its complexity
      * </ul>
-     * 
+     *
      * @param matches the ActionResult to serialize
      * @param gen the JsonGenerator used to write JSON content
      * @param provider the SerializerProvider (not used directly but passed to field serializers)
      * @throws IOException if there's an error writing to the JsonGenerator
      */
     @Override
-    public void serialize(ActionResult matches, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(ActionResult matches, JsonGenerator gen, SerializerProvider provider)
+            throws IOException {
         gen.writeStartObject();
 
         // Handle basic fields
@@ -138,10 +148,11 @@ public class MatchesSerializer extends JsonSerializer<ActionResult> {
         List<Match> sanitizedMatches = new ArrayList<>();
         for (Match match : matches.getMatchList()) {
             // Create a simplified version without problematic fields
-            Match.Builder builder = new Match.Builder()
-                    .setRegion(match.getRegion())
-                    .setSimScore(match.getScore())
-                    .setName(match.getName());
+            Match.Builder builder =
+                    new Match.Builder()
+                            .setRegion(match.getRegion())
+                            .setSimScore(match.getScore())
+                            .setName(match.getName());
 
             // Properly handle StateObjectData
             if (match.getStateObjectData() != null) {
@@ -162,5 +173,3 @@ public class MatchesSerializer extends JsonSerializer<ActionResult> {
         gen.writeEndObject();
     }
 }
-
-

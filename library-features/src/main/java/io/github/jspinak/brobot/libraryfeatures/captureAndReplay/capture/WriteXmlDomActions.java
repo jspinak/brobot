@@ -1,11 +1,11 @@
 package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.capture;
 
-import org.sikuli.script.Mouse;
-import org.springframework.stereotype.Component;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.FileSystems;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -16,12 +16,13 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.FileSystems;
-import java.time.Duration;
-import java.time.LocalDateTime;
+
+import org.sikuli.script.Mouse;
+import org.springframework.stereotype.Component;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
 @Component
 public class WriteXmlDomActions {
@@ -58,7 +59,9 @@ public class WriteXmlDomActions {
         child.setAttribute("x", Mouse.at().x + "");
         child.setAttribute("y", Mouse.at().y + "");
         child.setAttribute("key", key);
-        child.setAttribute("millis", String.valueOf(Duration.between(startTime, LocalDateTime.now()).toMillis()));
+        child.setAttribute(
+                "millis",
+                String.valueOf(Duration.between(startTime, LocalDateTime.now()).toMillis()));
         child.setAttribute(id, value);
     }
 
@@ -70,7 +73,8 @@ public class WriteXmlDomActions {
         }
     }
 
-    public void writeXmlToFile(String filename) throws TransformerException { // ParserConfigurationException,
+    public void writeXmlToFile(String filename)
+            throws TransformerException { // ParserConfigurationException,
         if (doc == null) return;
         // write dom document to a file
         String path = FileSystems.getDefault().getPath(".") + "\\" + filename;
@@ -83,9 +87,7 @@ public class WriteXmlDomActions {
     }
 
     // write doc to output stream
-    private static void writeXml(Document doc,
-                                 OutputStream output)
-            throws TransformerException {
+    private static void writeXml(Document doc, OutputStream output) throws TransformerException {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes"); // makes it look nice

@@ -1,12 +1,11 @@
 package io.github.jspinak.brobot.runner.ui.navigation;
 
+import java.util.Optional;
 import javafx.scene.Node;
 
-import java.util.Optional;
-
 /**
- * Interface representing a screen in the application.
- * A screen is a top-level UI component that can be navigated to.
+ * Interface representing a screen in the application. A screen is a top-level UI component that can
+ * be navigated to.
  */
 public interface IScreen {
 
@@ -28,7 +27,8 @@ public interface IScreen {
      * Creates and returns the content for this screen.
      *
      * @param context The navigation context
-     * @return An Optional containing the screen content, or empty if the content could not be created
+     * @return An Optional containing the screen content, or empty if the content could not be
+     *     created
      */
     Optional<Node> getContent(NavigationContext context);
 }

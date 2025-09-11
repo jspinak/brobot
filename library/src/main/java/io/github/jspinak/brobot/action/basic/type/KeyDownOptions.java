@@ -1,27 +1,26 @@
 package io.github.jspinak.brobot.action.basic.type;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import io.github.jspinak.brobot.action.ActionConfig;
-import lombok.Getter;
 
-import java.util.ArrayList;
-import java.util.List;
+import io.github.jspinak.brobot.action.ActionConfig;
+
+import lombok.Getter;
 
 /**
  * Configuration for the KeyDown action.
- * <p>
- * This class encapsulates all parameters for pressing and holding keyboard keys
- * without releasing them. It is an immutable object and must be constructed using
- * its inner {@link Builder}.
- * </p>
- * <p>
- * By providing a specialized configuration class, the Brobot API ensures that only
- * relevant options are available for key press operations, enhancing type safety
- * and ease of use.
- * </p>
+ *
+ * <p>This class encapsulates all parameters for pressing and holding keyboard keys without
+ * releasing them. It is an immutable object and must be constructed using its inner {@link
+ * Builder}.
+ *
+ * <p>By providing a specialized configuration class, the Brobot API ensures that only relevant
+ * options are available for key press operations, enhancing type safety and ease of use.
  *
  * @see ActionConfig
  * @see io.github.jspinak.brobot.action.basic.type.KeyDown
@@ -40,26 +39,23 @@ public final class KeyDownOptions extends ActionConfig {
         this.pauseBetweenKeys = builder.pauseBetweenKeys;
     }
 
-    /**
-     * Builder for constructing {@link KeyDownOptions} with a fluent API.
-     */
+    /** Builder for constructing {@link KeyDownOptions} with a fluent API. */
     @JsonPOJOBuilder(withPrefix = "set")
     public static class Builder extends ActionConfig.Builder<Builder> {
 
         @JsonProperty("modifiers")
         private List<String> modifiers = new ArrayList<>();
+
         @JsonProperty("pauseBetweenKeys")
         private double pauseBetweenKeys = 0.0;
 
-        /**
-         * Default constructor for creating a new KeyDownOptions configuration.
-         */
+        /** Default constructor for creating a new KeyDownOptions configuration. */
         @JsonCreator
         public Builder() {}
 
         /**
-         * Creates a new Builder instance pre-populated with values from an existing
-         * KeyDownOptions object, allowing for easy modification or templating.
+         * Creates a new Builder instance pre-populated with values from an existing KeyDownOptions
+         * object, allowing for easy modification or templating.
          *
          * @param original The KeyDownOptions instance to copy.
          */
@@ -70,8 +66,8 @@ public final class KeyDownOptions extends ActionConfig {
         }
 
         /**
-         * Sets the modifier keys to be held down during the key press.
-         * Common modifiers include "CTRL", "SHIFT", "ALT", "META" (Windows key).
+         * Sets the modifier keys to be held down during the key press. Common modifiers include
+         * "CTRL", "SHIFT", "ALT", "META" (Windows key).
          *
          * @param modifiers The list of modifier keys.
          * @return this Builder instance for chaining.
@@ -95,8 +91,8 @@ public final class KeyDownOptions extends ActionConfig {
         }
 
         /**
-         * Sets the pause duration between individual key presses when pressing
-         * multiple keys in sequence.
+         * Sets the pause duration between individual key presses when pressing multiple keys in
+         * sequence.
          *
          * @param pauseBetweenKeys The pause duration in seconds.
          * @return this Builder instance for chaining.

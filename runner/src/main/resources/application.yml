@@ -1,7 +1,7 @@
 spring:
   application:
     name: brobot-runner
-  
+
   # JPA Configuration
   jpa:
     hibernate:
@@ -11,14 +11,14 @@ spring:
       hibernate:
         format_sql: true
         use_sql_comments: false
-  
+
   # H2 Database Configuration
   datasource:
     url: jdbc:h2:file:./data/brobot-runner;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver
     username: sa
     password:
-  
+
   h2:
     console:
       enabled: true
@@ -36,7 +36,7 @@ brobot:
       flush-interval-seconds: 60
     database:
       batch-size: 100
-  
+
   runner:
     # Action Recording Configuration (now delegated to persistence module)
     recording:
@@ -49,20 +49,20 @@ brobot:
       compress-exports: false             # Don't compress by default
       store-screenshots: false            # Don't store screenshots by default
       max-screenshot-size: 500            # Max 500KB per screenshot
-      
+
       # Database settings
       database:
         batch-size: 100                  # Batch insert size
         async-recording: true             # Use async recording
         pool-size: 5                      # Connection pool size
-      
+
       # Performance settings
       performance:
         max-memory-buffer: 50             # 50MB memory buffer
         flush-on-memory-pressure: true   # Auto-flush on memory pressure
         thread-pool-size: 3               # 3 threads for async ops
         queue-capacity: 1000              # Queue up to 1000 operations
-      
+
       # Cleanup settings
       cleanup:
         retention-days: 30                # Keep sessions for 30 days
@@ -79,10 +79,10 @@ logging:
     io.github.jspinak.brobot.runner.persistence: INFO
     org.hibernate.SQL: WARN
     org.hibernate.type: WARN
-  
+
   file:
     name: logs/brobot-runner.log
-  
+
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n"

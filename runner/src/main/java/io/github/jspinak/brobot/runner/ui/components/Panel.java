@@ -11,12 +11,10 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+
 import lombok.Getter;
 
-/**
- * A panel with a title, content, and optional actions.
- * Can be collapsible to save space.
- */
+/** A panel with a title, content, and optional actions. Can be collapsible to save space. */
 public class Panel extends VBox {
 
     private final StringProperty title = new SimpleStringProperty();
@@ -26,11 +24,10 @@ public class Panel extends VBox {
     private final Label titleLabel;
     private final HBox headerBox;
     private final Button collapseButton;
-    /**
-     *  The content of the panel.
-     */
-    @Getter
-    private final VBox contentBox;
+
+    /** The content of the panel. */
+    @Getter private final VBox contentBox;
+
     private final HBox actionsBox;
 
     /**
@@ -76,7 +73,7 @@ public class Panel extends VBox {
 
         // Add to parent
         getChildren().addAll(headerBox, contentBox, actionsBox);
-        
+
         // Remove default spacing - let CSS handle it
         setSpacing(0);
 
@@ -84,26 +81,25 @@ public class Panel extends VBox {
         setupBindings();
     }
 
-    /**
-     * Sets up property bindings.
-     */
+    /** Sets up property bindings. */
     private void setupBindings() {
         // Bind collapse button visibility to collapsible property
         collapseButton.visibleProperty().bind(collapsible);
         collapseButton.managedProperty().bind(collapsible);
 
         // Update collapse button text based on collapsed state
-        collapsed.addListener((obs, oldVal, newVal) -> {
-            if (newVal) {
-                collapseButton.setText("▶");
-                contentBox.setVisible(false);
-                contentBox.setManaged(false);
-            } else {
-                collapseButton.setText("▼");
-                contentBox.setVisible(true);
-                contentBox.setManaged(true);
-            }
-        });
+        collapsed.addListener(
+                (obs, oldVal, newVal) -> {
+                    if (newVal) {
+                        collapseButton.setText("▶");
+                        contentBox.setVisible(false);
+                        contentBox.setManaged(false);
+                    } else {
+                        collapseButton.setText("▼");
+                        contentBox.setVisible(true);
+                        contentBox.setManaged(true);
+                    }
+                });
     }
 
     /**
@@ -232,9 +228,7 @@ public class Panel extends VBox {
         actionsBox.getChildren().remove(action);
     }
 
-    /**
-     * Clears all action buttons from the panel.
-     */
+    /** Clears all action buttons from the panel. */
     public void clearActions() {
         actionsBox.getChildren().clear();
         actionsBox.setVisible(false);

@@ -1,50 +1,54 @@
 package io.github.jspinak.brobot.model.element;
 
+import static java.awt.image.BufferedImage.TYPE_BYTE_BINARY;
+
+import java.awt.image.BufferedImage;
+
+import org.bytedeco.opencv.opencv_core.Mat;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 import io.github.jspinak.brobot.util.image.core.ImageConverter;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.bytedeco.opencv.opencv_core.Mat;
-import java.awt.image.BufferedImage;
-
-import static java.awt.image.BufferedImage.TYPE_BYTE_BINARY;
 
 /**
  * Physical representation of an image in the Brobot GUI automation framework.
- * 
- * <p>Image serves as the core container for visual data in Brobot, providing a unified 
- * interface for working with images across different formats and libraries. It acts as 
- * the bridge between Java's BufferedImage, OpenCV's Mat format, and SikuliX's image 
- * representation, enabling seamless interoperability.</p>
- * 
+ *
+ * <p>Image serves as the core container for visual data in Brobot, providing a unified interface
+ * for working with images across different formats and libraries. It acts as the bridge between
+ * Java's BufferedImage, OpenCV's Mat format, and SikuliX's image representation, enabling seamless
+ * interoperability.
+ *
  * <p>Key features:
+ *
  * <ul>
- *   <li><b>Multi-format Support</b>: Stores images as BufferedImage internally with 
- *       conversions to Mat (BGR/HSV) and SikuliX formats</li>
- *   <li><b>Database Persistence</b>: Serializable to byte arrays for storage</li>
- *   <li><b>Color Space Conversions</b>: Built-in BGR and HSV representations for 
- *       advanced color-based matching</li>
- *   <li><b>Flexible Construction</b>: Can be created from files, BufferedImages, 
- *       Mats, Patterns, or SikuliX images</li>
+ *   <li><b>Multi-format Support</b>: Stores images as BufferedImage internally with conversions to
+ *       Mat (BGR/HSV) and SikuliX formats
+ *   <li><b>Database Persistence</b>: Serializable to byte arrays for storage
+ *   <li><b>Color Space Conversions</b>: Built-in BGR and HSV representations for advanced
+ *       color-based matching
+ *   <li><b>Flexible Construction</b>: Can be created from files, BufferedImages, Mats, Patterns, or
+ *       SikuliX images
  * </ul>
- * </p>
- * 
+ *
  * <p>Use cases in model-based automation:
+ *
  * <ul>
- *   <li>Storing screenshots captured during automation execution</li>
- *   <li>Holding pattern templates for visual matching</li>
- *   <li>Providing image data for color analysis and profiling</li>
- *   <li>Enabling image manipulation and processing operations</li>
+ *   <li>Storing screenshots captured during automation execution
+ *   <li>Holding pattern templates for visual matching
+ *   <li>Providing image data for color analysis and profiling
+ *   <li>Enabling image manipulation and processing operations
  * </ul>
- * </p>
- * 
- * <p>The Image class abstracts away the complexity of working with multiple image 
- * libraries, providing a consistent API that supports the framework's cross-platform 
- * and technology-agnostic approach to GUI automation.</p>
- * 
+ *
+ * <p>The Image class abstracts away the complexity of working with multiple image libraries,
+ * providing a consistent API that supports the framework's cross-platform and technology-agnostic
+ * approach to GUI automation.
+ *
  * @since 1.0
  * @see Pattern
  * @see BufferedImageUtilities
@@ -58,7 +62,7 @@ public class Image {
 
     private String name;
 
-    @JsonIgnore  // Ignore by default, mixin can override
+    @JsonIgnore // Ignore by default, mixin can override
     private BufferedImage bufferedImage;
 
     public Image(BufferedImage bufferedImage) {
@@ -99,8 +103,9 @@ public class Image {
     }
 
     /**
-     * Returns the BGR representation as a JavaCV Mat.
-     * If there is a conversion issue, an empty Mat is returned.
+     * Returns the BGR representation as a JavaCV Mat. If there is a conversion issue, an empty Mat
+     * is returned.
+     *
      * @return the image as a Mat.
      */
     @JsonIgnore
@@ -113,15 +118,19 @@ public class Image {
         if (mat == null || mat.empty()) {
             log.error("[IMAGE] Mat conversion failed for image: {}", name);
         } else {
-            log.debug("[IMAGE] Successfully converted to Mat BGR - dimensions: {}x{} for image: {}", 
-                    mat.cols(), mat.rows(), name);
+            log.debug(
+                    "[IMAGE] Successfully converted to Mat BGR - dimensions: {}x{} for image: {}",
+                    mat.cols(),
+                    mat.rows(),
+                    name);
         }
         return mat;
     }
 
     /**
-     * Returns the HSV representation as a JavaCV Mat.
-     * If there is a conversion issue, an empty Mat is returned.
+     * Returns the HSV representation as a JavaCV Mat. If there is a conversion issue, an empty Mat
+     * is returned.
+     *
      * @return the image as a Mat.
      */
     @JsonIgnore
@@ -134,8 +143,11 @@ public class Image {
         if (mat == null || mat.empty()) {
             log.error("[IMAGE] Mat HSV conversion failed for image: {}", name);
         } else {
-            log.debug("[IMAGE] Successfully converted to Mat HSV - dimensions: {}x{} for image: {}", 
-                    mat.cols(), mat.rows(), name);
+            log.debug(
+                    "[IMAGE] Successfully converted to Mat HSV - dimensions: {}x{} for image: {}",
+                    mat.cols(),
+                    mat.rows(),
+                    name);
         }
         return mat;
     }
@@ -147,13 +159,16 @@ public class Image {
     @JsonIgnore
     public org.sikuli.script.Image sikuli() {
         if (bufferedImage == null) {
-            throw new IllegalStateException("Cannot create SikuliX Image: BufferedImage is null. " +
-                "Image file may not exist or failed to load: " + name);
+            throw new IllegalStateException(
+                    "Cannot create SikuliX Image: BufferedImage is null. "
+                            + "Image file may not exist or failed to load: "
+                            + name);
         }
-        
+
         // VERSION 1.0.7 APPROACH - DEFAULT
         // Pass image directly to SikuliX without any conversion
-        // This preserves exact pixel values and matches how patterns were captured with SikuliX tool
+        // This preserves exact pixel values and matches how patterns were captured with SikuliX
+        // tool
         // SikuliX handles any image type differences internally
         return new org.sikuli.script.Image(bufferedImage);
     }
@@ -195,23 +210,27 @@ public class Image {
 
     @Override
     public String toString() {
-        return "Image{" +
-                "name='" + name + '\'' +
-                ", width=" + (bufferedImage != null ? bufferedImage.getWidth() : "N/A") +
-                ", height=" + (bufferedImage != null ? bufferedImage.getHeight() : "N/A") +
-                '}';
+        return "Image{"
+                + "name='"
+                + name
+                + '\''
+                + ", width="
+                + (bufferedImage != null ? bufferedImage.getWidth() : "N/A")
+                + ", height="
+                + (bufferedImage != null ? bufferedImage.getHeight() : "N/A")
+                + '}';
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        
+
         Image image = (Image) o;
-        
+
         // Check name equality
         if (name != null ? !name.equals(image.name) : image.name != null) return false;
-        
+
         // Check bufferedImage reference equality (as per test expectations)
         // Two images are equal if they have the same BufferedImage reference and same name
         return bufferedImage == image.bufferedImage;
@@ -224,5 +243,4 @@ public class Image {
         result = 31 * result + (bufferedImage != null ? System.identityHashCode(bufferedImage) : 0);
         return result;
     }
-
 }

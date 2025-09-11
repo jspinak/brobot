@@ -1,13 +1,6 @@
 package io.github.jspinak.brobot.runner.session.discovery;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.jspinak.brobot.runner.common.diagnostics.DiagnosticInfo;
-import io.github.jspinak.brobot.runner.session.Session;
-import io.github.jspinak.brobot.runner.session.SessionSummary;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import org.springframework.test.util.ReflectionTestUtils;
+import static org.assertj.core.api.Assertions.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,26 +9,34 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.github.jspinak.brobot.runner.common.diagnostics.DiagnosticInfo;
+import io.github.jspinak.brobot.runner.session.Session;
+import io.github.jspinak.brobot.runner.session.SessionSummary;
 
 class SessionDiscoveryServiceTest {
 
     private SessionDiscoveryService discoveryService;
     private ObjectMapper objectMapper;
-    
-    @TempDir
-    Path tempDir;
+
+    @TempDir Path tempDir;
 
     @BeforeEach
     void setUp() {
         discoveryService = new SessionDiscoveryService();
         objectMapper = new ObjectMapper();
         objectMapper.findAndRegisterModules();
-        
+
         // Use reflection to set the storage path to our temp directory
-        ReflectionTestUtils.setField(discoveryService, "sessionStoragePathConfig", tempDir.toString());
+        ReflectionTestUtils.setField(
+                discoveryService, "sessionStoragePathConfig", tempDir.toString());
         discoveryService.initialize();
     }
 
@@ -103,7 +104,7 @@ class SessionDiscoveryServiceTest {
         // Given
         LocalDate today = LocalDate.now();
         LocalDate yesterday = today.minusDays(1);
-        
+
         createSessionFile("session1", "Today's Project 1", today.atStartOfDay());
         createSessionFile("session2", "Today's Project 2", today.atTime(10, 30));
         createSessionFile("session3", "Yesterday's Project", yesterday.atTime(14, 0));
@@ -114,9 +115,10 @@ class SessionDiscoveryServiceTest {
 
         // Then
         assertThat(todaySessions).hasSize(2);
-        assertThat(todaySessions).extracting(SessionSummary::getProjectName)
+        assertThat(todaySessions)
+                .extracting(SessionSummary::getProjectName)
                 .containsExactlyInAnyOrder("Today's Project 1", "Today's Project 2");
-        
+
         assertThat(yesterdaySessions).hasSize(1);
         assertThat(yesterdaySessions.get(0).getProjectName()).isEqualTo("Yesterday's Project");
     }
@@ -138,7 +140,8 @@ class SessionDiscoveryServiceTest {
         createSessionFile("session3", "Project Alpha", LocalDateTime.now());
 
         // When
-        List<SessionSummary> alphaSessions = discoveryService.findSessionsByProject("Project Alpha");
+        List<SessionSummary> alphaSessions =
+                discoveryService.findSessionsByProject("Project Alpha");
         List<SessionSummary> betaSessions = discoveryService.findSessionsByProject("Project Beta");
 
         // Then
@@ -189,8 +192,7 @@ class SessionDiscoveryServiceTest {
     void testGetRecentSessions() throws IOException {
         // Given
         for (int i = 0; i < 10; i++) {
-            createSessionFile("session" + i, "Project " + i, 
-                    LocalDateTime.now().minusHours(i));
+            createSessionFile("session" + i, "Project " + i, LocalDateTime.now().minusHours(i));
         }
 
         // When
@@ -207,7 +209,7 @@ class SessionDiscoveryServiceTest {
     void testCacheInvalidation() throws IOException {
         // Given - create initial sessions
         createSessionFile("session1", "Project 1", LocalDateTime.now());
-        
+
         // First load to populate cache
         List<SessionSummary> initial = discoveryService.listAvailableSessions();
         assertThat(initial).hasSize(1);
@@ -217,14 +219,14 @@ class SessionDiscoveryServiceTest {
 
         // When - immediately query (should use cache)
         List<SessionSummary> cached = discoveryService.listAvailableSessions();
-        
+
         // Then - should still show cached result
         assertThat(cached).hasSize(1);
 
         // When - force cache invalidation by setting cache time to past
-        ReflectionTestUtils.setField(discoveryService, "cacheLastUpdated", 
-                LocalDateTime.now().minusMinutes(10));
-        
+        ReflectionTestUtils.setField(
+                discoveryService, "cacheLastUpdated", LocalDateTime.now().minusMinutes(10));
+
         List<SessionSummary> refreshed = discoveryService.listAvailableSessions();
 
         // Then - should show updated results
@@ -272,10 +274,13 @@ class SessionDiscoveryServiceTest {
 
         // Then
         assertThat(diagnosticInfo.getComponent()).isEqualTo("SessionDiscoveryService");
-        assertThat(diagnosticInfo.getStates()).containsKeys(
-                "storagePath", "cachedSessions", "cacheLastUpdated", 
-                "cacheValid", "totalSessionFiles"
-        );
+        assertThat(diagnosticInfo.getStates())
+                .containsKeys(
+                        "storagePath",
+                        "cachedSessions",
+                        "cacheLastUpdated",
+                        "cacheValid",
+                        "totalSessionFiles");
         assertThat(diagnosticInfo.getStates().get("cachedSessions")).isEqualTo(2);
         assertThat(diagnosticInfo.getStates().get("totalSessionFiles")).isEqualTo(2L);
         assertThat((Boolean) diagnosticInfo.getStates().get("cacheValid")).isTrue();
@@ -312,20 +317,21 @@ class SessionDiscoveryServiceTest {
         assertThat(sessions).isEmpty(); // Corrupted file is skipped
     }
 
-    private void createSessionFile(String sessionId, String projectName, LocalDateTime startTime) 
+    private void createSessionFile(String sessionId, String projectName, LocalDateTime startTime)
             throws IOException {
         createSessionFile(sessionId, projectName, startTime, null);
     }
 
-    private void createSessionFile(String sessionId, String projectName, 
-                                 LocalDateTime startTime, String sessionName) throws IOException {
+    private void createSessionFile(
+            String sessionId, String projectName, LocalDateTime startTime, String sessionName)
+            throws IOException {
         Session session = new Session();
         session.setId(sessionId);
         session.setProjectName(projectName);
         session.setStartTime(startTime);
         session.setActive(true);
         session.setConfigPath("/config/" + sessionId + ".json");
-        
+
         if (sessionName != null) {
             ReflectionTestUtils.setField(session, "sessionName", sessionName);
         }

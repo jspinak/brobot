@@ -1,25 +1,7 @@
 package io.github.jspinak.brobot.integration;
 
-import org.junit.jupiter.api.Disabled;
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import static org.junit.jupiter.api.Assertions.*;
 
-import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.action.basic.find.Find;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.state.State;
-import io.github.jspinak.brobot.model.state.StateRegion;
-import io.github.jspinak.brobot.model.state.StateStore;
-import io.github.jspinak.brobot.action.ObjectCollection;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIf;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -28,21 +10,36 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import javax.imageio.ImageIO;
 
-/**
- * Test to debug why screenshots are not being saved.
- */
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIf;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.basic.find.Find;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.state.StateRegion;
+import io.github.jspinak.brobot.model.state.StateStore;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+
+/** Test to debug why screenshots are not being saved. */
 @SpringBootTest // (classes = ClaudeAutomatorApplication.class not available)
 @ActiveProfiles("linux")
 @Disabled("Failing in CI - temporarily disabled for CI/CD")
 public class ScreenshotSaveDebugTest extends BrobotTestBase {
 
-    @Autowired
-    private Find find;
+    @Autowired private Find find;
 
-    @Autowired
-    private StateStore stateStore;
+    @Autowired private StateStore stateStore;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -101,21 +98,19 @@ public class ScreenshotSaveDebugTest extends BrobotTestBase {
         System.out.println("\n2. Files in history before action: " + filesBefore);
 
         // Create a test state
-        State testState = new State.Builder("TestState")
-                .build();
-        StateRegion searchRegion = new StateRegion.Builder()
-                .setName("TestRegion")
-                .setSearchRegion(new Region(0, 0, 200, 200))
-                .build();
+        State testState = new State.Builder("TestState").build();
+        StateRegion searchRegion =
+                new StateRegion.Builder()
+                        .setName("TestRegion")
+                        .setSearchRegion(new Region(0, 0, 200, 200))
+                        .build();
         testState.addStateRegion(searchRegion);
         stateStore.save(testState);
 
         // Force illustration
         ActionResult result = new ActionResult();
 
-        ObjectCollection objects = new ObjectCollection.Builder()
-                .withRegions(searchRegion)
-                .build();
+        ObjectCollection objects = new ObjectCollection.Builder().withRegions(searchRegion).build();
 
         System.out.println("\n3. Performing FIND action with forced illustration...");
         find.perform(result, objects);
@@ -136,28 +131,29 @@ public class ScreenshotSaveDebugTest extends BrobotTestBase {
         System.out.println("\n5. PNG files in history directory:");
         try (Stream<Path> files = Files.list(historyPath)) {
             files.filter(p -> p.toString().endsWith(".png"))
-                    .forEach(p -> {
-                        File f = p.toFile();
-                        System.out.println("  " + f.getName() + " (" + f.length() + " bytes)");
+                    .forEach(
+                            p -> {
+                                File f = p.toFile();
+                                System.out.println(
+                                        "  " + f.getName() + " (" + f.length() + " bytes)");
 
-                        // Check if it's black
-                        try {
-                            BufferedImage img = ImageIO.read(f);
-                            int blackPixels = 0;
-                            for (int i = 0; i < 100; i++) {
-                                int x = (int) (Math.random() * img.getWidth());
-                                int y = (int) (Math.random() * img.getHeight());
-                                if (img.getRGB(x, y) == 0xFF000000)
-                                    blackPixels++;
-                            }
-                            System.out.println("    Black pixels: " + blackPixels + "%");
-                            if (blackPixels > 90) {
-                                System.out.println("    ⚠️ This file is BLACK!");
-                            }
-                        } catch (Exception e) {
-                            System.err.println("    Error reading: " + e.getMessage());
-                        }
-                    });
+                                // Check if it's black
+                                try {
+                                    BufferedImage img = ImageIO.read(f);
+                                    int blackPixels = 0;
+                                    for (int i = 0; i < 100; i++) {
+                                        int x = (int) (Math.random() * img.getWidth());
+                                        int y = (int) (Math.random() * img.getHeight());
+                                        if (img.getRGB(x, y) == 0xFF000000) blackPixels++;
+                                    }
+                                    System.out.println("    Black pixels: " + blackPixels + "%");
+                                    if (blackPixels > 90) {
+                                        System.out.println("    ⚠️ This file is BLACK!");
+                                    }
+                                } catch (Exception e) {
+                                    System.err.println("    Error reading: " + e.getMessage());
+                                }
+                            });
         }
 
         // Clean up test file

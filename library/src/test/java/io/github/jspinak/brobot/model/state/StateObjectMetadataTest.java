@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.model.state;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -10,12 +12,11 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
- * Comprehensive test suite for StateObjectMetadata class.
- * Tests metadata creation, property management, and reference tracking.
+ * Comprehensive test suite for StateObjectMetadata class. Tests metadata creation, property
+ * management, and reference tracking.
  */
 @DisplayName("StateObjectMetadata Tests")
 public class StateObjectMetadataTest extends BrobotTestBase {
@@ -232,7 +233,15 @@ public class StateObjectMetadataTest extends BrobotTestBase {
 
         @ParameterizedTest
         @DisplayName("Handle various string values for ID")
-        @ValueSource(strings = {"", " ", "  ", "\t", "\n", "very-long-id-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"})
+        @ValueSource(
+                strings = {
+                    "",
+                    " ",
+                    "  ",
+                    "\t",
+                    "\n",
+                    "very-long-id-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                })
         @NullSource
         void handleVariousStringValuesForId(String id) {
             // When
@@ -244,8 +253,16 @@ public class StateObjectMetadataTest extends BrobotTestBase {
 
         @ParameterizedTest
         @DisplayName("Handle special characters in names")
-        @ValueSource(strings = {"name with spaces", "name-with-dashes", "name_with_underscores", 
-                               "name.with.dots", "name@with#special$chars", "名前", "😀"})
+        @ValueSource(
+                strings = {
+                    "name with spaces",
+                    "name-with-dashes",
+                    "name_with_underscores",
+                    "name.with.dots",
+                    "name@with#special$chars",
+                    "名前",
+                    "😀"
+                })
         void handleSpecialCharactersInNames(String name) {
             // When
             metadata.setStateObjectName(name);
@@ -349,7 +366,7 @@ public class StateObjectMetadataTest extends BrobotTestBase {
             // When - simulate updates over time
             mutableMetadata.setStateObjectId("initial-id");
             mutableMetadata.setObjectType(StateObject.Type.IMAGE);
-            
+
             // Later update
             mutableMetadata.setStateObjectName("UpdatedName");
             mutableMetadata.setOwnerStateName("NewOwner");

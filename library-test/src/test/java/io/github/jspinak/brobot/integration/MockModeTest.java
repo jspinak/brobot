@@ -1,26 +1,21 @@
 package io.github.jspinak.brobot.integration;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import static org.junit.jupiter.api.Assertions.*;
 
-// import com.claude.automator.states.PromptState;
-import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.model.element.Pattern;
-import io.github.jspinak.brobot.model.state.StateImage;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
-/**
- * Test to verify mock mode functionality with ActionHistory.
- */
+/** Test to verify mock mode functionality with ActionHistory. */
 @SpringBootTest
 @ActiveProfiles("test")
 @Disabled("Missing PromptState and WorkingState dependencies")
@@ -78,9 +73,10 @@ public class MockModeTest extends BrobotTestBase {
         // PromptState promptState = new PromptState();
         // StateImage claudePrompt = promptState.getClaudePrompt();
 
-        ObjectCollection objects = new ObjectCollection.Builder()
-                // .withImages(claudePrompt)
-                .build();
+        ObjectCollection objects =
+                new ObjectCollection.Builder()
+                        // .withImages(claudePrompt)
+                        .build();
 
         // Attempt find in mock mode
         ActionResult result = action.find(objects);
@@ -90,7 +86,8 @@ public class MockModeTest extends BrobotTestBase {
         System.out.println("Matches: " + result.getMatchList().size());
 
         // In mock mode with ActionHistory, this should succeed
-        assertTrue(result.isSuccess() || !result.getMatchList().isEmpty(),
+        assertTrue(
+                result.isSuccess() || !result.getMatchList().isEmpty(),
                 "Mock find should succeed with ActionHistory");
     }
 }

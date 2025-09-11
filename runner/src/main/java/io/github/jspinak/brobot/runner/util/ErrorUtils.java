@@ -1,30 +1,28 @@
 package io.github.jspinak.brobot.runner.util;
 
-import lombok.Data;
-
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.function.Consumer;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.function.Consumer;
+import lombok.Data;
 
 /**
- * Utility class for error handling.
- * Provides methods for logging errors and displaying error information to the user.
+ * Utility class for error handling. Provides methods for logging errors and displaying error
+ * information to the user.
  */
 @Data
 public class ErrorUtils {
     private static final Logger logger = LoggerFactory.getLogger(ErrorUtils.class);
 
-    /**
-     * Private constructor to prevent instantiation.
-     */
+    /** Private constructor to prevent instantiation. */
     private ErrorUtils() {
         // Utility class
     }
@@ -54,19 +52,23 @@ public class ErrorUtils {
      * @param displayToUser Whether to display the error to the user
      * @param onErrorDisplayed Callback to execute after error is displayed to user
      */
-    public static void handleException(Exception exception, String message, boolean displayToUser,
-                                       Consumer<Exception> onErrorDisplayed) {
+    public static void handleException(
+            Exception exception,
+            String message,
+            boolean displayToUser,
+            Consumer<Exception> onErrorDisplayed) {
         // Log the error
         logger.error(message, exception);
 
         // Display to user if requested
         if (displayToUser) {
-            FxThreadUtils.runAsync(() -> {
-                showErrorDialog(message, exception);
-                if (onErrorDisplayed != null) {
-                    onErrorDisplayed.accept(exception);
-                }
-            });
+            FxThreadUtils.runAsync(
+                    () -> {
+                        showErrorDialog(message, exception);
+                        if (onErrorDisplayed != null) {
+                            onErrorDisplayed.accept(exception);
+                        }
+                    });
         } else if (onErrorDisplayed != null) {
             onErrorDisplayed.accept(exception);
         }
@@ -174,13 +176,14 @@ public class ErrorUtils {
      * @param content The error details
      */
     public static void showErrorAlert(String title, String header, String content) {
-        FxThreadUtils.runAsync(() -> {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle(title);
-            alert.setHeaderText(header);
-            alert.setContentText(content);
-            alert.showAndWait();
-        });
+        FxThreadUtils.runAsync(
+                () -> {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle(title);
+                    alert.setHeaderText(header);
+                    alert.setContentText(content);
+                    alert.showAndWait();
+                });
     }
 
     /**
@@ -190,7 +193,8 @@ public class ErrorUtils {
      * @param exceptionType The exception type to look for
      * @return true if the exception is of the specified type or has a cause of that type
      */
-    public static boolean isExceptionOfType(Throwable exception, Class<? extends Throwable> exceptionType) {
+    public static boolean isExceptionOfType(
+            Throwable exception, Class<? extends Throwable> exceptionType) {
         if (exception == null || exceptionType == null) {
             return false;
         }

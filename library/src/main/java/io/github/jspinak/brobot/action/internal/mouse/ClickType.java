@@ -1,29 +1,32 @@
 package io.github.jspinak.brobot.action.internal.mouse;
 
-import org.springframework.stereotype.Component;
-
 import java.awt.event.InputEvent;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.stereotype.Component;
+
 /**
  * Maps click types to Sikuli button constants.
- * <p>
- * This component provides the mapping between Brobot's button type enum
- * and the underlying Sikuli button constants used for mouse operations.
- * It serves as a bridge between the high-level action configuration and the
- * low-level mouse event generation.
- * </p>
+ *
+ * <p>This component provides the mapping between Brobot's button type enum and the underlying
+ * Sikuli button constants used for mouse operations. It serves as a bridge between the high-level
+ * action configuration and the low-level mouse event generation.
  */
 @Component
 public class ClickType {
 
     /**
-     * Enum representing mouse button types.
-     * This is a temporary enum that will be replaced by MouseButton enum.
+     * Enum representing mouse button types. This is a temporary enum that will be replaced by
+     * MouseButton enum.
      */
     public enum Type {
-        LEFT, RIGHT, MIDDLE, DOUBLE_LEFT, DOUBLE_RIGHT, DOUBLE_MIDDLE
+        LEFT,
+        RIGHT,
+        MIDDLE,
+        DOUBLE_LEFT,
+        DOUBLE_RIGHT,
+        DOUBLE_MIDDLE
     }
 
     private final Map<Type, Integer> typeToSikuliButton;
@@ -45,7 +48,7 @@ public class ClickType {
 
     /**
      * Gets the mapping from Type to Sikuli button constants.
-     * 
+     *
      * @return Map of Type to button mask integers
      */
     public Map<Type, Integer> getTypeToSikuliButton() {

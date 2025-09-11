@@ -12,5 +12,5 @@ logging:
   level:
     com.example.quickstart: DEBUG
     io.github.jspinak.brobot: INFO
-    
+
 # Note: For production use, you would set mock: false and provide actual screenshots

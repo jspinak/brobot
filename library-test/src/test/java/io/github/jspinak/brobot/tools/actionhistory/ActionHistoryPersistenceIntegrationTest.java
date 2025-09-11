@@ -1,41 +1,40 @@
 package io.github.jspinak.brobot.tools.actionhistory;
 
-import org.junit.jupiter.api.Disabled;
-import io.github.jspinak.brobot.model.action.ActionHistory;
-import io.github.jspinak.brobot.model.action.ActionRecord;
-import io.github.jspinak.brobot.model.element.Pattern;
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.action.basic.click.ClickOptions;
-import io.github.jspinak.brobot.test.SimpleTestBase;
-import io.github.jspinak.brobot.model.element.Text;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.model.action.ActionHistory;
+import io.github.jspinak.brobot.model.action.ActionRecord;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.element.Text;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.test.SimpleTestBase;
 
 /**
- * Integration tests for ActionHistoryPersistence.
- * Tests JSON serialization/deserialization, session management, and auto-save features.
+ * Integration tests for ActionHistoryPersistence. Tests JSON serialization/deserialization, session
+ * management, and auto-save features.
  */
 @Disabled("Failing in CI - temporarily disabled for CI/CD")
 public class ActionHistoryPersistenceIntegrationTest extends SimpleTestBase {
 
     private ActionHistoryPersistence persistence;
 
-    @TempDir
-    Path tempDir;
+    @TempDir Path tempDir;
 
     private ActionHistory testHistory;
     private Pattern testPattern;
@@ -54,42 +53,40 @@ public class ActionHistoryPersistenceIntegrationTest extends SimpleTestBase {
         testHistory.setTimesFound(12);
 
         // Create test records
-        ActionRecord record1 = new ActionRecord.Builder()
-                .setActionConfig(new PatternFindOptions.Builder()
-                        .setSimilarity(0.9)
-                        .setStrategy(PatternFindOptions.Strategy.BEST)
-                        .build())
-                .setActionSuccess(true)
-                .setDuration(100.0)
-                .setMatchList(Arrays.asList(
-                        new Match.Builder()
-                                .setRegion(new Region(10, 20, 30, 40))
-                                .setSimScore(0.95)
-                                .build()))
-                .build();
+        ActionRecord record1 =
+                new ActionRecord.Builder()
+                        .setActionConfig(
+                                new PatternFindOptions.Builder()
+                                        .setSimilarity(0.9)
+                                        .setStrategy(PatternFindOptions.Strategy.BEST)
+                                        .build())
+                        .setActionSuccess(true)
+                        .setDuration(100.0)
+                        .setMatchList(
+                                Arrays.asList(
+                                        new Match.Builder()
+                                                .setRegion(new Region(10, 20, 30, 40))
+                                                .setSimScore(0.95)
+                                                .build()))
+                        .build();
 
-        ActionRecord record2 = new ActionRecord.Builder()
-                .setActionConfig(new ClickOptions.Builder()
-                        .setNumberOfClicks(1)
-                        .build())
-                .setActionSuccess(false)
-                .setDuration(250.0)
-                .setMatchList(new ArrayList<>())
-                .setText("Click failed")
-                .build();
+        ActionRecord record2 =
+                new ActionRecord.Builder()
+                        .setActionConfig(new ClickOptions.Builder().setNumberOfClicks(1).build())
+                        .setActionSuccess(false)
+                        .setDuration(250.0)
+                        .setMatchList(new ArrayList<>())
+                        .setText("Click failed")
+                        .build();
 
         testHistory.setSnapshots(Arrays.asList(record1, record2));
 
         // Create test pattern with history
-        testPattern = new Pattern.Builder()
-                .setName("test-pattern")
-                .setMatchHistory(testHistory)
-                .build();
+        testPattern =
+                new Pattern.Builder().setName("test-pattern").setMatchHistory(testHistory).build();
 
         // Create test state image
-        testStateImage = new StateImage.Builder()
-                .addPattern(testPattern)
-                .build();
+        testStateImage = new StateImage.Builder().addPattern(testPattern).build();
     }
 
     @Test
@@ -98,18 +95,18 @@ public class ActionHistoryPersistenceIntegrationTest extends SimpleTestBase {
         ActionHistory simpleHistory = new ActionHistory();
         simpleHistory.setTimesSearched(10);
         simpleHistory.setTimesFound(8);
-        
+
         // Create simple record without Match objects that might contain Mat
-        ActionRecord simpleRecord = new ActionRecord.Builder()
-                .setActionConfig(new PatternFindOptions.Builder()
-                        .setSimilarity(0.85)
-                        .build())
-                .setActionSuccess(true)
-                .setDuration(200.0)
-                .setText("Test text")
-                .setMatchList(new ArrayList<>())  // Empty list to avoid Mat serialization
-                .build();
-        
+        ActionRecord simpleRecord =
+                new ActionRecord.Builder()
+                        .setActionConfig(
+                                new PatternFindOptions.Builder().setSimilarity(0.85).build())
+                        .setActionSuccess(true)
+                        .setDuration(200.0)
+                        .setText("Test text")
+                        .setMatchList(new ArrayList<>()) // Empty list to avoid Mat serialization
+                        .build();
+
         simpleHistory.setSnapshots(Arrays.asList(simpleRecord));
         String filename = "simple-history.json";
 
@@ -125,12 +122,13 @@ public class ActionHistoryPersistenceIntegrationTest extends SimpleTestBase {
 
         // Assert - Data preserved
         assertNotNull(loaded, "Loaded history should not be null");
-        assertEquals(simpleHistory.getTimesSearched(), loaded.getTimesSearched(),
+        assertEquals(
+                simpleHistory.getTimesSearched(),
+                loaded.getTimesSearched(),
                 "Times searched should match");
-        assertEquals(simpleHistory.getTimesFound(), loaded.getTimesFound(),
-                "Times found should match");
-        assertEquals(1, loaded.getSnapshots().size(),
-                "Should have one snapshot");
+        assertEquals(
+                simpleHistory.getTimesFound(), loaded.getTimesFound(), "Times found should match");
+        assertEquals(1, loaded.getSnapshots().size(), "Should have one snapshot");
 
         // Verify record details
         ActionRecord loadedRecord = loaded.getSnapshots().get(0);
@@ -145,24 +143,24 @@ public class ActionHistoryPersistenceIntegrationTest extends SimpleTestBase {
         ActionHistory simpleHistory = new ActionHistory();
         simpleHistory.setTimesSearched(5);
         simpleHistory.setTimesFound(3);
-        
-        ActionRecord simpleRecord = new ActionRecord.Builder()
-                .setActionSuccess(true)
-                .setDuration(100.0)
-                .setText("Session test")
-                .setMatchList(new ArrayList<>())  // No matches to avoid Mat issues
-                .build();
+
+        ActionRecord simpleRecord =
+                new ActionRecord.Builder()
+                        .setActionSuccess(true)
+                        .setDuration(100.0)
+                        .setText("Session test")
+                        .setMatchList(new ArrayList<>()) // No matches to avoid Mat issues
+                        .build();
         simpleHistory.setSnapshots(Arrays.asList(simpleRecord));
-        
-        Pattern simplePattern = new Pattern.Builder()
-                .setName("test-pattern")
-                .setMatchHistory(simpleHistory)
-                .build();
-                
-        StateImage simpleStateImage = new StateImage.Builder()
-                .addPattern(simplePattern)
-                .build();
-        
+
+        Pattern simplePattern =
+                new Pattern.Builder()
+                        .setName("test-pattern")
+                        .setMatchHistory(simpleHistory)
+                        .build();
+
+        StateImage simpleStateImage = new StateImage.Builder().addPattern(simplePattern).build();
+
         String sessionName = "test-session";
 
         // Act
@@ -173,10 +171,11 @@ public class ActionHistoryPersistenceIntegrationTest extends SimpleTestBase {
         assertTrue(Files.exists(historyDir), "History directory should exist");
 
         // Check for timestamped file
-        List<Path> files = Files.list(historyDir)
-                .filter(p -> p.getFileName().toString().startsWith(sessionName))
-                .filter(p -> p.getFileName().toString().endsWith(".json"))
-                .collect(java.util.stream.Collectors.toList());
+        List<Path> files =
+                Files.list(historyDir)
+                        .filter(p -> p.getFileName().toString().startsWith(sessionName))
+                        .filter(p -> p.getFileName().toString().endsWith(".json"))
+                        .collect(java.util.stream.Collectors.toList());
 
         assertFalse(files.isEmpty(), "Should create at least one session file");
 
@@ -193,10 +192,11 @@ public class ActionHistoryPersistenceIntegrationTest extends SimpleTestBase {
         ActionResult result = new ActionResult();
         result.setSuccess(true);
         result.setDuration(Duration.ofMillis(150));
-        result.add(new Match.Builder()
-                .setRegion(new Region(50, 60, 70, 80))
-                .setSimScore(0.88)
-                .build());
+        result.add(
+                new Match.Builder()
+                        .setRegion(new Region(50, 60, 70, 80))
+                        .setSimScore(0.88)
+                        .build());
         Text textResult = new Text();
         textResult.add("captured text");
         result.setText(textResult);
@@ -207,8 +207,8 @@ public class ActionHistoryPersistenceIntegrationTest extends SimpleTestBase {
 
         // Assert
         assertNotNull(pattern.getMatchHistory(), "Pattern should have history");
-        assertEquals(1, pattern.getMatchHistory().getSnapshots().size(),
-                "Should have one snapshot");
+        assertEquals(
+                1, pattern.getMatchHistory().getSnapshots().size(), "Should have one snapshot");
 
         ActionRecord captured = pattern.getMatchHistory().getSnapshots().get(0);
         assertTrue(captured.isActionSuccess(), "Should be successful");
@@ -238,9 +238,13 @@ public class ActionHistoryPersistenceIntegrationTest extends SimpleTestBase {
         assertTrue(allHistories.containsKey("history1"), "Should have history1");
         assertTrue(allHistories.containsKey("history2"), "Should have history2");
 
-        assertEquals(5, allHistories.get("history1").getSnapshots().size(),
+        assertEquals(
+                5,
+                allHistories.get("history1").getSnapshots().size(),
                 "history1 should have 5 snapshots");
-        assertEquals(3, allHistories.get("history2").getSnapshots().size(),
+        assertEquals(
+                3,
+                allHistories.get("history2").getSnapshots().size(),
                 "history2 should have 3 snapshots");
     }
 
@@ -262,13 +266,11 @@ public class ActionHistoryPersistenceIntegrationTest extends SimpleTestBase {
 
         // Assert
         assertNotNull(merged, "Merged history should not be null");
-        assertEquals(9, merged.getSnapshots().size(),
-                "Should have total of 9 snapshots (3+2+4)");
+        assertEquals(9, merged.getSnapshots().size(), "Should have total of 9 snapshots (3+2+4)");
 
         // Verify all records are present
-        long successCount = merged.getSnapshots().stream()
-                .filter(ActionRecord::isActionSuccess)
-                .count();
+        long successCount =
+                merged.getSnapshots().stream().filter(ActionRecord::isActionSuccess).count();
         assertEquals(7, successCount, "Should have 7 successful records (3+0+4)");
     }
 
@@ -282,7 +284,8 @@ public class ActionHistoryPersistenceIntegrationTest extends SimpleTestBase {
         Files.writeString(recentFile, "{}");
 
         // Set old file's modification time to 10 days ago
-        Files.setLastModifiedTime(oldFile,
+        Files.setLastModifiedTime(
+                oldFile,
                 java.nio.file.attribute.FileTime.from(
                         java.time.Instant.now().minus(Duration.ofDays(10))));
 
@@ -299,16 +302,15 @@ public class ActionHistoryPersistenceIntegrationTest extends SimpleTestBase {
     public void testAutoSave_TriggersAfterThreshold() throws IOException {
         // Arrange
         Pattern pattern = new Pattern.Builder().build();
-        
+
         // Create exactly 100 executions to trigger auto-save
         for (int i = 0; i < 100; i++) {
             ActionResult result = new ActionResult();
             result.setSuccess(i % 2 == 0);
             result.setDuration(Duration.ofMillis(50 + i));
-            
-            PatternFindOptions config = new PatternFindOptions.Builder()
-                    .setSimilarity(0.8 + (i * 0.001))
-                    .build();
+
+            PatternFindOptions config =
+                    new PatternFindOptions.Builder().setSimilarity(0.8 + (i * 0.001)).build();
 
             // Act
             persistence.captureCurrentExecution(result, pattern, config);
@@ -317,16 +319,18 @@ public class ActionHistoryPersistenceIntegrationTest extends SimpleTestBase {
         // Assert - Check auto-save occurred
         Path historyDir = Path.of("src/test/resources/histories");
         if (Files.exists(historyDir)) {
-            List<Path> autoSaveFiles = Files.list(historyDir)
-                    .filter(p -> p.getFileName().toString().startsWith("auto-save"))
-                    .collect(java.util.stream.Collectors.toList());
+            List<Path> autoSaveFiles =
+                    Files.list(historyDir)
+                            .filter(p -> p.getFileName().toString().startsWith("auto-save"))
+                            .collect(java.util.stream.Collectors.toList());
 
-            assertFalse(autoSaveFiles.isEmpty(),
-                    "Auto-save should have created at least one file");
+            assertFalse(autoSaveFiles.isEmpty(), "Auto-save should have created at least one file");
         }
 
         // Verify pattern has all records
-        assertEquals(100, pattern.getMatchHistory().getSnapshots().size(),
+        assertEquals(
+                100,
+                pattern.getMatchHistory().getSnapshots().size(),
                 "Pattern should have all 100 records");
     }
 
@@ -347,22 +351,26 @@ public class ActionHistoryPersistenceIntegrationTest extends SimpleTestBase {
         // Assert
         assertNotNull(loaded, "Should load sparse history");
         assertEquals(1, loaded.getSnapshots().size(), "Should have one record");
-        
+
         ActionRecord loadedRecord = loaded.getSnapshots().get(0);
         assertTrue(loadedRecord.isActionSuccess(), "Success should be preserved");
         assertEquals(50.0, loadedRecord.getDuration(), "Duration should be preserved");
         assertNull(loadedRecord.getActionConfig(), "Null config should remain null");
         // Note: Jackson may convert null to empty string during deserialization
-        assertTrue(loadedRecord.getText() == null || loadedRecord.getText().isEmpty(), 
+        assertTrue(
+                loadedRecord.getText() == null || loadedRecord.getText().isEmpty(),
                 "Text should be null or empty");
     }
 
     @Test
     public void testLoadNonExistentFile_ThrowsIOException() {
         // Act & Assert
-        assertThrows(IOException.class, () -> {
-            persistence.loadFromFile("non-existent.json", tempDir.toString());
-        }, "Should throw IOException for non-existent file");
+        assertThrows(
+                IOException.class,
+                () -> {
+                    persistence.loadFromFile("non-existent.json", tempDir.toString());
+                },
+                "Should throw IOException for non-existent file");
     }
 
     @Test
@@ -372,10 +380,11 @@ public class ActionHistoryPersistenceIntegrationTest extends SimpleTestBase {
         Pattern emptyPattern = new Pattern.Builder().build();
 
         // Act & Assert - Should not throw
-        assertDoesNotThrow(() -> {
-            persistence.saveSessionHistory(emptyStateImage, "empty-session");
-            persistence.saveSessionHistory(emptyPattern, "empty-pattern");
-        });
+        assertDoesNotThrow(
+                () -> {
+                    persistence.saveSessionHistory(emptyStateImage, "empty-session");
+                    persistence.saveSessionHistory(emptyPattern, "empty-pattern");
+                });
     }
 
     @Test
@@ -388,11 +397,11 @@ public class ActionHistoryPersistenceIntegrationTest extends SimpleTestBase {
 
         // Assert
         String json = Files.readString(tempDir.resolve("formatted.json"));
-        
+
         // Check for indentation (readable format)
         assertTrue(json.contains("\n"), "JSON should be formatted with newlines");
         assertTrue(json.contains("  "), "JSON should be indented");
-        
+
         // Check key fields are present
         assertTrue(json.contains("\"timesSearched\""), "Should contain timesSearched field");
         assertTrue(json.contains("\"snapshots\""), "Should contain snapshots field");
@@ -407,12 +416,13 @@ public class ActionHistoryPersistenceIntegrationTest extends SimpleTestBase {
 
         List<ActionRecord> records = new ArrayList<>();
         for (int i = 0; i < recordCount; i++) {
-            ActionRecord record = new ActionRecord.Builder()
-                    .setActionConfig(new PatternFindOptions.Builder().build())
-                    .setActionSuccess(success)
-                    .setDuration(100 + i * 10)
-                    .setMatchList(new ArrayList<>())
-                    .build();
+            ActionRecord record =
+                    new ActionRecord.Builder()
+                            .setActionConfig(new PatternFindOptions.Builder().build())
+                            .setActionSuccess(success)
+                            .setDuration(100 + i * 10)
+                            .setMatchList(new ArrayList<>())
+                            .build();
             records.add(record);
         }
         history.setSnapshots(records);

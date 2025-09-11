@@ -1,15 +1,12 @@
 package io.github.jspinak.brobot.runner.ui.dialogs;
 
+import java.util.function.Function;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 
-import java.util.function.Function;
-
-/**
- * Utility class for showing standardized error dialogs
- */
+/** Utility class for showing standardized error dialogs */
 public class ErrorDialog {
 
     // This field allows tests to replace the alert factory

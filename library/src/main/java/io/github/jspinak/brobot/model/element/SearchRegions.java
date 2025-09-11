@@ -1,47 +1,48 @@
 package io.github.jspinak.brobot.model.element;
 
+import java.util.*;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import io.github.jspinak.brobot.util.region.RegionUtils;
 import io.github.jspinak.brobot.util.region.SearchRegionsUtils;
-import lombok.Data;
 
-import java.util.*;
+import lombok.Data;
 
 /**
  * Manages multiple search areas for pattern matching in the Brobot framework.
- * 
- * <p>SearchRegions provides sophisticated control over where patterns are searched for 
- * on the screen, supporting both dynamic and fixed location patterns. This flexibility 
- * is crucial for handling various GUI scenarios where elements may appear in multiple 
- * locations or have complex spatial constraints.</p>
- * 
+ *
+ * <p>SearchRegions provides sophisticated control over where patterns are searched for on the
+ * screen, supporting both dynamic and fixed location patterns. This flexibility is crucial for
+ * handling various GUI scenarios where elements may appear in multiple locations or have complex
+ * spatial constraints.
+ *
  * <p>Key concepts:
+ *
  * <ul>
- *   <li><b>Multiple Regions</b>: Supports searching in multiple rectangular areas, 
- *       useful for complex layouts or when excluding certain screen areas</li>
- *   <li><b>Fixed Region</b>: Special handling for patterns that always appear in the 
- *       same location, optimizing search performance</li>
- *   <li><b>Dynamic Selection</b>: Can randomly select from available regions for 
- *       load distribution or testing variability</li>
+ *   <li><b>Multiple Regions</b>: Supports searching in multiple rectangular areas, useful for
+ *       complex layouts or when excluding certain screen areas
+ *   <li><b>Fixed Region</b>: Special handling for patterns that always appear in the same location,
+ *       optimizing search performance
+ *   <li><b>Dynamic Selection</b>: Can randomly select from available regions for load distribution
+ *       or testing variability
  * </ul>
- * </p>
- * 
+ *
  * <p>Use cases in model-based automation:
+ *
  * <ul>
- *   <li>Defining search areas for patterns that may appear in multiple locations 
- *       (e.g., pop-ups, floating windows)</li>
- *   <li>Excluding areas known to contain similar but incorrect patterns</li>
- *   <li>Optimizing performance by constraining searches to relevant screen areas</li>
- *   <li>Handling fixed UI elements that always appear in the same position</li>
+ *   <li>Defining search areas for patterns that may appear in multiple locations (e.g., pop-ups,
+ *       floating windows)
+ *   <li>Excluding areas known to contain similar but incorrect patterns
+ *   <li>Optimizing performance by constraining searches to relevant screen areas
+ *   <li>Handling fixed UI elements that always appear in the same position
  * </ul>
- * </p>
- * 
- * <p>The fixed region feature is particularly powerful for improving performance. When 
- * a pattern is found for the first time, its location can be recorded as fixed, and 
- * subsequent searches will only look in that specific area, dramatically reducing 
- * search time.</p>
- * 
+ *
+ * <p>The fixed region feature is particularly powerful for improving performance. When a pattern is
+ * found for the first time, its location can be recorded as fixed, and subsequent searches will
+ * only look in that specific area, dramatically reducing search time.
+ *
  * @since 1.0
  * @see Region
  * @see Pattern
@@ -57,15 +58,17 @@ public class SearchRegions {
     }
 
     private List<Region> regions = new ArrayList<>();
+
     /**
-     * The fixed region is usually defined when an image with a fixed location is found for the first time.
-     * This region is then used in future FIND operations with the associated image.
+     * The fixed region is usually defined when an image with a fixed location is found for the
+     * first time. This region is then used in future FIND operations with the associated image.
      * Initialized to null to distinguish between "not set" and "explicitly set to a region".
      */
     private Region fixedRegion = null;
 
     /**
      * If the fixed region has been set.
+     *
      * @return true if set.
      */
     @JsonIgnore
@@ -78,9 +81,9 @@ public class SearchRegions {
     }
 
     /**
-     * Return the fixed region if defined.
-     * Otherwise, return the first defined region.
-     * If no regions are defined, return an undefined region.
+     * Return the fixed region if defined. Otherwise, return the first defined region. If no regions
+     * are defined, return an undefined region.
+     *
      * @return one region.
      */
     @JsonIgnore
@@ -94,9 +97,9 @@ public class SearchRegions {
     }
 
     /**
-     * When the image has a fixed location, if
-     * - a region is defined, it is returned
-     * - no region is defined, a random search region is returned
+     * When the image has a fixed location, if - a region is defined, it is returned - no region is
+     * defined, a random search region is returned
+     *
      * @param fixed if the image has a fixed location
      * @return the search region
      */
@@ -108,9 +111,9 @@ public class SearchRegions {
     }
 
     /**
-     * When the image has a fixed location, if
-     * - a region is defined, it is returned
-     * - no region is defined, all search regions are returned
+     * When the image has a fixed location, if - a region is defined, it is returned - no region is
+     * defined, all search regions are returned
+     *
      * @param fixed if the image has a fixed location
      * @return the search regions
      */
@@ -129,8 +132,8 @@ public class SearchRegions {
     }
 
     /**
-     * Returns all configured regions without adding any defaults.
-     * This method returns exactly what has been configured, with no surprises.
+     * Returns all configured regions without adding any defaults. This method returns exactly what
+     * has been configured, with no surprises.
      *
      * @return a list of all configured regions (may be empty)
      */
@@ -138,11 +141,11 @@ public class SearchRegions {
     public List<Region> getAllRegions() {
         return new ArrayList<>(regions);
     }
-    
+
     /**
      * Returns regions for searching, adding a full-screen default if no regions are configured.
      * This is the method to use when actually performing searches.
-     * 
+     *
      * @return a list of search regions, with full-screen default if empty
      */
     @JsonIgnore
@@ -161,6 +164,7 @@ public class SearchRegions {
 
     /**
      * Access regions in a way that's safe for serialization/deserialization.
+     *
      * @return A mutable list containing all regions
      */
     @JsonIgnore
@@ -196,7 +200,8 @@ public class SearchRegions {
 
     /**
      * @param fixed does the pattern have a fixed position
-     * @return true if fixed and has been found, or if not fixed and one of the search regions is defined
+     * @return true if fixed and has been found, or if not fixed and one of the search regions is
+     *     defined
      */
     @JsonIgnore
     public boolean isDefined(boolean fixed) {
@@ -211,8 +216,8 @@ public class SearchRegions {
     }
 
     /**
-     * Create a deep copy by manually copying each field.
-     * Avoid calling SearchRegionsUtils to prevent circular reference.
+     * Create a deep copy by manually copying each field. Avoid calling SearchRegionsUtils to
+     * prevent circular reference.
      */
     @JsonIgnore
     public SearchRegions getDeepCopy() {
@@ -236,6 +241,7 @@ public class SearchRegions {
 
     /**
      * Copy constructor for deep copying SearchRegions.
+     *
      * @param other the SearchRegions instance to copy
      */
     public SearchRegions(SearchRegions other) {
@@ -248,16 +254,17 @@ public class SearchRegions {
 
     /**
      * Checks if a region is a duplicate of or contained within an existing region.
+     *
      * @param newRegion the region to check
      * @return true if the region is a duplicate or contained within an existing region
      */
     private boolean isDuplicateOrContained(Region newRegion) {
         for (Region existing : regions) {
             // Check for exact duplicate
-            if (existing.x() == newRegion.x() && 
-                existing.y() == newRegion.y() && 
-                existing.w() == newRegion.w() && 
-                existing.h() == newRegion.h()) {
+            if (existing.x() == newRegion.x()
+                    && existing.y() == newRegion.y()
+                    && existing.w() == newRegion.w()
+                    && existing.h() == newRegion.h()) {
                 return true;
             }
             // Check if new region is completely contained within existing region
@@ -267,51 +274,52 @@ public class SearchRegions {
         }
         return false;
     }
-    
+
     /**
      * Removes duplicate regions and regions that are completely contained within other regions.
      * This ensures that the search regions list contains only unique, non-nested regions.
      */
     private void removeDuplicatesAndContained() {
         List<Region> uniqueRegions = new ArrayList<>();
-        
+
         for (int i = 0; i < regions.size(); i++) {
             Region current = regions.get(i);
             boolean shouldAdd = true;
-            
+
             // Check against all other regions
             for (int j = 0; j < regions.size(); j++) {
                 if (i == j) continue;
                 Region other = regions.get(j);
-                
+
                 // If current is contained in another region, don't add it
                 if (other.contains(current)) {
                     shouldAdd = false;
                     break;
                 }
-                
+
                 // If current and other are duplicates, only add the first one
-                if (i > j && 
-                    current.x() == other.x() && 
-                    current.y() == other.y() && 
-                    current.w() == other.w() && 
-                    current.h() == other.h()) {
+                if (i > j
+                        && current.x() == other.x()
+                        && current.y() == other.y()
+                        && current.w() == other.w()
+                        && current.h() == other.h()) {
                     shouldAdd = false;
                     break;
                 }
             }
-            
+
             if (shouldAdd) {
                 uniqueRegions.add(current);
             }
         }
-        
+
         regions = uniqueRegions;
     }
-    
+
     /**
-     * Newly added regions may overlap with existing regions. To make sure duplicated matches are not returned
-     * due to overlapping regions, a newly added region should be trimmed if it overlaps with an existing region.
+     * Newly added regions may overlap with existing regions. To make sure duplicated matches are
+     * not returned due to overlapping regions, a newly added region should be trimmed if it
+     * overlaps with an existing region.
      */
     private List<Region> trimRegion(Region newRegion) {
         for (Region region : regions) {
@@ -323,9 +331,7 @@ public class SearchRegions {
         return result;
     }
 
-    /**
-     * Use utility class to create a string representation
-     */
+    /** Use utility class to create a string representation */
     @Override
     public String toString() {
         return SearchRegionsUtils.toString(this);
@@ -333,6 +339,7 @@ public class SearchRegions {
 
     /**
      * Merges this SearchRegions with another one
+     *
      * @param other The other SearchRegions to merge with
      * @return A new SearchRegions containing regions from both
      */

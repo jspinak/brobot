@@ -1,51 +1,52 @@
 package io.github.jspinak.brobot.model.state;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.Data;
 
 /**
  * Lightweight reference to StateObject instances in the Brobot framework.
- * 
- * <p>StateObjectMetadata provides a minimal, serializable representation of StateObject identity 
- * without the full object graph. This design pattern solves critical architectural challenges 
- * around circular dependencies and persistence while maintaining the ability to reference 
- * state objects throughout the framework.</p>
- * 
+ *
+ * <p>StateObjectMetadata provides a minimal, serializable representation of StateObject identity
+ * without the full object graph. This design pattern solves critical architectural challenges
+ * around circular dependencies and persistence while maintaining the ability to reference state
+ * objects throughout the framework.
+ *
  * <p>Key design benefits:
+ *
  * <ul>
- *   <li><b>Prevents Circular Dependencies</b>: Avoids infinite object graphs that would occur 
- *       if Match objects contained full StateObject references</li>
- *   <li><b>Persistence Friendly</b>: Can be embedded in entities without complex mappings, 
- *       as StateObjects are entities while this is embeddable</li>
- *   <li><b>Lightweight References</b>: Minimal memory footprint for object references</li>
- *   <li><b>Repository Pattern Support</b>: Contains sufficient data to retrieve full objects 
- *       from their respective repositories</li>
+ *   <li><b>Prevents Circular Dependencies</b>: Avoids infinite object graphs that would occur if
+ *       Match objects contained full StateObject references
+ *   <li><b>Persistence Friendly</b>: Can be embedded in entities without complex mappings, as
+ *       StateObjects are entities while this is embeddable
+ *   <li><b>Lightweight References</b>: Minimal memory footprint for object references
+ *   <li><b>Repository Pattern Support</b>: Contains sufficient data to retrieve full objects from
+ *       their respective repositories
  * </ul>
- * </p>
- * 
+ *
  * <p>Reference data captured:
+ *
  * <ul>
- *   <li><b>Object Identity</b>: Unique ID for repository lookup</li>
- *   <li><b>Object Type</b>: Specifies which repository to query (IMAGE, REGION, etc.)</li>
- *   <li><b>Object Name</b>: Human-readable identifier for debugging</li>
- *   <li><b>Owner State</b>: Both name and ID of the containing state</li>
+ *   <li><b>Object Identity</b>: Unique ID for repository lookup
+ *   <li><b>Object Type</b>: Specifies which repository to query (IMAGE, REGION, etc.)
+ *   <li><b>Object Name</b>: Human-readable identifier for debugging
+ *   <li><b>Owner State</b>: Both name and ID of the containing state
  * </ul>
- * </p>
- * 
+ *
  * <p>Common usage patterns:
+ *
  * <ul>
- *   <li>Stored in Match objects to track which StateObject was found</li>
- *   <li>Used in action results to reference involved state objects</li>
- *   <li>Enables lazy loading of full StateObjects when needed</li>
- *   <li>Facilitates cross-reference tracking without object coupling</li>
+ *   <li>Stored in Match objects to track which StateObject was found
+ *   <li>Used in action results to reference involved state objects
+ *   <li>Enables lazy loading of full StateObjects when needed
+ *   <li>Facilitates cross-reference tracking without object coupling
  * </ul>
- * </p>
- * 
- * <p>In the model-based approach, StateObjectMetadata enables the framework to maintain rich 
- * cross-references between matches, actions, and state objects without the complexity and 
- * performance overhead of full object graphs. This is essential for scalable automation 
- * that can handle complex state structures with many interconnected elements.</p>
- * 
+ *
+ * <p>In the model-based approach, StateObjectMetadata enables the framework to maintain rich
+ * cross-references between matches, actions, and state objects without the complexity and
+ * performance overhead of full object graphs. This is essential for scalable automation that can
+ * handle complex state structures with many interconnected elements.
+ *
  * @since 1.0
  * @see StateObject
  * @see StateImage
@@ -80,9 +81,15 @@ public class StateObjectMetadata {
 
     @Override
     public String toString() {
-        return "StateObject: " + stateObjectName + ", " + objectType +
-                ", ownerState=" + ownerStateName + ", id=" + stateObjectId +
-                ", owner state id=" + ownerStateId;
+        return "StateObject: "
+                + stateObjectName
+                + ", "
+                + objectType
+                + ", ownerState="
+                + ownerStateName
+                + ", id="
+                + stateObjectId
+                + ", owner state id="
+                + ownerStateId;
     }
-
 }

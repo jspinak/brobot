@@ -1,39 +1,43 @@
 package io.github.jspinak.brobot.analysis.compare;
 
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.match.Match;
-import lombok.Getter;
+import static org.bytedeco.opencv.global.opencv_core.sumElems;
+import static org.bytedeco.opencv.global.opencv_imgproc.*;
+
+import java.util.*;
+
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
 
-import java.util.*;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.match.Match;
 
-import static org.bytedeco.opencv.global.opencv_core.sumElems;
-import static org.bytedeco.opencv.global.opencv_imgproc.*;
+import lombok.Getter;
 
 /**
  * Extracts and processes contours from classified image regions to generate Match objects.
- * <p>
- * This class is central to the color-based finding mechanism in Brobot. It processes
- * classification results (typically from color analysis) to identify contiguous regions
- * that represent potential matches. The class handles the complete pipeline from raw
- * classification data to refined Match objects, including:
+ *
+ * <p>This class is central to the color-based finding mechanism in Brobot. It processes
+ * classification results (typically from color analysis) to identify contiguous regions that
+ * represent potential matches. The class handles the complete pipeline from raw classification data
+ * to refined Match objects, including:
+ *
  * <ul>
- * <li>Contour extraction using OpenCV's findContours</li>
- * <li>Size-based filtering (minimum and maximum area constraints)</li>
- * <li>Removal of contained/redundant contours</li>
- * <li>Score calculation based on pixel similarity</li>
- * <li>Large contour partitioning for maximum area compliance</li>
+ *   <li>Contour extraction using OpenCV's findContours
+ *   <li>Size-based filtering (minimum and maximum area constraints)
+ *   <li>Removal of contained/redundant contours
+ *   <li>Score calculation based on pixel similarity
+ *   <li>Large contour partitioning for maximum area compliance
  * </ul>
- * <p>
- * The scoring mechanism can operate in two modes:
+ *
+ * <p>The scoring mechanism can operate in two modes:
+ *
  * <ul>
- * <li><b>Pixel-based scoring</b>: Uses distance-to-threshold matrices to calculate
- * average similarity scores for each contour</li>
- * <li><b>Area-based scoring</b>: Uses contour area as the score (typically for
- * MOTION actions where pixel similarity is not relevant)</li>
+ *   <li><b>Pixel-based scoring</b>: Uses distance-to-threshold matrices to calculate average
+ *       similarity scores for each contour
+ *   <li><b>Area-based scoring</b>: Uses contour area as the score (typically for MOTION actions
+ *       where pixel similarity is not relevant)
  * </ul>
  *
  * @see Match
@@ -47,32 +51,42 @@ public class ContourExtractor {
 
     /**
      * BGR visualization of classification results.
-     * <p>
-     * For Find.COLOR actions, this Mat contains only pixels classified as target images.
-     * Each pixel's color represents which state image it was classified as belonging to.
+     *
+     * <p>For Find.COLOR actions, this Mat contains only pixels classified as target images. Each
+     * pixel's color represents which state image it was classified as belonging to.
      */
     private Mat bgrFromClassification2d;
+
     private List<Region> searchRegions = new ArrayList<>();
     private int minArea; // the smallest area allowed for a contour
-    private int maxArea; // the largest area allowed for a contour. The default of -1 allows for all sizes.
-    private MatVector opencvContours; // the original contours, saved as Mat masks of the specified regions. Rect coordinates are region specific.
-    private List<Rect> screenAdjustedContours = new ArrayList<>(); // the original contours with screen coordinates (instead of region coordinates).
-    private List<Rect> contours = new ArrayList<>(); // contours contained in other contours are removed, too small or too large contours are removed or modified, etc.
-    private Map<Integer, Match> matchMap = new HashMap<>(); // Maps contour index to Match object with calculated scores
+    private int maxArea; // the largest area allowed for a contour. The default of -1 allows for all
+    // sizes.
+    private MatVector
+            opencvContours; // the original contours, saved as Mat masks of the specified regions.
+    // Rect coordinates are region specific.
+    private List<Rect> screenAdjustedContours =
+            new ArrayList<>(); // the original contours with screen coordinates (instead of region
+    // coordinates).
+    private List<Rect> contours =
+            new ArrayList<>(); // contours contained in other contours are removed, too small or too
+    // large contours are removed or modified, etc.
+    private Map<Integer, Match> matchMap =
+            new HashMap<>(); // Maps contour index to Match object with calculated scores
 
     /**
      * Processes classification results to extract and refine contours.
-     * <p>
-     * This method orchestrates the complete contour extraction pipeline:
+     *
+     * <p>This method orchestrates the complete contour extraction pipeline:
+     *
      * <ol>
-     * <li>Extracts contours from each search region</li>
-     * <li>Converts region-relative coordinates to screen coordinates</li>
-     * <li>Removes contours that are completely contained within others</li>
-     * <li>Applies size filtering and partitioning</li>
-     * <li>Generates Match objects with calculated scores</li>
+     *   <li>Extracts contours from each search region
+     *   <li>Converts region-relative coordinates to screen coordinates
+     *   <li>Removes contours that are completely contained within others
+     *   <li>Applies size filtering and partitioning
+     *   <li>Generates Match objects with calculated scores
      * </ol>
-     * <p>
-     * Side effects: Modifies all contour-related fields including opencvContours,
+     *
+     * <p>Side effects: Modifies all contour-related fields including opencvContours,
      * screenAdjustedContours, contours, and matchMap.
      */
     public void setContours() {
@@ -84,10 +98,10 @@ public class ContourExtractor {
             int clippedY = Math.max(0, region.y());
             int clippedW = Math.min(region.w(), bgrFromClassification2d.cols() - clippedX);
             int clippedH = Math.min(region.h(), bgrFromClassification2d.rows() - clippedY);
-            
+
             // Skip regions that are completely outside the image
             if (clippedW <= 0 || clippedH <= 0) continue;
-            
+
             Region clippedRegion = new Region(clippedX, clippedY, clippedW, clippedH);
             MatVector regionalContours = getRegionalContourMats(clippedRegion);
             opencvContours.put(regionalContours);
@@ -97,7 +111,8 @@ public class ContourExtractor {
         screenAdjustedContours.forEach(rect -> contours.add(new Rect(rect)));
         contours = getContoursNotContained(contours);
         matchMap = getMatchMap(contours, minArea, maxArea);
-        //System.out.println("Contours: setContours. sizes of lists = " + opencvContours.size() + " " + screenAdjustedContours.size() + " " + contours.size());
+        // System.out.println("Contours: setContours. sizes of lists = " + opencvContours.size() + "
+        // " + screenAdjustedContours.size() + " " + contours.size());
     }
 
     private List<Rect> getContoursNotContained(List<Rect> contours) {
@@ -118,7 +133,8 @@ public class ContourExtractor {
     private MatVector getRegionalContourMats(Region region) {
         Mat regionalClassMat = new Mat(bgrFromClassification2d, region.getJavaCVRect());
         Mat gray = new Mat(regionalClassMat.size(), regionalClassMat.type());
-        if (bgrFromClassification2d.channels() == 3) cvtColor(regionalClassMat, gray, COLOR_BGR2GRAY);
+        if (bgrFromClassification2d.channels() == 3)
+            cvtColor(regionalClassMat, gray, COLOR_BGR2GRAY);
         else gray = regionalClassMat;
         MatVector regionalContours = new MatVector();
         findContours(gray, regionalContours, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
@@ -129,7 +145,12 @@ public class ContourExtractor {
         List<Rect> rectsWithScreenCoordinates = new ArrayList<>();
         for (int i = 0; i < regionalContours.size(); i++) {
             Rect baseRect = boundingRect(regionalContours.get(i));
-            Rect rect = new Rect(baseRect.x() + region.x(), baseRect.y() + region.y(), baseRect.width(), baseRect.height());
+            Rect rect =
+                    new Rect(
+                            baseRect.x() + region.x(),
+                            baseRect.y() + region.y(),
+                            baseRect.width(),
+                            baseRect.height());
             rectsWithScreenCoordinates.add(rect);
         }
         return rectsWithScreenCoordinates;
@@ -142,9 +163,9 @@ public class ContourExtractor {
 
     /**
      * Checks if a contour's area is within the maximum allowed size.
-     * <p>
-     * Note: Large contours that exceed maxArea are not simply discarded - they are
-     * partitioned into smaller contours by {@link #partitionLargeContour}.
+     *
+     * <p>Note: Large contours that exceed maxArea are not simply discarded - they are partitioned
+     * into smaller contours by {@link #partitionLargeContour}.
      *
      * @param contour The contour to check
      * @param maxArea Maximum allowed area (-1 means no limit)
@@ -162,21 +183,21 @@ public class ContourExtractor {
             contours.add(rect);
             return contours;
         }
-        
+
         // Calculate the maximum side length based on the max area (assuming square partitions)
         int maxSideLength = (int) Math.sqrt(maxArea);
-        
+
         // Partition the rectangle into smaller rectangles
         int startX = rect.x();
         int startY = rect.y();
         int endX = rect.x() + rect.width();
         int endY = rect.y() + rect.height();
-        
+
         for (int y = startY; y < endY; y += maxSideLength) {
             for (int x = startX; x < endX; x += maxSideLength) {
                 int width = Math.min(maxSideLength, endX - x);
                 int height = Math.min(maxSideLength, endY - y);
-                
+
                 // Only add if the partition has meaningful area
                 if (width > 0 && height > 0) {
                     Rect newRect = new Rect(x, y, width, height);
@@ -189,18 +210,22 @@ public class ContourExtractor {
 
     /**
      * Returns all matches sorted by score in descending order.
-     * <p>
-     * The scoring mechanism depends on the action type:
+     *
+     * <p>The scoring mechanism depends on the action type:
+     *
      * <ul>
-     * <li>For color-based matching: Score represents average pixel similarity</li>
-     * <li>For motion detection: Score represents contour area</li>
+     *   <li>For color-based matching: Score represents average pixel similarity
+     *   <li>For motion detection: Score represents contour area
      * </ul>
+     *
      * The highest scoring (best) matches appear first in the returned list.
      *
      * @return List of Match objects sorted by score (highest first)
      */
     public List<Match> getMatchList() {
-        return matchMap.values().stream().sorted(Comparator.comparing(Match::getScore).reversed()).toList();
+        return matchMap.values().stream()
+                .sorted(Comparator.comparing(Match::getScore).reversed())
+                .toList();
     }
 
     public Map<Integer, Match> getMatchMap(List<Rect> contours, int minArea, int maxArea) {
@@ -213,9 +238,10 @@ public class ContourExtractor {
                 for (Rect partitionedContour : partitionedContours) {
                     double score = getContourScore(partitionedContour);
                     if (score > 0) { // score is 0 if the contour is not a match
-                        Match match = new Match.Builder()
-                                .setRegion(new Region(partitionedContour))
-                                .build();
+                        Match match =
+                                new Match.Builder()
+                                        .setRegion(new Region(partitionedContour))
+                                        .build();
                         matchMap.put(m, match);
                         m++;
                     }
@@ -227,34 +253,36 @@ public class ContourExtractor {
 
     /**
      * Calculates a similarity score for a contour based on pixel analysis.
-     * <p>
-     * For color-based matching, the score is calculated as the average distance
-     * to threshold values for all pixels within the contour. The calculation:
+     *
+     * <p>For color-based matching, the score is calculated as the average distance to threshold
+     * values for all pixels within the contour. The calculation:
+     *
      * <ul>
-     * <li>Sums the distance values for each color channel (B, G, R/H, S, V)</li>
-     * <li>Applies double weight to the hue channel for HSV comparisons</li>
-     * <li>Returns 0 if any channel has no similarity (complete mismatch)</li>
+     *   <li>Sums the distance values for each color channel (B, G, R/H, S, V)
+     *   <li>Applies double weight to the hue channel for HSV comparisons
+     *   <li>Returns 0 if any channel has no similarity (complete mismatch)
      * </ul>
-     * <p>
-     * For motion detection (when scoreThresholdDist is null), returns the
-     * contour area as the score.
-     * <p>
-     * Note: Setting minSimilarity to 0 in ActionOptions provides the most thorough
-     * analysis but increases processing time as every pixel is evaluated.
+     *
+     * <p>For motion detection (when scoreThresholdDist is null), returns the contour area as the
+     * score.
+     *
+     * <p>Note: Setting minSimilarity to 0 in ActionOptions provides the most thorough analysis but
+     * increases processing time as every pixel is evaluated.
      *
      * @param rect The bounding rectangle of the contour to score
      * @return Similarity score (higher is better), or area for motion detection
      */
     private double getContourScore(Rect rect) {
-        if (scoreThresholdDist == null) return rect.area(); // with the Motion action, there is no scoreThresholdDist
+        if (scoreThresholdDist == null)
+            return rect.area(); // with the Motion action, there is no scoreThresholdDist
         Mat boundingMat = new Mat(scoreThresholdDist, rect);
         double totalScore = 0;
-        for (int i=0; i<3; i++) {
+        for (int i = 0; i < 3; i++) {
             Scalar score = sumElems(boundingMat);
             double sum = score.get(i);
             long totalCellsInContour = boundingMat.total();
             double average = sum / totalCellsInContour;
-            if (i==0) average *= 2; // hue weight relative to saturation and value
+            if (i == 0) average *= 2; // hue weight relative to saturation and value
             if (average == 0) return 0; // if any channel is 0, the contour is not a match
             totalScore += average;
         }
@@ -270,19 +298,15 @@ public class ContourExtractor {
     public Match getContourAsMatch(Mat contour) {
         Rect rect = boundingRect(contour);
         double score = getContourScore(rect);
-        return new Match.Builder()
-                .setRegion(rect)
-                .setSimScore(score)
-                .build();
+        return new Match.Builder().setRegion(rect).setSimScore(score).build();
     }
 
     /**
      * Builder class for constructing ContourExtractor instances with required parameters.
-     * <p>    
-     * The builder ensures that all necessary components are provided before
-     * contour extraction begins. At minimum, a BGR classification matrix and
-     * search regions must be specified.
-     */ 
+     *
+     * <p>The builder ensures that all necessary components are provided before contour extraction
+     * begins. At minimum, a BGR classification matrix and search regions must be specified.
+     */
     public static class Builder {
         private Mat scoreThresholdDist;
         private Mat scores;

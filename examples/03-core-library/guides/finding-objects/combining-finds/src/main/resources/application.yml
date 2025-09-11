@@ -4,13 +4,13 @@ brobot:
     image-path: images/     # Path to image resources
   screenshot:
     save-history: true      # Important to visualize nested/confirmed finds
-    save-snapshots: false   
-    history-path: history/  
+    save-snapshots: false
+    history-path: history/
   illustration:
     draw-find: true
     draw-repeated-actions: true  # Shows chain progression
   mouse:
-    move-delay: 0.5         
+    move-delay: 0.5
 
 logging:
   level:

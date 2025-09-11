@@ -1,24 +1,25 @@
 package io.github.jspinak.brobot.runner.persistence;
 
-import io.github.jspinak.brobot.runner.persistence.entities.IllustrationEntity;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import io.github.jspinak.brobot.runner.persistence.entities.IllustrationEntity;
 
 /**
  * JPA repository for illustration entities.
- * <p>
- * Provides database access for illustration metadata with
- * various query methods for gallery functionality.
+ *
+ * <p>Provides database access for illustration metadata with various query methods for gallery
+ * functionality.
  *
  * @see IllustrationEntity
  */
 @Repository
 public interface IllustrationRepository extends JpaRepository<IllustrationEntity, Long> {
-    
+
     /**
      * Finds all illustrations for a session ordered by timestamp.
      *
@@ -26,7 +27,7 @@ public interface IllustrationRepository extends JpaRepository<IllustrationEntity
      * @return list of illustrations ordered by newest first
      */
     List<IllustrationEntity> findBySessionIdOrderByTimestampDesc(String sessionId);
-    
+
     /**
      * Finds illustrations containing a specific tag.
      *
@@ -35,7 +36,7 @@ public interface IllustrationRepository extends JpaRepository<IllustrationEntity
      */
     @Query("SELECT i FROM IllustrationEntity i JOIN i.tags t WHERE t = :tag")
     List<IllustrationEntity> findByTagsContaining(String tag);
-    
+
     /**
      * Finds the most recent illustrations.
      *
@@ -44,7 +45,7 @@ public interface IllustrationRepository extends JpaRepository<IllustrationEntity
      */
     @Query("SELECT i FROM IllustrationEntity i ORDER BY i.timestamp DESC LIMIT :limit")
     List<IllustrationEntity> findTopNByOrderByTimestampDesc(int limit);
-    
+
     /**
      * Finds the oldest illustrations for cleanup.
      *
@@ -53,7 +54,7 @@ public interface IllustrationRepository extends JpaRepository<IllustrationEntity
      */
     @Query("SELECT i FROM IllustrationEntity i ORDER BY i.timestamp ASC LIMIT :limit")
     List<IllustrationEntity> findTopNByOrderByTimestampAsc(int limit);
-    
+
     /**
      * Counts illustrations by success status.
      *
@@ -61,7 +62,7 @@ public interface IllustrationRepository extends JpaRepository<IllustrationEntity
      * @return count of illustrations
      */
     long countBySuccess(boolean success);
-    
+
     /**
      * Finds illustrations within a date range.
      *
@@ -70,7 +71,7 @@ public interface IllustrationRepository extends JpaRepository<IllustrationEntity
      * @return list of illustrations in range
      */
     List<IllustrationEntity> findByTimestampBetween(LocalDateTime start, LocalDateTime end);
-    
+
     /**
      * Finds illustrations by action type and success status.
      *
@@ -79,7 +80,7 @@ public interface IllustrationRepository extends JpaRepository<IllustrationEntity
      * @return list of matching illustrations
      */
     List<IllustrationEntity> findByActionTypeAndSuccess(String actionType, boolean success);
-    
+
     /**
      * Deletes illustrations older than a specific date.
      *

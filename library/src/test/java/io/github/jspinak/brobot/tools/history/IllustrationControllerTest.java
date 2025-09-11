@@ -1,52 +1,50 @@
 package io.github.jspinak.brobot.tools.history;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 
 /**
- * Tests for IllustrationController class.
- * Verifies illustration filtering logic and permission management.
+ * Tests for IllustrationController class. Verifies illustration filtering logic and permission
+ * management.
  */
-@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Test incompatible with CI environment")
+@DisabledIfEnvironmentVariable(
+        named = "CI",
+        matches = "true",
+        disabledReason = "Test incompatible with CI environment")
 public class IllustrationControllerTest extends BrobotTestBase {
 
-    @Mock
-    private ImageFileUtilities mockImageUtils;
+    @Mock private ImageFileUtilities mockImageUtils;
 
-    @Mock
-    private ActionVisualizer mockActionVisualizer;
+    @Mock private ActionVisualizer mockActionVisualizer;
 
-    @Mock
-    private VisualizationOrchestrator mockVisualizationOrchestrator;
+    @Mock private VisualizationOrchestrator mockVisualizationOrchestrator;
 
-    @Mock
-    private LoggingVerbosityConfig mockLoggingConfig;
+    @Mock private LoggingVerbosityConfig mockLoggingConfig;
 
     private IllustrationController illustrationController;
 
@@ -77,8 +75,9 @@ public class IllustrationControllerTest extends BrobotTestBase {
         FrameworkSettings.drawDrag = true;
         FrameworkSettings.drawRepeatedActions = false;
 
-        illustrationController = new IllustrationController(
-                mockImageUtils, mockActionVisualizer, mockVisualizationOrchestrator);
+        illustrationController =
+                new IllustrationController(
+                        mockImageUtils, mockActionVisualizer, mockVisualizationOrchestrator);
     }
 
     @org.junit.jupiter.api.AfterEach
@@ -123,9 +122,10 @@ public class IllustrationControllerTest extends BrobotTestBase {
         @DisplayName("Should allow illustration with explicit YES even without saveHistory")
         public void testAllowedWithExplicitYes() {
             FrameworkSettings.saveHistory = false;
-            PatternFindOptions config = new PatternFindOptions.Builder()
-                    .setIllustrate(ActionConfig.Illustrate.YES)
-                    .build();
+            PatternFindOptions config =
+                    new PatternFindOptions.Builder()
+                            .setIllustrate(ActionConfig.Illustrate.YES)
+                            .build();
             ObjectCollection collection = new ObjectCollection.Builder().build();
 
             boolean allowed = illustrationController.okToIllustrate(config, collection);
@@ -137,9 +137,10 @@ public class IllustrationControllerTest extends BrobotTestBase {
         @DisplayName("Should deny illustration with explicit NO")
         public void testDeniedWithExplicitNo() {
             FrameworkSettings.saveHistory = true;
-            PatternFindOptions config = new PatternFindOptions.Builder()
-                    .setIllustrate(ActionConfig.Illustrate.NO)
-                    .build();
+            PatternFindOptions config =
+                    new PatternFindOptions.Builder()
+                            .setIllustrate(ActionConfig.Illustrate.NO)
+                            .build();
             ObjectCollection collection = new ObjectCollection.Builder().build();
 
             boolean allowed = illustrationController.okToIllustrate(config, collection);
@@ -260,8 +261,9 @@ public class IllustrationControllerTest extends BrobotTestBase {
             ActionResult result = new ActionResult();
             List<Region> regions = Arrays.asList(new Region(0, 0, 100, 100));
 
-            boolean created = illustrationController.illustrateWhenAllowed(
-                    result, regions, config, collection);
+            boolean created =
+                    illustrationController.illustrateWhenAllowed(
+                            result, regions, config, collection);
 
             assertTrue(created);
             verify(mockVisualizationOrchestrator).draw(result, regions, config);
@@ -276,8 +278,9 @@ public class IllustrationControllerTest extends BrobotTestBase {
             ActionResult result = new ActionResult();
             List<Region> regions = Collections.emptyList();
 
-            boolean created = illustrationController.illustrateWhenAllowed(
-                    result, regions, config, collection);
+            boolean created =
+                    illustrationController.illustrateWhenAllowed(
+                            result, regions, config, collection);
 
             assertFalse(created);
             verify(mockVisualizationOrchestrator, never()).draw(any(), any(), any());
@@ -293,11 +296,13 @@ public class IllustrationControllerTest extends BrobotTestBase {
 
             // Mock exception during draw
             doThrow(new RuntimeException("Draw error"))
-                    .when(mockVisualizationOrchestrator).draw(any(), any(), any());
+                    .when(mockVisualizationOrchestrator)
+                    .draw(any(), any(), any());
 
             // Should not throw, but still return true (attempted to illustrate)
-            boolean created = illustrationController.illustrateWhenAllowed(
-                    result, regions, config, collection);
+            boolean created =
+                    illustrationController.illustrateWhenAllowed(
+                            result, regions, config, collection);
 
             assertTrue(created);
             verify(mockVisualizationOrchestrator).draw(result, regions, config);
@@ -311,9 +316,10 @@ public class IllustrationControllerTest extends BrobotTestBase {
         @Test
         @DisplayName("Should update last action state after illustration")
         public void testUpdateLastActionState() {
-            PatternFindOptions config = new PatternFindOptions.Builder()
-                    .setStrategy(PatternFindOptions.Strategy.ALL)
-                    .build();
+            PatternFindOptions config =
+                    new PatternFindOptions.Builder()
+                            .setStrategy(PatternFindOptions.Strategy.ALL)
+                            .build();
             ObjectCollection collection = new ObjectCollection.Builder().build();
             ActionResult result = new ActionResult();
             List<Region> regions = Collections.emptyList();
@@ -329,12 +335,14 @@ public class IllustrationControllerTest extends BrobotTestBase {
         @Test
         @DisplayName("Should track different find strategies separately")
         public void testTrackFindStrategies() {
-            PatternFindOptions firstConfig = new PatternFindOptions.Builder()
-                    .setStrategy(PatternFindOptions.Strategy.FIRST)
-                    .build();
-            PatternFindOptions allConfig = new PatternFindOptions.Builder()
-                    .setStrategy(PatternFindOptions.Strategy.ALL)
-                    .build();
+            PatternFindOptions firstConfig =
+                    new PatternFindOptions.Builder()
+                            .setStrategy(PatternFindOptions.Strategy.FIRST)
+                            .build();
+            PatternFindOptions allConfig =
+                    new PatternFindOptions.Builder()
+                            .setStrategy(PatternFindOptions.Strategy.ALL)
+                            .build();
             ObjectCollection collection = new ObjectCollection.Builder().build();
             ActionResult result = new ActionResult();
             List<Region> regions = Collections.emptyList();
@@ -356,12 +364,14 @@ public class IllustrationControllerTest extends BrobotTestBase {
         @DisplayName("Should check verbose logging configuration")
         public void testVerboseLoggingCheck() {
             // Inject logging config
-            illustrationController = new IllustrationController(
-                    mockImageUtils, mockActionVisualizer, mockVisualizationOrchestrator);
+            illustrationController =
+                    new IllustrationController(
+                            mockImageUtils, mockActionVisualizer, mockVisualizationOrchestrator);
 
             // Use reflection to set the logging config
             try {
-                java.lang.reflect.Field field = IllustrationController.class.getDeclaredField("loggingConfig");
+                java.lang.reflect.Field field =
+                        IllustrationController.class.getDeclaredField("loggingConfig");
                 field.setAccessible(true);
                 field.set(illustrationController, mockLoggingConfig);
             } catch (Exception e) {

@@ -10,17 +10,17 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 30  # Prevent hanging jobs
-    
+
     strategy:
       fail-fast: false  # Continue other jobs even if one fails
       matrix:
         module: [library, library-test, persistence, runner]
-    
+
     steps:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0  # Shallow clone for faster checkout
-    
+
     - name: Setup JDK 17
       uses: actions/setup-java@v4
       with:
@@ -30,41 +30,41 @@ jobs:
         cache-dependency-path: |
           **/*.gradle*
           **/gradle-wrapper.properties
-    
+
     # Clear corrupted cache if needed
     - name: Clear Gradle cache on failure
       if: failure()
       run: |
         rm -rf ~/.gradle/caches/
         rm -rf ~/.gradle/wrapper/
-    
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
-    
+
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v2
       with:
         gradle-home-cache-cleanup: true
         cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-    
+
     # Set headless mode for tests
     - name: Configure headless environment
       run: |
         echo "java.awt.headless=true" >> $GITHUB_ENV
         export DISPLAY=:99
         sudo Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-    
+
     - name: Build ${{ matrix.module }}
       run: ./gradlew ${{ matrix.module }}:build -x test --no-daemon --parallel --build-cache
       timeout-minutes: 10
-    
+
     - name: Run ${{ matrix.module }} tests
       run: |
         # Increase ulimits to prevent crashes
         ulimit -c unlimited
         ulimit -n 65536
         ulimit -u 32768
-        
+
         if [ "${{ matrix.module }}" = "runner" ]; then
           # Skip runner tests - they timeout even with disabled tests
           echo "⚠️ WARNING: Skipping runner module tests to unblock CI/CD"
@@ -96,23 +96,23 @@ jobs:
       env:
         # JVM flags to prevent crashes in CI environment
         GRADLE_OPTS: |
-          -Xmx2g 
-          -XX:MaxMetaspaceSize=512m 
-          -XX:+HeapDumpOnOutOfMemoryError 
-          -Dfile.encoding=UTF-8 
-          -XX:+UseG1GC 
-          -XX:+UseStringDeduplication 
-          -XX:-TieredCompilation 
-          -XX:TieredStopAtLevel=1 
-          -XX:+DisableExplicitGC 
-          -Djava.security.egd=file:/dev/./urandom 
+          -Xmx2g
+          -XX:MaxMetaspaceSize=512m
+          -XX:+HeapDumpOnOutOfMemoryError
+          -Dfile.encoding=UTF-8
+          -XX:+UseG1GC
+          -XX:+UseStringDeduplication
+          -XX:-TieredCompilation
+          -XX:TieredStopAtLevel=1
+          -XX:+DisableExplicitGC
+          -Djava.security.egd=file:/dev/./urandom
           -Djdk.attach.allowAttachSelf=true
         _JAVA_OPTIONS: |
-          -Djava.awt.headless=true 
-          -Dprism.order=sw 
-          -Dtestfx.headless=true 
+          -Djava.awt.headless=true
+          -Dprism.order=sw
+          -Dtestfx.headless=true
           -Dtestfx.robot=glass
-    
+
     - name: Upload test results
       uses: actions/upload-artifact@v4
       if: always()
@@ -122,7 +122,7 @@ jobs:
           ${{ matrix.module }}/build/reports/tests/
           ${{ matrix.module }}/build/test-results/
         retention-days: 7
-    
+
     - name: Upload heap dump on OOM
       uses: actions/upload-artifact@v4
       if: failure()
@@ -142,7 +142,7 @@ jobs:
       with:
         pattern: test-results-*
         merge-multiple: true
-    
+
     - name: Publish Test Report
       uses: mikepenz/action-junit-report@v4
       if: always()

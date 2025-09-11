@@ -1,51 +1,54 @@
 package io.github.jspinak.brobot.model.state;
 
+import java.time.LocalDateTime;
+import java.util.*;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.github.jspinak.brobot.model.element.Scene;
+
 import io.github.jspinak.brobot.model.action.ActionHistory;
 import io.github.jspinak.brobot.model.action.ActionRecord;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.element.Scene;
+
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-import java.util.*;
-
 /**
  * Represents a distinct configuration of the GUI in the Brobot model-based automation framework.
- * 
- * <p>A State is the fundamental building block of the model-based approach, representing a 
- * recognizable and meaningful configuration of the user interface. States form the nodes in 
- * the state structure (Ω), which models the GUI environment as a navigable graph.</p>
- * 
+ *
+ * <p>A State is the fundamental building block of the model-based approach, representing a
+ * recognizable and meaningful configuration of the user interface. States form the nodes in the
+ * state structure (Ω), which models the GUI environment as a navigable graph.
+ *
  * <p>Key concepts:
+ *
  * <ul>
- *   <li><b>Identification</b>: States are identified by their StateImages - visual patterns 
- *       that uniquely define this GUI configuration</li>
- *   <li><b>Navigation</b>: States are connected by transitions, allowing Brobot to navigate 
- *       between them like pages in a website</li>
- *   <li><b>Recovery</b>: If Brobot gets lost, it can identify the current State and find 
- *       a new path to the target State</li>
- *   <li><b>Hierarchy</b>: States can hide other States (like menus covering content) and 
- *       can be blocking (requiring interaction before accessing other States)</li>
+ *   <li><b>Identification</b>: States are identified by their StateImages - visual patterns that
+ *       uniquely define this GUI configuration
+ *   <li><b>Navigation</b>: States are connected by transitions, allowing Brobot to navigate between
+ *       them like pages in a website
+ *   <li><b>Recovery</b>: If Brobot gets lost, it can identify the current State and find a new path
+ *       to the target State
+ *   <li><b>Hierarchy</b>: States can hide other States (like menus covering content) and can be
+ *       blocking (requiring interaction before accessing other States)
  * </ul>
- * </p>
- * 
+ *
  * <p>State components:
+ *
  * <ul>
- *   <li><b>StateImages</b>: Visual patterns that identify this State (some may be shared across States)</li>
- *   <li><b>StateRegions</b>: Clickable or hoverable areas that can trigger State changes</li>
- *   <li><b>StateStrings</b>: Text input fields that affect State transitions</li>
- *   <li><b>StateLocations</b>: Specific points for precise interactions</li>
- *   <li><b>StateText</b>: Text that appears in this State (used for faster preliminary searches)</li>
+ *   <li><b>StateImages</b>: Visual patterns that identify this State (some may be shared across
+ *       States)
+ *   <li><b>StateRegions</b>: Clickable or hoverable areas that can trigger State changes
+ *   <li><b>StateStrings</b>: Text input fields that affect State transitions
+ *   <li><b>StateLocations</b>: Specific points for precise interactions
+ *   <li><b>StateText</b>: Text that appears in this State (used for faster preliminary searches)
  * </ul>
- * </p>
- * 
- * <p>This class embodies the core principle of model-based GUI automation: transforming 
- * implicit knowledge about GUI structure into an explicit, navigable model that enables 
- * robust and maintainable automation.</p>
- * 
+ *
+ * <p>This class embodies the core principle of model-based GUI automation: transforming implicit
+ * knowledge about GUI structure into an explicit, navigable model that enables robust and
+ * maintainable automation.
+ *
  * @since 1.0
  * @see StateImage
  * @see StateRegion
@@ -59,47 +62,57 @@ public class State {
 
     private Long id = null; // set when the state is saved
     private String name = "";
+
     /**
      * StateText is text that appears on the screen and is a clue to look for images in this state.
-     * Text search is a lot faster than image search, but cannot be used without an image search to identify a state.
+     * Text search is a lot faster than image search, but cannot be used without an image search to
+     * identify a state.
      */
     private Set<String> stateText = new HashSet<>();
+
     private Set<StateImage> stateImages = new HashSet<>();
+
     /**
-     * StateStrings can change the expected state.
-     * They have associated regions where typing the string has an effect.
+     * StateStrings can change the expected state. They have associated regions where typing the
+     * string has an effect.
      */
     private Set<StateString> stateStrings = new HashSet<>();
+
     /**
-     * StateRegions can change the expected state when clicked or hovered over.
-     * They can also perform text retrieval.
+     * StateRegions can change the expected state when clicked or hovered over. They can also
+     * perform text retrieval.
      */
     private Set<StateRegion> stateRegions = new HashSet<>();
+
     private Set<StateLocation> stateLocations = new HashSet<>();
+
     /**
-     * When true, this State needs to be acted on before accessing other States.
-     * In effect, it makes all other States inactive, even though they may be visible.
-     * When a blocking State is exited, the other active States become accessible again.
+     * When true, this State needs to be acted on before accessing other States. In effect, it makes
+     * all other States inactive, even though they may be visible. When a blocking State is exited,
+     * the other active States become accessible again.
      */
     private boolean blocking = false;
+
     /**
-     * Holds the States that this State can hide when it becomes active. If one of the
-     * 'canHide' States is active when this State becomes active, these now hidden
-     * States are added to the 'hidden' set.
+     * Holds the States that this State can hide when it becomes active. If one of the 'canHide'
+     * States is active when this State becomes active, these now hidden States are added to the
+     * 'hidden' set.
      */
     private Set<String> canHide = new HashSet<>();
+
     private Set<Long> canHideIds = new HashSet<>();
+
     /**
      * Hiding a State means that this State covers the hidden State, and when this State is exited
-     * the hidden State becomes visible again. For example, opening a menu
-     * might completely block another State, but when the menu is closed the other State is visible again.
-     * When this State becomes active,
-     * any active 'canHide' States are deactivated and placed into this State's hidden set.
-     * When the State is exited and the hidden States reappear, they are removed from the hidden set.
-     * StateTransitions uses the hidden set when there is a PREVIOUS Transition (PREVIOUS is
-     * a variable StateEnum).
+     * the hidden State becomes visible again. For example, opening a menu might completely block
+     * another State, but when the menu is closed the other State is visible again. When this State
+     * becomes active, any active 'canHide' States are deactivated and placed into this State's
+     * hidden set. When the State is exited and the hidden States reappear, they are removed from
+     * the hidden set. StateTransitions uses the hidden set when there is a PREVIOUS Transition
+     * (PREVIOUS is a variable StateEnum).
      */
     private Set<String> hiddenStateNames = new HashSet<>(); // used when initializing states in code
+
     private Set<Long> hiddenStateIds = new HashSet<>(); // used at runtime
     private int pathScore = 1; // larger path scores discourage taking a path with this state
     /*
@@ -107,26 +120,33 @@ public class State {
     to a format for the database and back to a Java entity.
      */
     private LocalDateTime lastAccessed;
+
     /**
-     * The base probability that a State exists is transfered to the active variable 'probabilityExists',
-     * which is used by Find functions. ProbabilityExists is set to 0 when a State exits, and is set
-     * to the base probability when it should be found. Having a baseProbability of less than 100 will
-     * introduce unexpected behavior into a program (States may not appear when expected to), which
-     * can be useful for testing a program with built-in stochasticity.
+     * The base probability that a State exists is transfered to the active variable
+     * 'probabilityExists', which is used by Find functions. ProbabilityExists is set to 0 when a
+     * State exits, and is set to the base probability when it should be found. Having a
+     * baseProbability of less than 100 will introduce unexpected behavior into a program (States
+     * may not appear when expected to), which can be useful for testing a program with built-in
+     * stochasticity.
      */
     private int baseProbabilityExists = 100;
+
     private int probabilityExists = 0; // probability that the state exists. used for mocks.
     private int timesVisited = 0;
+
     /**
      * Screenshots where the state is found. These can be used for realistic simulations or for
-     * illustrating the state to display it visually. Not all StateImages need to be present.
-     * The usable area is the region used to find images. A pattern's fixed region gives its location in the usable area.
+     * illustrating the state to display it visually. Not all StateImages need to be present. The
+     * usable area is the region used to find images. A pattern's fixed region gives its location in
+     * the usable area.
      */
     private List<Scene> scenes = new ArrayList<>();
+
     private Region usableArea = new Region();
+
     /**
-     * Some actions take place without an associated Pattern or StateImage. These actions are stored in their
-     * corresponding state.
+     * Some actions take place without an associated Pattern or StateImage. These actions are stored
+     * in their corresponding state.
      */
     private ActionHistory matchHistory = new ActionHistory();
 
@@ -177,16 +197,21 @@ public class State {
     /**
      * Get the boundaries of the state using StateRegion, StateImage, and StateLocation objects.
      * Snapshots and SearchRegion(s) are used for StateImages.
+     *
      * @return the boundaries of the state.
      */
     public Region getBoundaries() {
         List<Region> imageRegions = new ArrayList<>();
         for (StateImage stateImage : stateImages.toArray(new StateImage[0])) {
             // if the image has a fixed location and has been found, add this location
-            stateImage.getPatterns().forEach(pattern -> {
-                        Region fixedRegion = pattern.getSearchRegions().getFixedRegion();
-                        if (fixedRegion != null && fixedRegion.isDefined()) imageRegions.add(fixedRegion);
-                    });
+            stateImage
+                    .getPatterns()
+                    .forEach(
+                            pattern -> {
+                                Region fixedRegion = pattern.getSearchRegions().getFixedRegion();
+                                if (fixedRegion != null && fixedRegion.isDefined())
+                                    imageRegions.add(fixedRegion);
+                            });
             // otherwise, add the snapshot locations
             List<ActionRecord> snapshots = stateImage.getAllMatchSnapshots();
             for (ActionRecord snapshot : snapshots) {
@@ -202,7 +227,7 @@ public class State {
         }
         if (imageRegions.isEmpty()) return new Region(); // the region is not defined
         Region union = imageRegions.get(0);
-        for (int i=1; i<imageRegions.size(); i++) {
+        for (int i = 1; i < imageRegions.size(); i++) {
             union = union.getUnion(imageRegions.get(i));
         }
         return union;
@@ -339,5 +364,3 @@ public class State {
         }
     }
 }
-
-

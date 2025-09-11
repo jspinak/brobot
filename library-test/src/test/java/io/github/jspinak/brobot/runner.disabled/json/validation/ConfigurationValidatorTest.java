@@ -1,5 +1,10 @@
 package io.github.jspinak.brobot.runner.json.validation;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.nio.file.Path;
+
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,7 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import io.github.jspinak.brobot.runner.json.validation.ConfigurationValidator;
 import io.github.jspinak.brobot.runner.json.validation.business.BusinessRuleValidator;
 import io.github.jspinak.brobot.runner.json.validation.crossref.ReferenceValidator;
 import io.github.jspinak.brobot.runner.json.validation.exception.ConfigValidationException;
@@ -18,28 +22,18 @@ import io.github.jspinak.brobot.runner.json.validation.model.ValidationSeverity;
 import io.github.jspinak.brobot.runner.json.validation.resource.ImageResourceValidator;
 import io.github.jspinak.brobot.runner.json.validation.schema.SchemaValidator;
 
-import java.nio.file.Path;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class ConfigurationValidatorTest {
 
-    @Mock
-    private SchemaValidator schemaValidatorMock;
+    @Mock private SchemaValidator schemaValidatorMock;
 
-    @Mock
-    private ReferenceValidator referenceValidatorMock;
+    @Mock private ReferenceValidator referenceValidatorMock;
 
-    @Mock
-    private BusinessRuleValidator businessRuleValidatorMock;
+    @Mock private BusinessRuleValidator businessRuleValidatorMock;
 
-    @Mock
-    private ImageResourceValidator imageResourceValidatorMock;
+    @Mock private ImageResourceValidator imageResourceValidatorMock;
 
-    @InjectMocks
-    private ConfigurationValidator configValidator;
+    @InjectMocks private ConfigurationValidator configValidator;
 
     private String validProjectJson;
     private String validDslJson;
@@ -63,29 +57,45 @@ class ConfigurationValidatorTest {
 
         when(schemaValidatorMock.validateProjectSchema(validProjectJson)).thenReturn(schemaResult);
         when(schemaValidatorMock.validateDSLSchema(validDslJson)).thenReturn(schemaResult);
-        when(referenceValidatorMock.validateReferences(any(JSONObject.class), any(JSONObject.class))).thenReturn(referenceResult);
-        when(businessRuleValidatorMock.validateRules(any(JSONObject.class), any(JSONObject.class))).thenReturn(businessResult);
-        when(imageResourceValidatorMock.validateImageResources(any(JSONObject.class), eq(imageBasePath))).thenReturn(imageResult);
+        when(referenceValidatorMock.validateReferences(
+                        any(JSONObject.class), any(JSONObject.class)))
+                .thenReturn(referenceResult);
+        when(businessRuleValidatorMock.validateRules(any(JSONObject.class), any(JSONObject.class)))
+                .thenReturn(businessResult);
+        when(imageResourceValidatorMock.validateImageResources(
+                        any(JSONObject.class), eq(imageBasePath)))
+                .thenReturn(imageResult);
 
-        ValidationResult result = configValidator.validateConfiguration(validProjectJson, validDslJson, imageBasePath);
+        ValidationResult result =
+                configValidator.validateConfiguration(
+                        validProjectJson, validDslJson, imageBasePath);
 
         assertTrue(result.isValid());
         verify(schemaValidatorMock).validateProjectSchema(validProjectJson);
         verify(schemaValidatorMock).validateDSLSchema(validDslJson);
-        verify(referenceValidatorMock).validateReferences(any(JSONObject.class), any(JSONObject.class));
-        verify(businessRuleValidatorMock).validateRules(any(JSONObject.class), any(JSONObject.class));
-        verify(imageResourceValidatorMock).validateImageResources(any(JSONObject.class), eq(imageBasePath));
+        verify(referenceValidatorMock)
+                .validateReferences(any(JSONObject.class), any(JSONObject.class));
+        verify(businessRuleValidatorMock)
+                .validateRules(any(JSONObject.class), any(JSONObject.class));
+        verify(imageResourceValidatorMock)
+                .validateImageResources(any(JSONObject.class), eq(imageBasePath));
     }
 
     @Test
     void validateConfiguration_whenSchemaValidationFails_shouldThrowException() {
         ValidationResult schemaResult = new ValidationResult();
-        schemaResult.addError(new ValidationError("SchemaError", "Invalid schema", ValidationSeverity.CRITICAL));
+        schemaResult.addError(
+                new ValidationError("SchemaError", "Invalid schema", ValidationSeverity.CRITICAL));
 
-        when(schemaValidatorMock.validateProjectSchema(invalidProjectJson)).thenReturn(schemaResult);
+        when(schemaValidatorMock.validateProjectSchema(invalidProjectJson))
+                .thenReturn(schemaResult);
 
-        ConfigValidationException exception = assertThrows(ConfigValidationException.class, () ->
-                configValidator.validateConfiguration(invalidProjectJson, validDslJson, imageBasePath));
+        ConfigValidationException exception =
+                assertThrows(
+                        ConfigValidationException.class,
+                        () ->
+                                configValidator.validateConfiguration(
+                                        invalidProjectJson, validDslJson, imageBasePath));
 
         assertTrue(exception.getValidationResult().hasCriticalErrors());
         verify(schemaValidatorMock).validateProjectSchema(invalidProjectJson);
@@ -95,50 +105,71 @@ class ConfigurationValidatorTest {
     @Test
     void validateImageResourcesOnly_whenImagesAreInvalid_shouldReturnErrors() {
         ValidationResult imageResult = new ValidationResult();
-        imageResult.addError(new ValidationError("ImageError", "Missing image", ValidationSeverity.ERROR));
+        imageResult.addError(
+                new ValidationError("ImageError", "Missing image", ValidationSeverity.ERROR));
 
-        when(imageResourceValidatorMock.validateImageResources(any(JSONObject.class), eq(imageBasePath))).thenReturn(imageResult);
+        when(imageResourceValidatorMock.validateImageResources(
+                        any(JSONObject.class), eq(imageBasePath)))
+                .thenReturn(imageResult);
 
-        ValidationResult result = configValidator.validateImageResourcesOnly(validProjectJson, imageBasePath);
+        ValidationResult result =
+                configValidator.validateImageResourcesOnly(validProjectJson, imageBasePath);
 
         assertFalse(result.isValid());
         assertTrue(result.hasSevereErrors());
-        verify(imageResourceValidatorMock).validateImageResources(any(JSONObject.class), eq(imageBasePath));
+        verify(imageResourceValidatorMock)
+                .validateImageResources(any(JSONObject.class), eq(imageBasePath));
     }
 
     @Test
     void validateConfiguration_whenDslSchemaFails_shouldThrowException() {
         ValidationResult validSchemaResult = new ValidationResult();
         ValidationResult invalidSchemaResult = new ValidationResult();
-        invalidSchemaResult.addError(new ValidationError("DslError", "Invalid DSL", ValidationSeverity.CRITICAL));
+        invalidSchemaResult.addError(
+                new ValidationError("DslError", "Invalid DSL", ValidationSeverity.CRITICAL));
 
-        when(schemaValidatorMock.validateProjectSchema(validProjectJson)).thenReturn(validSchemaResult);
+        when(schemaValidatorMock.validateProjectSchema(validProjectJson))
+                .thenReturn(validSchemaResult);
         when(schemaValidatorMock.validateDSLSchema(validDslJson)).thenReturn(invalidSchemaResult);
 
-        ConfigValidationException exception = assertThrows(ConfigValidationException.class, () ->
-                configValidator.validateConfiguration(validProjectJson, validDslJson, imageBasePath));
+        ConfigValidationException exception =
+                assertThrows(
+                        ConfigValidationException.class,
+                        () ->
+                                configValidator.validateConfiguration(
+                                        validProjectJson, validDslJson, imageBasePath));
 
         assertTrue(exception.getValidationResult().hasCriticalErrors());
         verify(schemaValidatorMock).validateProjectSchema(validProjectJson);
         verify(schemaValidatorMock).validateDSLSchema(validDslJson);
-        verify(referenceValidatorMock, never()).validateReferences(any(JSONObject.class), any(JSONObject.class));
+        verify(referenceValidatorMock, never())
+                .validateReferences(any(JSONObject.class), any(JSONObject.class));
     }
 
     @Test
     void validateConfiguration_whenReferenceValidationFails_shouldNotThrowForWarnings() {
         ValidationResult schemaResult = new ValidationResult();
         ValidationResult referenceResult = new ValidationResult();
-        referenceResult.addError(new ValidationError("RefWarning", "Minor reference issue", ValidationSeverity.WARNING));
+        referenceResult.addError(
+                new ValidationError(
+                        "RefWarning", "Minor reference issue", ValidationSeverity.WARNING));
         ValidationResult businessResult = new ValidationResult();
         ValidationResult imageResult = new ValidationResult();
 
         when(schemaValidatorMock.validateProjectSchema(validProjectJson)).thenReturn(schemaResult);
         when(schemaValidatorMock.validateDSLSchema(validDslJson)).thenReturn(schemaResult);
-        when(referenceValidatorMock.validateReferences(any(JSONObject.class), any(JSONObject.class))).thenReturn(referenceResult);
-        when(businessRuleValidatorMock.validateRules(any(JSONObject.class), any(JSONObject.class))).thenReturn(businessResult);
-        when(imageResourceValidatorMock.validateImageResources(any(JSONObject.class), eq(imageBasePath))).thenReturn(imageResult);
+        when(referenceValidatorMock.validateReferences(
+                        any(JSONObject.class), any(JSONObject.class)))
+                .thenReturn(referenceResult);
+        when(businessRuleValidatorMock.validateRules(any(JSONObject.class), any(JSONObject.class)))
+                .thenReturn(businessResult);
+        when(imageResourceValidatorMock.validateImageResources(
+                        any(JSONObject.class), eq(imageBasePath)))
+                .thenReturn(imageResult);
 
-        ValidationResult result = configValidator.validateConfiguration(validProjectJson, validDslJson, imageBasePath);
+        ValidationResult result =
+                configValidator.validateConfiguration(
+                        validProjectJson, validDslJson, imageBasePath);
 
         assertTrue(result.isValid());
         assertTrue(result.hasWarnings());
@@ -150,16 +181,25 @@ class ConfigurationValidatorTest {
         ValidationResult schemaResult = new ValidationResult();
         ValidationResult referenceResult = new ValidationResult();
         ValidationResult businessResult = new ValidationResult();
-        businessResult.addError(new ValidationError("BusinessError", "Invalid transition cycle", ValidationSeverity.ERROR));
+        businessResult.addError(
+                new ValidationError(
+                        "BusinessError", "Invalid transition cycle", ValidationSeverity.ERROR));
         ValidationResult imageResult = new ValidationResult();
 
         when(schemaValidatorMock.validateProjectSchema(validProjectJson)).thenReturn(schemaResult);
         when(schemaValidatorMock.validateDSLSchema(validDslJson)).thenReturn(schemaResult);
-        when(referenceValidatorMock.validateReferences(any(JSONObject.class), any(JSONObject.class))).thenReturn(referenceResult);
-        when(businessRuleValidatorMock.validateRules(any(JSONObject.class), any(JSONObject.class))).thenReturn(businessResult);
-        when(imageResourceValidatorMock.validateImageResources(any(JSONObject.class), eq(imageBasePath))).thenReturn(imageResult);
+        when(referenceValidatorMock.validateReferences(
+                        any(JSONObject.class), any(JSONObject.class)))
+                .thenReturn(referenceResult);
+        when(businessRuleValidatorMock.validateRules(any(JSONObject.class), any(JSONObject.class)))
+                .thenReturn(businessResult);
+        when(imageResourceValidatorMock.validateImageResources(
+                        any(JSONObject.class), eq(imageBasePath)))
+                .thenReturn(imageResult);
 
-        ValidationResult result = configValidator.validateConfiguration(validProjectJson, validDslJson, imageBasePath);
+        ValidationResult result =
+                configValidator.validateConfiguration(
+                        validProjectJson, validDslJson, imageBasePath);
 
         assertFalse(result.isValid());
         assertTrue(result.hasErrors());
@@ -175,33 +215,43 @@ class ConfigurationValidatorTest {
         when(schemaValidatorMock.validateProjectSchema(validProjectJson)).thenReturn(schemaResult);
         when(schemaValidatorMock.validateDSLSchema(malformedJson)).thenReturn(schemaResult);
 
-        ConfigValidationException exception = assertThrows(ConfigValidationException.class, () ->
-                configValidator.validateConfiguration(validProjectJson, malformedJson, imageBasePath));
+        ConfigValidationException exception =
+                assertThrows(
+                        ConfigValidationException.class,
+                        () ->
+                                configValidator.validateConfiguration(
+                                        validProjectJson, malformedJson, imageBasePath));
 
         assertTrue(exception.getValidationResult().hasCriticalErrors());
-        assertTrue(exception.getValidationResult().getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("JSON parsing error")));
+        assertTrue(
+                exception.getValidationResult().getErrors().stream()
+                        .anyMatch(e -> e.errorCode().equals("JSON parsing error")));
     }
 
     @Test
     void validateProjectSchemaOnly_shouldDelegateToSchemaValidator() {
         ValidationResult expectedResult = new ValidationResult();
-        expectedResult.addError(new ValidationError("SchemaError", "Project schema invalid", ValidationSeverity.ERROR));
+        expectedResult.addError(
+                new ValidationError(
+                        "SchemaError", "Project schema invalid", ValidationSeverity.ERROR));
 
-        when(schemaValidatorMock.validateProjectSchema(invalidProjectJson)).thenReturn(expectedResult);
+        when(schemaValidatorMock.validateProjectSchema(invalidProjectJson))
+                .thenReturn(expectedResult);
 
         ValidationResult result = configValidator.validateProjectSchemaOnly(invalidProjectJson);
 
         assertSame(expectedResult, result);
         verify(schemaValidatorMock).validateProjectSchema(invalidProjectJson);
-        verifyNoInteractions(referenceValidatorMock, businessRuleValidatorMock, imageResourceValidatorMock);
+        verifyNoInteractions(
+                referenceValidatorMock, businessRuleValidatorMock, imageResourceValidatorMock);
     }
 
     @Test
     void validateDslSchemaOnly_shouldDelegateToSchemaValidator() {
         ValidationResult expectedResult = new ValidationResult();
-        expectedResult.addError(new ValidationError("DslError", "DSL schema invalid", ValidationSeverity.ERROR));
-        
+        expectedResult.addError(
+                new ValidationError("DslError", "DSL schema invalid", ValidationSeverity.ERROR));
+
         String invalidDsl = "{\"functions\": []}";
         when(schemaValidatorMock.validateDSLSchema(invalidDsl)).thenReturn(expectedResult);
 
@@ -209,14 +259,16 @@ class ConfigurationValidatorTest {
 
         assertSame(expectedResult, result);
         verify(schemaValidatorMock).validateDSLSchema(invalidDsl);
-        verifyNoInteractions(referenceValidatorMock, businessRuleValidatorMock, imageResourceValidatorMock);
+        verifyNoInteractions(
+                referenceValidatorMock, businessRuleValidatorMock, imageResourceValidatorMock);
     }
 
     @Test
     void validateImageResourcesOnly_whenJsonIsMalformed_shouldReturnJsonError() {
         String malformedJson = "not json at all";
 
-        ValidationResult result = configValidator.validateImageResourcesOnly(malformedJson, imageBasePath);
+        ValidationResult result =
+                configValidator.validateImageResourcesOnly(malformedJson, imageBasePath);
 
         assertFalse(result.isValid());
         assertTrue(result.hasCriticalErrors());
@@ -228,27 +280,40 @@ class ConfigurationValidatorTest {
     void validateConfiguration_whenMultipleValidatorsReturnErrors_shouldMergeAll() {
         ValidationResult schemaResult = new ValidationResult();
         ValidationResult referenceResult = new ValidationResult();
-        referenceResult.addError(new ValidationError("RefError", "Invalid reference", ValidationSeverity.ERROR));
+        referenceResult.addError(
+                new ValidationError("RefError", "Invalid reference", ValidationSeverity.ERROR));
         ValidationResult businessResult = new ValidationResult();
-        businessResult.addError(new ValidationError("BizError", "Business rule violated", ValidationSeverity.ERROR));
+        businessResult.addError(
+                new ValidationError(
+                        "BizError", "Business rule violated", ValidationSeverity.ERROR));
         ValidationResult imageResult = new ValidationResult();
-        imageResult.addError(new ValidationError("ImgError", "Image not found", ValidationSeverity.WARNING));
+        imageResult.addError(
+                new ValidationError("ImgError", "Image not found", ValidationSeverity.WARNING));
 
         when(schemaValidatorMock.validateProjectSchema(validProjectJson)).thenReturn(schemaResult);
         when(schemaValidatorMock.validateDSLSchema(validDslJson)).thenReturn(schemaResult);
-        when(referenceValidatorMock.validateReferences(any(JSONObject.class), any(JSONObject.class))).thenReturn(referenceResult);
-        when(businessRuleValidatorMock.validateRules(any(JSONObject.class), any(JSONObject.class))).thenReturn(businessResult);
-        when(imageResourceValidatorMock.validateImageResources(any(JSONObject.class), eq(imageBasePath))).thenReturn(imageResult);
+        when(referenceValidatorMock.validateReferences(
+                        any(JSONObject.class), any(JSONObject.class)))
+                .thenReturn(referenceResult);
+        when(businessRuleValidatorMock.validateRules(any(JSONObject.class), any(JSONObject.class)))
+                .thenReturn(businessResult);
+        when(imageResourceValidatorMock.validateImageResources(
+                        any(JSONObject.class), eq(imageBasePath)))
+                .thenReturn(imageResult);
 
-        ValidationResult result = configValidator.validateConfiguration(validProjectJson, validDslJson, imageBasePath);
+        ValidationResult result =
+                configValidator.validateConfiguration(
+                        validProjectJson, validDslJson, imageBasePath);
 
         assertFalse(result.isValid());
         assertEquals(3, result.getErrors().size()); // Total errors includes warnings
         assertEquals(1, result.getWarnings().size());
         // Check for specific ERROR severity items
-        assertEquals(2, result.getErrors().stream()
-                .filter(e -> e.severity() == ValidationSeverity.ERROR)
-                .count());
+        assertEquals(
+                2,
+                result.getErrors().stream()
+                        .filter(e -> e.severity() == ValidationSeverity.ERROR)
+                        .count());
         assertTrue(result.getErrors().stream().anyMatch(e -> e.errorCode().equals("RefError")));
         assertTrue(result.getErrors().stream().anyMatch(e -> e.errorCode().equals("BizError")));
         assertTrue(result.getWarnings().stream().anyMatch(e -> e.errorCode().equals("ImgError")));
@@ -260,15 +325,23 @@ class ConfigurationValidatorTest {
 
         when(schemaValidatorMock.validateProjectSchema(validProjectJson)).thenReturn(schemaResult);
         when(schemaValidatorMock.validateDSLSchema(validDslJson)).thenReturn(schemaResult);
-        when(referenceValidatorMock.validateReferences(any(JSONObject.class), any(JSONObject.class)))
+        when(referenceValidatorMock.validateReferences(
+                        any(JSONObject.class), any(JSONObject.class)))
                 .thenThrow(new RuntimeException("Unexpected error"));
 
-        ConfigValidationException exception = assertThrows(ConfigValidationException.class, () ->
-                configValidator.validateConfiguration(validProjectJson, validDslJson, imageBasePath));
+        ConfigValidationException exception =
+                assertThrows(
+                        ConfigValidationException.class,
+                        () ->
+                                configValidator.validateConfiguration(
+                                        validProjectJson, validDslJson, imageBasePath));
 
         assertTrue(exception.getValidationResult().hasCriticalErrors());
-        assertTrue(exception.getValidationResult().getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Validation error") && 
-                          e.message().contains("Unexpected error")));
+        assertTrue(
+                exception.getValidationResult().getErrors().stream()
+                        .anyMatch(
+                                e ->
+                                        e.errorCode().equals("Validation error")
+                                                && e.message().contains("Unexpected error")));
     }
 }

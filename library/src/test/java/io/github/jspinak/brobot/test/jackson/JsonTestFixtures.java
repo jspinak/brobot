@@ -1,12 +1,13 @@
 package io.github.jspinak.brobot.test.jackson;
 
 /**
- * Provides JSON test fixtures for common Brobot objects.
- * These are properly formatted JSON strings that can be used in deserialization tests.
+ * Provides JSON test fixtures for common Brobot objects. These are properly formatted JSON strings
+ * that can be used in deserialization tests.
  */
 public class JsonTestFixtures {
 
-    public static final String VALID_ACTION_RECORD = """
+    public static final String VALID_ACTION_RECORD =
+            """
         {
             "actionConfig": {
                 "@class": "io.github.jspinak.brobot.action.basic.find.PatternFindOptions",
@@ -23,7 +24,8 @@ public class JsonTestFixtures {
         }
         """;
 
-    public static final String VALID_MATCH = """
+    public static final String VALID_MATCH =
+            """
         {
             "name": "test-match",
             "region": {
@@ -39,7 +41,8 @@ public class JsonTestFixtures {
         }
         """;
 
-    public static final String VALID_PATTERN = """
+    public static final String VALID_PATTERN =
+            """
         {
             "name": "test-pattern",
             "imgpath": "images/test-pattern.png",
@@ -67,7 +70,8 @@ public class JsonTestFixtures {
         }
         """;
 
-    public static final String VALID_STATE_IMAGE = """
+    public static final String VALID_STATE_IMAGE =
+            """
         {
             "name": "test-state-image",
             "id": 1000,
@@ -89,7 +93,8 @@ public class JsonTestFixtures {
         }
         """;
 
-    public static final String VALID_STATE_REGION = """
+    public static final String VALID_STATE_REGION =
+            """
         {
             "name": "test-state-region",
             "id": 1001,
@@ -107,7 +112,8 @@ public class JsonTestFixtures {
         }
         """;
 
-    public static final String VALID_STATE_LOCATION = """
+    public static final String VALID_STATE_LOCATION =
+            """
         {
             "name": "test-state-location",
             "id": 1002,
@@ -128,7 +134,8 @@ public class JsonTestFixtures {
         }
         """;
 
-    public static final String VALID_STATE_STRING = """
+    public static final String VALID_STATE_STRING =
+            """
         {
             "name": "test-state-string",
             "id": 1003,
@@ -141,7 +148,8 @@ public class JsonTestFixtures {
         }
         """;
 
-    public static final String VALID_OBJECT_COLLECTION = """
+    public static final String VALID_OBJECT_COLLECTION =
+            """
         {
             "stateLocations": [
                 {
@@ -180,7 +188,8 @@ public class JsonTestFixtures {
         }
         """;
 
-    public static final String VALID_ACTION_RESULT = """
+    public static final String VALID_ACTION_RESULT =
+            """
         {
             "actionConfig": {
                 "@class": "io.github.jspinak.brobot.action.basic.find.PatternFindOptions",
@@ -202,7 +211,8 @@ public class JsonTestFixtures {
         }
         """;
 
-    public static final String VALID_PATTERN_FIND_OPTIONS = """
+    public static final String VALID_PATTERN_FIND_OPTIONS =
+            """
         {
             "@class": "io.github.jspinak.brobot.action.basic.find.PatternFindOptions",
             "similarity": 0.8,
@@ -214,7 +224,8 @@ public class JsonTestFixtures {
         }
         """;
 
-    public static final String VALID_SEARCH_REGIONS = """
+    public static final String VALID_SEARCH_REGIONS =
+            """
         {
             "regions": [
                 {
@@ -239,7 +250,8 @@ public class JsonTestFixtures {
         }
         """;
 
-    public static final String VALID_ANCHORS = """
+    public static final String VALID_ANCHORS =
+            """
         {
             "anchorList": [
                 {
@@ -260,7 +272,8 @@ public class JsonTestFixtures {
         }
         """;
 
-    public static final String VALID_STATE = """
+    public static final String VALID_STATE =
+            """
         {
             "name": "TestState",
             "stateImages": [],
@@ -274,7 +287,7 @@ public class JsonTestFixtures {
 
     /**
      * Get a JSON fixture with placeholders replaced.
-     * 
+     *
      * @param fixture The fixture template
      * @param replacements Key-value pairs for replacement (key1, value1, key2, value2, ...)
      * @return The fixture with replacements applied
@@ -287,10 +300,9 @@ public class JsonTestFixtures {
         return result;
     }
 
-    /**
-     * Template for creating custom patterns.
-     */
-    public static final String PATTERN_TEMPLATE = """
+    /** Template for creating custom patterns. */
+    public static final String PATTERN_TEMPLATE =
+            """
         {
             "name": "${name}",
             "imgpath": "${imgpath}",
@@ -299,10 +311,9 @@ public class JsonTestFixtures {
         }
         """;
 
-    /**
-     * Template for creating custom matches.
-     */
-    public static final String MATCH_TEMPLATE = """
+    /** Template for creating custom matches. */
+    public static final String MATCH_TEMPLATE =
+            """
         {
             "name": "${name}",
             "score": ${score},

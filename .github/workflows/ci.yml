@@ -13,11 +13,11 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    
+
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
@@ -25,14 +25,14 @@ jobs:
         distribution: 'temurin'
         # Use smaller cache to avoid extraction issues
         cache: 'gradle'
-    
+
     - name: Setup Gradle
       run: |
         chmod +x gradlew
         # Clear any corrupted caches
         rm -rf ~/.gradle/caches/modules-2/modules-2.lock
         rm -rf ~/.gradle/caches/*/plugin-resolution/
-    
+
     - name: Build project
       run: |
         ./gradlew build -x test \
@@ -41,7 +41,7 @@ jobs:
           --console=plain \
           --warning-mode=summary
       timeout-minutes: 10
-    
+
     - name: Run tests
       run: |
         ./gradlew test \
@@ -53,7 +53,7 @@ jobs:
           -DrunFlakyTests=false
       timeout-minutes: 10
       continue-on-error: true
-    
+
     - name: Upload test results
       uses: actions/upload-artifact@v4
       if: always()

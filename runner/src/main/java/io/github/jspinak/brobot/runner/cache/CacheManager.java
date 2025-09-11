@@ -1,23 +1,23 @@
 package io.github.jspinak.brobot.runner.cache;
 
-import lombok.Data;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import io.github.jspinak.brobot.model.element.Pattern;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+
+import org.springframework.stereotype.Component;
+
 import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.resources.ResourceManager;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
-import org.springframework.stereotype.Component;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import lombok.Data;
 
-/**
- * Factory and manager for different cache types in the application
- */
+/** Factory and manager for different cache types in the application */
 @Component
 @Data
 public class CacheManager {
@@ -53,7 +53,7 @@ public class CacheManager {
 
     /**
      * Creates a new LRU cache with the specified name and size
-     * 
+     *
      * @param name The cache name
      * @param maxSize Maximum number of entries
      * @return New LRU cache instance
@@ -71,7 +71,7 @@ public class CacheManager {
 
     /**
      * Registers a cache for management
-     * 
+     *
      * @param key The cache key
      * @param cache The cache instance
      * @throws IllegalArgumentException if key or cache is null
@@ -86,55 +86,44 @@ public class CacheManager {
         caches.put(key, cache);
     }
 
-    /**
-     * Gets the state cache
-     */
+    /** Gets the state cache */
     public LRUCache<String, State> getStateCache() {
         return stateCache;
     }
 
-    /**
-     * Gets the state image cache
-     */
+    /** Gets the state image cache */
     public LRUCache<String, StateImage> getStateImageCache() {
         return stateImageCache;
     }
 
-    /**
-     * Gets the pattern cache
-     */
+    /** Gets the pattern cache */
     public LRUCache<String, Pattern> getPatternCache() {
         return patternCache;
     }
 
-    /**
-     * Gets the matches cache
-     */
+    /** Gets the matches cache */
     public LRUCache<String, ActionResult> getMatchesCache() {
         return matchesCache;
     }
 
-    /**
-     * Clears all caches
-     */
+    /** Clears all caches */
     public void clearAllCaches() {
-        caches.values().stream()
-            .filter(cache -> cache != null)
-            .forEach(LRUCache::invalidateAll);
+        caches.values().stream().filter(cache -> cache != null).forEach(LRUCache::invalidateAll);
     }
 
     /**
      * Gets statistics for all caches
-     * 
+     *
      * @return Map of cache names to their statistics
      */
     public Map<String, Map<String, Long>> getAllCacheStats() {
         Map<String, Map<String, Long>> stats = new ConcurrentHashMap<>();
-        caches.forEach((name, cache) -> {
-            if (cache != null) {
-                stats.put(name, cache.getStats());
-            }
-        });
+        caches.forEach(
+                (name, cache) -> {
+                    if (cache != null) {
+                        stats.put(name, cache.getStats());
+                    }
+                });
         return stats;
     }
 

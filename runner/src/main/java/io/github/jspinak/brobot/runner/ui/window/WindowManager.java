@@ -1,31 +1,32 @@
 package io.github.jspinak.brobot.runner.ui.window;
 
-import lombok.Data;
-
-import lombok.extern.slf4j.Slf4j;
-
-import io.github.jspinak.brobot.runner.events.EventBus;
-import io.github.jspinak.brobot.runner.ui.theme.ThemeManager;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.prefs.Preferences;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+
+import jakarta.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.prefs.Preferences;
+import io.github.jspinak.brobot.runner.events.EventBus;
+import io.github.jspinak.brobot.runner.ui.theme.ThemeManager;
+
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * Manages the application windows and dialogs.
- * Handles window creation, positioning, and state persistence.
+ * Manages the application windows and dialogs. Handles window creation, positioning, and state
+ * persistence.
  */
 @Component
 @Slf4j
@@ -102,8 +103,8 @@ public class WindowManager {
      * @param height The window height
      * @return The created Stage
      */
-    public Stage createWindow(String id, String title, javafx.scene.Parent content,
-                              double width, double height) {
+    public Stage createWindow(
+            String id, String title, javafx.scene.Parent content, double width, double height) {
         Stage stage = new Stage();
         stage.setTitle(title);
 
@@ -131,8 +132,14 @@ public class WindowManager {
      * @param owner The owner window for the dialog
      * @return The created Stage
      */
-    public Stage createDialog(String id, String title, javafx.scene.Parent content,
-                              double width, double height, Modality modality, Stage owner) {
+    public Stage createDialog(
+            String id,
+            String title,
+            javafx.scene.Parent content,
+            double width,
+            double height,
+            Modality modality,
+            Stage owner) {
         Stage stage = new Stage();
         stage.setTitle(title);
         stage.initModality(modality);
@@ -179,8 +186,8 @@ public class WindowManager {
      * @param height The window height
      * @return The created Stage
      */
-    public Stage createUtilityWindow(String id, javafx.scene.Parent content,
-                                     double width, double height) {
+    public Stage createUtilityWindow(
+            String id, javafx.scene.Parent content, double width, double height) {
         Stage stage = new Stage();
         stage.initStyle(StageStyle.UTILITY);
 
@@ -210,9 +217,7 @@ public class WindowManager {
         }
     }
 
-    /**
-     * Closes all windows.
-     */
+    /** Closes all windows. */
     public void closeAllWindows() {
         for (Stage stage : stages.values()) {
             stage.close();
@@ -261,9 +266,10 @@ public class WindowManager {
         }
 
         // Save state on window close
-        stage.setOnCloseRequest(event -> {
-            saveWindowState(id, stage);
-        });
+        stage.setOnCloseRequest(
+                event -> {
+                    saveWindowState(id, stage);
+                });
     }
 
     /**
@@ -330,7 +336,8 @@ public class WindowManager {
      * @param defaultValue The default input value
      * @return The input value, or empty if cancelled
      */
-    public Optional<String> showInputDialog(Stage owner, String title, String message, String defaultValue) {
+    public Optional<String> showInputDialog(
+            Stage owner, String title, String message, String defaultValue) {
         return DialogFactory.createInputDialog(owner, title, message, defaultValue);
     }
 
@@ -342,7 +349,8 @@ public class WindowManager {
      * @param message The message to display
      * @return The progress dialog
      */
-    public DialogFactory.ProgressDialog showProgressDialog(Stage owner, String title, String message) {
+    public DialogFactory.ProgressDialog showProgressDialog(
+            Stage owner, String title, String message) {
         return DialogFactory.createProgressDialog(owner, title, message);
     }
 }

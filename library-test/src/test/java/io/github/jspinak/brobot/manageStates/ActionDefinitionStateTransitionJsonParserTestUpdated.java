@@ -1,57 +1,52 @@
 package io.github.jspinak.brobot.manageStates;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import io.github.jspinak.brobot.action.basic.click.ClickOptions;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.action.basic.type.TypeOptions;
-import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
-import io.github.jspinak.brobot.model.action.MouseButton;
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.model.element.Pattern;
-import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.navigation.transition.TaskSequenceStateTransition;
-import io.github.jspinak.brobot.runner.dsl.model.TaskSequence;
-import io.github.jspinak.brobot.runner.dsl.model.ActionStep;
-import io.github.jspinak.brobot.model.transition.StateTransition;
-import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
-import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
-import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.*;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
-import java.util.*;
-import java.awt.image.BufferedImage;
+import com.fasterxml.jackson.databind.JsonNode;
 
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
+import io.github.jspinak.brobot.action.basic.type.TypeOptions;
+import io.github.jspinak.brobot.model.action.MouseButton;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.transition.StateTransition;
+import io.github.jspinak.brobot.navigation.transition.TaskSequenceStateTransition;
+import io.github.jspinak.brobot.runner.dsl.model.ActionStep;
+import io.github.jspinak.brobot.runner.dsl.model.TaskSequence;
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
 
 /**
  * Updated tests for ActionDefinitionStateTransition JSON parsing with new ActionConfig API.
- * 
- * Key changes:
- * - JSON now uses "actionConfig" with "@type" for polymorphic deserialization
- * - ActionStep uses specific config classes instead of generic ActionOptions
- * - Type-safe JSON structure for state transitions
+ *
+ * <p>Key changes: - JSON now uses "actionConfig" with "@type" for polymorphic deserialization -
+ * ActionStep uses specific config classes instead of generic ActionOptions - Type-safe JSON
+ * structure for state transitions
  */
 @SpringBootTest
 @TestPropertySource(properties = {"java.awt.headless=false"})
 public class ActionDefinitionStateTransitionJsonParserTestUpdated {
 
-    @Autowired
-    private ConfigurationParser jsonParser;
+    @Autowired private ConfigurationParser jsonParser;
 
-    @Autowired
-    private JsonUtils jsonUtils;
+    @Autowired private JsonUtils jsonUtils;
 
-    /**
-     * Test parsing a basic ActionDefinitionStateTransition from JSON with new API
-     */
+    /** Test parsing a basic ActionDefinitionStateTransition from JSON with new API */
     @Test
     public void testParseBasicTransitionWithNewAPI() throws ConfigurationException {
-        String json = """
+        String json =
+                """
                 {
                   "type": "actionDefinition",
                   "actionDefinition": {
@@ -80,7 +75,8 @@ public class ActionDefinitionStateTransitionJsonParserTestUpdated {
                 """;
 
         JsonNode jsonNode = jsonParser.parseJson(json);
-        TaskSequenceStateTransition transition = jsonParser.convertJson(jsonNode, TaskSequenceStateTransition.class);
+        TaskSequenceStateTransition transition =
+                jsonParser.convertJson(jsonNode, TaskSequenceStateTransition.class);
 
         assertNotNull(transition);
 
@@ -89,7 +85,7 @@ public class ActionDefinitionStateTransitionJsonParserTestUpdated {
         TaskSequence taskSeq = transition.getTaskSequenceOptional().get();
         assertNotNull(taskSeq.getSteps());
         assertEquals(1, taskSeq.getSteps().size());
-        
+
         // Verify the action config is ClickOptions
         ActionStep step = taskSeq.getSteps().get(0);
         assertTrue(step.getActionConfig() instanceof ClickOptions);
@@ -100,7 +96,8 @@ public class ActionDefinitionStateTransitionJsonParserTestUpdated {
         assertEquals(0.5, clickOptions.getPauseAfterEnd(), 0.001);
 
         // Verify basic properties
-        assertEquals(StateTransition.StaysVisible.TRUE, transition.getStaysVisibleAfterTransition());
+        assertEquals(
+                StateTransition.StaysVisible.TRUE, transition.getStaysVisibleAfterTransition());
         assertEquals(5, transition.getScore());
         assertEquals(10, transition.getTimesSuccessful());
 
@@ -115,12 +112,11 @@ public class ActionDefinitionStateTransitionJsonParserTestUpdated {
         assertTrue(transition.getExit().contains(1L));
     }
 
-    /**
-     * Test parsing an ActionDefinitionStateTransition with minimal properties
-     */
+    /** Test parsing an ActionDefinitionStateTransition with minimal properties */
     @Test
     public void testParseMinimalTransition() throws ConfigurationException {
-        String json = """
+        String json =
+                """
                 {
                   "type": "actionDefinition",
                   "actionDefinition": {
@@ -131,7 +127,8 @@ public class ActionDefinitionStateTransitionJsonParserTestUpdated {
                 """;
 
         JsonNode jsonNode = jsonParser.parseJson(json);
-        TaskSequenceStateTransition transition = jsonParser.convertJson(jsonNode, TaskSequenceStateTransition.class);
+        TaskSequenceStateTransition transition =
+                jsonParser.convertJson(jsonNode, TaskSequenceStateTransition.class);
 
         assertNotNull(transition);
         assertTrue(transition.getTaskSequenceOptional().isPresent());
@@ -140,12 +137,11 @@ public class ActionDefinitionStateTransitionJsonParserTestUpdated {
         assertTrue(transition.getExit().isEmpty());
     }
 
-    /**
-     * Test parsing complex transition with multiple action types
-     */
+    /** Test parsing complex transition with multiple action types */
     @Test
     public void testParseComplexTransitionWithMultipleActions() throws ConfigurationException {
-        String json = """
+        String json =
+                """
                 {
                   "type": "actionDefinition",
                   "actionDefinition": {
@@ -193,11 +189,12 @@ public class ActionDefinitionStateTransitionJsonParserTestUpdated {
                 """;
 
         JsonNode jsonNode = jsonParser.parseJson(json);
-        TaskSequenceStateTransition transition = jsonParser.convertJson(jsonNode, TaskSequenceStateTransition.class);
+        TaskSequenceStateTransition transition =
+                jsonParser.convertJson(jsonNode, TaskSequenceStateTransition.class);
 
         assertNotNull(transition);
         assertTrue(transition.getTaskSequenceOptional().isPresent());
-        
+
         TaskSequence taskSeq = transition.getTaskSequenceOptional().get();
         assertEquals(3, taskSeq.getSteps().size());
 
@@ -226,48 +223,54 @@ public class ActionDefinitionStateTransitionJsonParserTestUpdated {
         assertEquals(0.5, typeOptions.getPauseAfterEnd(), 0.001);
         // ObjectCollection has stateStrings, not strings
         assertEquals(1, step3.getObjectCollection().getStateStrings().size());
-        assertEquals("username@example.com", step3.getObjectCollection().getStateStrings().get(0).getString());
+        assertEquals(
+                "username@example.com",
+                step3.getObjectCollection().getStateStrings().get(0).getString());
 
         // Verify transition properties
-        assertEquals(StateTransition.StaysVisible.FALSE, transition.getStaysVisibleAfterTransition());
+        assertEquals(
+                StateTransition.StaysVisible.FALSE, transition.getStaysVisibleAfterTransition());
         assertEquals(1, transition.getActivate().size());
         assertTrue(transition.getActivate().contains(10L));
         assertEquals(2, transition.getExit().size());
         assertTrue(transition.getExit().containsAll(List.of(8L, 9L)));
     }
 
-    /**
-     * Test serialization and deserialization of ActionDefinitionStateTransition
-     */
+    /** Test serialization and deserialization of ActionDefinitionStateTransition */
     @Test
     public void testSerializeDeserializeTransition() throws ConfigurationException {
         // Create transition manually
         TaskSequenceStateTransition transition = new TaskSequenceStateTransition();
-        
+
         // Create action definition
         TaskSequence actionDef = new TaskSequence();
-        
+
         // Add Find step
-        PatternFindOptions findOptions = new PatternFindOptions.Builder()
-                .setStrategy(PatternFindOptions.Strategy.ALL)
-                .setSimilarity(0.85)
-                .setMaxMatchesToActOn(5)
-                .build();
-        actionDef.addStep(findOptions, new ObjectCollection.Builder()
-                .withImages(createTestStateImages(301L, 302L))
-                .build());
-        
+        PatternFindOptions findOptions =
+                new PatternFindOptions.Builder()
+                        .setStrategy(PatternFindOptions.Strategy.ALL)
+                        .setSimilarity(0.85)
+                        .setMaxMatchesToActOn(5)
+                        .build();
+        actionDef.addStep(
+                findOptions,
+                new ObjectCollection.Builder()
+                        .withImages(createTestStateImages(301L, 302L))
+                        .build());
+
         // Add Click step
-        ClickOptions clickOptions = new ClickOptions.Builder()
-                .setPressOptions(MousePressOptions.builder()
-                        .setButton(MouseButton.RIGHT)
-                        .build())
-                .setNumberOfClicks(1)
-                .build();
-        actionDef.addStep(clickOptions, new ObjectCollection.Builder()
-                // No direct method to use matches from previous action in Builder
-                .build());
-        
+        ClickOptions clickOptions =
+                new ClickOptions.Builder()
+                        .setPressOptions(
+                                MousePressOptions.builder().setButton(MouseButton.RIGHT).build())
+                        .setNumberOfClicks(1)
+                        .build();
+        actionDef.addStep(
+                clickOptions,
+                new ObjectCollection.Builder()
+                        // No direct method to use matches from previous action in Builder
+                        .build());
+
         transition.setActionDefinition(actionDef);
         transition.setStaysVisibleAfterTransition(StateTransition.StaysVisible.NONE);
         transition.setActivate(new HashSet<>(List.of(15L, 16L)));
@@ -288,22 +291,26 @@ public class ActionDefinitionStateTransitionJsonParserTestUpdated {
 
         // Deserialize
         JsonNode jsonNode = jsonParser.parseJson(json);
-        TaskSequenceStateTransition deserializedTransition = 
+        TaskSequenceStateTransition deserializedTransition =
                 jsonParser.convertJson(jsonNode, TaskSequenceStateTransition.class);
 
         // Verify deserialization
         assertNotNull(deserializedTransition);
         assertTrue(deserializedTransition.getTaskSequenceOptional().isPresent());
-        
+
         TaskSequence deserializedTaskSeq = deserializedTransition.getTaskSequenceOptional().get();
         assertEquals(2, deserializedTaskSeq.getSteps().size());
-        
+
         // Verify configs preserved
-        assertTrue(deserializedTaskSeq.getSteps().get(0).getActionConfig() instanceof PatternFindOptions);
+        assertTrue(
+                deserializedTaskSeq.getSteps().get(0).getActionConfig()
+                        instanceof PatternFindOptions);
         assertTrue(deserializedTaskSeq.getSteps().get(1).getActionConfig() instanceof ClickOptions);
-        
+
         // Verify transition properties
-        assertEquals(StateTransition.StaysVisible.NONE, deserializedTransition.getStaysVisibleAfterTransition());
+        assertEquals(
+                StateTransition.StaysVisible.NONE,
+                deserializedTransition.getStaysVisibleAfterTransition());
         assertEquals(2, deserializedTransition.getActivate().size());
         assertTrue(deserializedTransition.getActivate().containsAll(List.of(15L, 16L)));
         assertEquals(1, deserializedTransition.getExit().size());
@@ -312,13 +319,12 @@ public class ActionDefinitionStateTransitionJsonParserTestUpdated {
         assertEquals(25, deserializedTransition.getTimesSuccessful());
     }
 
-    /**
-     * Test parsing transition with different StaysVisible values
-     */
+    /** Test parsing transition with different StaysVisible values */
     @Test
     public void testParseStaysVisibleValues() throws ConfigurationException {
         // Test TRUE
-        String jsonTrue = """
+        String jsonTrue =
+                """
                 {
                   "type": "actionDefinition",
                   "actionDefinition": {"steps": []},
@@ -326,13 +332,16 @@ public class ActionDefinitionStateTransitionJsonParserTestUpdated {
                   "activate": [1]
                 }
                 """;
-        
-        TaskSequenceStateTransition transitionTrue = 
-                jsonParser.convertJson(jsonParser.parseJson(jsonTrue), TaskSequenceStateTransition.class);
-        assertEquals(StateTransition.StaysVisible.TRUE, transitionTrue.getStaysVisibleAfterTransition());
+
+        TaskSequenceStateTransition transitionTrue =
+                jsonParser.convertJson(
+                        jsonParser.parseJson(jsonTrue), TaskSequenceStateTransition.class);
+        assertEquals(
+                StateTransition.StaysVisible.TRUE, transitionTrue.getStaysVisibleAfterTransition());
 
         // Test FALSE
-        String jsonFalse = """
+        String jsonFalse =
+                """
                 {
                   "type": "actionDefinition",
                   "actionDefinition": {"steps": []},
@@ -340,13 +349,17 @@ public class ActionDefinitionStateTransitionJsonParserTestUpdated {
                   "activate": [1]
                 }
                 """;
-        
-        TaskSequenceStateTransition transitionFalse = 
-                jsonParser.convertJson(jsonParser.parseJson(jsonFalse), TaskSequenceStateTransition.class);
-        assertEquals(StateTransition.StaysVisible.FALSE, transitionFalse.getStaysVisibleAfterTransition());
+
+        TaskSequenceStateTransition transitionFalse =
+                jsonParser.convertJson(
+                        jsonParser.parseJson(jsonFalse), TaskSequenceStateTransition.class);
+        assertEquals(
+                StateTransition.StaysVisible.FALSE,
+                transitionFalse.getStaysVisibleAfterTransition());
 
         // Test NONE
-        String jsonNone = """
+        String jsonNone =
+                """
                 {
                   "type": "actionDefinition",
                   "actionDefinition": {"steps": []},
@@ -354,29 +367,27 @@ public class ActionDefinitionStateTransitionJsonParserTestUpdated {
                   "activate": [1]
                 }
                 """;
-        
-        TaskSequenceStateTransition transitionNone = 
-                jsonParser.convertJson(jsonParser.parseJson(jsonNone), TaskSequenceStateTransition.class);
-        assertEquals(StateTransition.StaysVisible.NONE, transitionNone.getStaysVisibleAfterTransition());
+
+        TaskSequenceStateTransition transitionNone =
+                jsonParser.convertJson(
+                        jsonParser.parseJson(jsonNone), TaskSequenceStateTransition.class);
+        assertEquals(
+                StateTransition.StaysVisible.NONE, transitionNone.getStaysVisibleAfterTransition());
     }
 
-    /**
-     * Test pretty printing of transitions
-     */
+    /** Test pretty printing of transitions */
     @Test
     public void testPrettyPrintTransition() throws ConfigurationException {
         TaskSequenceStateTransition transition = new TaskSequenceStateTransition();
-        
+
         TaskSequence actionDef = new TaskSequence();
         actionDef.addStep(
                 new ClickOptions.Builder()
-                        .setPressOptions(MousePressOptions.builder()
-                                .setButton(MouseButton.LEFT)
-                                .build())
+                        .setPressOptions(
+                                MousePressOptions.builder().setButton(MouseButton.LEFT).build())
                         .build(),
-                new ObjectCollection.Builder().withImages(createTestStateImages(401L)).build()
-        );
-        
+                new ObjectCollection.Builder().withImages(createTestStateImages(401L)).build());
+
         transition.setActionDefinition(actionDef);
         transition.setActivate(new HashSet<>(List.of(20L)));
 
@@ -391,16 +402,15 @@ public class ActionDefinitionStateTransitionJsonParserTestUpdated {
         assertTrue(prettyJson.contains("actionDefinition"));
         assertTrue(prettyJson.contains("ClickOptions"));
     }
-    
+
     private List<StateImage> createTestStateImages(Long... ids) {
         List<StateImage> images = new ArrayList<>();
         for (Long id : ids) {
-            StateImage img = new StateImage.Builder()
-                    .setName("testImage_" + id)
-                    .addPattern(new Pattern.Builder()
-                            .setName("pattern_" + id)
-                            .build())
-                    .build();
+            StateImage img =
+                    new StateImage.Builder()
+                            .setName("testImage_" + id)
+                            .addPattern(new Pattern.Builder().setName("pattern_" + id).build())
+                            .build();
             images.add(img);
         }
         return images;

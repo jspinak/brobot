@@ -12,30 +12,30 @@ brobot:
     mock: true
     # Enable verbose logging
     verbose: true
-    
+
   # Action settings
   action:
     # Default timeouts
     max-wait: 5
-    
+
   # Find settings
   find:
     similarity: 0.8
-    
+
   # Movement settings
   movement:
     # Default movement time (seconds)
     default-move-time: 0.5
     # Default movement pattern
     default-pattern: SMOOTH
-    
+
   # Drag settings
   drag:
     # Default hold time before drag
     default-hold-time: 0.5
     # Default drag speed
     default-speed: NORMAL
-    
+
   # Scroll settings
   scroll:
     # Default scroll clicks
@@ -56,13 +56,13 @@ mouse:
       - LINEAR
       - SIGMOID
       - RANDOM
-      
+
   # Speed presets
   speed:
     slow: 2.0
     normal: 1.0
     fast: 0.3
-    
+
 # Logging configuration
 logging:
   level:

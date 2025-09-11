@@ -1,16 +1,18 @@
 package io.github.jspinak.brobot.runner.project;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.github.jspinak.brobot.runner.dsl.BusinessTask;
+
 import lombok.Getter;
 import lombok.Setter;
-import java.util.List;
 
 /**
- * Represents the project configuration settings and references to automation functions.
- * Maps to the configuration object in project-schema.json and includes a reference to
- * automationFunctions from automation-dsl-schema.json.
+ * Represents the project configuration settings and references to automation functions. Maps to the
+ * configuration object in project-schema.json and includes a reference to automationFunctions from
+ * automation-dsl-schema.json.
  */
 @Getter
 @Setter

@@ -35,12 +35,12 @@ jobs:
         run: |
           # Create directories for runner module if they don't exist
           mkdir -p runner/src/main/resources
-          
+
           # Backup original application.properties if it exists
           if [ -f "runner/src/main/resources/application.properties" ]; then
             cp runner/src/main/resources/application.properties runner/src/main/resources/application.properties.backup
           fi
-          
+
           # Create application-ci.properties with direct values
           cat > runner/src/main/resources/application-ci.properties << EOF
           spring.application.name=brobot-runner
@@ -51,7 +51,7 @@ jobs:
           spring.datasource.driver-class-name=org.h2.Driver
           spring.jpa.hibernate.ddl-auto=create-drop
           EOF
-          
+
           # Create .env file
           cat > .env << EOF
           SERVER_PORT=8080
@@ -59,19 +59,19 @@ jobs:
           DATABASE_USERNAME=sa
           DATABASE_PASSWORD=
           EOF
-          
+
           # Set up directories
           mkdir -p /home/runner/work/brobot/brobot/screenshots
           mkdir -p /home/runner/work/brobot/brobot/images
           mkdir -p /home/runner/work/brobot/brobot/history
-          
+
           # Copy image files to screenshots directory
           find /home/runner/work/brobot/brobot -type f -name "*.png" -exec cp {} /home/runner/work/brobot/brobot/screenshots/ \;
           find /home/runner/work/brobot/brobot -type f -name "*.jpg" -exec cp {} /home/runner/work/brobot/brobot/screenshots/ \;
-          
+
           # Ensure permissions are correct
           chmod -R 755 /home/runner/work/brobot/brobot/screenshots
-          
+
           # Set up xvfb for headless GUI tests
           sudo apt-get update
           sudo apt-get install -y xvfb
@@ -155,15 +155,15 @@ jobs:
         run: |
           # Back up original file
           cp runner/build.gradle runner/build.gradle.backup
-          
+
           # Remove mainModule property
           sed -i 's/mainModule = .*/\/\/ mainModule removed for non-modular build/' runner/build.gradle
-          
+
           # Remove module-related JVM args
           sed -i '/--add-modules/d' runner/build.gradle
           sed -i '/--add-reads/d' runner/build.gradle
           sed -i '/--add-opens/d' runner/build.gradle
-          
+
           echo "Runner build.gradle modified for non-modular build"
 
       # Use standard distribution tasks from application plugin
@@ -185,7 +185,7 @@ jobs:
           chmod +x runner/build/jpackage-app/start.sh
           cd runner/build
           zip -r brobot-runner-package.zip jpackage-app
-          
+
           echo "Created simple application package"
 
       - name: Upload packaged application

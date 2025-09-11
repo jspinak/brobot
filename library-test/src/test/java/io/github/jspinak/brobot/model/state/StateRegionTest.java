@@ -1,21 +1,14 @@
 package io.github.jspinak.brobot.model.state;
 
-import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.model.action.ActionRecord;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.state.StateRegion;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ContextConfiguration;
-import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
-import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.model.action.ActionRecord;
+import io.github.jspinak.brobot.model.element.Region;
 
 @SpringBootTest
 public class StateRegionTest {
@@ -24,13 +17,14 @@ public class StateRegionTest {
 
     @BeforeAll
     public static void setUp() {
-        stateRegion = new StateRegion.Builder()
-                .setName("testRegion")
-                .setSearchRegion(new Region(10, 20, 30, 40))
-                .setOwnerStateName("testState")
-                .setProbabilityExists(80)
-                .setTimesActedOn(3)
-                .build();
+        stateRegion =
+                new StateRegion.Builder()
+                        .setName("testRegion")
+                        .setSearchRegion(new Region(10, 20, 30, 40))
+                        .setOwnerStateName("testState")
+                        .setProbabilityExists(80)
+                        .setTimesActedOn(3)
+                        .build();
     }
 
     @Test

@@ -1,27 +1,28 @@
 package io.github.jspinak.brobot.runner.services;
 
-import lombok.extern.slf4j.Slf4j;
-
-import io.github.jspinak.brobot.runner.events.EventBus;
-import io.github.jspinak.brobot.runner.events.LogEvent;
-import io.github.jspinak.brobot.runner.ui.window.DialogFactory;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
-import lombok.Setter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import io.github.jspinak.brobot.runner.events.EventBus;
+import io.github.jspinak.brobot.runner.events.LogEvent;
+import io.github.jspinak.brobot.runner.ui.window.DialogFactory;
+
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * Service for displaying dialogs and managing UI interactions.
- * Handles both synchronous and asynchronous dialog operations.
+ * Service for displaying dialogs and managing UI interactions. Handles both synchronous and
+ * asynchronous dialog operations.
  */
 @Service
 @Slf4j
@@ -29,11 +30,9 @@ public class DialogService {
     private static final Logger logger = LoggerFactory.getLogger(DialogService.class);
 
     private final EventBus eventBus;
-    /**
-     *  The primary stage for displaying dialogs.
-     */
-    @Setter
-    private Stage primaryStage;
+
+    /** The primary stage for displaying dialogs. */
+    @Setter private Stage primaryStage;
 
     @Autowired
     public DialogService(EventBus eventBus) {
@@ -47,10 +46,11 @@ public class DialogService {
      * @param message The message to display
      */
     public void showInformation(String title, String message) {
-        Platform.runLater(() -> {
-            DialogFactory.createMessageDialog(primaryStage, title, message);
-            eventBus.publish(LogEvent.info(this, "Dialog shown: " + title, "UI"));
-        });
+        Platform.runLater(
+                () -> {
+                    DialogFactory.createMessageDialog(primaryStage, title, message);
+                    eventBus.publish(LogEvent.info(this, "Dialog shown: " + title, "UI"));
+                });
     }
 
     /**
@@ -60,10 +60,16 @@ public class DialogService {
      * @param message The error message
      */
     public void showError(String title, String message) {
-        Platform.runLater(() -> {
-            DialogFactory.createErrorDialog(primaryStage, title, message, null);
-            eventBus.publish(LogEvent.error(this, "Error dialog shown: " + title + " - " + message, "UI", null));
-        });
+        Platform.runLater(
+                () -> {
+                    DialogFactory.createErrorDialog(primaryStage, title, message, null);
+                    eventBus.publish(
+                            LogEvent.error(
+                                    this,
+                                    "Error dialog shown: " + title + " - " + message,
+                                    "UI",
+                                    null));
+                });
     }
 
     /**
@@ -74,10 +80,16 @@ public class DialogService {
      * @param exception The exception that caused the error
      */
     public void showError(String title, String message, Exception exception) {
-        Platform.runLater(() -> {
-            DialogFactory.createErrorDialog(primaryStage, title, message, exception);
-            eventBus.publish(LogEvent.error(this, "Error dialog shown: " + title + " - " + message, "UI", exception));
-        });
+        Platform.runLater(
+                () -> {
+                    DialogFactory.createErrorDialog(primaryStage, title, message, exception);
+                    eventBus.publish(
+                            LogEvent.error(
+                                    this,
+                                    "Error dialog shown: " + title + " - " + message,
+                                    "UI",
+                                    exception));
+                });
     }
 
     /**
@@ -99,7 +111,9 @@ public class DialogService {
         }
 
         boolean result = DialogFactory.createConfirmDialog(primaryStage, title, message);
-        eventBus.publish(LogEvent.info(this, "Confirmation dialog shown: " + title + ", result: " + result, "UI"));
+        eventBus.publish(
+                LogEvent.info(
+                        this, "Confirmation dialog shown: " + title + ", result: " + result, "UI"));
         return result;
     }
 
@@ -113,11 +127,20 @@ public class DialogService {
     public CompletableFuture<Boolean> showConfirmationAsync(String title, String message) {
         CompletableFuture<Boolean> future = new CompletableFuture<>();
 
-        Platform.runLater(() -> {
-            boolean result = DialogFactory.createConfirmDialog(primaryStage, title, message);
-            eventBus.publish(LogEvent.info(this, "Async confirmation dialog shown: " + title + ", result: " + result, "UI"));
-            future.complete(result);
-        });
+        Platform.runLater(
+                () -> {
+                    boolean result =
+                            DialogFactory.createConfirmDialog(primaryStage, title, message);
+                    eventBus.publish(
+                            LogEvent.info(
+                                    this,
+                                    "Async confirmation dialog shown: "
+                                            + title
+                                            + ", result: "
+                                            + result,
+                                    "UI"));
+                    future.complete(result);
+                });
 
         return future;
     }
@@ -141,8 +164,13 @@ public class DialogService {
             }
         }
 
-        Optional<String> result = DialogFactory.createInputDialog(primaryStage, title, message, defaultValue);
-        eventBus.publish(LogEvent.info(this, "Input dialog shown: " + title + ", has result: " + result.isPresent(), "UI"));
+        Optional<String> result =
+                DialogFactory.createInputDialog(primaryStage, title, message, defaultValue);
+        eventBus.publish(
+                LogEvent.info(
+                        this,
+                        "Input dialog shown: " + title + ", has result: " + result.isPresent(),
+                        "UI"));
         return result;
     }
 
@@ -154,14 +182,25 @@ public class DialogService {
      * @param defaultValue The default input value
      * @return A CompletableFuture that will resolve to the dialog result
      */
-    public CompletableFuture<Optional<String>> showInputDialogAsync(String title, String message, String defaultValue) {
+    public CompletableFuture<Optional<String>> showInputDialogAsync(
+            String title, String message, String defaultValue) {
         CompletableFuture<Optional<String>> future = new CompletableFuture<>();
 
-        Platform.runLater(() -> {
-            Optional<String> result = DialogFactory.createInputDialog(primaryStage, title, message, defaultValue);
-            eventBus.publish(LogEvent.info(this, "Async input dialog shown: " + title + ", has result: " + result.isPresent(), "UI"));
-            future.complete(result);
-        });
+        Platform.runLater(
+                () -> {
+                    Optional<String> result =
+                            DialogFactory.createInputDialog(
+                                    primaryStage, title, message, defaultValue);
+                    eventBus.publish(
+                            LogEvent.info(
+                                    this,
+                                    "Async input dialog shown: "
+                                            + title
+                                            + ", has result: "
+                                            + result.isPresent(),
+                                    "UI"));
+                    future.complete(result);
+                });
 
         return future;
     }
@@ -178,7 +217,8 @@ public class DialogService {
             logger.warn("Progress dialog should be created on the JavaFX application thread");
         }
 
-        DialogFactory.ProgressDialog dialog = DialogFactory.createProgressDialog(primaryStage, title, message);
+        DialogFactory.ProgressDialog dialog =
+                DialogFactory.createProgressDialog(primaryStage, title, message);
         eventBus.publish(LogEvent.info(this, "Progress dialog shown: " + title, "UI"));
         return dialog;
     }
@@ -192,7 +232,8 @@ public class DialogService {
      * @param contentText The content text
      * @return The result of the dialog (button clicked)
      */
-    public Optional<ButtonType> showAlert(Alert.AlertType alertType, String title, String headerText, String contentText) {
+    public Optional<ButtonType> showAlert(
+            Alert.AlertType alertType, String title, String headerText, String contentText) {
         if (!Platform.isFxApplicationThread()) {
             // If called from a non-JavaFX thread, use the async version and wait for the result
             try {
@@ -213,7 +254,8 @@ public class DialogService {
         }
 
         Optional<ButtonType> result = alert.showAndWait();
-        eventBus.publish(LogEvent.info(this, "Alert dialog shown: " + title + ", type: " + alertType, "UI"));
+        eventBus.publish(
+                LogEvent.info(this, "Alert dialog shown: " + title + ", type: " + alertType, "UI"));
         return result;
     }
 
@@ -226,23 +268,29 @@ public class DialogService {
      * @param contentText The content text
      * @return A CompletableFuture that will resolve to the dialog result
      */
-    public CompletableFuture<Optional<ButtonType>> showAlertAsync(Alert.AlertType alertType, String title, String headerText, String contentText) {
+    public CompletableFuture<Optional<ButtonType>> showAlertAsync(
+            Alert.AlertType alertType, String title, String headerText, String contentText) {
         CompletableFuture<Optional<ButtonType>> future = new CompletableFuture<>();
 
-        Platform.runLater(() -> {
-            Alert alert = new Alert(alertType);
-            alert.setTitle(title);
-            alert.setHeaderText(headerText);
-            alert.setContentText(contentText);
+        Platform.runLater(
+                () -> {
+                    Alert alert = new Alert(alertType);
+                    alert.setTitle(title);
+                    alert.setHeaderText(headerText);
+                    alert.setContentText(contentText);
 
-            if (primaryStage != null) {
-                alert.initOwner(primaryStage);
-            }
+                    if (primaryStage != null) {
+                        alert.initOwner(primaryStage);
+                    }
 
-            Optional<ButtonType> result = alert.showAndWait();
-            eventBus.publish(LogEvent.info(this, "Async alert dialog shown: " + title + ", type: " + alertType, "UI"));
-            future.complete(result);
-        });
+                    Optional<ButtonType> result = alert.showAndWait();
+                    eventBus.publish(
+                            LogEvent.info(
+                                    this,
+                                    "Async alert dialog shown: " + title + ", type: " + alertType,
+                                    "UI"));
+                    future.complete(result);
+                });
 
         return future;
     }

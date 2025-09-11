@@ -1,32 +1,27 @@
 package io.github.jspinak.brobot.runner.json.validation.crossref;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import io.github.jspinak.brobot.runner.json.validation.crossref.FunctionReferenceValidator;
-import io.github.jspinak.brobot.runner.json.validation.crossref.ReferenceValidator;
-import io.github.jspinak.brobot.runner.json.validation.crossref.StateReferenceValidator;
 import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
 import io.github.jspinak.brobot.runner.json.validation.model.ValidationSeverity;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ReferenceValidatorTest {
 
-    @Mock
-    private StateReferenceValidator stateReferenceValidator;
+    @Mock private StateReferenceValidator stateReferenceValidator;
 
-    @Mock
-    private FunctionReferenceValidator functionReferenceValidator;
+    @Mock private FunctionReferenceValidator functionReferenceValidator;
 
     private ReferenceValidator validator;
     private Map<String, Object> projectModel;
@@ -45,8 +40,10 @@ class ReferenceValidatorTest {
         ValidationResult emptyResult = new ValidationResult();
         when(stateReferenceValidator.validateInternalReferences(any())).thenReturn(emptyResult);
         when(functionReferenceValidator.validateInternalReferences(any())).thenReturn(emptyResult);
-        when(stateReferenceValidator.validateStateReferencesInFunctions(any(), any())).thenReturn(emptyResult);
-        when(functionReferenceValidator.validateButtonFunctionReferences(any(), any())).thenReturn(emptyResult);
+        when(stateReferenceValidator.validateStateReferencesInFunctions(any(), any()))
+                .thenReturn(emptyResult);
+        when(functionReferenceValidator.validateButtonFunctionReferences(any(), any()))
+                .thenReturn(emptyResult);
 
         // Act
         ValidationResult result = validator.validateReferences(projectModel, dslModel);
@@ -67,12 +64,16 @@ class ReferenceValidatorTest {
         stateResult.addError("state-error", "State internal error", ValidationSeverity.ERROR);
 
         ValidationResult functionResult = new ValidationResult();
-        functionResult.addError("function-error", "Function internal error", ValidationSeverity.WARNING);
+        functionResult.addError(
+                "function-error", "Function internal error", ValidationSeverity.WARNING);
 
         when(stateReferenceValidator.validateInternalReferences(any())).thenReturn(stateResult);
-        when(functionReferenceValidator.validateInternalReferences(any())).thenReturn(functionResult);
-        when(stateReferenceValidator.validateStateReferencesInFunctions(any(), any())).thenReturn(new ValidationResult());
-        when(functionReferenceValidator.validateButtonFunctionReferences(any(), any())).thenReturn(new ValidationResult());
+        when(functionReferenceValidator.validateInternalReferences(any()))
+                .thenReturn(functionResult);
+        when(stateReferenceValidator.validateStateReferencesInFunctions(any(), any()))
+                .thenReturn(new ValidationResult());
+        when(functionReferenceValidator.validateButtonFunctionReferences(any(), any()))
+                .thenReturn(new ValidationResult());
 
         // Act
         ValidationResult result = validator.validateReferences(projectModel, dslModel);
@@ -82,22 +83,29 @@ class ReferenceValidatorTest {
         assertTrue(result.hasSevereErrors());
         assertEquals(2, result.getErrors().size());
         assertTrue(result.getErrors().stream().anyMatch(e -> e.errorCode().equals("state-error")));
-        assertTrue(result.getErrors().stream().anyMatch(e -> e.errorCode().equals("function-error")));
+        assertTrue(
+                result.getErrors().stream().anyMatch(e -> e.errorCode().equals("function-error")));
     }
 
     @Test
     void validateReferences_withCrossReferenceErrors_shouldMergeResults() {
         // Arrange
         ValidationResult stateInFuncsResult = new ValidationResult();
-        stateInFuncsResult.addError("state-func-error", "Invalid state in function", ValidationSeverity.ERROR);
+        stateInFuncsResult.addError(
+                "state-func-error", "Invalid state in function", ValidationSeverity.ERROR);
 
         ValidationResult buttonFuncResult = new ValidationResult();
-        buttonFuncResult.addError("button-func-error", "Invalid button function", ValidationSeverity.ERROR);
+        buttonFuncResult.addError(
+                "button-func-error", "Invalid button function", ValidationSeverity.ERROR);
 
-        when(stateReferenceValidator.validateInternalReferences(any())).thenReturn(new ValidationResult());
-        when(functionReferenceValidator.validateInternalReferences(any())).thenReturn(new ValidationResult());
-        when(stateReferenceValidator.validateStateReferencesInFunctions(any(), any())).thenReturn(stateInFuncsResult);
-        when(functionReferenceValidator.validateButtonFunctionReferences(any(), any())).thenReturn(buttonFuncResult);
+        when(stateReferenceValidator.validateInternalReferences(any()))
+                .thenReturn(new ValidationResult());
+        when(functionReferenceValidator.validateInternalReferences(any()))
+                .thenReturn(new ValidationResult());
+        when(stateReferenceValidator.validateStateReferencesInFunctions(any(), any()))
+                .thenReturn(stateInFuncsResult);
+        when(functionReferenceValidator.validateButtonFunctionReferences(any(), any()))
+                .thenReturn(buttonFuncResult);
 
         // Act
         ValidationResult result = validator.validateReferences(projectModel, dslModel);
@@ -105,8 +113,12 @@ class ReferenceValidatorTest {
         // Assert
         assertTrue(result.hasErrors());
         assertEquals(2, result.getErrors().size());
-        assertTrue(result.getErrors().stream().anyMatch(e -> e.errorCode().equals("state-func-error")));
-        assertTrue(result.getErrors().stream().anyMatch(e -> e.errorCode().equals("button-func-error")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(e -> e.errorCode().equals("state-func-error")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(e -> e.errorCode().equals("button-func-error")));
     }
 
     @Test

@@ -6,13 +6,9 @@ import org.springframework.context.annotation.ComponentScan;
 
 /**
  * Demonstrates action logging best practices in Brobot.
- * 
- * This example shows:
- * - Structured logging with SLF4J
- * - Logging at appropriate levels
- * - Including context with MDC
- * - Action chain logging
- * - Performance tracking with logs
+ *
+ * <p>This example shows: - Structured logging with SLF4J - Logging at appropriate levels -
+ * Including context with MDC - Action chain logging - Performance tracking with logs
  */
 @SpringBootApplication
 @ComponentScan(basePackages = {"com.example.logging", "io.github.jspinak.brobot"})

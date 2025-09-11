@@ -1,81 +1,64 @@
 package io.github.jspinak.brobot.tools.logging.visual;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
+
 import io.github.jspinak.brobot.action.ActionResult;
-// import io.github.jspinak.brobot.action.ObjectCollection; // COMMENTED OUT - not used due to performHighlight() method not existing
-// import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions; // COMMENTED OUT - not used due to performHighlight() method not existing
-import io.github.jspinak.brobot.tools.testing.wrapper.HighlightWrapper;
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import io.github.jspinak.brobot.logging.unified.LogBuilder;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
-import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import io.github.jspinak.brobot.test.DisabledInCI;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import io.github.jspinak.brobot.tools.testing.wrapper.HighlightWrapper;
 
 /**
- * Tests for HighlightManager - manages visual feedback and highlighting.
- * These tests verify the logic for highlighting matches, regions, clicks, and
- * errors.
- * The actual GUI rendering is mocked, so tests can run in headless
- * environments.
- * All visual operations are mocked through HighlightWrapper, making these tests
- * safe for CI/CD.
+ * Tests for HighlightManager - manages visual feedback and highlighting. These tests verify the
+ * logic for highlighting matches, regions, clicks, and errors. The actual GUI rendering is mocked,
+ * so tests can run in headless environments. All visual operations are mocked through
+ * HighlightWrapper, making these tests safe for CI/CD.
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("HighlightManager Tests")
-
 @DisabledInCI
 public class HighlightManagerTest extends BrobotTestBase {
 
     private HighlightManager highlightManager;
 
-    @Mock
-    private VisualFeedbackConfig config;
+    @Mock private VisualFeedbackConfig config;
 
-    @Mock
-    private BrobotLogger brobotLogger;
+    @Mock private BrobotLogger brobotLogger;
 
-    @Mock
-    private LogBuilder logBuilder;
+    @Mock private LogBuilder logBuilder;
 
-    @Mock
-    private HighlightWrapper highlightWrapper;
+    @Mock private HighlightWrapper highlightWrapper;
 
-    @Mock
-    private VisualFeedbackConfig.FindHighlightConfig findConfig;
+    @Mock private VisualFeedbackConfig.FindHighlightConfig findConfig;
 
-    @Mock
-    private VisualFeedbackConfig.SearchRegionHighlightConfig searchConfig;
+    @Mock private VisualFeedbackConfig.SearchRegionHighlightConfig searchConfig;
 
-    @Mock
-    private VisualFeedbackConfig.ErrorHighlightConfig errorConfig;
+    @Mock private VisualFeedbackConfig.ErrorHighlightConfig errorConfig;
 
-    @Mock
-    private VisualFeedbackConfig.ClickHighlightConfig clickConfig;
+    @Mock private VisualFeedbackConfig.ClickHighlightConfig clickConfig;
 
-    @Mock
-    private io.github.jspinak.brobot.statemanagement.StateMemory stateMemory;
-    
-    @Mock
-    private io.github.jspinak.brobot.util.coordinates.CoordinateScaler coordinateScaler;
+    @Mock private io.github.jspinak.brobot.statemanagement.StateMemory stateMemory;
+
+    @Mock private io.github.jspinak.brobot.util.coordinates.CoordinateScaler coordinateScaler;
 
     @BeforeEach
     @Override
@@ -122,7 +105,9 @@ public class HighlightManagerTest extends BrobotTestBase {
         lenient().when(clickConfig.getRadius()).thenReturn(20);
         lenient().when(clickConfig.isRippleEffect()).thenReturn(false);
 
-        highlightManager = new HighlightManager(config, brobotLogger, highlightWrapper, stateMemory, coordinateScaler);
+        highlightManager =
+                new HighlightManager(
+                        config, brobotLogger, highlightWrapper, stateMemory, coordinateScaler);
 
         // Set up default wrapper behavior
         // lenient().when(highlightWrapper.isAvailable()).thenReturn(true); // COMMENTED
@@ -136,14 +121,16 @@ public class HighlightManagerTest extends BrobotTestBase {
         when(config.isAutoHighlightFinds()).thenReturn(true);
 
         List<Match> matches = new ArrayList<>();
-        matches.add(new Match.Builder()
-                .setRegion(new Region(100, 100, 50, 50))
-                .setSimScore(0.95)
-                .build());
-        matches.add(new Match.Builder()
-                .setRegion(new Region(200, 200, 60, 60))
-                .setSimScore(0.90)
-                .build());
+        matches.add(
+                new Match.Builder()
+                        .setRegion(new Region(100, 100, 50, 50))
+                        .setSimScore(0.95)
+                        .build());
+        matches.add(
+                new Match.Builder()
+                        .setRegion(new Region(200, 200, 60, 60))
+                        .setSimScore(0.90)
+                        .build());
 
         ActionResult mockResult = new ActionResult();
         mockResult.setSuccess(true);
@@ -167,11 +154,12 @@ public class HighlightManagerTest extends BrobotTestBase {
         // Arrange
         when(config.isEnabled()).thenReturn(false);
 
-        List<Match> matches = Arrays.asList(
-                new Match.Builder()
-                        .setRegion(new Region(100, 100, 50, 50))
-                        .setSimScore(0.95)
-                        .build());
+        List<Match> matches =
+                Arrays.asList(
+                        new Match.Builder()
+                                .setRegion(new Region(100, 100, 50, 50))
+                                .setSimScore(0.95)
+                                .build());
 
         // Act
         highlightManager.highlightMatches(matches);
@@ -212,11 +200,12 @@ public class HighlightManagerTest extends BrobotTestBase {
         // Removed unused stubbing: when(findConfig.getFlashCount()).thenReturn(3);
         // Removed unused stubbing: when(findConfig.getFlashInterval()).thenReturn(200L);
 
-        List<Match> matches = Arrays.asList(
-                new Match.Builder()
-                        .setRegion(new Region(100, 100, 50, 50))
-                        .setSimScore(0.95)
-                        .build());
+        List<Match> matches =
+                Arrays.asList(
+                        new Match.Builder()
+                                .setRegion(new Region(100, 100, 50, 50))
+                                .setSimScore(0.95)
+                                .build());
 
         ActionResult mockResult = new ActionResult();
         mockResult.setSuccess(true);
@@ -245,9 +234,8 @@ public class HighlightManagerTest extends BrobotTestBase {
         when(config.isEnabled()).thenReturn(true);
         when(config.isAutoHighlightSearchRegions()).thenReturn(true);
 
-        List<Region> regions = Arrays.asList(
-                new Region(0, 0, 100, 100),
-                new Region(200, 200, 150, 150));
+        List<Region> regions =
+                Arrays.asList(new Region(0, 0, 100, 100), new Region(200, 200, 150, 150));
 
         ActionResult mockResult = new ActionResult();
         mockResult.setSuccess(true);
@@ -299,8 +287,7 @@ public class HighlightManagerTest extends BrobotTestBase {
         when(config.isAutoHighlightSearchRegions()).thenReturn(true);
         when(searchConfig.isShowDimensions()).thenReturn(true);
 
-        List<Region> regions = Arrays.asList(
-                new Region(0, 0, 100, 100));
+        List<Region> regions = Arrays.asList(new Region(0, 0, 100, 100));
 
         ActionResult mockResult = new ActionResult();
         mockResult.setSuccess(true);
@@ -334,7 +321,8 @@ public class HighlightManagerTest extends BrobotTestBase {
         // Assert
         verify(brobotLogger, atLeastOnce()).log();
         verify(logBuilder).error(any(IllegalStateException.class));
-        verify(logBuilder).message("Cannot display highlights - HighlightWrapper component not available");
+        verify(logBuilder)
+                .message("Cannot display highlights - HighlightWrapper component not available");
     }
 
     @Test
@@ -343,11 +331,12 @@ public class HighlightManagerTest extends BrobotTestBase {
         when(config.isEnabled()).thenReturn(true);
         when(config.isAutoHighlightSearchRegions()).thenReturn(true);
 
-        List<HighlightManager.RegionWithContext> regionsWithContext = Arrays.asList(
-                new HighlightManager.RegionWithContext(
-                        new Region(0, 0, 100, 100), "State1", "Object1"),
-                new HighlightManager.RegionWithContext(
-                        new Region(200, 200, 150, 150), "State2", "Object2"));
+        List<HighlightManager.RegionWithContext> regionsWithContext =
+                Arrays.asList(
+                        new HighlightManager.RegionWithContext(
+                                new Region(0, 0, 100, 100), "State1", "Object1"),
+                        new HighlightManager.RegionWithContext(
+                                new Region(200, 200, 150, 150), "State2", "Object2"));
 
         ActionResult mockResult = new ActionResult();
         mockResult.setSuccess(true);
@@ -366,7 +355,8 @@ public class HighlightManagerTest extends BrobotTestBase {
         // any(ObjectCollection.class)); // COMMENTED OUT - performHighlight() method
         // doesn't exist
         verify(brobotLogger, atLeastOnce()).log();
-        verify(logBuilder, atLeastOnce()).observation(contains("Highlighting region for State1.Object1"));
+        verify(logBuilder, atLeastOnce())
+                .observation(contains("Highlighting region for State1.Object1"));
         verify(logBuilder, atLeastOnce()).metadata("state", "State1");
         verify(logBuilder, atLeastOnce()).metadata("object", "Object1");
     }
@@ -552,11 +542,12 @@ public class HighlightManagerTest extends BrobotTestBase {
         when(config.isEnabled()).thenReturn(true);
         when(config.isAutoHighlightFinds()).thenReturn(true);
 
-        List<Match> matches = Arrays.asList(
-                new Match.Builder()
-                        .setRegion(new Region(100, 100, 50, 50))
-                        .setSimScore(0.95)
-                        .build());
+        List<Match> matches =
+                Arrays.asList(
+                        new Match.Builder()
+                                .setRegion(new Region(100, 100, 50, 50))
+                                .setSimScore(0.95)
+                                .build());
 
         // Act
         highlightManager.highlightMatches(matches);
@@ -593,7 +584,9 @@ public class HighlightManagerTest extends BrobotTestBase {
     @Test
     public void testGetColorName_CommonColors() {
         // Use reflection to test private method
-        HighlightManager manager = new HighlightManager(config, brobotLogger, highlightWrapper, stateMemory, coordinateScaler);
+        HighlightManager manager =
+                new HighlightManager(
+                        config, brobotLogger, highlightWrapper, stateMemory, coordinateScaler);
 
         assertEquals("red", invokeGetColorName(manager, Color.RED));
         assertEquals("green", invokeGetColorName(manager, Color.GREEN));
@@ -609,7 +602,9 @@ public class HighlightManagerTest extends BrobotTestBase {
 
     @Test
     public void testGetColorName_CustomColors() {
-        HighlightManager manager = new HighlightManager(config, brobotLogger, highlightWrapper, stateMemory, coordinateScaler);
+        HighlightManager manager =
+                new HighlightManager(
+                        config, brobotLogger, highlightWrapper, stateMemory, coordinateScaler);
 
         // Test color approximation
         assertEquals("red", invokeGetColorName(manager, new Color(220, 50, 50)));
@@ -639,15 +634,16 @@ public class HighlightManagerTest extends BrobotTestBase {
         when(config.isEnabled()).thenReturn(true);
         when(config.isAutoHighlightFinds()).thenReturn(true);
 
-        List<Match> matches = Arrays.asList(
-                new Match.Builder()
-                        // Null region - don't set region at all
-                        .setSimScore(0.95)
-                        .build(),
-                new Match.Builder()
-                        .setRegion(new Region(100, 100, 50, 50))
-                        .setSimScore(0.90)
-                        .build());
+        List<Match> matches =
+                Arrays.asList(
+                        new Match.Builder()
+                                // Null region - don't set region at all
+                                .setSimScore(0.95)
+                                .build(),
+                        new Match.Builder()
+                                .setRegion(new Region(100, 100, 50, 50))
+                                .setSimScore(0.90)
+                                .build());
 
         ActionResult mockResult = new ActionResult();
         mockResult.setSuccess(true);

@@ -1,29 +1,24 @@
 package io.github.jspinak.brobot.model.state;
 
-import io.github.jspinak.brobot.model.element.Pattern;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.state.StateRegion;
-import io.github.jspinak.brobot.model.state.StateImage;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ContextConfiguration;
-import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
-import io.github.jspinak.brobot.test.mock.MockScreenConfig;
-import io.github.jspinak.brobot.model.state.State;
-
-import java.awt.image.BufferedImage;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
-
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.awt.image.BufferedImage;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Region;
+
 @SpringBootTest
-@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Integration test requires non-CI environment")
+@DisabledIfEnvironmentVariable(
+        named = "CI",
+        matches = "true",
+        disabledReason = "Integration test requires non-CI environment")
 public class StateIntegrationTest {
-    
+
     @BeforeAll
     static void setupHeadlessMode() {
         System.setProperty("java.awt.headless", "true");
@@ -36,15 +31,14 @@ public class StateIntegrationTest {
 
     @Test
     void stateCanBeCreatedInSpringContext() {
-        StateImage stateImage = new StateImage.Builder()
-                .addPattern(createTestPattern())
-                .build();
+        StateImage stateImage = new StateImage.Builder().addPattern(createTestPattern()).build();
 
-        State state = new State.Builder("IntegrationTestState")
-                .withImages(stateImage)
-                .withRegions(new StateRegion.Builder().build())
-                .setBlocking(true)
-                .build();
+        State state =
+                new State.Builder("IntegrationTestState")
+                        .withImages(stateImage)
+                        .withRegions(new StateRegion.Builder().build())
+                        .setBlocking(true)
+                        .build();
 
         assertNotNull(state, "State should be created successfully in a Spring context.");
         assertEquals("IntegrationTestState", state.getName());
@@ -53,12 +47,15 @@ public class StateIntegrationTest {
 
     @Test
     void testGetBoundariesInSpringContext() {
-        StateRegion stateRegion1 = new StateRegion.Builder().setSearchRegion(new Region(0, 10, 20, 20)).build();
-        StateRegion stateRegion2 = new StateRegion.Builder().setSearchRegion(new Region(30, 10, 20, 20)).build();
+        StateRegion stateRegion1 =
+                new StateRegion.Builder().setSearchRegion(new Region(0, 10, 20, 20)).build();
+        StateRegion stateRegion2 =
+                new StateRegion.Builder().setSearchRegion(new Region(30, 10, 20, 20)).build();
 
-        State state = new State.Builder("IntegrationBoundaryState")
-                .withRegions(stateRegion1, stateRegion2)
-                .build();
+        State state =
+                new State.Builder("IntegrationBoundaryState")
+                        .withRegions(stateRegion1, stateRegion2)
+                        .build();
 
         Region boundaries = state.getBoundaries();
 

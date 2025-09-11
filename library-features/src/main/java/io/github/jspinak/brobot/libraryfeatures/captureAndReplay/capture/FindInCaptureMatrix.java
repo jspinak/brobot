@@ -9,9 +9,10 @@ import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
 public class FindInCaptureMatrix {
 
     /**
-     * The Mat is ordered from the oldest to the newest row.
-     * The guess comes from finding the screenshot that is the most similar to the current screen, based on
-     * the sequence of actions to be performed. The query is like a look-up table for the sequence.
+     * The Mat is ordered from the oldest to the newest row. The guess comes from finding the
+     * screenshot that is the most similar to the current screen, based on the sequence of actions
+     * to be performed. The query is like a look-up table for the sequence.
+     *
      * @param guessIndex index of the previous last row
      * @param startTime time of the first row
      * @param endTime time of the last row
@@ -47,7 +48,8 @@ public class FindInCaptureMatrix {
                 if (firstIndexAfterStartTime == 0) { // we are at the beginning of the matrix
                     break;
                 }
-                double previousTime = MatrixUtilities.getDouble(4, firstIndexAfterStartTime - 1, 0, mat);
+                double previousTime =
+                        MatrixUtilities.getDouble(4, firstIndexAfterStartTime - 1, 0, mat);
                 time = MatrixUtilities.getDouble(4, firstIndexAfterStartTime, 0, mat);
                 if (previousTime < startTime && time > startTime) {
                     break;
@@ -86,5 +88,4 @@ public class FindInCaptureMatrix {
         }
         return lastIndexBeforeEndTime;
     }
-
 }

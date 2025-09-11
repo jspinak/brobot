@@ -1,26 +1,25 @@
 package io.github.jspinak.brobot.action.basic.type;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import io.github.jspinak.brobot.action.ActionConfig;
-import lombok.Getter;
 
-import java.util.ArrayList;
-import java.util.List;
+import io.github.jspinak.brobot.action.ActionConfig;
+
+import lombok.Getter;
 
 /**
  * Configuration for the KeyUp action.
- * <p>
- * This class encapsulates all parameters for releasing previously pressed keyboard keys.
- * It is an immutable object and must be constructed using its inner {@link Builder}.
- * </p>
- * <p>
- * By providing a specialized configuration class, the Brobot API ensures that only
- * relevant options are available for key release operations, enhancing type safety
- * and ease of use.
- * </p>
+ *
+ * <p>This class encapsulates all parameters for releasing previously pressed keyboard keys. It is
+ * an immutable object and must be constructed using its inner {@link Builder}.
+ *
+ * <p>By providing a specialized configuration class, the Brobot API ensures that only relevant
+ * options are available for key release operations, enhancing type safety and ease of use.
  *
  * @see ActionConfig
  * @see io.github.jspinak.brobot.action.basic.type.KeyUp
@@ -37,24 +36,20 @@ public final class KeyUpOptions extends ActionConfig {
         this.modifiers = new ArrayList<>(builder.modifiers);
     }
 
-    /**
-     * Builder for constructing {@link KeyUpOptions} with a fluent API.
-     */
+    /** Builder for constructing {@link KeyUpOptions} with a fluent API. */
     @JsonPOJOBuilder(withPrefix = "set")
     public static class Builder extends ActionConfig.Builder<Builder> {
 
         @JsonProperty("modifiers")
         private List<String> modifiers = new ArrayList<>();
 
-        /**
-         * Default constructor for creating a new KeyUpOptions configuration.
-         */
+        /** Default constructor for creating a new KeyUpOptions configuration. */
         @JsonCreator
         public Builder() {}
 
         /**
-         * Creates a new Builder instance pre-populated with values from an existing
-         * KeyUpOptions object, allowing for easy modification or templating.
+         * Creates a new Builder instance pre-populated with values from an existing KeyUpOptions
+         * object, allowing for easy modification or templating.
          *
          * @param original The KeyUpOptions instance to copy.
          */
@@ -64,9 +59,8 @@ public final class KeyUpOptions extends ActionConfig {
         }
 
         /**
-         * Sets the modifier keys to be released.
-         * These are typically released after all other keys to maintain proper
-         * key combination semantics.
+         * Sets the modifier keys to be released. These are typically released after all other keys
+         * to maintain proper key combination semantics.
          *
          * @param modifiers The list of modifier keys to release.
          * @return this Builder instance for chaining.

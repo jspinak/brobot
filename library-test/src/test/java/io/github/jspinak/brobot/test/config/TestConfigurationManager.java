@@ -1,23 +1,23 @@
 package io.github.jspinak.brobot.test.config;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
-
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
+
 /**
  * Manages test configuration initialization with proper ordering.
- * 
- * Single Responsibility: Initialize test environment before Spring context
- * loads.
- * This ensures ExecutionEnvironment and other static configurations are set
- * before any beans are created, preventing initialization conflicts.
+ *
+ * <p>Single Responsibility: Initialize test environment before Spring context loads. This ensures
+ * ExecutionEnvironment and other static configurations are set before any beans are created,
+ * preventing initialization conflicts.
  */
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class TestConfigurationManager implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+public class TestConfigurationManager
+        implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
@@ -25,8 +25,8 @@ public class TestConfigurationManager implements ApplicationContextInitializer<C
     }
 
     /**
-     * Configure the test environment before Spring beans are created.
-     * This method has a single responsibility: set up the test environment.
+     * Configure the test environment before Spring beans are created. This method has a single
+     * responsibility: set up the test environment.
      */
     private void configureTestEnvironment() {
         // Prevent ExecutionEnvironment from overriding headless settings
@@ -42,12 +42,14 @@ public class TestConfigurationManager implements ApplicationContextInitializer<C
         boolean isIntegrationTest = "integration".equals(testType);
 
         // Configure ExecutionEnvironment based on test type
-        ExecutionEnvironment env = ExecutionEnvironment.builder()
-                .mockMode(!isIntegrationTest) // Mock for unit tests, real for integration
-                .forceHeadless(true) // Always headless in tests
-                .allowScreenCapture(false) // No screen capture in tests
-                .verboseLogging(System.getProperty("brobot.test.verbose", "false").equals("true"))
-                .build();
+        ExecutionEnvironment env =
+                ExecutionEnvironment.builder()
+                        .mockMode(!isIntegrationTest) // Mock for unit tests, real for integration
+                        .forceHeadless(true) // Always headless in tests
+                        .allowScreenCapture(false) // No screen capture in tests
+                        .verboseLogging(
+                                System.getProperty("brobot.test.verbose", "false").equals("true"))
+                        .build();
 
         ExecutionEnvironment.setInstance(env);
 

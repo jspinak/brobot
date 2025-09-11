@@ -1,8 +1,20 @@
 package io.github.jspinak.brobot.util.image.debug;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.file.Path;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import javax.imageio.ImageIO;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,24 +24,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.sikuli.script.Pattern;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.test.DisabledInCI;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
-
 @DisabledInCI
 public class CaptureDebuggerTest extends BrobotTestBase {
 
@@ -37,8 +37,7 @@ public class CaptureDebuggerTest extends BrobotTestBase {
     private ByteArrayOutputStream outputStream;
     private PrintStream originalOut;
 
-    @TempDir
-    Path tempDir;
+    @TempDir Path tempDir;
 
     @BeforeEach
     @Override
@@ -132,16 +131,17 @@ public class CaptureDebuggerTest extends BrobotTestBase {
         String filename = "test-capture";
 
         // Act - Use reflection to test private method
-        BufferedImage result = invokePrivateMethod(
-                captureDebugger, "captureWithNewScreen", region, filename);
+        BufferedImage result =
+                invokePrivateMethod(captureDebugger, "captureWithNewScreen", region, filename);
 
         // Assert
         // In mock mode, capture methods might return null or mock images
         String output = outputStream.toString();
-        assertTrue(output.contains("Method: new Screen()") ||
-                output.contains("capture") ||
-                result == null ||
-                result.getWidth() > 0);
+        assertTrue(
+                output.contains("Method: new Screen()")
+                        || output.contains("capture")
+                        || result == null
+                        || result.getWidth() > 0);
     }
 
     @Test
@@ -151,14 +151,15 @@ public class CaptureDebuggerTest extends BrobotTestBase {
         String filename = "test-default";
 
         // Act
-        BufferedImage result = invokePrivateMethod(
-                captureDebugger, "captureWithDefaultScreen", region, filename);
+        BufferedImage result =
+                invokePrivateMethod(captureDebugger, "captureWithDefaultScreen", region, filename);
 
         // Assert
         String output = outputStream.toString();
-        assertTrue(output.contains("Method: Screen.getPrimaryScreen()") ||
-                output.contains("capture") ||
-                result == null);
+        assertTrue(
+                output.contains("Method: Screen.getPrimaryScreen()")
+                        || output.contains("capture")
+                        || result == null);
     }
 
     @Test
@@ -168,14 +169,15 @@ public class CaptureDebuggerTest extends BrobotTestBase {
         String filename = "test-robot";
 
         // Act
-        BufferedImage result = invokePrivateMethod(
-                captureDebugger, "captureWithRobot", region, filename);
+        BufferedImage result =
+                invokePrivateMethod(captureDebugger, "captureWithRobot", region, filename);
 
         // Assert
         String output = outputStream.toString();
-        assertTrue(output.contains("Method: Robot.createScreenCapture()") ||
-                output.contains("Robot") ||
-                result == null);
+        assertTrue(
+                output.contains("Method: Robot.createScreenCapture()")
+                        || output.contains("Robot")
+                        || result == null);
     }
 
     @Test
@@ -201,9 +203,10 @@ public class CaptureDebuggerTest extends BrobotTestBase {
         // Assert
         String output = outputStream.toString();
         assertTrue(output.contains("Test Comparison"));
-        assertTrue(output.contains("Same dimensions: 50x50") ||
-                output.contains("50") ||
-                output.contains("identical"));
+        assertTrue(
+                output.contains("Same dimensions: 50x50")
+                        || output.contains("50")
+                        || output.contains("identical"));
     }
 
     @Test
@@ -218,24 +221,35 @@ public class CaptureDebuggerTest extends BrobotTestBase {
         // Assert
         String output = outputStream.toString();
         assertTrue(output.contains("Size Diff"));
-        assertTrue(output.contains("DIFFERENT dimensions") ||
-                output.contains("50x50 vs 100x100") ||
-                output.contains("different"));
+        assertTrue(
+                output.contains("DIFFERENT dimensions")
+                        || output.contains("50x50 vs 100x100")
+                        || output.contains("different"));
     }
 
     @Test
     public void testCompareImages_NullImages() {
         // Act & Assert - Should handle nulls gracefully
-        assertDoesNotThrow(() -> {
-            invokePrivateMethod(captureDebugger, "compareImages", null, null, "Both Null");
-            invokePrivateMethod(captureDebugger, "compareImages",
-                    new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB), null, "Second Null");
-            invokePrivateMethod(captureDebugger, "compareImages",
-                    null, new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB), "First Null");
-        });
+        assertDoesNotThrow(
+                () -> {
+                    invokePrivateMethod(captureDebugger, "compareImages", null, null, "Both Null");
+                    invokePrivateMethod(
+                            captureDebugger,
+                            "compareImages",
+                            new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB),
+                            null,
+                            "Second Null");
+                    invokePrivateMethod(
+                            captureDebugger,
+                            "compareImages",
+                            null,
+                            new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB),
+                            "First Null");
+                });
 
         String output = outputStream.toString();
-        assertTrue(output.contains("null") || output.contains("NULL") || output.contains("missing"));
+        assertTrue(
+                output.contains("null") || output.contains("NULL") || output.contains("missing"));
     }
 
     @Test
@@ -260,9 +274,10 @@ public class CaptureDebuggerTest extends BrobotTestBase {
 
         // Assert
         String output = outputStream.toString();
-        assertTrue(output.contains("TEST IMAGE ANALYSIS") ||
-                output.contains("TEST IMAGE") ||
-                output.contains("100x100"));
+        assertTrue(
+                output.contains("TEST IMAGE ANALYSIS")
+                        || output.contains("TEST IMAGE")
+                        || output.contains("100x100"));
     }
 
     @Test
@@ -292,10 +307,11 @@ public class CaptureDebuggerTest extends BrobotTestBase {
 
         // Assert
         String output = outputStream.toString();
-        assertTrue(output.contains("Java Version") ||
-                output.contains("OS") ||
-                output.contains("Screen") ||
-                output.contains("System"));
+        assertTrue(
+                output.contains("Java Version")
+                        || output.contains("OS")
+                        || output.contains("Screen")
+                        || output.contains("System"));
     }
 
     @Test
@@ -323,13 +339,12 @@ public class CaptureDebuggerTest extends BrobotTestBase {
             Pattern pattern = new Pattern(patternFile.getAbsolutePath());
 
             // Act
-            invokePrivateMethod(captureDebugger, "testPatternMatch",
-                    capture, pattern, "Test Match");
+            invokePrivateMethod(
+                    captureDebugger, "testPatternMatch", capture, pattern, "Test Match");
 
             // Assert
             String output = outputStream.toString();
-            assertTrue(output.contains("Test Match") ||
-                    output.contains("Pattern matching"));
+            assertTrue(output.contains("Test Match") || output.contains("Pattern matching"));
 
         } catch (Exception e) {
             // In mock mode, Pattern creation might fail - that's OK

@@ -1,17 +1,15 @@
 package io.github.jspinak.brobot.runner.session;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-
-/**
- * Represents the state of an application session.
- */
+/** Represents the state of an application session. */
 @Data
 @Builder
 @NoArgsConstructor
@@ -23,16 +21,16 @@ public class SessionState {
     private LocalDateTime lastSaveTime;
     private boolean endedNormally;
     private String applicationVersion;
-    
+
     // Open configurations
     private List<String> openConfigurations;
-    
+
     // Window states
     private Map<String, WindowState> windowStates;
-    
+
     // User preferences
     private Map<String, String> userPreferences;
-    
+
     // Execution history
     private List<ExecutionRecord> executionHistory;
 }
@@ -63,7 +61,4 @@ class ExecutionRecord {
     private String status;
 }
 
-record RecoverySuggestions(
-    List<String> suggestions,
-    List<String> warnings
-) {}
+record RecoverySuggestions(List<String> suggestions, List<String> warnings) {}

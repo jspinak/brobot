@@ -1,14 +1,9 @@
 package io.github.jspinak.brobot.action.composite.chains;
 
-import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.action.ActionConfig;
-import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.action.basic.click.ClickOptions;
-import io.github.jspinak.brobot.action.basic.type.TypeOptions;
-import io.github.jspinak.brobot.model.element.Location;
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -17,36 +12,39 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
- * Comprehensive test class for ActionConfigFacade functionality.
- * Tests the facade methods that provide convenient action execution.
+ * Comprehensive test class for ActionConfigFacade functionality. Tests the facade methods that
+ * provide convenient action execution.
  */
 @ExtendWith(MockitoExtension.class)
 public class ActionConfigFacadeTest extends BrobotTestBase {
 
-    @Mock
-    private Action mockAction;
-    
-    @Mock 
-    private ActionResult mockActionResult;
-    
+    @Mock private Action mockAction;
+
+    @Mock private ActionResult mockActionResult;
+
     private ActionConfigFacade facade;
-    
+
     @BeforeEach
     @Override
     public void setupTest() {
         super.setupTest();
         facade = new ActionConfigFacade(mockAction);
-        
+
         // Setup default mock behavior with specific parameter types
-        when(mockAction.perform(any(ActionConfig.class), any(ObjectCollection[].class))).thenReturn(mockActionResult);
+        when(mockAction.perform(any(ActionConfig.class), any(ObjectCollection[].class)))
+                .thenReturn(mockActionResult);
         when(mockActionResult.isSuccess()).thenReturn(true);
     }
-    
+
     @Nested
     @DisplayName("Click Methods Tests")
     class ClickMethodsTests {
@@ -56,20 +54,20 @@ public class ActionConfigFacadeTest extends BrobotTestBase {
         void shouldPerformClickWithTimeout() {
             StateImage target = new StateImage();
             double maxWait = 5.0;
-            
+
             boolean result = facade.click(maxWait, target);
-            
+
             // In mocked environment, result can be either true or false
             assertTrue(result || !result);
         }
-        
+
         @Test
         @DisplayName("Should perform click at location")
         void shouldPerformClickAtLocation() {
             Location location = new Location(100, 200);
-            
+
             boolean result = facade.click(location);
-            
+
             assertTrue(result || !result);
         }
 
@@ -78,9 +76,9 @@ public class ActionConfigFacadeTest extends BrobotTestBase {
         void shouldPerformDoubleClickWithTimeout() {
             StateImage target = new StateImage();
             double maxWait = 5.0;
-            
+
             boolean result = facade.doubleClick(maxWait, target);
-            
+
             assertTrue(result || !result);
         }
 
@@ -88,9 +86,9 @@ public class ActionConfigFacadeTest extends BrobotTestBase {
         @DisplayName("Should perform double click at location")
         void shouldPerformDoubleClickAtLocation() {
             Location location = new Location(100, 200);
-            
+
             boolean result = facade.doubleClick(location);
-            
+
             assertTrue(result || !result);
         }
 
@@ -99,13 +97,13 @@ public class ActionConfigFacadeTest extends BrobotTestBase {
         void shouldPerformRightClick() {
             StateImage target = new StateImage();
             double maxWait = 5.0;
-            
+
             boolean result = facade.rightClick(maxWait, target);
-            
+
             assertTrue(result || !result);
         }
     }
-    
+
     @Nested
     @DisplayName("Type Methods Tests")
     class TypeMethodsTests {
@@ -114,9 +112,9 @@ public class ActionConfigFacadeTest extends BrobotTestBase {
         @DisplayName("Should type text")
         void shouldTypeText() {
             String text = "Hello World";
-            
+
             boolean result = facade.type(text);
-            
+
             assertTrue(result || !result);
         }
 
@@ -125,29 +123,31 @@ public class ActionConfigFacadeTest extends BrobotTestBase {
         void shouldTypeTextWithModifiers() {
             String text = "c";
             String modifiers = "CTRL";
-            
+
             boolean result = facade.typeWithModifiers(text, modifiers);
-            
+
             assertTrue(result || !result);
         }
     }
-    
+
     @Test
     @DisplayName("Should handle null inputs gracefully")
     void shouldHandleNullInputsGracefully() {
-        assertDoesNotThrow(() -> {
-            facade.click(5.0, (StateImage) null);
-            facade.type(null);
-            facade.typeWithModifiers(null, null);
-        });
+        assertDoesNotThrow(
+                () -> {
+                    facade.click(5.0, (StateImage) null);
+                    facade.type(null);
+                    facade.typeWithModifiers(null, null);
+                });
     }
-    
+
     @Test
     @DisplayName("Should handle empty arrays")
     void shouldHandleEmptyArrays() {
-        assertDoesNotThrow(() -> {
-            facade.click(5.0);  // Empty varargs
-            facade.rightClick(3.0);  // Empty varargs
-        });
+        assertDoesNotThrow(
+                () -> {
+                    facade.click(5.0); // Empty varargs
+                    facade.rightClick(3.0); // Empty varargs
+                });
     }
 }

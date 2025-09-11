@@ -1,39 +1,41 @@
 /**
  * Validators for external resource availability and integrity.
- * 
- * <p>This package contains validators that verify external resources referenced
- * in configurations are available, accessible, and valid. This includes image
- * files, data files, and other external dependencies that the automation
- * project requires at runtime.</p>
- * 
+ *
+ * <p>This package contains validators that verify external resources referenced in configurations
+ * are available, accessible, and valid. This includes image files, data files, and other external
+ * dependencies that the automation project requires at runtime.
+ *
  * <h2>Validators</h2>
- * 
+ *
  * <ul>
- *   <li>{@link io.github.jspinak.brobot.runner.json.validation.resource.ImageResourceValidator} - 
- *       Validates image file resources</li>
+ *   <li>{@link io.github.jspinak.brobot.runner.json.validation.resource.ImageResourceValidator} -
+ *       Validates image file resources
  * </ul>
- * 
+ *
  * <h2>Resource Types</h2>
- * 
+ *
  * <h3>Image Resources</h3>
+ *
  * <ul>
- *   <li>Pattern image files (.png, .jpg, .gif)</li>
- *   <li>Screenshot references</li>
- *   <li>Icon files</li>
- *   <li>Dynamic image templates</li>
+ *   <li>Pattern image files (.png, .jpg, .gif)
+ *   <li>Screenshot references
+ *   <li>Icon files
+ *   <li>Dynamic image templates
  * </ul>
- * 
+ *
  * <h3>File Resources</h3>
+ *
  * <ul>
- *   <li>Configuration files</li>
- *   <li>Data files</li>
- *   <li>Script files</li>
- *   <li>Template files</li>
+ *   <li>Configuration files
+ *   <li>Data files
+ *   <li>Script files
+ *   <li>Template files
  * </ul>
- * 
+ *
  * <h2>Validation Checks</h2>
- * 
+ *
  * <h3>Existence Validation</h3>
+ *
  * <pre>{@code
  * // Check if file exists
  * if (!imageFile.exists()) {
@@ -44,8 +46,9 @@
  *     ));
  * }
  * }</pre>
- * 
+ *
  * <h3>Accessibility Validation</h3>
+ *
  * <pre>{@code
  * // Check read permissions
  * if (!imageFile.canRead()) {
@@ -56,8 +59,9 @@
  *     ));
  * }
  * }</pre>
- * 
+ *
  * <h3>Format Validation</h3>
+ *
  * <pre>{@code
  * // Validate image format
  * try {
@@ -77,8 +81,9 @@
  *     ));
  * }
  * }</pre>
- * 
+ *
  * <h3>Size Validation</h3>
+ *
  * <pre>{@code
  * // Check image dimensions
  * if (img.getWidth() > MAX_WIDTH || img.getHeight() > MAX_HEIGHT) {
@@ -91,17 +96,18 @@
  *     ));
  * }
  * }</pre>
- * 
+ *
  * <h2>Path Resolution</h2>
- * 
- * <p>Resource paths are resolved in order:</p>
+ *
+ * <p>Resource paths are resolved in order:
+ *
  * <ol>
- *   <li>Absolute paths used as-is</li>
- *   <li>Relative to project root</li>
- *   <li>Relative to configured resource directories</li>
- *   <li>Classpath resources</li>
+ *   <li>Absolute paths used as-is
+ *   <li>Relative to project root
+ *   <li>Relative to configured resource directories
+ *   <li>Classpath resources
  * </ol>
- * 
+ *
  * <pre>{@code
  * // Path resolution example
  * Path resolved = resourceResolver.resolve(
@@ -110,31 +116,32 @@
  *     resourceDirs
  * );
  * }</pre>
- * 
+ *
  * <h2>Batch Validation</h2>
- * 
+ *
  * <pre>{@code
  * // Validate all images in parallel
- * List<CompletableFuture<ValidationResult>> futures = 
+ * List<CompletableFuture<ValidationResult>> futures =
  *     images.stream()
  *         .map(img -> CompletableFuture.supplyAsync(
  *             () -> validateImage(img)
  *         ))
  *         .collect(Collectors.toList());
- * 
+ *
  * // Combine results
  * ValidationResult combined = futures.stream()
  *     .map(CompletableFuture::join)
  *     .reduce(new ValidationResult(), ValidationResult::merge);
  * }</pre>
- * 
+ *
  * <h2>Caching</h2>
- * 
- * <p>Resource validation can be expensive, so caching is recommended:</p>
+ *
+ * <p>Resource validation can be expensive, so caching is recommended:
+ *
  * <pre>{@code
- * private final Map<String, ValidationResult> cache = 
+ * private final Map<String, ValidationResult> cache =
  *     new ConcurrentHashMap<>();
- * 
+ *
  * public ValidationResult validate(String resourcePath) {
  *     return cache.computeIfAbsent(resourcePath, path -> {
  *         // Perform actual validation
@@ -142,9 +149,9 @@
  *     });
  * }
  * }</pre>
- * 
+ *
  * <h2>Error Recovery</h2>
- * 
+ *
  * <pre>{@code
  * // Suggest alternatives for missing resources
  * if (!file.exists()) {
@@ -152,7 +159,7 @@
  *         file.getParent(),
  *         file.getName()
  *     );
- *     
+ *
  *     if (!similar.isEmpty()) {
  *         error.setSuggestion(
  *             "Did you mean: " + similar.get(0) + "?"
@@ -160,18 +167,18 @@
  *     }
  * }
  * }</pre>
- * 
+ *
  * <h2>Best Practices</h2>
- * 
+ *
  * <ul>
- *   <li>Validate resources early in startup</li>
- *   <li>Cache validation results</li>
- *   <li>Provide helpful path resolution hints</li>
- *   <li>Support both file system and classpath resources</li>
- *   <li>Validate in parallel for large projects</li>
- *   <li>Include file size/format in error messages</li>
+ *   <li>Validate resources early in startup
+ *   <li>Cache validation results
+ *   <li>Provide helpful path resolution hints
+ *   <li>Support both file system and classpath resources
+ *   <li>Validate in parallel for large projects
+ *   <li>Include file size/format in error messages
  * </ul>
- * 
+ *
  * @since 1.0
  * @see io.github.jspinak.brobot.runner.json.validation
  * @see java.nio.file.Path

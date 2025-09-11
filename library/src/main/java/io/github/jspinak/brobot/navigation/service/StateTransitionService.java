@@ -1,77 +1,79 @@
 package io.github.jspinak.brobot.navigation.service;
 
-import io.github.jspinak.brobot.model.transition.StateTransition;
-import io.github.jspinak.brobot.model.state.special.SpecialStateType;
-import io.github.jspinak.brobot.model.transition.StateTransitionStore;
-import io.github.jspinak.brobot.navigation.transition.StateTransitions;
-import io.github.jspinak.brobot.navigation.transition.StateTransitionsJointTable;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-import lombok.Getter;
-import org.springframework.stereotype.Component;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.springframework.stereotype.Component;
+
+import io.github.jspinak.brobot.model.state.special.SpecialStateType;
+import io.github.jspinak.brobot.model.transition.StateTransition;
+import io.github.jspinak.brobot.model.transition.StateTransitionStore;
+import io.github.jspinak.brobot.navigation.transition.StateTransitions;
+import io.github.jspinak.brobot.navigation.transition.StateTransitionsJointTable;
+import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+
+import lombok.Getter;
+
 /**
  * Service layer for managing state transitions within the active project.
- * 
- * <p>StateTransitionService provides comprehensive access to state transition information, 
- * handling the complexity of transition resolution including special cases like hidden states 
- * and PREVIOUS navigation. It serves as the bridge between high-level navigation requests 
- * and the underlying transition repository, ensuring correct transition selection even in 
- * complex GUI scenarios with overlapping states.</p>
- * 
+ *
+ * <p>StateTransitionService provides comprehensive access to state transition information, handling
+ * the complexity of transition resolution including special cases like hidden states and PREVIOUS
+ * navigation. It serves as the bridge between high-level navigation requests and the underlying
+ * transition repository, ensuring correct transition selection even in complex GUI scenarios with
+ * overlapping states.
+ *
  * <p>Key responsibilities:
+ *
  * <ul>
- *   <li><b>Transition Resolution</b>: Find the correct transition between any two states</li>
- *   <li><b>Hidden State Handling</b>: Resolve PREVIOUS transitions for hidden states</li>
- *   <li><b>Repository Management</b>: Provide access to transition collections</li>
- *   <li><b>Joint Table Maintenance</b>: Keep the transition index synchronized</li>
- *   <li><b>Statistics Management</b>: Track and reset transition success metrics</li>
+ *   <li><b>Transition Resolution</b>: Find the correct transition between any two states
+ *   <li><b>Hidden State Handling</b>: Resolve PREVIOUS transitions for hidden states
+ *   <li><b>Repository Management</b>: Provide access to transition collections
+ *   <li><b>Joint Table Maintenance</b>: Keep the transition index synchronized
+ *   <li><b>Statistics Management</b>: Track and reset transition success metrics
  * </ul>
- * </p>
- * 
+ *
  * <p>Transition resolution logic:
+ *
  * <ol>
- *   <li>Check for direct transition from source to target state</li>
- *   <li>If not found, check if target is a hidden state of source</li>
- *   <li>Return PREVIOUS if hidden state transition is valid</li>
- *   <li>Return NULL if no valid transition exists</li>
+ *   <li>Check for direct transition from source to target state
+ *   <li>If not found, check if target is a hidden state of source
+ *   <li>Return PREVIOUS if hidden state transition is valid
+ *   <li>Return NULL if no valid transition exists
  * </ol>
- * </p>
- * 
+ *
  * <p>Special state handling:
+ *
  * <ul>
- *   <li><b>PREVIOUS</b>: Represents navigation to states hidden by the current state</li>
- *   <li><b>NULL</b>: Indicates no valid transition path exists</li>
- *   <li><b>Hidden States</b>: States covered by overlays but still conceptually present</li>
+ *   <li><b>PREVIOUS</b>: Represents navigation to states hidden by the current state
+ *   <li><b>NULL</b>: Indicates no valid transition path exists
+ *   <li><b>Hidden States</b>: States covered by overlays but still conceptually present
  * </ul>
- * </p>
- * 
+ *
  * <p>Common usage patterns:
+ *
  * <ul>
- *   <li>Resolve transitions during path planning</li>
- *   <li>Access transition definitions for execution</li>
- *   <li>Query available transitions from a state</li>
- *   <li>Reset metrics for new automation runs</li>
+ *   <li>Resolve transitions during path planning
+ *   <li>Access transition definitions for execution
+ *   <li>Query available transitions from a state
+ *   <li>Reset metrics for new automation runs
  * </ul>
- * </p>
- * 
+ *
  * <p>Performance considerations:
+ *
  * <ul>
- *   <li>Uses StateTransitionsJointTable for O(1) transition lookups</li>
- *   <li>Caches transition relationships in joint table</li>
- *   <li>Returns Optional to handle missing transitions gracefully</li>
+ *   <li>Uses StateTransitionsJointTable for O(1) transition lookups
+ *   <li>Caches transition relationships in joint table
+ *   <li>Returns Optional to handle missing transitions gracefully
  * </ul>
- * </p>
- * 
- * <p>In the model-based approach, StateTransitionService encapsulates the intelligence 
- * needed to navigate complex state relationships. It understands not just direct transitions 
- * but also the nuanced relationships created by GUI layering, enabling robust automation 
- * that can handle popups, dialogs, and other overlapping UI elements.</p>
- * 
+ *
+ * <p>In the model-based approach, StateTransitionService encapsulates the intelligence needed to
+ * navigate complex state relationships. It understands not just direct transitions but also the
+ * nuanced relationships created by GUI layering, enabling robust automation that can handle popups,
+ * dialogs, and other overlapping UI elements.
+ *
  * @since 1.0
  * @see StateTransitions
  * @see StateTransition
@@ -88,8 +90,9 @@ public class StateTransitionService {
 
     private final Set<Long> statesToActivate = new HashSet<>();
 
-    public StateTransitionService(StateTransitionStore stateTransitionsRepository,
-                                            StateTransitionsJointTable stateTransitionsJointTable) {
+    public StateTransitionService(
+            StateTransitionStore stateTransitionsRepository,
+            StateTransitionsJointTable stateTransitionsJointTable) {
         this.stateTransitionsRepository = stateTransitionsRepository;
         this.stateTransitionsJointTable = stateTransitionsJointTable;
     }
@@ -104,10 +107,9 @@ public class StateTransitionService {
 
     /**
      * Initializes the transition repository and joint table.
-     * <p>
-     * Populates the StateTransitionsJointTable with all transition
-     * relationships for efficient lookup during navigation.
-     * Should be called after all transitions are loaded.
+     *
+     * <p>Populates the StateTransitionsJointTable with all transition relationships for efficient
+     * lookup during navigation. Should be called after all transitions are loaded.
      */
     public void setupRepo() {
         stateTransitionsRepository.populateStateTransitionsJointTable();
@@ -119,16 +121,17 @@ public class StateTransitionService {
 
     /**
      * Resolves the correct transition type between two states.
-     * <p>
-     * Determines whether a transition is direct, through PREVIOUS (hidden state),
-     * or invalid (NULL). This resolution is crucial for handling complex GUI
-     * scenarios where states may be hidden by overlays.
-     * <p>
-     * Resolution logic:
+     *
+     * <p>Determines whether a transition is direct, through PREVIOUS (hidden state), or invalid
+     * (NULL). This resolution is crucial for handling complex GUI scenarios where states may be
+     * hidden by overlays.
+     *
+     * <p>Resolution logic:
+     *
      * <ol>
-     *   <li>Direct transition: Returns target state ID</li>
-     *   <li>Hidden state transition: Returns PREVIOUS ID</li>
-     *   <li>No valid transition: Returns NULL ID</li>
+     *   <li>Direct transition: Returns target state ID
+     *   <li>Hidden state transition: Returns PREVIOUS ID
+     *   <li>No valid transition: Returns NULL ID
      * </ol>
      *
      * @param from Source state ID
@@ -139,8 +142,11 @@ public class StateTransitionService {
         // check first if it is a normal transition
         if (stateTransitionsJointTable.getStatesWithTransitionsFrom(from).contains(to)) return to;
         // if not, it may be a hidden state transition
-        if (!stateTransitionsJointTable.getIncomingTransitionsToPREVIOUS().containsKey(to) ||
-            !stateTransitionsJointTable.getIncomingTransitionsToPREVIOUS().get(to).contains(from))
+        if (!stateTransitionsJointTable.getIncomingTransitionsToPREVIOUS().containsKey(to)
+                || !stateTransitionsJointTable
+                        .getIncomingTransitionsToPREVIOUS()
+                        .get(to)
+                        .contains(from))
             return SpecialStateType.NULL.getId(); // it is not a hidden state transition either
         return SpecialStateType.PREVIOUS.getId(); // it is a hidden state transition
     }
@@ -154,25 +160,28 @@ public class StateTransitionService {
     public Optional<StateTransitions> getTransitions(Long stateId) {
         // Debug: Log what we're looking for and what's available
         System.out.println("=== TRANSITION DEBUG: getTransitions() called for stateId: " + stateId);
-        System.out.println("=== TRANSITION DEBUG: Repository contains transitions for states: " + 
-                          stateTransitionsRepository.getAllStateIds());
-        
+        System.out.println(
+                "=== TRANSITION DEBUG: Repository contains transitions for states: "
+                        + stateTransitionsRepository.getAllStateIds());
+
         Optional<StateTransitions> result = stateTransitionsRepository.get(stateId);
         if (result.isPresent()) {
             System.out.println("=== TRANSITION DEBUG: Found StateTransitions for state " + stateId);
-            System.out.println("=== TRANSITION DEBUG: Transitions: " + result.get().getTransitions().size());
+            System.out.println(
+                    "=== TRANSITION DEBUG: Transitions: " + result.get().getTransitions().size());
         } else {
-            System.out.println("=== TRANSITION DEBUG: NO StateTransitions found for state " + stateId);
+            System.out.println(
+                    "=== TRANSITION DEBUG: NO StateTransitions found for state " + stateId);
         }
-        
+
         return result;
     }
 
     /**
      * Retrieves a specific transition between two states.
-     * <p>
-     * Finds the exact transition definition that navigates from
-     * the source state to the target state.
+     *
+     * <p>Finds the exact transition definition that navigates from the source state to the target
+     * state.
      *
      * @param fromState Source state ID
      * @param toState Target state ID
@@ -186,27 +195,26 @@ public class StateTransitionService {
 
     /**
      * Resets success counters for all transitions.
-     * <p>
-     * Clears transition success statistics, useful for starting
-     * fresh automation runs or resetting performance metrics.
-     * Side effect: modifies all transitions in repository.
+     *
+     * <p>Clears transition success statistics, useful for starting fresh automation runs or
+     * resetting performance metrics. Side effect: modifies all transitions in repository.
      */
     public void resetTimesSuccessful() {
-        stateTransitionsRepository.getAllTransitions().forEach(transition ->
-                transition.setTimesSuccessful(0));
+        stateTransitionsRepository
+                .getAllTransitions()
+                .forEach(transition -> transition.setTimesSuccessful(0));
     }
 
     /**
      * Prints all transitions to the report for debugging.
-     * <p>
-     * Useful for verifying transition definitions and
-     * troubleshooting navigation issues.
+     *
+     * <p>Useful for verifying transition definitions and troubleshooting navigation issues.
      */
     public void printAllTransitions() {
         ConsoleReporter.print("State Transitions in Project:\n");
-        stateTransitionsRepository.getAllTransitions().forEach(transition ->
-                ConsoleReporter.println(transition.toString()));
+        stateTransitionsRepository
+                .getAllTransitions()
+                .forEach(transition -> ConsoleReporter.println(transition.toString()));
         ConsoleReporter.println();
     }
-
 }

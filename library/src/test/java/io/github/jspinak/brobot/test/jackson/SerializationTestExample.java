@@ -1,6 +1,11 @@
 package io.github.jspinak.brobot.test.jackson;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.time.LocalDateTime;
+
+import org.junit.jupiter.api.Test;
+
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
@@ -13,17 +18,10 @@ import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.state.StateLocation;
 import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.junit.jupiter.api.Test;
-
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Example test demonstrating how to properly serialize/deserialize Brobot objects.
- * Shows solutions to common Jackson serialization issues.
+ * Example test demonstrating how to properly serialize/deserialize Brobot objects. Shows solutions
+ * to common Jackson serialization issues.
  */
 public class SerializationTestExample extends BrobotTestBase {
 
@@ -39,19 +37,19 @@ public class SerializationTestExample extends BrobotTestBase {
         record.setResultSuccess(true);
         record.setStateName("TestState");
         record.setStateId(1L);
-        
+
         // Add a match (will be serialized as simplified object)
         Match match = new Match();
         match.setRegion(new Region(10, 20, 100, 50));
         match.setScore(0.95);
         match.setText("Match text");
         record.addMatch(match);
-        
+
         // Serialize
         String json = testObjectMapper.writeValueAsString(record);
         assertNotNull(json);
         assertTrue(json.contains("\"actionSuccess\":true"));
-        
+
         // Deserialize
         ActionRecord deserialized = testObjectMapper.readValue(json, ActionRecord.class);
         assertNotNull(deserialized);
@@ -64,21 +62,21 @@ public class SerializationTestExample extends BrobotTestBase {
     public void testObjectCollectionSerialization() throws Exception {
         // Create ObjectCollection with various objects
         ObjectCollection collection = new ObjectCollection();
-        
+
         // Add StateLocation
         StateLocation stateLocation = new StateLocation();
         stateLocation.setName("TestLocation");
         Location location = new Location(100, 200);
         stateLocation.setLocation(location);
         collection.getStateLocations().add(stateLocation);
-        
+
         // Add StateRegion
         StateRegion stateRegion = new StateRegion();
         stateRegion.setName("TestRegion");
         Region region = new Region(0, 0, 800, 600);
         stateRegion.setSearchRegion(region);
         collection.getStateRegions().add(stateRegion);
-        
+
         // Add StateImage (without actual image data)
         StateImage stateImage = new StateImage();
         stateImage.setName("TestImage");
@@ -87,14 +85,14 @@ public class SerializationTestExample extends BrobotTestBase {
         pattern.setImgpath("images/test.png");
         stateImage.getPatterns().add(pattern);
         collection.getStateImages().add(stateImage);
-        
+
         // Serialize
         String json = testObjectMapper.writeValueAsString(collection);
         assertNotNull(json);
         assertTrue(json.contains("TestLocation"));
         assertTrue(json.contains("TestRegion"));
         assertTrue(json.contains("TestImage"));
-        
+
         // Deserialize
         ObjectCollection deserialized = testObjectMapper.readValue(json, ObjectCollection.class);
         assertNotNull(deserialized);
@@ -112,24 +110,24 @@ public class SerializationTestExample extends BrobotTestBase {
         result.setSuccess(true);
         // Duration is a Duration object, not double
         // Text is a Text object, not String
-        
+
         // Add matches
         Match match1 = new Match();
         match1.setRegion(new Region(10, 10, 50, 50));
         match1.setScore(0.98);
         result.getMatchList().add(match1);
-        
+
         Match match2 = new Match();
         match2.setRegion(new Region(100, 100, 50, 50));
         match2.setScore(0.85);
         result.getMatchList().add(match2);
-        
+
         // Serialize
         String json = testObjectMapper.writeValueAsString(result);
         assertNotNull(json);
         assertTrue(json.contains("\"success\":true"));
         // Text field removed as it's a complex object
-        
+
         // Deserialize
         ActionResult deserialized = testObjectMapper.readValue(json, ActionResult.class);
         assertNotNull(deserialized);
@@ -141,17 +139,16 @@ public class SerializationTestExample extends BrobotTestBase {
     @Test
     public void testPatternFindOptionsSerialization() throws Exception {
         // Create PatternFindOptions with builder pattern
-        PatternFindOptions options = new PatternFindOptions.Builder()
-            .setSimilarity(0.8)
-            .build();
-        
+        PatternFindOptions options = new PatternFindOptions.Builder().setSimilarity(0.8).build();
+
         // Serialize
         String json = testObjectMapper.writeValueAsString(options);
         assertNotNull(json);
         assertTrue(json.contains("0.8"));
-        
+
         // Deserialize
-        PatternFindOptions deserialized = testObjectMapper.readValue(json, PatternFindOptions.class);
+        PatternFindOptions deserialized =
+                testObjectMapper.readValue(json, PatternFindOptions.class);
         assertNotNull(deserialized);
         assertEquals(0.8, deserialized.getSimilarity(), 0.01);
     }
@@ -165,13 +162,13 @@ public class SerializationTestExample extends BrobotTestBase {
         match.setText("Extracted text");
         match.setName("test-match");
         match.setTimeStamp(LocalDateTime.now());
-        
+
         // Serialize
         String json = testObjectMapper.writeValueAsString(match);
         assertNotNull(json);
         assertTrue(json.contains("0.92"));
         assertTrue(json.contains("Extracted text"));
-        
+
         // Deserialize
         Match deserialized = testObjectMapper.readValue(json, Match.class);
         assertNotNull(deserialized);
@@ -185,7 +182,7 @@ public class SerializationTestExample extends BrobotTestBase {
         // Create StateImage with multiple patterns
         StateImage stateImage = new StateImage();
         stateImage.setName("ComplexState");
-        
+
         // Add patterns without actual image data
         for (int i = 0; i < 3; i++) {
             Pattern pattern = new Pattern();
@@ -193,13 +190,13 @@ public class SerializationTestExample extends BrobotTestBase {
             pattern.setImgpath("images/pattern-" + i + ".png");
             pattern.setFixed(i == 0); // First pattern is fixed
             pattern.setDynamic(i == 2); // Last pattern is dynamic
-            
+
             // Add search regions
             pattern.getRegions().add(new Region(i * 100, i * 100, 200, 200));
-            
+
             stateImage.getPatterns().add(pattern);
         }
-        
+
         // Serialize
         String json = testObjectMapper.writeValueAsString(stateImage);
         assertNotNull(json);
@@ -207,7 +204,7 @@ public class SerializationTestExample extends BrobotTestBase {
         assertTrue(json.contains("pattern-0"));
         assertTrue(json.contains("pattern-1"));
         assertTrue(json.contains("pattern-2"));
-        
+
         // Deserialize
         StateImage deserialized = testObjectMapper.readValue(json, StateImage.class);
         assertNotNull(deserialized);
@@ -222,11 +219,11 @@ public class SerializationTestExample extends BrobotTestBase {
         // Create objects with null/empty fields
         ActionRecord record = new ActionRecord();
         // Don't set timestamp, matches, etc.
-        
+
         // Should serialize without errors
         String json = testObjectMapper.writeValueAsString(record);
         assertNotNull(json);
-        
+
         // Should deserialize without errors
         ActionRecord deserialized = testObjectMapper.readValue(json, ActionRecord.class);
         assertNotNull(deserialized);
@@ -235,16 +232,18 @@ public class SerializationTestExample extends BrobotTestBase {
     }
 
     @Test
-    @org.junit.jupiter.api.Disabled("ObjectCollection requires type information due to enableDefaultTyping - needs review")
+    @org.junit.jupiter.api.Disabled(
+            "ObjectCollection requires type information due to enableDefaultTyping - needs review")
     public void testArrayVsSingleValueDeserialization() throws Exception {
         // Test that arrays are properly deserialized
         String jsonWithArray = "{\"stateImages\":[{\"name\":\"test\"}]}";
-        
+
         // Array should deserialize successfully
-        ObjectCollection fromArray = testObjectMapper.readValue(jsonWithArray, ObjectCollection.class);
+        ObjectCollection fromArray =
+                testObjectMapper.readValue(jsonWithArray, ObjectCollection.class);
         assertNotNull(fromArray);
         assertEquals(1, fromArray.getStateImages().size());
-        
+
         // Note: Single value as array feature would require additional configuration
         // For ObjectCollection which doesn't have @JsonTypeInfo, this is the expected behavior
     }

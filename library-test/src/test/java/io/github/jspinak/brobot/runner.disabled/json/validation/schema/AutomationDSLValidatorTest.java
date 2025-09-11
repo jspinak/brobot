@@ -1,13 +1,12 @@
 package io.github.jspinak.brobot.runner.json.validation.schema;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
 import io.github.jspinak.brobot.runner.json.validation.model.ValidationSeverity;
-import io.github.jspinak.brobot.runner.json.validation.schema.AutomationDSLValidator;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class AutomationDSLValidatorTest {
 
@@ -20,7 +19,8 @@ class AutomationDSLValidatorTest {
 
     @Test
     void validate_whenJsonIsValid_shouldReturnSuccessfulResult() {
-        String validJson = """
+        String validJson =
+                """
         {
             "automationFunctions": [
                 {
@@ -52,7 +52,8 @@ class AutomationDSLValidatorTest {
 
     @Test
     void validate_whenSchemaValidationFails_shouldReturnErrors() {
-        String invalidSchemaJson = """
+        String invalidSchemaJson =
+                """
         {
             "automationFunctions": [
                 {
@@ -67,13 +68,15 @@ class AutomationDSLValidatorTest {
 
         assertFalse(result.isValid());
         assertTrue(result.hasSevereErrors());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Schema validation failed")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(e -> e.errorCode().equals("Schema validation failed")));
     }
 
     @Test
     void validate_whenFunctionNamesAreNotUnique_shouldReturnError() {
-        String duplicateFunctionNamesJson = """
+        String duplicateFunctionNamesJson =
+                """
         {
             "automationFunctions": [
                 {
@@ -93,14 +96,16 @@ class AutomationDSLValidatorTest {
         ValidationResult result = automationDSLValidator.validate(duplicateFunctionNamesJson);
 
         assertFalse(result.isValid());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Duplicate function name")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(e -> e.errorCode().equals("Duplicate function name")));
     }
 
     @Test
     void validate_whenNonVoidFunctionMissingReturn_shouldReturnError() {
         // Using "int" which is valid in the schema enum
-        String functionMissingReturnJson = """
+        String functionMissingReturnJson =
+                """
         {
             "automationFunctions": [
                 {
@@ -115,20 +120,16 @@ class AutomationDSLValidatorTest {
         ValidationResult result = automationDSLValidator.validate(functionMissingReturnJson);
 
         assertFalse(result.isValid());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Missing return statement")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(e -> e.errorCode().equals("Missing return statement")));
     }
-
-
-
-
-
-
 
     @Test
     void validate_whenFunctionHasNoName_shouldReturnError() {
         // Schema requires name, so this will fail with critical error
-        String missingNameJson = """
+        String missingNameJson =
+                """
         {
             "automationFunctions": [
                 {
@@ -143,9 +144,8 @@ class AutomationDSLValidatorTest {
 
         assertFalse(result.isValid());
         assertTrue(result.hasCriticalErrors());
-        assertTrue(result.getErrors().stream()
-                .anyMatch(e -> e.errorCode().equals("Schema validation failed")));
+        assertTrue(
+                result.getErrors().stream()
+                        .anyMatch(e -> e.errorCode().equals("Schema validation failed")));
     }
-
-
 }

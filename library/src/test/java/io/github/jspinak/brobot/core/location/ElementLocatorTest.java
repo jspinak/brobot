@@ -1,9 +1,13 @@
 package io.github.jspinak.brobot.core.location;
 
-import io.github.jspinak.brobot.model.element.Pattern;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,31 +15,25 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
- * Comprehensive tests for ElementLocator interface.
- * Tests element location operations and strategies.
+ * Comprehensive tests for ElementLocator interface. Tests element location operations and
+ * strategies.
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ElementLocator Interface Tests")
 public class ElementLocatorTest extends BrobotTestBase {
 
-    @Mock
-    private ElementLocator elementLocator;
-    
-    @Mock
-    private Pattern mockPattern;
-    
-    @Mock
-    private StateImage mockStateImage;
-    
+    @Mock private ElementLocator elementLocator;
+
+    @Mock private Pattern mockPattern;
+
+    @Mock private StateImage mockStateImage;
+
     @BeforeEach
     @Override
     public void setupTest() {
@@ -46,10 +44,11 @@ public class ElementLocatorTest extends BrobotTestBase {
     @DisplayName("Should locate elements with default request")
     void testLocateWithDefaults() {
         // Arrange
-        ElementLocator.LocateRequest request = new ElementLocator.LocateRequest.Builder()
-            .withPatterns(Arrays.asList(mockPattern))
-            .build();
-            
+        ElementLocator.LocateRequest request =
+                new ElementLocator.LocateRequest.Builder()
+                        .withPatterns(Arrays.asList(mockPattern))
+                        .build();
+
         ElementLocator.Element element = createTestElement(100, 200, 50, 50, 0.9);
         when(elementLocator.locate(request)).thenReturn(Arrays.asList(element));
 
@@ -67,17 +66,18 @@ public class ElementLocatorTest extends BrobotTestBase {
     @DisplayName("Should locate elements with ALL strategy")
     void testLocateWithAllStrategy() {
         // Arrange
-        ElementLocator.LocateRequest request = new ElementLocator.LocateRequest.Builder()
-            .withPatterns(Arrays.asList(mockPattern))
-            .withStrategy(ElementLocator.FindStrategy.ALL)
-            .withSimilarity(0.8)
-            .build();
-            
-        List<ElementLocator.Element> elements = Arrays.asList(
-            createTestElement(100, 100, 50, 50, 0.95),
-            createTestElement(200, 200, 50, 50, 0.85),
-            createTestElement(300, 300, 50, 50, 0.82)
-        );
+        ElementLocator.LocateRequest request =
+                new ElementLocator.LocateRequest.Builder()
+                        .withPatterns(Arrays.asList(mockPattern))
+                        .withStrategy(ElementLocator.FindStrategy.ALL)
+                        .withSimilarity(0.8)
+                        .build();
+
+        List<ElementLocator.Element> elements =
+                Arrays.asList(
+                        createTestElement(100, 100, 50, 50, 0.95),
+                        createTestElement(200, 200, 50, 50, 0.85),
+                        createTestElement(300, 300, 50, 50, 0.82));
         when(elementLocator.locate(request)).thenReturn(elements);
 
         // Act
@@ -92,11 +92,12 @@ public class ElementLocatorTest extends BrobotTestBase {
     @DisplayName("Should locate single best element with BEST strategy")
     void testLocateWithBestStrategy() {
         // Arrange
-        ElementLocator.LocateRequest request = new ElementLocator.LocateRequest.Builder()
-            .withPatterns(Arrays.asList(mockPattern))
-            .withStrategy(ElementLocator.FindStrategy.BEST)
-            .build();
-            
+        ElementLocator.LocateRequest request =
+                new ElementLocator.LocateRequest.Builder()
+                        .withPatterns(Arrays.asList(mockPattern))
+                        .withStrategy(ElementLocator.FindStrategy.BEST)
+                        .build();
+
         ElementLocator.Element bestElement = createTestElement(150, 150, 60, 60, 0.98);
         when(elementLocator.locate(request)).thenReturn(Arrays.asList(bestElement));
 
@@ -113,11 +114,12 @@ public class ElementLocatorTest extends BrobotTestBase {
     @DisplayName("Should locate first element with FIRST strategy")
     void testLocateWithFirstStrategy() {
         // Arrange
-        ElementLocator.LocateRequest request = new ElementLocator.LocateRequest.Builder()
-            .withPatterns(Arrays.asList(mockPattern))
-            .withStrategy(ElementLocator.FindStrategy.FIRST)
-            .build();
-            
+        ElementLocator.LocateRequest request =
+                new ElementLocator.LocateRequest.Builder()
+                        .withPatterns(Arrays.asList(mockPattern))
+                        .withStrategy(ElementLocator.FindStrategy.FIRST)
+                        .build();
+
         ElementLocator.Element firstElement = createTestElement(50, 50, 40, 40, 0.85);
         when(elementLocator.locate(request)).thenReturn(Arrays.asList(firstElement));
 
@@ -135,16 +137,17 @@ public class ElementLocatorTest extends BrobotTestBase {
         // Arrange
         Pattern pattern1 = mock(Pattern.class);
         Pattern pattern2 = mock(Pattern.class);
-        
-        ElementLocator.LocateRequest request = new ElementLocator.LocateRequest.Builder()
-            .withPatterns(Arrays.asList(pattern1, pattern2))
-            .withStrategy(ElementLocator.FindStrategy.EACH)
-            .build();
-            
-        List<ElementLocator.Element> elements = Arrays.asList(
-            createTestElement(100, 100, 50, 50, 0.9),
-            createTestElement(200, 200, 50, 50, 0.85)
-        );
+
+        ElementLocator.LocateRequest request =
+                new ElementLocator.LocateRequest.Builder()
+                        .withPatterns(Arrays.asList(pattern1, pattern2))
+                        .withStrategy(ElementLocator.FindStrategy.EACH)
+                        .build();
+
+        List<ElementLocator.Element> elements =
+                Arrays.asList(
+                        createTestElement(100, 100, 50, 50, 0.9),
+                        createTestElement(200, 200, 50, 50, 0.85));
         when(elementLocator.locate(request)).thenReturn(elements);
 
         // Act
@@ -160,17 +163,17 @@ public class ElementLocatorTest extends BrobotTestBase {
     void testLocateInRegion() {
         // Arrange
         Region searchRegion = new Region(100, 100, 400, 300);
-        ElementLocator.LocateRequest request = new ElementLocator.LocateRequest.Builder()
-            .withPatterns(Arrays.asList(mockPattern))
-            .build();
-            
+        ElementLocator.LocateRequest request =
+                new ElementLocator.LocateRequest.Builder()
+                        .withPatterns(Arrays.asList(mockPattern))
+                        .build();
+
         ElementLocator.Element element = createTestElement(150, 150, 50, 50, 0.92);
         when(elementLocator.locateInRegion(request, searchRegion))
-            .thenReturn(Arrays.asList(element));
+                .thenReturn(Arrays.asList(element));
 
         // Act
-        List<ElementLocator.Element> results = 
-            elementLocator.locateInRegion(request, searchRegion);
+        List<ElementLocator.Element> results = elementLocator.locateInRegion(request, searchRegion);
 
         // Assert
         assertNotNull(results);
@@ -183,11 +186,12 @@ public class ElementLocatorTest extends BrobotTestBase {
     @DisplayName("Should return empty list when no elements found")
     void testLocateNoResults() {
         // Arrange
-        ElementLocator.LocateRequest request = new ElementLocator.LocateRequest.Builder()
-            .withPatterns(Arrays.asList(mockPattern))
-            .withSimilarity(0.99)
-            .build();
-            
+        ElementLocator.LocateRequest request =
+                new ElementLocator.LocateRequest.Builder()
+                        .withPatterns(Arrays.asList(mockPattern))
+                        .withSimilarity(0.99)
+                        .build();
+
         when(elementLocator.locate(request)).thenReturn(new ArrayList<>());
 
         // Act
@@ -231,17 +235,16 @@ public class ElementLocatorTest extends BrobotTestBase {
     @DisplayName("Should wait for element to appear")
     void testWaitForElement() {
         // Arrange
-        ElementLocator.LocateRequest request = new ElementLocator.LocateRequest.Builder()
-            .withPatterns(Arrays.asList(mockPattern))
-            .build();
-            
+        ElementLocator.LocateRequest request =
+                new ElementLocator.LocateRequest.Builder()
+                        .withPatterns(Arrays.asList(mockPattern))
+                        .build();
+
         ElementLocator.Element element = createTestElement(100, 100, 50, 50, 0.9);
-        when(elementLocator.waitForElement(request, 5.0))
-            .thenReturn(Arrays.asList(element));
+        when(elementLocator.waitForElement(request, 5.0)).thenReturn(Arrays.asList(element));
 
         // Act
-        List<ElementLocator.Element> results = 
-            elementLocator.waitForElement(request, 5.0);
+        List<ElementLocator.Element> results = elementLocator.waitForElement(request, 5.0);
 
         // Assert
         assertNotNull(results);
@@ -252,16 +255,15 @@ public class ElementLocatorTest extends BrobotTestBase {
     @DisplayName("Should timeout when element doesn't appear")
     void testWaitForElementTimeout() {
         // Arrange
-        ElementLocator.LocateRequest request = new ElementLocator.LocateRequest.Builder()
-            .withPatterns(Arrays.asList(mockPattern))
-            .build();
-            
-        when(elementLocator.waitForElement(request, 2.0))
-            .thenReturn(new ArrayList<>());
+        ElementLocator.LocateRequest request =
+                new ElementLocator.LocateRequest.Builder()
+                        .withPatterns(Arrays.asList(mockPattern))
+                        .build();
+
+        when(elementLocator.waitForElement(request, 2.0)).thenReturn(new ArrayList<>());
 
         // Act
-        List<ElementLocator.Element> results = 
-            elementLocator.waitForElement(request, 2.0);
+        List<ElementLocator.Element> results = elementLocator.waitForElement(request, 2.0);
 
         // Assert
         assertNotNull(results);
@@ -315,11 +317,12 @@ public class ElementLocatorTest extends BrobotTestBase {
     void testRequestWithStateImages() {
         // Arrange
         List<StateImage> stateImages = Arrays.asList(mockStateImage);
-        ElementLocator.LocateRequest request = new ElementLocator.LocateRequest.Builder()
-            .withStateImages(stateImages)
-            .withSimilarity(0.85)
-            .withMaxMatches(5)
-            .build();
+        ElementLocator.LocateRequest request =
+                new ElementLocator.LocateRequest.Builder()
+                        .withStateImages(stateImages)
+                        .withSimilarity(0.85)
+                        .withMaxMatches(5)
+                        .build();
 
         // Assert
         assertNotNull(request.getStateImages());
@@ -332,14 +335,11 @@ public class ElementLocatorTest extends BrobotTestBase {
     @DisplayName("Should build request with search regions")
     void testRequestWithSearchRegions() {
         // Arrange
-        List<Region> regions = Arrays.asList(
-            new Region(0, 0, 500, 500),
-            new Region(500, 0, 500, 500)
-        );
-        
-        ElementLocator.LocateRequest request = new ElementLocator.LocateRequest.Builder()
-            .withSearchRegions(regions)
-            .build();
+        List<Region> regions =
+                Arrays.asList(new Region(0, 0, 500, 500), new Region(500, 0, 500, 500));
+
+        ElementLocator.LocateRequest request =
+                new ElementLocator.LocateRequest.Builder().withSearchRegions(regions).build();
 
         // Assert
         assertNotNull(request.getSearchRegions());
@@ -360,7 +360,7 @@ public class ElementLocatorTest extends BrobotTestBase {
         assertNotNull(location);
         assertEquals(130, location.getX()); // 100 + 60/2
         assertEquals(220, location.getY()); // 200 + 40/2
-        
+
         assertNotNull(region);
         assertEquals(100, region.x());
         assertEquals(200, region.y());
@@ -373,7 +373,7 @@ public class ElementLocatorTest extends BrobotTestBase {
     void testElementProperties() {
         // Arrange
         ElementLocator.Element element = new ElementLocator.Element();
-        
+
         // Act
         element.setX(150);
         element.setY(250);
@@ -415,7 +415,7 @@ public class ElementLocatorTest extends BrobotTestBase {
         List<Pattern> patterns = Arrays.asList(mockPattern);
         List<StateImage> stateImages = Arrays.asList(mockStateImage);
         List<Region> regions = Arrays.asList(new Region(0, 0, 100, 100));
-        
+
         // Act
         request.setPatterns(patterns);
         request.setStateImages(stateImages);
@@ -434,7 +434,8 @@ public class ElementLocatorTest extends BrobotTestBase {
     }
 
     // Helper method to create test elements
-    private ElementLocator.Element createTestElement(int x, int y, int w, int h, double confidence) {
+    private ElementLocator.Element createTestElement(
+            int x, int y, int w, int h, double confidence) {
         ElementLocator.Element element = new ElementLocator.Element();
         element.setX(x);
         element.setY(y);

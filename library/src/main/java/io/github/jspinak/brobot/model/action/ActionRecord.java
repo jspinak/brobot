@@ -1,13 +1,4 @@
 package io.github.jspinak.brobot.model.action;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.action.ActionType;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.github.jspinak.brobot.action.ActionConfig;
-import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.model.state.special.SpecialStateType;
-import lombok.Data;
-import org.sikuli.script.Screen;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -16,64 +7,74 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
+import org.sikuli.script.Screen;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.state.special.SpecialStateType;
+
+import lombok.Data;
+
 // ActionOptions and UNIVERSAL find strategy have been removed
 // Use PatternFindOptions.Strategy instead
 
 /**
  * Records match results and context at a specific point in time for the Brobot framework.
- * 
- * <p>ActionRecord captures comprehensive information about a match operation, including the 
- * matches found (or not found), the action options used, timing data, and contextual state 
- * information. These records form the foundation of Brobot's learning and mocking capabilities, 
- * enabling the framework to simulate realistic GUI behavior based on historical data.</p>
- * 
+ *
+ * <p>ActionRecord captures comprehensive information about a match operation, including the matches
+ * found (or not found), the action options used, timing data, and contextual state information.
+ * These records form the foundation of Brobot's learning and mocking capabilities, enabling the
+ * framework to simulate realistic GUI behavior based on historical data.
+ *
  * <p>Key components captured:
+ *
  * <ul>
- *   <li><b>Match Results</b>: List of matches found (empty for failed searches)</li>
- *   <li><b>Action Context</b>: The ActionConfig that produced this result</li>
- *   <li><b>Timing Data</b>: Duration of the operation for performance analysis</li>
- *   <li><b>State Context</b>: Which state the match occurred in</li>
- *   <li><b>Success Indicators</b>: Both action success and result success flags</li>
- *   <li><b>Text Data</b>: Extracted text for text-based operations</li>
+ *   <li><b>Match Results</b>: List of matches found (empty for failed searches)
+ *   <li><b>Action Context</b>: The ActionConfig that produced this result
+ *   <li><b>Timing Data</b>: Duration of the operation for performance analysis
+ *   <li><b>State Context</b>: Which state the match occurred in
+ *   <li><b>Success Indicators</b>: Both action success and result success flags
+ *   <li><b>Text Data</b>: Extracted text for text-based operations
  * </ul>
- * </p>
- * 
+ *
  * <p>Snapshot creation strategy:
+ *
  * <ul>
- *   <li>One record per action completion, not per find operation</li>
- *   <li>Avoids skewing data with repeated searches in wait loops</li>
- *   <li>Captures representative examples of real-world behavior</li>
+ *   <li>One record per action completion, not per find operation
+ *   <li>Avoids skewing data with repeated searches in wait loops
+ *   <li>Captures representative examples of real-world behavior
  * </ul>
- * </p>
- * 
+ *
  * <p>Mock operation support:
+ *
  * <ul>
- *   <li>Provides realistic match/failure distributions based on history</li>
- *   <li>Action-specific records prevent cross-action interference</li>
- *   <li>Enables accurate simulation of Find.ALL and Find.EACH operations</li>
- *   <li>Supports extraction of best matches for Find.FIRST/BEST simulation</li>
+ *   <li>Provides realistic match/failure distributions based on history
+ *   <li>Action-specific records prevent cross-action interference
+ *   <li>Enables accurate simulation of Find.ALL and Find.EACH operations
+ *   <li>Supports extraction of best matches for Find.FIRST/BEST simulation
  * </ul>
- * </p>
- * 
+ *
  * <p>Special handling:
+ *
  * <ul>
- *   <li><b>Failed Searches</b>: Empty match list indicates search failure</li>
- *   <li><b>Multiple Results</b>: Text operations may produce multiple strings in one record</li>
- *   <li><b>Reused Matches</b>: Matches used multiple times within an action are recorded once</li>
- *   <li><b>State Association</b>: Links matches to their containing state for context</li>
+ *   <li><b>Failed Searches</b>: Empty match list indicates search failure
+ *   <li><b>Multiple Results</b>: Text operations may produce multiple strings in one record
+ *   <li><b>Reused Matches</b>: Matches used multiple times within an action are recorded once
+ *   <li><b>State Association</b>: Links matches to their containing state for context
  * </ul>
- * </p>
- * 
- * <p>In the model-based approach, ActionRecord provides the empirical foundation for 
- * understanding how GUI elements behave over time. By capturing not just what was found 
- * but also when, where, and under what conditions, these records enable sophisticated 
- * analysis and realistic simulation of GUI interactions.</p>
- * 
- * <p>The extensive documentation in this class reflects its central role in Brobot's 
- * learning and simulation capabilities. The detailed timing and context capture enables 
- * the framework to adapt to varying application behaviors and provide accurate mock 
- * responses during development and testing.</p>
- * 
+ *
+ * <p>In the model-based approach, ActionRecord provides the empirical foundation for understanding
+ * how GUI elements behave over time. By capturing not just what was found but also when, where, and
+ * under what conditions, these records enable sophisticated analysis and realistic simulation of
+ * GUI interactions.
+ *
+ * <p>The extensive documentation in this class reflects its central role in Brobot's learning and
+ * simulation capabilities. The detailed timing and context capture enables the framework to adapt
+ * to varying application behaviors and provide accurate mock responses during development and
+ * testing.
+ *
  * @since 1.0
  * @see ActionHistory
  * @see Match
@@ -85,36 +86,38 @@ import java.util.Random;
 public class ActionRecord {
 
     // ActionOptions field removed - use actionConfig instead
-    
+
     /**
-     * The ActionConfig can be queried to find which settings lead to success.
-     * This is the new API replacement for actionConfig.
+     * The ActionConfig can be queried to find which settings lead to success. This is the new API
+     * replacement for actionConfig.
      */
     private ActionConfig actionConfig;
+
     private List<Match> matchList = new ArrayList<>();
     private String text = "";
     private double duration = 0.0;
     private LocalDateTime timeStamp; // JPA can handle LocalDateTime without @Embedded
-    /**
-     * The Action was successfully performed.
-     */
+
+    /** The Action was successfully performed. */
     private boolean actionSuccess = false;
+
     /**
-     * The Result was successful. Results must be defined by the app.
-     * For example, the result of a Click is finding a particular Image.
-     * This field can be used to analyze Action options in order to find
-     * the best settings for an application.
+     * The Result was successful. Results must be defined by the app. For example, the result of a
+     * Click is finding a particular Image. This field can be used to analyze Action options in
+     * order to find the best settings for an application.
      */
     private boolean resultSuccess = false;
+
     /**
-     * The state in which the image is found gives important information about where and when the state can be found.
-     * Mock operations can query this information when an action is carried out in a particular state.
+     * The state in which the image is found gives important information about where and when the
+     * state can be found. Mock operations can query this information when an action is carried out
+     * in a particular state.
      */
     private String stateName = SpecialStateType.NULL.toString();
+
     private Long stateId = SpecialStateType.NULL.getId();
 
-    public <E> ActionRecord(List<E> matchInSnapshot) {
-    }
+    public <E> ActionRecord(List<E> matchInSnapshot) {}
 
     public boolean wasFound() {
         return !matchList.isEmpty() || !text.isEmpty();
@@ -137,20 +140,23 @@ public class ActionRecord {
         if (actionConfig != null) {
             System.out.format(" %s", getActionTypeFromConfig(actionConfig));
         }
-        matchList.forEach(match -> System.out.format(" %d.%d,%d.%d", match.x(), match.y(), match.w(), match.h()));
+        matchList.forEach(
+                match ->
+                        System.out.format(
+                                " %d.%d,%d.%d", match.x(), match.y(), match.w(), match.h()));
         System.out.format(" %s", text);
         System.out.println();
     }
-    
+
     /**
      * Helper method to extract action type from ActionConfig based on its class name.
-     * 
+     *
      * @param actionConfig the configuration to extract action type from
      * @return string representation of the action type
      */
     private String getActionTypeFromConfig(ActionConfig actionConfig) {
         String className = actionConfig.getClass().getSimpleName();
-        
+
         // Map config class names to action types
         if (className.contains("Click")) return "CLICK";
         if (className.contains("Find") || className.contains("Pattern")) return "FIND";
@@ -163,13 +169,14 @@ public class ActionRecord {
         if (className.contains("Scroll")) return "SCROLL";
         if (className.contains("KeyDown")) return "KEY_DOWN";
         if (className.contains("KeyUp")) return "KEY_UP";
-        
+
         // Default to class name if no mapping found
         return className.replace("Options", "").toUpperCase();
     }
 
     /**
      * Match objects and Text are compared. If they are the same, true is returned.
+     *
      * @param actionRecord the ActionRecord to compare
      * @return true if the Match list and Text are the same.
      */
@@ -193,9 +200,7 @@ public class ActionRecord {
     The most common Snapshot added directly to a State is a Match (x,y,w,h) with a Find operation.
      */
     public ActionRecord(int x, int y, int w, int h) {
-        Match match = new Match.Builder()
-                .setRegion(x,y,w,h)
-                .build();
+        Match match = new Match.Builder().setRegion(x, y, w, h).build();
         this.matchList.add(match);
     }
 
@@ -206,43 +211,68 @@ public class ActionRecord {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         ActionRecord that = (ActionRecord) obj;
-        return Double.compare(that.duration, duration) == 0 &&
-                actionSuccess == that.actionSuccess &&
-                resultSuccess == that.resultSuccess &&
-                Objects.equals(actionConfig, that.actionConfig) &&
-                Objects.equals(matchList, that.matchList) &&
-                Objects.equals(text, that.text) &&
-                Objects.equals(stateName, that.stateName) &&
-                Objects.equals(stateId, that.stateId) &&
-                (timeStamp == null && that.timeStamp == null ||
-                        timeStamp != null && that.timeStamp != null &&
-                                timeStamp.truncatedTo(java.time.temporal.ChronoUnit.SECONDS)
-                                        .equals(that.timeStamp.truncatedTo(java.time.temporal.ChronoUnit.SECONDS)));
+        return Double.compare(that.duration, duration) == 0
+                && actionSuccess == that.actionSuccess
+                && resultSuccess == that.resultSuccess
+                && Objects.equals(actionConfig, that.actionConfig)
+                && Objects.equals(matchList, that.matchList)
+                && Objects.equals(text, that.text)
+                && Objects.equals(stateName, that.stateName)
+                && Objects.equals(stateId, that.stateId)
+                && (timeStamp == null && that.timeStamp == null
+                        || timeStamp != null
+                                && that.timeStamp != null
+                                && timeStamp
+                                        .truncatedTo(java.time.temporal.ChronoUnit.SECONDS)
+                                        .equals(
+                                                that.timeStamp.truncatedTo(
+                                                        java.time.temporal.ChronoUnit.SECONDS)));
     }
 
     @Override
     public int hashCode() {
         // Truncate timestamp to seconds to be consistent with the equals() method.
-        java.time.LocalDateTime truncatedTimestamp = (timeStamp != null) ?
-                timeStamp.truncatedTo(java.time.temporal.ChronoUnit.SECONDS) : null;
+        java.time.LocalDateTime truncatedTimestamp =
+                (timeStamp != null)
+                        ? timeStamp.truncatedTo(java.time.temporal.ChronoUnit.SECONDS)
+                        : null;
 
-        return java.util.Objects.hash(actionConfig, matchList, text, duration, truncatedTimestamp,
-                actionSuccess, resultSuccess, stateName, stateId);
+        return java.util.Objects.hash(
+                actionConfig,
+                matchList,
+                text,
+                duration,
+                truncatedTimestamp,
+                actionSuccess,
+                resultSuccess,
+                stateName,
+                stateId);
     }
 
     @Override
     public String toString() {
-        return "ActionRecord{" +
-                "actionConfig=" + actionConfig +
-                ", matchList=" + matchList +
-                ", text='" + text + '\'' +
-                ", duration=" + duration +
-                ", timeStamp=" + timeStamp +
-                ", actionSuccess=" + actionSuccess +
-                ", resultSuccess=" + resultSuccess +
-                ", stateName='" + stateName + '\'' +
-                ", stateId=" + stateId +
-                '}';
+        return "ActionRecord{"
+                + "actionConfig="
+                + actionConfig
+                + ", matchList="
+                + matchList
+                + ", text='"
+                + text
+                + '\''
+                + ", duration="
+                + duration
+                + ", timeStamp="
+                + timeStamp
+                + ", actionSuccess="
+                + actionSuccess
+                + ", resultSuccess="
+                + resultSuccess
+                + ", stateName='"
+                + stateName
+                + '\''
+                + ", stateId="
+                + stateId
+                + '}';
     }
 
     public static class Builder {
@@ -257,6 +287,7 @@ public class ActionRecord {
 
         /**
          * Sets the ActionConfig for this record (modern API).
+         *
          * @param actionConfig the ActionConfig used for the action
          * @return this builder
          */
@@ -282,20 +313,16 @@ public class ActionRecord {
         }
 
         public Builder addMatch(int x, int y, int w, int h) {
-            Match match = new Match.Builder()
-                    .setRegion(x,y,w,h)
-                    .build();
+            Match match = new Match.Builder().setRegion(x, y, w, h).build();
             this.matchList.add(match);
             return this;
         }
 
         public Builder addMatches(int numberOfMatches, int w, int h) {
-            for (int i=0; i<numberOfMatches; i++) {
+            for (int i = 0; i < numberOfMatches; i++) {
                 int x = new Random().nextInt(new Screen().w);
                 int y = new Random().nextInt(new Screen().h);
-                Match match = new Match.Builder()
-                        .setRegion(x,y,w,h)
-                        .build();
+                Match match = new Match.Builder().setRegion(x, y, w, h).build();
                 this.matchList.add(match);
             }
             return this;
@@ -344,5 +371,4 @@ public class ActionRecord {
             return this;
         }
     }
-
 }

@@ -1,11 +1,14 @@
 package io.github.jspinak.brobot.core.location;
 
-import io.github.jspinak.brobot.core.services.PatternMatcher;
-import io.github.jspinak.brobot.core.services.ScreenCaptureService;
-import io.github.jspinak.brobot.model.element.Pattern;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,43 +16,35 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import io.github.jspinak.brobot.core.services.PatternMatcher;
+import io.github.jspinak.brobot.core.services.ScreenCaptureService;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
- * Comprehensive tests for VisualElementLocator implementation.
- * Tests the visual pattern matching implementation of element location.
+ * Comprehensive tests for VisualElementLocator implementation. Tests the visual pattern matching
+ * implementation of element location.
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("VisualElementLocator Implementation Tests")
 public class VisualElementLocatorTest extends BrobotTestBase {
 
     private VisualElementLocator visualLocator;
-    
-    @Mock
-    private PatternMatcher patternMatcher;
-    
-    @Mock
-    private ScreenCaptureService screenCapture;
-    
-    @Mock
-    private BufferedImage mockScreen;
-    
-    @Mock
-    private BufferedImage mockRegionImage;
-    
-    @Mock
-    private Pattern mockPattern;
-    
-    @Mock
-    private StateImage mockStateImage;
-    
+
+    @Mock private PatternMatcher patternMatcher;
+
+    @Mock private ScreenCaptureService screenCapture;
+
+    @Mock private BufferedImage mockScreen;
+
+    @Mock private BufferedImage mockRegionImage;
+
+    @Mock private Pattern mockPattern;
+
+    @Mock private StateImage mockStateImage;
+
     @BeforeEach
     @Override
     public void setupTest() {
@@ -63,18 +58,19 @@ public class VisualElementLocatorTest extends BrobotTestBase {
         // Arrange
         when(screenCapture.captureScreen()).thenReturn(mockScreen);
         when(mockStateImage.getPatterns()).thenReturn(Arrays.asList(mockPattern));
-        
-        ElementLocator.LocateRequest request = new ElementLocator.LocateRequest.Builder()
-            .withStateImages(Arrays.asList(mockStateImage))
-            .withSimilarity(0.8)
-            .withStrategy(ElementLocator.FindStrategy.ALL)
-            .build();
-            
-        PatternMatcher.MatchResult matchResult = 
-            new PatternMatcher.MatchResult(100, 200, 50, 50, 0.95);
-        
+
+        ElementLocator.LocateRequest request =
+                new ElementLocator.LocateRequest.Builder()
+                        .withStateImages(Arrays.asList(mockStateImage))
+                        .withSimilarity(0.8)
+                        .withStrategy(ElementLocator.FindStrategy.ALL)
+                        .build();
+
+        PatternMatcher.MatchResult matchResult =
+                new PatternMatcher.MatchResult(100, 200, 50, 50, 0.95);
+
         when(patternMatcher.findPatterns(eq(mockScreen), eq(mockPattern), any()))
-            .thenReturn(Arrays.asList(matchResult));
+                .thenReturn(Arrays.asList(matchResult));
 
         // Act
         List<ElementLocator.Element> results = visualLocator.locate(request);
@@ -93,10 +89,11 @@ public class VisualElementLocatorTest extends BrobotTestBase {
     void testLocateScreenCaptureFailure() {
         // Arrange
         when(screenCapture.captureScreen()).thenReturn(null);
-        
-        ElementLocator.LocateRequest request = new ElementLocator.LocateRequest.Builder()
-            .withPatterns(Arrays.asList(mockPattern))
-            .build();
+
+        ElementLocator.LocateRequest request =
+                new ElementLocator.LocateRequest.Builder()
+                        .withPatterns(Arrays.asList(mockPattern))
+                        .build();
 
         // Act
         List<ElementLocator.Element> results = visualLocator.locate(request);
@@ -115,21 +112,21 @@ public class VisualElementLocatorTest extends BrobotTestBase {
         Region searchRegion = new Region(100, 100, 400, 300);
         when(screenCapture.captureRegion(searchRegion)).thenReturn(mockRegionImage);
         when(mockPattern.getName()).thenReturn("TestPattern");
-        
-        ElementLocator.LocateRequest request = new ElementLocator.LocateRequest.Builder()
-            .withPatterns(Arrays.asList(mockPattern))
-            .withSimilarity(0.75)
-            .build();
-            
-        PatternMatcher.MatchResult matchResult = 
-            new PatternMatcher.MatchResult(50, 60, 40, 40, 0.88);
-        
+
+        ElementLocator.LocateRequest request =
+                new ElementLocator.LocateRequest.Builder()
+                        .withPatterns(Arrays.asList(mockPattern))
+                        .withSimilarity(0.75)
+                        .build();
+
+        PatternMatcher.MatchResult matchResult =
+                new PatternMatcher.MatchResult(50, 60, 40, 40, 0.88);
+
         when(patternMatcher.findPatterns(eq(mockRegionImage), eq(mockPattern), any()))
-            .thenReturn(Arrays.asList(matchResult));
+                .thenReturn(Arrays.asList(matchResult));
 
         // Act
-        List<ElementLocator.Element> results = 
-            visualLocator.locateInRegion(request, searchRegion);
+        List<ElementLocator.Element> results = visualLocator.locateInRegion(request, searchRegion);
 
         // Assert
         assertNotNull(results);
@@ -157,13 +154,13 @@ public class VisualElementLocatorTest extends BrobotTestBase {
     @DisplayName("Should handle null region")
     void testLocateInNullRegion() {
         // Arrange
-        ElementLocator.LocateRequest request = new ElementLocator.LocateRequest.Builder()
-            .withPatterns(Arrays.asList(mockPattern))
-            .build();
+        ElementLocator.LocateRequest request =
+                new ElementLocator.LocateRequest.Builder()
+                        .withPatterns(Arrays.asList(mockPattern))
+                        .build();
 
         // Act
-        List<ElementLocator.Element> results = 
-            visualLocator.locateInRegion(request, null);
+        List<ElementLocator.Element> results = visualLocator.locateInRegion(request, null);
 
         // Assert
         assertNotNull(results);
@@ -176,9 +173,9 @@ public class VisualElementLocatorTest extends BrobotTestBase {
     void testLocateEmptyPatterns() {
         // Arrange
         when(screenCapture.captureScreen()).thenReturn(mockScreen);
-        
-        ElementLocator.LocateRequest request = new ElementLocator.LocateRequest.Builder()
-            .build(); // No patterns or StateImages
+
+        ElementLocator.LocateRequest request =
+                new ElementLocator.LocateRequest.Builder().build(); // No patterns or StateImages
 
         // Act
         List<ElementLocator.Element> results = visualLocator.locate(request);
@@ -195,20 +192,21 @@ public class VisualElementLocatorTest extends BrobotTestBase {
     void testApplyBestStrategy() {
         // Arrange
         when(screenCapture.captureScreen()).thenReturn(mockScreen);
-        
-        ElementLocator.LocateRequest request = new ElementLocator.LocateRequest.Builder()
-            .withPatterns(Arrays.asList(mockPattern))
-            .withStrategy(ElementLocator.FindStrategy.BEST)
-            .build();
-            
-        List<PatternMatcher.MatchResult> matchResults = Arrays.asList(
-            new PatternMatcher.MatchResult(100, 100, 50, 50, 0.85),
-            new PatternMatcher.MatchResult(200, 200, 50, 50, 0.95), // Best
-            new PatternMatcher.MatchResult(300, 300, 50, 50, 0.75)
-        );
-        
+
+        ElementLocator.LocateRequest request =
+                new ElementLocator.LocateRequest.Builder()
+                        .withPatterns(Arrays.asList(mockPattern))
+                        .withStrategy(ElementLocator.FindStrategy.BEST)
+                        .build();
+
+        List<PatternMatcher.MatchResult> matchResults =
+                Arrays.asList(
+                        new PatternMatcher.MatchResult(100, 100, 50, 50, 0.85),
+                        new PatternMatcher.MatchResult(200, 200, 50, 50, 0.95), // Best
+                        new PatternMatcher.MatchResult(300, 300, 50, 50, 0.75));
+
         when(patternMatcher.findPatterns(eq(mockScreen), eq(mockPattern), any()))
-            .thenReturn(matchResults);
+                .thenReturn(matchResults);
 
         // Act
         List<ElementLocator.Element> results = visualLocator.locate(request);
@@ -225,20 +223,21 @@ public class VisualElementLocatorTest extends BrobotTestBase {
     void testApplyFirstStrategy() {
         // Arrange
         when(screenCapture.captureScreen()).thenReturn(mockScreen);
-        
-        ElementLocator.LocateRequest request = new ElementLocator.LocateRequest.Builder()
-            .withPatterns(Arrays.asList(mockPattern))
-            .withStrategy(ElementLocator.FindStrategy.FIRST)
-            .withSimilarity(0.7)
-            .build();
-            
-        List<PatternMatcher.MatchResult> matchResults = Arrays.asList(
-            new PatternMatcher.MatchResult(100, 100, 50, 50, 0.85),
-            new PatternMatcher.MatchResult(200, 200, 50, 50, 0.95)
-        );
-        
+
+        ElementLocator.LocateRequest request =
+                new ElementLocator.LocateRequest.Builder()
+                        .withPatterns(Arrays.asList(mockPattern))
+                        .withStrategy(ElementLocator.FindStrategy.FIRST)
+                        .withSimilarity(0.7)
+                        .build();
+
+        List<PatternMatcher.MatchResult> matchResults =
+                Arrays.asList(
+                        new PatternMatcher.MatchResult(100, 100, 50, 50, 0.85),
+                        new PatternMatcher.MatchResult(200, 200, 50, 50, 0.95));
+
         when(patternMatcher.findPatterns(eq(mockScreen), eq(mockPattern), any()))
-            .thenReturn(matchResults);
+                .thenReturn(matchResults);
 
         // Act
         List<ElementLocator.Element> results = visualLocator.locate(request);
@@ -254,30 +253,31 @@ public class VisualElementLocatorTest extends BrobotTestBase {
     void testApplyEachStrategy() {
         // Arrange
         when(screenCapture.captureScreen()).thenReturn(mockScreen);
-        
+
         Pattern pattern1 = mock(Pattern.class);
         Pattern pattern2 = mock(Pattern.class);
         when(pattern1.getName()).thenReturn("Pattern1");
         when(pattern2.getName()).thenReturn("Pattern2");
-        
-        ElementLocator.LocateRequest request = new ElementLocator.LocateRequest.Builder()
-            .withPatterns(Arrays.asList(pattern1, pattern2))
-            .withStrategy(ElementLocator.FindStrategy.EACH)
-            .build();
-            
+
+        ElementLocator.LocateRequest request =
+                new ElementLocator.LocateRequest.Builder()
+                        .withPatterns(Arrays.asList(pattern1, pattern2))
+                        .withStrategy(ElementLocator.FindStrategy.EACH)
+                        .build();
+
         // Multiple matches for pattern1
         when(patternMatcher.findPatterns(eq(mockScreen), eq(pattern1), any()))
-            .thenReturn(Arrays.asList(
-                new PatternMatcher.MatchResult(100, 100, 50, 50, 0.9),
-                new PatternMatcher.MatchResult(150, 150, 50, 50, 0.85)
-            ));
-            
+                .thenReturn(
+                        Arrays.asList(
+                                new PatternMatcher.MatchResult(100, 100, 50, 50, 0.9),
+                                new PatternMatcher.MatchResult(150, 150, 50, 50, 0.85)));
+
         // Multiple matches for pattern2
         when(patternMatcher.findPatterns(eq(mockScreen), eq(pattern2), any()))
-            .thenReturn(Arrays.asList(
-                new PatternMatcher.MatchResult(200, 200, 50, 50, 0.88),
-                new PatternMatcher.MatchResult(250, 250, 50, 50, 0.82)
-            ));
+                .thenReturn(
+                        Arrays.asList(
+                                new PatternMatcher.MatchResult(200, 200, 50, 50, 0.88),
+                                new PatternMatcher.MatchResult(250, 250, 50, 50, 0.82)));
 
         // Act
         List<ElementLocator.Element> results = visualLocator.locate(request);
@@ -300,15 +300,14 @@ public class VisualElementLocatorTest extends BrobotTestBase {
         element.setHeight(60);
         element.setConfidence(0.9);
         element.setSourcePattern(mockPattern);
-        
+
         Region elementRegion = element.getRegion();
         when(screenCapture.captureRegion(elementRegion)).thenReturn(mockRegionImage);
-        
-        PatternMatcher.MatchResult matchResult = 
-            new PatternMatcher.MatchResult(0, 0, 50, 60, 0.85);
-        
+
+        PatternMatcher.MatchResult matchResult = new PatternMatcher.MatchResult(0, 0, 50, 60, 0.85);
+
         when(patternMatcher.findPatterns(eq(mockRegionImage), eq(mockPattern), any()))
-            .thenReturn(Arrays.asList(matchResult));
+                .thenReturn(Arrays.asList(matchResult));
 
         // Act
         boolean exists = visualLocator.verifyElement(element);
@@ -328,12 +327,12 @@ public class VisualElementLocatorTest extends BrobotTestBase {
         element.setWidth(50);
         element.setHeight(60);
         element.setSourcePattern(mockPattern);
-        
+
         Region elementRegion = element.getRegion();
         when(screenCapture.captureRegion(elementRegion)).thenReturn(mockRegionImage);
-        
+
         when(patternMatcher.findPatterns(eq(mockRegionImage), eq(mockPattern), any()))
-            .thenReturn(new ArrayList<>());
+                .thenReturn(new ArrayList<>());
 
         // Act
         boolean exists = visualLocator.verifyElement(element);
@@ -357,24 +356,24 @@ public class VisualElementLocatorTest extends BrobotTestBase {
     @DisplayName("Should wait for element to appear")
     void testWaitForElement() throws InterruptedException {
         // Arrange
-        ElementLocator.LocateRequest request = new ElementLocator.LocateRequest.Builder()
-            .withPatterns(Arrays.asList(mockPattern))
-            .build();
-            
+        ElementLocator.LocateRequest request =
+                new ElementLocator.LocateRequest.Builder()
+                        .withPatterns(Arrays.asList(mockPattern))
+                        .build();
+
         when(screenCapture.captureScreen())
-            .thenReturn(null) // First attempt - not found
-            .thenReturn(null) // Second attempt - not found
-            .thenReturn(mockScreen); // Third attempt - found
-            
-        PatternMatcher.MatchResult matchResult = 
-            new PatternMatcher.MatchResult(100, 100, 50, 50, 0.9);
-        
+                .thenReturn(null) // First attempt - not found
+                .thenReturn(null) // Second attempt - not found
+                .thenReturn(mockScreen); // Third attempt - found
+
+        PatternMatcher.MatchResult matchResult =
+                new PatternMatcher.MatchResult(100, 100, 50, 50, 0.9);
+
         when(patternMatcher.findPatterns(eq(mockScreen), eq(mockPattern), any()))
-            .thenReturn(Arrays.asList(matchResult));
+                .thenReturn(Arrays.asList(matchResult));
 
         // Act
-        List<ElementLocator.Element> results = 
-            visualLocator.waitForElement(request, 1.0);
+        List<ElementLocator.Element> results = visualLocator.waitForElement(request, 1.0);
 
         // Assert
         assertNotNull(results);
@@ -386,17 +385,16 @@ public class VisualElementLocatorTest extends BrobotTestBase {
     @DisplayName("Should timeout waiting for element")
     void testWaitForElementTimeout() {
         // Arrange
-        ElementLocator.LocateRequest request = new ElementLocator.LocateRequest.Builder()
-            .withPatterns(Arrays.asList(mockPattern))
-            .build();
-            
+        ElementLocator.LocateRequest request =
+                new ElementLocator.LocateRequest.Builder()
+                        .withPatterns(Arrays.asList(mockPattern))
+                        .build();
+
         when(screenCapture.captureScreen()).thenReturn(mockScreen);
-        when(patternMatcher.findPatterns(any(), any(), any()))
-            .thenReturn(new ArrayList<>());
+        when(patternMatcher.findPatterns(any(), any(), any())).thenReturn(new ArrayList<>());
 
         // Act
-        List<ElementLocator.Element> results = 
-            visualLocator.waitForElement(request, 0.5);
+        List<ElementLocator.Element> results = visualLocator.waitForElement(request, 0.5);
 
         // Assert
         assertNotNull(results);
@@ -413,17 +411,17 @@ public class VisualElementLocatorTest extends BrobotTestBase {
         element.setWidth(50);
         element.setHeight(60);
         element.setSourcePattern(mockPattern);
-        
+
         Region elementRegion = element.getRegion();
         when(screenCapture.captureRegion(elementRegion))
-            .thenReturn(mockRegionImage) // First check - still exists
-            .thenReturn(mockRegionImage) // Second check - still exists
-            .thenReturn(mockRegionImage); // Third check - gone
-            
+                .thenReturn(mockRegionImage) // First check - still exists
+                .thenReturn(mockRegionImage) // Second check - still exists
+                .thenReturn(mockRegionImage); // Third check - gone
+
         when(patternMatcher.findPatterns(eq(mockRegionImage), eq(mockPattern), any()))
-            .thenReturn(Arrays.asList(new PatternMatcher.MatchResult(0, 0, 50, 60, 0.9)))
-            .thenReturn(Arrays.asList(new PatternMatcher.MatchResult(0, 0, 50, 60, 0.9)))
-            .thenReturn(new ArrayList<>()); // Element vanished
+                .thenReturn(Arrays.asList(new PatternMatcher.MatchResult(0, 0, 50, 60, 0.9)))
+                .thenReturn(Arrays.asList(new PatternMatcher.MatchResult(0, 0, 50, 60, 0.9)))
+                .thenReturn(new ArrayList<>()); // Element vanished
 
         // Act
         boolean vanished = visualLocator.waitForVanish(element, 1.0);
@@ -443,13 +441,13 @@ public class VisualElementLocatorTest extends BrobotTestBase {
         element.setWidth(50);
         element.setHeight(60);
         element.setSourcePattern(mockPattern);
-        
+
         Region elementRegion = element.getRegion();
         when(screenCapture.captureRegion(elementRegion)).thenReturn(mockRegionImage);
-        
+
         // Element always found
         when(patternMatcher.findPatterns(eq(mockRegionImage), eq(mockPattern), any()))
-            .thenReturn(Arrays.asList(new PatternMatcher.MatchResult(0, 0, 50, 60, 0.9)));
+                .thenReturn(Arrays.asList(new PatternMatcher.MatchResult(0, 0, 50, 60, 0.9)));
 
         // Act
         boolean vanished = visualLocator.waitForVanish(element, 0.5);
@@ -473,17 +471,18 @@ public class VisualElementLocatorTest extends BrobotTestBase {
     void testExtractPatternsFromStateImages() {
         // Arrange
         when(screenCapture.captureScreen()).thenReturn(mockScreen);
-        
+
         Pattern pattern1 = mock(Pattern.class);
         Pattern pattern2 = mock(Pattern.class);
         when(mockStateImage.getPatterns()).thenReturn(Arrays.asList(pattern1, pattern2));
-        
-        ElementLocator.LocateRequest request = new ElementLocator.LocateRequest.Builder()
-            .withStateImages(Arrays.asList(mockStateImage))
-            .build();
-            
+
+        ElementLocator.LocateRequest request =
+                new ElementLocator.LocateRequest.Builder()
+                        .withStateImages(Arrays.asList(mockStateImage))
+                        .build();
+
         when(patternMatcher.findPatterns(eq(mockScreen), any(Pattern.class), any()))
-            .thenReturn(Arrays.asList(new PatternMatcher.MatchResult(100, 100, 50, 50, 0.9)));
+                .thenReturn(Arrays.asList(new PatternMatcher.MatchResult(100, 100, 50, 50, 0.9)));
 
         // Act
         List<ElementLocator.Element> results = visualLocator.locate(request);
@@ -501,13 +500,14 @@ public class VisualElementLocatorTest extends BrobotTestBase {
         // Arrange
         when(screenCapture.captureScreen()).thenReturn(mockScreen);
         when(mockStateImage.getPatterns()).thenReturn(Arrays.asList(mockPattern));
-        
-        ElementLocator.LocateRequest request = new ElementLocator.LocateRequest.Builder()
-            .withStateImages(Arrays.asList(mockStateImage))
-            .build();
-            
+
+        ElementLocator.LocateRequest request =
+                new ElementLocator.LocateRequest.Builder()
+                        .withStateImages(Arrays.asList(mockStateImage))
+                        .build();
+
         when(patternMatcher.findPatterns(eq(mockScreen), eq(mockPattern), any()))
-            .thenReturn(Arrays.asList(new PatternMatcher.MatchResult(100, 100, 50, 50, 0.9)));
+                .thenReturn(Arrays.asList(new PatternMatcher.MatchResult(100, 100, 50, 50, 0.9)));
 
         // Act
         List<ElementLocator.Element> results = visualLocator.locate(request);

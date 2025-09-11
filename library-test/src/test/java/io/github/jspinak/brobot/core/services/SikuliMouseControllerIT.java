@@ -1,17 +1,18 @@
 package io.github.jspinak.brobot.core.services;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
- * Integration tests for SikuliMouseController.
- * Tests mouse operations in mock mode using Spring context.
+ * Integration tests for SikuliMouseController. Tests mouse operations in mock mode using Spring
+ * context.
  */
 @SpringBootTest
 @ActiveProfiles("test")
@@ -20,8 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Tag("mouse")
 public class SikuliMouseControllerIT extends BrobotTestBase {
 
-    @Autowired
-    private SikuliMouseController mouseController;
+    @Autowired private SikuliMouseController mouseController;
 
     @BeforeEach
     @Override
@@ -74,11 +74,13 @@ public class SikuliMouseControllerIT extends BrobotTestBase {
     @DisplayName("Should successfully double-click in mock mode")
     void testDoubleClick() {
         // Test double-click for left button
-        boolean leftDouble = mouseController.doubleClick(100, 200, MouseController.MouseButton.LEFT);
+        boolean leftDouble =
+                mouseController.doubleClick(100, 200, MouseController.MouseButton.LEFT);
         assertTrue(leftDouble, "Left double-click should succeed in mock mode");
 
         // Test double-click for right button (simulated)
-        boolean rightDouble = mouseController.doubleClick(150, 250, MouseController.MouseButton.RIGHT);
+        boolean rightDouble =
+                mouseController.doubleClick(150, 250, MouseController.MouseButton.RIGHT);
         assertTrue(rightDouble, "Right double-click should succeed in mock mode");
     }
 
@@ -138,7 +140,8 @@ public class SikuliMouseControllerIT extends BrobotTestBase {
             boolean moveResult = mouseController.moveTo(i * 10, i * 10);
             assertTrue(moveResult, "Move " + i + " should succeed");
 
-            boolean clickResult = mouseController.click(i * 10, i * 10, MouseController.MouseButton.LEFT);
+            boolean clickResult =
+                    mouseController.click(i * 10, i * 10, MouseController.MouseButton.LEFT);
             assertTrue(clickResult, "Click " + i + " should succeed");
         }
     }
@@ -169,9 +172,11 @@ public class SikuliMouseControllerIT extends BrobotTestBase {
 
         for (int i = 0; i < threadCount; i++) {
             final int index = i;
-            threads[i] = new Thread(() -> {
-                results[index] = mouseController.moveTo(index * 100, index * 100);
-            });
+            threads[i] =
+                    new Thread(
+                            () -> {
+                                results[index] = mouseController.moveTo(index * 100, index * 100);
+                            });
             threads[i].start();
         }
 

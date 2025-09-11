@@ -1,73 +1,61 @@
 package io.github.jspinak.brobot.runner.ui.execution;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicLong;
 import javafx.geometry.Insets;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
-import javafx.scene.control.TitledPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+
+import io.github.jspinak.brobot.runner.ui.components.base.BrobotCard;
+
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.AccessLevel;
-import io.github.jspinak.brobot.runner.ui.components.base.BrobotCard;
-import atlantafx.base.theme.Styles;
-
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Panel component for displaying performance metrics and charts.
- * 
+ *
  * <p>This panel displays:
+ *
  * <ul>
- *   <li>Total actions executed</li>
- *   <li>Average action duration</li>
- *   <li>Success rate percentage</li>
- *   <li>Peak memory usage</li>
- *   <li>Performance charts for action duration and match time</li>
+ *   <li>Total actions executed
+ *   <li>Average action duration
+ *   <li>Success rate percentage
+ *   <li>Peak memory usage
+ *   <li>Performance charts for action duration and match time
  * </ul>
- * </p>
  */
 @Getter
 @Setter(AccessLevel.PRIVATE)
 public class PerformanceMetricsPanel extends BrobotCard {
-    
+
     // Metrics labels
-    @Getter
-    private Label totalActionsLabel;
-    @Getter
-    private Label avgActionDurationLabel;
-    @Getter
-    private Label successRateLabel;
-    @Getter
-    private Label peakMemoryLabel;
-    
+    @Getter private Label totalActionsLabel;
+    @Getter private Label avgActionDurationLabel;
+    @Getter private Label successRateLabel;
+    @Getter private Label peakMemoryLabel;
+
     // Charts
-    @Getter
-    private LineChart<Number, Number> performanceChart;
-    @Getter
-    private XYChart.Series<Number, Number> actionDurationSeries;
-    @Getter
-    private XYChart.Series<Number, Number> matchTimeSeries;
-    
+    @Getter private LineChart<Number, Number> performanceChart;
+    @Getter private XYChart.Series<Number, Number> actionDurationSeries;
+    @Getter private XYChart.Series<Number, Number> matchTimeSeries;
+
     // Data tracking
     private final Queue<PerformanceMetric> performanceMetrics = new ConcurrentLinkedQueue<>();
     private final AtomicLong totalActions = new AtomicLong(0);
     private final AtomicLong successfulActions = new AtomicLong(0);
     private final AtomicLong totalDuration = new AtomicLong(0);
     private long peakMemory = 0;
-    
+
     // Constants
     private static final int MAX_CHART_POINTS = 100;
 
-    /**
-     * Creates a new PerformanceMetricsPanel.
-     */
+    /** Creates a new PerformanceMetricsPanel. */
     public PerformanceMetricsPanel() {
         super("Performance Metrics");
         initializeContent();
@@ -95,7 +83,8 @@ public class PerformanceMetricsPanel extends BrobotCard {
         metricsGrid.setHgap(20);
         metricsGrid.setVgap(5);
         metricsGrid.setPadding(new Insets(10));
-        metricsGrid.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: #ddd; -fx-border-radius: 5;");
+        metricsGrid.setStyle(
+                "-fx-background-color: #f0f0f0; -fx-border-color: #ddd; -fx-border-radius: 5;");
 
         metricsGrid.add(new Label("Total Actions:"), 0, 0);
         totalActionsLabel = new Label("0");
@@ -145,7 +134,8 @@ public class PerformanceMetricsPanel extends BrobotCard {
      * @param matchTime The time spent matching in milliseconds
      * @param successful Whether the action was successful
      */
-    public void addPerformanceMetric(long actionNumber, long actionDuration, long matchTime, boolean successful) {
+    public void addPerformanceMetric(
+            long actionNumber, long actionDuration, long matchTime, boolean successful) {
         // Update counters
         totalActions.incrementAndGet();
         totalDuration.addAndGet(actionDuration);
@@ -194,9 +184,7 @@ public class PerformanceMetricsPanel extends BrobotCard {
         }
     }
 
-    /**
-     * Resets all metrics to initial values.
-     */
+    /** Resets all metrics to initial values. */
     public void reset() {
         totalActions.set(0);
         successfulActions.set(0);
@@ -213,9 +201,7 @@ public class PerformanceMetricsPanel extends BrobotCard {
         performanceMetrics.clear();
     }
 
-    /**
-     * Internal class for tracking performance metrics.
-     */
+    /** Internal class for tracking performance metrics. */
     @Getter
     private static class PerformanceMetric {
         private final long timestamp;

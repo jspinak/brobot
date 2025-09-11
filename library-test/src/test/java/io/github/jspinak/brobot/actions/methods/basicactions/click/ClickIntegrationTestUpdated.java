@@ -1,16 +1,27 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.click;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+import java.util.Optional;
+
+import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.click.Click;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
-import io.github.jspinak.brobot.action.internal.mouse.MoveMouseWrapper;
 import io.github.jspinak.brobot.action.internal.mouse.MouseDownWrapper;
 import io.github.jspinak.brobot.action.internal.mouse.MouseUpWrapper;
+import io.github.jspinak.brobot.action.internal.mouse.MoveMouseWrapper;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
@@ -18,56 +29,33 @@ import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 
-import org.junit.jupiter.api.*;
-import org.mockito.ArgumentCaptor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
 /**
  * Integration tests for click actions using the ActionConfig API.
- * 
- * Original test intended to verify:
- * 1. Simple click with move, mouse down, and mouse up
- * 2. Right click functionality
- * 3. Double click behavior
- * 4. Click with move after action
- * 5. Click on specific locations
- * 6. Click on found matches
- * 7. Multiple clicks in sequence
- * 
- * Rewritten to use actual available APIs:
- * - ClickOptions with numberOfClicks and mousePressOptions
- * - No ClickType enum - use MouseButton in MousePressOptions
- * - ActionService.getAction() returns Optional<ActionInterface>
- * - No direct moveMouseAfterAction in ClickOptions
+ *
+ * <p>Original test intended to verify: 1. Simple click with move, mouse down, and mouse up 2. Right
+ * click functionality 3. Double click behavior 4. Click with move after action 5. Click on specific
+ * locations 6. Click on found matches 7. Multiple clicks in sequence
+ *
+ * <p>Rewritten to use actual available APIs: - ClickOptions with numberOfClicks and
+ * mousePressOptions - No ClickType enum - use MouseButton in MousePressOptions -
+ * ActionService.getAction() returns Optional<ActionInterface> - No direct moveMouseAfterAction in
+ * ClickOptions
  */
 @SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Disabled("CI failure - needs investigation")
 public class ClickIntegrationTestUpdated extends BrobotIntegrationTestBase {
 
-    @Autowired
-    private ActionService actionService;
+    @Autowired private ActionService actionService;
 
     @Autowired(required = false)
     private Click click;
 
-    @SpyBean
-    private MoveMouseWrapper moveMouseWrapper;
+    @SpyBean private MoveMouseWrapper moveMouseWrapper;
 
-    @SpyBean
-    private MouseDownWrapper mouseDownWrapper;
+    @SpyBean private MouseDownWrapper mouseDownWrapper;
 
-    @SpyBean
-    private MouseUpWrapper mouseUpWrapper;
+    @SpyBean private MouseUpWrapper mouseUpWrapper;
 
     @BeforeEach
     void setUp() {
@@ -91,18 +79,16 @@ public class ClickIntegrationTestUpdated extends BrobotIntegrationTestBase {
          * Actual API: ClickOptions with default LEFT button.
          */
 
-        ClickOptions clickOptions = new ClickOptions.Builder()
-                .setNumberOfClicks(1)
-                .build();
+        ClickOptions clickOptions = new ClickOptions.Builder().setNumberOfClicks(1).build();
 
-        ObjectCollection objectCollection = new ObjectCollection.Builder()
-                .withLocations(new Location(100, 100))
-                .build();
+        ObjectCollection objectCollection =
+                new ObjectCollection.Builder().withLocations(new Location(100, 100)).build();
 
         ActionResult result = new ActionResult();
         result.setActionConfig(clickOptions);
-        result.setActionLifecycle(new io.github.jspinak.brobot.action.internal.execution.ActionLifecycle(
-                java.time.LocalDateTime.now(), 30.0));
+        result.setActionLifecycle(
+                new io.github.jspinak.brobot.action.internal.execution.ActionLifecycle(
+                        java.time.LocalDateTime.now(), 30.0));
 
         // Get the action from service
         Optional<ActionInterface> clickActionOpt = actionService.getAction(clickOptions);
@@ -129,23 +115,23 @@ public class ClickIntegrationTestUpdated extends BrobotIntegrationTestBase {
          * Actual API: Use MousePressOptions with MouseButton.RIGHT.
          */
 
-        MousePressOptions pressOptions = MousePressOptions.builder()
-                .setButton(MouseButton.RIGHT)
-                .build();
+        MousePressOptions pressOptions =
+                MousePressOptions.builder().setButton(MouseButton.RIGHT).build();
 
-        ClickOptions clickOptions = new ClickOptions.Builder()
-                .setNumberOfClicks(1)
-                .setPressOptions(pressOptions)
-                .build();
+        ClickOptions clickOptions =
+                new ClickOptions.Builder()
+                        .setNumberOfClicks(1)
+                        .setPressOptions(pressOptions)
+                        .build();
 
-        ObjectCollection objectCollection = new ObjectCollection.Builder()
-                .withLocations(new Location(200, 200))
-                .build();
+        ObjectCollection objectCollection =
+                new ObjectCollection.Builder().withLocations(new Location(200, 200)).build();
 
         ActionResult result = new ActionResult();
         result.setActionConfig(clickOptions);
-        result.setActionLifecycle(new io.github.jspinak.brobot.action.internal.execution.ActionLifecycle(
-                java.time.LocalDateTime.now(), 30.0));
+        result.setActionLifecycle(
+                new io.github.jspinak.brobot.action.internal.execution.ActionLifecycle(
+                        java.time.LocalDateTime.now(), 30.0));
 
         Optional<ActionInterface> clickActionOpt = actionService.getAction(clickOptions);
         assertTrue(clickActionOpt.isPresent());
@@ -166,18 +152,16 @@ public class ClickIntegrationTestUpdated extends BrobotIntegrationTestBase {
          * Actual API: Use numberOfClicks = 2.
          */
 
-        ClickOptions clickOptions = new ClickOptions.Builder()
-                .setNumberOfClicks(2)
-                .build();
+        ClickOptions clickOptions = new ClickOptions.Builder().setNumberOfClicks(2).build();
 
-        ObjectCollection objectCollection = new ObjectCollection.Builder()
-                .withLocations(new Location(150, 150))
-                .build();
+        ObjectCollection objectCollection =
+                new ObjectCollection.Builder().withLocations(new Location(150, 150)).build();
 
         ActionResult result = new ActionResult();
         result.setActionConfig(clickOptions);
-        result.setActionLifecycle(new io.github.jspinak.brobot.action.internal.execution.ActionLifecycle(
-                java.time.LocalDateTime.now(), 30.0));
+        result.setActionLifecycle(
+                new io.github.jspinak.brobot.action.internal.execution.ActionLifecycle(
+                        java.time.LocalDateTime.now(), 30.0));
 
         Optional<ActionInterface> clickActionOpt = actionService.getAction(clickOptions);
         assertTrue(clickActionOpt.isPresent());
@@ -200,18 +184,16 @@ public class ClickIntegrationTestUpdated extends BrobotIntegrationTestBase {
 
         Region region = new Region(100, 100, 50, 50);
 
-        ClickOptions clickOptions = new ClickOptions.Builder()
-                .setNumberOfClicks(1)
-                .build();
+        ClickOptions clickOptions = new ClickOptions.Builder().setNumberOfClicks(1).build();
 
-        ObjectCollection objectCollection = new ObjectCollection.Builder()
-                .withRegions(region)
-                .build();
+        ObjectCollection objectCollection =
+                new ObjectCollection.Builder().withRegions(region).build();
 
         ActionResult result = new ActionResult();
         result.setActionConfig(clickOptions);
-        result.setActionLifecycle(new io.github.jspinak.brobot.action.internal.execution.ActionLifecycle(
-                java.time.LocalDateTime.now(), 30.0));
+        result.setActionLifecycle(
+                new io.github.jspinak.brobot.action.internal.execution.ActionLifecycle(
+                        java.time.LocalDateTime.now(), 30.0));
 
         Optional<ActionInterface> clickActionOpt = actionService.getAction(clickOptions);
         assertTrue(clickActionOpt.isPresent());
@@ -231,29 +213,25 @@ public class ClickIntegrationTestUpdated extends BrobotIntegrationTestBase {
          * The match location is used for the click.
          */
 
-        Match match = new Match.Builder()
-                .setRegion(50, 50, 20, 20)
-                .setSimScore(0.95)
-                .build();
+        Match match = new Match.Builder().setRegion(50, 50, 20, 20).setSimScore(0.95).build();
 
-        ClickOptions clickOptions = new ClickOptions.Builder()
-                .setNumberOfClicks(1)
-                .build();
+        ClickOptions clickOptions = new ClickOptions.Builder().setNumberOfClicks(1).build();
 
         // Convert Match to ActionResult
         ActionResult matchResult = new ActionResult();
-        matchResult.setActionLifecycle(new io.github.jspinak.brobot.action.internal.execution.ActionLifecycle(
-                java.time.LocalDateTime.now(), 30.0));
+        matchResult.setActionLifecycle(
+                new io.github.jspinak.brobot.action.internal.execution.ActionLifecycle(
+                        java.time.LocalDateTime.now(), 30.0));
         matchResult.add(match);
 
-        ObjectCollection objectCollection = new ObjectCollection.Builder()
-                .withMatches(matchResult)
-                .build();
+        ObjectCollection objectCollection =
+                new ObjectCollection.Builder().withMatches(matchResult).build();
 
         ActionResult result = new ActionResult();
         result.setActionConfig(clickOptions);
-        result.setActionLifecycle(new io.github.jspinak.brobot.action.internal.execution.ActionLifecycle(
-                java.time.LocalDateTime.now(), 30.0));
+        result.setActionLifecycle(
+                new io.github.jspinak.brobot.action.internal.execution.ActionLifecycle(
+                        java.time.LocalDateTime.now(), 30.0));
 
         Optional<ActionInterface> clickActionOpt = actionService.getAction(clickOptions);
         assertTrue(clickActionOpt.isPresent());
@@ -272,23 +250,23 @@ public class ClickIntegrationTestUpdated extends BrobotIntegrationTestBase {
          * Test middle mouse button click.
          */
 
-        MousePressOptions pressOptions = MousePressOptions.builder()
-                .setButton(MouseButton.MIDDLE)
-                .build();
+        MousePressOptions pressOptions =
+                MousePressOptions.builder().setButton(MouseButton.MIDDLE).build();
 
-        ClickOptions clickOptions = new ClickOptions.Builder()
-                .setNumberOfClicks(1)
-                .setPressOptions(pressOptions)
-                .build();
+        ClickOptions clickOptions =
+                new ClickOptions.Builder()
+                        .setNumberOfClicks(1)
+                        .setPressOptions(pressOptions)
+                        .build();
 
-        ObjectCollection objectCollection = new ObjectCollection.Builder()
-                .withLocations(new Location(300, 300))
-                .build();
+        ObjectCollection objectCollection =
+                new ObjectCollection.Builder().withLocations(new Location(300, 300)).build();
 
         ActionResult result = new ActionResult();
         result.setActionConfig(clickOptions);
-        result.setActionLifecycle(new io.github.jspinak.brobot.action.internal.execution.ActionLifecycle(
-                java.time.LocalDateTime.now(), 30.0));
+        result.setActionLifecycle(
+                new io.github.jspinak.brobot.action.internal.execution.ActionLifecycle(
+                        java.time.LocalDateTime.now(), 30.0));
 
         Optional<ActionInterface> clickActionOpt = actionService.getAction(clickOptions);
         assertTrue(clickActionOpt.isPresent());
@@ -308,28 +286,30 @@ public class ClickIntegrationTestUpdated extends BrobotIntegrationTestBase {
          * Test click with custom pause timings.
          */
 
-        MousePressOptions pressOptions = MousePressOptions.builder()
-                .setButton(MouseButton.LEFT)
-                .setPauseBeforeMouseDown(0.5)
-                .setPauseAfterMouseDown(0.3)
-                .setPauseBeforeMouseUp(0.2)
-                .setPauseAfterMouseUp(0.4)
-                .build();
+        MousePressOptions pressOptions =
+                MousePressOptions.builder()
+                        .setButton(MouseButton.LEFT)
+                        .setPauseBeforeMouseDown(0.5)
+                        .setPauseAfterMouseDown(0.3)
+                        .setPauseBeforeMouseUp(0.2)
+                        .setPauseAfterMouseUp(0.4)
+                        .build();
 
-        ClickOptions clickOptions = new ClickOptions.Builder()
-                .setNumberOfClicks(1)
-                .setPressOptions(pressOptions)
-                .setPauseAfterEnd(1.0)
-                .build();
+        ClickOptions clickOptions =
+                new ClickOptions.Builder()
+                        .setNumberOfClicks(1)
+                        .setPressOptions(pressOptions)
+                        .setPauseAfterEnd(1.0)
+                        .build();
 
-        ObjectCollection objectCollection = new ObjectCollection.Builder()
-                .withLocations(new Location(250, 250))
-                .build();
+        ObjectCollection objectCollection =
+                new ObjectCollection.Builder().withLocations(new Location(250, 250)).build();
 
         ActionResult result = new ActionResult();
         result.setActionConfig(clickOptions);
-        result.setActionLifecycle(new io.github.jspinak.brobot.action.internal.execution.ActionLifecycle(
-                java.time.LocalDateTime.now(), 30.0));
+        result.setActionLifecycle(
+                new io.github.jspinak.brobot.action.internal.execution.ActionLifecycle(
+                        java.time.LocalDateTime.now(), 30.0));
 
         Optional<ActionInterface> clickActionOpt = actionService.getAction(clickOptions);
         assertTrue(clickActionOpt.isPresent());
@@ -350,23 +330,22 @@ public class ClickIntegrationTestUpdated extends BrobotIntegrationTestBase {
          * Test clicking on a StateImage object.
          */
 
-        StateImage stateImage = new StateImage.Builder()
-                .setName("testImage")
-                .setSearchRegionForAllPatterns(new Region(0, 0, 100, 100))
-                .build();
+        StateImage stateImage =
+                new StateImage.Builder()
+                        .setName("testImage")
+                        .setSearchRegionForAllPatterns(new Region(0, 0, 100, 100))
+                        .build();
 
-        ClickOptions clickOptions = new ClickOptions.Builder()
-                .setNumberOfClicks(1)
-                .build();
+        ClickOptions clickOptions = new ClickOptions.Builder().setNumberOfClicks(1).build();
 
-        ObjectCollection objectCollection = new ObjectCollection.Builder()
-                .withImages(stateImage)
-                .build();
+        ObjectCollection objectCollection =
+                new ObjectCollection.Builder().withImages(stateImage).build();
 
         ActionResult result = new ActionResult();
         result.setActionConfig(clickOptions);
-        result.setActionLifecycle(new io.github.jspinak.brobot.action.internal.execution.ActionLifecycle(
-                java.time.LocalDateTime.now(), 30.0));
+        result.setActionLifecycle(
+                new io.github.jspinak.brobot.action.internal.execution.ActionLifecycle(
+                        java.time.LocalDateTime.now(), 30.0));
 
         Optional<ActionInterface> clickActionOpt = actionService.getAction(clickOptions);
         assertTrue(clickActionOpt.isPresent());
@@ -387,23 +366,18 @@ public class ClickIntegrationTestUpdated extends BrobotIntegrationTestBase {
          */
 
         Location[] locations = {
-                new Location(100, 100),
-                new Location(200, 200),
-                new Location(300, 300)
+            new Location(100, 100), new Location(200, 200), new Location(300, 300)
         };
 
-        ClickOptions clickOptions = new ClickOptions.Builder()
-                .setNumberOfClicks(1)
-                .build();
+        ClickOptions clickOptions = new ClickOptions.Builder().setNumberOfClicks(1).build();
 
         Optional<ActionInterface> clickActionOpt = actionService.getAction(clickOptions);
         assertTrue(clickActionOpt.isPresent());
         ActionInterface clickAction = clickActionOpt.get();
 
         for (Location loc : locations) {
-            ObjectCollection objectCollection = new ObjectCollection.Builder()
-                    .withLocations(loc)
-                    .build();
+            ObjectCollection objectCollection =
+                    new ObjectCollection.Builder().withLocations(loc).build();
 
             ActionResult result = new ActionResult();
             result.setActionConfig(clickOptions);
@@ -422,13 +396,10 @@ public class ClickIntegrationTestUpdated extends BrobotIntegrationTestBase {
          */
 
         if (click != null) {
-            ClickOptions clickOptions = new ClickOptions.Builder()
-                    .setNumberOfClicks(1)
-                    .build();
+            ClickOptions clickOptions = new ClickOptions.Builder().setNumberOfClicks(1).build();
 
-            ObjectCollection objectCollection = new ObjectCollection.Builder()
-                    .withLocations(new Location(400, 400))
-                    .build();
+            ObjectCollection objectCollection =
+                    new ObjectCollection.Builder().withLocations(new Location(400, 400)).build();
 
             ActionResult result = new ActionResult();
             result.setActionConfig(clickOptions);

@@ -1,40 +1,13 @@
 package io.github.jspinak.brobot.util.file;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.test.ConcurrentTestBase;
-import io.github.jspinak.brobot.test.annotations.Flaky;
-import io.github.jspinak.brobot.test.annotations.Flaky.FlakyCause;
-import io.github.jspinak.brobot.test.utils.ConcurrentTestHelper;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Timeout;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.api.parallel.ResourceLock;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.MockitoAnnotations;
-import org.sikuli.script.Image;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-import javax.imageio.ImageIO;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,14 +16,36 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.sikuli.script.Image;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.test.ConcurrentTestBase;
+import io.github.jspinak.brobot.test.annotations.Flaky;
+import io.github.jspinak.brobot.test.annotations.Flaky.FlakyCause;
+import io.github.jspinak.brobot.test.utils.ConcurrentTestHelper;
 
 /**
- * Comprehensive test suite for RecorderSaveToFile - file persistence
- * operations.
- * Tests image saving, XML persistence, and folder management.
- * Uses ConcurrentTestBase for thread-safe parallel execution.
+ * Comprehensive test suite for RecorderSaveToFile - file persistence operations. Tests image
+ * saving, XML persistence, and folder management. Uses ConcurrentTestBase for thread-safe parallel
+ * execution.
  */
 @DisplayName("RecorderSaveToFile Tests")
 @ResourceLock(value = ConcurrentTestBase.ResourceLocks.FILE_SYSTEM)
@@ -58,14 +53,11 @@ public class RecorderSaveToFileTest extends ConcurrentTestBase {
 
     private RecorderSaveToFile saveToFile;
 
-    @TempDir
-    Path tempDir;
+    @TempDir Path tempDir;
 
-    @Mock
-    private Image mockImage;
+    @Mock private Image mockImage;
 
-    @Mock
-    private BufferedImage mockBufferedImage;
+    @Mock private BufferedImage mockBufferedImage;
 
     private String originalRecordingFolder;
 
@@ -242,7 +234,8 @@ public class RecorderSaveToFileTest extends ConcurrentTestBase {
         }
 
         @ParameterizedTest
-        @ValueSource(strings = { "test", "screenshot", "click_action", "state-transition", "match.found" })
+        @ValueSource(
+                strings = {"test", "screenshot", "click_action", "state-transition", "match.found"})
         @DisplayName("Various base filename formats")
         public void testVariousBaseFilenames(String baseName) {
             BufferedImage realImage = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
@@ -462,7 +455,8 @@ public class RecorderSaveToFileTest extends ConcurrentTestBase {
 
             // Save report XML to report folder
             FrameworkSettings.recordingFolder = reportFolder.getPath();
-            Document report = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+            Document report =
+                    DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
             Element root = report.createElement("report");
             report.appendChild(root);
 
@@ -497,21 +491,26 @@ public class RecorderSaveToFileTest extends ConcurrentTestBase {
             try {
                 for (int t = 0; t < threadCount; t++) {
                     final int threadId = t;
-                    executor.submit(() -> {
-                        try {
-                            startLatch.await();
-                            String path = saveToFile.saveImageWithDate(mockImage, "concurrent_" + threadId);
-                            allPaths.add(path);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                        } finally {
-                            endLatch.countDown();
-                        }
-                    });
+                    executor.submit(
+                            () -> {
+                                try {
+                                    startLatch.await();
+                                    String path =
+                                            saveToFile.saveImageWithDate(
+                                                    mockImage, "concurrent_" + threadId);
+                                    allPaths.add(path);
+                                } catch (InterruptedException e) {
+                                    Thread.currentThread().interrupt();
+                                } finally {
+                                    endLatch.countDown();
+                                }
+                            });
                 }
 
                 startLatch.countDown();
-                assertTrue(ConcurrentTestHelper.awaitLatch(endLatch, Duration.ofSeconds(5), "Concurrent save completion"));
+                assertTrue(
+                        ConcurrentTestHelper.awaitLatch(
+                                endLatch, Duration.ofSeconds(5), "Concurrent save completion"));
             } finally {
                 ConcurrentTestHelper.shutdownExecutor(executor, Duration.ofSeconds(2));
             }
@@ -533,16 +532,19 @@ public class RecorderSaveToFileTest extends ConcurrentTestBase {
             ExecutorService executor = Executors.newFixedThreadPool(threadCount);
             try {
                 for (int i = 0; i < threadCount; i++) {
-                    executor.submit(() -> {
-                        try {
-                            saveToFile.createFolder(sharedFolder);
-                        } finally {
-                            latch.countDown();
-                        }
-                    });
+                    executor.submit(
+                            () -> {
+                                try {
+                                    saveToFile.createFolder(sharedFolder);
+                                } finally {
+                                    latch.countDown();
+                                }
+                            });
                 }
 
-                assertTrue(ConcurrentTestHelper.awaitLatch(latch, Duration.ofSeconds(5), "Folder creation completion"));
+                assertTrue(
+                        ConcurrentTestHelper.awaitLatch(
+                                latch, Duration.ofSeconds(5), "Folder creation completion"));
             } finally {
                 ConcurrentTestHelper.shutdownExecutor(executor, Duration.ofSeconds(2));
             }

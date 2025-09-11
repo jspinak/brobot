@@ -1,20 +1,20 @@
 package io.github.jspinak.brobot.action.internal.text;
 
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Component;
+
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateString;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Component;
 
 /**
- * Primary text typing implementation that handles both mock and live
- * environments.
- * Automatically switches between mock and live typing based on
- * FrameworkSettings.mock.
+ * Primary text typing implementation that handles both mock and live environments. Automatically
+ * switches between mock and live typing based on FrameworkSettings.mock.
  */
 @Component
 @Primary
@@ -30,9 +30,10 @@ public class DefaultTextTyper implements TextTyper {
         }
 
         // Handle null or empty string
-        String textToType = stateString != null && stateString.getString() != null
-                ? stateString.getString()
-                : "";
+        String textToType =
+                stateString != null && stateString.getString() != null
+                        ? stateString.getString()
+                        : "";
 
         if (FrameworkSettings.mock) {
             return mockType(textToType, modifiers);

@@ -1,23 +1,23 @@
 package io.github.jspinak.brobot.action.internal.sikuli;
 
-import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
 import org.sikuli.basics.Settings;
 import org.springframework.stereotype.Component;
 
+import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
+
 /**
  * Manages the transactional application of settings to the global SikuliX context.
- * <p>
- * This class ensures that action-specific settings are applied only for the duration
- * of a single action and are safely restored afterwards, even if the action fails.
- * It provides a safe bridge between Brobot's flexible, per-action configuration
- * and SikuliX's global static settings.
+ *
+ * <p>This class ensures that action-specific settings are applied only for the duration of a single
+ * action and are safely restored afterwards, even if the action fails. It provides a safe bridge
+ * between Brobot's flexible, per-action configuration and SikuliX's global static settings.
  */
 @Component
 public class SikuliSettingsManager {
 
     /**
-     * Executes a given action with temporarily applied mouse movement settings.
-     * It ensures the original SikuliX settings are restored after execution.
+     * Executes a given action with temporarily applied mouse movement settings. It ensures the
+     * original SikuliX settings are restored after execution.
      *
      * @param options The configuration for this specific mouse move action.
      * @param actionToExecute The action logic (the wrapper call) to run with these settings.
@@ -38,6 +38,4 @@ public class SikuliSettingsManager {
             Settings.MoveMouseDelay = originalMoveMouseDelay;
         }
     }
-
-    
 }

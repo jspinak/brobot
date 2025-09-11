@@ -1,44 +1,45 @@
 package io.github.jspinak.brobot.navigation.transition;
 
+import java.util.*;
+import java.util.function.BooleanSupplier;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.github.jspinak.brobot.model.transition.StateTransition;
 import io.github.jspinak.brobot.runner.dsl.model.TaskSequence;
-import lombok.Data;
 
-import java.util.*;
-import java.util.function.BooleanSupplier;
+import lombok.Data;
 
 /**
  * Container for all transitions associated with a specific State in the Brobot framework.
- * 
- * <p>StateTransitions is a key component of the state structure (Ω), defining the edges 
- * in the state graph that enable navigation between GUI configurations. It encapsulates 
- * both incoming transitions (how to finalize arrival at this state) and outgoing 
- * transitions (how to navigate from this state to others).</p>
- * 
+ *
+ * <p>StateTransitions is a key component of the state structure (Ω), defining the edges in the
+ * state graph that enable navigation between GUI configurations. It encapsulates both incoming
+ * transitions (how to finalize arrival at this state) and outgoing transitions (how to navigate
+ * from this state to others).
+ *
  * <p>Transition types:
+ *
  * <ul>
- *   <li><b>Transition Finish</b>: Actions performed when arriving at this state from another 
- *       state, ensuring the GUI is in the expected configuration</li>
- *   <li><b>Outgoing Transitions</b>: Collection of transitions that can navigate from this 
- *       state to other states in the application</li>
+ *   <li><b>Transition Finish</b>: Actions performed when arriving at this state from another state,
+ *       ensuring the GUI is in the expected configuration
+ *   <li><b>Outgoing Transitions</b>: Collection of transitions that can navigate from this state to
+ *       other states in the application
  * </ul>
- * </p>
- * 
+ *
  * <p>Key features:
+ *
  * <ul>
- *   <li>Supports multiple transition types (Java functions, Action definitions)</li>
- *   <li>Handles state visibility control during transitions</li>
- *   <li>Enables dynamic path finding by providing transition options</li>
- *   <li>Maintains bidirectional navigation information</li>
+ *   <li>Supports multiple transition types (Java functions, Action definitions)
+ *   <li>Handles state visibility control during transitions
+ *   <li>Enables dynamic path finding by providing transition options
+ *   <li>Maintains bidirectional navigation information
  * </ul>
- * </p>
- * 
- * <p>In the model-based approach, StateTransitions transform implicit navigation knowledge 
- * into explicit, executable paths through the GUI. This enables the framework to automatically 
- * find routes between states and recover from unexpected situations by recalculating paths.</p>
- * 
+ *
+ * <p>In the model-based approach, StateTransitions transform implicit navigation knowledge into
+ * explicit, executable paths through the GUI. This enables the framework to automatically find
+ * routes between states and recover from unexpected situations by recalculating paths.
+ *
  * @since 1.0
  * @see State
  * @see StateTransition
@@ -55,55 +56,55 @@ public class StateTransitions {
     private StateTransition transitionFinish;
     private Map<Long, TaskSequenceStateTransition> actionDefinitionTransitions = new HashMap<>();
     private List<StateTransition> transitions = new ArrayList<>(); // for use at runtime
+
     /**
-     * When set, the same variable in a Transition takes precedence over this one.
-     * Only applies to FromTransitions.
+     * When set, the same variable in a Transition takes precedence over this one. Only applies to
+     * FromTransitions.
      */
-    private boolean staysVisibleAfterTransition = false; // the same variable in a Transition takes precedence
+    private boolean staysVisibleAfterTransition =
+            false; // the same variable in a Transition takes precedence
 
     /**
      * Finds the transition that activates a specific target state.
-     * <p>
-     * Searches through all transitions to find one that includes the target
-     * state in its activation list. If the target is this state itself,
-     * returns the transitionFinish.
+     *
+     * <p>Searches through all transitions to find one that includes the target state in its
+     * activation list. If the target is this state itself, returns the transitionFinish.
      *
      * @param to ID of the target state to find a transition for
      * @return Optional containing the transition if found, empty otherwise
      */
     public Optional<StateTransition> getTransitionFunctionByActivatedStateId(Long to) {
-        if (to == null)
-            return Optional.empty();
-        if (to.equals(stateId))
-            return Optional.of(transitionFinish);
+        if (to == null) return Optional.empty();
+        if (to.equals(stateId)) return Optional.of(transitionFinish);
         for (StateTransition transition : transitions) {
-            if (transition.getActivate().contains(to))
-                return Optional.of(transition);
+            if (transition.getActivate().contains(to)) return Optional.of(transition);
         }
         return Optional.empty();
     }
 
     /**
      * Determines if this state remains visible after transitioning to another state.
-     * <p>
-     * Visibility is determined by:
+     *
+     * <p>Visibility is determined by:
+     *
      * <ol>
-     *   <li>Transition-specific setting (if not NONE)</li>
-     *   <li>State-level default setting (if transition setting is NONE)</li>
+     *   <li>Transition-specific setting (if not NONE)
+     *   <li>State-level default setting (if transition setting is NONE)
      * </ol>
      *
      * @param toState ID of the target state being transitioned to
      * @return true if this state stays visible, false otherwise
      */
     public boolean stateStaysVisible(Long toState) {
-        Optional<StateTransition> stateTransition = getTransitionFunctionByActivatedStateId(toState);
+        Optional<StateTransition> stateTransition =
+                getTransitionFunctionByActivatedStateId(toState);
         if (stateTransition.isEmpty())
             return false; // couldn't find the Transition, return value not important
-        StateTransition.StaysVisible localStaysVisible = stateTransition.get().getStaysVisibleAfterTransition();
+        StateTransition.StaysVisible localStaysVisible =
+                stateTransition.get().getStaysVisibleAfterTransition();
         if (localStaysVisible == StateTransition.StaysVisible.NONE)
             return staysVisibleAfterTransition;
-        else
-            return localStaysVisible == StateTransition.StaysVisible.TRUE;
+        else return localStaysVisible == StateTransition.StaysVisible.TRUE;
     }
 
     /**
@@ -117,8 +118,8 @@ public class StateTransitions {
 
     /**
      * Adds an ActionDefinition-based transition to this state's outgoing transitions.
-     * <p>
-     * Also maintains a lookup map for quick access by target state ID.
+     *
+     * <p>Also maintains a lookup map for quick access by target state ID.
      *
      * @param transition ActionDefinitionStateTransition to add
      */
@@ -131,24 +132,25 @@ public class StateTransitions {
 
     /**
      * Convenience method to add a simple function-based transition.
-     * <p>
-     * Creates a JavaStateTransition with the provided function and target states.
+     *
+     * <p>Creates a JavaStateTransition with the provided function and target states.
      *
      * @param transition Function containing transition logic
      * @param toStates Names of states to activate on success
      */
     public void addTransition(BooleanSupplier transition, String... toStates) {
-        JavaStateTransition javaStateTransition = new JavaStateTransition.Builder()
-                .setFunction(transition)
-                .addToActivate(toStates)
-                .build();
+        JavaStateTransition javaStateTransition =
+                new JavaStateTransition.Builder()
+                        .setFunction(transition)
+                        .addToActivate(toStates)
+                        .build();
         addTransition(javaStateTransition);
     }
 
     /**
      * Retrieves the ActionDefinition for transitioning to a specific state.
-     * <p>
-     * Only returns a value if the transition is ActionDefinition-based.
+     *
+     * <p>Only returns a value if the transition is ActionDefinition-based.
      *
      * @param toState ID of the target state
      * @return Optional containing ActionDefinition if found and applicable
@@ -166,29 +168,32 @@ public class StateTransitions {
         if (stateId != null) stringBuilder.append("id=").append(stateId).append(", ");
         if (stateName != null) stringBuilder.append("from=").append(stateName).append(" ");
         stringBuilder.append("to=");
-        transitions.forEach(transition -> {
-            if (transition instanceof TaskSequenceStateTransition) {
-                stringBuilder.append(transition.getActivate());
-            } else {
-                stringBuilder.append(((JavaStateTransition) transition).getActivateNames());
-                stringBuilder.append(",");
-            }
-        });
+        transitions.forEach(
+                transition -> {
+                    if (transition instanceof TaskSequenceStateTransition) {
+                        stringBuilder.append(transition.getActivate());
+                    } else {
+                        stringBuilder.append(((JavaStateTransition) transition).getActivateNames());
+                        stringBuilder.append(",");
+                    }
+                });
         return stringBuilder.toString();
     }
 
     /**
      * Builder for creating StateTransitions instances fluently.
-     * <p>
-     * Simplifies construction of StateTransitions with multiple transitions
-     * and configuration options. Provides sensible defaults:
+     *
+     * <p>Simplifies construction of StateTransitions with multiple transitions and configuration
+     * options. Provides sensible defaults:
+     *
      * <ul>
-     *   <li>Empty transition finish (always succeeds)</li>
-     *   <li>Empty transition list</li>
-     *   <li>State does not stay visible by default</li>
+     *   <li>Empty transition finish (always succeeds)
+     *   <li>Empty transition list
+     *   <li>State does not stay visible by default
      * </ul>
-     * <p>
-     * Example usage:
+     *
+     * <p>Example usage:
+     *
      * <pre>
      * StateTransitions transitions = new StateTransitions.Builder("HomePage")
      *     .addTransitionFinish(() -> find("HomePageLogo"))
@@ -221,10 +226,11 @@ public class StateTransitions {
          * @return This builder for method chaining
          */
         public Builder addTransition(BooleanSupplier transition, String... toStates) {
-            JavaStateTransition javaStateTransition = new JavaStateTransition.Builder()
-                    .setFunction(transition)
-                    .addToActivate(toStates)
-                    .build();
+            JavaStateTransition javaStateTransition =
+                    new JavaStateTransition.Builder()
+                            .setFunction(transition)
+                            .addToActivate(toStates)
+                            .build();
             return addTransition(javaStateTransition);
         }
 
@@ -241,15 +247,16 @@ public class StateTransitions {
 
         /**
          * Sets the transition finish function.
-         * <p>
-         * This function is executed when arriving at this state to verify
-         * and finalize the transition.
+         *
+         * <p>This function is executed when arriving at this state to verify and finalize the
+         * transition.
          *
          * @param transitionFinish Function to verify state arrival
          * @return This builder for method chaining
          */
         public Builder addTransitionFinish(BooleanSupplier transitionFinish) {
-            this.transitionFinish = new JavaStateTransition.Builder().setFunction(transitionFinish).build();
+            this.transitionFinish =
+                    new JavaStateTransition.Builder().setFunction(transitionFinish).build();
             return this;
         }
 
@@ -266,8 +273,8 @@ public class StateTransitions {
 
         /**
          * Sets default visibility behavior for outgoing transitions.
-         * <p>
-         * Individual transitions can override this default.
+         *
+         * <p>Individual transitions can override this default.
          *
          * @param staysVisibleAfterTransition true if state stays visible by default
          * @return This builder for method chaining
@@ -291,5 +298,4 @@ public class StateTransitions {
             return stateTransitions;
         }
     }
-
 }

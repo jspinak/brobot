@@ -1,40 +1,41 @@
 package io.github.jspinak.brobot.util;
 
+import org.springframework.stereotype.Component;
+
 import io.github.jspinak.brobot.action.*;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
-import io.github.jspinak.brobot.model.state.StateObject;
 import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.state.StateLocation;
+import io.github.jspinak.brobot.model.state.StateObject;
 import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.model.state.StateString;
-import io.github.jspinak.brobot.model.state.StateLocation;
+
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 /**
- * Spring-friendly wrapper around ConditionalActionChain that simplifies
- * conditional action execution in Brobot applications.
- * 
- * <p>
- * This wrapper provides:
+ * Spring-friendly wrapper around ConditionalActionChain that simplifies conditional action
+ * execution in Brobot applications.
+ *
+ * <p>This wrapper provides:
+ *
  * <ul>
- * <li>Convenient methods for common patterns</li>
- * <li>Integration with StateObject types</li>
- * <li>Pre-configured action builders</li>
- * <li>Simplified error handling</li>
+ *   <li>Convenient methods for common patterns
+ *   <li>Integration with StateObject types
+ *   <li>Pre-configured action builders
+ *   <li>Simplified error handling
  * </ul>
- * 
- * <p>
- * Example usage:
- * 
+ *
+ * <p>Example usage:
+ *
  * <pre>{@code
  * @Autowired
  * private ConditionalActionWrapper actions;
- * 
+ *
  * // Simple find and click
  * ActionResult result = actions.findAndClick(submitButton);
- * 
+ *
  * // Using the chain builder
  * ActionResult result = actions.createChain()
  *         .find(searchField)
@@ -55,7 +56,7 @@ public class ConditionalActionWrapper {
 
     /**
      * Simple find and click operation.
-     * 
+     *
      * @param stateObject the object to find and click
      * @return the action result
      */
@@ -66,17 +67,17 @@ public class ConditionalActionWrapper {
         PatternFindOptions findOptions = new PatternFindOptions.Builder().build();
         ClickOptions clickOptions = new ClickOptions.Builder().build();
 
-        ConditionalActionChain chain = ConditionalActionChain.find(findOptions)
-                .ifFound(clickOptions);
+        ConditionalActionChain chain =
+                ConditionalActionChain.find(findOptions).ifFound(clickOptions);
 
         return executeChain(chain, stateObject);
     }
 
     /**
      * Find and type operation.
-     * 
+     *
      * @param target where to click before typing
-     * @param text   what to type
+     * @param text what to type
      * @return the action result
      */
     public ActionResult findAndType(StateObject target, String text) {
@@ -91,9 +92,8 @@ public class ConditionalActionWrapper {
         StateString textToType = new StateString();
         textToType.setString(text);
 
-        ConditionalActionChain chain = ConditionalActionChain.find(findOptions)
-                .ifFound(clickOptions)
-                .ifFound(typeOptions);
+        ConditionalActionChain chain =
+                ConditionalActionChain.find(findOptions).ifFound(clickOptions).ifFound(typeOptions);
 
         ObjectCollection collection = createCollection(target);
         collection.getStateStrings().add(textToType);
@@ -103,24 +103,20 @@ public class ConditionalActionWrapper {
 
     /**
      * Creates a new chain builder for complex conditional logic.
-     * 
+     *
      * @return a new ChainBuilder instance
      */
     public ChainBuilder createChain() {
         return new ChainBuilder();
     }
 
-    /**
-     * Helper method to execute a chain with a single StateObject.
-     */
+    /** Helper method to execute a chain with a single StateObject. */
     private ActionResult executeChain(ConditionalActionChain chain, StateObject stateObject) {
         ObjectCollection collection = createCollection(stateObject);
         return chain.perform(action, collection);
     }
 
-    /**
-     * Helper method to create an ObjectCollection from a StateObject.
-     */
+    /** Helper method to create an ObjectCollection from a StateObject. */
     private ObjectCollection createCollection(StateObject stateObject) {
         ObjectCollection.Builder builder = new ObjectCollection.Builder();
 
@@ -137,9 +133,7 @@ public class ConditionalActionWrapper {
         return builder.build();
     }
 
-    /**
-     * Static factory methods for common action configurations.
-     */
+    /** Static factory methods for common action configurations. */
     public static ClickOptions click() {
         return new ClickOptions.Builder().build();
     }
@@ -152,26 +146,20 @@ public class ConditionalActionWrapper {
         return new PatternFindOptions.Builder().build();
     }
 
-    /**
-     * Fluent builder for creating conditional action chains.
-     */
+    /** Fluent builder for creating conditional action chains. */
     public class ChainBuilder {
         private ConditionalActionChain currentChain;
         private StateObject primaryObject;
 
-        /**
-         * Starts the chain with a find operation.
-         */
+        /** Starts the chain with a find operation. */
         public ChainBuilder find(StateObject stateObject) {
             this.primaryObject = stateObject;
-            this.currentChain = ConditionalActionChain.find(
-                    new PatternFindOptions.Builder().build());
+            this.currentChain =
+                    ConditionalActionChain.find(new PatternFindOptions.Builder().build());
             return this;
         }
 
-        /**
-         * Adds an action to execute if the previous action succeeded.
-         */
+        /** Adds an action to execute if the previous action succeeded. */
         public ChainBuilder ifFound(ActionConfig actionConfig) {
             if (currentChain == null) {
                 throw new IllegalStateException("Chain not started. Call find() first.");
@@ -180,9 +168,7 @@ public class ConditionalActionWrapper {
             return this;
         }
 
-        /**
-         * Adds an action to execute if the previous action failed.
-         */
+        /** Adds an action to execute if the previous action failed. */
         public ChainBuilder ifNotFound(ActionConfig actionConfig) {
             if (currentChain == null) {
                 throw new IllegalStateException("Chain not started. Call find() first.");
@@ -191,9 +177,7 @@ public class ConditionalActionWrapper {
             return this;
         }
 
-        /**
-         * Adds an action that always executes.
-         */
+        /** Adds an action that always executes. */
         public ChainBuilder always(ActionConfig actionConfig) {
             if (currentChain == null) {
                 throw new IllegalStateException("Chain not started. Call find() first.");
@@ -202,9 +186,7 @@ public class ConditionalActionWrapper {
             return this;
         }
 
-        /**
-         * Logs a message if the previous action succeeded.
-         */
+        /** Logs a message if the previous action succeeded. */
         public ChainBuilder ifFoundLog(String message) {
             if (currentChain == null) {
                 throw new IllegalStateException("Chain not started. Call find() first.");
@@ -213,9 +195,7 @@ public class ConditionalActionWrapper {
             return this;
         }
 
-        /**
-         * Logs a message if the previous action failed.
-         */
+        /** Logs a message if the previous action failed. */
         public ChainBuilder ifNotFoundLog(String message) {
             if (currentChain == null) {
                 throw new IllegalStateException("Chain not started. Call find() first.");
@@ -226,7 +206,7 @@ public class ConditionalActionWrapper {
 
         /**
          * Executes the chain.
-         * 
+         *
          * @return the final ActionResult
          */
         public ActionResult execute() {
@@ -239,7 +219,7 @@ public class ConditionalActionWrapper {
 
         /**
          * Executes the chain with additional object collections.
-         * 
+         *
          * @param additionalCollections extra collections to include
          * @return the final ActionResult
          */
@@ -249,9 +229,11 @@ public class ConditionalActionWrapper {
             }
 
             ObjectCollection primaryCollection = createCollection(primaryObject);
-            ObjectCollection[] allCollections = new ObjectCollection[additionalCollections.length + 1];
+            ObjectCollection[] allCollections =
+                    new ObjectCollection[additionalCollections.length + 1];
             allCollections[0] = primaryCollection;
-            System.arraycopy(additionalCollections, 0, allCollections, 1, additionalCollections.length);
+            System.arraycopy(
+                    additionalCollections, 0, allCollections, 1, additionalCollections.length);
 
             return currentChain.perform(action, allCollections);
         }

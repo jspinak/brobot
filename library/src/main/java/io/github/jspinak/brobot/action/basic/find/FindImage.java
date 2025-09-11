@@ -1,45 +1,40 @@
 package io.github.jspinak.brobot.action.basic.find;
 
-import io.github.jspinak.brobot.action.internal.execution.ActionLifecycleManagement;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.action.internal.find.IterativePatternFinder;
-import io.github.jspinak.brobot.action.internal.find.DefinedRegionConverter;
+import java.util.*;
+
+import org.springframework.stereotype.Component;
+
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.color.SceneProvider;
+import io.github.jspinak.brobot.action.internal.execution.ActionLifecycleManagement;
+import io.github.jspinak.brobot.action.internal.find.DefinedRegionConverter;
+import io.github.jspinak.brobot.action.internal.find.IterativePatternFinder;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.action.ActionConfig;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-
-import java.util.*;
 
 /**
  * Core component for finding images on screen using various search strategies.
- * <p>
- * This class implements the primary image matching functionality in Brobot,
- * supporting
- * multiple find strategies including finding all matches, finding the best
- * match,
- * finding one match per state object, and finding matches per scene. It
- * integrates
- * with the action lifecycle management to handle iterative searches and exit
- * conditions.
- * 
- * <p>
- * Key features:
- * </p>
+ *
+ * <p>This class implements the primary image matching functionality in Brobot, supporting multiple
+ * find strategies including finding all matches, finding the best match, finding one match per
+ * state object, and finding matches per scene. It integrates with the action lifecycle management
+ * to handle iterative searches and exit conditions.
+ *
+ * <p>Key features:
+ *
  * <ul>
- * <li>Multiple find strategies (ALL, BEST, EACH, EACH_SCENE)</li>
- * <li>Support for defined regions to constrain searches</li>
- * <li>Integration with scene analysis for offline processing</li>
- * <li>Lifecycle management for iterative searches (e.g., wait until
- * vanish)</li>
+ *   <li>Multiple find strategies (ALL, BEST, EACH, EACH_SCENE)
+ *   <li>Support for defined regions to constrain searches
+ *   <li>Integration with scene analysis for offline processing
+ *   <li>Lifecycle management for iterative searches (e.g., wait until vanish)
  * </ul>
- * 
+ *
  * @see PatternFindOptions
  * @see IterativePatternFinder
  * @see ActionLifecycleManagement
@@ -54,8 +49,11 @@ public class FindImage {
     private final SceneProvider getScenes;
     private final IterativePatternFinder findPatternsIteration;
 
-    public FindImage(DefinedRegionConverter useDefinedRegion, ActionLifecycleManagement actionLifecycleManagement,
-            SceneProvider getScenes, IterativePatternFinder findPatternsIteration) {
+    public FindImage(
+            DefinedRegionConverter useDefinedRegion,
+            ActionLifecycleManagement actionLifecycleManagement,
+            SceneProvider getScenes,
+            IterativePatternFinder findPatternsIteration) {
         this.useDefinedRegion = useDefinedRegion;
         this.actionLifecycleManagement = actionLifecycleManagement;
         this.getScenes = getScenes;
@@ -64,13 +62,12 @@ public class FindImage {
 
     /**
      * Finds all matches for the provided images without filtering.
-     * <p>
-     * This method searches for all occurrences of the target images and returns
-     * every match found, regardless of score or position.
-     * 
-     * @param matches           The ActionResult to populate with all found matches.
-     *                          This object
-     *                          is modified by adding all discovered matches.
+     *
+     * <p>This method searches for all occurrences of the target images and returns every match
+     * found, regardless of score or position.
+     *
+     * @param matches The ActionResult to populate with all found matches. This object is modified
+     *     by adding all discovered matches.
      * @param objectCollections Collections containing the images to search for
      */
     void findAll(ActionResult matches, List<ObjectCollection> objectCollections) {
@@ -79,15 +76,13 @@ public class FindImage {
 
     /**
      * Finds only the single best match across all images.
-     * <p>
-     * This method searches for all matches but returns only the one with the
-     * highest similarity score. Useful when you need to interact with the most
-     * likely match among multiple possibilities.
-     * 
-     * @param matches           The ActionResult to populate with the best match.
-     *                          The match list
-     *                          is replaced with a single-element list containing
-     *                          only the best match.
+     *
+     * <p>This method searches for all matches but returns only the one with the highest similarity
+     * score. Useful when you need to interact with the most likely match among multiple
+     * possibilities.
+     *
+     * @param matches The ActionResult to populate with the best match. The match list is replaced
+     *     with a single-element list containing only the best match.
      * @param objectCollections Collections containing the images to search for
      */
     void findBest(ActionResult matches, List<ObjectCollection> objectCollections) {
@@ -97,16 +92,13 @@ public class FindImage {
 
     /**
      * Finds the best match for each unique state object.
-     * <p>
-     * This method ensures that each state image gets at most one match - the one
-     * with the highest score. This is useful when you have multiple images and
-     * want to find the best instance of each, rather than all instances or just
-     * the single best overall.
-     * 
-     * @param matches           The ActionResult to populate with the best match per
-     *                          state object.
-     *                          The match list is replaced with the filtered
-     *                          results.
+     *
+     * <p>This method ensures that each state image gets at most one match - the one with the
+     * highest score. This is useful when you have multiple images and want to find the best
+     * instance of each, rather than all instances or just the single best overall.
+     *
+     * @param matches The ActionResult to populate with the best match per state object. The match
+     *     list is replaced with the filtered results.
      * @param objectCollections Collections containing the images to search for
      */
     void findEachStateObject(ActionResult matches, List<ObjectCollection> objectCollections) {
@@ -115,8 +107,9 @@ public class FindImage {
         Set<String> imageIds = matches.getUniqueImageIds();
         for (String id : imageIds) {
             List<Match> singleObjectMatchList = matches.getMatchObjectsWithTargetStateObject(id);
-            Optional<Match> matchWithHighestScore = singleObjectMatchList.stream()
-                    .max(java.util.Comparator.comparingDouble(Match::getScore));
+            Optional<Match> matchWithHighestScore =
+                    singleObjectMatchList.stream()
+                            .max(java.util.Comparator.comparingDouble(Match::getScore));
             matchWithHighestScore.ifPresent(bestMatchPerStateObject::add);
         }
         matches.setMatchList(bestMatchPerStateObject);
@@ -124,57 +117,52 @@ public class FindImage {
 
     /**
      * Finds the best match per scene when analyzing multiple screenshots.
-     * <p>
-     * This method is useful for scene-based analysis where you want to find
-     * the best match in each scene separately. The final result contains one
-     * match per scene, each being the highest-scoring match within that scene.
-     * 
-     * @param matches           The ActionResult to populate with the best match
-     *                          from each scene.
-     *                          The match list is replaced with the per-scene
-     *                          results.
-     * @param objectCollections Collections containing the images and scenes to
-     *                          analyze
+     *
+     * <p>This method is useful for scene-based analysis where you want to find the best match in
+     * each scene separately. The final result contains one match per scene, each being the
+     * highest-scoring match within that scene.
+     *
+     * @param matches The ActionResult to populate with the best match from each scene. The match
+     *     list is replaced with the per-scene results.
+     * @param objectCollections Collections containing the images and scenes to analyze
      */
     void findEachScene(ActionResult matches, List<ObjectCollection> objectCollections) {
         getImageMatches(matches, objectCollections);
         matches.setMatchList(new ArrayList<>());
-        matches.getSceneAnalysisCollection().getSceneAnalyses().forEach(sceneAnalysis -> {
-            sceneAnalysis.getMatchList().stream()
-                    .max(Comparator.comparingDouble(Match::getScore))
-                    .ifPresent(matches::add);
-        });
+        matches.getSceneAnalysisCollection()
+                .getSceneAnalyses()
+                .forEach(
+                        sceneAnalysis -> {
+                            sceneAnalysis.getMatchList().stream()
+                                    .max(Comparator.comparingDouble(Match::getScore))
+                                    .ifPresent(matches::add);
+                        });
     }
 
     /**
-     * Core method that performs the actual image matching with lifecycle
-     * management.
-     * <p>
-     * This method handles the iterative search process, respecting action options
-     * such as repetitions, wait times, and exit conditions. It supports both
-     * standard searches and searches using defined regions. The search continues
-     * until the lifecycle management determines the exit condition is met.
-     * 
-     * <p>
-     * Special behaviors:
-     * </p>
+     * Core method that performs the actual image matching with lifecycle management.
+     *
+     * <p>This method handles the iterative search process, respecting action options such as
+     * repetitions, wait times, and exit conditions. It supports both standard searches and searches
+     * using defined regions. The search continues until the lifecycle management determines the
+     * exit condition is met.
+     *
+     * <p>Special behaviors:
+     *
      * <ul>
-     * <li>Returns early if no images are provided</li>
-     * <li>Uses defined regions if specified in action options</li>
-     * <li>Continues searching based on lifecycle conditions (e.g., VANISH waits
-     * until images disappear)</li>
-     * <li>Increments repetition count after each search iteration</li>
+     *   <li>Returns early if no images are provided
+     *   <li>Uses defined regions if specified in action options
+     *   <li>Continues searching based on lifecycle conditions (e.g., VANISH waits until images
+     *       disappear)
+     *   <li>Increments repetition count after each search iteration
      * </ul>
-     * 
-     * @param matches           Contains ActionConfig and accumulates all matches
-     *                          found.
-     *                          This object is modified throughout the search
-     *                          process.
+     *
+     * @param matches Contains ActionConfig and accumulates all matches found. This object is
+     *     modified throughout the search process.
      * @param objectCollections Collections containing the images to search for
      */
     void getImageMatches(ActionResult matches, List<ObjectCollection> objectCollections) {
-        if (objectCollections.isEmpty())
-            return; // no images to search for
+        if (objectCollections.isEmpty()) return; // no images to search for
 
         ActionConfig actionConfig = matches.getActionConfig();
 
@@ -182,7 +170,8 @@ public class FindImage {
         if (actionConfig != null && actionConfig instanceof PatternFindOptions) {
             PatternFindOptions findOptions = (PatternFindOptions) actionConfig;
             if (findOptions.isUseDefinedRegion()) {
-                matches.addAllResults(useDefinedRegion.useRegion(matches, objectCollections.get(0)));
+                matches.addAllResults(
+                        useDefinedRegion.useRegion(matches, objectCollections.get(0)));
                 return;
             }
         }
@@ -234,11 +223,13 @@ public class FindImage {
         }
 
         if (iterations >= maxIterations) {
-            log.warn("[FIND_IMAGE] Find operation reached maximum iterations limit ({})", maxIterations);
+            log.warn(
+                    "[FIND_IMAGE] Find operation reached maximum iterations limit ({})",
+                    maxIterations);
         }
 
-        log.debug("[FIND_IMAGE] Find operation complete. SceneAnalysisCollection size: {}",
+        log.debug(
+                "[FIND_IMAGE] Find operation complete. SceneAnalysisCollection size: {}",
                 matches.getSceneAnalysisCollection().getSceneAnalyses().size());
     }
-
 }
