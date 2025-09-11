@@ -23,7 +23,7 @@ import java.awt.event.KeyEvent;
  * 
  * @since 2.0.0
  */
-@Component
+@Component("robotMouseController")
 public class RobotMouseController implements MouseController {
     
     private final Robot robot;

@@ -30,7 +30,7 @@ import java.awt.GraphicsEnvironment;
  * 
  * @since 2.0.0
  */
-@Component
+@Component("sikuliMouseController")
 @Primary
 public class SikuliMouseController implements MouseController {
     
