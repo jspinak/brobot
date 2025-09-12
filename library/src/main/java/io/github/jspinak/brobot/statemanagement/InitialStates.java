@@ -16,7 +16,8 @@ import org.springframework.stereotype.Component;
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.navigation.service.StateService;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Manages probabilistic initial state discovery for automation startup and recovery.
@@ -98,6 +99,7 @@ import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
  * @see State
  * @see FrameworkSettings
  */
+@Slf4j
 @Component
 public class InitialStates {
 
@@ -172,9 +174,27 @@ public class InitialStates {
         for (String name : stateNames) {
             allStatesInProjectService
                     .getState(name)
-                    .ifPresent(state -> stateIds.add(state.getId()));
+                    .ifPresent(
+                            state -> {
+                                stateIds.add(state.getId());
+                                log.info(
+                                        "Added state to initial set: {} (ID: {})",
+                                        name,
+                                        state.getId());
+                            });
+            if (!allStatesInProjectService.getState(name).isPresent()) {
+                log.warn("State not found for initial state: {}", name);
+            }
         }
-        potentialActiveStates.put(stateIds, sumOfProbabilities);
+        if (!stateIds.isEmpty()) {
+            potentialActiveStates.put(stateIds, sumOfProbabilities);
+            log.info(
+                    "Registered initial state set with {} states, probability: {}",
+                    stateIds.size(),
+                    probability);
+        } else {
+            log.warn("No states found for initial state names: {}", Arrays.toString(stateNames));
+        }
     }
 
     /**
@@ -200,7 +220,7 @@ public class InitialStates {
      * @see #searchForInitialStates()
      */
     public void findInitialStates() {
-        ConsoleReporter.println("find initial states");
+        log.info("Finding initial states (mock mode: {})", FrameworkSettings.mock);
         if (FrameworkSettings.mock) {
             mockInitialStates();
             return;
@@ -226,14 +246,14 @@ public class InitialStates {
      */
     private void mockInitialStates() {
         if (potentialActiveStates.isEmpty()) {
-            ConsoleReporter.println("No potential active states defined");
+            log.warn("No potential active states defined for mock mode");
             return;
         }
 
         // Generate a random number between 1 and sumOfProbabilities
         int randomValue = new Random().nextInt(sumOfProbabilities) + 1;
-        ConsoleReporter.println(
-                "Randomly selected value: " + randomValue + " out of " + sumOfProbabilities);
+        log.info(
+                "Mock mode: randomly selected value {} out of {}", randomValue, sumOfProbabilities);
 
         // Find the state set whose probability range contains the random value
         for (Map.Entry<Set<Long>, Integer> entry : potentialActiveStates.entrySet()) {
@@ -241,7 +261,7 @@ public class InitialStates {
                 Set<Long> selectedStates = entry.getKey();
 
                 // Activate the selected states
-                ConsoleReporter.println("Selected " + selectedStates.size() + " initial states");
+                log.info("Mock mode: selected {} initial states", selectedStates.size());
                 selectedStates.forEach(
                         stateId -> {
                             stateMemory.addActiveState(stateId, true);
@@ -250,15 +270,13 @@ public class InitialStates {
                                     .ifPresent(
                                             state -> {
                                                 state.setProbabilityToBaseProbability();
-                                                ConsoleReporter.println(
-                                                        "Activated state: "
-                                                                + state.getName()
-                                                                + " (ID: "
-                                                                + stateId
-                                                                + ")");
+                                                log.info(
+                                                        "Activated state: {} (ID: {})",
+                                                        state.getName(),
+                                                        stateId);
                                             });
                         });
-                ConsoleReporter.print("Initial States are ");
+                log.info("Initial states activated: {}", stateMemory.getActiveStateNames());
                 stateMemory
                         .getActiveStateNames()
                         .forEach(state -> System.out.println(state + ", "));
@@ -267,7 +285,7 @@ public class InitialStates {
         }
 
         // This should never happen if potentialActiveStates is properly populated
-        ConsoleReporter.println("Failed to select any initial states");
+        log.error("Failed to select any initial states in mock mode");
     }
 
     /**
