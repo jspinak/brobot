@@ -2,8 +2,10 @@ package io.github.jspinak.brobot.config.core;
 
 import jakarta.annotation.PostConstruct;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+
+import io.github.jspinak.brobot.config.mock.MockProperties;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,15 +17,21 @@ import lombok.extern.slf4j.Slf4j;
 @Configuration
 public class FrameworkSettingsConfig {
 
-    @Value("${brobot.framework.mock:false}")
-    private boolean mockMode;
+    @Autowired
+    private MockProperties mockProperties;
 
     @PostConstruct
     public void initializeFrameworkSettings() {
-        // Set the static mock field
-        FrameworkSettings.mock = mockMode;
+        // Set the static mock field from the new MockProperties
+        FrameworkSettings.mock = mockProperties.isEnabled();
+        
+        // Set the action success probability (store in FrameworkSettings for now)
+        // This will be used by mock action implementations
+        FrameworkSettings.mockActionSuccessProbability = mockProperties.getAction().getSuccessProbability();
 
-        log.info("FrameworkSettings initialized: mock={}", FrameworkSettings.mock);
+        log.info("FrameworkSettings initialized: mock={}, actionSuccessProbability={}", 
+                FrameworkSettings.mock, 
+                FrameworkSettings.mockActionSuccessProbability);
 
         // Log other important settings
         log.info(

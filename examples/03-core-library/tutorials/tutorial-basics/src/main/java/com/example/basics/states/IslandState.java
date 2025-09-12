@@ -24,9 +24,16 @@ public class IslandState {
 
     private final StateImage islandName;
     private final StateImage islandCapture;
+    private final StateImage backToWorldButton;
 
     public IslandState() {
         islandName = new StateImage.Builder().addPatterns("islandName").build();
+        
+        backToWorldButton = 
+                new StateImage.Builder()
+                        .addPatterns("backToWorld", "worldMap", "exitIsland")
+                        .setName("backToWorldButton")
+                        .build();
 
         // Define the island capture region relative to the search button
         // The island appears near the search button, so we define the capture

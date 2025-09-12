@@ -87,7 +87,7 @@ public class ProfileAutoConfiguration {
             log.info("═══ BROBOT LIVE PROFILE ACTIVATED ═══");
 
             // Check if mock mode is explicitly set
-            String mockProperty = environment.getProperty("brobot.framework.mock", "false");
+            String mockProperty = environment.getProperty("brobot.mock.enabled", "false");
             FrameworkSettings.mock = Boolean.parseBoolean(mockProperty);
 
             if (FrameworkSettings.mock) {
@@ -102,7 +102,7 @@ public class ProfileAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(
-            name = "brobot.framework.mock",
+            name = "brobot.mock.enabled",
             havingValue = "true",
             matchIfMissing = false)
     public MockStateManagement mockStateManagement(StateService stateService) {
@@ -144,7 +144,7 @@ public class ProfileAutoConfiguration {
             boolean isTestProfile = java.util.Arrays.asList(activeProfiles).contains("test");
 
             // Validate mock mode consistency
-            String mockProperty = environment.getProperty("brobot.framework.mock", "false");
+            String mockProperty = environment.getProperty("brobot.mock.enabled", "false");
             boolean mockEnabled = Boolean.parseBoolean(mockProperty);
 
             if (isTestProfile && !mockEnabled) {

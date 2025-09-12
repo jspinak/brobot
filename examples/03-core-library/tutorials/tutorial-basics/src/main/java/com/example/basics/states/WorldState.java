@@ -27,6 +27,8 @@ public class WorldState {
     private final StateImage farms;
     private final StateImage mines;
     private final StateImage searchButton;
+    private final StateImage backButton;
+    private final StateImage island1;
     private final StateRegion gameArea;
 
     public WorldState() {
@@ -47,6 +49,18 @@ public class WorldState {
                 new StateImage.Builder()
                         .addPatterns("searchButton")
                         .setName("searchButton")
+                        .build();
+
+        backButton =
+                new StateImage.Builder()
+                        .addPatterns("backButton", "homeButton")
+                        .setName("backButton")
+                        .build();
+
+        island1 =
+                new StateImage.Builder()
+                        .addPatterns("island1", "firstIsland")
+                        .setName("island1")
                         .build();
 
         // Define regions for area-based interactions

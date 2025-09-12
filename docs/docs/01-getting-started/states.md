@@ -144,14 +144,31 @@ public class GameMenuState {
 
 This pattern provides clean access in transitions:
 ```java
-@Transition(from = GameMenuState.class, to = GamePlayState.class)
-public class StartGameTransition {
+@TransitionSet(state = GamePlayState.class)
+@Component
+@RequiredArgsConstructor
+public class GamePlayTransitions {
     private final GameMenuState menuState;
+    private final GamePlayState gamePlayState;
     private final Action action;
     
-    public boolean execute() {
+    @FromTransition(from = GameMenuState.class, priority = 1)
+    public boolean fromMenu() {
+        // In mock mode, return true for testing
+        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+            return true;
+        }
         // Direct, readable access to state components
         return action.click(menuState.getPlayButton()).isSuccess();
+    }
+    
+    @ToTransition(required = true)
+    public boolean verifyArrival() {
+        // Verify we're in the game play state
+        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+            return true;
+        }
+        return action.find(gamePlayState.getGameBoard()).isSuccess();
     }
 }
 ```

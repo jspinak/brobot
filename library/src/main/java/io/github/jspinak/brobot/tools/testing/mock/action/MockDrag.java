@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.tools.testing.mock.action;
 
 import static io.github.jspinak.brobot.config.core.FrameworkSettings.mockTimeDrag;
+import static io.github.jspinak.brobot.config.core.FrameworkSettings.mockActionSuccessProbability;
 
 import org.springframework.stereotype.Component;
 
@@ -16,12 +17,14 @@ public class MockDrag {
     }
 
     /**
-     * Drag succeeds when the images are found, but it still takes time to do the drag.
+     * Drag succeeds based on the configured success probability.
+     * The action still takes time to simulate the drag operation.
      *
-     * @return true
+     * @return true if the action succeeds based on mockActionSuccessProbability
      */
     public boolean drag() {
         mockTime.wait(mockTimeDrag);
-        return true;
+        // Use the configured success probability to determine if the action succeeds
+        return Math.random() < mockActionSuccessProbability;
     }
 }
