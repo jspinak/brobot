@@ -45,6 +45,7 @@ public class AnnotationProcessor {
     private final ApplicationEventPublisher eventPublisher;
     private final StateAnnotationBeanPostProcessor stateBeanPostProcessor;
     private final TransitionAnnotationBeanPostProcessor transitionBeanPostProcessor;
+    private final TransitionSetProcessor transitionSetProcessor;
     private final Map<String, Integer> initialStatePriorities = new HashMap<>();
     private volatile boolean annotationsProcessed = false;
 
@@ -58,7 +59,8 @@ public class AnnotationProcessor {
             StateRegistrationService registrationService,
             ApplicationEventPublisher eventPublisher,
             StateAnnotationBeanPostProcessor stateBeanPostProcessor,
-            TransitionAnnotationBeanPostProcessor transitionBeanPostProcessor) {
+            TransitionAnnotationBeanPostProcessor transitionBeanPostProcessor,
+            TransitionSetProcessor transitionSetProcessor) {
         this.applicationContext = applicationContext;
         this.jointTable = jointTable;
         this.stateService = stateService;
@@ -69,6 +71,7 @@ public class AnnotationProcessor {
         this.eventPublisher = eventPublisher;
         this.stateBeanPostProcessor = stateBeanPostProcessor;
         this.transitionBeanPostProcessor = transitionBeanPostProcessor;
+        this.transitionSetProcessor = transitionSetProcessor;
         log.info("AnnotationProcessor constructor called");
     }
 
@@ -93,7 +96,7 @@ public class AnnotationProcessor {
                 (name, bean) -> log.info("  - {} ({})", name, bean.getClass().getName()));
 
         Map<String, Object> collectedTransitionBeans =
-                transitionBeanPostProcessor.getTransitionBeans();
+                transitionBeanPostProcessor.getTransitionSetBeans();
         log.info(
                 "TransitionBeanPostProcessor has already collected {} @Transition beans:",
                 collectedTransitionBeans.size());
@@ -166,7 +169,8 @@ public class AnnotationProcessor {
         collectedBeans.forEach(
                 (name, bean) -> log.info("  - {} ({})", name, bean.getClass().getName()));
 
-        Map<String, Object> collectedTransitions = transitionBeanPostProcessor.getTransitionBeans();
+        Map<String, Object> collectedTransitions =
+                transitionBeanPostProcessor.getTransitionSetBeans();
         log.info(
                 "TransitionBeanPostProcessor has collected {} @Transition beans:",
                 collectedTransitions.size());
@@ -179,7 +183,7 @@ public class AnnotationProcessor {
         // Process @Transition annotations
         processTransitions(stateMap);
 
-        int transitionCount = transitionBeanPostProcessor.getTransitionBeanCount();
+        int transitionCount = transitionBeanPostProcessor.getTransitionSetBeans().size();
         log.info(
                 "Brobot annotation processing complete. {} states and {} transitions registered.",
                 stateMap.size(),
@@ -303,76 +307,56 @@ public class AnnotationProcessor {
     }
 
     private void processTransitions(Map<Class<?>, Object> stateMap) {
-        // Use the BeanPostProcessor to get transition beans (more reliable than
-        // getBeansWithAnnotation)
-        Map<String, Object> transitionBeans = transitionBeanPostProcessor.getTransitionBeans();
+        // Use the BeanPostProcessor to get TransitionSet beans
+        Map<String, Object> transitionSetBeans =
+                transitionBeanPostProcessor.getTransitionSetBeans();
         log.info(
-                "Found {} beans with @Transition annotation from BeanPostProcessor",
-                transitionBeans.size());
+                "Found {} beans with @TransitionSet annotation from BeanPostProcessor",
+                transitionSetBeans.size());
 
         // Also check what Spring sees directly for comparison
-        Map<String, Object> springTransitionBeans =
-                applicationContext.getBeansWithAnnotation(Transition.class);
+        Map<String, Object> springTransitionSetBeans =
+                applicationContext.getBeansWithAnnotation(TransitionSet.class);
         log.info(
-                "Spring's getBeansWithAnnotation found {} @Transition beans",
-                springTransitionBeans.size());
-        springTransitionBeans.forEach(
+                "Spring's getBeansWithAnnotation found {} @TransitionSet beans",
+                springTransitionSetBeans.size());
+        springTransitionSetBeans.forEach(
                 (name, bean) ->
                         log.info("  Spring found: {} ({})", name, bean.getClass().getName()));
 
-        for (Map.Entry<String, Object> entry : transitionBeans.entrySet()) {
-            Object transitionBean = entry.getValue();
-            Class<?> transitionClass = transitionBean.getClass();
+        // Process each TransitionSet bean
+        for (Map.Entry<String, Object> entry : transitionSetBeans.entrySet()) {
+            Object transitionSetBean = entry.getValue();
+            Class<?> transitionSetClass = transitionSetBean.getClass();
+
             // Use AnnotationUtils to find annotation on the actual class (handles proxies)
-            Transition transitionAnnotation =
+            TransitionSet transitionSetAnnotation =
                     org.springframework.core.annotation.AnnotationUtils.findAnnotation(
                             org.springframework.aop.framework.AopProxyUtils.ultimateTargetClass(
-                                    transitionBean),
-                            Transition.class);
+                                    transitionSetBean),
+                            TransitionSet.class);
 
-            if (transitionAnnotation == null) {
+            if (transitionSetAnnotation == null) {
                 log.error(
-                        "No @Transition annotation found on bean {} ({})",
+                        "No @TransitionSet annotation found on bean {} ({})",
                         entry.getKey(),
-                        transitionClass.getName());
+                        transitionSetClass.getName());
                 continue;
             }
 
-            // Get the transition method
-            Method transitionMethod =
-                    findTransitionMethod(transitionClass, transitionAnnotation.method());
-            if (transitionMethod == null) {
-                log.error(
-                        "Transition method '{}' not found in class {}",
-                        transitionAnnotation.method(),
-                        transitionClass.getName());
-                continue;
-            }
+            // Process the TransitionSet using the dedicated processor
+            boolean success =
+                    transitionSetProcessor.processTransitionSet(
+                            transitionSetBean, transitionSetAnnotation);
 
-            // Log transition details
-            log.info(
-                    "Processing transition bean: {} ({})",
-                    entry.getKey(),
-                    transitionClass.getSimpleName());
-            log.info("  - From: {}", (Object) transitionAnnotation.from());
-            log.info("  - To: {}", (Object) transitionAnnotation.to());
-            log.info("  - Method: {}", transitionAnnotation.method());
-            log.info("  - Priority: {}", transitionAnnotation.priority());
-
-            // Register transitions for all from/to combinations
-            for (Class<?> fromState : transitionAnnotation.from()) {
-                for (Class<?> toState : transitionAnnotation.to()) {
-                    registerTransition(
-                            fromState,
-                            toState,
-                            transitionBean,
-                            transitionMethod,
-                            transitionAnnotation.priority());
-                }
+            if (success) {
+                log.info("Successfully processed TransitionSet: {}", entry.getKey());
+            } else {
+                log.error("Failed to process TransitionSet: {}", entry.getKey());
             }
         }
 
-        log.info("Successfully processed {} transition beans", transitionBeans.size());
+        log.info("Successfully processed {} TransitionSet beans", transitionSetBeans.size());
     }
 
     private Method findTransitionMethod(Class<?> transitionClass, String methodName) {

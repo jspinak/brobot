@@ -14,23 +14,29 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * BeanPostProcessor that detects and collects beans annotated with @Transition.
+ * BeanPostProcessor that detects and collects beans annotated with @TransitionSet.
  *
  * <p>This is necessary because Spring's getBeansWithAnnotation() method doesn't reliably detect
- * beans with meta-annotations (like @Transition which includes @Component).
+ * beans with meta-annotations (like @TransitionSet which includes @Component).
  *
- * <p>This processor: 1. Intercepts bean creation during Spring's initialization 2. Checks if the
- * bean's target class has @Transition annotation 3. Stores references to transition beans for later
- * processing
+ * <p>This processor:
+ *
+ * <ol>
+ *   <li>Intercepts bean creation during Spring's initialization
+ *   <li>Checks if the bean's target class has @TransitionSet annotation
+ *   <li>Stores references to transition set beans for later processing
+ * </ol>
  *
  * <p>This approach is more reliable than getBeansWithAnnotation() for meta-annotations.
+ *
+ * @since 1.2.0
  */
 @Component
 @Slf4j
 @RequiredArgsConstructor
 public class TransitionAnnotationBeanPostProcessor implements BeanPostProcessor {
 
-    private final Map<String, Object> transitionBeans = new ConcurrentHashMap<>();
+    private final Map<String, Object> transitionSetBeans = new ConcurrentHashMap<>();
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName)
@@ -38,47 +44,38 @@ public class TransitionAnnotationBeanPostProcessor implements BeanPostProcessor 
         // Get the actual class (handles proxies)
         Class<?> targetClass = AopProxyUtils.ultimateTargetClass(bean);
 
-        // Check if the class has @Transition annotation
-        Transition transitionAnnotation =
-                AnnotationUtils.findAnnotation(targetClass, Transition.class);
+        // Check if the class has @TransitionSet annotation
+        TransitionSet transitionSetAnnotation =
+                AnnotationUtils.findAnnotation(targetClass, TransitionSet.class);
 
-        if (transitionAnnotation != null) {
-            log.info("=== TRANSITION BEAN DETECTED BY POST PROCESSOR ===");
+        if (transitionSetAnnotation != null) {
+            log.info("=== TRANSITION SET BEAN DETECTED BY POST PROCESSOR ===");
             log.info("Bean name: {}", beanName);
             log.info("Bean class: {}", targetClass.getName());
-            log.info("Transition annotation details:");
-            log.info("  - From: {}", (Object) transitionAnnotation.from());
-            log.info("  - To: {}", (Object) transitionAnnotation.to());
-            log.info("  - Method: {}", transitionAnnotation.method());
-            log.info("  - Priority: {}", transitionAnnotation.priority());
+            log.info("TransitionSet annotation details:");
+            log.info("  - State: {}", transitionSetAnnotation.state().getSimpleName());
+            log.info("  - Name override: {}", transitionSetAnnotation.name());
+            log.info("  - Description: {}", transitionSetAnnotation.description());
 
-            transitionBeans.put(beanName, bean);
-            log.info("Total transition beans collected so far: {}", transitionBeans.size());
+            // Store the bean for later processing
+            transitionSetBeans.put(beanName, bean);
+            log.info("Stored TransitionSet bean '{}' for later processing", beanName);
         }
 
         return bean;
     }
 
     /**
-     * Get all beans that have been detected with @Transition annotation.
+     * Get all collected TransitionSet beans.
      *
-     * @return Unmodifiable map of transition bean names to bean instances
+     * @return unmodifiable map of bean names to TransitionSet beans
      */
-    public Map<String, Object> getTransitionBeans() {
-        return Collections.unmodifiableMap(transitionBeans);
+    public Map<String, Object> getTransitionSetBeans() {
+        return Collections.unmodifiableMap(transitionSetBeans);
     }
 
-    /** Clear the collected transition beans. Useful for testing or resetting state. */
+    /** Clear all collected beans. Useful for testing. */
     public void clear() {
-        transitionBeans.clear();
-    }
-
-    /**
-     * Get the count of detected transition beans.
-     *
-     * @return The number of transition beans detected
-     */
-    public int getTransitionBeanCount() {
-        return transitionBeans.size();
+        transitionSetBeans.clear();
     }
 }

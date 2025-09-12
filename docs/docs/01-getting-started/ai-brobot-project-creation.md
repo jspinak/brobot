@@ -4,7 +4,7 @@
 
 Brobot is a Java-based GUI automation framework that provides model-based automation with states and transitions. It builds on SikuliX for pattern matching while adding Spring Boot integration, mock testing capabilities, and a clean API.
 
-**Current Version**: 1.1.0  
+**Current Version**: 1.2.0  
 **Java Version**: 21+  
 **Spring Boot**: 3.2.0+
 
@@ -126,6 +126,61 @@ Brobot is a Java-based GUI automation framework that provides model-based automa
 - **States Theory**: [States Theory](05-theoretical-foundations/states.md)
 - **Transitions Theory**: [Transitions Theory](05-theoretical-foundations/transitions.md)
 
+## CRITICAL: Only Use Brobot API - Never Use External Functions
+
+### ⚠️ ABSOLUTE RULES - NO EXCEPTIONS
+
+**NEVER use any of these:**
+- ❌ `Thread.sleep()` - Breaks mock testing and model-based automation
+- ❌ `org.sikuli.script.*` direct calls - Circumvents Brobot's wrapper functions
+- ❌ `java.awt.Robot` - Bypasses Brobot's automation model
+- ❌ Any direct system calls or native automation
+
+**Why this matters:**
+- Brobot uses wrapper functions that decide whether to mock or execute live automation
+- Using external functions circumvents the model and **nullifies ALL benefits** of model-based GUI automation
+- Mock testing becomes impossible when you use direct calls
+- The automation cannot be tested without a real UI
+
+### ✅ ALWAYS Use Brobot Actions Instead
+
+```java
+// ❌ WRONG - Never do this!
+Thread.sleep(2000);  // Breaks mock testing!
+
+// ✅ CORRECT - Use Brobot's wait/pause actions
+action.pause(2.0);  // Works in both mock and live mode
+
+// ❌ WRONG - Direct SikuliX call
+org.sikuli.script.Screen.wait(pattern, 5);
+
+// ✅ CORRECT - Use Brobot's Action API
+action.find(stateImage);  // Respects mock/live mode
+
+// ❌ WRONG - Direct mouse movement
+Robot robot = new Robot();
+robot.mouseMove(100, 200);
+
+// ✅ CORRECT - Use Brobot's Action API
+action.move(new Location(100, 200));
+```
+
+### Waiting and Timing in Brobot
+
+```java
+// For pauses between actions
+action.pause(1.5);  // Pause for 1.5 seconds
+
+// For waiting for elements (built into find operations)
+PatternFindOptions options = new PatternFindOptions.Builder()
+    .setWaitTime(5.0)  // Wait up to 5 seconds
+    .build();
+action.find(options, stateImage);
+
+// Navigation automatically waits for state transitions
+navigation.goToState("NextState");  // Includes appropriate waits
+```
+
 ## Key Patterns & Best Practices
 
 ### Project Structure
@@ -166,7 +221,7 @@ dependencies {
 @State(initial = true)  // Marks as initial state
 @Getter
 @Slf4j
-public class HomeState {
+public class HomeState {  // Class name ends with "State"
     private final StateImage button;
     
     public HomeState() {
@@ -178,20 +233,90 @@ public class HomeState {
 }
 ```
 
-#### Transition Definition
+#### Transition Organization with @TransitionSet
+
+Brobot 1.2.0+ uses a cohesive approach where ALL transitions for a state are in ONE class:
+
 ```java
-@Transition(from = HomeState.class, to = NextState.class)
+@TransitionSet(state = PricingState.class)
 @RequiredArgsConstructor
 @Slf4j
-public class HomeToNextTransition {
-    private final HomeState homeState;
+public class PricingTransitions {
+    private final MenuState menuState;
+    private final HomepageState homepageState;
+    private final PricingState pricingState;
     private final Action action;
     
-    public boolean execute() {
-        return action.click(homeState.getButton()).isSuccess();
+    // FromTransition: How to get TO Pricing FROM Menu
+    @FromTransition(from = MenuState.class, priority = 1)
+    public boolean fromMenu() {
+        log.info("Navigating from Menu to Pricing");
+        return action.click(menuState.getPricingButton()).isSuccess();
+    }
+    
+    // FromTransition: How to get TO Pricing FROM Homepage
+    @FromTransition(from = HomepageState.class, priority = 2)
+    public boolean fromHomepage() {
+        log.info("Navigating from Homepage to Pricing");
+        return action.click(homepageState.getPricingLink()).isSuccess();
+    }
+    
+    // ToTransition: Verify we've ARRIVED at Pricing
+    @ToTransition
+    public boolean verifyArrival() {
+        log.info("Verifying arrival at Pricing state");
+        return action.find(pricingState.getUniqueElement()).isSuccess();
     }
 }
 ```
+
+**Key Points**: 
+- **ONE class per state** containing all its transitions
+- **@FromTransition methods** handle navigation FROM other states
+- **@ToTransition method** verifies arrival (only ONE per class)
+- **High cohesion** - easy to find all transitions for a state
+- Transitions execute in sequence: FromTransition → ToTransition
+
+#### CRITICAL: Navigation Usage
+```java
+// WRONG - Never call transitions directly!
+@Component
+public class WrongRunner {
+    @Autowired
+    private HomeToNextTransition transition;
+    
+    public void run() {
+        transition.execute();  // ❌ WRONG - Don't do this!
+    }
+}
+
+// CORRECT - Use Navigation service
+@Component
+@RequiredArgsConstructor
+public class CorrectRunner {
+    private final Navigation navigation;
+    private final Action action;
+    private final NextState nextState;
+    
+    public void run() {
+        // Navigate using state name (without "State" suffix)
+        navigation.goToState("Next");  // ✅ CORRECT
+        
+        // Then perform actions on the state
+        action.click(nextState.getButton());
+    }
+}
+```
+
+#### State Naming Convention
+- **Class naming**: Always end with "State" (e.g., `MenuState`, `PricingState`)
+- **@State annotation**: Automatically removes "State" suffix for the state name
+- **Navigation**: Use the name WITHOUT "State":
+  ```java
+  // Class: MenuState → navigation.goToState("Menu")
+  // Class: PricingState → navigation.goToState("Pricing")
+  // Class: HomepageState → navigation.goToState("Homepage")
+  ```
 
 #### ConditionalActionChain Pattern
 ```java
@@ -234,19 +359,32 @@ brobot:
 
 ### Critical Points to Remember
 
-1. **Brobot does NOT call SikuliX methods directly** - Always use Brobot's Action API
-2. **@State and @Transition include @Component** - No need to add @Component separately
-3. **ActionHistory is REQUIRED for mock mode** - Patterns won't be found without it
-4. **Use ActionConfig classes, NOT ActionOptions** - ActionOptions is deprecated
-5. **Configure via properties files** - Don't set FrameworkSettings fields directly
+1. **NEVER use Thread.sleep(), Robot, or ANY external functions** - Only use Brobot API
+2. **Brobot does NOT call SikuliX methods directly** - Always use Brobot's Action API
+3. **Use @TransitionSet with method-level annotations** - All transitions for a state in ONE class
+4. **@FromTransition methods** navigate TO the state FROM other states
+5. **@ToTransition method** (only ONE per class) verifies arrival at the state
+6. **@State and @TransitionSet include @Component** - No need to add @Component separately
+7. **ActionHistory is REQUIRED for mock mode** - Patterns won't be found without it
+8. **Configure via properties files** - Don't set FrameworkSettings fields directly
+9. **NEVER call transitions directly** - Use `Navigation.goToState("StateName")` instead
+10. **State naming convention** - Classes end with "State" but navigation uses name without "State"
+    - Class: `PricingState` → Navigate: `navigation.goToState("Pricing")`
 
 ### Common Pitfalls to Avoid
 
+- ❌ Using `Thread.sleep()` anywhere in the code - Use `action.pause()` instead
+- ❌ Using `java.awt.Robot` or any system automation outside Brobot
 - ❌ Using `org.sikuli.script.Screen` directly
-- ❌ Adding `@Component` to `@State` or `@Transition` classes
+- ❌ Scattering transitions across multiple classes instead of using @TransitionSet
+- ❌ Having multiple @ToTransition methods in one @TransitionSet class
+- ❌ Forgetting to annotate transition class with @TransitionSet
+- ❌ Adding `@Component` to `@State` or `@TransitionSet` classes (already included)
 - ❌ Using `ActionOptions` instead of specific config classes
 - ❌ Setting `FrameworkSettings.mock = true` directly
 - ❌ Forgetting ActionHistory in mock mode tests
+- ❌ Calling transition methods directly instead of using Navigation
+- ❌ Using full class name in `navigation.goToState()` (e.g., "PricingState" instead of "Pricing")
 
 ### When Helping Users
 

@@ -326,20 +326,37 @@ public class TransitionExecutor {
         if (stateMemory.getActiveStates().contains(toStateName))
             return true; // State is already active
         Optional<State> toStateOpt = allStatesInProjectService.getState(toStateName);
-        if (toStateOpt.isEmpty()) return false; // State doesn't exist
+        if (toStateOpt.isEmpty()) {
+            System.out.println("=== TRANSITION DEBUG: State doesn't exist for ID " + toStateName);
+            return false; // State doesn't exist
+        }
         State toState = toStateOpt.get();
         toState.setProbabilityToBaseProbability();
         Optional<StateTransitions> stateTransitions =
                 stateTransitionsInProjectService.getTransitions(toStateName);
-        if (stateTransitions.isEmpty()) return false; // transition doesn't exist
+        if (stateTransitions.isEmpty()) {
+            System.out.println(
+                    "=== TRANSITION DEBUG: No StateTransitions found for state " + toStateName);
+            return false; // transition doesn't exist
+        }
         StateTransition StateTransition = stateTransitions.get().getTransitionFinish();
         BooleanSupplier booleanSupplier =
                 transitionBooleanSupplierPackager.toBooleanSupplier(StateTransition);
-        if (!booleanSupplier.getAsBoolean()) { // transition failed
+        boolean result = booleanSupplier.getAsBoolean();
+        System.out.println(
+                "=== TRANSITION DEBUG: ToTransition for state "
+                        + toStateName
+                        + " ("
+                        + allStatesInProjectService.getStateName(toStateName)
+                        + ") returned: "
+                        + result);
+        if (!result) { // transition failed
             toState.setProbabilityExists(0); // mock assumes State is not present
             return false;
         }
         toState.setProbabilityExists(100); // State found
+        // Add the state to active states!
+        stateMemory.addActiveState(toStateName);
         setHiddenStates.set(toStateName);
         stateTransitionsJointTable.addTransitionsToHiddenStates(toState);
         StateTransition.getActivate().forEach(this::doTransitionTo);

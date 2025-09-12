@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.config.dpi.PhysicalResolutionCapture;
@@ -23,6 +24,7 @@ import io.github.jspinak.brobot.config.dpi.PhysicalResolutionCapture;
  * @since 1.1.0
  */
 @Component
+@ConditionalOnProperty(name = "brobot.framework.mock", havingValue = "false", matchIfMissing = true)
 public class CrossPlatformPhysicalCapture {
 
     private static final String OS = System.getProperty("os.name").toLowerCase();

@@ -110,88 +110,96 @@ The academic paper provides a formal definition for a transition as a tuple **t 
 * **A** is a **process**, which is a sequence of one or more actions `(a¹, a², ..., aⁿ)`.  This corresponds to the method you pass to the builder (e.g., `goToIsland`).
 * **S<sub>t</sub><sup>def</sup>** is the **intended state information**.  This is an explicit definition of which states should become active or inactive if the transition succeeds. This makes state management more robust and predictable, as the framework doesn't have to guess the outcome.  This corresponds to builder methods like `.addToActivate(ISLAND)`. 
 
-## Modern Approach: Using @Transition Annotation
+## Modern Approach: Using @TransitionSet Annotation
 
-Brobot 1.1.0+ introduces a simpler, annotation-based approach for defining transitions. This modern approach reduces boilerplate and integrates seamlessly with Spring Boot's dependency injection.
+Brobot 1.2.0+ introduces a cohesive, method-level annotation approach that groups all transitions for a state in one class. This maintains high cohesion while providing clear, annotation-based configuration.
 
-### @Transition Annotation
+### @TransitionSet Annotation
 
-The `@Transition` annotation automatically registers your transition class with the framework:
+The `@TransitionSet` annotation marks a class as containing all transitions for a specific state:
 
 ```java
-@Transition(from = HomeState.class, to = SettingsState.class)
+@TransitionSet(state = PricingState.class)
 @RequiredArgsConstructor
 @Slf4j
-public class HomeToSettingsTransition {
-    private final HomeState homeState;
+public class PricingTransitions {
+    private final MenuState menuState;
+    private final HomepageState homepageState;
+    private final PricingState pricingState;
     private final Action action;
     
-    public boolean execute() {
-        log.info("Navigating from Home to Settings");
-        // Click the settings button in the home state
-        return action.click(homeState.getSettingsButton()).isSuccess();
+    @FromTransition(from = MenuState.class, priority = 1)
+    public boolean fromMenu() {
+        log.info("Navigating from Menu to Pricing");
+        return action.click(menuState.getPricingButton()).isSuccess();
+    }
+    
+    @FromTransition(from = HomepageState.class, priority = 2)
+    public boolean fromHomepage() {
+        log.info("Navigating from Homepage to Pricing");
+        return action.click(homepageState.getPricingLink()).isSuccess();
+    }
+    
+    @ToTransition
+    public boolean verifyArrival() {
+        log.info("Verifying arrival at Pricing state");
+        return action.find(pricingState.getStartForFreeButton()).isSuccess();
     }
 }
 ```
 
-### Annotation Parameters
+### Annotation Types
 
-- **from**: The source state class(es) - where the transition starts
-- **to**: The target state class(es) - where the transition ends
-- **method**: The method name to execute (default: "execute")
-- **priority**: Transition priority when multiple paths exist (default: 0)
-- **description**: Documentation for the transition
+#### @TransitionSet
+- **state**: The state class these transitions belong to
+- **name**: Optional state name override
+- **description**: Documentation for the transition set
 
-### Multiple Target States
+#### @FromTransition
+- **from**: The source state class
+- **priority**: Transition priority (higher = preferred)
+- **description**: Documentation
+- **timeout**: Timeout in seconds
 
-You can define transitions that go to multiple possible states:
+#### @ToTransition
+- **description**: Documentation
+- **timeout**: Verification timeout
+- **required**: Whether verification must succeed
 
-```java
-@Transition(
-    from = LoginState.class, 
-    to = {HomeState.class, ErrorState.class},
-    description = "Login attempt that can succeed or fail"
-)
-@RequiredArgsConstructor
-public class LoginTransition {
-    private final LoginState loginState;
-    private final Action action;
-    
-    public boolean execute() {
-        // Type credentials
-        action.type(loginState.getUsernameField(), "user@example.com");
-        action.type(loginState.getPasswordField(), "password");
-        
-        // Click login button
-        return action.click(loginState.getLoginButton()).isSuccess();
-    }
-}
-```
+### Key Benefits of @TransitionSet
+
+1. **High Cohesion**: All transitions for a state in ONE class
+2. **Clear Separation**: FromTransitions handle navigation, ToTransition verifies arrival
+3. **Natural Organization**: Easy to find all paths to/from a state
+4. **Spring Integration**: Full dependency injection support
+5. **Type Safety**: Class-based state references
+6. **Reduced Boilerplate**: Method-level annotations are concise
 
 ### Comparison: Traditional vs Modern
 
-| Aspect | Traditional StateTransitions | Modern @Transition |
-|--------|------------------------------|--------------------|
-| **Boilerplate** | More verbose, requires builder pattern | Minimal, annotation-based |
-| **Registration** | Manual in StateRegistrationListener | Automatic with Spring scanning |
-| **Dependencies** | Injected but used in builder | Direct dependency injection |
-| **Type Safety** | String-based state names | Class-based references |
+| Aspect | Traditional StateTransitions | Modern @TransitionSet |
+|--------|------------------------------|------------------------|
+| **Organization** | All transitions in one builder | All transitions in one class with methods |
+| **Cohesion** | High (single class) | High (single class) |
+| **FromTransitions** | addTransition() calls | @FromTransition methods |
+| **ToTransition** | addTransitionFinish() | @ToTransition method |
+| **Registration** | Manual in listener | Automatic with Spring |
+| **Type Safety** | String-based names | Class-based references |
 | **Spring Integration** | Partial | Full integration |
-| **Readability** | Complex with nested builders | Simple and clear |
+| **Clarity** | Builder pattern complexity | Clear method annotations |
 
 ### When to Use Each Approach
 
-- **Use @Transition (Modern)** for:
-  - New projects starting with Brobot 1.1.0+
-  - Simple, direct state transitions
+- **Use @TransitionSet (Modern)** for:
+  - New projects starting with Brobot 1.2.0+
+  - Projects that value cohesion and organization
   - Better Spring Boot integration
   - Cleaner, more maintainable code
 
 - **Use StateTransitions (Traditional)** for:
-  - Legacy projects or gradual migration
-  - Complex transition logic requiring fine control
-  - Dynamic transition generation
-  - Backward compatibility needs
+  - Legacy projects that haven't migrated
+  - Dynamic transition generation at runtime
+  - Complex programmatic transition logic
 
 ## Dynamic Transitions for Hidden States
 
