@@ -6,8 +6,11 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import io.github.jspinak.brobot.config.automation.AutomationConfig;
+import io.github.jspinak.brobot.exception.AutomationException;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.navigation.path.PathFinder;
 import io.github.jspinak.brobot.navigation.path.PathManager;
@@ -19,6 +22,8 @@ import io.github.jspinak.brobot.tools.logging.ActionLogger;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.tools.logging.ExecutionSession;
 import io.github.jspinak.brobot.tools.logging.MessageFormatter;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * High-level state navigation orchestrator for the Brobot framework.
@@ -87,6 +92,7 @@ import io.github.jspinak.brobot.tools.logging.MessageFormatter;
  * @see StateMemory
  * @see ActionLogger
  */
+@Slf4j
 @Component
 public class StateNavigator {
 
@@ -97,6 +103,9 @@ public class StateNavigator {
     private final PathManager pathManager;
     private final ActionLogger actionLogger;
     private final ExecutionSession automationSession;
+    
+    @Autowired(required = false)
+    private AutomationConfig automationConfig;
 
     Set<Long> activeStates;
 
@@ -128,13 +137,22 @@ public class StateNavigator {
      * @see #openState(Long)
      */
     public boolean openState(String stateName) {
-        ConsoleReporter.format("Open State %s\n", stateName);
-        Long stateToOpen = allStatesInProjectService.getStateId(stateName);
-        if (stateToOpen == null) {
-            ConsoleReporter.println(MessageFormatter.fail + " Target state not found.");
+        try {
+            ConsoleReporter.format("Open State %s\n", stateName);
+            Long stateToOpen = allStatesInProjectService.getStateId(stateName);
+            if (stateToOpen == null) {
+                String errorMsg = "Target state not found: " + stateName;
+                ConsoleReporter.println(MessageFormatter.fail + " " + errorMsg);
+                handleNavigationFailure(errorMsg, stateName, "state_lookup", false);
+                return false;
+            }
+            return openState(stateToOpen);
+        } catch (Exception e) {
+            String errorMsg = "Failed to navigate to state: " + stateName;
+            log.error(errorMsg, e);
+            handleNavigationFailure(errorMsg, stateName, "navigation", false);
             return false;
         }
-        return openState(stateToOpen);
     }
 
     /**
@@ -214,8 +232,16 @@ public class StateNavigator {
                 success,
                 duration.toMillis());
 
-        if (!success)
+        if (!success) {
             ConsoleReporter.println(MessageFormatter.fail + " All paths tried, open failed.");
+            String targetStateName = targetState.get().getName();
+            handleNavigationFailure(
+                "Failed to navigate to state after trying all paths: " + targetStateName,
+                targetStateName,
+                "path_traversal",
+                true // potentially recoverable with retry
+            );
+        }
         String activeStatesStr =
                 activeStates.stream()
                         .map(id -> id + "(" + allStatesInProjectService.getStateName(id) + ")")
@@ -266,5 +292,46 @@ public class StateNavigator {
                         activeStates, paths, pathTraverser.getFailedTransitionStartState()),
                 stateToOpen,
                 sessionId);
+    }
+    
+    /**
+     * Handles navigation failures based on configured behavior.
+     * 
+     * <p>This method determines how to handle automation failures based on the AutomationConfig:
+     * <ul>
+     *   <li>Log the failure with appropriate detail level
+     *   <li>Throw an exception if configured to do so
+     *   <li>Exit the application if configured to do so
+     * </ul>
+     * 
+     * @param errorMessage Error message describing the failure
+     * @param stateName Name of the state involved in the failure
+     * @param operation Operation that failed (e.g., "navigation", "transition")
+     * @param recoverable Whether the error is potentially recoverable
+     */
+    private void handleNavigationFailure(String errorMessage, String stateName, String operation, boolean recoverable) {
+        // If no config is provided, use default behavior (just log)
+        if (automationConfig == null) {
+            log.error("Navigation failure: {}", errorMessage);
+            return;
+        }
+        
+        // Log the failure
+        if (automationConfig.isLogStackTraces()) {
+            log.error("Navigation failure in state '{}' during '{}': {}", stateName, operation, errorMessage);
+        } else {
+            log.error("Navigation failure: {}", errorMessage);
+        }
+        
+        // Throw exception if configured
+        if (automationConfig.isThrowOnFailure()) {
+            throw new AutomationException(errorMessage, stateName, operation, recoverable);
+        }
+        
+        // Exit application if configured
+        if (automationConfig.isExitOnFailure()) {
+            log.error("Exiting application due to navigation failure (brobot.automation.exitOnFailure=true)");
+            System.exit(automationConfig.getFailureExitCode());
+        }
     }
 }
