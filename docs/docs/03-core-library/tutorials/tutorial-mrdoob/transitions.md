@@ -5,174 +5,398 @@ sidebar_position: 5
 # Transitions
 
 :::info Version Note
-This tutorial was originally created for an earlier version of Brobot but has been updated for version 1.1.0 with the new annotation system.
+This tutorial has been updated for Brobot 1.2.0+ with the new @TransitionSet annotation system.
 :::
  
-Transitions define how to navigate between states. With the new annotation system, transitions are now separate classes with the `@Transition` annotation.
+Transitions define how to navigate between states. With the new @TransitionSet annotation system, all transitions for a state are grouped together in a single class, providing better organization and clearer intent.
 
-Here are the transition classes:
+## Modern Approach: Unified Transition Classes
 
-## Homepage to Harmony Transition
+### HomepageTransitions.java
 
 ```java
 package com.example.mrdoob.transitions;
 
-import io.github.jspinak.brobot.annotations.Transition;
-import io.github.jspinak.brobot.action.Action;
+import org.springframework.stereotype.Component;
 import com.example.mrdoob.states.Homepage;
 import com.example.mrdoob.states.Harmony;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-
-@Transition(from = Homepage.class, to = Harmony.class)
-@Component
-@RequiredArgsConstructor
-@Slf4j
-public class HomepageToHarmonyTransition {
-    
-    private final Action action;
-    private final Homepage homepage;
-    
-    public boolean execute() {
-        log.info("Transitioning from Homepage to Harmony");
-        return action.click(homepage.getHarmony()).isSuccess();
-    }
-}
-```
-
-## Harmony to About Transition
-
-```java
-package com.example.mrdoob.transitions;
-
-import io.github.jspinak.brobot.annotations.Transition;
 import io.github.jspinak.brobot.action.Action;
-import com.example.mrdoob.states.Harmony;
-import com.example.mrdoob.states.About;
+import io.github.jspinak.brobot.annotations.FromTransition;
+import io.github.jspinak.brobot.annotations.ToTransition;
+import io.github.jspinak.brobot.annotations.TransitionSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
-@Transition(from = Harmony.class, to = About.class)
+/**
+ * All transitions for the Homepage state.
+ * Contains FromTransitions from other states TO Homepage,
+ * and a ToTransition to verify arrival at Homepage.
+ */
+@TransitionSet(state = Homepage.class, description = "MrDoob Homepage transitions")
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class HarmonyToAboutTransition {
-    
-    private final Action action;
-    private final Harmony harmony;
-    
-    public boolean execute() {
-        log.info("Transitioning from Harmony to About");
-        return action.click(harmony.getAbout()).isSuccess();
-    }
-}
-```
-
-## Key Improvements with Annotations
-
-### Before (Manual Registration)
-```java
-@Component
 public class HomepageTransitions {
     
-    public HomepageTransitions(StateTransitionsRepository repository,
-                               Action action, Homepage homepage) {
-        StateTransitions transitions = new StateTransitions.Builder("homepage")
-                .addTransitionFinish(this::finishTransition)
-                .addTransition(new StateTransition.Builder()
-                        .addToActivate("harmony")
-                        .setFunction(this::gotoHarmony)
-                        .build())
-                .build();
-        repository.add(transitions);  // Manual registration
+    private final Homepage homepage;
+    private final Harmony harmony;
+    private final Action action;
+    
+    /**
+     * Navigate from Harmony back to Homepage.
+     * This might involve clicking a home/back button.
+     */
+    @FromTransition(from = Harmony.class, priority = 1, description = "Return from Harmony to Homepage")
+    public boolean fromHarmony() {
+        log.info("Navigating from Harmony to Homepage");
+        
+        // Mock mode support for testing
+        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+            log.info("Mock mode: simulating successful navigation");
+            return true;
+        }
+        
+        // Assuming there's a home button or back navigation in Harmony
+        return action.click(harmony.getHomeButton()).isSuccess();
     }
     
-    private boolean finishTransition() { /* ... */ }
-    private boolean gotoHarmony() { /* ... */ }
-}
-```
-
-### After (Automatic Registration)
-```java
-@Transition(from = Homepage.class, to = Harmony.class)
-@Component
-@RequiredArgsConstructor
-@Slf4j
-public class HomepageToHarmonyTransition {
-    public boolean execute() {
-        // Just implement the transition logic
-        return action.click(homepage.getHarmony()).isSuccess();
-    }
-}
-```
-
-## Benefits
-
-1. **Declarative**: `@Transition(from = X.class, to = Y.class)` clearly shows the navigation
-2. **Less Code**: No StateTransitions.Builder or manual registration
-3. **Single Responsibility**: Each transition is a focused class
-4. **Automatic Wiring**: Framework handles all the connections
-5. **Type Safety**: Compile-time checking of state relationships
-
-## Transition Patterns
-
-### Simple Click Transition
-```java
-@Transition(from = SourceState.class, to = TargetState.class)
-public class SimpleTransition {
-    public boolean execute() {
-        return action.click(element).isSuccess();
-    }
-}
-```
-
-### Multiple Actions
-```java
-@Transition(from = FormState.class, to = ResultState.class)
-public class FormSubmitTransition {
-    public boolean execute() {
-        return action.type(nameField, "John Doe").isSuccess() &&
-               action.type(emailField, "john@example.com").isSuccess() &&
-               action.click(submitButton).isSuccess();
-    }
-}
-```
-
-### Error Handling
-```java
-@Transition(from = SearchState.class, to = ResultsState.class)
-public class SearchTransition {
-    public boolean execute() {
-        try {
-            action.type(searchBox, searchTerm);
-            action.click(searchButton);
-            return action.find(resultsPanel).isSuccess();
-        } catch (Exception e) {
-            log.error("Search transition failed", e);
+    /**
+     * Verify that we have successfully arrived at the Homepage state.
+     * Checks for the presence of homepage-specific elements.
+     */
+    @ToTransition(description = "Verify arrival at Homepage", required = true)
+    public boolean verifyArrival() {
+        log.info("Verifying arrival at Homepage");
+        
+        // Mock mode support for testing
+        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+            log.info("Mock mode: simulating successful verification");
+            return true;
+        }
+        
+        // Check for presence of homepage-specific elements
+        boolean foundHarmonyLink = action.find(homepage.getHarmony()).isSuccess();
+        
+        if (foundHarmonyLink) {
+            log.info("Successfully confirmed Homepage is active");
+            return true;
+        } else {
+            log.error("Failed to confirm Homepage - harmony link not found");
             return false;
         }
     }
 }
 ```
 
+### HarmonyTransitions.java
+
+```java
+package com.example.mrdoob.transitions;
+
+import org.springframework.stereotype.Component;
+import com.example.mrdoob.states.Homepage;
+import com.example.mrdoob.states.Harmony;
+import com.example.mrdoob.states.About;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.annotations.FromTransition;
+import io.github.jspinak.brobot.annotations.ToTransition;
+import io.github.jspinak.brobot.annotations.TransitionSet;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * All transitions for the Harmony state.
+ * Contains FromTransitions from other states TO Harmony,
+ * and a ToTransition to verify arrival at Harmony.
+ */
+@TransitionSet(state = Harmony.class, description = "MrDoob Harmony page transitions")
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class HarmonyTransitions {
+    
+    private final Homepage homepage;
+    private final Harmony harmony;
+    private final About about;
+    private final Action action;
+    
+    /**
+     * Navigate from Homepage to Harmony by clicking the harmony link.
+     */
+    @FromTransition(from = Homepage.class, priority = 1, description = "Navigate from Homepage to Harmony")
+    public boolean fromHomepage() {
+        log.info("Navigating from Homepage to Harmony");
+        
+        // Mock mode support for testing
+        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+            log.info("Mock mode: simulating successful navigation");
+            return true;
+        }
+        
+        return action.click(homepage.getHarmony()).isSuccess();
+    }
+    
+    /**
+     * Navigate from About page back to Harmony.
+     */
+    @FromTransition(from = About.class, priority = 2, description = "Return from About to Harmony")
+    public boolean fromAbout() {
+        log.info("Navigating from About to Harmony");
+        
+        // Mock mode support for testing
+        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+            log.info("Mock mode: simulating successful navigation");
+            return true;
+        }
+        
+        // Assuming there's a back button or harmony link in About page
+        return action.click(about.getBackButton()).isSuccess();
+    }
+    
+    /**
+     * Verify that we have successfully arrived at the Harmony state.
+     * Checks for the presence of harmony-specific elements.
+     */
+    @ToTransition(description = "Verify arrival at Harmony", required = true)
+    public boolean verifyArrival() {
+        log.info("Verifying arrival at Harmony");
+        
+        // Mock mode support for testing
+        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+            log.info("Mock mode: simulating successful verification");
+            return true;
+        }
+        
+        // Check for presence of harmony-specific elements
+        boolean foundAboutLink = action.find(harmony.getAbout()).isSuccess();
+        boolean foundCanvas = action.find(harmony.getHarmonyCanvas()).isSuccess();
+        
+        if (foundAboutLink || foundCanvas) {
+            log.info("Successfully confirmed Harmony state is active");
+            return true;
+        } else {
+            log.error("Failed to confirm Harmony state - expected elements not found");
+            return false;
+        }
+    }
+}
+```
+
+### AboutTransitions.java
+
+```java
+package com.example.mrdoob.transitions;
+
+import org.springframework.stereotype.Component;
+import com.example.mrdoob.states.Harmony;
+import com.example.mrdoob.states.About;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.annotations.FromTransition;
+import io.github.jspinak.brobot.annotations.ToTransition;
+import io.github.jspinak.brobot.annotations.TransitionSet;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * All transitions for the About state.
+ * Contains FromTransitions from other states TO About,
+ * and a ToTransition to verify arrival at About.
+ */
+@TransitionSet(state = About.class, description = "MrDoob About page transitions")
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class AboutTransitions {
+    
+    private final Harmony harmony;
+    private final About about;
+    private final Action action;
+    
+    /**
+     * Navigate from Harmony to About by clicking the about link.
+     */
+    @FromTransition(from = Harmony.class, priority = 1, description = "Navigate from Harmony to About")
+    public boolean fromHarmony() {
+        log.info("Navigating from Harmony to About");
+        
+        // Mock mode support for testing
+        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+            log.info("Mock mode: simulating successful navigation");
+            return true;
+        }
+        
+        return action.click(harmony.getAbout()).isSuccess();
+    }
+    
+    /**
+     * Verify that we have successfully arrived at the About state.
+     * Checks for the presence of about-specific elements.
+     */
+    @ToTransition(description = "Verify arrival at About", required = true)
+    public boolean verifyArrival() {
+        log.info("Verifying arrival at About");
+        
+        // Mock mode support for testing
+        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+            log.info("Mock mode: simulating successful verification");
+            return true;
+        }
+        
+        // Check for presence of about-specific elements
+        boolean foundAboutContent = action.find(about.getAboutContent()).isSuccess();
+        
+        if (foundAboutContent) {
+            log.info("Successfully confirmed About state is active");
+            return true;
+        } else {
+            log.error("Failed to confirm About state - content not found");
+            return false;
+        }
+    }
+}
+```
+
+## Key Improvements with @TransitionSet
+
+### Comparison: Old vs New
+
+#### Before (Individual Transition Classes - v1.1.0)
+```java
+// Separate file for each transition
+@Transition(from = Homepage.class, to = Harmony.class)
+@Component
+public class HomepageToHarmonyTransition {
+    private final Action action;
+    private final Homepage homepage;
+    
+    public boolean execute() {
+        return action.click(homepage.getHarmony()).isSuccess();
+    }
+}
+
+// Another separate file
+@Transition(from = Harmony.class, to = About.class)
+@Component
+public class HarmonyToAboutTransition {
+    private final Action action;
+    private final Harmony harmony;
+    
+    public boolean execute() {
+        return action.click(harmony.getAbout()).isSuccess();
+    }
+}
+```
+
+#### After (Unified Transition Classes - v1.2.0+)
+```java
+// All transitions for Harmony in ONE class
+@TransitionSet(state = Harmony.class)
+@Component
+public class HarmonyTransitions {
+    
+    @FromTransition(from = Homepage.class, priority = 1)
+    public boolean fromHomepage() {
+        if (FrameworkSettings.mock) return true;
+        return action.click(homepage.getHarmony()).isSuccess();
+    }
+    
+    @FromTransition(from = About.class, priority = 2)
+    public boolean fromAbout() {
+        if (FrameworkSettings.mock) return true;
+        return action.click(about.getBackButton()).isSuccess();
+    }
+    
+    @ToTransition(required = true)
+    public boolean verifyArrival() {
+        if (FrameworkSettings.mock) return true;
+        return action.find(harmony.getAboutLink()).isSuccess();
+    }
+}
+```
+
+## File Organization
+
+Organize your transitions alongside states:
+
+```
+src/main/java/com/example/mrdoob/
+├── states/
+│   ├── Homepage.java
+│   ├── Harmony.java
+│   └── About.java
+└── transitions/
+    ├── HomepageTransitions.java  # All transitions for Homepage
+    ├── HarmonyTransitions.java   # All transitions for Harmony
+    └── AboutTransitions.java     # All transitions for About
+```
+
+## Benefits of the New Approach
+
+1. **Better Organization**: All transitions for a state in ONE place
+2. **Clearer Intent**: FromTransitions vs ToTransition makes navigation flow obvious
+3. **Less Boilerplate**: No need for separate classes for each transition path
+4. **Mock Mode Ready**: Easy to add testing support with framework settings check
+5. **Natural Structure**: File organization mirrors state structure
+6. **Easier Maintenance**: Adding new transitions is straightforward
+
+## Testing Transitions
+
+The unified structure makes testing easier:
+
+```java
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {TestConfiguration.class})
+public class HarmonyTransitionsTest {
+    
+    @Autowired
+    private HarmonyTransitions harmonyTransitions;
+    
+    @MockBean
+    private Action action;
+    
+    @MockBean
+    private Homepage homepage;
+    
+    @Test
+    public void testFromHomepageTransition() {
+        // Given
+        when(action.click(any())).thenReturn(
+            new ActionResult.Builder().setSuccess(true).build()
+        );
+        
+        // When
+        boolean result = harmonyTransitions.fromHomepage();
+        
+        // Then
+        assertTrue(result);
+        verify(action).click(homepage.getHarmony());
+    }
+    
+    @Test
+    public void testVerifyArrival() {
+        // Given
+        when(action.find(any())).thenReturn(
+            new ActionResult.Builder().setSuccess(true).build()
+        );
+        
+        // When
+        boolean arrived = harmonyTransitions.verifyArrival();
+        
+        // Then
+        assertTrue(arrived);
+    }
+}
+```
+
 ## Best Practices
 
-1. Use these standard annotations:
-   ```java
-   @Transition(from = X.class, to = Y.class)
-   @Component               // Spring component registration
-   @RequiredArgsConstructor  // For dependency injection
-   @Slf4j                   // For logging
-   ```
+1. **Always include mock mode support** for testing environments
+2. **Use descriptive method names** like `fromHomepage()`, `fromAbout()`
+3. **Add comprehensive logging** for debugging
+4. **Verify critical elements** in ToTransition methods
+5. **Handle failures gracefully** with try-catch blocks where appropriate
+6. **Set appropriate priorities** when multiple paths exist to the same state
 
-2. Keep transitions simple and focused on navigation
+## Next Steps
 
-3. Log important steps for debugging
-
-4. Return `true` for success, `false` for failure
-
-5. Inject dependencies via constructor (Action, states, etc.)
-
-With states and transitions using annotations, the entire state machine is automatically configured!
+With states and transitions defined using the @TransitionSet system, your entire MrDoob automation is ready to run. The framework handles all registration and wiring automatically - you just focus on the automation logic!

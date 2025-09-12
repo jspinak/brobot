@@ -4,137 +4,237 @@ sidebar_position: 5
 
 # Transitions
 
-Transitions define how your automation moves between states. With Brobot's modern `@Transition` annotation, creating robust state transitions is simple and maintainable.
+Transitions define how your automation moves between states. With Brobot's modern `@TransitionSet` annotation system (1.2.0+), all transitions for a state are grouped together in a single class, providing better organization and clearer intent.
 
-## Modern Transition Definition with @Transition Annotation
+## Modern Transition Definition with @TransitionSet
 
-The `@Transition` annotation automatically registers transitions between states. Note that `@Transition` includes Spring's `@Component` annotation, so you don't need to add `@Component` separately:
+The `@TransitionSet` annotation groups all transitions for a state in one class. Each class contains:
+- `@FromTransition` methods that define how to navigate TO this state FROM other states
+- `@ToTransition` method that verifies arrival at this state
 
 ```java
-@Transition(from = HomeState.class, to = WorldState.class)
+@TransitionSet(state = WorldState.class, description = "World state transitions")
+@Component
 @RequiredArgsConstructor
 @Slf4j
-public class HomeToWorldTransition {
-    private final HomeState homeState;
-    private final Action action;
+public class WorldTransitions {
     
-    public boolean execute() {
-        log.info("Transitioning from Home to World");
-        return action.click(homeState.getToWorldButton()).isSuccess();
-    }
-}
-```
-
-## Key Features of Modern Transitions
-
-### 1. Automatic Registration
-No manual transition setup needed - the annotation handles everything:
-```java
-@Transition(from = LoginState.class, to = DashboardState.class)
-public class LoginToDashboardTransition {
-    // Automatically registered with state management
-}
-```
-
-### 2. Dependency Injection
-Transitions are Spring components with full DI support:
-```java
-@Transition(from = WorldState.class, to = IslandState.class)
-@RequiredArgsConstructor
-public class WorldToIslandTransition {
+    private final HomeState homeState;
     private final WorldState worldState;
     private final IslandState islandState;
     private final Action action;
-    private final DatabaseService databaseService;  // Any Spring bean
     
-    public boolean execute() {
-        // Access any injected dependencies
-        return action.click(worldState.getCastle()).isSuccess();
+    /**
+     * Navigate from Home to World by clicking the world button.
+     */
+    @FromTransition(from = HomeState.class, priority = 1, description = "Navigate from Home to World")
+    public boolean fromHome() {
+        log.info("Navigating from Home to World");
+        
+        // Mock mode support for testing
+        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+            log.info("Mock mode: simulating successful navigation");
+            return true;
+        }
+        
+        return action.click(homeState.getToWorldButton()).isSuccess();
+    }
+    
+    /**
+     * Navigate from Island back to World.
+     */
+    @FromTransition(from = IslandState.class, priority = 2, description = "Return from Island to World")
+    public boolean fromIsland() {
+        log.info("Navigating from Island to World");
+        
+        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+            return true;
+        }
+        
+        return action.click(islandState.getBackToWorldButton()).isSuccess();
+    }
+    
+    /**
+     * Verify that we have successfully arrived at the World state.
+     */
+    @ToTransition(description = "Verify arrival at World state", required = true)
+    public boolean verifyArrival() {
+        log.info("Verifying arrival at World state");
+        
+        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+            return true;
+        }
+        
+        // Check for world-specific elements
+        boolean foundMinimap = action.find(worldState.getMinimap()).isSuccess();
+        
+        if (foundMinimap) {
+            log.info("Successfully confirmed World state is active");
+            return true;
+        } else {
+            log.error("Failed to confirm World state - minimap not found");
+            return false;
+        }
     }
 }
 ```
 
-### 3. Action Convenience Methods
-Use fluent action methods for clean, readable code:
+## Key Features of @TransitionSet
+
+### 1. Unified Class Structure
+All transitions for a state are in ONE class:
+- Better organization - easy to find all paths to/from a state
+- Clear separation of concerns - navigation vs verification
+- Natural file structure that mirrors state structure
+
+### 2. Method-Level Annotations
+
+#### @FromTransition
+Defines how to navigate TO this state FROM another state:
 ```java
-public boolean execute() {
-    return action
-        .click(loginState.getUsernameField())
-        .type("admin")
-        .click(loginState.getPasswordField())
-        .type("password123")
-        .click(loginState.getSubmitButton())
-        .isSuccess();
+@FromTransition(
+    from = SourceState.class,     // Required: source state
+    priority = 1,                  // Optional: higher = preferred path
+    description = "Navigation logic" // Optional: documentation
+)
+public boolean fromSource() {
+    // Navigation logic
 }
 ```
 
-## Robust Error Handling with Sequential Actions
+#### @ToTransition
+Verifies successful arrival at the state:
+```java
+@ToTransition(
+    description = "Verification logic",  // Optional: documentation
+    required = true                       // Optional: must succeed (default: false)
+)
+public boolean verifyArrival() {
+    // Verification logic
+}
+```
 
-Handle failures gracefully with sequential action patterns:
+### 3. Automatic Registration
+No manual transition setup needed - the framework handles everything automatically.
+
+### 4. Dependency Injection
+Transitions are Spring components with full DI support:
+```java
+@TransitionSet(state = DashboardState.class)
+@Component
+@RequiredArgsConstructor
+public class DashboardTransitions {
+    private final LoginState loginState;
+    private final DashboardState dashboardState;
+    private final Action action;
+    private final DatabaseService databaseService;  // Any Spring bean
+    
+    @FromTransition(from = LoginState.class, priority = 1)
+    public boolean fromLogin() {
+        // Access any injected dependencies
+        return action.click(loginState.getSubmitButton()).isSuccess();
+    }
+}
+```
+
+## Complete Example: Island Transitions
 
 ```java
-@Transition(from = MainMenuState.class, to = GameState.class)
+@TransitionSet(state = IslandState.class, description = "Island state transitions")
+@Component
 @RequiredArgsConstructor
 @Slf4j
-public class MainMenuToGameTransition {
-    private final MainMenuState mainMenu;
-    private final GameState gameState;
+public class IslandTransitions {
+    
+    private final IslandState islandState;
+    private final WorldState worldState;
     private final Action action;
     
-    public boolean execute() {
-        log.info("Starting game from main menu");
+    /**
+     * Navigate from World to Island by clicking on an island.
+     */
+    @FromTransition(from = WorldState.class, priority = 1)
+    public boolean fromWorld() {
+        log.info("Navigating from World to Island");
         
-        // Try primary action first
-        ActionResult playResult = action.click(mainMenu.getPlayButton());
-        
-        if (!playResult.isSuccess()) {
-            log.warn("Play button not found, trying alternative");
-            playResult = action.click(mainMenu.getStartButton());
+        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+            return true;
         }
         
-        if (!playResult.isSuccess()) {
-            log.error("Failed to start game");
-            return false;
+        // Try clicking different islands
+        ActionResult result = action.click(worldState.getCastle());
+        if (!result.isSuccess()) {
+            result = action.click(worldState.getFarms());
+        }
+        if (!result.isSuccess()) {
+            result = action.click(worldState.getMines());
         }
         
-        // Wait for game board to appear with timeout
-        ActionResult waitResult = action.findWithTimeout(gameState.getGameBoard(), 10);
+        return result.isSuccess();
+    }
+    
+    /**
+     * Verify arrival at Island state.
+     */
+    @ToTransition(required = true)
+    public boolean verifyArrival() {
+        log.info("Verifying arrival at Island state");
         
-        if (!waitResult.isSuccess()) {
-            log.error("Game failed to load");
-            return false;
+        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+            return true;
         }
         
-        return true;
+        return action.find(islandState.getIslandName()).isSuccess();
     }
 }
 ```
 
 ## Transition Patterns
 
-### Simple Click Transition
+### Simple Navigation
 ```java
-@Transition(from = HomeState.class, to = SettingsState.class)
+@TransitionSet(state = SettingsState.class)
+@Component
 @RequiredArgsConstructor
-public class HomeToSettingsTransition {
+public class SettingsTransitions {
+    
     private final HomeState homeState;
+    private final SettingsState settingsState;
     private final Action action;
     
-    public boolean execute() {
+    @FromTransition(from = HomeState.class, priority = 1)
+    public boolean fromHome() {
+        if (FrameworkSettings.mock) return true;
         return action.click(homeState.getSettingsIcon()).isSuccess();
+    }
+    
+    @ToTransition(required = true)
+    public boolean verifyArrival() {
+        if (FrameworkSettings.mock) return true;
+        return action.find(settingsState.getSettingsHeader()).isSuccess();
     }
 }
 ```
 
-### Multi-Step Transition
+### Multi-Step Navigation
 ```java
-@Transition(from = LoginState.class, to = DashboardState.class)
+@TransitionSet(state = DashboardState.class)
+@Component
 @RequiredArgsConstructor
-public class LoginTransition {
+@Slf4j
+public class DashboardTransitions {
+    
     private final LoginState loginState;
+    private final DashboardState dashboardState;
     private final Action action;
     
-    public boolean execute() {
+    @FromTransition(from = LoginState.class, priority = 1)
+    public boolean fromLogin() {
+        log.info("Navigating from Login to Dashboard");
+        
+        if (FrameworkSettings.mock) return true;
+        
+        // Multi-step login process
         ActionResult result = action
             .click(loginState.getUsernameField())
             .type("user@example.com")
@@ -150,30 +250,76 @@ public class LoginTransition {
         log.error("Login failed: {}", result.getFailureReason());
         return false;
     }
+    
+    @ToTransition(required = true)
+    public boolean verifyArrival() {
+        if (FrameworkSettings.mock) return true;
+        
+        // Wait for dashboard to load
+        ActionResult validation = action.findWithTimeout(
+            dashboardState.getDashboardHeader(), 10
+        );
+        
+        return validation.isSuccess();
+    }
 }
 ```
 
-### Conditional Navigation
+### Conditional Navigation with Multiple Paths
 ```java
-@Transition(from = ProductListState.class, to = ProductDetailsState.class)
+@TransitionSet(state = GameState.class)
+@Component
 @RequiredArgsConstructor
-public class SelectProductTransition {
-    private final ProductListState productList;
+@Slf4j
+public class GameTransitions {
+    
+    private final MainMenuState mainMenu;
+    private final PauseMenuState pauseMenu;
+    private final GameState gameState;
     private final Action action;
     
-    public boolean execute() {
-        // Try to find and click a specific product
-        ActionResult specificProduct = action.click(
-            productList.getProductByName("Premium Widget")
-        );
+    @FromTransition(from = MainMenuState.class, priority = 1)
+    public boolean fromMainMenu() {
+        log.info("Starting game from main menu");
         
-        if (specificProduct.isSuccess()) {
-            return true;
+        if (FrameworkSettings.mock) return true;
+        
+        // Try primary action first
+        ActionResult playResult = action.click(mainMenu.getPlayButton());
+        
+        if (!playResult.isSuccess()) {
+            log.warn("Play button not found, trying alternative");
+            playResult = action.click(mainMenu.getStartButton());
         }
         
-        // Fallback: click the first available product
-        log.info("Specific product not found, selecting first available");
-        return action.click(productList.getFirstProduct()).isSuccess();
+        return playResult.isSuccess();
+    }
+    
+    @FromTransition(from = PauseMenuState.class, priority = 2)
+    public boolean fromPauseMenu() {
+        log.info("Resuming game from pause menu");
+        
+        if (FrameworkSettings.mock) return true;
+        
+        return action.click(pauseMenu.getResumeButton()).isSuccess();
+    }
+    
+    @ToTransition(required = true)
+    public boolean verifyArrival() {
+        if (FrameworkSettings.mock) return true;
+        
+        // Wait for game board to appear
+        ActionResult waitResult = action.findWithTimeout(
+            gameState.getGameBoard(), 10
+        );
+        
+        if (!waitResult.isSuccess()) {
+            log.error("Game failed to load");
+            return false;
+        }
+        
+        log.info("Game state confirmed active");
+        return true;
     }
 }
 ```
@@ -183,259 +329,219 @@ public class SelectProductTransition {
 Use modern ActionConfig classes for precise control:
 
 ```java
-@Transition(from = FormState.class, to = ConfirmationState.class)
+@TransitionSet(state = ConfirmationState.class)
+@Component
 @RequiredArgsConstructor
-public class SubmitFormTransition {
+public class ConfirmationTransitions {
+    
     private final FormState formState;
+    private final ConfirmationState confirmationState;
     private final Action action;
     
-    public boolean execute() {
+    @FromTransition(from = FormState.class, priority = 1)
+    public boolean fromForm() {
+        if (FrameworkSettings.mock) return true;
+        
         // Configure specific action behaviors
         ClickOptions doubleClick = new ClickOptions.Builder()
             .setNumberOfClicks(2)
             .setPauseAfterEnd(0.5)
             .build();
             
-        TypeTextOptions secureType = new TypeTextOptions.Builder()
+        TypeOptions secureType = new TypeOptions.Builder()
             .setPauseBeforeBegin(0.3)
-            .setModifierKeys(KeyEvent.VK_CONTROL)
             .build();
             
-        DragOptions preciseDrag = new DragOptions.Builder()
-            .setDragDuration(1.5)
-            .setPauseAfterEnd(0.2)
+        // Chain actions with specific configurations
+        PatternFindOptions chainedAction = new PatternFindOptions.Builder()
+            .then(doubleClick)
+            .then(secureType)
             .build();
         
-        return action
-            .click(formState.getNameField())
-            .type("John Doe")
-            .perform(formState.getSubmitButton(), doubleClick)
-            .isSuccess();
+        ObjectCollection targets = new ObjectCollection.Builder()
+            .withImages(formState.getSubmitButton())
+            .withStrings("John Doe")
+            .build();
+        
+        return action.perform(chainedAction, targets).isSuccess();
+    }
+    
+    @ToTransition(required = true)
+    public boolean verifyArrival() {
+        if (FrameworkSettings.mock) return true;
+        return action.find(confirmationState.getSuccessMessage()).isSuccess();
     }
 }
 ```
 
-## Transition with State Validation
+## File Organization
 
-Ensure you've reached the correct state:
+Organize transitions alongside states for clarity:
 
-```java
-@Transition(from = HomeState.class, to = WorldState.class)
-@RequiredArgsConstructor
-@Slf4j
-public class HomeToWorldWithValidation {
-    private final HomeState homeState;
-    private final WorldState worldState;
-    private final Action action;
-    
-    public boolean execute() {
-        // Perform the transition
-        ActionResult clickResult = action.click(homeState.getToWorldButton());
-        
-        if (!clickResult.isSuccess()) {
-            log.error("Failed to click world button");
-            return false;
-        }
-        
-        // Validate we reached the target state
-        ActionResult validation = action.findWithTimeout(worldState.getMinimap(), 5);
-        
-        if (validation.isSuccess()) {
-            log.info("Successfully transitioned to World state");
-            return true;
-        }
-        
-        log.error("Transition executed but World state not reached");
-        return false;
-    }
-}
 ```
-
-## Complex Transition with Retry Logic
-
-```java
-@Transition(from = ConnectionState.class, to = ConnectedState.class)
-@RequiredArgsConstructor
-@Slf4j
-public class ConnectWithRetryTransition {
-    private final ConnectionState connectionState;
-    private final ConnectedState connectedState;
-    private final Action action;
-    
-    private static final int MAX_RETRIES = 3;
-    private static final int RETRY_DELAY = 2000;
-    
-    public boolean execute() {
-        for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-            log.info("Connection attempt {} of {}", attempt, MAX_RETRIES);
-            
-            ActionResult connectResult = action.click(
-                connectionState.getConnectButton()
-            );
-            
-            if (!connectResult.isSuccess()) {
-                log.warn("Connect button click failed");
-                continue;
-            }
-            
-            // Wait for connection with timeout
-            ActionResult waitResult = action.findWithTimeout(
-                connectedState.getConnectionIndicator(), 
-                10
-            );
-            
-            if (waitResult.isSuccess()) {
-                log.info("Successfully connected on attempt {}", attempt);
-                return true;
-            }
-            
-            if (attempt < MAX_RETRIES) {
-                log.info("Connection failed, retrying in {} ms", RETRY_DELAY);
-                try {
-                    Thread.sleep(RETRY_DELAY);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    return false;
-                }
-            }
-        }
-        
-        log.error("Failed to connect after {} attempts", MAX_RETRIES);
-        return false;
-    }
-}
+src/main/java/com/example/basics/
+├── states/
+│   ├── HomeState.java
+│   ├── WorldState.java
+│   ├── IslandState.java
+│   └── SettingsState.java
+└── transitions/
+    ├── HomeTransitions.java      # All transitions for Home state
+    ├── WorldTransitions.java     # All transitions for World state
+    ├── IslandTransitions.java    # All transitions for Island state
+    └── SettingsTransitions.java  # All transitions for Settings state
 ```
 
 ## Best Practices
 
-### 1. Single Responsibility
-Each transition should handle one logical flow:
-```java
-// Good: Clear, single purpose
-@Transition(from = LoginState.class, to = DashboardState.class)
-public class LoginTransition { }
+1. **Always Include Mock Mode Support**
+   ```java
+   @FromTransition(from = SourceState.class)
+   public boolean fromSource() {
+       if (FrameworkSettings.mock) return true;
+       // Real navigation logic
+   }
+   ```
 
-// Avoid: Multiple unrelated transitions
-@Transition(from = LoginState.class, to = DashboardState.class)
-public class LoginAndSetupAndNavigateTransition { }
-```
+2. **Use Descriptive Method Names**
+   - `fromHome()`, `fromLogin()`, `fromMenu()` - clear source indication
+   - `verifyArrival()` - standard verification method name
 
-### 2. Logging
-Add meaningful logs for debugging:
+3. **Add Comprehensive Logging**
+   ```java
+   @FromTransition(from = SourceState.class)
+   public boolean fromSource() {
+       log.info("Navigating from Source to Target");
+       if (FrameworkSettings.mock) {
+           log.info("Mock mode: simulating successful navigation");
+           return true;
+       }
+       // Navigation logic
+   }
+   ```
+
+4. **Handle Failures Gracefully**
+   ```java
+   @FromTransition(from = SourceState.class)
+   public boolean fromSource() {
+       try {
+           if (FrameworkSettings.mock) return true;
+           return action.click(element).isSuccess();
+       } catch (Exception e) {
+           log.error("Transition failed", e);
+           return false;
+       }
+   }
+   ```
+
+5. **Verify Critical Elements in ToTransition**
+   ```java
+   @ToTransition(required = true)
+   public boolean verifyArrival() {
+       if (FrameworkSettings.mock) return true;
+       
+       // Check multiple elements for robust verification
+       boolean hasHeader = action.find(state.getHeader()).isSuccess();
+       boolean hasContent = action.find(state.getMainContent()).isSuccess();
+       
+       return hasHeader && hasContent;
+   }
+   ```
+
+## Testing Transitions
+
+The unified structure makes testing straightforward:
+
 ```java
-public boolean execute() {
-    log.info("Starting transition from {} to {}", 
-        homeState.getClass().getSimpleName(),
-        worldState.getClass().getSimpleName());
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {TestConfiguration.class})
+public class WorldTransitionsTest {
     
-    ActionResult result = action.click(homeState.getToWorldButton());
+    @Autowired
+    private WorldTransitions worldTransitions;
     
-    if (result.isSuccess()) {
-        log.info("Transition successful");
-    } else {
-        log.error("Transition failed: {}", result.getFailureReason());
+    @MockBean
+    private Action action;
+    
+    @MockBean
+    private HomeState homeState;
+    
+    @Test
+    public void testFromHomeTransition() {
+        // Given
+        when(action.click(any())).thenReturn(
+            new ActionResult.Builder().setSuccess(true).build()
+        );
+        
+        // When
+        boolean result = worldTransitions.fromHome();
+        
+        // Then
+        assertTrue(result);
+        verify(action).click(homeState.getToWorldButton());
     }
     
-    return result.isSuccess();
+    @Test
+    public void testVerifyArrival() {
+        // Given
+        when(action.find(any())).thenReturn(
+            new ActionResult.Builder().setSuccess(true).build()
+        );
+        
+        // When
+        boolean arrived = worldTransitions.verifyArrival();
+        
+        // Then
+        assertTrue(arrived);
+    }
 }
 ```
 
-### 3. State Validation
-Always validate you've reached the target state:
+## Migration from Old Format
+
+If migrating from the old `@Transition` annotation:
+
+### Old Format (Pre-1.2.0)
 ```java
-public boolean execute() {
-    // Perform action
-    action.click(sourceState.getNavigationButton());
-    
-    // Validate arrival
-    return action.exists(targetState.getUniqueElement());
-}
-```
-
-### 4. Error Recovery
-Use sequential actions with error checking for robust handling:
-```java
-public boolean execute() {
-    // Try primary button first
-    ActionResult primaryResult = action.click(primaryButton);
-    
-    if (!primaryResult.isSuccess()) {
-        primaryResult = action.click(fallbackButton);
-    }
-    
-    if (!primaryResult.isSuccess()) {
-        return false;
-    }
-    
-    // Wait for target element to appear
-    ActionResult waitResult = action.findWithTimeout(targetElement, 5);
-    return waitResult.isSuccess();
-}
-```
-
-## Complete Example
-
-Here's a complete transition with all modern features:
-
-```java
-@Transition(from = ShoppingCartState.class, to = CheckoutState.class)
-@RequiredArgsConstructor
-@Slf4j
-public class CartToCheckoutTransition {
-    private final ShoppingCartState cartState;
-    private final CheckoutState checkoutState;
-    private final Action action;
-    private final CartService cartService;
-    
+// Separate class for each transition
+@Transition(from = HomeState.class, to = WorldState.class)
+public class HomeToWorldTransition {
     public boolean execute() {
-        log.info("Proceeding to checkout");
-        
-        // Validate cart is not empty
-        if (cartService.isEmpty()) {
-            log.error("Cannot checkout with empty cart");
-            return false;
-        }
-        
-        // Use sequential execution for robust handling
-        // Try primary checkout button first
-        ActionResult checkoutResult = action.click(cartState.getCheckoutButton());
-        
-        if (!checkoutResult.isSuccess()) {
-            log.warn("Primary checkout button failed, trying alternative");
-            checkoutResult = action.click(cartState.getProceedButton());
-        }
-        
-        if (!checkoutResult.isSuccess()) {
-            log.error("Failed to click checkout button");
-            return false;
-        }
-        
-        // Wait for checkout page to load
-        ActionResult waitResult = action.findWithTimeout(checkoutState.getPaymentSection(), 10);
-        
-        if (!waitResult.isSuccess()) {
-            log.error("Checkout page did not load, trying to recover by refreshing");
-            action.keyPress(KeyEvent.VK_F5);
-            waitResult = action.findWithTimeout(checkoutState.getPaymentSection(), 5);
-        }
-        
-        ActionResult result = waitResult;
-        
-        if (result.isSuccess()) {
-            log.info("Successfully reached checkout");
-            cartService.markAsCheckedOut();
-        } else {
-            log.error("Failed to reach checkout: {}", result.getFailureReason());
-        }
-        
-        return result.isSuccess();
+        return action.click(homeState.getToWorldButton()).isSuccess();
     }
 }
 ```
+
+### New Format (1.2.0+)
+```java
+// All transitions for a state in one class
+@TransitionSet(state = WorldState.class)
+@Component
+public class WorldTransitions {
+    
+    @FromTransition(from = HomeState.class, priority = 1)
+    public boolean fromHome() {
+        if (FrameworkSettings.mock) return true;
+        return action.click(homeState.getToWorldButton()).isSuccess();
+    }
+    
+    @ToTransition(required = true)
+    public boolean verifyArrival() {
+        if (FrameworkSettings.mock) return true;
+        return action.find(worldState.getMinimap()).isSuccess();
+    }
+}
+```
+
+## Benefits of @TransitionSet
+
+1. **Better Organization** - All transitions for a state in ONE place
+2. **Clearer Intent** - FromTransitions vs ToTransition makes flow obvious
+3. **Less Boilerplate** - No manual StateTransitions builders
+4. **Natural Structure** - File organization mirrors state structure
+5. **Easier Testing** - Each method can be tested independently
+6. **Mock Mode Ready** - Easy to add testing support
 
 ## Next Steps
 
-With states and transitions defined, you're ready to build complete automation workflows. Check out:
-- [Action Configuration](../../guides/action-config-factory) for advanced action options
-- [Testing](../../../testing/testing-intro) to validate your automation
-- [Live Automation](live-automation) to see everything in action
+With states and transitions defined using the @TransitionSet system, your entire state machine is automatically configured. The framework handles all registration and wiring - you just focus on your automation logic!

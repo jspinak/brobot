@@ -18,7 +18,7 @@ Brobot's mock mode provides a powerful testing framework that simulates GUI auto
 
 ### What Mock Mode Does
 
-When mock mode is enabled (via `MockModeManager.setMockMode(true)` or properties):
+When mock mode is enabled (via `brobot.mock.enabled=true` property or `MockModeManager.setMockMode(true)`):
 
 1. **No screen capture** - Brobot doesn't capture actual screens
 2. **No real pattern matching** - Image patterns aren't matched against real screens
@@ -37,12 +37,23 @@ State probabilities determine how often a state's objects (images, regions, etc.
 
 ### Enabling Mock Mode
 
-#### Centralized Mock Mode Management (Recommended)
+#### Property-Based Configuration (Recommended)
 
-Brobot now provides a centralized `MockModeManager` class that ensures consistency across all components:
+Brobot uses simplified mock configuration properties:
+
+```properties
+# application.properties
+# Single master switch for mock mode
+brobot.mock.enabled=true
+
+# Probability of action success (0.0 to 1.0, default 1.0)
+brobot.mock.action.success.probability=0.95
+```
+
+#### Programmatic Configuration
 
 ```java
-import io.github.jspinak.brobot.config.MockModeManager;
+import io.github.jspinak.brobot.config.mock.MockModeManager;
 
 // Enable mock mode globally
 MockModeManager.setMockMode(true);
@@ -57,21 +68,20 @@ MockModeManager.logMockModeState();
 ```
 
 The `MockModeManager` automatically synchronizes mock mode across:
-- System properties (`brobot.mock.mode`, `brobot.framework.mock`, `brobot.core.mock-mode`)
+- System properties (`brobot.mock.enabled`)
 - `ExecutionEnvironment` (for runtime behavior)
-- `FrameworkSettings.mock` (for SikuliX compatibility)
+- `FrameworkSettings.mock` (for compatibility)
 
-#### Configuration via Properties
+### Action Success Probability
 
-You can also set mock mode in `application.properties`:
+The `brobot.mock.action.success.probability` property controls how often simulated actions succeed:
 
-```properties
-# Enable mock mode
-brobot.framework.mock=true
-# Alternative properties (all synchronized by MockModeManager)
-brobot.mock.mode=true
-brobot.core.mock-mode=true
-```
+- **1.0** (default): All actions always succeed - ideal for deterministic testing
+- **0.95**: 95% success rate - simulates realistic conditions
+- **0.5**: 50% success rate - stress testing
+- **0.0**: All actions always fail - failure path testing
+
+This applies to actions like click, type, and drag. Find operations still require ActionSnapshots for proper match simulation.
 
 ### Setting State Probabilities
 
@@ -118,7 +128,7 @@ Use `MockStateManagement` to configure multiple states:
 
 ```java
 @Configuration
-@ConditionalOnProperty(name = "brobot.framework.mock", havingValue = "true")
+@ConditionalOnProperty(name = "brobot.mock.enabled", havingValue = "true")
 public class MockConfiguration {
     
     @Autowired
@@ -370,10 +380,25 @@ mockStateManagement.setStateProbabilities(100, "StateName");
 
 ### Issue: Transitions Not Working
 
-**Solution**: Check state registration and transition definitions:
+**Solution**: Check state registration and transition definitions. Use the unified transition format:
 
 ```java
-@Transition(from = FromState.class, to = ToState.class)
+@TransitionSet(state = TargetState.class)
+@Component
+public class TargetStateTransitions {
+    
+    @FromTransition(from = SourceState.class, priority = 1)
+    public boolean fromSource() {
+        if (FrameworkSettings.mock) return true;
+        return action.click(sourceState.getButton()).isSuccess();
+    }
+    
+    @ToTransition(required = true)
+    public boolean verifyArrival() {
+        if (FrameworkSettings.mock) return true;
+        return action.find(targetState.getElement()).isSuccess();
+    }
+}
 ```
 
 ### Issue: Mock Mode Not Activating

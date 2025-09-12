@@ -137,7 +137,8 @@ public class MockConfiguration {
 
             // Force mock mode for test profile
             FrameworkSettings.mock = true;
-            log.info("✅ Mock mode enabled for test profile");
+            FrameworkSettings.mockActionSuccessProbability = 1.0; // 100% success for tests
+            log.info("✅ Mock mode enabled for test profile with 100% action success");
 
             // Configure test-optimized settings
             configureTestSettings();

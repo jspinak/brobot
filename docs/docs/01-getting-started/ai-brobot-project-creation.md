@@ -352,7 +352,7 @@ brobot:
 
 1. **Always use ActionHistory in mock mode** - Required for patterns to be found
 2. **Use MockActionHistoryFactory** for common UI patterns
-3. **Enable mock mode in test properties**: `brobot.core.mock=true`
+3. **Enable mock mode in test properties**: `brobot.mock.enabled=true`
 4. **Use @ActiveProfiles("test")** in Spring tests
 
 ## Important Notes for AI/LLMs
@@ -388,8 +388,8 @@ brobot:
 
 ### When Helping Users
 
-1. **Check the version** - This guide is for Brobot 1.1.0+
-2. **Use modern patterns** - @State/@Transition annotations, ActionConfig classes
+1. **Check the version** - This guide is for Brobot 1.2.0+
+2. **Use modern patterns** - @State/@TransitionSet annotations, ActionConfig classes
 3. **Link to specific docs** - Use the links above for detailed information
 4. **Test with mock mode** - Ensure ActionHistory is configured
 5. **Follow Spring Boot conventions** - Dependency injection, profiles, etc.
