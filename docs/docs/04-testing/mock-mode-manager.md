@@ -13,7 +13,7 @@ The `MockModeManager` class provides centralized control over mock mode configur
 Prior to the introduction of `MockModeManager`, mock mode configuration was scattered across multiple components:
 - `FrameworkSettings.mock` (legacy SikuliX setting)
 - `ExecutionEnvironment.mockMode` (runtime environment setting)
-- Various system properties (`brobot.mock.mode`, `brobot.framework.mock`, etc.)
+- Various system properties (`brobot.mock.mode`, `brobot.mock`, etc.)
 
 This led to confusion and potential inconsistencies. The `MockModeManager` solves this by providing a single source of truth.
 
@@ -68,8 +68,8 @@ This will output something like:
 Mock Mode State:
   System Properties:
     brobot.mock.mode = true
-    brobot.framework.mock = true
-    brobot.core.mock-mode = true
+    brobot.mock = true
+    brobot.mock-mode = true
   ExecutionEnvironment:
     mockMode = true
     hasDisplay = false
@@ -187,8 +187,8 @@ java -jar myapp.jar --brobot.mock.mode=true
 
 1. **System Properties:**
    - `brobot.mock.mode`
-   - `brobot.framework.mock`
-   - `brobot.core.mock-mode`
+   - `brobot.mock`
+   - `brobot.mock-mode`
 
 2. **ExecutionEnvironment:**
    - `mockMode = true`
@@ -272,7 +272,7 @@ public void testModeTransition() {
 
 Before:
 ```java
-System.setProperty("brobot.framework.mock", "true");
+System.setProperty("brobot.mock", "true");
 FrameworkSettings.mock = true;
 ExecutionEnvironment env = ExecutionEnvironment.builder()
     .mockMode(true)

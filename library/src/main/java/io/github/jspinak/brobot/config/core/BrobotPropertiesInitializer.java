@@ -33,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 public class BrobotPropertiesInitializer implements InitializingBean {
 
     private final BrobotProperties properties;
+    private final MockModeResolver mockModeResolver;
     private boolean initialized = false;
 
     /**
@@ -66,17 +67,18 @@ public class BrobotPropertiesInitializer implements InitializingBean {
         properties.applyToFrameworkSettings();
 
         // Also update ExecutionEnvironment to keep it in sync
+        boolean mockMode = mockModeResolver.isMockMode();
         ExecutionEnvironment updatedEnv =
                 ExecutionEnvironment.builder()
-                        .mockMode(properties.getCore().isMock())
+                        .mockMode(mockMode)
                         .forceHeadless(properties.getCore().isHeadless() ? true : null)
-                        .allowScreenCapture(!properties.getCore().isMock())
+                        .allowScreenCapture(!mockMode)
                         .build();
         ExecutionEnvironment.setInstance(updatedEnv);
         log.debug("Set ExecutionEnvironment with mockMode={}", updatedEnv.isMockMode());
 
         // Log mock mode configuration prominently
-        if (properties.getCore().isMock()) {
+        if (mockMode) {
             log.info("✅ MOCK MODE ENABLED");
             log.info("Mock timing configuration:");
             log.info("  - Find first: {}s", properties.getMock().getTimeFindFirst());

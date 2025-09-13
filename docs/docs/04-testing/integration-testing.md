@@ -80,8 +80,8 @@ Additional testing configuration:
 # Mock mode is automatically enabled by BrobotTestBase
 # These properties are synchronized by MockModeManager:
 brobot.mock.mode=true
-brobot.core.mock=true
-brobot.framework.mock=true
+brobot.mock=true
+brobot.mock=true
 
 # Mock timing configuration
 brobot.mock.time-find-first=0.1
@@ -313,7 +313,7 @@ Mock execution provides detailed logging for debugging and analysis:
 ```java
 @SpringBootTest
 @TestPropertySource(properties = {
-    "brobot.core.mock=true",
+    "brobot.mock=true",
     "brobot.testing.send-logs=true",
     "brobot.logging.verbosity=VERBOSE"
 })

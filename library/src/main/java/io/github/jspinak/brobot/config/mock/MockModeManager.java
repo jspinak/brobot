@@ -32,17 +32,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MockModeManager {
 
-    private static final String MOCK_ENABLED_PROPERTY = "brobot.mock.enabled";
+    private static final String MOCK_ENABLED_PROPERTY = "brobot.mock";
     private static final String MOCK_SUCCESS_PROBABILITY_PROPERTY =
             "brobot.mock.action.success.probability";
 
-    // Legacy properties for backward compatibility during transition
-    @Deprecated private static final String LEGACY_MOCK_MODE_PROPERTY = "brobot.mock.mode";
-
-    @Deprecated
-    private static final String LEGACY_FRAMEWORK_MOCK_PROPERTY = "brobot.framework.mock";
-
-    @Deprecated private static final String LEGACY_CORE_MOCK_PROPERTY = "brobot.core.mock-mode";
 
     /**
      * Checks if mock mode is currently enabled.
@@ -63,11 +56,8 @@ public class MockModeManager {
             log.debug("ExecutionEnvironment not available, checking system properties");
         }
 
-        // Fallback: Check system properties (new property first, then legacy)
-        return "true".equalsIgnoreCase(System.getProperty(MOCK_ENABLED_PROPERTY))
-                || "true".equalsIgnoreCase(System.getProperty(LEGACY_MOCK_MODE_PROPERTY))
-                || "true".equalsIgnoreCase(System.getProperty(LEGACY_FRAMEWORK_MOCK_PROPERTY))
-                || "true".equalsIgnoreCase(System.getProperty(LEGACY_CORE_MOCK_PROPERTY));
+        // Fallback: Check system properties
+        return "true".equalsIgnoreCase(System.getProperty(MOCK_ENABLED_PROPERTY));
     }
 
     /**
@@ -86,13 +76,8 @@ public class MockModeManager {
     public static void setMockMode(boolean enable) {
         log.info("Setting mock mode to: {}", enable);
 
-        // 1. Update system properties (new simplified property)
+        // 1. Update system property
         System.setProperty(MOCK_ENABLED_PROPERTY, String.valueOf(enable));
-
-        // Also set legacy properties for any code still using them
-        System.setProperty(LEGACY_MOCK_MODE_PROPERTY, String.valueOf(enable));
-        System.setProperty(LEGACY_FRAMEWORK_MOCK_PROPERTY, String.valueOf(enable));
-        System.setProperty(LEGACY_CORE_MOCK_PROPERTY, String.valueOf(enable));
 
         // 2. Update ExecutionEnvironment
         try {
@@ -156,16 +141,6 @@ public class MockModeManager {
                 .append(System.getProperty(MOCK_SUCCESS_PROBABILITY_PROPERTY))
                 .append("\n");
 
-        // Also show legacy properties if set
-        String legacyMock = System.getProperty(LEGACY_MOCK_MODE_PROPERTY);
-        if (legacyMock != null) {
-            state.append("  Legacy Properties (deprecated):\n");
-            state.append("    ")
-                    .append(LEGACY_MOCK_MODE_PROPERTY)
-                    .append(" = ")
-                    .append(legacyMock)
-                    .append("\n");
-        }
 
         // Check ExecutionEnvironment
         try {
@@ -204,12 +179,7 @@ public class MockModeManager {
      */
     public static void initializeMockMode() {
         boolean shouldEnableMock =
-                "true".equalsIgnoreCase(System.getProperty(MOCK_ENABLED_PROPERTY))
-                        || "true".equalsIgnoreCase(System.getProperty(LEGACY_MOCK_MODE_PROPERTY))
-                        || "true"
-                                .equalsIgnoreCase(
-                                        System.getProperty(LEGACY_FRAMEWORK_MOCK_PROPERTY))
-                        || "true".equalsIgnoreCase(System.getProperty(LEGACY_CORE_MOCK_PROPERTY));
+                "true".equalsIgnoreCase(System.getProperty(MOCK_ENABLED_PROPERTY));
 
         if (shouldEnableMock) {
             log.info("Initializing mock mode based on system properties");

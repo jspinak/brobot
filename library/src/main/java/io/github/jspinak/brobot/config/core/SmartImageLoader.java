@@ -122,7 +122,9 @@ public class SmartImageLoader {
             log.warn("⚠️ Mock mode active - Image loading skipped: {}", imageName);
             log.warn("   To load real images, run without mock profile");
             loadHistory.put(
-                    imageName, LoadResult.failure("Mock mode - no real images", System.currentTimeMillis() - startTime));
+                    imageName,
+                    LoadResult.failure(
+                            "Mock mode - no real images", System.currentTimeMillis() - startTime));
             return null;
         }
 
@@ -184,12 +186,15 @@ public class SmartImageLoader {
             if (resolvedPath != null) {
                 log.error("     - {} (resolved path)", resolvedPath);
             }
-            log.error("   Please ensure the image file exists with .png, .jpg, .jpeg, .gif, or .bmp extension");
-            
+            log.error(
+                    "   Please ensure the image file exists with .png, .jpg, .jpeg, .gif, or .bmp"
+                            + " extension");
+
             // Return null instead of placeholder - let the caller handle the missing image
             result =
                     LoadResult.failure(
-                            "Image not found: " + imageName, System.currentTimeMillis() - startTime);
+                            "Image not found: " + imageName,
+                            System.currentTimeMillis() - startTime);
             loadHistory.put(imageName, result);
             return null;
         }
@@ -380,7 +385,6 @@ public class SmartImageLoader {
         }
         return null;
     }
-
 
     private String removeExtension(String filename) {
         int lastDot = filename.lastIndexOf('.');

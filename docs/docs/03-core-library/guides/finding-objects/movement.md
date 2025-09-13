@@ -60,7 +60,7 @@ The three different input methods for finding motion:
 //     save-history: true
 // 
 // Or in application.properties:
-// brobot.core.mock=true
+// brobot.mock=true
 // brobot.screenshot.save-history=true
 //
 // Screenshots should be placed in the directory configured by
@@ -87,7 +87,7 @@ ActionResult result = action.perform(motionOptions, objectCollection);
 ```java
 // Ensure these are configured in your application properties:
 // brobot.screenshot.save-history=true
-// brobot.core.mock=true
+// brobot.mock=true
 
 MotionFindOptions motionOptions = new MotionFindOptions.Builder()
         .setMaxMovement(100)
@@ -114,7 +114,7 @@ ActionResult result = action.perform(motionOptions, screenshots);
 
 ```java
 // Configure for live mode in application properties:
-// brobot.core.mock=false
+// brobot.mock=false
 
 MotionFindOptions motionOptions = new MotionFindOptions.Builder()
         .setMaxMovement(100)
@@ -211,7 +211,7 @@ MotionFindOptions trackCharacters = new MotionFindOptions.Builder()
         .build();
 
 // Configure for mock mode in application properties:
-// brobot.core.mock=true
+// brobot.mock=true
 // Place screenshots in the directory configured by brobot.screenshot.path
 
 // Execute motion tracking

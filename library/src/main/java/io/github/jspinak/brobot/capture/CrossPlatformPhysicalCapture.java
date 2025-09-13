@@ -24,7 +24,7 @@ import io.github.jspinak.brobot.config.dpi.PhysicalResolutionCapture;
  * @since 1.1.0
  */
 @Component
-@ConditionalOnProperty(name = "brobot.framework.mock", havingValue = "false", matchIfMissing = true)
+@ConditionalOnProperty(name = "brobot.mock", havingValue = "false", matchIfMissing = true)
 public class CrossPlatformPhysicalCapture {
 
     private static final String OS = System.getProperty("os.name").toLowerCase();

@@ -19,29 +19,31 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * All transitions for the Working state using the new unified annotation format.
- * Contains FromTransitions from other states TO Working,
- * and a ToTransition to verify arrival at Working.
+ * All transitions for the Working state using the new unified annotation format. Contains
+ * FromTransitions from other states TO Working, and a ToTransition to verify arrival at Working.
  */
 @TransitionSet(state = WorkingState.class, description = "Claude Working state transitions")
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class WorkingTransitions {
-    
+
     private final PromptState promptState;
     private final WorkingState workingState;
     private final Action action;
-    
+
     /**
-     * Navigate from Prompt to Working by submitting a command.
-     * This transition occurs when the user submits a prompt and Claude begins processing.
+     * Navigate from Prompt to Working by submitting a command. This transition occurs when the user
+     * submits a prompt and Claude begins processing.
      */
-    @FromTransition(from = PromptState.class, priority = 1, description = "Navigate from Prompt to Working")
+    @FromTransition(
+            from = PromptState.class,
+            priority = 1,
+            description = "Navigate from Prompt to Working")
     public boolean fromPrompt() {
         try {
             log.info("Navigating from Prompt to Working");
-            
+
             // In mock mode, just return true for testing
             if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
                 log.info("Mock mode: simulating successful navigation");
@@ -84,10 +86,10 @@ public class WorkingTransitions {
             return false;
         }
     }
-    
+
     /**
-     * Verify that we have successfully arrived at the Working state.
-     * Checks for the presence of the working indicator.
+     * Verify that we have successfully arrived at the Working state. Checks for the presence of the
+     * working indicator.
      */
     @ToTransition(description = "Verify arrival at Working state", required = true)
     public boolean verifyArrival() {
@@ -97,10 +99,10 @@ public class WorkingTransitions {
             log.info("Mock mode: simulating successful verification");
             return true;
         }
-        
+
         // Check for presence of working-specific elements
         boolean foundWorkingIndicator = action.find(workingState.getWorkingIndicator()).isSuccess();
-        
+
         if (foundWorkingIndicator) {
             log.info("Successfully confirmed Working state is active");
             return true;

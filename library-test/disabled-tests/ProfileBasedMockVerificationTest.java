@@ -96,7 +96,7 @@ public class ProfileBasedMockVerificationTest extends BrobotTestBase {
         log.info("✅ Mock mode is properly propagated");
 
         // Verify mock-related properties from test profile
-        String mockProperty = environment.getProperty("brobot.framework.mock");
+        String mockProperty = environment.getProperty("brobot.mock");
         log.info("Property brobot.framework.mock = {}", mockProperty);
         assertEquals("true", mockProperty, "Mock property should be true in test profile");
         log.info("✅ Mock property correctly set in test profile");
@@ -224,7 +224,7 @@ public class ProfileBasedMockVerificationTest extends BrobotTestBase {
 
         // Log key properties
         log.info("\nKey Properties:");
-        log.info("  brobot.framework.mock = {}", environment.getProperty("brobot.framework.mock"));
+        log.info("  brobot.framework.mock = {}", environment.getProperty("brobot.mock"));
         log.info("  brobot.action.similarity = {}", environment.getProperty("brobot.action.similarity"));
         log.info("  brobot.logging.verbosity = {}", environment.getProperty("brobot.logging.verbosity"));
         log.info("  claude.automator.mock.prompt-state-probability = {}",

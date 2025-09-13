@@ -99,7 +99,7 @@ Map<String, Object> getDiagnostics()
 **Optimized Settings**:
 ```properties
 # Automatically applied with test profile
-brobot.framework.mock=true
+brobot.mock=true
 brobot.mock.time.find-first=0.01
 brobot.mock.time.click=0.005
 brobot.draw.*=false
@@ -167,7 +167,7 @@ While Brobot auto-configures most settings, you can override them via `applicati
 ```properties
 # Core settings (usually auto-detected)
 brobot.core.image-path=images          # Auto-resolved by ImagePathManager
-brobot.framework.mock=false            # Auto-set to true in test profile
+brobot.mock=false            # Auto-set to true in test profile
 
 # Logging (affects ConsoleReporter output)
 brobot.logging.verbosity=NORMAL        # QUIET, NORMAL, or VERBOSE

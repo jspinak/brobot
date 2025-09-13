@@ -38,7 +38,7 @@ public class MockOnlyTestConfiguration
         System.setProperty("java.awt.headless", "true");
 
         // Override any conflicting properties
-        System.setProperty("brobot.framework.mock", "true");
-        System.setProperty("brobot.mock.enabled", "true");
+        System.setProperty("brobot.mock", "true");
+        System.setProperty("brobot.mock", "true");
     }
 }

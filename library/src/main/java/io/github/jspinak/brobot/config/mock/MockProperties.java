@@ -12,8 +12,7 @@ import lombok.Data;
  * properties:
  *
  * <ul>
- *   <li><b>enabled</b>: Master switch for mock mode (replaces brobot.mock, brobot.core.mock,
- *       brobot.framework.mock)
+ *   <li><b>enabled</b>: Master switch for mock mode
  *   <li><b>actionSuccessProbability</b>: Probability of action success (0.0 to 1.0)
  * </ul>
  *
@@ -25,7 +24,7 @@ import lombok.Data;
  *
  * <pre>{@code
  * # application.properties
- * brobot.mock.enabled=true
+ * brobot.mock=true
  * brobot.mock.action.success.probability=0.95
  * }</pre>
  *

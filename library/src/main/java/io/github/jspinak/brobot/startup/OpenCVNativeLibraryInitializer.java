@@ -59,7 +59,7 @@ public class OpenCVNativeLibraryInitializer
         ConfigurableEnvironment env = applicationContext.getEnvironment();
 
         // Check if we should skip native library loading (e.g., in mock mode)
-        boolean mockMode = env.getProperty("brobot.framework.mock", Boolean.class, false);
+        boolean mockMode = env.getProperty("brobot.mock", Boolean.class, false);
 
         if (!mockMode) {
             log.debug("Initializing OpenCV native libraries via ApplicationContextInitializer");
