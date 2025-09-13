@@ -180,6 +180,7 @@ public class FrameworkSettings {
      * Probability of action success in mock mode (0.0 to 1.0).
      *
      * <p>Controls how often simulated actions succeed:
+     *
      * <ul>
      *   <li>1.0 = All actions always succeed (default)
      *   <li>0.95 = 95% success rate (realistic simulation)

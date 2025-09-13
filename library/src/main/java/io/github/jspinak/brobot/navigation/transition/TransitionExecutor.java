@@ -235,7 +235,7 @@ public class TransitionExecutor {
             return false; // couldn't find one of the needed Transitions
         }
         TransitionFetcher transitions = transitionsOpt.get();
-        
+
         // Execute FromTransition first
         System.out.println(
                 "=== TRANSITION DEBUG: Executing FromTransition from "
@@ -248,9 +248,10 @@ public class TransitionExecutor {
                         + toStateName
                         + ")");
         boolean fromTransitionSuccess = transitions.getFromTransitionFunction().getAsBoolean();
-        System.out.println("=== TRANSITION DEBUG: FromTransition result = " + fromTransitionSuccess);
+        System.out.println(
+                "=== TRANSITION DEBUG: FromTransition result = " + fromTransitionSuccess);
         if (!fromTransitionSuccess) return false; // the FromTransition didn't succeed
-        
+
         // Now execute the ToTransition for the primary target state
         System.out.println(
                 "=== TRANSITION DEBUG: Executing ToTransition for target state "
@@ -262,14 +263,15 @@ public class TransitionExecutor {
         System.out.println("=== TRANSITION DEBUG: ToTransition result = " + toTransitionSuccess);
         if (!toTransitionSuccess) {
             System.out.println(
-                    "=== TRANSITION DEBUG: Transition failed - ToTransition for primary target state "
+                    "=== TRANSITION DEBUG: Transition failed - ToTransition for primary target"
+                            + " state "
                             + to
                             + "("
                             + toStateName
                             + ") did not succeed");
             return false; // The ToTransition for the primary target didn't succeed
         }
-        
+
         // Process additional states to activate (cascading transitions)
         Set<Long> statesToActivate = getStatesToActivate(transitions, to);
         statesToActivate.remove(to); // Remove primary target since we already processed it
@@ -279,9 +281,10 @@ public class TransitionExecutor {
                                 .getState(stateName)
                                 .ifPresent(State::setProbabilityToBaseProbability));
         StateTransition fromTrsn = transitions.getFromTransition();
-        statesToActivate.forEach(this::doTransitionTo); // do remaining ToTransitions for cascading states
+        statesToActivate.forEach(
+                this::doTransitionTo); // do remaining ToTransitions for cascading states
         fromTrsn.getExit().forEach(this::exitState); // exit all States to exit
-        
+
         // Verify the primary target state is active
         if (!stateMemory.getActiveStates().contains(to)) {
             System.out.println(
@@ -292,7 +295,7 @@ public class TransitionExecutor {
                             + ") is not active after transition");
             return false;
         }
-        
+
         if (!transitions.getFromTransitions().stateStaysVisible(to))
             exitState(from); // exit 'from' State
         return true;
@@ -368,14 +371,14 @@ public class TransitionExecutor {
         }
         State toState = toStateOpt.get();
         toState.setProbabilityToBaseProbability();
-        
+
         // Get the StateTransitions for this state (may not exist for terminal states)
         Optional<StateTransitions> stateTransitions =
                 stateTransitionsInProjectService.getTransitions(toStateName);
-        
+
         boolean result = true; // Default to true if no transition finish exists
         StateTransition stateTransition = null;
-        
+
         if (stateTransitions.isPresent()) {
             stateTransition = stateTransitions.get().getTransitionFinish();
             if (stateTransition != null) {
@@ -406,24 +409,24 @@ public class TransitionExecutor {
                             + allStatesInProjectService.getStateName(toStateName)
                             + "), treating as terminal state");
         }
-        
+
         if (!result) { // transition failed
             toState.setProbabilityExists(0); // mock assumes State is not present
             return false;
         }
-        
+
         toState.setProbabilityExists(100); // State found
         // Add the state to active states!
         stateMemory.addActiveState(toStateName);
         setHiddenStates.set(toStateName);
         stateTransitionsJointTable.addTransitionsToHiddenStates(toState);
-        
+
         // Process cascading transitions if they exist
         if (stateTransition != null) {
             stateTransition.getActivate().forEach(this::doTransitionTo);
             stateTransition.getExit().forEach(this::exitState);
         }
-        
+
         return stateMemory.getActiveStates().contains(toStateName);
     }
 

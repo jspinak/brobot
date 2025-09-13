@@ -185,52 +185,117 @@ Initial state and startup behavior.
 
 ## Profile-Based Configuration
 
-You can organize properties into profiles for different environments:
+Spring Boot profiles allow you to organize configurations for different environments. Profiles can be combined for powerful configuration combinations.
 
-### Debug Profile Example
+### Profile Strategy
 
-Create `application-debug.properties`:
+Brobot uses a modular profile approach to minimize duplication:
+
+1. **Base Configuration** (`application.properties`) - Common settings for all profiles
+2. **Feature Profiles** - Each profile adds specific functionality
+3. **Profile Composition** - Combine multiple profiles for complex configurations
+
+### Available Profiles
+
+#### Debug Profile
+Create `application-debug.properties` for image finding debugging:
 
 ```properties
-# Enable comprehensive debugging
+# Image Find Debugging
 brobot.debug.image.enabled=true
 brobot.debug.image.level=DETAILED
-brobot.debug.image.visual.enabled=true
-brobot.debug.image.console.use-colors=true
+brobot.debug.image.save-screenshots=true
+brobot.debug.image.save-patterns=true
+brobot.debug.image.save-comparisons=true
+brobot.debug.image.output-dir=debug/image-finding
 
-# Verbose logging
+# Visual Debugging
+brobot.debug.image.visual.enabled=true
+brobot.debug.image.visual.show-search-regions=true
+brobot.debug.image.visual.show-match-scores=true
+brobot.debug.image.visual.highlight-best-match=true
+brobot.debug.image.visual.create-comparison-grid=true
+
+# Console Output (with ANSI colors for Windows via Jansi)
+brobot.debug.image.console.use-colors=true
+brobot.debug.image.console.show-box=true
+brobot.debug.image.console.show-timestamp=true
+
+# Enhanced Logging
 brobot.logging.verbosity=VERBOSE
 brobot.console.actions.enabled=true
+brobot.console.actions.level=VERBOSE
 
-# Lower similarity for debugging
-brobot.find.similarity=0.7
-
-# Add pauses for observation
+# Slow down for observation
 brobot.action.pause-after=500
+brobot.action.pause-before=200
+
+# Spring Boot Debug Logging
+logging.level.io.github.jspinak.brobot.debug=DEBUG
+logging.level.io.github.jspinak.brobot.action.basic.find=DEBUG
 ```
 
-Run with: `./gradlew bootRun --args='--spring.profiles.active=debug'`
-
-### Test Profile Example
-
-Create `application-test.properties`:
+#### Mock Profile
+Create `application-mock.properties` for headless testing:
 
 ```properties
-# Enable mock mode for tests
+# Enable Mock Mode
 brobot.mock.enabled=true
-brobot.mock.action.success.probability=1.0
+brobot.mock.action.success.probability=0.8
 
-# Disable GUI checks
+# GUI Access Settings for Mock Mode
 brobot.gui-access.continue-on-error=true
 brobot.gui-access.check-on-startup=false
 
-# Basic debugging only
-brobot.debug.image.enabled=true
-brobot.debug.image.level=BASIC
-brobot.debug.image.save-screenshots=false
+# Automation Failure Handling
+brobot.automation.exit-on-failure=false
+brobot.automation.max-retries=2
+brobot.automation.retry-delay-ms=500
 ```
 
-Run with: `./gradlew test --args='--spring.profiles.active=test'`
+### Profile Combinations
+
+Profiles can be combined using comma separation:
+
+| Command | Description | Use Case |
+|---------|-------------|----------|
+| `./gradlew bootRun` | Default (no profile) | Live automation on Windows/Linux with GUI |
+| `./gradlew bootRun --args='--spring.profiles.active=debug'` | Debug profile | Live automation with comprehensive debugging |
+| `./gradlew bootRun --args='--spring.profiles.active=mock'` | Mock profile | Testing without GUI/display |
+| `./gradlew bootRun --args='--spring.profiles.active=mock,debug'` | Mock + Debug | Mock testing with debug output |
+
+### Example Usage Scenarios
+
+#### Windows Live Automation with Debugging
+```bash
+# For debugging image finding issues on Windows
+./gradlew bootRun --args='--spring.profiles.active=debug'
+```
+This enables:
+- Colorful console output (via Jansi library)
+- Visual annotations on screenshots
+- Debug file saving to `debug/image-finding/`
+- Detailed similarity scoring logs
+
+#### CI/CD Pipeline Testing
+```bash
+# For automated testing in headless environments
+./gradlew test --args='--spring.profiles.active=mock'
+```
+This enables:
+- Mock mode (no GUI required)
+- Predictable test results
+- Fast execution
+
+#### Development with Full Debugging
+```bash
+# For development with both mock and debug features
+./gradlew bootRun --args='--spring.profiles.active=mock,debug'
+```
+This enables:
+- Mock mode for consistent testing
+- Full debug output for troubleshooting
+- No GUI dependencies
 
 ---
 

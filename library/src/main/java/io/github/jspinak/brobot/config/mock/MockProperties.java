@@ -8,8 +8,8 @@ import lombok.Data;
 /**
  * Simplified mock configuration properties for the Brobot framework.
  *
- * <p>This class provides a streamlined approach to mock mode configuration with just two
- * essential properties:
+ * <p>This class provides a streamlined approach to mock mode configuration with just two essential
+ * properties:
  *
  * <ul>
  *   <li><b>enabled</b>: Master switch for mock mode (replaces brobot.mock, brobot.core.mock,
@@ -72,16 +72,11 @@ public class MockProperties {
      */
     private ActionSuccessProbability action = new ActionSuccessProbability();
 
-    /**
-     * Nested configuration for action success probability.
-     */
+    /** Nested configuration for action success probability. */
     @Data
     public static class ActionSuccessProbability {
-        
-        /**
-         * Success probability for all actions (0.0 to 1.0).
-         * Default: 1.0 (100% success rate)
-         */
+
+        /** Success probability for all actions (0.0 to 1.0). Default: 1.0 (100% success rate) */
         private double successProbability = 1.0;
 
         /**
