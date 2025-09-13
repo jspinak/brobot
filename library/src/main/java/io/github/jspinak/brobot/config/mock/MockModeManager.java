@@ -33,15 +33,16 @@ import lombok.extern.slf4j.Slf4j;
 public class MockModeManager {
 
     private static final String MOCK_ENABLED_PROPERTY = "brobot.mock.enabled";
-    private static final String MOCK_SUCCESS_PROBABILITY_PROPERTY = "brobot.mock.action.success.probability";
-    
+    private static final String MOCK_SUCCESS_PROBABILITY_PROPERTY =
+            "brobot.mock.action.success.probability";
+
     // Legacy properties for backward compatibility during transition
-    @Deprecated
-    private static final String LEGACY_MOCK_MODE_PROPERTY = "brobot.mock.mode";
+    @Deprecated private static final String LEGACY_MOCK_MODE_PROPERTY = "brobot.mock.mode";
+
     @Deprecated
     private static final String LEGACY_FRAMEWORK_MOCK_PROPERTY = "brobot.framework.mock";
-    @Deprecated
-    private static final String LEGACY_CORE_MOCK_PROPERTY = "brobot.core.mock-mode";
+
+    @Deprecated private static final String LEGACY_CORE_MOCK_PROPERTY = "brobot.core.mock-mode";
 
     /**
      * Checks if mock mode is currently enabled.
@@ -87,7 +88,7 @@ public class MockModeManager {
 
         // 1. Update system properties (new simplified property)
         System.setProperty(MOCK_ENABLED_PROPERTY, String.valueOf(enable));
-        
+
         // Also set legacy properties for any code still using them
         System.setProperty(LEGACY_MOCK_MODE_PROPERTY, String.valueOf(enable));
         System.setProperty(LEGACY_FRAMEWORK_MOCK_PROPERTY, String.valueOf(enable));
@@ -154,12 +155,16 @@ public class MockModeManager {
                 .append(" = ")
                 .append(System.getProperty(MOCK_SUCCESS_PROBABILITY_PROPERTY))
                 .append("\n");
-        
+
         // Also show legacy properties if set
         String legacyMock = System.getProperty(LEGACY_MOCK_MODE_PROPERTY);
         if (legacyMock != null) {
             state.append("  Legacy Properties (deprecated):\n");
-            state.append("    ").append(LEGACY_MOCK_MODE_PROPERTY).append(" = ").append(legacyMock).append("\n");
+            state.append("    ")
+                    .append(LEGACY_MOCK_MODE_PROPERTY)
+                    .append(" = ")
+                    .append(legacyMock)
+                    .append("\n");
         }
 
         // Check ExecutionEnvironment
@@ -179,8 +184,11 @@ public class MockModeManager {
                     Class.forName("io.github.jspinak.brobot.config.core.FrameworkSettings");
             Object mockValue = frameworkSettingsClass.getField("mock").get(null);
             state.append("  FrameworkSettings.mock = ").append(mockValue).append("\n");
-            Object probabilityValue = frameworkSettingsClass.getField("mockActionSuccessProbability").get(null);
-            state.append("  FrameworkSettings.mockActionSuccessProbability = ").append(probabilityValue).append("\n");
+            Object probabilityValue =
+                    frameworkSettingsClass.getField("mockActionSuccessProbability").get(null);
+            state.append("  FrameworkSettings.mockActionSuccessProbability = ")
+                    .append(probabilityValue)
+                    .append("\n");
         } catch (Exception e) {
             state.append("  FrameworkSettings: Not available\n");
         }
@@ -198,7 +206,9 @@ public class MockModeManager {
         boolean shouldEnableMock =
                 "true".equalsIgnoreCase(System.getProperty(MOCK_ENABLED_PROPERTY))
                         || "true".equalsIgnoreCase(System.getProperty(LEGACY_MOCK_MODE_PROPERTY))
-                        || "true".equalsIgnoreCase(System.getProperty(LEGACY_FRAMEWORK_MOCK_PROPERTY))
+                        || "true"
+                                .equalsIgnoreCase(
+                                        System.getProperty(LEGACY_FRAMEWORK_MOCK_PROPERTY))
                         || "true".equalsIgnoreCase(System.getProperty(LEGACY_CORE_MOCK_PROPERTY));
 
         if (shouldEnableMock) {

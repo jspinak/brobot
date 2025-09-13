@@ -273,27 +273,44 @@ public class SmartImageLoader {
     }
 
     private BufferedImage tryLoadFromConfiguredPaths(String imageName) {
+        // First, try the resolved path if available
+        String resolvedPath = System.getProperty("brobot.resolved.image.path");
+        if (resolvedPath != null) {
+            BufferedImage img = tryLoadFromSpecificPath(resolvedPath, imageName);
+            if (img != null) {
+                log.debug("Loaded {} from resolved path: {}", imageName, resolvedPath);
+                return img;
+            }
+        }
+
+        // Then try other configured paths
         for (String configuredPath : pathManager.getConfiguredPaths()) {
-            try {
-                Path fullPath = Paths.get(configuredPath, imageName);
+            BufferedImage img = tryLoadFromSpecificPath(configuredPath, imageName);
+            if (img != null) {
+                return img;
+            }
+        }
+
+        return null;
+    }
+
+    private BufferedImage tryLoadFromSpecificPath(String basePath, String imageName) {
+        try {
+            Path fullPath = Paths.get(basePath, imageName);
+            if (Files.exists(fullPath) && Files.isRegularFile(fullPath)) {
+                return ImageIO.read(fullPath.toFile());
+            }
+
+            // Also try without extension and common extensions
+            String nameWithoutExt = removeExtension(imageName);
+            for (String ext : new String[] {".png", ".jpg", ".jpeg", ".gif", ".bmp"}) {
+                fullPath = Paths.get(basePath, nameWithoutExt + ext);
                 if (Files.exists(fullPath) && Files.isRegularFile(fullPath)) {
                     return ImageIO.read(fullPath.toFile());
                 }
-
-                // Also try without extension and common extensions
-                String nameWithoutExt = removeExtension(imageName);
-                for (String ext : new String[] {".png", ".jpg", ".jpeg", ".gif", ".bmp"}) {
-                    fullPath = Paths.get(configuredPath, nameWithoutExt + ext);
-                    if (Files.exists(fullPath) && Files.isRegularFile(fullPath)) {
-                        return ImageIO.read(fullPath.toFile());
-                    }
-                }
-            } catch (Exception e) {
-                log.debug(
-                        "Failed to load from configured path {}: {}",
-                        configuredPath,
-                        e.getMessage());
             }
+        } catch (Exception e) {
+            log.trace("Could not load from path: {} - {}", basePath, e.getMessage());
         }
         return null;
     }

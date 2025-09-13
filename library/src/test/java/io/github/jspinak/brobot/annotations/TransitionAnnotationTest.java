@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.*;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -15,10 +15,10 @@ import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.test.TestCategories;
 
 /**
- * Comprehensive test suite for @Transition annotation. Tests annotation attributes, from/to
- * relationships, method binding, and Spring integration.
+ * Comprehensive test suite for @TransitionSet, @FromTransition, and @ToTransition annotations.
+ * Tests annotation attributes, relationships, method binding, and Spring integration.
  */
-@DisplayName("@Transition Annotation Tests")
+@DisplayName("Transition Annotations Tests")
 @Tag(TestCategories.UNIT)
 @Tag(TestCategories.FAST)
 @Tag("annotations")
@@ -26,66 +26,108 @@ public class TransitionAnnotationTest extends BrobotTestBase {
 
     // Test state classes
     @State
-    static class StateA {}
+    static class MenuState {}
 
     @State
-    static class StateB {}
+    static class HomepageState {}
 
     @State
-    static class StateC {}
+    static class PricingState {}
 
     @State
-    static class StateD {}
+    static class ContactState {}
 
-    // Test transition classes
-    @Transition(from = StateA.class, to = StateB.class)
-    static class SimpleTransition {
-        public boolean execute() {
+    @State
+    static class CheckoutState {}
+
+    // Simple TransitionSet with basic transitions
+    @TransitionSet(state = PricingState.class)
+    static class PricingTransitions {
+
+        @FromTransition(from = MenuState.class, priority = 1)
+        public boolean fromMenu() {
+            return true;
+        }
+
+        @FromTransition(from = HomepageState.class)
+        public boolean fromHomepage() {
+            return true;
+        }
+
+        @ToTransition
+        public boolean verifyArrival() {
             return true;
         }
     }
 
-    @Transition(
-            from = StateA.class,
-            to = {StateB.class, StateC.class})
-    static class MultiTargetTransition {
-        public boolean execute() {
+    // TransitionSet with custom attributes
+    @TransitionSet(
+            state = ContactState.class,
+            name = "contact_page",
+            description = "All transitions to Contact page")
+    static class ContactTransitions {
+
+        @FromTransition(
+                from = MenuState.class,
+                priority = 10,
+                description = "Navigate from menu",
+                timeout = 20)
+        public boolean fromMenuWithPriority() {
+            return true;
+        }
+
+        @FromTransition(from = PricingState.class)
+        public boolean fromPricing() {
+            return true;
+        }
+
+        @ToTransition(description = "Verify contact form is visible", timeout = 15)
+        public boolean verifyContactForm() {
             return true;
         }
     }
 
-    @Transition(
-            from = {StateA.class, StateB.class},
-            to = StateC.class)
-    static class MultiSourceTransition {
-        public boolean execute() {
+    // TransitionSet with multiple FromTransitions from same source
+    @TransitionSet(state = CheckoutState.class)
+    static class CheckoutTransitions {
+
+        @FromTransition(from = PricingState.class, priority = 1)
+        public boolean fromPricingQuickCheckout() {
+            return true;
+        }
+
+        @FromTransition(from = PricingState.class, priority = 2)
+        public boolean fromPricingStandardCheckout() {
+            return true;
+        }
+
+        @ToTransition(required = false)
+        public boolean verifyCheckoutPage() {
             return true;
         }
     }
 
-    @Transition(
-            from = StateA.class,
-            to = StateB.class,
-            method = "customMethod",
-            description = "Custom transition",
-            priority = 10)
-    static class CustomTransition {
-        public boolean customMethod() {
+    // Invalid TransitionSet - multiple ToTransitions (for testing validation)
+    @TransitionSet(state = MenuState.class)
+    static class InvalidMultipleToTransitions {
+
+        @ToTransition
+        public boolean verifyMethod1() {
+            return true;
+        }
+
+        @ToTransition
+        public boolean verifyMethod2() {
             return true;
         }
     }
 
-    @Transition(
-            from = {StateA.class, StateB.class},
-            to = {StateC.class, StateD.class})
-    static class ComplexTransition {
-        public boolean execute() {
+    // Class without annotations
+    static class NonTransitionClass {
+        public boolean someMethod() {
             return true;
         }
     }
-
-    // Class without annotation
-    static class NonTransition {}
 
     @BeforeEach
     @Override
@@ -94,186 +136,425 @@ public class TransitionAnnotationTest extends BrobotTestBase {
     }
 
     @Nested
-    @DisplayName("Annotation Presence Tests")
-    class AnnotationPresenceTests {
+    @DisplayName("TransitionSet Annotation Tests")
+    class TransitionSetAnnotationTests {
 
         @Test
-        @DisplayName("Should detect @Transition annotation on class")
-        void shouldDetectTransitionAnnotation() {
-            assertTrue(SimpleTransition.class.isAnnotationPresent(Transition.class));
-            assertTrue(MultiTargetTransition.class.isAnnotationPresent(Transition.class));
-            assertTrue(MultiSourceTransition.class.isAnnotationPresent(Transition.class));
-            assertTrue(CustomTransition.class.isAnnotationPresent(Transition.class));
+        @DisplayName("Should detect @TransitionSet annotation on class")
+        void shouldDetectTransitionSetAnnotation() {
+            assertTrue(PricingTransitions.class.isAnnotationPresent(TransitionSet.class));
+            assertTrue(ContactTransitions.class.isAnnotationPresent(TransitionSet.class));
+            assertTrue(CheckoutTransitions.class.isAnnotationPresent(TransitionSet.class));
         }
 
         @Test
-        @DisplayName("Should not detect @Transition on non-annotated class")
-        void shouldNotDetectTransitionOnNonAnnotated() {
-            assertFalse(NonTransition.class.isAnnotationPresent(Transition.class));
+        @DisplayName("Should not detect @TransitionSet on non-annotated class")
+        void shouldNotDetectTransitionSetOnNonAnnotated() {
+            assertFalse(NonTransitionClass.class.isAnnotationPresent(TransitionSet.class));
+        }
+
+        @Test
+        @DisplayName("Should extract state from @TransitionSet")
+        void shouldExtractStateFromTransitionSet() {
+            TransitionSet annotation = PricingTransitions.class.getAnnotation(TransitionSet.class);
+            assertNotNull(annotation);
+            assertEquals(PricingState.class, annotation.state());
+        }
+
+        @Test
+        @DisplayName("Should support custom name and description")
+        void shouldSupportCustomNameAndDescription() {
+            TransitionSet annotation = ContactTransitions.class.getAnnotation(TransitionSet.class);
+            assertNotNull(annotation);
+            assertEquals("contact_page", annotation.name());
+            assertEquals("All transitions to Contact page", annotation.description());
+        }
+
+        @Test
+        @DisplayName("Should have default values for optional attributes")
+        void shouldHaveDefaultValuesForOptionalAttributes() {
+            TransitionSet annotation = PricingTransitions.class.getAnnotation(TransitionSet.class);
+            assertNotNull(annotation);
+            assertEquals("", annotation.name());
+            assertEquals("", annotation.description());
+        }
+
+        @Test
+        @DisplayName("@TransitionSet should include @Component")
+        void transitionSetShouldIncludeComponent() {
+            Component component =
+                    AnnotationUtils.findAnnotation(TransitionSet.class, Component.class);
+            assertNotNull(component, "@TransitionSet should be meta-annotated with @Component");
+        }
+
+        @Test
+        @DisplayName("Should make class a Spring component")
+        void shouldMakeClassSpringComponent() {
+            boolean hasComponent =
+                    AnnotationUtils.findAnnotation(PricingTransitions.class, Component.class)
+                            != null;
+            assertTrue(hasComponent, "Class with @TransitionSet should be Spring component");
         }
 
         @Test
         @DisplayName("Should have runtime retention")
         void shouldHaveRuntimeRetention() {
-            Transition annotation = SimpleTransition.class.getAnnotation(Transition.class);
+            TransitionSet annotation = PricingTransitions.class.getAnnotation(TransitionSet.class);
+            assertNotNull(annotation, "Runtime accessibility proves RUNTIME retention");
+        }
+    }
+
+    @Nested
+    @DisplayName("FromTransition Annotation Tests")
+    class FromTransitionAnnotationTests {
+
+        @Test
+        @DisplayName("Should detect @FromTransition on methods")
+        void shouldDetectFromTransitionOnMethods() throws NoSuchMethodException {
+            Method fromMenu = PricingTransitions.class.getMethod("fromMenu");
+            Method fromHomepage = PricingTransitions.class.getMethod("fromHomepage");
+
+            assertTrue(fromMenu.isAnnotationPresent(FromTransition.class));
+            assertTrue(fromHomepage.isAnnotationPresent(FromTransition.class));
+        }
+
+        @Test
+        @DisplayName("Should extract source state from @FromTransition")
+        void shouldExtractSourceState() throws NoSuchMethodException {
+            Method fromMenu = PricingTransitions.class.getMethod("fromMenu");
+            FromTransition annotation = fromMenu.getAnnotation(FromTransition.class);
+
             assertNotNull(annotation);
-            // Runtime accessibility proves RUNTIME retention
+            assertEquals(MenuState.class, annotation.from());
         }
 
         @Test
-        @DisplayName("Should be documented")
-        void shouldBeDocumented() {
-            // Note: java.lang.annotation.Documented may not be present
-            // This is a metadata test that can be skipped if Documented is not available
-            assertTrue(true, "Documented annotation check skipped");
-        }
-    }
+        @DisplayName("Should support priority attribute")
+        void shouldSupportPriority() throws NoSuchMethodException {
+            Method fromMenu = PricingTransitions.class.getMethod("fromMenu");
+            FromTransition annotation = fromMenu.getAnnotation(FromTransition.class);
 
-    @Nested
-    @DisplayName("From/To Relationship Tests")
-    class FromToRelationshipTests {
-
-        @Test
-        @DisplayName("Should handle single source and target")
-        void shouldHandleSingleSourceAndTarget() {
-            Transition annotation = SimpleTransition.class.getAnnotation(Transition.class);
-
-            Class<?>[] from = annotation.from();
-            Class<?>[] to = annotation.to();
-
-            assertEquals(1, from.length);
-            assertEquals(1, to.length);
-            assertEquals(StateA.class, from[0]);
-            assertEquals(StateB.class, to[0]);
+            assertEquals(1, annotation.priority());
         }
 
         @Test
-        @DisplayName("Should handle multiple targets")
-        void shouldHandleMultipleTargets() {
-            Transition annotation = MultiTargetTransition.class.getAnnotation(Transition.class);
+        @DisplayName("Should have default priority of 0")
+        void shouldHaveDefaultPriority() throws NoSuchMethodException {
+            Method fromHomepage = PricingTransitions.class.getMethod("fromHomepage");
+            FromTransition annotation = fromHomepage.getAnnotation(FromTransition.class);
 
-            Class<?>[] from = annotation.from();
-            Class<?>[] to = annotation.to();
-
-            assertEquals(1, from.length);
-            assertEquals(2, to.length);
-            assertEquals(StateA.class, from[0]);
-
-            Set<Class<?>> targets = new HashSet<>(Arrays.asList(to));
-            assertTrue(targets.contains(StateB.class));
-            assertTrue(targets.contains(StateC.class));
-        }
-
-        @Test
-        @DisplayName("Should handle multiple sources")
-        void shouldHandleMultipleSources() {
-            Transition annotation = MultiSourceTransition.class.getAnnotation(Transition.class);
-
-            Class<?>[] from = annotation.from();
-            Class<?>[] to = annotation.to();
-
-            assertEquals(2, from.length);
-            assertEquals(1, to.length);
-
-            Set<Class<?>> sources = new HashSet<>(Arrays.asList(from));
-            assertTrue(sources.contains(StateA.class));
-            assertTrue(sources.contains(StateB.class));
-            assertEquals(StateC.class, to[0]);
-        }
-
-        @Test
-        @DisplayName("Should handle many-to-many transitions")
-        void shouldHandleManyToManyTransitions() {
-            Transition annotation = ComplexTransition.class.getAnnotation(Transition.class);
-
-            Class<?>[] from = annotation.from();
-            Class<?>[] to = annotation.to();
-
-            assertEquals(2, from.length);
-            assertEquals(2, to.length);
-
-            Set<Class<?>> sources = new HashSet<>(Arrays.asList(from));
-            Set<Class<?>> targets = new HashSet<>(Arrays.asList(to));
-
-            assertTrue(sources.contains(StateA.class));
-            assertTrue(sources.contains(StateB.class));
-            assertTrue(targets.contains(StateC.class));
-            assertTrue(targets.contains(StateD.class));
-        }
-    }
-
-    @Nested
-    @DisplayName("Method and Priority Tests")
-    class MethodAndPriorityTests {
-
-        @Test
-        @DisplayName("Should have default method name")
-        void shouldHaveDefaultMethodName() {
-            Transition annotation = SimpleTransition.class.getAnnotation(Transition.class);
-            assertEquals("execute", annotation.method());
-        }
-
-        @Test
-        @DisplayName("Should support custom method name")
-        void shouldSupportCustomMethodName() {
-            Transition annotation = CustomTransition.class.getAnnotation(Transition.class);
-            assertEquals("customMethod", annotation.method());
-        }
-
-        @Test
-        @DisplayName("Should verify method exists")
-        void shouldVerifyMethodExists() throws NoSuchMethodException {
-            Transition annotation = CustomTransition.class.getAnnotation(Transition.class);
-            String methodName = annotation.method();
-
-            Method method = CustomTransition.class.getMethod(methodName);
-            assertNotNull(method);
-            assertEquals(boolean.class, method.getReturnType());
-        }
-
-        @Test
-        @DisplayName("Should have default priority")
-        void shouldHaveDefaultPriority() {
-            Transition annotation = SimpleTransition.class.getAnnotation(Transition.class);
             assertEquals(0, annotation.priority());
         }
 
         @Test
-        @DisplayName("Should support custom priority")
-        void shouldSupportCustomPriority() {
-            Transition annotation = CustomTransition.class.getAnnotation(Transition.class);
-            assertEquals(10, annotation.priority());
+        @DisplayName("Should support custom description and timeout")
+        void shouldSupportCustomDescriptionAndTimeout() throws NoSuchMethodException {
+            Method fromMenu = ContactTransitions.class.getMethod("fromMenuWithPriority");
+            FromTransition annotation = fromMenu.getAnnotation(FromTransition.class);
+
+            assertNotNull(annotation);
+            assertEquals("Navigate from menu", annotation.description());
+            assertEquals(20, annotation.timeout());
+        }
+
+        @Test
+        @DisplayName("Should have default timeout of 10 seconds")
+        void shouldHaveDefaultTimeout() throws NoSuchMethodException {
+            Method fromMenu = PricingTransitions.class.getMethod("fromMenu");
+            FromTransition annotation = fromMenu.getAnnotation(FromTransition.class);
+
+            assertEquals(10, annotation.timeout());
+        }
+
+        @Test
+        @DisplayName("Should find all FromTransitions in a class")
+        void shouldFindAllFromTransitionsInClass() {
+            Method[] methods = PricingTransitions.class.getDeclaredMethods();
+            List<Method> fromTransitions =
+                    Arrays.stream(methods)
+                            .filter(m -> m.isAnnotationPresent(FromTransition.class))
+                            .collect(Collectors.toList());
+
+            assertEquals(2, fromTransitions.size());
+        }
+
+        @Test
+        @DisplayName("Should allow multiple transitions from same source state")
+        void shouldAllowMultipleTransitionsFromSameSource() {
+            Method[] methods = CheckoutTransitions.class.getDeclaredMethods();
+            List<Method> fromPricing =
+                    Arrays.stream(methods)
+                            .filter(m -> m.isAnnotationPresent(FromTransition.class))
+                            .filter(
+                                    m ->
+                                            m.getAnnotation(FromTransition.class).from()
+                                                    == PricingState.class)
+                            .collect(Collectors.toList());
+
+            assertEquals(2, fromPricing.size(), "Should have 2 transitions from PricingState");
+        }
+
+        @Test
+        @DisplayName("Should sort transitions by priority")
+        void shouldSortTransitionsByPriority() throws NoSuchMethodException {
+            Method quickCheckout = CheckoutTransitions.class.getMethod("fromPricingQuickCheckout");
+            Method standardCheckout =
+                    CheckoutTransitions.class.getMethod("fromPricingStandardCheckout");
+
+            FromTransition quick = quickCheckout.getAnnotation(FromTransition.class);
+            FromTransition standard = standardCheckout.getAnnotation(FromTransition.class);
+
+            assertTrue(
+                    quick.priority() < standard.priority(),
+                    "Quick checkout should have higher priority (lower number)");
         }
     }
 
     @Nested
-    @DisplayName("Description and Metadata Tests")
-    class DescriptionAndMetadataTests {
+    @DisplayName("ToTransition Annotation Tests")
+    class ToTransitionAnnotationTests {
 
         @Test
-        @DisplayName("Should have empty default description")
-        void shouldHaveEmptyDefaultDescription() {
-            Transition annotation = SimpleTransition.class.getAnnotation(Transition.class);
+        @DisplayName("Should detect @ToTransition on method")
+        void shouldDetectToTransitionOnMethod() throws NoSuchMethodException {
+            Method verifyArrival = PricingTransitions.class.getMethod("verifyArrival");
+            assertTrue(verifyArrival.isAnnotationPresent(ToTransition.class));
+        }
+
+        @Test
+        @DisplayName("Should have default values for optional attributes")
+        void shouldHaveDefaultValuesForOptionalAttributes() throws NoSuchMethodException {
+            Method verifyArrival = PricingTransitions.class.getMethod("verifyArrival");
+            ToTransition annotation = verifyArrival.getAnnotation(ToTransition.class);
+
+            assertNotNull(annotation);
             assertEquals("", annotation.description());
+            assertEquals(5, annotation.timeout());
+            assertTrue(annotation.required());
         }
 
         @Test
-        @DisplayName("Should support custom description")
-        void shouldSupportCustomDescription() {
-            Transition annotation = CustomTransition.class.getAnnotation(Transition.class);
-            assertEquals("Custom transition", annotation.description());
+        @DisplayName("Should support custom description and timeout")
+        void shouldSupportCustomDescriptionAndTimeout() throws NoSuchMethodException {
+            Method verifyContact = ContactTransitions.class.getMethod("verifyContactForm");
+            ToTransition annotation = verifyContact.getAnnotation(ToTransition.class);
+
+            assertNotNull(annotation);
+            assertEquals("Verify contact form is visible", annotation.description());
+            assertEquals(15, annotation.timeout());
         }
 
         @Test
-        @DisplayName("Should extract all attributes")
-        void shouldExtractAllAttributes() {
-            Transition annotation = CustomTransition.class.getAnnotation(Transition.class);
+        @DisplayName("Should support required attribute")
+        void shouldSupportRequiredAttribute() throws NoSuchMethodException {
+            Method verifyCheckout = CheckoutTransitions.class.getMethod("verifyCheckoutPage");
+            ToTransition annotation = verifyCheckout.getAnnotation(ToTransition.class);
 
-            assertNotNull(annotation.from());
-            assertNotNull(annotation.to());
-            assertNotNull(annotation.method());
-            assertNotNull(annotation.description());
-            assertEquals(10, annotation.priority());
+            assertNotNull(annotation);
+            assertFalse(annotation.required());
+        }
+
+        @Test
+        @DisplayName("Should find single ToTransition in a class")
+        void shouldFindSingleToTransitionInClass() {
+            Method[] methods = PricingTransitions.class.getDeclaredMethods();
+            List<Method> toTransitions =
+                    Arrays.stream(methods)
+                            .filter(m -> m.isAnnotationPresent(ToTransition.class))
+                            .collect(Collectors.toList());
+
+            assertEquals(1, toTransitions.size(), "Should have exactly one ToTransition");
+        }
+
+        @Test
+        @DisplayName("Should detect multiple ToTransitions (validation scenario)")
+        void shouldDetectMultipleToTransitions() {
+            Method[] methods = InvalidMultipleToTransitions.class.getDeclaredMethods();
+            List<Method> toTransitions =
+                    Arrays.stream(methods)
+                            .filter(m -> m.isAnnotationPresent(ToTransition.class))
+                            .collect(Collectors.toList());
+
+            assertTrue(
+                    toTransitions.size() > 1,
+                    "Should detect multiple ToTransitions for validation purposes");
+        }
+    }
+
+    @Nested
+    @DisplayName("Transition Relationship Tests")
+    class TransitionRelationshipTests {
+
+        @Test
+        @DisplayName("Should identify all transitions to a specific state")
+        void shouldIdentifyAllTransitionsToState() {
+            TransitionSet annotation = PricingTransitions.class.getAnnotation(TransitionSet.class);
+            assertEquals(PricingState.class, annotation.state());
+
+            Method[] methods = PricingTransitions.class.getDeclaredMethods();
+            List<Class<?>> sourceStates =
+                    Arrays.stream(methods)
+                            .filter(m -> m.isAnnotationPresent(FromTransition.class))
+                            .map(m -> m.getAnnotation(FromTransition.class).from())
+                            .collect(Collectors.toList());
+
+            assertTrue(sourceStates.contains(MenuState.class));
+            assertTrue(sourceStates.contains(HomepageState.class));
+        }
+
+        @Test
+        @DisplayName("Should identify all transitions from a specific state")
+        void shouldIdentifyAllTransitionsFromState() {
+            // Find all TransitionSets
+            Class<?>[] transitionSets = {
+                PricingTransitions.class, ContactTransitions.class, CheckoutTransitions.class
+            };
+
+            // Count transitions from MenuState
+            int fromMenuCount = 0;
+            for (Class<?> tsClass : transitionSets) {
+                Method[] methods = tsClass.getDeclaredMethods();
+                fromMenuCount +=
+                        Arrays.stream(methods)
+                                .filter(m -> m.isAnnotationPresent(FromTransition.class))
+                                .filter(
+                                        m ->
+                                                m.getAnnotation(FromTransition.class).from()
+                                                        == MenuState.class)
+                                .count();
+            }
+
+            assertEquals(2, fromMenuCount, "Should find 2 transitions from MenuState");
+        }
+
+        @Test
+        @DisplayName("Should map source states to target states")
+        void shouldMapSourceStatesToTargetStates() {
+            TransitionSet tsAnnotation =
+                    PricingTransitions.class.getAnnotation(TransitionSet.class);
+            Class<?> targetState = tsAnnotation.state();
+
+            Method[] methods = PricingTransitions.class.getDeclaredMethods();
+            List<Class<?>> sourceStates =
+                    Arrays.stream(methods)
+                            .filter(m -> m.isAnnotationPresent(FromTransition.class))
+                            .map(m -> m.getAnnotation(FromTransition.class).from())
+                            .collect(Collectors.toList());
+
+            // All source states should transition to PricingState
+            assertFalse(sourceStates.isEmpty());
+            sourceStates.forEach(
+                    source -> {
+                        assertNotNull(source, "Source state should not be null");
+                        // Conceptually, all these source states lead to targetState (PricingState)
+                    });
+            assertEquals(PricingState.class, targetState);
+        }
+    }
+
+    @Nested
+    @DisplayName("Method Signature Tests")
+    class MethodSignatureTests {
+
+        @Test
+        @DisplayName("FromTransition methods should return boolean")
+        void fromTransitionMethodsShouldReturnBoolean() {
+            Method[] methods = PricingTransitions.class.getDeclaredMethods();
+            Arrays.stream(methods)
+                    .filter(m -> m.isAnnotationPresent(FromTransition.class))
+                    .forEach(
+                            m ->
+                                    assertEquals(
+                                            boolean.class,
+                                            m.getReturnType(),
+                                            "FromTransition method should return boolean"));
+        }
+
+        @Test
+        @DisplayName("ToTransition methods should return boolean")
+        void toTransitionMethodsShouldReturnBoolean() {
+            Method[] methods = PricingTransitions.class.getDeclaredMethods();
+            Arrays.stream(methods)
+                    .filter(m -> m.isAnnotationPresent(ToTransition.class))
+                    .forEach(
+                            m ->
+                                    assertEquals(
+                                            boolean.class,
+                                            m.getReturnType(),
+                                            "ToTransition method should return boolean"));
+        }
+
+        @Test
+        @DisplayName("Should not have @FromTransition on non-methods")
+        void shouldNotHaveFromTransitionOnNonMethods() {
+            assertFalse(
+                    PricingTransitions.class.isAnnotationPresent(FromTransition.class),
+                    "FromTransition should not be on class");
+        }
+
+        @Test
+        @DisplayName("Should not have @ToTransition on class")
+        void shouldNotHaveToTransitionOnClass() {
+            assertFalse(
+                    PricingTransitions.class.isAnnotationPresent(ToTransition.class),
+                    "ToTransition should not be on class");
+        }
+    }
+
+    @Nested
+    @DisplayName("Annotation Metadata Tests")
+    class AnnotationMetadataTests {
+
+        @Test
+        @DisplayName("Should access TransitionSet annotation methods via reflection")
+        void shouldAccessTransitionSetMethods() throws NoSuchMethodException {
+            assertNotNull(TransitionSet.class.getMethod("state"));
+            assertNotNull(TransitionSet.class.getMethod("name"));
+            assertNotNull(TransitionSet.class.getMethod("description"));
+
+            assertEquals(Class.class, TransitionSet.class.getMethod("state").getReturnType());
+            assertEquals(String.class, TransitionSet.class.getMethod("name").getReturnType());
+            assertEquals(
+                    String.class, TransitionSet.class.getMethod("description").getReturnType());
+        }
+
+        @Test
+        @DisplayName("Should access FromTransition annotation methods via reflection")
+        void shouldAccessFromTransitionMethods() throws NoSuchMethodException {
+            assertNotNull(FromTransition.class.getMethod("from"));
+            assertNotNull(FromTransition.class.getMethod("priority"));
+            assertNotNull(FromTransition.class.getMethod("description"));
+            assertNotNull(FromTransition.class.getMethod("timeout"));
+
+            assertEquals(Class.class, FromTransition.class.getMethod("from").getReturnType());
+            assertEquals(int.class, FromTransition.class.getMethod("priority").getReturnType());
+            assertEquals(
+                    String.class, FromTransition.class.getMethod("description").getReturnType());
+            assertEquals(int.class, FromTransition.class.getMethod("timeout").getReturnType());
+        }
+
+        @Test
+        @DisplayName("Should access ToTransition annotation methods via reflection")
+        void shouldAccessToTransitionMethods() throws NoSuchMethodException {
+            assertNotNull(ToTransition.class.getMethod("description"));
+            assertNotNull(ToTransition.class.getMethod("timeout"));
+            assertNotNull(ToTransition.class.getMethod("required"));
+
+            assertEquals(String.class, ToTransition.class.getMethod("description").getReturnType());
+            assertEquals(int.class, ToTransition.class.getMethod("timeout").getReturnType());
+            assertEquals(boolean.class, ToTransition.class.getMethod("required").getReturnType());
+        }
+
+        @Test
+        @DisplayName("Should verify annotation types")
+        void shouldVerifyAnnotationTypes() {
+            assertTrue(TransitionSet.class.isAnnotation());
+            assertTrue(FromTransition.class.isAnnotation());
+            assertTrue(ToTransition.class.isAnnotation());
+
+            assertEquals("TransitionSet", TransitionSet.class.getSimpleName());
+            assertEquals("FromTransition", FromTransition.class.getSimpleName());
+            assertEquals("ToTransition", ToTransition.class.getSimpleName());
         }
     }
 
@@ -282,227 +563,158 @@ public class TransitionAnnotationTest extends BrobotTestBase {
     class SpringIntegrationTests {
 
         @Test
-        @DisplayName("@Transition should include @Component")
-        void transitionShouldIncludeComponent() {
-            Component component = AnnotationUtils.findAnnotation(Transition.class, Component.class);
-            assertNotNull(component, "@Transition should be meta-annotated with @Component");
-        }
-
-        @Test
-        @DisplayName("Should make class a Spring component")
-        void shouldMakeClassSpringComponent() {
-            boolean hasComponent =
-                    AnnotationUtils.findAnnotation(SimpleTransition.class, Component.class) != null;
-            assertTrue(hasComponent, "Class with @Transition should be Spring component");
-        }
-
-        @Test
-        @DisplayName("Should work with Spring's annotation utilities")
-        void shouldWorkWithSpringAnnotationUtils() {
-            Transition annotation =
-                    AnnotationUtils.findAnnotation(SimpleTransition.class, Transition.class);
+        @DisplayName("Should work with Spring's annotation utilities for TransitionSet")
+        void shouldWorkWithSpringAnnotationUtilsForTransitionSet() {
+            TransitionSet annotation =
+                    AnnotationUtils.findAnnotation(PricingTransitions.class, TransitionSet.class);
             assertNotNull(annotation);
-            assertEquals(StateA.class, annotation.from()[0]);
-            assertEquals(StateB.class, annotation.to()[0]);
+            assertEquals(PricingState.class, annotation.state());
+        }
+
+        @Test
+        @DisplayName("Should work with Spring's annotation utilities for FromTransition")
+        void shouldWorkWithSpringAnnotationUtilsForFromTransition() throws NoSuchMethodException {
+            Method fromMenu = PricingTransitions.class.getMethod("fromMenu");
+            FromTransition annotation =
+                    AnnotationUtils.findAnnotation(fromMenu, FromTransition.class);
+            assertNotNull(annotation);
+            assertEquals(MenuState.class, annotation.from());
+        }
+
+        @Test
+        @DisplayName("Should work with Spring's annotation utilities for ToTransition")
+        void shouldWorkWithSpringAnnotationUtilsForToTransition() throws NoSuchMethodException {
+            Method verifyArrival = PricingTransitions.class.getMethod("verifyArrival");
+            ToTransition annotation =
+                    AnnotationUtils.findAnnotation(verifyArrival, ToTransition.class);
+            assertNotNull(annotation);
+            assertTrue(annotation.required());
+        }
+
+        @Test
+        @DisplayName("TransitionSet classes should be discoverable as Spring components")
+        void transitionSetClassesShouldBeDiscoverableAsSpringComponents() {
+            // Verify that classes with @TransitionSet are treated as Spring components
+            Component component =
+                    AnnotationUtils.findAnnotation(PricingTransitions.class, Component.class);
+            assertNotNull(component, "TransitionSet classes should be Spring components");
         }
     }
 
     @Nested
-    @DisplayName("Transition Discovery Tests")
-    class TransitionDiscoveryTests {
+    @DisplayName("Edge Cases and Validation Tests")
+    class EdgeCasesAndValidationTests {
 
         @Test
-        @DisplayName("Should find transitions from specific state")
-        void shouldFindTransitionsFromState() {
-            Class<?>[] transitions = {
-                SimpleTransition.class,
-                MultiTargetTransition.class,
-                MultiSourceTransition.class,
-                CustomTransition.class,
-                ComplexTransition.class
-            };
-
-            int fromStateACount = 0;
-            for (Class<?> transitionClass : transitions) {
-                Transition annotation = transitionClass.getAnnotation(Transition.class);
-                if (annotation != null) {
-                    Class<?>[] from = annotation.from();
-                    if (Arrays.asList(from).contains(StateA.class)) {
-                        fromStateACount++;
-                    }
+        @DisplayName("Should handle TransitionSet without FromTransitions")
+        void shouldHandleTransitionSetWithoutFromTransitions() {
+            @TransitionSet(state = MenuState.class)
+            class OnlyToTransition {
+                @ToTransition
+                public boolean verify() {
+                    return true;
                 }
             }
 
-            assertEquals(5, fromStateACount, "Should find 5 transitions from StateA");
+            TransitionSet annotation = OnlyToTransition.class.getAnnotation(TransitionSet.class);
+            assertNotNull(annotation);
+
+            Method[] methods = OnlyToTransition.class.getDeclaredMethods();
+            long fromCount =
+                    Arrays.stream(methods)
+                            .filter(m -> m.isAnnotationPresent(FromTransition.class))
+                            .count();
+            long toCount =
+                    Arrays.stream(methods)
+                            .filter(m -> m.isAnnotationPresent(ToTransition.class))
+                            .count();
+
+            assertEquals(0, fromCount);
+            assertEquals(1, toCount);
         }
 
         @Test
-        @DisplayName("Should find transitions to specific state")
-        void shouldFindTransitionsToState() {
-            Class<?>[] transitions = {
-                SimpleTransition.class,
-                MultiTargetTransition.class,
-                MultiSourceTransition.class,
-                CustomTransition.class,
-                ComplexTransition.class
-            };
-
-            int toStateCCount = 0;
-            for (Class<?> transitionClass : transitions) {
-                Transition annotation = transitionClass.getAnnotation(Transition.class);
-                if (annotation != null) {
-                    Class<?>[] to = annotation.to();
-                    if (Arrays.asList(to).contains(StateC.class)) {
-                        toStateCCount++;
-                    }
+        @DisplayName("Should handle TransitionSet without ToTransition")
+        void shouldHandleTransitionSetWithoutToTransition() {
+            @TransitionSet(state = MenuState.class)
+            class OnlyFromTransitions {
+                @FromTransition(from = HomepageState.class)
+                public boolean fromHome() {
+                    return true;
                 }
             }
 
-            assertEquals(3, toStateCCount, "Should find 3 transitions to StateC");
+            TransitionSet annotation = OnlyFromTransitions.class.getAnnotation(TransitionSet.class);
+            assertNotNull(annotation);
+
+            Method[] methods = OnlyFromTransitions.class.getDeclaredMethods();
+            long fromCount =
+                    Arrays.stream(methods)
+                            .filter(m -> m.isAnnotationPresent(FromTransition.class))
+                            .count();
+            long toCount =
+                    Arrays.stream(methods)
+                            .filter(m -> m.isAnnotationPresent(ToTransition.class))
+                            .count();
+
+            assertEquals(1, fromCount);
+            assertEquals(0, toCount);
         }
 
         @Test
-        @DisplayName("Should sort transitions by priority")
-        void shouldSortTransitionsByPriority() {
-            Class<?>[] transitions = {
-                SimpleTransition.class, // priority = 0
-                CustomTransition.class // priority = 10
-            };
+        @DisplayName("Should validate state classes have @State annotation")
+        void shouldValidateStateClassesHaveStateAnnotation() {
+            TransitionSet tsAnnotation =
+                    PricingTransitions.class.getAnnotation(TransitionSet.class);
+            Class<?> targetState = tsAnnotation.state();
 
-            Arrays.sort(
-                    transitions,
-                    (a, b) -> {
-                        Transition transA = a.getAnnotation(Transition.class);
-                        Transition transB = b.getAnnotation(Transition.class);
-                        return Integer.compare(transB.priority(), transA.priority());
-                    });
+            assertTrue(
+                    targetState.isAnnotationPresent(State.class),
+                    "Target state should be annotated with @State");
 
-            assertEquals(CustomTransition.class, transitions[0]);
-            assertEquals(SimpleTransition.class, transitions[1]);
-        }
-    }
-
-    @Nested
-    @DisplayName("Validation Tests")
-    class ValidationTests {
-
-        @Test
-        @DisplayName("Should validate annotation target")
-        void shouldValidateAnnotationTarget() {
-            // @Transition should only be on types
-            Method[] methods = SimpleTransition.class.getDeclaredMethods();
-            for (Method method : methods) {
-                assertFalse(
-                        method.isAnnotationPresent(Transition.class),
-                        "Transition annotation should not be on methods");
-            }
-        }
-
-        @Test
-        @DisplayName("Should handle state class validation")
-        void shouldHandleStateClassValidation() {
-            Transition annotation = SimpleTransition.class.getAnnotation(Transition.class);
-
-            // Verify from/to are actually State classes
-            for (Class<?> fromClass : annotation.from()) {
-                assertTrue(
-                        fromClass.isAnnotationPresent(State.class),
-                        fromClass.getSimpleName() + " should be annotated with @State");
-            }
-
-            for (Class<?> toClass : annotation.to()) {
-                assertTrue(
-                        toClass.isAnnotationPresent(State.class),
-                        toClass.getSimpleName() + " should be annotated with @State");
-            }
-        }
-
-        @Test
-        @DisplayName("Should validate arrays are not empty")
-        void shouldValidateArraysNotEmpty() {
-            Transition annotation = SimpleTransition.class.getAnnotation(Transition.class);
-
-            assertTrue(annotation.from().length > 0, "from array should not be empty");
-            assertTrue(annotation.to().length > 0, "to array should not be empty");
-        }
-    }
-
-    @Nested
-    @DisplayName("Edge Cases Tests")
-    class EdgeCasesTests {
-
-        @Test
-        @DisplayName("Should handle same state in from and to")
-        void shouldHandleSameStateInFromAndTo() {
-            // This would be a self-transition
-            @Transition(from = StateA.class, to = StateA.class)
-            class SelfTransition {}
-
-            Transition annotation = SelfTransition.class.getAnnotation(Transition.class);
-            assertEquals(annotation.from()[0], annotation.to()[0]);
-        }
-
-        @Test
-        @DisplayName("Should handle duplicate states in arrays")
-        void shouldHandleDuplicateStatesInArrays() {
-            @Transition(
-                    from = {StateA.class, StateA.class},
-                    to = StateB.class)
-            class DuplicateSourceTransition {}
-
-            Transition annotation = DuplicateSourceTransition.class.getAnnotation(Transition.class);
-            assertEquals(2, annotation.from().length);
-            assertEquals(StateA.class, annotation.from()[0]);
-            assertEquals(StateA.class, annotation.from()[1]);
-        }
-
-        @Test
-        @DisplayName("Should compare transition annotations")
-        void shouldCompareTransitionAnnotations() {
-            Transition trans1 = SimpleTransition.class.getAnnotation(Transition.class);
-            Transition trans2 = SimpleTransition.class.getAnnotation(Transition.class);
-            Transition trans3 = CustomTransition.class.getAnnotation(Transition.class);
-
-            assertEquals(trans1, trans2);
-            assertNotEquals(trans1, trans3);
+            Method[] methods = PricingTransitions.class.getDeclaredMethods();
+            Arrays.stream(methods)
+                    .filter(m -> m.isAnnotationPresent(FromTransition.class))
+                    .map(m -> m.getAnnotation(FromTransition.class).from())
+                    .forEach(
+                            sourceState ->
+                                    assertTrue(
+                                            sourceState.isAnnotationPresent(State.class),
+                                            sourceState.getSimpleName()
+                                                    + " should be annotated with @State"));
         }
 
         @Test
         @DisplayName("Should handle null gracefully")
         void shouldHandleNullGracefully() {
-            Transition annotation = NonTransition.class.getAnnotation(Transition.class);
-            assertNull(annotation);
-        }
-    }
+            TransitionSet tsAnnotation =
+                    NonTransitionClass.class.getAnnotation(TransitionSet.class);
+            assertNull(tsAnnotation);
 
-    @Nested
-    @DisplayName("Annotation Method Tests")
-    class AnnotationMethodTests {
-
-        @Test
-        @DisplayName("Should access annotation methods via reflection")
-        void shouldAccessAnnotationMethods() throws NoSuchMethodException {
-            assertNotNull(Transition.class.getMethod("from"));
-            assertNotNull(Transition.class.getMethod("to"));
-            assertNotNull(Transition.class.getMethod("method"));
-            assertNotNull(Transition.class.getMethod("description"));
-            assertNotNull(Transition.class.getMethod("priority"));
-
-            // Verify return types
-            assertEquals(Class[].class, Transition.class.getMethod("from").getReturnType());
-            assertEquals(Class[].class, Transition.class.getMethod("to").getReturnType());
-            assertEquals(String.class, Transition.class.getMethod("method").getReturnType());
-            assertEquals(String.class, Transition.class.getMethod("description").getReturnType());
-            assertEquals(int.class, Transition.class.getMethod("priority").getReturnType());
+            try {
+                Method method = NonTransitionClass.class.getMethod("someMethod");
+                FromTransition fromAnnotation = method.getAnnotation(FromTransition.class);
+                ToTransition toAnnotation = method.getAnnotation(ToTransition.class);
+                assertNull(fromAnnotation);
+                assertNull(toAnnotation);
+            } catch (NoSuchMethodException e) {
+                fail("Method should exist");
+            }
         }
 
         @Test
-        @DisplayName("Should have proper annotation type")
-        void shouldHaveProperAnnotationType() {
-            assertTrue(Transition.class.isAnnotation());
-            assertEquals("Transition", Transition.class.getSimpleName());
-            assertEquals(
-                    "io.github.jspinak.brobot.annotations.Transition", Transition.class.getName());
+        @DisplayName("Should compare annotations for equality")
+        void shouldCompareAnnotationsForEquality() throws NoSuchMethodException {
+            Method fromMenu1 = PricingTransitions.class.getMethod("fromMenu");
+            Method fromMenu2 = PricingTransitions.class.getMethod("fromMenu");
+            Method fromHomepage = PricingTransitions.class.getMethod("fromHomepage");
+
+            FromTransition annotation1 = fromMenu1.getAnnotation(FromTransition.class);
+            FromTransition annotation2 = fromMenu2.getAnnotation(FromTransition.class);
+            FromTransition annotation3 = fromHomepage.getAnnotation(FromTransition.class);
+
+            assertEquals(annotation1, annotation2);
+            assertNotEquals(annotation1, annotation3);
         }
     }
 }

@@ -17,20 +17,21 @@ import lombok.extern.slf4j.Slf4j;
 @Configuration
 public class FrameworkSettingsConfig {
 
-    @Autowired
-    private MockProperties mockProperties;
+    @Autowired private MockProperties mockProperties;
 
     @PostConstruct
     public void initializeFrameworkSettings() {
         // Set the static mock field from the new MockProperties
         FrameworkSettings.mock = mockProperties.isEnabled();
-        
+
         // Set the action success probability (store in FrameworkSettings for now)
         // This will be used by mock action implementations
-        FrameworkSettings.mockActionSuccessProbability = mockProperties.getAction().getSuccessProbability();
+        FrameworkSettings.mockActionSuccessProbability =
+                mockProperties.getAction().getSuccessProbability();
 
-        log.info("FrameworkSettings initialized: mock={}, actionSuccessProbability={}", 
-                FrameworkSettings.mock, 
+        log.info(
+                "FrameworkSettings initialized: mock={}, actionSuccessProbability={}",
+                FrameworkSettings.mock,
                 FrameworkSettings.mockActionSuccessProbability);
 
         // Log other important settings

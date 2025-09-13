@@ -103,7 +103,7 @@ public class StateNavigator {
     private final PathManager pathManager;
     private final ActionLogger actionLogger;
     private final ExecutionSession automationSession;
-    
+
     @Autowired(required = false)
     private AutomationConfig automationConfig;
 
@@ -236,11 +236,11 @@ public class StateNavigator {
             ConsoleReporter.println(MessageFormatter.fail + " All paths tried, open failed.");
             String targetStateName = targetState.get().getName();
             handleNavigationFailure(
-                "Failed to navigate to state after trying all paths: " + targetStateName,
-                targetStateName,
-                "path_traversal",
-                true // potentially recoverable with retry
-            );
+                    "Failed to navigate to state after trying all paths: " + targetStateName,
+                    targetStateName,
+                    "path_traversal",
+                    true // potentially recoverable with retry
+                    );
         }
         String activeStatesStr =
                 activeStates.stream()
@@ -293,44 +293,52 @@ public class StateNavigator {
                 stateToOpen,
                 sessionId);
     }
-    
+
     /**
      * Handles navigation failures based on configured behavior.
-     * 
+     *
      * <p>This method determines how to handle automation failures based on the AutomationConfig:
+     *
      * <ul>
      *   <li>Log the failure with appropriate detail level
      *   <li>Throw an exception if configured to do so
      *   <li>Exit the application if configured to do so
      * </ul>
-     * 
+     *
      * @param errorMessage Error message describing the failure
      * @param stateName Name of the state involved in the failure
      * @param operation Operation that failed (e.g., "navigation", "transition")
      * @param recoverable Whether the error is potentially recoverable
      */
-    private void handleNavigationFailure(String errorMessage, String stateName, String operation, boolean recoverable) {
+    private void handleNavigationFailure(
+            String errorMessage, String stateName, String operation, boolean recoverable) {
         // If no config is provided, use default behavior (just log)
         if (automationConfig == null) {
             log.error("Navigation failure: {}", errorMessage);
             return;
         }
-        
+
         // Log the failure
         if (automationConfig.isLogStackTraces()) {
-            log.error("Navigation failure in state '{}' during '{}': {}", stateName, operation, errorMessage);
+            log.error(
+                    "Navigation failure in state '{}' during '{}': {}",
+                    stateName,
+                    operation,
+                    errorMessage);
         } else {
             log.error("Navigation failure: {}", errorMessage);
         }
-        
+
         // Throw exception if configured
         if (automationConfig.isThrowOnFailure()) {
             throw new AutomationException(errorMessage, stateName, operation, recoverable);
         }
-        
+
         // Exit application if configured
         if (automationConfig.isExitOnFailure()) {
-            log.error("Exiting application due to navigation failure (brobot.automation.exitOnFailure=true)");
+            log.error(
+                    "Exiting application due to navigation failure"
+                            + " (brobot.automation.exitOnFailure=true)");
             System.exit(automationConfig.getFailureExitCode());
         }
     }
