@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.MockModeResolver;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.tools.testing.mock.state.MockStateManagement;
 
@@ -28,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ProfileAutoConfiguration {
 
     @Autowired private Environment environment;
+    @Autowired(required = false) private MockModeResolver mockModeResolver;
 
     /** Configuration for test profile - loads test defaults */
     @Configuration
@@ -81,14 +83,15 @@ public class ProfileAutoConfiguration {
     public static class LiveProfileConfiguration {
 
         @Autowired private Environment environment;
+        @Autowired(required = false) private MockModeResolver mockModeResolver;
 
         @PostConstruct
         public void configureLiveEnvironment() {
             log.info("═══ BROBOT LIVE PROFILE ACTIVATED ═══");
 
             // Check if mock mode is explicitly set
-            String mockProperty = environment.getProperty("brobot.mock.enabled", "false");
-            FrameworkSettings.mock = Boolean.parseBoolean(mockProperty);
+            boolean mockMode = mockModeResolver != null ? mockModeResolver.isMockMode() : false;
+            FrameworkSettings.mock = mockMode;
 
             if (FrameworkSettings.mock) {
                 log.warn("Mock mode is ENABLED in live profile - this is unusual!");
@@ -102,7 +105,7 @@ public class ProfileAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(
-            name = "brobot.mock.enabled",
+            name = "brobot.mock",
             havingValue = "true",
             matchIfMissing = false)
     public MockStateManagement mockStateManagement(StateService stateService) {
@@ -137,15 +140,15 @@ public class ProfileAutoConfiguration {
     public static class ProfileValidator {
 
         @Autowired private Environment environment;
+        @Autowired(required = false) private MockModeResolver mockModeResolver;
 
         @PostConstruct
         public void validateProfileConfiguration() {
             String[] activeProfiles = environment.getActiveProfiles();
             boolean isTestProfile = java.util.Arrays.asList(activeProfiles).contains("test");
 
-            // Validate mock mode consistency
-            String mockProperty = environment.getProperty("brobot.mock.enabled", "false");
-            boolean mockEnabled = Boolean.parseBoolean(mockProperty);
+            // Validate mock mode consistency  
+            boolean mockEnabled = mockModeResolver != null ? mockModeResolver.isMockMode() : false;
 
             if (isTestProfile && !mockEnabled) {
                 log.warn("⚠️ Test profile active but mock mode not enabled - fixing...");

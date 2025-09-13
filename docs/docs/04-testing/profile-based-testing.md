@@ -52,7 +52,7 @@ public abstract class IntegrationTestBase {
     public void setupTest() {
         // Ensure mock mode is enabled
         MockModeManager.setMockMode(true);
-        System.setProperty("brobot.mock.enabled", "true");
+        System.setProperty("brobot.mock", "true");
         System.setProperty("java.awt.headless", "true");
     }
 }
@@ -69,7 +69,7 @@ spring.main.lazy-initialization=false
 
 # Mock Mode Settings - SIMPLIFIED
 # Single master switch for mock mode
-brobot.mock.enabled=true
+brobot.mock=true
 # Probability of action success (0.0 to 1.0)
 brobot.mock.action.success.probability=1.0
 
@@ -104,7 +104,7 @@ public class IntegrationTestMinimalConfig {
         // Enable mock mode before Spring context loads
         MockModeManager.setMockMode(true);
         System.setProperty("java.awt.headless", "true");
-        System.setProperty("brobot.mock.enabled", "true");
+        System.setProperty("brobot.mock", "true");
     }
     
     @Bean
@@ -291,7 +291,7 @@ Ensure mock mode is set before Spring context loads:
 ```java
 static {
     MockModeManager.setMockMode(true);
-    System.setProperty("brobot.mock.enabled", "true");
+    System.setProperty("brobot.mock", "true");
 }
 ```
 
@@ -345,7 +345,7 @@ public class ExampleTestConfig {
 @SpringBootTest(classes = ExampleTestConfig.class)
 @ActiveProfiles("integration-example")
 @TestPropertySource(properties = {
-    "brobot.mock.enabled=true",
+    "brobot.mock=true",
     "logging.level.io.github.jspinak.brobot=DEBUG"
 })
 public class ExampleIntegrationTest {

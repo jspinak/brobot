@@ -32,7 +32,7 @@ public class DirectLoggingDiagnosticTest extends BrobotTestBase {
         // Set properties
         System.setProperty("brobot.logging.verbosity", "QUIET");
         System.setProperty("brobot.logging.console.capture-enabled", "false");
-        System.setProperty("brobot.framework.mock", "true");
+        System.setProperty("brobot.mock", "true");
         System.setProperty("logging.level.root", "INFO");
 
         // Capture console output

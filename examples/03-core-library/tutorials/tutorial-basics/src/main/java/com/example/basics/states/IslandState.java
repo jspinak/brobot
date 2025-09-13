@@ -28,8 +28,8 @@ public class IslandState {
 
     public IslandState() {
         islandName = new StateImage.Builder().addPatterns("islandName").build();
-        
-        backToWorldButton = 
+
+        backToWorldButton =
                 new StateImage.Builder()
                         .addPatterns("backToWorld", "worldMap", "exitIsland")
                         .setName("backToWorldButton")

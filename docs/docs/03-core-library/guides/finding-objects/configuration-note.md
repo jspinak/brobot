@@ -37,7 +37,7 @@ brobot:
 
 ```properties
 # Core settings
-brobot.core.mock=true
+brobot.mock=true
 brobot.core.image-path=images/
 
 # Screenshot settings

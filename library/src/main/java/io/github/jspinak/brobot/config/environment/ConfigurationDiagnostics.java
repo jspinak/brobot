@@ -275,7 +275,7 @@ public class ConfigurationDiagnostics {
         if (issue.contains("no display available")) {
             suggestions.add("Set brobot.core.force-headless=true in application.properties");
             suggestions.add("Or set environment variable BROBOT_FORCE_HEADLESS=true");
-            suggestions.add("Consider using mock mode for testing: brobot.core.mock-mode=true");
+            suggestions.add("Consider using mock mode for testing: brobot.mock=true");
         }
 
         if (issue.contains("No image paths configured")) {

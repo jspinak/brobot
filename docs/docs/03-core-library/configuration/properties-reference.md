@@ -83,7 +83,7 @@ Properties for running Brobot in mock mode for testing without GUI.
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `brobot.mock.enabled` | boolean | `false` | Enable mock mode |
+| `brobot.mock` | boolean | `false` | Enable mock mode |
 | `brobot.mock.action.success.probability` | double | `1.0` | Probability of action success (0.0-1.0) |
 | `brobot.screenshot.path` | string | `images` | Path to mock screenshots |
 
@@ -240,7 +240,7 @@ Create `application-mock.properties` for headless testing:
 
 ```properties
 # Enable Mock Mode
-brobot.mock.enabled=true
+brobot.mock=true
 brobot.mock.action.success.probability=0.8
 
 # GUI Access Settings for Mock Mode

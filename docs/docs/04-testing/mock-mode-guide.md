@@ -18,7 +18,7 @@ Brobot's mock mode provides a powerful testing framework that simulates GUI auto
 
 ### What Mock Mode Does
 
-When mock mode is enabled (via `brobot.mock.enabled=true` property or `MockModeManager.setMockMode(true)`):
+When mock mode is enabled (via `brobot.mock=true` property or `MockModeManager.setMockMode(true)`):
 
 1. **No screen capture** - Brobot doesn't capture actual screens
 2. **No real pattern matching** - Image patterns aren't matched against real screens
@@ -44,7 +44,7 @@ Brobot uses simplified mock configuration properties:
 ```properties
 # application.properties
 # Single master switch for mock mode
-brobot.mock.enabled=true
+brobot.mock=true
 
 # Probability of action success (0.0 to 1.0, default 1.0)
 brobot.mock.action.success.probability=0.95
@@ -68,7 +68,7 @@ MockModeManager.logMockModeState();
 ```
 
 The `MockModeManager` automatically synchronizes mock mode across:
-- System properties (`brobot.mock.enabled`)
+- System properties (`brobot.mock`)
 - `ExecutionEnvironment` (for runtime behavior)
 - `FrameworkSettings.mock` (for compatibility)
 
@@ -128,7 +128,7 @@ Use `MockStateManagement` to configure multiple states:
 
 ```java
 @Configuration
-@ConditionalOnProperty(name = "brobot.mock.enabled", havingValue = "true")
+@ConditionalOnProperty(name = "brobot.mock", havingValue = "true")
 public class MockConfiguration {
     
     @Autowired
@@ -264,10 +264,10 @@ Keep mock-specific configuration separate:
 
 ```properties
 # application.properties
-brobot.framework.mock=false  # Production
+brobot.mock=false  # Production
 
 # application-test.properties
-brobot.framework.mock=true   # Testing
+brobot.mock=true   # Testing
 ```
 
 ### 5. Clean State Between Tests
@@ -406,7 +406,7 @@ public class TargetStateTransitions {
 **Solution**: Verify configuration:
 
 ```properties
-brobot.framework.mock=true
+brobot.mock=true
 ```
 
 ## Enhanced Mock Infrastructure

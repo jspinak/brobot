@@ -48,9 +48,9 @@ public class IntegrationTestMinimalConfig {
         // Enable mock mode before Spring context loads
         MockModeManager.setMockMode(true);
         System.setProperty("java.awt.headless", "true");
-        System.setProperty("brobot.core.mock", "true");
-        System.setProperty("brobot.mock.enabled", "true");
-        System.setProperty("brobot.framework.mock", "true");
+        System.setProperty("brobot.mock", "true");
+        System.setProperty("brobot.mock", "true");
+        System.setProperty("brobot.mock", "true");
     }
 
     @Bean

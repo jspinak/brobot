@@ -45,8 +45,8 @@ public class MinimalTestConfig {
         System.setProperty("brobot.console.capture.enabled", "false");
 
         // Enable mock mode
-        System.setProperty("brobot.mock.enabled", "true");
-        System.setProperty("brobot.framework.mock", "true");
+        System.setProperty("brobot.mock", "true");
+        System.setProperty("brobot.mock", "true");
 
         // Disable screen capture
         System.setProperty("brobot.screen.capture.enabled", "false");

@@ -67,7 +67,7 @@ brobot:
 Or `application.properties`:
 
 ```properties
-brobot.core.mock=false
+brobot.mock=false
 brobot.screenshot.save-history=true
 brobot.screenshot.history-path=my-history/
 ```

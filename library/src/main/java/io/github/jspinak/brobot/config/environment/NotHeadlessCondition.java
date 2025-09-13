@@ -27,7 +27,7 @@ public class NotHeadlessCondition implements Condition {
         }
 
         // Check if mock mode is enabled
-        String mockEnabled = context.getEnvironment().getProperty("brobot.mock.enabled");
+        String mockEnabled = context.getEnvironment().getProperty("brobot.mock");
         if ("true".equals(mockEnabled)) {
             return false;
         }

@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 // @Configuration // Disabled - handled by BrobotPropertiesInitializer
 public class ExecutionEnvironmentConfig {
 
-    @Value("${brobot.core.mock:false}")
+    @Value("${brobot.mock:false}")
     private boolean mockMode;
 
     @Value("${brobot.force.headless:#{null}}")

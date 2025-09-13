@@ -217,7 +217,7 @@ public class MyApp {
 brobot.startup.auto-activate=true
 brobot.startup.initial-delay=3
 brobot.startup.activate-first-only=true
-brobot.framework.mock=false
+brobot.mock=false
 ```
 
 With this configuration, the HomeState will automatically be found and activated 3 seconds after application startup.

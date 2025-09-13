@@ -52,20 +52,19 @@ public class BrobotAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public ExecutionEnvironment executionEnvironment(BrobotProperties properties) {
+    public ExecutionEnvironment executionEnvironment(
+            BrobotProperties properties, MockModeResolver mockModeResolver) {
         // Configure ExecutionEnvironment directly here based on properties
         // This ensures it's configured before being used by other beans
+        boolean mockMode = mockModeResolver.isMockMode();
         ExecutionEnvironment env =
                 ExecutionEnvironment.builder()
-                        .mockMode(properties.getCore().isMock())
+                        .mockMode(mockMode)
                         .forceHeadless(properties.getCore().isHeadless() ? true : null)
-                        .allowScreenCapture(!properties.getCore().isMock())
+                        .allowScreenCapture(!mockMode)
                         .build();
         ExecutionEnvironment.setInstance(env);
-        String mode =
-                properties.getCore().isMock()
-                        ? "mock"
-                        : (env.hasDisplay() ? "display" : "headless");
+        String mode = mockMode ? "mock" : (env.hasDisplay() ? "display" : "headless");
         System.out.println("[Brobot] Mode: " + mode);
         return env;
     }

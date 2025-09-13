@@ -26,7 +26,7 @@ Ensure your tests extend `BrobotTestBase`:
 public class MyTest {
     @BeforeEach
     public void setup() {
-        System.setProperty("brobot.framework.mock", "true");
+        System.setProperty("brobot.mock", "true");
         FrameworkSettings.mock = true;
     }
 }
@@ -78,7 +78,7 @@ Update code that sets mock mode:
 **Before:**
 ```java
 // Multiple places to set
-System.setProperty("brobot.framework.mock", "true");
+System.setProperty("brobot.mock", "true");
 System.setProperty("brobot.mock.mode", "true");
 FrameworkSettings.mock = true;
 
@@ -102,8 +102,8 @@ MockModeManager.setMockMode(true);
 ```java
 @SpringBootTest
 @TestPropertySource(properties = {
-    "brobot.core.mock=true",
-    "brobot.framework.mock=true"
+    "brobot.mock=true",
+    "brobot.mock=true"
 })
 public class IntegrationTest {
     @BeforeEach
@@ -165,7 +165,7 @@ public void testWithConditionalMock() {
     boolean useMock = System.getenv("CI") != null;
     
     if (useMock) {
-        System.setProperty("brobot.framework.mock", "true");
+        System.setProperty("brobot.mock", "true");
         FrameworkSettings.mock = true;
     }
     
@@ -199,12 +199,12 @@ public void testModeSwitch() {
     
     // Switch to real
     FrameworkSettings.mock = false;
-    System.setProperty("brobot.framework.mock", "false");
+    System.setProperty("brobot.mock", "false");
     // ... real tests ...
     
     // Back to mock
     FrameworkSettings.mock = true;
-    System.setProperty("brobot.framework.mock", "true");
+    System.setProperty("brobot.mock", "true");
 }
 ```
 

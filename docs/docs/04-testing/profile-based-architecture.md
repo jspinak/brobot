@@ -48,7 +48,7 @@ Brobot provides two default configuration files:
 #### `brobot-defaults.properties`
 Production/live defaults applied to all Brobot applications:
 ```properties
-brobot.framework.mock=false
+brobot.mock=false
 brobot.action.similarity=0.85
 brobot.highlight.enabled=true
 brobot.screenshot.save-history=true
@@ -57,7 +57,7 @@ brobot.screenshot.save-history=true
 #### `brobot-test-defaults.properties`
 Test-optimized defaults automatically loaded with test profile:
 ```properties
-brobot.framework.mock=true
+brobot.mock=true
 brobot.action.similarity=0.70
 brobot.highlight.enabled=false
 brobot.screenshot.save-history=false
@@ -71,7 +71,7 @@ Create profile-specific configurations in your application:
 #### `application.properties`
 ```properties
 # Default/production configuration
-brobot.framework.mock=false
+brobot.mock=false
 logging.level.root=WARN
 ```
 
@@ -79,7 +79,7 @@ logging.level.root=WARN
 ```properties
 # Test profile configuration
 spring.config.import=optional:classpath:brobot-test-defaults.properties
-brobot.framework.mock=true
+brobot.mock=true
 logging.level.root=INFO
 
 # State probabilities for deterministic testing
@@ -90,7 +90,7 @@ myapp.mock.home-state-probability=100
 #### `application-dev.properties`
 ```properties
 # Development profile
-brobot.framework.mock=false
+brobot.mock=false
 brobot.highlight.enabled=true
 brobot.logging.verbosity=VERBOSE
 logging.level.root=DEBUG
@@ -270,7 +270,7 @@ public class StateTransitionTest {
 @SpringBootTest
 @ActiveProfiles("integration")
 @TestPropertySource(properties = {
-    "brobot.framework.mock=false",  // Override for real UI testing
+    "brobot.mock=false",  // Override for real UI testing
     "brobot.action.similarity=0.95"  // Stricter matching
 })
 public class RealUIIntegrationTest {
@@ -309,7 +309,7 @@ src/main/resources/
 ```properties
 # application-integration.properties
 spring.profiles.include=test  # Inherit from test profile
-brobot.framework.mock=false   # Override specific properties
+brobot.mock=false   # Override specific properties
 ```
 
 ### 4. Documentation
@@ -338,7 +338,7 @@ private boolean featureEnabled;
 ```java
 // Before
 @TestPropertySource(properties = {
-    "brobot.framework.mock=true",
+    "brobot.mock=true",
     "logging.level=DEBUG"
 })
 
