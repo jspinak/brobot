@@ -42,8 +42,9 @@ public class BrobotAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public BrobotPropertiesInitializer brobotPropertiesInitializer(BrobotProperties properties) {
-        return new BrobotPropertiesInitializer(properties);
+    public BrobotPropertiesInitializer brobotPropertiesInitializer(
+            BrobotProperties properties, MockModeResolver mockModeResolver) {
+        return new BrobotPropertiesInitializer(properties, mockModeResolver);
     }
 
     /**
