@@ -33,7 +33,11 @@ import io.github.jspinak.brobot.tools.logging.gui.GuiAccessConfig;
     io.github.jspinak.brobot.config.environment.DiagnosticsConfiguration.class,
     io.github.jspinak.brobot.annotations.AnnotationConfiguration.class
 })
-@EnableConfigurationProperties({BrobotProperties.class, GuiAccessConfig.class})
+@EnableConfigurationProperties({
+    BrobotProperties.class,
+    GuiAccessConfig.class,
+    io.github.jspinak.brobot.debug.ImageDebugConfig.class
+})
 public class BrobotAutoConfiguration {
 
     /**
