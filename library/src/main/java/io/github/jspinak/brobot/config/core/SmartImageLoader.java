@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Component
-@Order(2)  // Created early, but after ImageLoadingInitializer
+@Order(2) // Created early, but after ImageLoadingInitializer
 public class SmartImageLoader {
 
     private final ImagePathManager pathManager;
@@ -35,9 +35,7 @@ public class SmartImageLoader {
     private final Map<String, LoadResult> loadHistory = new ConcurrentHashMap<>();
 
     @Autowired
-    public SmartImageLoader(
-            ImagePathManager pathManager, 
-            ExecutionEnvironment environment) {
+    public SmartImageLoader(ImagePathManager pathManager, ExecutionEnvironment environment) {
         this.pathManager = pathManager;
         this.environment = environment;
         // ImagePathManager will be initialized by ImageLoadingInitializer

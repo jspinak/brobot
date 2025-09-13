@@ -263,6 +263,67 @@ public class ImageFindDebugger {
                     }
                 }
             }
+
+            // Save comparison image for failed matches
+            if (config.isSaveComparisons() && !debugInfo.found && screenCapture != null) {
+                BufferedImage screenshot = screenCapture.capture();
+                if (screenshot != null) {
+                    // Create a comparison image showing where we searched
+                    BufferedImage comparison =
+                            new BufferedImage(
+                                    screenshot.getWidth(),
+                                    screenshot.getHeight(),
+                                    BufferedImage.TYPE_INT_ARGB);
+                    java.awt.Graphics2D g2d = comparison.createGraphics();
+                    g2d.drawImage(screenshot, 0, 0, null);
+
+                    // If we have search region, highlight it
+                    if (debugInfo.searchRegion != null) {
+                        // Draw search region with semi-transparent red overlay
+                        g2d.setColor(new java.awt.Color(255, 0, 0, 50));
+                        g2d.fillRect(
+                                debugInfo.searchRegion.getX(), debugInfo.searchRegion.getY(),
+                                debugInfo.searchRegion.getW(), debugInfo.searchRegion.getH());
+                        g2d.setColor(java.awt.Color.RED);
+                        g2d.setStroke(new java.awt.BasicStroke(2));
+                        g2d.drawRect(
+                                debugInfo.searchRegion.getX(), debugInfo.searchRegion.getY(),
+                                debugInfo.searchRegion.getW(), debugInfo.searchRegion.getH());
+                    }
+
+                    // Add text showing failure reason
+                    g2d.setColor(java.awt.Color.RED);
+                    g2d.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 14));
+                    String text =
+                            "NOT FOUND: "
+                                    + (debugInfo.failureReason != null
+                                            ? debugInfo.failureReason
+                                            : "Pattern: " + debugInfo.patternName);
+                    g2d.drawString(text, 10, 30);
+                    g2d.drawString(
+                            "Similarity threshold: "
+                                    + String.format("%.2f", debugInfo.similarityThreshold),
+                            10,
+                            50);
+                    if (debugInfo.bestScore > 0) {
+                        g2d.drawString(
+                                "Best score: " + String.format("%.3f", debugInfo.bestScore),
+                                10,
+                                70);
+                    }
+
+                    g2d.dispose();
+
+                    String filename =
+                            String.format(
+                                    "failed_%03d_%s.png",
+                                    debugInfo.operationId, sanitizeFilename(debugInfo.patternName));
+                    Path comparisonPath = debugOutputPath.resolve("comparisons").resolve(filename);
+                    ImageIO.write(comparison, "png", comparisonPath.toFile());
+                    debugInfo.comparisonPath = comparisonPath.toString();
+                    log.debug("Saved failed match comparison image: {}", comparisonPath);
+                }
+            }
         } catch (IOException e) {
             log.error("Failed to save debug files", e);
         }
