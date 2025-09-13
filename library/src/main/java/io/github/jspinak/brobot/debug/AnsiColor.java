@@ -1,10 +1,33 @@
 package io.github.jspinak.brobot.debug;
 
+import org.fusesource.jansi.AnsiConsole;
+
 /**
  * ANSI color codes for colorful console output.
  * Provides easy-to-use color formatting for debug messages.
+ * Supports Windows console through Jansi library.
  */
 public class AnsiColor {
+    
+    private static boolean colorsEnabled = true;
+    
+    static {
+        // Initialize Jansi for Windows console support
+        try {
+            AnsiConsole.systemInstall();
+            // Register shutdown hook to clean up
+            Runtime.getRuntime().addShutdownHook(new Thread(AnsiConsole::systemUninstall));
+            
+            // Check if we're on Windows
+            String os = System.getProperty("os.name").toLowerCase();
+            if (os.contains("win")) {
+                System.out.println("[Brobot Debug] Windows detected - ANSI colors enabled via Jansi");
+            }
+        } catch (Exception e) {
+            // Silently fail if Jansi initialization fails
+            colorsEnabled = false;
+        }
+    }
     
     // Reset
     public static final String RESET = "\u001B[0m";

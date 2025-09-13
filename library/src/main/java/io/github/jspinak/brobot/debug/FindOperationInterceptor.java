@@ -29,6 +29,12 @@ public class FindOperationInterceptor {
     @Autowired(required = false)
     private ImageFindDebugger debugger;
     
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        log.info("✅ FindOperationInterceptor initialized - Find operations will be intercepted for debugging");
+        System.out.println(success("✅ IMAGE FIND DEBUGGER: AOP Interceptor Active"));
+    }
+    
     @Autowired(required = false)
     private ImageDebugConfig config;
     
@@ -39,6 +45,7 @@ public class FindOperationInterceptor {
      */
     @Around("execution(* io.github.jspinak.brobot.action.basic.find.Find.perform(..))")
     public Object interceptFindPerform(ProceedingJoinPoint joinPoint) throws Throwable {
+        log.debug("🔍 INTERCEPTING Find.perform() operation");
         if (config == null || !config.isEnabled() || debugger == null) {
             return joinPoint.proceed();
         }
