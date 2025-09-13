@@ -36,7 +36,6 @@ public class MockModeManager {
     private static final String MOCK_SUCCESS_PROBABILITY_PROPERTY =
             "brobot.mock.action.success.probability";
 
-
     /**
      * Checks if mock mode is currently enabled.
      *
@@ -140,7 +139,6 @@ public class MockModeManager {
                 .append(" = ")
                 .append(System.getProperty(MOCK_SUCCESS_PROBABILITY_PROPERTY))
                 .append("\n");
-
 
         // Check ExecutionEnvironment
         try {

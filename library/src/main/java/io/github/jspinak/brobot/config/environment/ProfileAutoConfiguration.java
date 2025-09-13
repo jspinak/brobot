@@ -29,7 +29,9 @@ import lombok.extern.slf4j.Slf4j;
 public class ProfileAutoConfiguration {
 
     @Autowired private Environment environment;
-    @Autowired(required = false) private MockModeResolver mockModeResolver;
+
+    @Autowired(required = false)
+    private MockModeResolver mockModeResolver;
 
     /** Configuration for test profile - loads test defaults */
     @Configuration
@@ -83,7 +85,9 @@ public class ProfileAutoConfiguration {
     public static class LiveProfileConfiguration {
 
         @Autowired private Environment environment;
-        @Autowired(required = false) private MockModeResolver mockModeResolver;
+
+        @Autowired(required = false)
+        private MockModeResolver mockModeResolver;
 
         @PostConstruct
         public void configureLiveEnvironment() {
@@ -104,10 +108,7 @@ public class ProfileAutoConfiguration {
     /** Mock state management bean - only available in test profile or when mock is enabled */
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(
-            name = "brobot.mock",
-            havingValue = "true",
-            matchIfMissing = false)
+    @ConditionalOnProperty(name = "brobot.mock", havingValue = "true", matchIfMissing = false)
     public MockStateManagement mockStateManagement(StateService stateService) {
         log.info("Creating MockStateManagement bean (mock mode enabled)");
         return new MockStateManagement(stateService);
@@ -140,14 +141,16 @@ public class ProfileAutoConfiguration {
     public static class ProfileValidator {
 
         @Autowired private Environment environment;
-        @Autowired(required = false) private MockModeResolver mockModeResolver;
+
+        @Autowired(required = false)
+        private MockModeResolver mockModeResolver;
 
         @PostConstruct
         public void validateProfileConfiguration() {
             String[] activeProfiles = environment.getActiveProfiles();
             boolean isTestProfile = java.util.Arrays.asList(activeProfiles).contains("test");
 
-            // Validate mock mode consistency  
+            // Validate mock mode consistency
             boolean mockEnabled = mockModeResolver != null ? mockModeResolver.isMockMode() : false;
 
             if (isTestProfile && !mockEnabled) {
