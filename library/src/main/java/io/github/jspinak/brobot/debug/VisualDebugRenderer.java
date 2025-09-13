@@ -258,7 +258,7 @@ public class VisualDebugRenderer {
     private void drawSearchRegion(Graphics2D g2d, Region region) {
         g2d.setColor(COLOR_SEARCH_REGION);
         g2d.setStroke(new BasicStroke(2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 0, new float[]{10, 5}, 0));
-        g2d.drawRect(region.getX(), region.getY(), region.getWidth(), region.getHeight());
+        g2d.drawRect(region.getX(), region.getY(), region.w(), region.h());
         
         // Draw label
         g2d.setFont(new Font("Arial", Font.BOLD, 12));
@@ -290,7 +290,7 @@ public class VisualDebugRenderer {
         // Draw all matches
         for (Match match : matches) {
             matchIndex++;
-            Region target = match.getTarget();
+            Region target = match.getRegion();
             
             // Choose color based on match type
             Color matchColor;
@@ -306,14 +306,14 @@ public class VisualDebugRenderer {
             // Draw rectangle
             g2d.setColor(matchColor);
             g2d.setStroke(new BasicStroke(strokeWidth));
-            g2d.drawRect(target.getX(), target.getY(), target.getWidth(), target.getHeight());
+            g2d.drawRect(target.getX(), target.getY(), target.w(), target.h());
             
             // Draw score if configured
             if (config.getVisual().isShowMatchScores()) {
                 String scoreText = String.format("#%d: %.1f%%", matchIndex, match.getScore() * 100);
                 drawTextWithBackground(g2d, scoreText, 
                     target.getX() + 2, 
-                    target.getY() + target.getHeight() - 4);
+                    target.getY() + target.h() - 4);
             }
         }
     }
@@ -328,21 +328,21 @@ public class VisualDebugRenderer {
         g2d.drawLine(
             searchRegion.getX(), 
             searchRegion.getY(),
-            searchRegion.getX() + searchRegion.getWidth(),
-            searchRegion.getY() + searchRegion.getHeight()
+            searchRegion.getX() + searchRegion.w(),
+            searchRegion.getY() + searchRegion.h()
         );
         g2d.drawLine(
-            searchRegion.getX() + searchRegion.getWidth(),
+            searchRegion.getX() + searchRegion.w(),
             searchRegion.getY(),
             searchRegion.getX(),
-            searchRegion.getY() + searchRegion.getHeight()
+            searchRegion.getY() + searchRegion.h()
         );
         
         // Draw "NOT FOUND" label
         String label = "NOT FOUND";
         drawTextWithBackground(g2d, label,
-            searchRegion.getX() + searchRegion.getWidth() / 2 - 40,
-            searchRegion.getY() + searchRegion.getHeight() / 2);
+            searchRegion.getX() + searchRegion.w() / 2 - 40,
+            searchRegion.getY() + searchRegion.h() / 2);
     }
     
     private void drawLegend(Graphics2D g2d, int width, int height) {
@@ -413,11 +413,11 @@ public class VisualDebugRenderer {
     private BufferedImage extractMatchRegion(BufferedImage screenshot, Match match) {
         if (screenshot == null || match == null) return null;
         
-        Region target = match.getTarget();
+        Region target = match.getRegion();
         int x = Math.max(0, target.getX());
         int y = Math.max(0, target.getY());
-        int width = Math.min(target.getWidth(), screenshot.getWidth() - x);
-        int height = Math.min(target.getHeight(), screenshot.getHeight() - y);
+        int width = Math.min(target.w(), screenshot.getWidth() - x);
+        int height = Math.min(target.h(), screenshot.getHeight() - y);
         
         if (width <= 0 || height <= 0) return null;
         
