@@ -1,7 +1,6 @@
 package io.github.jspinak.brobot.debug;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import lombok.Data;
 
@@ -19,7 +18,6 @@ import lombok.Data;
  *
  * @since 1.0
  */
-@Configuration
 @ConfigurationProperties(prefix = "brobot.debug.image")
 @Data
 public class ImageDebugConfig {

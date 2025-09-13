@@ -23,10 +23,7 @@ public class MockScreenConfig {
 
     @Bean
     @Primary
-    @ConditionalOnProperty(
-            name = "brobot.mock",
-            havingValue = "true",
-            matchIfMissing = true)
+    @ConditionalOnProperty(name = "brobot.mock", havingValue = "true", matchIfMissing = true)
     public Screen mockScreen() {
         Screen mockScreen = mock(Screen.class);
 
