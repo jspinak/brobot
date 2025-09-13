@@ -82,7 +82,7 @@ public class FindOperationInterceptor {
 
             // Log after execution
             if (!isNested && collections != null && collections.length > 0) {
-                PatternFindOptions options = extractOptions(collections[0]);
+                PatternFindOptions options = extractOptions(actionResult);
 
                 // Use the main debugger for comprehensive output
                 if (debugger != null && actionResult != null) {
@@ -222,10 +222,14 @@ public class FindOperationInterceptor {
         System.out.println(log.toString());
     }
 
-    private PatternFindOptions extractOptions(ObjectCollection collection) {
-        // Options are typically configured on StateImages, not on ObjectCollection
-        // For now, return null since options are not directly accessible here
-        // The ImageFindDebugger will use default values when options are null
+    private PatternFindOptions extractOptions(ActionResult actionResult) {
+        // Extract options from the ActionResult's actionConfig
+        if (actionResult != null && actionResult.getActionConfig() != null) {
+            if (actionResult.getActionConfig() instanceof PatternFindOptions) {
+                return (PatternFindOptions) actionResult.getActionConfig();
+            }
+        }
+        // Return null if no options found - ImageFindDebugger will use defaults
         return null;
     }
 }

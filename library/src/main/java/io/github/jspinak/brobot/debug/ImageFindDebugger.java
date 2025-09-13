@@ -198,8 +198,13 @@ public class ImageFindDebugger {
     private void captureSearchParameters(PatternFindOptions options, FindDebugInfo debugInfo) {
         if (options != null) {
             debugInfo.similarityThreshold = options.getSimilarity();
-            // Note: options.getSearchRegions() returns SearchRegions, not Region
-            // For now, we'll leave searchRegion as null
+            // Extract the first search region for debugging visualization
+            if (options.getSearchRegions() != null) {
+                List<Region> regions = options.getSearchRegions().getRegionsForSearch();
+                if (!regions.isEmpty()) {
+                    debugInfo.searchRegion = regions.get(0);
+                }
+            }
         } else {
             debugInfo.similarityThreshold = 0.8; // Default
         }
