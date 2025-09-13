@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.annotations;
 
 import java.lang.annotation.*;
 
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 /**
@@ -39,6 +40,7 @@ import org.springframework.stereotype.Component;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Component
+@DependsOn("imageLoadingInitializer")
 public @interface State {
     /**
      * Indicates whether this state is an initial state. Initial states are automatically registered
