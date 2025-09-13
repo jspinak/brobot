@@ -13,6 +13,7 @@ import javax.imageio.ImageIO;
 
 import org.sikuli.script.Image;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
@@ -25,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Component
+@Order(2)  // Created early, but after ImageLoadingInitializer
 public class SmartImageLoader {
 
     private final ImagePathManager pathManager;
@@ -33,9 +35,12 @@ public class SmartImageLoader {
     private final Map<String, LoadResult> loadHistory = new ConcurrentHashMap<>();
 
     @Autowired
-    public SmartImageLoader(ImagePathManager pathManager, ExecutionEnvironment environment) {
+    public SmartImageLoader(
+            ImagePathManager pathManager, 
+            ExecutionEnvironment environment) {
         this.pathManager = pathManager;
         this.environment = environment;
+        // ImagePathManager will be initialized by ImageLoadingInitializer
     }
 
     /** Result of an image load attempt with diagnostic information */
@@ -297,17 +302,22 @@ public class SmartImageLoader {
         // First, try the resolved path if available
         String resolvedPath = System.getProperty("brobot.resolved.image.path");
         if (resolvedPath != null) {
+            log.info("Trying resolved path: {} for image: {}", resolvedPath, imageName);
             BufferedImage img = tryLoadFromSpecificPath(resolvedPath, imageName);
             if (img != null) {
-                log.debug("Loaded {} from resolved path: {}", imageName, resolvedPath);
+                log.info("✅ Loaded {} from resolved path: {}", imageName, resolvedPath);
                 return img;
             }
         }
 
         // Then try other configured paths
-        for (String configuredPath : pathManager.getConfiguredPaths()) {
+        List<String> paths = pathManager.getConfiguredPaths();
+        log.info("Trying {} configured paths for image: {}", paths.size(), imageName);
+        for (String configuredPath : paths) {
+            log.info("Trying configured path: {} for image: {}", configuredPath, imageName);
             BufferedImage img = tryLoadFromSpecificPath(configuredPath, imageName);
             if (img != null) {
+                log.info("✅ Loaded {} from configured path: {}", imageName, configuredPath);
                 return img;
             }
         }
@@ -318,7 +328,9 @@ public class SmartImageLoader {
     private BufferedImage tryLoadFromSpecificPath(String basePath, String imageName) {
         try {
             Path fullPath = Paths.get(basePath, imageName);
+            log.trace("Trying direct path: {}", fullPath);
             if (Files.exists(fullPath) && Files.isRegularFile(fullPath)) {
+                log.debug("Found image at: {}", fullPath);
                 return ImageIO.read(fullPath.toFile());
             }
 
@@ -326,12 +338,14 @@ public class SmartImageLoader {
             String nameWithoutExt = removeExtension(imageName);
             for (String ext : new String[] {".png", ".jpg", ".jpeg", ".gif", ".bmp"}) {
                 fullPath = Paths.get(basePath, nameWithoutExt + ext);
+                log.trace("Trying path with extension: {}", fullPath);
                 if (Files.exists(fullPath) && Files.isRegularFile(fullPath)) {
+                    log.debug("Found image at: {}", fullPath);
                     return ImageIO.read(fullPath.toFile());
                 }
             }
         } catch (Exception e) {
-            log.trace("Could not load from path: {} - {}", basePath, e.getMessage());
+            log.debug("Could not load from path: {} - {}", basePath, e.getMessage());
         }
         return null;
     }
