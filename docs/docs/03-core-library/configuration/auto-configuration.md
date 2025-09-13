@@ -46,7 +46,27 @@ Settings.CheckLastSeen    // Enabled for performance
 
 **Configuration**: Set via `brobot.logging.verbosity` property
 
-### 3. ImagePathManager
+### 3. Image Find Debugging (New)
+
+**Purpose**: Provides comprehensive debugging for image finding operations with colorful console output and visual reports.
+
+**Features**:
+- Colorful console output with success/failure indicators
+- Visual annotations on screenshots
+- HTML/JSON reports with statistics
+- Pattern vs match comparison grids
+
+**Auto-configured when enabled**:
+- AOP interceptors for Find operations
+- Visual debug renderer
+- Report generator
+- Session management
+
+**Configuration**: Enable via `brobot.debug.image.enabled=true`
+
+**See**: [Image Find Debugging Guide](../tools/image-find-debugging.md) and [Properties Reference](./properties-reference.md#image-find-debugging)
+
+### 4. ImagePathManager
 
 **Purpose**: Intelligent image path resolution with multiple fallback strategies.
 
