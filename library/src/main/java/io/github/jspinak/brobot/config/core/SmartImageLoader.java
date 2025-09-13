@@ -117,13 +117,13 @@ public class SmartImageLoader {
             return cached;
         }
 
-        // In mock mode, return placeholder
+        // In mock mode, log and return null
         if (environment.isMockMode()) {
-            BufferedImage placeholder = createPlaceholder(imageName);
-            imageCache.put(imageName, placeholder);
+            log.warn("⚠️ Mock mode active - Image loading skipped: {}", imageName);
+            log.warn("   To load real images, run without mock profile");
             loadHistory.put(
-                    imageName, LoadResult.success("mock", System.currentTimeMillis() - startTime));
-            return placeholder;
+                    imageName, LoadResult.failure("Mock mode - no real images", System.currentTimeMillis() - startTime));
+            return null;
         }
 
         // Try loading strategies in order
@@ -173,13 +173,25 @@ public class SmartImageLoader {
             }
         }
 
-        // If all strategies failed, create placeholder and log error
+        // If all strategies failed, log error and return null
         if (image == null) {
-            log.debug("Image not found: {} - using placeholder", imageName);
-            image = createPlaceholder(imageName);
+            log.error("❌ IMAGE NOT FOUND: {}", imageName);
+            log.error("   Searched in:");
+            for (String path : pathManager.getConfiguredPaths()) {
+                log.error("     - {}", path);
+            }
+            String resolvedPath = System.getProperty("brobot.resolved.image.path");
+            if (resolvedPath != null) {
+                log.error("     - {} (resolved path)", resolvedPath);
+            }
+            log.error("   Please ensure the image file exists with .png, .jpg, .jpeg, .gif, or .bmp extension");
+            
+            // Return null instead of placeholder - let the caller handle the missing image
             result =
                     LoadResult.failure(
-                            "All load strategies failed", System.currentTimeMillis() - startTime);
+                            "Image not found: " + imageName, System.currentTimeMillis() - startTime);
+            loadHistory.put(imageName, result);
+            return null;
         }
 
         // Cache the result
@@ -198,10 +210,14 @@ public class SmartImageLoader {
      * Load an image and wrap it in a SikuliX Image object.
      *
      * @param imageName the name or path of the image to load
-     * @return SikuliX Image object
+     * @return SikuliX Image object, or null if image not found
      */
     public Image loadSikuliImage(String imageName) {
         BufferedImage bufferedImage = loadImageInternal(imageName);
+        if (bufferedImage == null) {
+            log.error("Cannot create SikuliX Image for missing file: {}", imageName);
+            return null;
+        }
         return new Image(bufferedImage, imageName);
     }
 
@@ -341,7 +357,7 @@ public class SmartImageLoader {
 
     private BufferedImage tryLoadFromURL(String urlString) {
         try {
-            URL url = new URL(urlString);
+            URL url = new java.net.URI(urlString).toURL();
             return ImageIO.read(url);
         } catch (Exception e) {
             log.debug("Failed to load from URL: {}", e.getMessage());
@@ -365,23 +381,6 @@ public class SmartImageLoader {
         return null;
     }
 
-    private BufferedImage createPlaceholder(String imageName) {
-        // Create a simple placeholder image
-        int width = 100;
-        int height = 100;
-        BufferedImage placeholder = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-
-        // Fill with a pattern to make it obvious it's a placeholder
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                int color = ((x + y) % 20 < 10) ? 0xCCCCCC : 0x999999;
-                placeholder.setRGB(x, y, color);
-            }
-        }
-
-        log.debug("Created placeholder for: {}", imageName);
-        return placeholder;
-    }
 
     private String removeExtension(String filename) {
         int lastDot = filename.lastIndexOf('.');
