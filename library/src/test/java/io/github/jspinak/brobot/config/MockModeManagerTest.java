@@ -12,7 +12,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -30,25 +29,20 @@ import io.github.jspinak.brobot.test.BrobotTestBase;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MockModeManagerTest extends BrobotTestBase {
 
-    private static final String MOCK_MODE_PROPERTY = "brobot.mock.mode";
-    private static final String FRAMEWORK_MOCK_PROPERTY = "brobot.framework.mock";
-    private static final String CORE_MOCK_PROPERTY = "brobot.core.mock-mode";
+    private static final String MOCK_MODE_PROPERTY = "brobot.mock";
 
     private String originalMockMode;
-    private String originalFrameworkMock;
-    private String originalCoreMock;
     private ExecutionEnvironment originalEnv;
     private boolean originalFrameworkSettingsMock;
 
     @BeforeEach
     @Override
     public void setupTest() {
-        super.setupTest();
+        // Don't call super.setupTest() to avoid BrobotTestBase setting mock mode
+        // We need full control over mock mode for these tests
 
         // Save original property values
         originalMockMode = System.getProperty(MOCK_MODE_PROPERTY);
-        originalFrameworkMock = System.getProperty(FRAMEWORK_MOCK_PROPERTY);
-        originalCoreMock = System.getProperty(CORE_MOCK_PROPERTY);
 
         // Save original ExecutionEnvironment
         originalEnv = ExecutionEnvironment.getInstance();
@@ -56,10 +50,14 @@ public class MockModeManagerTest extends BrobotTestBase {
         // Save original FrameworkSettings.mock
         originalFrameworkSettingsMock = FrameworkSettings.mock;
 
-        // Clear properties for clean test state
+        // Clear properties and reset to clean state for testing
         System.clearProperty(MOCK_MODE_PROPERTY);
-        System.clearProperty(FRAMEWORK_MOCK_PROPERTY);
-        System.clearProperty(CORE_MOCK_PROPERTY);
+
+        // Reset to a clean ExecutionEnvironment
+        ExecutionEnvironment.setInstance(ExecutionEnvironment.builder().mockMode(false).build());
+
+        // Reset FrameworkSettings
+        FrameworkSettings.mock = false;
     }
 
     @AfterEach
@@ -69,18 +67,6 @@ public class MockModeManagerTest extends BrobotTestBase {
             System.setProperty(MOCK_MODE_PROPERTY, originalMockMode);
         } else {
             System.clearProperty(MOCK_MODE_PROPERTY);
-        }
-
-        if (originalFrameworkMock != null) {
-            System.setProperty(FRAMEWORK_MOCK_PROPERTY, originalFrameworkMock);
-        } else {
-            System.clearProperty(FRAMEWORK_MOCK_PROPERTY);
-        }
-
-        if (originalCoreMock != null) {
-            System.setProperty(CORE_MOCK_PROPERTY, originalCoreMock);
-        } else {
-            System.clearProperty(CORE_MOCK_PROPERTY);
         }
 
         // Restore original ExecutionEnvironment
@@ -133,16 +119,14 @@ public class MockModeManagerTest extends BrobotTestBase {
 
     @ParameterizedTest
     @CsvSource({
-        "brobot.mock.mode, true, true",
-        "brobot.framework.mock, true, true",
-        "brobot.core.mock-mode, true, true",
-        "brobot.mock.mode, false, false",
-        "brobot.framework.mock, false, false",
-        "brobot.core.mock-mode, false, false"
+        "brobot.mock, true, true",
+        "brobot.mock, false, false",
+        "brobot.mock, TRUE, true",
+        "brobot.mock, False, false"
     })
-    @DisplayName("Should check various system properties")
+    @DisplayName("Should check system property")
     @Order(3)
-    void testCheckVariousSystemProperties(String property, String value, boolean expected) {
+    void testCheckSystemProperty(String property, String value, boolean expected) {
         // Clear ExecutionEnvironment to force property check
         ExecutionEnvironment.setInstance(null);
 
@@ -185,14 +169,12 @@ public class MockModeManagerTest extends BrobotTestBase {
     void testEnableMockMode() {
         MockModeManager.setMockMode(true);
 
-        // Verify system properties
+        // Verify system property
         assertEquals("true", System.getProperty(MOCK_MODE_PROPERTY));
-        assertEquals("true", System.getProperty(FRAMEWORK_MOCK_PROPERTY));
-        assertEquals("true", System.getProperty(CORE_MOCK_PROPERTY));
 
         // Verify ExecutionEnvironment
         assertTrue(ExecutionEnvironment.getInstance().isMockMode());
-        assertTrue(ExecutionEnvironment.getInstance().hasDisplay() == false);
+        assertFalse(ExecutionEnvironment.getInstance().hasDisplay());
         assertFalse(ExecutionEnvironment.getInstance().canCaptureScreen());
 
         // Verify FrameworkSettings
@@ -209,10 +191,8 @@ public class MockModeManagerTest extends BrobotTestBase {
         // Then disable
         MockModeManager.setMockMode(false);
 
-        // Verify system properties
+        // Verify system property
         assertEquals("false", System.getProperty(MOCK_MODE_PROPERTY));
-        assertEquals("false", System.getProperty(FRAMEWORK_MOCK_PROPERTY));
-        assertEquals("false", System.getProperty(CORE_MOCK_PROPERTY));
 
         // Verify ExecutionEnvironment
         assertFalse(ExecutionEnvironment.getInstance().isMockMode());
@@ -334,8 +314,6 @@ public class MockModeManagerTest extends BrobotTestBase {
     void testLogMockModeState() {
         // Set up various states
         System.setProperty(MOCK_MODE_PROPERTY, "true");
-        System.setProperty(FRAMEWORK_MOCK_PROPERTY, "false");
-        System.setProperty(CORE_MOCK_PROPERTY, "true");
 
         ExecutionEnvironment env = ExecutionEnvironment.builder().mockMode(true).build();
         ExecutionEnvironment.setInstance(env);
@@ -352,8 +330,6 @@ public class MockModeManagerTest extends BrobotTestBase {
     void testLogWithMissingComponents() {
         // Clear all properties
         System.clearProperty(MOCK_MODE_PROPERTY);
-        System.clearProperty(FRAMEWORK_MOCK_PROPERTY);
-        System.clearProperty(CORE_MOCK_PROPERTY);
 
         // Set ExecutionEnvironment to null
         ExecutionEnvironment.setInstance(null);
@@ -381,39 +357,33 @@ public class MockModeManagerTest extends BrobotTestBase {
     }
 
     @Test
-    @DisplayName("Should not initialize mock mode when properties are false")
+    @DisplayName("Should not initialize mock mode when property is false")
     @Order(14)
     void testInitializeMockModeDisabled() {
-        // Set properties to false
+        // Set property to false
         System.setProperty(MOCK_MODE_PROPERTY, "false");
-        System.setProperty(FRAMEWORK_MOCK_PROPERTY, "false");
-        System.setProperty(CORE_MOCK_PROPERTY, "false");
 
         // Set initial state to mock
         MockModeManager.setMockMode(true);
 
-        // Initialize (should not change since properties are false)
+        // Initialize (should not change since property is false)
         MockModeManager.initializeMockMode();
 
         // Mock mode should still be true (not changed by initialization)
         assertTrue(MockModeManager.isMockMode());
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"brobot.mock.mode", "brobot.framework.mock", "brobot.core.mock-mode"})
-    @DisplayName("Should initialize from any mock property")
+    @Test
+    @DisplayName("Should initialize from mock property")
     @Order(15)
-    void testInitializeFromAnyProperty(String property) {
-        // Clear all and set only one
+    void testInitializeFromProperty() {
+        // Clear and set property
         System.clearProperty(MOCK_MODE_PROPERTY);
-        System.clearProperty(FRAMEWORK_MOCK_PROPERTY);
-        System.clearProperty(CORE_MOCK_PROPERTY);
-
-        System.setProperty(property, "true");
+        System.setProperty(MOCK_MODE_PROPERTY, "true");
 
         MockModeManager.initializeMockMode();
 
-        assertTrue(MockModeManager.isMockMode(), "Should initialize mock mode from " + property);
+        assertTrue(MockModeManager.isMockMode(), "Should initialize mock mode from property");
     }
 
     // ========== Integration Tests ==========
@@ -428,8 +398,6 @@ public class MockModeManagerTest extends BrobotTestBase {
         // All components should report mock mode
         assertTrue(MockModeManager.isMockMode());
         assertEquals("true", System.getProperty(MOCK_MODE_PROPERTY));
-        assertEquals("true", System.getProperty(FRAMEWORK_MOCK_PROPERTY));
-        assertEquals("true", System.getProperty(CORE_MOCK_PROPERTY));
         assertTrue(ExecutionEnvironment.getInstance().isMockMode());
         assertTrue(FrameworkSettings.mock);
 
@@ -439,8 +407,6 @@ public class MockModeManagerTest extends BrobotTestBase {
         // All components should report real mode
         assertFalse(MockModeManager.isMockMode());
         assertEquals("false", System.getProperty(MOCK_MODE_PROPERTY));
-        assertEquals("false", System.getProperty(FRAMEWORK_MOCK_PROPERTY));
-        assertEquals("false", System.getProperty(CORE_MOCK_PROPERTY));
         assertFalse(ExecutionEnvironment.getInstance().isMockMode());
         assertFalse(FrameworkSettings.mock);
     }
@@ -528,8 +494,6 @@ public class MockModeManagerTest extends BrobotTestBase {
         ExecutionEnvironment.setInstance(null);
 
         System.setProperty(MOCK_MODE_PROPERTY, "");
-        System.setProperty(FRAMEWORK_MOCK_PROPERTY, "");
-        System.setProperty(CORE_MOCK_PROPERTY, "");
 
         assertFalse(MockModeManager.isMockMode(), "Empty properties should be false");
     }
@@ -538,10 +502,8 @@ public class MockModeManagerTest extends BrobotTestBase {
     @DisplayName("Should prioritize ExecutionEnvironment over properties")
     @Order(22)
     void testPriorityOfExecutionEnvironment() {
-        // Set all properties to true
+        // Set property to true
         System.setProperty(MOCK_MODE_PROPERTY, "true");
-        System.setProperty(FRAMEWORK_MOCK_PROPERTY, "true");
-        System.setProperty(CORE_MOCK_PROPERTY, "true");
 
         // But ExecutionEnvironment is false
         ExecutionEnvironment env = ExecutionEnvironment.builder().mockMode(false).build();
@@ -559,12 +521,9 @@ public class MockModeManagerTest extends BrobotTestBase {
     @MethodSource("provideMockModeScenarios")
     @DisplayName("Should handle various mock mode scenarios")
     @Order(23)
-    void testVariousMockModeScenarios(
-            String prop1, String prop2, String prop3, Boolean envMock, boolean expected) {
-        // Set properties
-        if (prop1 != null) System.setProperty(MOCK_MODE_PROPERTY, prop1);
-        if (prop2 != null) System.setProperty(FRAMEWORK_MOCK_PROPERTY, prop2);
-        if (prop3 != null) System.setProperty(CORE_MOCK_PROPERTY, prop3);
+    void testVariousMockModeScenarios(String prop, Boolean envMock, boolean expected) {
+        // Set property
+        if (prop != null) System.setProperty(MOCK_MODE_PROPERTY, prop);
 
         // Set ExecutionEnvironment
         if (envMock != null) {
@@ -579,16 +538,16 @@ public class MockModeManagerTest extends BrobotTestBase {
 
     private static Stream<Arguments> provideMockModeScenarios() {
         return Stream.of(
-                // prop1, prop2, prop3, envMock, expected
-                Arguments.of("true", null, null, null, true), // Only first property
-                Arguments.of(null, "true", null, null, true), // Only second property
-                Arguments.of(null, null, "true", null, true), // Only third property
-                Arguments.of("false", "true", null, null, true), // Mixed properties (any true)
-                Arguments.of("false", "false", "false", null, false), // All false
-                Arguments.of("true", "true", "true", false, false), // Env overrides properties
-                Arguments.of(null, null, null, true, true), // Only env mock
-                Arguments.of(null, null, null, false, false), // Only env real
-                Arguments.of("invalid", "no", "0", null, false) // Invalid values
+                // prop, envMock, expected
+                Arguments.of("true", null, true), // Property true, no env
+                Arguments.of("false", null, false), // Property false, no env
+                Arguments.of("TRUE", null, true), // Property uppercase true
+                Arguments.of("invalid", null, false), // Invalid property value
+                Arguments.of("true", false, false), // Env overrides property
+                Arguments.of("false", true, true), // Env overrides property
+                Arguments.of(null, true, true), // Only env mock
+                Arguments.of(null, false, false), // Only env real
+                Arguments.of("", null, false) // Empty property
                 );
     }
 }
