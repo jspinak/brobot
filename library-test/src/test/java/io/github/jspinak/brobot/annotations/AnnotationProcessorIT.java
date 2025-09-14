@@ -68,11 +68,15 @@ public class AnnotationProcessorIT extends BrobotTestBase {
         // Test state with custom properties
     }
 
-    @Transition(
-            from = {TestState1.class},
-            to = {TestState2.class})
+    @TransitionSet(state = TestState2.class)
     public static class TestTransition1 {
-        public boolean execute() {
+        @FromTransition(from = TestState1.class)
+        public boolean fromTestState1() {
+            return true;
+        }
+
+        @ToTransition
+        public boolean verifyArrival() {
             return true;
         }
     }
@@ -114,10 +118,10 @@ public class AnnotationProcessorIT extends BrobotTestBase {
         }
 
         @Test
-        @DisplayName("Spring should discover @Transition annotated beans")
+        @DisplayName("Spring should discover @TransitionSet annotated beans")
         public void testSpringDiscoversTransitionBeans() {
             Map<String, Object> transitionBeans =
-                    applicationContext.getBeansWithAnnotation(Transition.class);
+                    applicationContext.getBeansWithAnnotation(TransitionSet.class);
 
             // This test may return 0 if no transition beans are registered in the test context
             // The behavior depends on the Spring Boot test configuration
@@ -252,25 +256,36 @@ public class AnnotationProcessorIT extends BrobotTestBase {
     class TransitionAnnotationVerification {
 
         @Test
-        @DisplayName("Should handle @Transition annotation with correct attributes")
+        @DisplayName("Should handle @TransitionSet annotation with correct attributes")
         public void testTransitionAnnotationAttributes() {
-            Transition transitionAnnotation = TestTransition1.class.getAnnotation(Transition.class);
+            TransitionSet transitionAnnotation =
+                    TestTransition1.class.getAnnotation(TransitionSet.class);
 
             assertNotNull(
-                    transitionAnnotation, "TestTransition1 should have @Transition annotation");
+                    transitionAnnotation, "TestTransition1 should have @TransitionSet annotation");
 
-            // Verify the from/to arrays
-            Class<?>[] fromStates = transitionAnnotation.from();
-            Class<?>[] toStates = transitionAnnotation.to();
+            // Verify the state attribute
+            Class<?> targetState = transitionAnnotation.state();
+            assertEquals(TestState2.class, targetState, "Target state should be TestState2");
 
-            assertEquals(1, fromStates.length, "Should have one from state");
-            assertEquals(1, toStates.length, "Should have one to state");
+            // Verify FromTransition methods
+            java.lang.reflect.Method[] methods = TestTransition1.class.getDeclaredMethods();
+            boolean hasFromTransition = false;
+            boolean hasToTransition = false;
 
-            assertEquals(TestState1.class, fromStates[0]);
-            assertEquals(TestState2.class, toStates[0]);
+            for (java.lang.reflect.Method method : methods) {
+                if (method.isAnnotationPresent(FromTransition.class)) {
+                    hasFromTransition = true;
+                    FromTransition fromAnnotation = method.getAnnotation(FromTransition.class);
+                    assertEquals(TestState1.class, fromAnnotation.from());
+                }
+                if (method.isAnnotationPresent(ToTransition.class)) {
+                    hasToTransition = true;
+                }
+            }
 
-            assertEquals("execute", transitionAnnotation.method()); // Default method name
-            assertEquals(0, transitionAnnotation.priority()); // Default priority
+            assertTrue(hasFromTransition, "Should have at least one @FromTransition method");
+            assertTrue(hasToTransition, "Should have a @ToTransition method");
             assertEquals("", transitionAnnotation.description()); // Default description
         }
     }
