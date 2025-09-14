@@ -54,7 +54,7 @@ public class CorrectApplication {
 
     public void run() {
         // Navigate using state name (WITHOUT "State" suffix)
-        navigation.goToState("Pricing");  // ✅ CORRECT
+        navigation.openState("Pricing");  // ✅ CORRECT
 
         // Then perform actions on the state
         action.click(pricingState.getStartButton());
@@ -71,9 +71,9 @@ public class PricingState { }    // ✅ CORRECT
 public class Menu { }             // ❌ WRONG
 
 // Navigation uses name WITHOUT "State"
-navigation.goToState("Menu");     // ✅ CORRECT - for MenuState class
-navigation.goToState("Pricing");  // ✅ CORRECT - for PricingState class
-navigation.goToState("MenuState"); // ❌ WRONG - don't include "State"
+navigation.openState("Menu");     // ✅ CORRECT - for MenuState class
+navigation.openState("Pricing");  // ✅ CORRECT - for PricingState class
+navigation.openState("MenuState"); // ❌ WRONG - don't include "State"
 ```
 
 ## COMPLETE PROJECT STRUCTURE
@@ -150,32 +150,22 @@ public class MenuState {
         logo = new StateImage.Builder()
             .addPatterns("menu/menu-logo")  // Path relative to images/ folder
             .setName("Menu Logo")
-            .setSimilarity(0.9)  // 90% similarity threshold
             .build();
 
         pricingButton = new StateImage.Builder()
             .addPatterns("menu/menu-pricing")
             .setName("Pricing Button")
-            .setSimilarity(0.85)
             .build();
 
         homeButton = new StateImage.Builder()
             .addPatterns("menu/menu-home")
             .setName("Home Button")
-            .setSimilarity(0.85)
             .build();
 
         searchBox = new StateImage.Builder()
             .addPatterns("menu/menu-search")
             .setName("Search Box")
-            .setSimilarity(0.8)
-            .setIsTextField(true)  // Mark as text input field
             .build();
-    }
-
-    // Helper method to get a unique element that identifies this state
-    public StateImage getUniqueElement() {
-        return logo;  // Logo is unique to menu state
     }
 }
 ```
@@ -316,7 +306,7 @@ public class AutomationRunner implements CommandLineRunner {
         try {
             // Step 1: Navigate to Pricing page
             log.info("Step 1: Navigating to Pricing");
-            navigation.goToState("Pricing");  // Note: "Pricing" not "PricingState"
+            navigation.openState("Pricing");  // Note: "Pricing" not "PricingState"
 
             // Step 2: Click on "Start for Free" button
             log.info("Step 2: Clicking Start for Free");
@@ -332,7 +322,7 @@ public class AutomationRunner implements CommandLineRunner {
 
             // Step 3: Navigate to Homepage
             log.info("Step 3: Navigating to Homepage");
-            navigation.goToState("Homepage");
+            navigation.openState("Homepage");
 
             // Step 4: Type email address
             log.info("Step 4: Entering email address");
@@ -405,92 +395,199 @@ brobot.action.pause-after-end=0.0
 brobot.action.move-mouse-delay=0.5
 ```
 
-### 6. Complete Test Class with Mock Mode
+### 6. Complete State Class with Mock Mode Support
 
 ```java
-package com.example.automation;
+package com.example.automation.states;
 
-import com.example.automation.states.MenuState;
-import com.example.automation.states.PricingState;
-import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.action.actionHistory.ActionHistory;
-import io.github.jspinak.brobot.action.actionHistory.MockActionHistoryFactory;
-import io.github.jspinak.brobot.navigation.Navigation;
-import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import io.github.jspinak.brobot.state.annotations.State;
+import io.github.jspinak.brobot.stateStructure.model.state.StateImage;
+import io.github.jspinak.brobot.primatives.region.Region;
+import io.github.jspinak.brobot.config.mock.MockStateManagement;
+import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.tools.testing.mock.history.MockActionHistoryFactory;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import javax.annotation.PostConstruct;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+@State(initial = true)  // Mark as initial state
+@Getter
+@Slf4j
+public class MenuState {
 
-@SpringBootTest
-@ActiveProfiles("test")  // Use test profile for mock mode
-public class MockAutomationTest extends BrobotTestBase {
 
-    @Autowired
-    private Navigation navigation;
+    private final StateImage logo;
+    private final StateImage pricingButton;
+    private final StateImage homeButton;
 
-    @Autowired
-    private Action action;
+    public MenuState() {
+        log.info("Initializing MenuState");
 
-    @Autowired
-    private MenuState menuState;
+        // Define regions where elements appear (for mock mode)
+        Region logoRegion = new Region(100, 50, 150, 60);
+        Region pricingRegion = new Region(300, 50, 100, 40);
+        Region homeRegion = new Region(200, 50, 100, 40);
 
-    @Autowired
-    private PricingState pricingState;
+        // Create StateImages with ActionHistory for mock mode
+        // WITHOUT ActionHistory, patterns will NEVER be found in mock mode!
+        logo = new StateImage.Builder()
+            .addPatterns("menu/menu-logo")
+            .setName("Menu Logo")
+            // ActionHistory is REQUIRED for mock mode
+            .withActionHistory(MockActionHistoryFactory.reliableButton(logoRegion))
+            .build();
 
-    @Autowired
-    private ActionHistory actionHistory;
+        pricingButton = new StateImage.Builder()
+            .addPatterns("menu/menu-pricing")
+            .setName("Pricing Button")
+            // ActionHistory determines where/how pattern is "found" in mock
+            .withActionHistory(MockActionHistoryFactory.reliableButton(pricingRegion))
+            .build();
 
-    @BeforeEach
-    @Override
-    public void setupTest() {
-        super.setupTest();  // ALWAYS call parent setup for mock mode
-
-        // Set up mock patterns for testing
-        MockActionHistoryFactory factory = new MockActionHistoryFactory();
-
-        // Add mock patterns that will be "found" during test
-        factory.addFoundPattern(menuState.getPricingButton());
-        factory.addFoundPattern(pricingState.getUniqueElement());
-        factory.addFoundPattern(pricingState.getStartForFreeButton());
-
-        // Apply mock history
-        actionHistory.setMockHistory(factory.build());
+        homeButton = new StateImage.Builder()
+            .addPatterns("menu/menu-home")
+            .setName("Home Button")
+            .withActionHistory(MockActionHistoryFactory.reliableButton(homeRegion))
+            .build();
     }
 
-    @Test
-    public void testNavigationToPricing() {
-        // This will work in mock mode without real UI
-        boolean success = navigation.goToState("Pricing");
-        assertTrue(success, "Should navigate to Pricing state");
+    // No need to configure state probabilities - defaults to 100%
+    // The ActionHistory in StateImages is what makes mock mode work
+}
+```
 
-        // Verify we can interact with elements
-        assertTrue(action.find(pricingState.getStartForFreeButton()).isSuccess());
+### 7. Running in Mock Mode
+
+Mock mode runs the SAME production code but simulates GUI interactions using ActionHistory from StateImages. No separate test classes or @SpringBootTest needed!
+
+#### Enabling Mock Mode
+
+Simply set these properties in `application.properties`:
+
+```properties
+# Enable mock mode - this is the ONLY required setting
+brobot.mock=true
+
+# Optional: Control action success probability (default is 1.0 = 100%)
+brobot.mock.action.success.probability=1.0
+```
+
+#### Running Your Automation in Mock Mode
+
+Your existing runner class works for both live and mock mode:
+
+```java
+package com.example.automation.runner;
+
+import com.example.automation.states.*;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.navigation.Navigation;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class AutomationRunner implements CommandLineRunner {
+
+    private final Navigation navigation;
+    private final Action action;
+    private final MenuState menuState;
+    private final PricingState pricingState;
+    private final HomepageState homepageState;
+
+    @Override
+    public void run(String... args) {
+        // This code runs in BOTH live and mock mode
+        // In mock mode, actions use ActionHistory instead of real GUI
+
+        log.info("Starting automation (Mock mode: {})",
+                io.github.jspinak.brobot.config.core.FrameworkSettings.mock);
+
+        // Navigate to Pricing
+        log.info("Navigating to Pricing page");
+        navigation.openState("Pricing");
+
+        // Click Start for Free
+        log.info("Clicking Start for Free button");
+        var result = action.click(pricingState.getStartForFreeButton());
+        log.info("Click result: {}", result.isSuccess());
+
+        // Navigate to Homepage
+        log.info("Navigating to Homepage");
+        navigation.openState("Homepage");
+
+        // Enter email
+        log.info("Entering email address");
+        action.click(homepageState.getEmailField());
+        action.type("user@example.com");
+        action.click(homepageState.getSubmitButton());
+
+        log.info("Automation completed successfully");
     }
 }
 ```
 
-### 7. Complete Test Configuration (application-test.properties)
+#### Different Configurations for Live vs Mock
+
+Use Spring profiles or separate property files:
+
+**application.properties** (Live/Production):
 
 ```properties
-# Test Profile Configuration
-brobot.core.mock=true
-brobot.mock.enabled=true
-brobot.mock.success-probability=1.0
+# Live mode - interact with real GUI
+brobot.mock=false
+
+# Other production settings
+brobot.screenshot.save-history=true
+brobot.logging.verbosity=VERBOSE
+```
+
+**application-mock.properties** (Mock mode):
+
+```properties
+# Enable mock mode - uses ActionHistory instead of real GUI
+brobot.mock=true
+
+# Optional: Control success probability (default 1.0 = 100%)
+brobot.mock.action.success.probability=1.0
+
+# Fast mock timings
 brobot.mock.find-duration=0.01
 brobot.mock.click-duration=0.01
 brobot.mock.type-duration=0.01
 
-# Disable real screenshots in tests
+# Disable screenshots in mock mode
 brobot.screenshot.save-history=false
-
-# Reduce logging in tests
-brobot.logging.verbosity=QUIET
-brobot.console.actions.enabled=false
 ```
+
+#### Running with Different Profiles
+
+```bash
+# Run in live mode (default)
+java -jar my-automation.jar
+
+# Run in mock mode
+java -jar my-automation.jar --spring.profiles.active=mock
+
+# Or set environment variable
+export SPRING_PROFILES_ACTIVE=mock
+java -jar my-automation.jar
+```
+
+#### Key Points About Mock Mode
+
+1. **Same Code**: Your automation code is identical for live and mock mode
+2. **ActionHistory Required**: StateImages MUST have ActionHistory or patterns won't be found
+3. **No Test Framework**: No JUnit, no @SpringBootTest, no separate test classes
+4. **Property-Driven**: Switch between modes with just `brobot.mock=true/false`
+5. **Fast Execution**: Mock actions complete in milliseconds (0.01s vs 1-2s for real)
+6. **CI/CD Ready**: Works in headless environments without displays
+
+The mock mode is designed to validate your automation logic and flow without requiring access to the actual GUI.
 
 ## GRADLE BUILD CONFIGURATION
 
@@ -696,24 +793,6 @@ action.move(center);
 
 ## ERROR PATTERNS AND SOLUTIONS
 
-### Pattern Not Found in Mock Mode
-**Error**: `Pattern not found: [pattern-name]`
-**Solution**: Ensure ActionHistory is configured with mock patterns:
-```java
-MockActionHistoryFactory factory = new MockActionHistoryFactory();
-factory.addFoundPattern(stateImage);
-actionHistory.setMockHistory(factory.build());
-```
-
-### HeadlessException
-**Error**: `java.awt.HeadlessException`
-**Solution**: Enable mock mode in tests by extending BrobotTestBase:
-```java
-public class MyTest extends BrobotTestBase {
-    // Mock mode is automatically enabled
-}
-```
-
 ### Navigation Fails
 **Error**: `No path found from [CurrentState] to [TargetState]`
 **Solution**: Ensure TransitionSet classes are properly annotated and scanned:
@@ -738,7 +817,7 @@ public class TargetTransitions {
 public class MenuState { }  // ✅ CORRECT
 
 // Navigation uses name without "State"
-navigation.goToState("Menu");  // ✅ CORRECT
+navigation.openState("Menu");  // ✅ CORRECT
 ```
 
 ### Transition Not Executing
@@ -749,7 +828,7 @@ navigation.goToState("Menu");  // ✅ CORRECT
 transition.execute();
 
 // ✅ CORRECT
-navigation.goToState("TargetState");
+navigation.openState("Target");
 ```
 
 ## CHECKLIST FOR NEW BROBOT PROJECT
@@ -762,26 +841,24 @@ navigation.goToState("TargetState");
 - [ ] Images organized in folders by state name
 - [ ] application.properties configured with brobot settings
 - [ ] Spring Boot main class scans both project and brobot packages
-- [ ] Tests extend BrobotTestBase for mock mode
-- [ ] ActionHistory configured for mock patterns in tests
+- [ ] **ActionHistory configured in StateImage.Builder for ALL patterns that need to be found in mock mode**
 - [ ] NO Thread.sleep() anywhere in code
 - [ ] NO direct SikuliX calls
 - [ ] NO java.awt.Robot usage
-- [ ] Navigation.goToState() used for all state transitions
+- [ ] Navigation.openState() used for all state transitions
 - [ ] Pauses configured via ActionConfig options, not action.pause()
 
 ## IMPORTANT REMINDERS
 
 1. **Brobot wraps SikuliX** - Never call SikuliX methods directly
-2. **Mock mode requires ActionHistory** - Patterns won't be found without it
+2. **Mock mode REQUIRES ActionHistory** - Patterns will NEVER be found without it! Use withActionHistory() in StateImage.Builder
 3. **@State includes @Component** - Don't add @Component to State classes
 4. **@TransitionSet includes @Component** - Don't add @Component to TransitionSet classes
 5. **Navigation handles pathing** - It finds the route and executes transitions automatically
 6. **State suffix is removed** - MenuState becomes "Menu" in navigation
 7. **Pauses are in ActionConfig** - Use setPauseBeforeBegin/setPauseAfterEnd
-8. **Tests need BrobotTestBase** - Extends this for proper mock mode setup
-9. **One TransitionSet per state** - All transitions for a state in one class
-10. **OutgoingTransition + IncomingTransition** - OutgoingTransitions navigate FROM the state, IncomingTransition verifies arrival
+8. **One TransitionSet per state** - All transitions for a state in one class
+9. **OutgoingTransition + IncomingTransition** - OutgoingTransitions navigate FROM the state, IncomingTransition verifies arrival
 
 ---
 

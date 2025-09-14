@@ -98,7 +98,7 @@ The `ActionChainBuilder` provides a fluent API for creating complex action seque
 ### Related Documentation
 
 - **[Combining Find Operations](finding-objects/combining-finds.md)** - Learn about nested and confirmed find strategies
-- **[Conditional Action Chaining](/docs/getting-started/ai-brobot-project-creation#conditionalactionchain-pattern)** - Advanced conditional execution patterns
+- **[Conditional Action Chaining](/docs/getting-started/ai-brobot-project-creation#conditional-action-chains)** - Advanced conditional execution patterns
 - **[AI Project Creation Guide](/docs/getting-started/ai-brobot-project-creation)** - Complete guide with chaining examples
 
 ### Benefits
