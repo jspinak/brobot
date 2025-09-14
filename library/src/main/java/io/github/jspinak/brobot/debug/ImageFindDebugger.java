@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.debug;
 
 import static io.github.jspinak.brobot.debug.AnsiColor.*;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,6 +19,7 @@ import javax.imageio.ImageIO;
 import jakarta.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -43,7 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ImageFindDebugger {
 
     @Autowired(required = false)
-    private ImageDebugConfig config;
+    @Qualifier("brobot.debug.image-io.github.jspinak.brobot.debug.ImageDebugConfig") private ImageDebugConfig config;
 
     @Autowired(required = false)
     private BrobotScreenCapture screenCapture;
@@ -80,8 +82,12 @@ public class ImageFindDebugger {
         private String screenshotPath;
         private String patternImagePath;
         private String comparisonPath;
+        private String visualComparisonPath;
         private LocalDateTime timestamp;
         private String failureReason;
+        // Store best match location even when below threshold
+        private Region bestMatchRegion;
+        private double bestMatchScore;
     }
 
     @PostConstruct
@@ -103,6 +109,7 @@ public class ImageFindDebugger {
             Files.createDirectories(debugOutputPath.resolve("screenshots"));
             Files.createDirectories(debugOutputPath.resolve("patterns"));
             Files.createDirectories(debugOutputPath.resolve("comparisons"));
+            Files.createDirectories(debugOutputPath.resolve("visual"));
             Files.createDirectories(debugOutputPath.resolve("logs"));
 
             printSessionHeader();
@@ -329,8 +336,135 @@ public class ImageFindDebugger {
                     log.debug("Saved failed match comparison image: {}", comparisonPath);
                 }
             }
+
+            // Save visual comparison for all matches (successful or not)
+            saveVisualComparison(debugInfo, objectCollection);
+
         } catch (IOException e) {
             log.error("Failed to save debug files", e);
+        }
+    }
+
+    private void saveVisualComparison(FindDebugInfo debugInfo, ObjectCollection objectCollection) {
+        try {
+            if (!config.isVisualEnabled() || screenCapture == null) return;
+
+            BufferedImage screenshot = screenCapture.capture();
+            if (screenshot == null) return;
+
+            // Get the pattern image
+            BufferedImage patternImage = null;
+            if (!objectCollection.getStateImages().isEmpty()) {
+                StateImage stateImage = objectCollection.getStateImages().get(0);
+                if (!stateImage.getPatterns().isEmpty()) {
+                    Pattern pattern = stateImage.getPatterns().get(0);
+                    patternImage = pattern.getBImage();
+                }
+            }
+
+            if (patternImage == null) return;
+
+            // Determine which region to show
+            Region regionToShow = null;
+            double scoreToShow = 0.0;
+            String label = "";
+
+            if (!debugInfo.matches.isEmpty()) {
+                // Use the best match from successful matches
+                Match bestMatch =
+                        debugInfo.matches.stream()
+                                .max((m1, m2) -> Double.compare(m1.getScore(), m2.getScore()))
+                                .orElse(debugInfo.matches.get(0));
+                regionToShow = bestMatch.getRegion();
+                scoreToShow = bestMatch.getScore();
+                label = String.format("MATCH (%.1f%%)", scoreToShow * 100);
+            } else if (debugInfo.bestMatchRegion != null) {
+                // Use the best match even if below threshold
+                regionToShow = debugInfo.bestMatchRegion;
+                scoreToShow = debugInfo.bestMatchScore;
+                label =
+                        String.format(
+                                "BEST BELOW THRESHOLD (%.1f%% < %.1f%%)",
+                                scoreToShow * 100, debugInfo.similarityThreshold * 100);
+            } else if (debugInfo.searchRegion != null) {
+                // No matches at all, show the search region
+                regionToShow = debugInfo.searchRegion;
+                label = "NO SIMILAR REGIONS FOUND";
+            }
+
+            if (regionToShow == null) return;
+
+            // Extract the region from screenshot
+            int x = Math.max(0, regionToShow.getX());
+            int y = Math.max(0, regionToShow.getY());
+            int w = Math.min(regionToShow.getW(), screenshot.getWidth() - x);
+            int h = Math.min(regionToShow.getH(), screenshot.getHeight() - y);
+
+            if (w <= 0 || h <= 0) return;
+
+            BufferedImage regionImage = screenshot.getSubimage(x, y, w, h);
+
+            // Create side-by-side comparison
+            int gap = 20;
+            int labelHeight = 30;
+            int totalWidth = patternImage.getWidth() + gap + regionImage.getWidth();
+            int totalHeight =
+                    labelHeight + Math.max(patternImage.getHeight(), regionImage.getHeight());
+
+            BufferedImage comparison =
+                    new BufferedImage(totalWidth, totalHeight, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g2d = comparison.createGraphics();
+
+            // Set rendering hints for better quality
+            g2d.setRenderingHint(
+                    RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2d.setRenderingHint(
+                    RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+            // White background
+            g2d.setColor(Color.WHITE);
+            g2d.fillRect(0, 0, totalWidth, totalHeight);
+
+            // Draw pattern image on left
+            g2d.drawImage(patternImage, 0, labelHeight, null);
+            g2d.setColor(Color.BLACK);
+            g2d.setFont(new Font("Arial", Font.BOLD, 12));
+            g2d.drawString("PATTERN", 5, 20);
+
+            // Draw found/best region on right
+            int regionX = patternImage.getWidth() + gap;
+            g2d.drawImage(regionImage, regionX, labelHeight, null);
+
+            // Color-code the label based on success
+            if (debugInfo.found) {
+                g2d.setColor(new Color(0, 128, 0)); // Green for success
+            } else {
+                g2d.setColor(Color.RED); // Red for failure
+            }
+            g2d.drawString(label, regionX + 5, 20);
+
+            // Draw border around images
+            g2d.setColor(Color.GRAY);
+            g2d.setStroke(new BasicStroke(1));
+            g2d.drawRect(0, labelHeight, patternImage.getWidth(), patternImage.getHeight());
+            g2d.drawRect(regionX, labelHeight, regionImage.getWidth(), regionImage.getHeight());
+
+            g2d.dispose();
+
+            // Save to visual folder
+            String filename =
+                    String.format(
+                            "visual_%03d_%s_%.0f%%.png",
+                            debugInfo.operationId,
+                            sanitizeFilename(debugInfo.patternName),
+                            scoreToShow * 100);
+            Path visualPath = debugOutputPath.resolve("visual").resolve(filename);
+            ImageIO.write(comparison, "png", visualPath.toFile());
+            debugInfo.visualComparisonPath = visualPath.toString();
+            log.debug("Saved visual comparison: {}", visualPath);
+
+        } catch (Exception e) {
+            log.error("Failed to save visual comparison", e);
         }
     }
 

@@ -256,14 +256,67 @@ public class Action {
      * Performs a Click action with default options on the specified state images.
      *
      * <p>This convenience method simplifies the common pattern of clicking on images, automatically
-     * finding and clicking on the first match found.
+     * finding and clicking on the first match found. When StateImages are provided, this method
+     * performs a Find operation first, then clicks on the found matches.
      *
      * @param stateImages the images to find and click
      * @return ActionResult containing the click operation results
      */
     public ActionResult click(StateImage... stateImages) {
-        ClickOptions clickOptions = new ClickOptions.Builder().build();
-        return perform(clickOptions, stateImages);
+        // When clicking on StateImages, we need to find them first, then click
+        // Use ConditionalActionChain for proper find-then-click behavior
+        if (stateImages.length == 1) {
+            // Use the convenience method for single image
+            return ConditionalActionChain
+                    .find(stateImages[0])
+                    .ifFoundClick()
+                    .perform(this);
+        } else {
+            // For multiple images, create a chain with ObjectCollection
+            ConditionalActionChain chain = ConditionalActionChain
+                    .find(new PatternFindOptions.Builder().build());
+            // Add the ObjectCollection as the first action's target
+            ObjectCollection collection = new ObjectCollection.Builder()
+                    .withImages(stateImages)
+                    .build();
+            return chain.ifFoundClick()
+                    .perform(this, collection);
+        }
+    }
+
+    /**
+     * Performs a Click action with default options on the specified object collections.
+     *
+     * <p>This method handles clicking on various object types. For StateImages, it performs
+     * a Find operation first, then clicks on the found matches. For Locations and Regions,
+     * it clicks directly without finding.
+     *
+     * @param objectCollections collections containing objects to click
+     * @return ActionResult containing the click operation results
+     */
+    public ActionResult click(ObjectCollection... objectCollections) {
+        // Check if collections contain StateImages that need to be found first
+        boolean hasImages = false;
+        if (objectCollections != null) {
+            for (ObjectCollection collection : objectCollections) {
+                if (collection != null && !collection.getStateImages().isEmpty()) {
+                    hasImages = true;
+                    break;
+                }
+            }
+        }
+
+        if (hasImages) {
+            // If there are images, use find-then-click pattern
+            ConditionalActionChain chain = ConditionalActionChain
+                    .find(new PatternFindOptions.Builder().build());
+            return chain.ifFoundClick()
+                    .perform(this, objectCollections);
+        } else {
+            // For locations/regions, click directly without finding
+            ClickOptions clickOptions = new ClickOptions.Builder().build();
+            return perform(clickOptions, objectCollections);
+        }
     }
 
     /**
