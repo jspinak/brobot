@@ -6,6 +6,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +39,7 @@ public class FindOperationInterceptor {
     }
 
     @Autowired(required = false)
-    private ImageDebugConfig config;
+    @Qualifier("brobot.debug.image-io.github.jspinak.brobot.debug.ImageDebugConfig") private ImageDebugConfig config;
 
     private static final ThreadLocal<Integer> depth = ThreadLocal.withInitial(() -> 0);
 

@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DebugReportGenerator {
 
     @Autowired(required = false)
-    private ImageDebugConfig config;
+    @Qualifier("brobot.debug.image-io.github.jspinak.brobot.debug.ImageDebugConfig") private ImageDebugConfig config;
 
     @Autowired(required = false)
     private ObjectMapper objectMapper;
