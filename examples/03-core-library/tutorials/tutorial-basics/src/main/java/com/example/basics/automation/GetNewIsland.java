@@ -23,8 +23,7 @@ public class GetNewIsland {
 
     private Map<String, String> islandTypes = new HashMap<>();
 
-    public GetNewIsland(
-            Action action, IslandState island, IslandTransitions islandTransitions) {
+    public GetNewIsland(Action action, IslandState island, IslandTransitions islandTransitions) {
         this.action = action;
         this.island = island;
         this.islandTransitions = islandTransitions;
