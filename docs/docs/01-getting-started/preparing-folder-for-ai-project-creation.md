@@ -48,82 +48,19 @@ The AI will:
 3. Create State classes for your UI screens
 4. Create TWO types of Transition classes:
    - **FromTransitions**: Navigate FROM one state TO another (e.g., MenuToPricing)
-   - **ToTransitions**: Verify arrival AT any state (e.g., ToPricing)
+   - **IncomingTransitions**: Verify arrival AT any state (e.g., ToPricing)
 5. Generate a Spring Boot application with proper navigation
 
-## Important: Brobot's Model-Based Architecture
+## Key Concepts for Your Brobot Application
 
-### ⚠️ CRITICAL: Only Use Brobot API - NO External Functions
+The AI assistant will create a model-based GUI automation application following Brobot's architecture:
 
-**NEVER use these (they break model-based automation):**
-- ❌ `Thread.sleep()` - Breaks mock testing completely
-- ❌ `java.awt.Robot` - Circumvents Brobot's model
-- ❌ Direct SikuliX calls - Bypasses wrapper functions
-- ❌ Any system automation outside Brobot API
+- **States**: Represent different screens/pages of your application
+- **Transitions**: Define how to navigate between states
+- **Navigation**: Brobot automatically finds paths between states
+- **Mock Testing**: All actions can be tested without a real GUI
 
-**ALWAYS use Brobot's API:**
-- ✅ `action.pause(2.0)` instead of `Thread.sleep(2000)`
-- ✅ `action.move(location)` instead of Robot.mouseMove()
-- ✅ `action.find(stateImage)` instead of Screen.wait()
-
-Using external functions **nullifies ALL benefits** of model-based GUI automation and makes mock testing impossible.
-
-### Navigation System
-- **NEVER** call transitions directly (don't do `transition.execute()`)
-- Use `Navigation.goToState("StateName")` to navigate between states
-- Brobot automatically finds the path from current state to target state
-- Brobot executes all necessary transitions in the correct order
-
-### State Naming Convention
-- Classes should be named with "State" suffix: `MenuState`, `PricingState`, `HomepageState`
-- @State annotation automatically removes "State" from the name
-- When navigating, use the name WITHOUT "State":
-  - Class: `PricingState` → Navigate with: `navigation.goToState("Pricing")`
-  - Class: `HomepageState` → Navigate with: `navigation.goToState("Homepage")`
-  - Class: `MenuState` → Navigate with: `navigation.goToState("Menu")`
-
-### Transition Organization
-
-Each state should have ONE TransitionSet class containing ALL its transitions:
-
-```java
-@TransitionSet(state = PricingState.class)
-@RequiredArgsConstructor
-public class PricingTransitions {
-    private final MenuState menuState;
-    private final PricingState pricingState;
-    private final Action action;
-    
-    // FromTransition - How to get TO Pricing FROM Menu
-    @FromTransition(from = MenuState.class)
-    public boolean fromMenu() {
-        return action.click(menuState.getPricingButton()).isSuccess();
-    }
-    
-    // FromTransition - How to get TO Pricing FROM Homepage
-    @FromTransition(from = HomepageState.class)
-    public boolean fromHomepage() {
-        return action.click(homepageState.getPricingLink()).isSuccess();
-    }
-    
-    // ToTransition - Verify ARRIVAL at Pricing
-    @ToTransition
-    public boolean verifyArrival() {
-        return action.find(pricingState.getUniqueElement()).isSuccess();
-    }
-}
-```
-
-### Navigation Example
-```java
-// WRONG - Don't call transitions directly
-menuToPricingTransition.execute();
-
-// CORRECT - Use Navigation (executes both transitions automatically)
-navigation.goToState("Pricing");  // Note: "Pricing" not "PricingState"
-```
-
-For more details on navigation, see:
+For technical details about Brobot's architecture, see:
 - [States Overview](states.md)
 - [Transitions Overview](transitions.md)
 - [State Management Architecture](../03-core-library/architecture/initial-state-handling.md)

@@ -10,7 +10,7 @@ Transitions define how your automation moves between states. With Brobot's moder
 
 The `@TransitionSet` annotation groups all transitions for a state in one class. Each class contains:
 - `@FromTransition` methods that define how to navigate TO this state FROM other states
-- `@ToTransition` method that verifies arrival at this state
+- `@IncomingTransition` method that verifies arrival at this state
 
 ```java
 @TransitionSet(state = WorldState.class, description = "World state transitions")
@@ -57,7 +57,7 @@ public class WorldTransitions {
     /**
      * Verify that we have successfully arrived at the World state.
      */
-    @ToTransition(description = "Verify arrival at World state", required = true)
+    @IncomingTransition(description = "Verify arrival at World state", required = true)
     public boolean verifyArrival() {
         log.info("Verifying arrival at World state");
         
@@ -102,10 +102,10 @@ public boolean fromSource() {
 }
 ```
 
-#### @ToTransition
+#### @IncomingTransition
 Verifies successful arrival at the state:
 ```java
-@ToTransition(
+@IncomingTransition(
     description = "Verification logic",  // Optional: documentation
     required = true                       // Optional: must succeed (default: false)
 )
@@ -176,7 +176,7 @@ public class IslandTransitions {
     /**
      * Verify arrival at Island state.
      */
-    @ToTransition(required = true)
+    @IncomingTransition(required = true)
     public boolean verifyArrival() {
         log.info("Verifying arrival at Island state");
         
@@ -208,7 +208,7 @@ public class SettingsTransitions {
         return action.click(homeState.getSettingsIcon()).isSuccess();
     }
     
-    @ToTransition(required = true)
+    @IncomingTransition(required = true)
     public boolean verifyArrival() {
         if (FrameworkSettings.mock) return true;
         return action.find(settingsState.getSettingsHeader()).isSuccess();
@@ -251,7 +251,7 @@ public class DashboardTransitions {
         return false;
     }
     
-    @ToTransition(required = true)
+    @IncomingTransition(required = true)
     public boolean verifyArrival() {
         if (FrameworkSettings.mock) return true;
         
@@ -304,7 +304,7 @@ public class GameTransitions {
         return action.click(pauseMenu.getResumeButton()).isSuccess();
     }
     
-    @ToTransition(required = true)
+    @IncomingTransition(required = true)
     public boolean verifyArrival() {
         if (FrameworkSettings.mock) return true;
         
@@ -366,7 +366,7 @@ public class ConfirmationTransitions {
         return action.perform(chainedAction, targets).isSuccess();
     }
     
-    @ToTransition(required = true)
+    @IncomingTransition(required = true)
     public boolean verifyArrival() {
         if (FrameworkSettings.mock) return true;
         return action.find(confirmationState.getSuccessMessage()).isSuccess();
@@ -434,9 +434,9 @@ src/main/java/com/example/basics/
    }
    ```
 
-5. **Verify Critical Elements in ToTransition**
+5. **Verify Critical Elements in IncomingTransition**
    ```java
-   @ToTransition(required = true)
+   @IncomingTransition(required = true)
    public boolean verifyArrival() {
        if (FrameworkSettings.mock) return true;
        
@@ -525,7 +525,7 @@ public class WorldTransitions {
         return action.click(homeState.getToWorldButton()).isSuccess();
     }
     
-    @ToTransition(required = true)
+    @IncomingTransition(required = true)
     public boolean verifyArrival() {
         if (FrameworkSettings.mock) return true;
         return action.find(worldState.getMinimap()).isSuccess();
@@ -536,7 +536,7 @@ public class WorldTransitions {
 ## Benefits of @TransitionSet
 
 1. **Better Organization** - All transitions for a state in ONE place
-2. **Clearer Intent** - FromTransitions vs ToTransition makes flow obvious
+2. **Clearer Intent** - FromTransitions vs IncomingTransition makes flow obvious
 3. **Less Boilerplate** - No manual StateTransitions builders
 4. **Natural Structure** - File organization mirrors state structure
 5. **Easier Testing** - Each method can be tested independently

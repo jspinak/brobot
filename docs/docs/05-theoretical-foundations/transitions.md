@@ -21,12 +21,12 @@ The transition function, f&lt;sub>τ&lt;/sub>, processes this tuple to produce a
 
 ### Implementation
 
-Brobot implements the transition model by separating it into two parts: a **FromTransition** and a **ToTransition**.
+Brobot implements the transition model by separating it into two parts: a **FromTransition** and a **IncomingTransition**.
 
 * A **FromTransition** contains the initial actions required to move from a specific starting state towards a target state.
-* A **ToTransition** contains the actions that always occur to finalize the entry into the target state, regardless of where the transition began.
+* A **IncomingTransition** contains the actions that always occur to finalize the entry into the target state, regardless of where the transition began.
 
-For example, to go from `State 1` to `State 6`, the framework first executes the `FromTransition` for `State 1 to State 6` and then completes it by executing the `ToTransition` for `to State 6`.
+For example, to go from `State 1` to `State 6`, the framework first executes the `FromTransition` for `State 1 to State 6` and then completes it by executing the `IncomingTransition` for `to State 6`.
 
 ### Code Example
 

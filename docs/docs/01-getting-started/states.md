@@ -162,7 +162,7 @@ public class GamePlayTransitions {
         return action.click(menuState.getPlayButton()).isSuccess();
     }
     
-    @ToTransition(required = true)
+    @IncomingTransition(required = true)
     public boolean verifyArrival() {
         // Verify we're in the game play state
         if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {

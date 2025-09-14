@@ -393,7 +393,7 @@ public class TargetStateTransitions {
         return action.click(sourceState.getButton()).isSuccess();
     }
     
-    @ToTransition(required = true)
+    @IncomingTransition(required = true)
     public boolean verifyArrival() {
         if (FrameworkSettings.mock) return true;
         return action.find(targetState.getElement()).isSuccess();
