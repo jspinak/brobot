@@ -16,7 +16,7 @@ import com.claude.automator.states.PromptState;
 import com.claude.automator.states.WorkingState;
 import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.annotations.FromTransition;
-import io.github.jspinak.brobot.annotations.ToTransition;
+import io.github.jspinak.brobot.annotations.IncomingTransition;
 import io.github.jspinak.brobot.annotations.TransitionSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * All transitions for the Prompt state.
  * Contains FromTransitions from other states TO Prompt,
- * and a ToTransition to verify arrival at Prompt.
+ * and a IncomingTransition to verify arrival at Prompt.
  */
 @TransitionSet(state = PromptState.class, description = "Claude Prompt state transitions")
 @Component
@@ -59,7 +59,7 @@ public class PromptTransitions {
      * Verify that we have successfully arrived at the Prompt state.
      * Checks for the presence of the Claude prompt input area.
      */
-    @ToTransition(description = "Verify arrival at Prompt state", required = true)
+    @IncomingTransition(description = "Verify arrival at Prompt state", required = true)
     public boolean verifyArrival() {
         log.info("Verifying arrival at Prompt state");
         
@@ -98,7 +98,7 @@ import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.annotations.FromTransition;
-import io.github.jspinak.brobot.annotations.ToTransition;
+import io.github.jspinak.brobot.annotations.IncomingTransition;
 import io.github.jspinak.brobot.annotations.TransitionSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -106,7 +106,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * All transitions for the Working state.
  * Contains FromTransitions from other states TO Working,
- * and a ToTransition to verify arrival at Working.
+ * and a IncomingTransition to verify arrival at Working.
  */
 @TransitionSet(state = WorkingState.class, description = "Claude Working state transitions")
 @Component
@@ -170,7 +170,7 @@ public class WorkingTransitions {
      * Verify that we have successfully arrived at the Working state.
      * Checks for the presence of the working indicator.
      */
-    @ToTransition(description = "Verify arrival at Working state", required = true)
+    @IncomingTransition(description = "Verify arrival at Working state", required = true)
     public boolean verifyArrival() {
         log.info("Verifying arrival at Working state");
         
@@ -199,7 +199,7 @@ public class WorkingTransitions {
 ### 1. **Unified Class Structure**
 All transitions for a state are in ONE class:
 - `@FromTransition` methods define how to get TO this state FROM other states
-- `@ToTransition` method (only ONE per class) verifies arrival at this state
+- `@IncomingTransition` method (only ONE per class) verifies arrival at this state
 
 ### 2. **Clear Annotations**
 
@@ -217,7 +217,7 @@ All transitions for a state are in ONE class:
 - **description**: Optional documentation
 
 ```java
-@ToTransition(description = "Verification logic", required = true)
+@IncomingTransition(description = "Verification logic", required = true)
 ```
 - **required**: Whether verification must succeed (default: false)
 - **description**: Optional documentation
@@ -291,7 +291,7 @@ public class WorkingTransitions {
         return action.click(promptState.getButton()).isSuccess();
     }
     
-    @ToTransition(required = true)
+    @IncomingTransition(required = true)
     public boolean verifyArrival() {
         if (FrameworkSettings.mock) return true;
         return action.find(workingState.getIndicator()).isSuccess();
@@ -346,7 +346,7 @@ src/main/java/com/claude/automator/
 ## Benefits of @TransitionSet Approach
 
 1. **Better Organization**: All transitions for a state in ONE place
-2. **Clearer Intent**: FromTransitions vs ToTransition makes flow obvious
+2. **Clearer Intent**: FromTransitions vs IncomingTransition makes flow obvious
 3. **Less Boilerplate**: No manual StateTransitions builders
 4. **Compile-Time Safety**: IDE immediately shows if states don't exist
 5. **Easier Testing**: Each transition method can be tested independently

@@ -6,21 +6,21 @@ import com.claude.automator.states.PromptState;
 import com.claude.automator.states.WorkingState;
 
 import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.action.basic.click.ClickOptions;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.action.basic.type.TypeOptions;
-import io.github.jspinak.brobot.annotations.FromTransition;
-import io.github.jspinak.brobot.annotations.ToTransition;
+import io.github.jspinak.brobot.annotations.OutgoingTransition;
+import io.github.jspinak.brobot.annotations.IncomingTransition;
 import io.github.jspinak.brobot.annotations.TransitionSet;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * All transitions for the Working state using the new unified annotation format. Contains
- * FromTransitions from other states TO Working, and a ToTransition to verify arrival at Working.
+ * All transitions for the Working state.
+ * Contains:
+ * - An IncomingTransition to verify arrival at Working
+ * - OutgoingTransitions that go FROM Working TO other states
+ *
+ * This pattern is cleaner because the outgoing transitions use Working's images,
+ * creating better cohesion with only the WorkingState as a dependency.
  */
 @TransitionSet(state = WorkingState.class, description = "Claude Working state transitions")
 @Component
@@ -28,21 +28,20 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class WorkingTransitions {
 
-    private final PromptState promptState;
     private final WorkingState workingState;
     private final Action action;
 
     /**
-     * Navigate from Prompt to Working by submitting a command. This transition occurs when the user
-     * submits a prompt and Claude begins processing.
+     * Navigate from Working to Prompt when work is complete.
+     * This occurs when Claude finishes processing and returns to the prompt.
      */
-    @FromTransition(
-            from = PromptState.class,
+    @OutgoingTransition(
+            to = PromptState.class,
             priority = 1,
-            description = "Navigate from Prompt to Working")
-    public boolean fromPrompt() {
+            description = "Navigate from Working to Prompt")
+    public boolean toPrompt() {
         try {
-            log.info("Navigating from Prompt to Working");
+            log.info("Navigating from Working to Prompt");
 
             // In mock mode, just return true for testing
             if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
@@ -50,39 +49,30 @@ public class WorkingTransitions {
                 return true;
             }
 
-            // Using the fluent API to chain actions: find -> click -> type
-            PatternFindOptions findClickType =
-                    new PatternFindOptions.Builder()
-                            .setPauseAfterEnd(0.5) // Pause before clicking
-                            .then(
-                                    new ClickOptions.Builder()
-                                            .setPauseAfterEnd(0.5) // Pause before typing
-                                            .build())
-                            .then(new TypeOptions.Builder().build())
-                            .build();
+            // Wait for work to complete
+            // The working indicator should disappear when Claude is done
+            // We might need to wait or check for the absence of the working indicator
+            int maxWaitTime = 30; // seconds
+            int checkInterval = 1; // second
 
-            // Create target objects for the chained action
-            ObjectCollection target =
-                    new ObjectCollection.Builder()
-                            .withImages(promptState.getClaudePrompt()) // For find & click
-                            .withStrings(
-                                    promptState
-                                            .getContinueCommand()) // For type (continue with Enter)
-                            .build();
-
-            // Execute the chained action
-            ActionResult result = action.perform(findClickType, target);
-
-            if (result.isSuccess()) {
-                log.info("Successfully triggered transition from Prompt to Working");
-                return true;
-            } else {
-                log.warn("Failed to execute transition: {}", result.getActionDescription());
-                return false;
+            for (int i = 0; i < maxWaitTime; i++) {
+                if (!action.find(workingState.getWorkingIndicator()).isSuccess()) {
+                    log.info("Working indicator disappeared, Claude has finished processing");
+                    return true;
+                }
+                try {
+                    Thread.sleep(checkInterval * 1000);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return false;
+                }
             }
 
+            log.warn("Timeout waiting for Claude to finish working");
+            return false;
+
         } catch (Exception e) {
-            log.error("Error during Prompt to Working transition", e);
+            log.error("Error during Working to Prompt transition", e);
             return false;
         }
     }
@@ -91,7 +81,7 @@ public class WorkingTransitions {
      * Verify that we have successfully arrived at the Working state. Checks for the presence of the
      * working indicator.
      */
-    @ToTransition(description = "Verify arrival at Working state", required = true)
+    @IncomingTransition(description = "Verify arrival at Working state", required = true)
     public boolean verifyArrival() {
         log.info("Verifying arrival at Working state");
         // In mock mode, just return true for testing

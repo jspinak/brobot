@@ -16,10 +16,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Processes @TransitionSet classes and their @FromTransition and @ToTransition methods to build
+ * Processes @TransitionSet classes and their @IncomingTransition and @OutgoingTransition methods to build
  * StateTransitions objects for the Brobot framework.
  *
- * @since 1.2.0
+ * The new pattern (1.3.0+) groups transitions more cohesively:
+ * - @IncomingTransition verifies arrival at the state
+ * - @OutgoingTransition defines transitions FROM this state TO other states
+ *
+ * This is cleaner because outgoing transitions use the current state's images.
+ *
+ * @since 1.3.0
  */
 @Component
 @RequiredArgsConstructor
@@ -51,34 +57,41 @@ public class TransitionSetProcessor {
             // Create StateTransitions builder
             StateTransitions.Builder builder = new StateTransitions.Builder(stateName);
 
-            // Process ToTransition (arrival/finish transition)
-            Method toTransitionMethod = findToTransitionMethod(beanClass);
-            if (toTransitionMethod != null) {
-                BooleanSupplier toTransition = createBooleanSupplier(bean, toTransitionMethod);
-                builder.addTransitionFinish(toTransition);
-                log.debug("Added ToTransition from method: {}", toTransitionMethod.getName());
+            // Process IncomingTransition (arrival/finish transition)
+            Method incomingTransitionMethod = findIncomingTransitionMethod(beanClass);
+            if (incomingTransitionMethod != null) {
+                BooleanSupplier incomingTransition = createBooleanSupplier(bean, incomingTransitionMethod);
+                builder.addTransitionFinish(incomingTransition);
+                log.debug("Added IncomingTransition from method: {}", incomingTransitionMethod.getName());
             } else {
                 log.warn(
-                        "No @ToTransition method found for state: {}. Using default (always"
+                        "No @IncomingTransition method found for state: {}. Using default (always"
                                 + " succeeds).",
                         stateName);
             }
 
-            // Process FromTransitions - they will be registered to their FROM states
+            // Process OutgoingTransitions - transitions FROM this state TO other states
+            List<Method> outgoingTransitionMethods = findOutgoingTransitionMethods(beanClass);
+            for (Method method : outgoingTransitionMethods) {
+                processOutgoingTransition(bean, method, stateName, builder);
+            }
+
+            // Also process legacy FromTransitions for backward compatibility
             List<Method> fromTransitionMethods = findFromTransitionMethods(beanClass);
             for (Method method : fromTransitionMethods) {
                 processFromTransition(bean, method, stateName, builder);
             }
 
-            // Register the ToTransition for this target state
-            if (toTransitionMethod != null) {
-                registerToTransitionForState(stateName, builder);
+            // Register the IncomingTransition for this target state
+            if (incomingTransitionMethod != null) {
+                registerIncomingTransitionForState(stateName, builder);
             }
 
             log.info(
-                    "Successfully registered {} FromTransitions and {} ToTransition for state: {}",
+                    "Successfully registered {} OutgoingTransitions, {} FromTransitions and {} IncomingTransition for state: {}",
+                    outgoingTransitionMethods.size(),
                     fromTransitionMethods.size(),
-                    toTransitionMethod != null ? 1 : 0,
+                    incomingTransitionMethod != null ? 1 : 0,
                     stateName);
 
             return true;
@@ -89,11 +102,11 @@ public class TransitionSetProcessor {
         }
     }
 
-    /** Find the method annotated with @ToTransition in the given class. */
-    private Method findToTransitionMethod(Class<?> clazz) {
+    /** Find the method annotated with @IncomingTransition in the given class. */
+    private Method findIncomingTransitionMethod(Class<?> clazz) {
         Method[] methods = clazz.getDeclaredMethods();
         for (Method method : methods) {
-            if (method.isAnnotationPresent(ToTransition.class)) {
+            if (method.isAnnotationPresent(IncomingTransition.class)) {
                 validateTransitionMethod(method);
                 return method;
             }
@@ -112,6 +125,19 @@ public class TransitionSetProcessor {
             }
         }
         return fromTransitions;
+    }
+
+    /** Find all methods annotated with @OutgoingTransition in the given class. */
+    private List<Method> findOutgoingTransitionMethods(Class<?> clazz) {
+        List<Method> outgoingTransitions = new ArrayList<>();
+        Method[] methods = clazz.getDeclaredMethods();
+        for (Method method : methods) {
+            if (method.isAnnotationPresent(OutgoingTransition.class)) {
+                validateTransitionMethod(method);
+                outgoingTransitions.add(method);
+            }
+        }
+        return outgoingTransitions;
     }
 
     /** Process a single FromTransition method and register it with the correct state. */
@@ -141,6 +167,39 @@ public class TransitionSetProcessor {
 
         // This transition needs to be added to the FROM state's transitions, not the TO state
         // We need to register this with the StateTransitionService for the FROM state
+        registerTransitionForState(fromStateName, toStateName, transition);
+    }
+
+    /** Process a single OutgoingTransition method - a transition FROM this state TO another. */
+    private void processOutgoingTransition(
+            Object bean, Method method, String fromStateName, StateTransitions.Builder builder) {
+        OutgoingTransition annotation = method.getAnnotation(OutgoingTransition.class);
+        Class<?> toStateClass = annotation.to();
+        String toStateName = deriveStateName(toStateClass, "");
+
+        log.info(
+                "Processing OutgoingTransition: {} -> {} (method: {}, priority: {})",
+                fromStateName,
+                toStateName,
+                method.getName(),
+                annotation.priority());
+
+        BooleanSupplier transitionFunction = createBooleanSupplier(bean, method);
+
+        // Create a StateTransition with the function and metadata
+        // This transition goes FROM the current state TO the target state
+        JavaStateTransition.Builder transitionBuilder =
+                new JavaStateTransition.Builder()
+                        .setFunction(transitionFunction)
+                        .addToActivate(toStateName)
+                        .setScore(annotation.priority());
+
+        JavaStateTransition transition = transitionBuilder.build();
+
+        // Add this outgoing transition to the current state's transitions
+        builder.addTransition(transition);
+
+        // Also register it with the state transition service
         registerTransitionForState(fromStateName, toStateName, transition);
     }
 
@@ -192,8 +251,8 @@ public class TransitionSetProcessor {
         return className;
     }
 
-    /** Register a ToTransition for a specific state. */
-    private void registerToTransitionForState(String stateName, StateTransitions.Builder builder) {
+    /** Register an IncomingTransition for a specific state. */
+    private void registerIncomingTransitionForState(String stateName, StateTransitions.Builder builder) {
         // Get the state ID
         var stateOpt = stateService.getState(stateName);
 

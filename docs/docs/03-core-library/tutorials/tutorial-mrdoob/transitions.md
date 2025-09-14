@@ -22,7 +22,7 @@ import com.example.mrdoob.states.Homepage;
 import com.example.mrdoob.states.Harmony;
 import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.annotations.FromTransition;
-import io.github.jspinak.brobot.annotations.ToTransition;
+import io.github.jspinak.brobot.annotations.IncomingTransition;
 import io.github.jspinak.brobot.annotations.TransitionSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * All transitions for the Homepage state.
  * Contains FromTransitions from other states TO Homepage,
- * and a ToTransition to verify arrival at Homepage.
+ * and a IncomingTransition to verify arrival at Homepage.
  */
 @TransitionSet(state = Homepage.class, description = "MrDoob Homepage transitions")
 @Component
@@ -64,7 +64,7 @@ public class HomepageTransitions {
      * Verify that we have successfully arrived at the Homepage state.
      * Checks for the presence of homepage-specific elements.
      */
-    @ToTransition(description = "Verify arrival at Homepage", required = true)
+    @IncomingTransition(description = "Verify arrival at Homepage", required = true)
     public boolean verifyArrival() {
         log.info("Verifying arrival at Homepage");
         
@@ -99,7 +99,7 @@ import com.example.mrdoob.states.Harmony;
 import com.example.mrdoob.states.About;
 import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.annotations.FromTransition;
-import io.github.jspinak.brobot.annotations.ToTransition;
+import io.github.jspinak.brobot.annotations.IncomingTransition;
 import io.github.jspinak.brobot.annotations.TransitionSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -107,7 +107,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * All transitions for the Harmony state.
  * Contains FromTransitions from other states TO Harmony,
- * and a ToTransition to verify arrival at Harmony.
+ * and a IncomingTransition to verify arrival at Harmony.
  */
 @TransitionSet(state = Harmony.class, description = "MrDoob Harmony page transitions")
 @Component
@@ -157,7 +157,7 @@ public class HarmonyTransitions {
      * Verify that we have successfully arrived at the Harmony state.
      * Checks for the presence of harmony-specific elements.
      */
-    @ToTransition(description = "Verify arrival at Harmony", required = true)
+    @IncomingTransition(description = "Verify arrival at Harmony", required = true)
     public boolean verifyArrival() {
         log.info("Verifying arrival at Harmony");
         
@@ -192,7 +192,7 @@ import com.example.mrdoob.states.Harmony;
 import com.example.mrdoob.states.About;
 import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.annotations.FromTransition;
-import io.github.jspinak.brobot.annotations.ToTransition;
+import io.github.jspinak.brobot.annotations.IncomingTransition;
 import io.github.jspinak.brobot.annotations.TransitionSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -200,7 +200,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * All transitions for the About state.
  * Contains FromTransitions from other states TO About,
- * and a ToTransition to verify arrival at About.
+ * and a IncomingTransition to verify arrival at About.
  */
 @TransitionSet(state = About.class, description = "MrDoob About page transitions")
 @Component
@@ -232,7 +232,7 @@ public class AboutTransitions {
      * Verify that we have successfully arrived at the About state.
      * Checks for the presence of about-specific elements.
      */
-    @ToTransition(description = "Verify arrival at About", required = true)
+    @IncomingTransition(description = "Verify arrival at About", required = true)
     public boolean verifyArrival() {
         log.info("Verifying arrival at About");
         
@@ -306,7 +306,7 @@ public class HarmonyTransitions {
         return action.click(about.getBackButton()).isSuccess();
     }
     
-    @ToTransition(required = true)
+    @IncomingTransition(required = true)
     public boolean verifyArrival() {
         if (FrameworkSettings.mock) return true;
         return action.find(harmony.getAboutLink()).isSuccess();
@@ -333,7 +333,7 @@ src/main/java/com/example/mrdoob/
 ## Benefits of the New Approach
 
 1. **Better Organization**: All transitions for a state in ONE place
-2. **Clearer Intent**: FromTransitions vs ToTransition makes navigation flow obvious
+2. **Clearer Intent**: FromTransitions vs IncomingTransition makes navigation flow obvious
 3. **Less Boilerplate**: No need for separate classes for each transition path
 4. **Mock Mode Ready**: Easy to add testing support with framework settings check
 5. **Natural Structure**: File organization mirrors state structure
@@ -393,7 +393,7 @@ public class HarmonyTransitionsTest {
 1. **Always include mock mode support** for testing environments
 2. **Use descriptive method names** like `fromHomepage()`, `fromAbout()`
 3. **Add comprehensive logging** for debugging
-4. **Verify critical elements** in ToTransition methods
+4. **Verify critical elements** in IncomingTransition methods
 5. **Handle failures gracefully** with try-catch blocks where appropriate
 6. **Set appropriate priorities** when multiple paths exist to the same state
 

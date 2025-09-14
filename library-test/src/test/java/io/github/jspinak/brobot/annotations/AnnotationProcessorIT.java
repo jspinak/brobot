@@ -75,7 +75,7 @@ public class AnnotationProcessorIT extends BrobotTestBase {
             return true;
         }
 
-        @ToTransition
+        @IncomingTransition
         public boolean verifyArrival() {
             return true;
         }
@@ -279,13 +279,13 @@ public class AnnotationProcessorIT extends BrobotTestBase {
                     FromTransition fromAnnotation = method.getAnnotation(FromTransition.class);
                     assertEquals(TestState1.class, fromAnnotation.from());
                 }
-                if (method.isAnnotationPresent(ToTransition.class)) {
+                if (method.isAnnotationPresent(IncomingTransition.class)) {
                     hasToTransition = true;
                 }
             }
 
             assertTrue(hasFromTransition, "Should have at least one @FromTransition method");
-            assertTrue(hasToTransition, "Should have a @ToTransition method");
+            assertTrue(hasToTransition, "Should have an @IncomingTransition method");
             assertEquals("", transitionAnnotation.description()); // Default description
         }
     }

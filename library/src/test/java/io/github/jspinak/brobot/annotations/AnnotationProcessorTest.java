@@ -85,7 +85,7 @@ public class AnnotationProcessorTest extends BrobotTestBase {
             return true;
         }
 
-        @io.github.jspinak.brobot.annotations.ToTransition
+        @io.github.jspinak.brobot.annotations.IncomingTransition
         public boolean verifyArrival() {
             return true;
         }

@@ -13,9 +13,11 @@ import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.test.TestCategories;
+import io.github.jspinak.brobot.annotations.IncomingTransition;
+import io.github.jspinak.brobot.annotations.OutgoingTransition;
 
 /**
- * Comprehensive test suite for @TransitionSet, @FromTransition, and @ToTransition annotations.
+ * Comprehensive test suite for @TransitionSet, @FromTransition, @OutgoingTransition, and @IncomingTransition annotations.
  * Tests annotation attributes, relationships, method binding, and Spring integration.
  */
 @DisplayName("Transition Annotations Tests")
@@ -54,7 +56,7 @@ public class TransitionAnnotationTest extends BrobotTestBase {
             return true;
         }
 
-        @ToTransition
+        @IncomingTransition
         public boolean verifyArrival() {
             return true;
         }
@@ -81,7 +83,7 @@ public class TransitionAnnotationTest extends BrobotTestBase {
             return true;
         }
 
-        @ToTransition(description = "Verify contact form is visible", timeout = 15)
+        @IncomingTransition(description = "Verify contact form is visible", timeout = 15)
         public boolean verifyContactForm() {
             return true;
         }
@@ -101,22 +103,22 @@ public class TransitionAnnotationTest extends BrobotTestBase {
             return true;
         }
 
-        @ToTransition(required = false)
+        @IncomingTransition(required = false)
         public boolean verifyCheckoutPage() {
             return true;
         }
     }
 
-    // Invalid TransitionSet - multiple ToTransitions (for testing validation)
+    // Invalid TransitionSet - multiple IncomingTransitions (for testing validation)
     @TransitionSet(state = MenuState.class)
-    static class InvalidMultipleToTransitions {
+    static class InvalidMultipleIncomingTransitions {
 
-        @ToTransition
+        @IncomingTransition
         public boolean verifyMethod1() {
             return true;
         }
 
-        @ToTransition
+        @IncomingTransition
         public boolean verifyMethod2() {
             return true;
         }
@@ -311,21 +313,21 @@ public class TransitionAnnotationTest extends BrobotTestBase {
     }
 
     @Nested
-    @DisplayName("ToTransition Annotation Tests")
-    class ToTransitionAnnotationTests {
+    @DisplayName("IncomingTransition Annotation Tests")
+    class IncomingTransitionAnnotationTests {
 
         @Test
-        @DisplayName("Should detect @ToTransition on method")
-        void shouldDetectToTransitionOnMethod() throws NoSuchMethodException {
+        @DisplayName("Should detect @IncomingTransition on method")
+        void shouldDetectIncomingTransitionOnMethod() throws NoSuchMethodException {
             Method verifyArrival = PricingTransitions.class.getMethod("verifyArrival");
-            assertTrue(verifyArrival.isAnnotationPresent(ToTransition.class));
+            assertTrue(verifyArrival.isAnnotationPresent(IncomingTransition.class));
         }
 
         @Test
         @DisplayName("Should have default values for optional attributes")
         void shouldHaveDefaultValuesForOptionalAttributes() throws NoSuchMethodException {
             Method verifyArrival = PricingTransitions.class.getMethod("verifyArrival");
-            ToTransition annotation = verifyArrival.getAnnotation(ToTransition.class);
+            IncomingTransition annotation = verifyArrival.getAnnotation(IncomingTransition.class);
 
             assertNotNull(annotation);
             assertEquals("", annotation.description());
@@ -337,7 +339,7 @@ public class TransitionAnnotationTest extends BrobotTestBase {
         @DisplayName("Should support custom description and timeout")
         void shouldSupportCustomDescriptionAndTimeout() throws NoSuchMethodException {
             Method verifyContact = ContactTransitions.class.getMethod("verifyContactForm");
-            ToTransition annotation = verifyContact.getAnnotation(ToTransition.class);
+            IncomingTransition annotation = verifyContact.getAnnotation(IncomingTransition.class);
 
             assertNotNull(annotation);
             assertEquals("Verify contact form is visible", annotation.description());
@@ -348,36 +350,36 @@ public class TransitionAnnotationTest extends BrobotTestBase {
         @DisplayName("Should support required attribute")
         void shouldSupportRequiredAttribute() throws NoSuchMethodException {
             Method verifyCheckout = CheckoutTransitions.class.getMethod("verifyCheckoutPage");
-            ToTransition annotation = verifyCheckout.getAnnotation(ToTransition.class);
+            IncomingTransition annotation = verifyCheckout.getAnnotation(IncomingTransition.class);
 
             assertNotNull(annotation);
             assertFalse(annotation.required());
         }
 
         @Test
-        @DisplayName("Should find single ToTransition in a class")
-        void shouldFindSingleToTransitionInClass() {
+        @DisplayName("Should find single IncomingTransition in a class")
+        void shouldFindSingleIncomingTransitionInClass() {
             Method[] methods = PricingTransitions.class.getDeclaredMethods();
-            List<Method> toTransitions =
+            List<Method> incomingTransitions =
                     Arrays.stream(methods)
-                            .filter(m -> m.isAnnotationPresent(ToTransition.class))
+                            .filter(m -> m.isAnnotationPresent(IncomingTransition.class))
                             .collect(Collectors.toList());
 
-            assertEquals(1, toTransitions.size(), "Should have exactly one ToTransition");
+            assertEquals(1, incomingTransitions.size(), "Should have exactly one IncomingTransition");
         }
 
         @Test
-        @DisplayName("Should detect multiple ToTransitions (validation scenario)")
-        void shouldDetectMultipleToTransitions() {
-            Method[] methods = InvalidMultipleToTransitions.class.getDeclaredMethods();
-            List<Method> toTransitions =
+        @DisplayName("Should detect multiple IncomingTransitions (validation scenario)")
+        void shouldDetectMultipleIncomingTransitions() {
+            Method[] methods = InvalidMultipleIncomingTransitions.class.getDeclaredMethods();
+            List<Method> incomingTransitions =
                     Arrays.stream(methods)
-                            .filter(m -> m.isAnnotationPresent(ToTransition.class))
+                            .filter(m -> m.isAnnotationPresent(IncomingTransition.class))
                             .collect(Collectors.toList());
 
             assertTrue(
-                    toTransitions.size() > 1,
-                    "Should detect multiple ToTransitions for validation purposes");
+                    incomingTransitions.size() > 1,
+                    "Should detect multiple IncomingTransitions for validation purposes");
         }
     }
 
@@ -471,17 +473,17 @@ public class TransitionAnnotationTest extends BrobotTestBase {
         }
 
         @Test
-        @DisplayName("ToTransition methods should return boolean")
-        void toTransitionMethodsShouldReturnBoolean() {
+        @DisplayName("IncomingTransition methods should return boolean")
+        void incomingTransitionMethodsShouldReturnBoolean() {
             Method[] methods = PricingTransitions.class.getDeclaredMethods();
             Arrays.stream(methods)
-                    .filter(m -> m.isAnnotationPresent(ToTransition.class))
+                    .filter(m -> m.isAnnotationPresent(IncomingTransition.class))
                     .forEach(
                             m ->
                                     assertEquals(
                                             boolean.class,
                                             m.getReturnType(),
-                                            "ToTransition method should return boolean"));
+                                            "IncomingTransition method should return boolean"));
         }
 
         @Test
@@ -493,11 +495,11 @@ public class TransitionAnnotationTest extends BrobotTestBase {
         }
 
         @Test
-        @DisplayName("Should not have @ToTransition on class")
-        void shouldNotHaveToTransitionOnClass() {
+        @DisplayName("Should not have @IncomingTransition on class")
+        void shouldNotHaveIncomingTransitionOnClass() {
             assertFalse(
-                    PricingTransitions.class.isAnnotationPresent(ToTransition.class),
-                    "ToTransition should not be on class");
+                    PricingTransitions.class.isAnnotationPresent(IncomingTransition.class),
+                    "IncomingTransition should not be on class");
         }
     }
 
@@ -534,15 +536,15 @@ public class TransitionAnnotationTest extends BrobotTestBase {
         }
 
         @Test
-        @DisplayName("Should access ToTransition annotation methods via reflection")
-        void shouldAccessToTransitionMethods() throws NoSuchMethodException {
-            assertNotNull(ToTransition.class.getMethod("description"));
-            assertNotNull(ToTransition.class.getMethod("timeout"));
-            assertNotNull(ToTransition.class.getMethod("required"));
+        @DisplayName("Should access IncomingTransition annotation methods via reflection")
+        void shouldAccessIncomingTransitionMethods() throws NoSuchMethodException {
+            assertNotNull(IncomingTransition.class.getMethod("description"));
+            assertNotNull(IncomingTransition.class.getMethod("timeout"));
+            assertNotNull(IncomingTransition.class.getMethod("required"));
 
-            assertEquals(String.class, ToTransition.class.getMethod("description").getReturnType());
-            assertEquals(int.class, ToTransition.class.getMethod("timeout").getReturnType());
-            assertEquals(boolean.class, ToTransition.class.getMethod("required").getReturnType());
+            assertEquals(String.class, IncomingTransition.class.getMethod("description").getReturnType());
+            assertEquals(int.class, IncomingTransition.class.getMethod("timeout").getReturnType());
+            assertEquals(boolean.class, IncomingTransition.class.getMethod("required").getReturnType());
         }
 
         @Test
@@ -550,11 +552,13 @@ public class TransitionAnnotationTest extends BrobotTestBase {
         void shouldVerifyAnnotationTypes() {
             assertTrue(TransitionSet.class.isAnnotation());
             assertTrue(FromTransition.class.isAnnotation());
-            assertTrue(ToTransition.class.isAnnotation());
+            assertTrue(IncomingTransition.class.isAnnotation());
+            assertTrue(OutgoingTransition.class.isAnnotation());
 
             assertEquals("TransitionSet", TransitionSet.class.getSimpleName());
             assertEquals("FromTransition", FromTransition.class.getSimpleName());
-            assertEquals("ToTransition", ToTransition.class.getSimpleName());
+            assertEquals("IncomingTransition", IncomingTransition.class.getSimpleName());
+            assertEquals("OutgoingTransition", OutgoingTransition.class.getSimpleName());
         }
     }
 
@@ -582,11 +586,11 @@ public class TransitionAnnotationTest extends BrobotTestBase {
         }
 
         @Test
-        @DisplayName("Should work with Spring's annotation utilities for ToTransition")
-        void shouldWorkWithSpringAnnotationUtilsForToTransition() throws NoSuchMethodException {
+        @DisplayName("Should work with Spring's annotation utilities for IncomingTransition")
+        void shouldWorkWithSpringAnnotationUtilsForIncomingTransition() throws NoSuchMethodException {
             Method verifyArrival = PricingTransitions.class.getMethod("verifyArrival");
-            ToTransition annotation =
-                    AnnotationUtils.findAnnotation(verifyArrival, ToTransition.class);
+            IncomingTransition annotation =
+                    AnnotationUtils.findAnnotation(verifyArrival, IncomingTransition.class);
             assertNotNull(annotation);
             assertTrue(annotation.required());
         }
@@ -609,33 +613,33 @@ public class TransitionAnnotationTest extends BrobotTestBase {
         @DisplayName("Should handle TransitionSet without FromTransitions")
         void shouldHandleTransitionSetWithoutFromTransitions() {
             @TransitionSet(state = MenuState.class)
-            class OnlyToTransition {
-                @ToTransition
+            class OnlyIncomingTransition {
+                @IncomingTransition
                 public boolean verify() {
                     return true;
                 }
             }
 
-            TransitionSet annotation = OnlyToTransition.class.getAnnotation(TransitionSet.class);
+            TransitionSet annotation = OnlyIncomingTransition.class.getAnnotation(TransitionSet.class);
             assertNotNull(annotation);
 
-            Method[] methods = OnlyToTransition.class.getDeclaredMethods();
+            Method[] methods = OnlyIncomingTransition.class.getDeclaredMethods();
             long fromCount =
                     Arrays.stream(methods)
                             .filter(m -> m.isAnnotationPresent(FromTransition.class))
                             .count();
-            long toCount =
+            long incomingCount =
                     Arrays.stream(methods)
-                            .filter(m -> m.isAnnotationPresent(ToTransition.class))
+                            .filter(m -> m.isAnnotationPresent(IncomingTransition.class))
                             .count();
 
             assertEquals(0, fromCount);
-            assertEquals(1, toCount);
+            assertEquals(1, incomingCount);
         }
 
         @Test
-        @DisplayName("Should handle TransitionSet without ToTransition")
-        void shouldHandleTransitionSetWithoutToTransition() {
+        @DisplayName("Should handle TransitionSet without IncomingTransition")
+        void shouldHandleTransitionSetWithoutIncomingTransition() {
             @TransitionSet(state = MenuState.class)
             class OnlyFromTransitions {
                 @FromTransition(from = HomepageState.class)
@@ -652,13 +656,13 @@ public class TransitionAnnotationTest extends BrobotTestBase {
                     Arrays.stream(methods)
                             .filter(m -> m.isAnnotationPresent(FromTransition.class))
                             .count();
-            long toCount =
+            long incomingCount =
                     Arrays.stream(methods)
-                            .filter(m -> m.isAnnotationPresent(ToTransition.class))
+                            .filter(m -> m.isAnnotationPresent(IncomingTransition.class))
                             .count();
 
             assertEquals(1, fromCount);
-            assertEquals(0, toCount);
+            assertEquals(0, incomingCount);
         }
 
         @Test
@@ -694,9 +698,9 @@ public class TransitionAnnotationTest extends BrobotTestBase {
             try {
                 Method method = NonTransitionClass.class.getMethod("someMethod");
                 FromTransition fromAnnotation = method.getAnnotation(FromTransition.class);
-                ToTransition toAnnotation = method.getAnnotation(ToTransition.class);
+                IncomingTransition incomingAnnotation = method.getAnnotation(IncomingTransition.class);
                 assertNull(fromAnnotation);
-                assertNull(toAnnotation);
+                assertNull(incomingAnnotation);
             } catch (NoSuchMethodException e) {
                 fail("Method should exist");
             }

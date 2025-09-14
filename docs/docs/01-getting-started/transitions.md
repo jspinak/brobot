@@ -11,68 +11,41 @@ While States define "where you can be" in a GUI, **Transitions** define "how you
 
 Formally, a transition is a process or a sequence of actions that changes the GUI from one state to another. They form the "edges" of the state graph and are the building blocks used by the framework's pathfinder to navigate the application. 
 
-## The Brobot Implementation: FromTransition and ToTransition
+## The Brobot Implementation: IncomingTransition and OutgoingTransition
 
-Brobot implements this concept by splitting transitions into two types: **FromTransitions** and **ToTransitions**. This two-part system provides a clear and reusable structure for managing navigation logic.
+Brobot implements transitions using a cohesive pattern where each state's transition class contains:
 
-![Transition Diagram](/img/paper/transitions.png) 
-_This diagram is based on Figure 8 from the research paper._ 
+![Transition Diagram](/img/paper/transitions.png)
+_This diagram is based on Figure 8 from the research paper._
 
-* **FromTransition**: This handles the process of leaving another state to arrive at *this* state. For example, to go from `State A` to `State B`, the FromTransition in `BTransitions` defines how to navigate from A. It contains the specific actions needed to trigger the move from State A.
+* **IncomingTransition**: This verifies successful arrival at the state, regardless of which state initiated the transition. There is only one IncomingTransition per state, and it contains checks to confirm the state is active.
 
-* **ToTransition**: This handles the verification of arriving at a state, regardless of which state started the process. There can be multiple FromTransitions coming to `State B` from different states, but there is only one ToTransition for `State B`. This verification contains checks to confirm `State B` is active.
+* **OutgoingTransition**: These handle navigation FROM the current state TO other states. Since these transitions use the current state's images and UI elements, grouping them in the state's transition class creates better cohesion. Each OutgoingTransition contains the specific actions needed to navigate to a target state.
 
-## Modern Approach: Using @TransitionSet Annotation
+## Using @TransitionSet Annotation
 
-Brobot 1.2.0+ uses a cohesive, method-level annotation approach that groups all transitions for a state in one class. This maintains high cohesion while providing clear, annotation-based configuration.
+Brobot uses a cohesive, method-level annotation approach that groups all transitions for a state in one class. Each transition class contains:
+- The IncomingTransition to verify arrival at the state
+- All OutgoingTransitions that navigate FROM this state to other states
+
+This pattern maintains high cohesion since outgoing transitions use the current state's images.
 
 ### Complete Example
 
 ```java
 @TransitionSet(state = PricingState.class, description = "Pricing page transitions")
-@Component
 @RequiredArgsConstructor
 @Slf4j
 public class PricingTransitions {
-    
-    private final MenuState menuState;
-    private final HomepageState homepageState;
+
     private final PricingState pricingState;
     private final Action action;
-    
-    /**
-     * Navigate from Menu to Pricing by clicking the pricing menu item.
-     */
-    @FromTransition(from = MenuState.class, priority = 1, description = "Navigate from Menu to Pricing")
-    public boolean fromMenu() {
-        log.info("Navigating from Menu to Pricing");
-        // In mock mode, just return true for testing
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
-            log.info("Mock mode: simulating successful navigation");
-            return true;
-        }
-        return action.click(menuState.getPricingButton()).isSuccess();
-    }
-    
-    /**
-     * Navigate from Homepage to Pricing.
-     */
-    @FromTransition(from = HomepageState.class, priority = 2, description = "Navigate from Homepage to Pricing")
-    public boolean fromHomepage() {
-        log.info("Navigating from Homepage to Pricing");
-        // In mock mode, just return true for testing
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
-            log.info("Mock mode: simulating successful navigation");
-            return true;
-        }
-        return action.click(homepageState.getPricingLink()).isSuccess();
-    }
     
     /**
      * Verify that we have successfully arrived at the Pricing state.
      * Checks for the presence of pricing-specific elements.
      */
-    @ToTransition(description = "Verify arrival at Pricing state", required = true)
+    @IncomingTransition(description = "Verify arrival at Pricing state", required = true)
     public boolean verifyArrival() {
         log.info("Verifying arrival at Pricing state");
         // In mock mode, just return true for testing
@@ -80,9 +53,9 @@ public class PricingTransitions {
             log.info("Mock mode: simulating successful verification");
             return true;
         }
-        
+
         boolean found = action.find(pricingState.getStartForFreeButton()).isSuccess();
-        
+
         if (found) {
             log.info("Successfully confirmed Pricing state is active");
             return true;
@@ -90,6 +63,34 @@ public class PricingTransitions {
             log.error("Failed to confirm Pricing state - button not found");
             return false;
         }
+    }
+
+    /**
+     * Navigate from Pricing to Homepage by clicking the home/logo button.
+     */
+    @OutgoingTransition(to = HomepageState.class, priority = 1, description = "Navigate from Pricing to Homepage")
+    public boolean toHomepage() {
+        log.info("Navigating from Pricing to Homepage");
+        // In mock mode, just return true for testing
+        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+            log.info("Mock mode: simulating successful navigation");
+            return true;
+        }
+        return action.click(pricingState.getHomeLink()).isSuccess();
+    }
+
+    /**
+     * Navigate from Pricing to Menu by clicking the menu icon.
+     */
+    @OutgoingTransition(to = MenuState.class, priority = 2, description = "Navigate from Pricing to Menu")
+    public boolean toMenu() {
+        log.info("Navigating from Pricing to Menu");
+        // In mock mode, just return true for testing
+        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+            log.info("Mock mode: simulating successful navigation");
+            return true;
+        }
+        return action.click(pricingState.getMenuIcon()).isSuccess();
     }
 }
 ```
@@ -102,18 +103,18 @@ Marks a class as containing all transitions for a specific state:
 - **name**: Optional state name override (defaults to class name without "State" suffix)
 - **description**: Documentation for the transition set
 
-#### @FromTransition
-Defines a transition FROM another state TO this state:
-- **from**: The source state class (required)
-- **priority**: Transition priority - higher values are preferred when multiple paths exist (default: 0)
-- **description**: Documentation for this transition
-- **timeout**: Timeout in seconds (optional)
-
-#### @ToTransition
+#### @IncomingTransition
 Verifies successful arrival at the state:
 - **description**: Documentation for the verification
 - **timeout**: Verification timeout in seconds (optional)
 - **required**: Whether verification must succeed (default: false)
+
+#### @OutgoingTransition
+Defines a transition FROM the current state TO another state:
+- **to**: The target state class (required)
+- **priority**: Transition priority - higher values are preferred when multiple paths exist (default: 0)
+- **description**: Documentation for this transition
+- **timeout**: Timeout in seconds (optional)
 
 ## World State Example
 
@@ -121,58 +122,28 @@ Here's another complete example showing transitions for a World state with multi
 
 ```java
 @TransitionSet(state = WorldState.class, description = "World map transitions")
-@Component
 @RequiredArgsConstructor
 @Slf4j
 public class WorldTransitions {
-    
-    private final HomeState homeState;
+
     private final WorldState worldState;
-    private final IslandState islandState;
     private final Action action;
-    
-    /**
-     * Navigate from Home to World by clicking the world button.
-     */
-    @FromTransition(from = HomeState.class, priority = 1, description = "Navigate from Home to World")
-    public boolean fromHome() {
-        log.info("Navigating from Home to World");
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
-            log.info("Mock mode: simulating successful navigation");
-            return true;
-        }
-        return action.click(homeState.getToWorldButton()).isSuccess();
-    }
-    
-    /**
-     * Navigate from Island back to World.
-     */
-    @FromTransition(from = IslandState.class, priority = 2, description = "Return from Island to World")
-    public boolean fromIsland() {
-        log.info("Navigating from Island to World");
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
-            log.info("Mock mode: simulating successful navigation");
-            return true;
-        }
-        // Click back button or world map icon
-        return action.click(islandState.getBackToWorldButton()).isSuccess();
-    }
     
     /**
      * Verify arrival at World state by checking for the world map.
      */
-    @ToTransition(description = "Verify arrival at World state", required = true)
+    @IncomingTransition(description = "Verify arrival at World state", required = true)
     public boolean verifyArrival() {
         log.info("Verifying arrival at World state");
         if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
             log.info("Mock mode: simulating successful verification");
             return true;
         }
-        
+
         // Check for world-specific elements
         boolean foundMap = action.find(worldState.getWorldMap()).isSuccess();
         boolean foundIslands = action.find(worldState.getIsland1()).isSuccess();
-        
+
         if (foundMap || foundIslands) {
             log.info("Successfully confirmed World state is active");
             return true;
@@ -181,18 +152,46 @@ public class WorldTransitions {
             return false;
         }
     }
+
+    /**
+     * Navigate from World to Home by clicking the home button.
+     */
+    @OutgoingTransition(to = HomeState.class, priority = 1, description = "Navigate from World to Home")
+    public boolean toHome() {
+        log.info("Navigating from World to Home");
+        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+            log.info("Mock mode: simulating successful navigation");
+            return true;
+        }
+        return action.click(worldState.getHomeButton()).isSuccess();
+    }
+
+    /**
+     * Navigate from World to Island by clicking on an island.
+     */
+    @OutgoingTransition(to = IslandState.class, priority = 2, description = "Navigate from World to Island")
+    public boolean toIsland() {
+        log.info("Navigating from World to Island");
+        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+            log.info("Mock mode: simulating successful navigation");
+            return true;
+        }
+        // Click on first island
+        return action.click(worldState.getIsland1()).isSuccess();
+    }
 }
 ```
 
-## Key Benefits of @TransitionSet
+## Key Benefits of This Pattern
 
-1. **High Cohesion**: All transitions for a state in ONE class - easy to find and maintain
-2. **Clear Separation**: FromTransitions handle navigation logic, ToTransition verifies arrival
+1. **High Cohesion**: Each transition class only needs its own state as a dependency, since outgoing transitions use that state's images
+2. **Clear Separation**: IncomingTransition verifies arrival, OutgoingTransitions handle navigation FROM the state
 3. **Natural Organization**: File structure mirrors state structure (one transitions class per state)
-4. **Spring Integration**: Full dependency injection support with @Component
-5. **Type Safety**: Class-based state references prevent typos and enable IDE refactoring
-6. **Mock Mode Support**: Easy to add testing support with framework settings check
-7. **Reduced Boilerplate**: Method-level annotations are more concise than builders
+4. **Reduced Dependencies**: No need to inject other states just for their images in incoming transitions
+5. **Spring Integration**: Full dependency injection support (@TransitionSet includes @Component)
+6. **Type Safety**: Class-based state references prevent typos and enable IDE refactoring
+7. **Mock Mode Support**: Easy to add testing support with framework settings check
+8. **Cleaner Code**: Each transition class is self-contained with its state's navigation logic
 
 ## File Organization
 
@@ -218,61 +217,42 @@ For transitions that require multiple steps, you can chain actions together:
 
 ```java
 @TransitionSet(state = WorkingState.class, description = "Claude Working state transitions")
-@Component
 @RequiredArgsConstructor
 @Slf4j
 public class WorkingTransitions {
-    
-    private final PromptState promptState;
+
     private final WorkingState workingState;
     private final Action action;
     
-    /**
-     * Navigate from Prompt to Working by submitting a command.
-     */
-    @FromTransition(from = PromptState.class, priority = 1)
-    public boolean fromPrompt() {
-        try {
-            log.info("Navigating from Prompt to Working");
-            
-            if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
-                return true;
-            }
-
-            // Chain multiple actions: find -> click -> type
-            PatternFindOptions findClickType =
-                    new PatternFindOptions.Builder()
-                            .setPauseAfterEnd(0.5) // Pause before clicking
-                            .then(new ClickOptions.Builder()
-                                    .setPauseAfterEnd(0.5) // Pause before typing
-                                    .build())
-                            .then(new TypeOptions.Builder().build())
-                            .build();
-
-            // Create target objects for the chained action
-            ObjectCollection target =
-                    new ObjectCollection.Builder()
-                            .withImages(promptState.getClaudePrompt()) // For find & click
-                            .withStrings(promptState.getContinueCommand()) // For type
-                            .build();
-
-            // Execute the chained action
-            ActionResult result = action.perform(findClickType, target);
-            return result.isSuccess();
-            
-        } catch (Exception e) {
-            log.error("Error during Prompt to Working transition", e);
-            return false;
-        }
-    }
-    
-    @ToTransition(required = true)
+    @IncomingTransition(required = true)
     public boolean verifyArrival() {
         log.info("Verifying arrival at Working state");
         if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
             return true;
         }
         return action.find(workingState.getWorkingIndicator()).isSuccess();
+    }
+
+    /**
+     * Navigate from Working to Prompt when work is complete.
+     */
+    @OutgoingTransition(to = PromptState.class, priority = 1)
+    public boolean toPrompt() {
+        try {
+            log.info("Navigating from Working to Prompt");
+
+            if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+                return true;
+            }
+
+            // Wait for work to complete and return to prompt
+            // This might involve clicking a button or waiting for the prompt to reappear
+            return action.click(workingState.getStopButton()).isSuccess();
+
+        } catch (Exception e) {
+            log.error("Error during Working to Prompt transition", e);
+            return false;
+        }
     }
 }
 ```
@@ -281,8 +261,8 @@ public class WorkingTransitions {
 
 The academic paper provides a formal definition for a transition as a tuple **t = (A, S<sub>t</sub><sup>def</sup>)**. 
 
-* **A** is a **process**, which is a sequence of one or more actions `(a¹, a², ..., aⁿ)`. This corresponds to the method body in your @FromTransition methods.
-* **S<sub>t</sub><sup>def</sup>** is the **intended state information**. This is handled automatically by the framework based on the @TransitionSet's state parameter and the @FromTransition's from parameter.
+* **A** is a **process**, which is a sequence of one or more actions `(a¹, a², ..., aⁿ)`. This corresponds to the method body in your @OutgoingTransition methods.
+* **S<sub>t</sub><sup>def</sup>** is the **intended state information**. This is handled automatically by the framework based on the @TransitionSet's state parameter and the @OutgoingTransition's to parameter.
 
 ## Dynamic Transitions for Hidden States
 
@@ -292,7 +272,6 @@ You can define transitions that return to the previous state dynamically:
 
 ```java
 @TransitionSet(state = MenuState.class, description = "Menu overlay transitions")
-@Component
 @RequiredArgsConstructor
 @Slf4j
 public class MenuTransitions {
@@ -304,12 +283,12 @@ public class MenuTransitions {
      * Close menu and return to whatever state was underneath.
      * This uses the PREVIOUS special state for dynamic navigation.
      */
-    @FromTransition(
-        from = io.github.jspinak.brobot.model.state.special.SpecialStateType.PREVIOUS.class,
+    @OutgoingTransition(
+        to = io.github.jspinak.brobot.model.state.special.SpecialStateType.PREVIOUS.class,
         priority = 1,
         description = "Close menu and return to previous state"
     )
-    public boolean fromPrevious() {
+    public boolean toPrevious() {
         log.info("Closing menu to return to previous state");
         if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
             return true;
@@ -319,7 +298,7 @@ public class MenuTransitions {
                action.type("\u001B").isSuccess(); // ESC key
     }
     
-    @ToTransition
+    @IncomingTransition
     public boolean verifyArrival() {
         log.info("Verifying arrival at Menu state");
         if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
@@ -373,53 +352,24 @@ public class PricingTransitionsTest {
 }
 ```
 
-## Migration from Legacy Format
-
-If you're migrating from older Brobot versions, here's a quick comparison:
-
-### Old Format (Pre-1.2.0)
-```java
-// Separate class for each transition
-@Transition(from = HomeState.class, to = WorldState.class)
-@Component
-public class HomeToWorldTransition {
-    public boolean execute() {
-        return action.click(homeState.getToWorldButton()).isSuccess();
-    }
-}
-```
-
-### New Format (1.2.0+)
-```java
-// All transitions for a state in one class
-@TransitionSet(state = WorldState.class)
-@Component
-public class WorldTransitions {
-    
-    @FromTransition(from = HomeState.class, priority = 1)
-    public boolean fromHome() {
-        if (FrameworkSettings.mock) return true;
-        return action.click(homeState.getToWorldButton()).isSuccess();
-    }
-    
-    @ToTransition(required = true)
-    public boolean verifyArrival() {
-        if (FrameworkSettings.mock) return true;
-        return action.find(worldState.getWorldMap()).isSuccess();
-    }
-}
-```
-
 ## Best Practices
 
 1. **Always include mock mode support** for testing environments
-2. **Use descriptive method names** like `fromMenu()`, `fromHomepage()` 
+2. **Use descriptive method names** like `toMenu()`, `toHomepage()` for outgoing transitions
 3. **Add logging** to track navigation flow during debugging
 4. **Verify critical elements** in ToTransition to ensure state is truly active
 5. **Set appropriate priorities** when multiple paths exist to the same state
 6. **Handle exceptions** gracefully in complex transitions
 7. **Keep transitions focused** - each method should do one thing well
+8. **Minimize dependencies** - each transition class should only need its own state
 
 ## Summary
 
-The @TransitionSet approach provides a clean, maintainable way to define state transitions in Brobot. By grouping all transitions for a state in a single class and using clear annotations to distinguish navigation logic (FromTransition) from verification logic (ToTransition), your automation code becomes easier to understand, test, and maintain.
+The @TransitionSet pattern with @OutgoingTransition and @IncomingTransition provides a clean, maintainable way to define state transitions in Brobot. By grouping a state's verification logic (IncomingTransition) with its outgoing navigation logic (OutgoingTransition) in a single class, you achieve:
+
+- **Better cohesion**: Outgoing transitions use the current state's images
+- **Fewer dependencies**: Each transition class only needs its own state
+- **Clearer organization**: Navigation logic flows naturally from each state
+- **Easier maintenance**: All transitions for a state are in one place
+
+This pattern makes your automation code easier to understand, test, and maintain.
