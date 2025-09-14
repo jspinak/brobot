@@ -22,6 +22,7 @@ import io.github.jspinak.brobot.action.internal.execution.ActionExecution;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
@@ -263,33 +264,34 @@ public class Action {
      * @return ActionResult containing the click operation results
      */
     public ActionResult click(StateImage... stateImages) {
-        // When clicking on StateImages, we need to find them first, then click
-        // Use ConditionalActionChain for proper find-then-click behavior
-        if (stateImages.length == 1) {
-            // Use the convenience method for single image
-            return ConditionalActionChain
-                    .find(stateImages[0])
-                    .ifFoundClick()
-                    .perform(this);
-        } else {
-            // For multiple images, create a chain with ObjectCollection
-            ConditionalActionChain chain = ConditionalActionChain
-                    .find(new PatternFindOptions.Builder().build());
-            // Add the ObjectCollection as the first action's target
-            ObjectCollection collection = new ObjectCollection.Builder()
-                    .withImages(stateImages)
-                    .build();
-            return chain.ifFoundClick()
-                    .perform(this, collection);
+        // First, perform a Find operation
+        ActionResult findResult = find(stateImages);
+
+        // If Find succeeded and we have matches, click on them
+        if (findResult.isSuccess() && !findResult.getMatchList().isEmpty()) {
+            // Create ObjectCollection with the matches from Find
+            // Convert matches to clickable regions
+            ObjectCollection matchCollection =
+                    new ObjectCollection.Builder()
+                            .withMatchObjectsAsRegions(
+                                    findResult.getMatchList().toArray(new Match[0]))
+                            .build();
+
+            // Perform the Click with the matches
+            ClickOptions clickOptions = new ClickOptions.Builder().build();
+            return perform(clickOptions, matchCollection);
         }
+
+        // Find failed or no matches found
+        return findResult;
     }
 
     /**
      * Performs a Click action with default options on the specified object collections.
      *
-     * <p>This method handles clicking on various object types. For StateImages, it performs
-     * a Find operation first, then clicks on the found matches. For Locations and Regions,
-     * it clicks directly without finding.
+     * <p>This method handles clicking on various object types. For StateImages, it performs a Find
+     * operation first, then clicks on the found matches. For Locations and Regions, it clicks
+     * directly without finding.
      *
      * @param objectCollections collections containing objects to click
      * @return ActionResult containing the click operation results
@@ -307,11 +309,25 @@ public class Action {
         }
 
         if (hasImages) {
-            // If there are images, use find-then-click pattern
-            ConditionalActionChain chain = ConditionalActionChain
-                    .find(new PatternFindOptions.Builder().build());
-            return chain.ifFoundClick()
-                    .perform(this, objectCollections);
+            // If there are images, perform find first
+            ActionResult findResult = find(objectCollections);
+
+            // If Find succeeded and we have matches, click on them
+            if (findResult.isSuccess() && !findResult.getMatchList().isEmpty()) {
+                // Create ObjectCollection with the matches from Find
+                ObjectCollection matchCollection =
+                        new ObjectCollection.Builder()
+                                .withMatchObjectsAsRegions(
+                                        findResult.getMatchList().toArray(new Match[0]))
+                                .build();
+
+                // Perform the Click with the matches
+                ClickOptions clickOptions = new ClickOptions.Builder().build();
+                return perform(clickOptions, matchCollection);
+            }
+
+            // Find failed or no matches found
+            return findResult;
         } else {
             // For locations/regions, click directly without finding
             ClickOptions clickOptions = new ClickOptions.Builder().build();
