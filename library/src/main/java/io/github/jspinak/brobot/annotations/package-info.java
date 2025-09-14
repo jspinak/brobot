@@ -26,16 +26,25 @@
  *         .build();
  * }
  *
- * // Define a transition
- * @Transition(from = LoginState.class, to = DashboardState.class)
+ * // Define transitions for a state
+ * @TransitionSet(state = DashboardState.class)
  * @RequiredArgsConstructor
  * @Slf4j
- * public class LoginToDashboardTransition {
- *     private final ActionConfig actionConfig;
+ * public class DashboardTransitions {
+ *     private final Action action;
+ *     private final LoginState loginState;
+ *     private final DashboardState dashboardState;
  *
- *     public boolean execute() {
- *         // Transition logic here
- *         return true;
+ *     @FromTransition(from = LoginState.class)
+ *     public boolean fromLogin() {
+ *         // Transition logic from login to dashboard
+ *         return action.click(loginState.getLoginButton()).isSuccess();
+ *     }
+ *
+ *     @ToTransition
+ *     public boolean verifyArrival() {
+ *         // Verify we've arrived at the dashboard
+ *         return action.find(dashboardState.getDashboardHeader()).isSuccess();
  *     }
  * }
  * </pre>

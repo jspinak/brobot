@@ -26,7 +26,7 @@ import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.test.TestCategories;
 
 /**
- * Test suite for AnnotationProcessor. Tests the runtime processing of @State and @Transition
+ * Test suite for AnnotationProcessor. Tests the runtime processing of @State and @TransitionSet
  * annotations.
  */
 @DisplayName("AnnotationProcessor Tests")
@@ -62,6 +62,8 @@ public class AnnotationProcessorTest extends BrobotTestBase {
 
     @Mock private TransitionAnnotationBeanPostProcessor transitionBeanPostProcessor;
 
+    @Mock private TransitionSetProcessor transitionSetProcessor;
+
     private AnnotationProcessor processor;
     private AutoCloseable mocks;
 
@@ -75,10 +77,16 @@ public class AnnotationProcessorTest extends BrobotTestBase {
     @io.github.jspinak.brobot.annotations.State(profiles = {"test", "dev"})
     static class ProfileState {}
 
-    // Test transition class
-    @io.github.jspinak.brobot.annotations.Transition(from = TestState.class, to = SimpleState.class)
+    // Test transition class using TransitionSet
+    @io.github.jspinak.brobot.annotations.TransitionSet(state = SimpleState.class)
     static class TestTransition {
+        @io.github.jspinak.brobot.annotations.FromTransition(from = TestState.class)
         public boolean execute() {
+            return true;
+        }
+
+        @io.github.jspinak.brobot.annotations.ToTransition
+        public boolean verifyArrival() {
             return true;
         }
     }
@@ -100,7 +108,8 @@ public class AnnotationProcessorTest extends BrobotTestBase {
                         registrationService,
                         eventPublisher,
                         stateBeanPostProcessor,
-                        transitionBeanPostProcessor);
+                        transitionBeanPostProcessor,
+                        transitionSetProcessor);
     }
 
     @AfterEach
@@ -211,7 +220,7 @@ public class AnnotationProcessorTest extends BrobotTestBase {
     class TransitionProcessingTests {
 
         @Test
-        @DisplayName("Should process transitions with @Transition annotation")
+        @DisplayName("Should process transitions with @TransitionSet annotation")
         void shouldProcessTransitionsWithAnnotation() {
             // Setup states first
             Map<String, Object> stateBeans = new HashMap<>();
@@ -235,13 +244,11 @@ public class AnnotationProcessorTest extends BrobotTestBase {
             when(applicationContext.getBeansWithAnnotation(
                             io.github.jspinak.brobot.annotations.State.class))
                     .thenReturn(stateBeans);
-            when(applicationContext.getBeansWithAnnotation(Transition.class))
+            when(applicationContext.getBeansWithAnnotation(TransitionSet.class))
                     .thenReturn(transitionBeans);
 
             // Mock the BeanPostProcessors
-            when(transitionBeanPostProcessor.getTransitionBeans()).thenReturn(transitionBeans);
-            when(transitionBeanPostProcessor.getTransitionBeanCount())
-                    .thenReturn(transitionBeans.size());
+            when(transitionBeanPostProcessor.getTransitionSetBeans()).thenReturn(transitionBeans);
             when(applicationContext.getEnvironment()).thenReturn(environment);
             when(environment.getActiveProfiles()).thenReturn(new String[] {});
             when(stateBuilder.buildState(any(), any()))
@@ -299,7 +306,7 @@ public class AnnotationProcessorTest extends BrobotTestBase {
             when(applicationContext.getBeansWithAnnotation(
                             io.github.jspinak.brobot.annotations.State.class))
                     .thenReturn(stateBeans);
-            when(applicationContext.getBeansWithAnnotation(Transition.class))
+            when(applicationContext.getBeansWithAnnotation(TransitionSet.class))
                     .thenReturn(new HashMap<>());
             when(applicationContext.getEnvironment()).thenReturn(environment);
             when(environment.getActiveProfiles()).thenReturn(new String[] {});
@@ -323,11 +330,13 @@ public class AnnotationProcessorTest extends BrobotTestBase {
         @DisplayName("Should handle missing transition method gracefully")
         void shouldHandleMissingTransitionMethod() {
             // Setup transition with invalid method name
-            @Transition(
-                    from = TestState.class,
-                    to = SimpleState.class,
-                    method = "nonExistentMethod")
-            class InvalidTransition {}
+            @TransitionSet(state = SimpleState.class)
+            class InvalidTransition {
+                @FromTransition(from = TestState.class)
+                public boolean nonExistentMethod() {
+                    return false;
+                }
+            }
 
             Map<String, Object> transitionBeans = new HashMap<>();
             transitionBeans.put("invalidTransition", new InvalidTransition());
@@ -335,13 +344,11 @@ public class AnnotationProcessorTest extends BrobotTestBase {
             when(applicationContext.getBeansWithAnnotation(
                             io.github.jspinak.brobot.annotations.State.class))
                     .thenReturn(new HashMap<>());
-            when(applicationContext.getBeansWithAnnotation(Transition.class))
+            when(applicationContext.getBeansWithAnnotation(TransitionSet.class))
                     .thenReturn(transitionBeans);
 
             // Mock the BeanPostProcessors
-            when(transitionBeanPostProcessor.getTransitionBeans()).thenReturn(transitionBeans);
-            when(transitionBeanPostProcessor.getTransitionBeanCount())
-                    .thenReturn(transitionBeans.size());
+            when(transitionBeanPostProcessor.getTransitionSetBeans()).thenReturn(transitionBeans);
             when(applicationContext.getEnvironment()).thenReturn(environment);
             when(environment.getActiveProfiles()).thenReturn(new String[] {});
             when(registrationService.getRegisteredStateCount()).thenReturn(0);

@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import com.example.basics.states.IslandState;
-import com.example.basics.transitions.WorldToIslandTransition;
+import com.example.basics.transitions.IslandTransitions;
 
 import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ActionResult;
@@ -19,15 +19,15 @@ public class GetNewIsland {
 
     private final Action action;
     private final IslandState island;
-    private final WorldToIslandTransition worldTransitions;
+    private final IslandTransitions islandTransitions;
 
     private Map<String, String> islandTypes = new HashMap<>();
 
     public GetNewIsland(
-            Action action, IslandState island, WorldToIslandTransition worldTransitions) {
+            Action action, IslandState island, IslandTransitions islandTransitions) {
         this.action = action;
         this.island = island;
-        this.worldTransitions = worldTransitions;
+        this.islandTransitions = islandTransitions;
 
         // Initialize the map
         islandTypes.put("Burg", "Castle");
@@ -39,7 +39,7 @@ public class GetNewIsland {
     }
 
     public String getIsland() {
-        worldTransitions.execute();
+        islandTransitions.fromWorld();
         String textRead = getIslandType();
         for (Map.Entry<String, String> type : islandTypes.entrySet()) {
             if (textRead.contains(type.getKey())) return type.getValue();
