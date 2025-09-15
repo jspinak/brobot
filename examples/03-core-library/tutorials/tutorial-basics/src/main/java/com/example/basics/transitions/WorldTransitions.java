@@ -7,21 +7,19 @@ import com.example.basics.states.IslandState;
 import com.example.basics.states.WorldState;
 
 import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.annotations.OutgoingTransition;
 import io.github.jspinak.brobot.annotations.IncomingTransition;
+import io.github.jspinak.brobot.annotations.OutgoingTransition;
 import io.github.jspinak.brobot.annotations.TransitionSet;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * All transitions for the World state.
- * Contains:
- * - An IncomingTransition to verify arrival at World
+ * All transitions for the World state. Contains: - An IncomingTransition to verify arrival at World
  * - OutgoingTransitions that go FROM World TO other states
  *
- * This pattern is cleaner because the outgoing transitions use World's images,
- * creating better cohesion with only the WorldState as a dependency.
+ * <p>This pattern is cleaner because the outgoing transitions use World's images, creating better
+ * cohesion with only the WorldState as a dependency.
  */
 @TransitionSet(state = WorldState.class, description = "World state transitions")
 @Component
@@ -32,9 +30,7 @@ public class WorldTransitions {
     private final WorldState worldState;
     private final Action action;
 
-    /**
-     * Navigate from World to Home by clicking the home button.
-     */
+    /** Navigate from World to Home by clicking the home button. */
     @OutgoingTransition(
             to = HomeState.class,
             priority = 1,
@@ -51,9 +47,7 @@ public class WorldTransitions {
         return true;
     }
 
-    /**
-     * Navigate from World to Island by clicking on an island.
-     */
+    /** Navigate from World to Island by clicking on an island. */
     @OutgoingTransition(
             to = IslandState.class,
             priority = 2,

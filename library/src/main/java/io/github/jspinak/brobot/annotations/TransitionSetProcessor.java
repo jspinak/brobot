@@ -16,14 +16,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Processes @TransitionSet classes and their @IncomingTransition and @OutgoingTransition methods to build
- * StateTransitions objects for the Brobot framework.
+ * Processes @TransitionSet classes and their @IncomingTransition and @OutgoingTransition methods to
+ * build StateTransitions objects for the Brobot framework.
  *
- * The new pattern (1.3.0+) groups transitions more cohesively:
- * - @IncomingTransition verifies arrival at the state
- * - @OutgoingTransition defines transitions FROM this state TO other states
+ * <p>The new pattern (1.3.0+) groups transitions more cohesively: - @IncomingTransition verifies
+ * arrival at the state - @OutgoingTransition defines transitions FROM this state TO other states
  *
- * This is cleaner because outgoing transitions use the current state's images.
+ * <p>This is cleaner because outgoing transitions use the current state's images.
  *
  * @since 1.3.0
  */
@@ -60,9 +59,12 @@ public class TransitionSetProcessor {
             // Process IncomingTransition (arrival/finish transition)
             Method incomingTransitionMethod = findIncomingTransitionMethod(beanClass);
             if (incomingTransitionMethod != null) {
-                BooleanSupplier incomingTransition = createBooleanSupplier(bean, incomingTransitionMethod);
+                BooleanSupplier incomingTransition =
+                        createBooleanSupplier(bean, incomingTransitionMethod);
                 builder.addTransitionFinish(incomingTransition);
-                log.debug("Added IncomingTransition from method: {}", incomingTransitionMethod.getName());
+                log.debug(
+                        "Added IncomingTransition from method: {}",
+                        incomingTransitionMethod.getName());
             } else {
                 log.warn(
                         "No @IncomingTransition method found for state: {}. Using default (always"
@@ -88,7 +90,8 @@ public class TransitionSetProcessor {
             }
 
             log.info(
-                    "Successfully registered {} OutgoingTransitions, {} FromTransitions and {} IncomingTransition for state: {}",
+                    "Successfully registered {} OutgoingTransitions, {} FromTransitions and {}"
+                            + " IncomingTransition for state: {}",
                     outgoingTransitionMethods.size(),
                     fromTransitionMethods.size(),
                     incomingTransitionMethod != null ? 1 : 0,
@@ -252,7 +255,8 @@ public class TransitionSetProcessor {
     }
 
     /** Register an IncomingTransition for a specific state. */
-    private void registerIncomingTransitionForState(String stateName, StateTransitions.Builder builder) {
+    private void registerIncomingTransitionForState(
+            String stateName, StateTransitions.Builder builder) {
         // Get the state ID
         var stateOpt = stateService.getState(stateName);
 

@@ -3,12 +3,12 @@ package io.github.jspinak.brobot.annotations;
 import java.lang.annotation.*;
 
 /**
- * Marks a method as an OutgoingTransition - a transition FROM the state defined in
- * the enclosing @TransitionSet class TO a specific target state.
+ * Marks a method as an OutgoingTransition - a transition FROM the state defined in the
+ * enclosing @TransitionSet class TO a specific target state.
  *
- * <p>This annotation represents the cleaner pattern where a state's transition class
- * contains its incoming transition (ToTransition) and all its outgoing transitions.
- * This is more cohesive since outgoing transitions use the current state's images.
+ * <p>This annotation represents the cleaner pattern where a state's transition class contains its
+ * incoming transition (ToTransition) and all its outgoing transitions. This is more cohesive since
+ * outgoing transitions use the current state's images.
  *
  * <p>The annotated method should:
  *
