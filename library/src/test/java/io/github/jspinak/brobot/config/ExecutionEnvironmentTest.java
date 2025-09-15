@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.config;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -21,14 +22,25 @@ import io.github.jspinak.brobot.test.BrobotTestBase;
 public class ExecutionEnvironmentTest extends BrobotTestBase {
 
     private ExecutionEnvironment environment;
+    private ExecutionEnvironment originalEnvironment;
 
     @BeforeEach
     @Override
     public void setupTest() {
         super.setupTest();
+        // Save the original instance to restore after test
+        originalEnvironment = ExecutionEnvironment.getInstance();
         // Reset to a fresh instance for each test
         environment = ExecutionEnvironment.builder().build();
         ExecutionEnvironment.setInstance(environment);
+    }
+
+    @AfterEach
+    public void tearDown() {
+        // Restore the original environment to prevent test pollution
+        if (originalEnvironment != null) {
+            ExecutionEnvironment.setInstance(originalEnvironment);
+        }
     }
 
     @Nested
