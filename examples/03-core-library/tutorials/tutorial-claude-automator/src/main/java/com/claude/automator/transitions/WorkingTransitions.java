@@ -6,21 +6,19 @@ import com.claude.automator.states.PromptState;
 import com.claude.automator.states.WorkingState;
 
 import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.annotations.OutgoingTransition;
 import io.github.jspinak.brobot.annotations.IncomingTransition;
+import io.github.jspinak.brobot.annotations.OutgoingTransition;
 import io.github.jspinak.brobot.annotations.TransitionSet;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * All transitions for the Working state.
- * Contains:
- * - An IncomingTransition to verify arrival at Working
- * - OutgoingTransitions that go FROM Working TO other states
+ * All transitions for the Working state. Contains: - An IncomingTransition to verify arrival at
+ * Working - OutgoingTransitions that go FROM Working TO other states
  *
- * This pattern is cleaner because the outgoing transitions use Working's images,
- * creating better cohesion with only the WorkingState as a dependency.
+ * <p>This pattern is cleaner because the outgoing transitions use Working's images, creating better
+ * cohesion with only the WorkingState as a dependency.
  */
 @TransitionSet(state = WorkingState.class, description = "Claude Working state transitions")
 @Component
@@ -32,8 +30,8 @@ public class WorkingTransitions {
     private final Action action;
 
     /**
-     * Navigate from Working to Prompt when work is complete.
-     * This occurs when Claude finishes processing and returns to the prompt.
+     * Navigate from Working to Prompt when work is complete. This occurs when Claude finishes
+     * processing and returns to the prompt.
      */
     @OutgoingTransition(
             to = PromptState.class,

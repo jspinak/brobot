@@ -3,25 +3,23 @@ package com.example.basics.transitions;
 import org.springframework.stereotype.Component;
 
 import com.example.basics.states.HomeState;
-import com.example.basics.states.WorldState;
 import com.example.basics.states.IslandState;
+import com.example.basics.states.WorldState;
 
 import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.annotations.OutgoingTransition;
 import io.github.jspinak.brobot.annotations.IncomingTransition;
+import io.github.jspinak.brobot.annotations.OutgoingTransition;
 import io.github.jspinak.brobot.annotations.TransitionSet;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * All transitions for the Home state.
- * Contains:
- * - An IncomingTransition to verify arrival at Home
- * - OutgoingTransitions that go FROM Home TO other states
+ * All transitions for the Home state. Contains: - An IncomingTransition to verify arrival at Home -
+ * OutgoingTransitions that go FROM Home TO other states
  *
- * This pattern creates better cohesion - only needs HomeState as dependency
- * since all outgoing transitions use Home's images.
+ * <p>This pattern creates better cohesion - only needs HomeState as dependency since all outgoing
+ * transitions use Home's images.
  */
 @TransitionSet(state = HomeState.class, description = "Home state transitions")
 @Component
@@ -32,9 +30,7 @@ public class HomeTransitions {
     private final HomeState homeState;
     private final Action action;
 
-    /**
-     * Navigate from Home to World by clicking the world button.
-     */
+    /** Navigate from Home to World by clicking the world button. */
     @OutgoingTransition(
             to = WorldState.class,
             priority = 1,
@@ -50,9 +46,7 @@ public class HomeTransitions {
         return action.click(homeState.getToWorldButton()).isSuccess();
     }
 
-    /**
-     * Navigate from Home to Island by clicking the island shortcut.
-     */
+    /** Navigate from Home to Island by clicking the island shortcut. */
     @OutgoingTransition(
             to = IslandState.class,
             priority = 2,

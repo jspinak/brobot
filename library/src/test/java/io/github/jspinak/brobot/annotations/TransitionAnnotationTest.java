@@ -13,12 +13,11 @@ import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.test.TestCategories;
-import io.github.jspinak.brobot.annotations.IncomingTransition;
-import io.github.jspinak.brobot.annotations.OutgoingTransition;
 
 /**
- * Comprehensive test suite for @TransitionSet, @FromTransition, @OutgoingTransition, and @IncomingTransition annotations.
- * Tests annotation attributes, relationships, method binding, and Spring integration.
+ * Comprehensive test suite for @TransitionSet, @FromTransition, @OutgoingTransition,
+ * and @IncomingTransition annotations. Tests annotation attributes, relationships, method binding,
+ * and Spring integration.
  */
 @DisplayName("Transition Annotations Tests")
 @Tag(TestCategories.UNIT)
@@ -365,7 +364,8 @@ public class TransitionAnnotationTest extends BrobotTestBase {
                             .filter(m -> m.isAnnotationPresent(IncomingTransition.class))
                             .collect(Collectors.toList());
 
-            assertEquals(1, incomingTransitions.size(), "Should have exactly one IncomingTransition");
+            assertEquals(
+                    1, incomingTransitions.size(), "Should have exactly one IncomingTransition");
         }
 
         @Test
@@ -542,9 +542,12 @@ public class TransitionAnnotationTest extends BrobotTestBase {
             assertNotNull(IncomingTransition.class.getMethod("timeout"));
             assertNotNull(IncomingTransition.class.getMethod("required"));
 
-            assertEquals(String.class, IncomingTransition.class.getMethod("description").getReturnType());
+            assertEquals(
+                    String.class,
+                    IncomingTransition.class.getMethod("description").getReturnType());
             assertEquals(int.class, IncomingTransition.class.getMethod("timeout").getReturnType());
-            assertEquals(boolean.class, IncomingTransition.class.getMethod("required").getReturnType());
+            assertEquals(
+                    boolean.class, IncomingTransition.class.getMethod("required").getReturnType());
         }
 
         @Test
@@ -587,7 +590,8 @@ public class TransitionAnnotationTest extends BrobotTestBase {
 
         @Test
         @DisplayName("Should work with Spring's annotation utilities for IncomingTransition")
-        void shouldWorkWithSpringAnnotationUtilsForIncomingTransition() throws NoSuchMethodException {
+        void shouldWorkWithSpringAnnotationUtilsForIncomingTransition()
+                throws NoSuchMethodException {
             Method verifyArrival = PricingTransitions.class.getMethod("verifyArrival");
             IncomingTransition annotation =
                     AnnotationUtils.findAnnotation(verifyArrival, IncomingTransition.class);
@@ -620,7 +624,8 @@ public class TransitionAnnotationTest extends BrobotTestBase {
                 }
             }
 
-            TransitionSet annotation = OnlyIncomingTransition.class.getAnnotation(TransitionSet.class);
+            TransitionSet annotation =
+                    OnlyIncomingTransition.class.getAnnotation(TransitionSet.class);
             assertNotNull(annotation);
 
             Method[] methods = OnlyIncomingTransition.class.getDeclaredMethods();
@@ -698,7 +703,8 @@ public class TransitionAnnotationTest extends BrobotTestBase {
             try {
                 Method method = NonTransitionClass.class.getMethod("someMethod");
                 FromTransition fromAnnotation = method.getAnnotation(FromTransition.class);
-                IncomingTransition incomingAnnotation = method.getAnnotation(IncomingTransition.class);
+                IncomingTransition incomingAnnotation =
+                        method.getAnnotation(IncomingTransition.class);
                 assertNull(fromAnnotation);
                 assertNull(incomingAnnotation);
             } catch (NoSuchMethodException e) {

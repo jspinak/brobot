@@ -3,8 +3,8 @@ package io.github.jspinak.brobot.annotations;
 import java.lang.annotation.*;
 
 /**
- * Marks a method as an IncomingTransition (also known as arrival transition or verification transition).
- * This transition verifies that we have successfully arrived at the target state.
+ * Marks a method as an IncomingTransition (also known as arrival transition or verification
+ * transition). This transition verifies that we have successfully arrived at the target state.
  *
  * <p>The annotated method should:
  *
@@ -15,8 +15,8 @@ import java.lang.annotation.*;
  *   <li>There should be only ONE @IncomingTransition method per @TransitionSet class
  * </ul>
  *
- * <p>This transition is executed to confirm successful navigation to the target state,
- * regardless of which state we came from. It verifies the state is active and ready.
+ * <p>This transition is executed to confirm successful navigation to the target state, regardless
+ * of which state we came from. It verifies the state is active and ready.
  *
  * <p>Example usage:
  *

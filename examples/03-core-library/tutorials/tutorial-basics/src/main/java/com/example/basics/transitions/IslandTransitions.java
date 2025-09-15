@@ -7,21 +7,19 @@ import com.example.basics.states.IslandState;
 import com.example.basics.states.WorldState;
 
 import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.annotations.OutgoingTransition;
 import io.github.jspinak.brobot.annotations.IncomingTransition;
+import io.github.jspinak.brobot.annotations.OutgoingTransition;
 import io.github.jspinak.brobot.annotations.TransitionSet;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * All transitions for the Island state.
- * Contains:
- * - An IncomingTransition to verify arrival at Island
- * - OutgoingTransitions that go FROM Island TO other states
+ * All transitions for the Island state. Contains: - An IncomingTransition to verify arrival at
+ * Island - OutgoingTransitions that go FROM Island TO other states
  *
- * This pattern is cleaner because the outgoing transitions use Island's images,
- * creating better cohesion with only the IslandState as a dependency.
+ * <p>This pattern is cleaner because the outgoing transitions use Island's images, creating better
+ * cohesion with only the IslandState as a dependency.
  */
 @TransitionSet(state = IslandState.class, description = "Island state transitions")
 @Component
@@ -32,9 +30,7 @@ public class IslandTransitions {
     private final IslandState islandState;
     private final Action action;
 
-    /**
-     * Navigate from Island back to World by clicking the back button.
-     */
+    /** Navigate from Island back to World by clicking the back button. */
     @OutgoingTransition(
             to = WorldState.class,
             priority = 1,
@@ -50,9 +46,7 @@ public class IslandTransitions {
         return action.click(islandState.getBackToWorldButton()).isSuccess();
     }
 
-    /**
-     * Navigate from Island to Home (shortcut).
-     */
+    /** Navigate from Island to Home (shortcut). */
     @OutgoingTransition(
             to = HomeState.class,
             priority = 2,
