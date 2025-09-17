@@ -85,6 +85,80 @@ public class ObjectCollection {
                 && scenes.isEmpty();
     }
 
+    // ===== Convenience Factory Methods =====
+
+    /**
+     * Creates an ObjectCollection containing a single Location.
+     *
+     * <p>This is a convenience method for the common case of acting on a single location.
+     *
+     * @param location the location to include
+     * @return a new ObjectCollection containing the location
+     */
+    public static ObjectCollection withLocations(Location... locations) {
+        return new Builder().withLocations(locations).build();
+    }
+
+    /**
+     * Creates an ObjectCollection containing StateImages.
+     *
+     * <p>This is a convenience method for the common case of acting on state images.
+     *
+     * @param stateImages the state images to include
+     * @return a new ObjectCollection containing the state images
+     */
+    public static ObjectCollection withStateImages(StateImage... stateImages) {
+        return new Builder().withImages(stateImages).build();
+    }
+
+    /**
+     * Creates an ObjectCollection containing Regions.
+     *
+     * <p>This is a convenience method for the common case of acting on regions.
+     *
+     * @param regions the regions to include
+     * @return a new ObjectCollection containing the regions
+     */
+    public static ObjectCollection withRegions(Region... regions) {
+        return new Builder().withRegions(regions).build();
+    }
+
+    /**
+     * Creates an ObjectCollection containing StateRegions.
+     *
+     * <p>This is a convenience method for the common case of acting on state regions.
+     *
+     * @param stateRegions the state regions to include
+     * @return a new ObjectCollection containing the state regions
+     */
+    public static ObjectCollection withStateRegions(StateRegion... stateRegions) {
+        return new Builder().withRegions(stateRegions).build();
+    }
+
+    /**
+     * Creates an ObjectCollection containing Strings.
+     *
+     * <p>This is a convenience method for the common case of typing strings.
+     *
+     * @param strings the strings to include
+     * @return a new ObjectCollection containing the strings
+     */
+    public static ObjectCollection withStrings(String... strings) {
+        return new Builder().withStrings(strings).build();
+    }
+
+    /**
+     * Creates an ObjectCollection from an ActionResult.
+     *
+     * <p>This is a convenience method for using results from a previous find operation.
+     *
+     * @param actionResult the action result to include
+     * @return a new ObjectCollection containing the action result
+     */
+    public static ObjectCollection fromActionResult(ActionResult actionResult) {
+        return new Builder().withMatches(actionResult).build();
+    }
+
     /**
      * Sets the timesActedOn variable to 0 for all objects, including those found in the
      * ActionResult variable. Knowing how many times an object Match was acted on is valuable for

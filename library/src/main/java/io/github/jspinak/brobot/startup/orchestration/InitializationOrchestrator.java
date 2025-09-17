@@ -77,7 +77,6 @@ public class InitializationOrchestrator {
     @Autowired(required = false)
     private BrobotProperties brobotProperties;
 
-
     @Autowired(required = false)
     private MockConfiguration mockConfiguration;
 
@@ -476,8 +475,7 @@ public class InitializationOrchestrator {
 
             // Check for specific Brobot event listeners
             String[] importantListeners = {
-                "StateInitializationOrchestrator",
-                "AutoStartupVerifier"
+                "StateInitializationOrchestrator", "AutoStartupVerifier"
             };
 
             for (String listenerName : importantListeners) {

@@ -1,8 +1,9 @@
 package io.github.jspinak.brobot.test;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Simple base test class for tests that don't require Spring context. Sets up mock mode to ensure
@@ -10,9 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
  */
 public abstract class SimpleTestBase {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
-
+    @Autowired private BrobotProperties brobotProperties;
 
     @BeforeEach
     public void setupMockMode() {

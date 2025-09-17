@@ -70,26 +70,5 @@ public class PostClickHandler {
         return false;
     }
 
-    /**
-     * Handles post-click operations for ActionConfig-based actions.
-     *
-     * <p>In the new ActionConfig architecture, mouse movement after clicks should be handled
-     * through action chaining rather than built-in post-click movement. This method is provided for
-     * compatibility but performs no operation.
-     *
-     * <p>To move the mouse after a click with ActionConfig:
-     *
-     * <pre>{@code
-     * ClickOptions clickWithMove = new ClickOptions.Builder()
-     *     .then(new MouseMoveOptions.Builder()
-     *         .setLocation(targetLocation)
-     *         .build())
-     *     .build();
-     * }</pre>
-     *
-     * @param actionConfig The action configuration (unused in this implementation)
-     * @return false, as post-click movement is handled through action chaining
-     * @deprecated Post-click mouse movement should be implemented via action chaining
-     */
-    // Duplicate deprecated method removed - using the one at line 67
+    // Duplicate deprecated method removed - use action chaining for post-click movement
 }

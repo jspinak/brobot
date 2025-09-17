@@ -60,10 +60,15 @@ public class BrobotIntegrationTest extends BrobotTestBase {
         // Check that BrobotProperties are updated from properties
         System.out.println("BrobotProperties values:");
         System.out.println("  mock = " + brobotProperties.getCore().isMock());
-        System.out.println("  mockTimeFindFirst = " + brobotProperties.getMock().getTimeFindFirst());
+        System.out.println(
+                "  mockTimeFindFirst = " + brobotProperties.getMock().getTimeFindFirst());
 
         assertTrue(brobotProperties.getCore().isMock(), "Mock mode should be true");
-        assertEquals(0.01, brobotProperties.getMock().getTimeFindFirst(), 0.001, "Mock time should be configured");
+        assertEquals(
+                0.01,
+                brobotProperties.getMock().getTimeFindFirst(),
+                0.001,
+                "Mock time should be configured");
 
         System.out.println("\n✅ BrobotProperties are properly configured from Brobot library!");
     }

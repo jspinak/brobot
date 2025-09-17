@@ -21,7 +21,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.TestPropertySource;
 
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.config.core.BrobotPropertyVerifier;
@@ -29,8 +31,6 @@ import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import io.github.jspinak.brobot.logging.unified.LogBuilder;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 
 /**
  * Comprehensive tests for BrobotPropertyVerifier. Achieves high coverage through testing all
@@ -43,10 +43,7 @@ import org.springframework.test.context.TestPropertySource;
         matches = "true",
         disabledReason = "Test incompatible with CI environment")
 @SpringBootTest
-@TestPropertySource(properties = {
-    "brobot.core.mock=true",
-    "brobot.core.headless=true"
-})
+@TestPropertySource(properties = {"brobot.core.mock=true", "brobot.core.headless=true"})
 public class BrobotPropertyVerifierTest extends BrobotTestBase {
 
     @Mock private BrobotProperties mockProperties;

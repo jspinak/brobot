@@ -12,10 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Pattern;
@@ -32,9 +32,7 @@ import io.github.jspinak.brobot.testutils.TestPaths;
 @Disabled("CI failure - needs investigation")
 public class FindImageWithPositionTest extends BrobotIntegrationTestBase {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
-
+    @Autowired private BrobotProperties brobotProperties;
 
     @BeforeAll
     public static void setupHeadlessMode() {

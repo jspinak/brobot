@@ -12,7 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.click.Click;
@@ -22,6 +21,7 @@ import io.github.jspinak.brobot.action.internal.mouse.MouseDownWrapper;
 import io.github.jspinak.brobot.action.internal.mouse.MouseUpWrapper;
 import io.github.jspinak.brobot.action.internal.mouse.MoveMouseWrapper;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
@@ -46,9 +46,7 @@ import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 @Disabled("CI failure - needs investigation")
 public class ClickIntegrationTestUpdated extends BrobotIntegrationTestBase {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
-
+    @Autowired private BrobotProperties brobotProperties;
 
     @Autowired private ActionService actionService;
 

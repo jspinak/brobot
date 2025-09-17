@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
@@ -25,8 +27,6 @@ import io.github.jspinak.brobot.action.composite.drag.DragOptions;
 import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
 
 /**
@@ -38,10 +38,7 @@ import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
         matches = "true",
         disabledReason = "Test incompatible with CI environment")
 @SpringBootTest
-@TestPropertySource(properties = {
-    "brobot.core.mock=true",
-    "brobot.core.headless=true"
-})
+@TestPropertySource(properties = {"brobot.core.mock=true", "brobot.core.headless=true"})
 public class IllustrationControllerTest extends BrobotTestBase {
 
     @Mock private ImageFileUtilities mockImageUtils;

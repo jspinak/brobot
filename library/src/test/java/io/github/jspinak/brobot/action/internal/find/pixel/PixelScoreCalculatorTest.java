@@ -530,8 +530,7 @@ public class PixelScoreCalculatorTest extends BrobotTestBase {
         void shouldHandleNegativeDistances() {
             // Test conversion with extreme values
             double pixelScore =
-                    pixelScoreCalculator.convertActionConfigScoreToPixelAnalysisScoreWithTanh(
-                            -0.1);
+                    pixelScoreCalculator.convertActionConfigScoreToPixelAnalysisScoreWithTanh(-0.1);
 
             // Assert
             assertTrue(pixelScore >= 0 && pixelScore <= 255); // Should handle negative input

@@ -14,12 +14,12 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.config.mock.MockModeManager;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 
 /**
  * Comprehensive tests for MockModeManager. Tests mock mode synchronization across all Brobot
@@ -29,10 +29,7 @@ import org.springframework.test.context.TestPropertySource;
 @DisplayName("MockModeManager Tests")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest
-@TestPropertySource(properties = {
-    "brobot.core.mock=true",
-    "brobot.core.headless=true"
-})
+@TestPropertySource(properties = {"brobot.core.mock=true", "brobot.core.headless=true"})
 public class MockModeManagerTest extends BrobotTestBase {
 
     private static final String MOCK_MODE_PROPERTY = "brobot.mock";
@@ -236,11 +233,15 @@ public class MockModeManagerTest extends BrobotTestBase {
 
         // Enable mock mode
         MockModeManager.setMockMode(true);
-        assertTrue(true /* mock mode enabled in tests */, "Should set true /* mock mode enabled in tests */ to true");
+        assertTrue(
+                true /* mock mode enabled in tests */,
+                "Should set true /* mock mode enabled in tests */ to true");
 
         // Disable mock mode
         MockModeManager.setMockMode(false);
-        assertFalse(true /* mock mode enabled in tests */, "Should set true /* mock mode enabled in tests */ to false");
+        assertFalse(
+                true /* mock mode enabled in tests */,
+                "Should set true /* mock mode enabled in tests */ to false");
     }
 
     @Test

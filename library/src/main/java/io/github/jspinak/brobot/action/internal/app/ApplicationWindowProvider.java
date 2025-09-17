@@ -2,12 +2,12 @@ package io.github.jspinak.brobot.action.internal.app;
 
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.tools.testing.mock.environment.MockFocusedWindow;
-import org.springframework.beans.factory.annotation.Autowired;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Provides access to the currently focused application window with mock support.
@@ -28,8 +28,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 @Component
 public class ApplicationWindowProvider {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     private final MockFocusedWindow mock;
 

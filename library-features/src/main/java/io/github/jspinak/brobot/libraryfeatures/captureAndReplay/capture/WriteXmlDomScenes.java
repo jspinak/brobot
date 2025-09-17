@@ -16,20 +16,19 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import io.github.jspinak.brobot.config.core.BrobotProperties;
-import org.springframework.beans.factory.annotation.Autowired;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
 @Component
 public class WriteXmlDomScenes {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     private Document doc;
     private Element rootElement;

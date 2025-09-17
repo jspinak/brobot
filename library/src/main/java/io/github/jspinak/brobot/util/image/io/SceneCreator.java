@@ -5,11 +5,11 @@ import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.model.element.Scene;
-import org.springframework.beans.factory.annotation.Autowired;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
+import io.github.jspinak.brobot.model.element.Scene;
 
 /**
  * Creates Scene objects from screenshot files in a configured directory.
@@ -59,8 +59,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 @Component
 public class SceneCreator {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     /**
      * Creates Scene objects from all PNG files in the screenshot directory.
@@ -101,7 +100,10 @@ public class SceneCreator {
                     String nameWithoutSuffix = filename.replaceFirst("[.][^.]+$", "");
                     // Construct scene with relative path format
                     Scene scene =
-                            new Scene("../" + brobotProperties.getScreenshot().getPath() + nameWithoutSuffix);
+                            new Scene(
+                                    "../"
+                                            + brobotProperties.getScreenshot().getPath()
+                                            + nameWithoutSuffix);
                     scenes.add(scene);
                 }
             }

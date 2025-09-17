@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.util.file;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -21,8 +20,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,18 +27,20 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.sikuli.script.Image;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import io.github.jspinak.brobot.test.annotations.Flaky;
-import org.springframework.beans.factory.annotation.Autowired;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.annotations.Flaky;
 import io.github.jspinak.brobot.test.annotations.Flaky.FlakyCause;
 import io.github.jspinak.brobot.test.utils.ConcurrentTestHelper;
 
@@ -53,10 +52,7 @@ import io.github.jspinak.brobot.test.utils.ConcurrentTestHelper;
 @DisplayName("RecorderSaveToFile Tests")
 // @ResourceLock removed - using @SpringBootTest for thread safety
 @SpringBootTest
-@TestPropertySource(properties = {
-    "brobot.core.mock=true",
-    "brobot.core.headless=true"
-})
+@TestPropertySource(properties = {"brobot.core.mock=true", "brobot.core.headless=true"})
 public class RecorderSaveToFileTest extends BrobotTestBase {
 
     private RecorderSaveToFile saveToFile;
@@ -67,8 +63,7 @@ public class RecorderSaveToFileTest extends BrobotTestBase {
 
     @Mock private BufferedImage mockBufferedImage;
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     @BeforeEach
     @Override

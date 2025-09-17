@@ -18,6 +18,7 @@ import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
 import io.github.jspinak.brobot.action.basic.region.DefineRegionOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
@@ -25,7 +26,6 @@ import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Controls when and how action results are illustrated to prevent redundancy.
@@ -77,8 +77,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 @Getter
 public class IllustrationController {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     private ImageFileUtilities imageUtils;
     private ActionVisualizer draw;
@@ -150,8 +149,12 @@ public class IllustrationController {
         // Verbose logging
         if (isVerbose()) {
             log.debug("[ILLUSTRATION] Checking if ok to illustrate:");
-            log.debug("  brobotProperties.getScreenshot().isSaveHistory(): {}", brobotProperties.getScreenshot().isSaveHistory());
-            log.debug("  brobotProperties.getScreenshot().getHistoryPath(): {}", brobotProperties.getScreenshot().getHistoryPath());
+            log.debug(
+                    "  brobotProperties.getScreenshot().isSaveHistory(): {}",
+                    brobotProperties.getScreenshot().isSaveHistory());
+            log.debug(
+                    "  brobotProperties.getScreenshot().getHistoryPath(): {}",
+                    brobotProperties.getScreenshot().getHistoryPath());
             log.debug("  ActionConfig.illustrate: {}", actionConfig.getIllustrate());
             log.debug("  Action type: determined at runtime");
         }
@@ -182,8 +185,12 @@ public class IllustrationController {
             ConsoleReporter.println(action + " not set to illustrate in BrobotProperties.");
             if (isVerbose()) {
                 log.debug("  Result: NO - action {} not permitted in settings", action);
-                log.debug("  brobotProperties.getIllustration().isDrawFind(): {}", brobotProperties.getIllustration().isDrawFind());
-                log.debug("  brobotProperties.getIllustration().isDrawClick(): {}", brobotProperties.getIllustration().isDrawClick());
+                log.debug(
+                        "  brobotProperties.getIllustration().isDrawFind(): {}",
+                        brobotProperties.getIllustration().isDrawFind());
+                log.debug(
+                        "  brobotProperties.getIllustration().isDrawClick(): {}",
+                        brobotProperties.getIllustration().isDrawClick());
             }
             return false;
         }
@@ -274,7 +281,9 @@ public class IllustrationController {
 
         if (isVerbose()) {
             log.debug("[ILLUSTRATION] Creating illustration for action: {}", actionType);
-            log.debug("[ILLUSTRATION] History path: {}", brobotProperties.getScreenshot().getHistoryPath());
+            log.debug(
+                    "[ILLUSTRATION] History path: {}",
+                    brobotProperties.getScreenshot().getHistoryPath());
             log.debug("[ILLUSTRATION] Calling illustrationManager.draw()");
         }
 

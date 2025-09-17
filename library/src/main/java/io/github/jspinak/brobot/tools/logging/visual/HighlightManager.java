@@ -8,6 +8,7 @@ import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import io.github.jspinak.brobot.logging.unified.LogEvent;
 import io.github.jspinak.brobot.model.element.Region;
@@ -18,7 +19,6 @@ import io.github.jspinak.brobot.tools.testing.wrapper.HighlightWrapper;
 import io.github.jspinak.brobot.util.coordinates.CoordinateScaler;
 
 import lombok.extern.slf4j.Slf4j;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Manages visual highlighting of screen regions during automation execution. Provides configurable
@@ -39,8 +39,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 @Slf4j
 public class HighlightManager {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     /** Represents a region with its state and object context for better logging. */
     public static class RegionWithContext {

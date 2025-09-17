@@ -4,21 +4,20 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 
-import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /** Test to verify that configuration logging is working properly. */
 @SpringBootTest
 @ExtendWith(OutputCaptureExtension.class)
 public class ConfigurationLoggingTest extends BrobotTestBase {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     @Test
     public void testConfigurationLogsAppear(CapturedOutput output) {

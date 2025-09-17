@@ -13,13 +13,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.config.core.EarlyImagePathInitializer;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 
 /**
  * Tests for EarlyImagePathInitializer ensuring image paths are set before Pattern objects are
@@ -27,10 +27,7 @@ import org.springframework.test.context.TestPropertySource;
  */
 @DisplayName("EarlyImagePathInitializer Tests")
 @SpringBootTest
-@TestPropertySource(properties = {
-    "brobot.core.mock=true",
-    "brobot.core.headless=true"
-})
+@TestPropertySource(properties = {"brobot.core.mock=true", "brobot.core.headless=true"})
 public class EarlyImagePathInitializerTest extends BrobotTestBase {
 
     private EarlyImagePathInitializer initializer;

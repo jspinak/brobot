@@ -2,15 +2,15 @@ package io.github.jspinak.brobot.tools.history.draw;
 
 import org.sikuli.basics.Settings;
 import org.sikuli.script.Region;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateObjectMetadata;
-import org.springframework.beans.factory.annotation.Autowired;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Provides visual highlighting functionality for matches on screen with mock support.
@@ -34,8 +34,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 @Component
 public class MatchHighlighter {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     private final BrobotLogger brobotLogger;
 
@@ -62,7 +61,8 @@ public class MatchHighlighter {
             highlightColor = highlightOptions.getHighlightColor();
         }
 
-        if (brobotProperties.getCore().isMock() && brobotProperties.getScreenshot().getTestScreenshots().isEmpty()) {
+        if (brobotProperties.getCore().isMock()
+                && brobotProperties.getScreenshot().getTestScreenshots().isEmpty()) {
             brobotLogger
                     .log()
                     .observation(
@@ -124,7 +124,8 @@ public class MatchHighlighter {
      * @param match The match to stop highlighting. Must not be null.
      */
     public void turnOff(Match match) {
-        if (!brobotProperties.getCore().isMock() || !brobotProperties.getScreenshot().getTestScreenshots().isEmpty()) {
+        if (!brobotProperties.getCore().isMock()
+                || !brobotProperties.getScreenshot().getTestScreenshots().isEmpty()) {
             // Temporarily disable SikuliX logs
             boolean previousActionLogs = Settings.ActionLogs;
             Settings.ActionLogs = false;
@@ -164,7 +165,8 @@ public class MatchHighlighter {
             highlightColor = highlightOptions.getHighlightColor();
         }
 
-        if (brobotProperties.getCore().isMock() && brobotProperties.getScreenshot().getTestScreenshots().isEmpty()) {
+        if (brobotProperties.getCore().isMock()
+                && brobotProperties.getScreenshot().getTestScreenshots().isEmpty()) {
             brobotLogger
                     .log()
                     .observation("Highlight: " + formatMatch(match))

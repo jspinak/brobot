@@ -14,8 +14,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import io.github.jspinak.brobot.test.config.OptimizedTestConfig;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
+import io.github.jspinak.brobot.test.config.OptimizedTestConfig;
 import io.github.jspinak.brobot.test.config.TestActionConfig;
 import io.github.jspinak.brobot.test.config.TestConfigurationManager;
 
@@ -42,8 +42,7 @@ import io.github.jspinak.brobot.test.config.TestConfigurationManager;
 @Timeout(value = 5, unit = TimeUnit.MINUTES) // Default 5-minute timeout per test
 public abstract class OptimizedIntegrationTestBase {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     private static boolean globalSetupComplete = false;
     private static final Object SETUP_LOCK = new Object();

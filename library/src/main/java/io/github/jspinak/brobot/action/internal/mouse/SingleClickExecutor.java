@@ -152,11 +152,7 @@ public class SingleClickExecutor {
      *   <li>Performs mouse button press and release
      *   <li>In mock mode, writes click information to Report
      * </ul>
-     *
-     * @param location Target location for the click operation
-     * @deprecated This method has been removed. Use click(Location, ActionConfig) instead.
      */
-
 
     /**
      * Performs a click operation with full control over timing and button type.

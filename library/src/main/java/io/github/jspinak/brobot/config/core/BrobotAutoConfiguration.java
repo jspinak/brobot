@@ -7,7 +7,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.tools.logging.gui.GuiAccessConfig;
 
@@ -49,7 +48,9 @@ public class BrobotAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public BrobotPropertiesInitializer brobotPropertiesInitializer(
-            BrobotProperties properties, MockModeResolver mockModeResolver, ApplicationContext applicationContext) {
+            BrobotProperties properties,
+            MockModeResolver mockModeResolver,
+            ApplicationContext applicationContext) {
         return new BrobotPropertiesInitializer(properties, mockModeResolver, applicationContext);
     }
 

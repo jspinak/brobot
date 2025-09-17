@@ -18,10 +18,10 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.io.FilenameUtils;
 import org.sikuli.basics.Debug;
 import org.sikuli.script.Image;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
@@ -71,14 +71,13 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 @Component
 public class RecorderSaveToFile implements SaveToFile {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     /**
      * Creates the default recording folder from global settings.
      *
-     * <p>Uses the path configured in {@link BrobotProperties} as the default
-     * location for all recording outputs.
+     * <p>Uses the path configured in {@link BrobotProperties} as the default location for all
+     * recording outputs.
      *
      * @return File object representing the recording folder
      */

@@ -20,8 +20,6 @@ import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.state.StateLocation;
 import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 
 /**
  * Tests for the FindPipeline class which orchestrates the find operation workflow. The pipeline is

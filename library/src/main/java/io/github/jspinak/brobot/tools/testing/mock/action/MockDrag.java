@@ -1,17 +1,15 @@
 package io.github.jspinak.brobot.tools.testing.mock.action;
 
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.tools.testing.mock.time.MockTime;
-import org.springframework.beans.factory.annotation.Autowired;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
+import io.github.jspinak.brobot.tools.testing.mock.time.MockTime;
 
 @Component
 public class MockDrag {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     private final MockTime mockTime;
 

@@ -52,9 +52,9 @@ public class MatchContentExtractor {
      * Captures both visual and text content from matched regions.
      *
      * <p>This method should run after all adjustments are made to the match objects, including
-     * position shifts, match fusion, and other transformations specified by ActionConfig. The
-     * order is critical because these adjustments affect the underlying regions from which content
-     * is captured.
+     * position shifts, match fusion, and other transformations specified by ActionConfig. The order
+     * is critical because these adjustments affect the underlying regions from which content is
+     * captured.
      *
      * <p>The method performs two operations:
      *

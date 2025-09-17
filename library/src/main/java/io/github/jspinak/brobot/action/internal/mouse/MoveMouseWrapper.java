@@ -4,12 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.internal.utility.DragCoordinateCalculator;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.coordinates.CoordinateScaler;
 
 import lombok.extern.slf4j.Slf4j;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Handles mouse movement operations to specific screen locations.
@@ -51,8 +51,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 @Component
 public class MoveMouseWrapper {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     @Autowired private CoordinateScaler coordinateScaler;
 

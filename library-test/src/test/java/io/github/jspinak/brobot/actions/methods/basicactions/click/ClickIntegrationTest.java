@@ -20,13 +20,13 @@ import io.github.jspinak.brobot.action.internal.mouse.ClickType;
 import io.github.jspinak.brobot.action.internal.mouse.MouseDownWrapper;
 import io.github.jspinak.brobot.action.internal.mouse.MouseUpWrapper;
 import io.github.jspinak.brobot.action.internal.mouse.MoveMouseWrapper;
+import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
 import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
 import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
 import io.github.jspinak.brobot.test.mock.MockScreenConfig;
-import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 
 @SpringBootTest(
         classes = io.github.jspinak.brobot.BrobotTestApplication.class,

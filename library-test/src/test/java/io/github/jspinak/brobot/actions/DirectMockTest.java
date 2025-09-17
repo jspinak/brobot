@@ -3,8 +3,8 @@ package io.github.jspinak.brobot.actions;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
-import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 
+import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 
 /** Direct test to verify mock mode settings. */
 class DirectMockTest {

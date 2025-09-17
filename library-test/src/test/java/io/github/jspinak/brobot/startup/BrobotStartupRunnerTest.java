@@ -12,22 +12,19 @@ import org.junit.jupiter.api.Timeout;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.startup.orchestration.StartupConfiguration;
 import io.github.jspinak.brobot.startup.orchestration.StartupRunner;
 import io.github.jspinak.brobot.startup.verification.InitialStateVerifier;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 
 /** Test suite for BrobotStartupRunner. Tests application startup state verification. */
 @DisplayName("BrobotStartupRunner Tests")
 @SpringBootTest
-@TestPropertySource(properties = {
-    "brobot.core.mock=true",
-    "brobot.core.headless=true"
-})
+@TestPropertySource(properties = {"brobot.core.mock=true", "brobot.core.headless=true"})
 public class BrobotStartupRunnerTest extends BrobotTestBase {
 
     @Mock private InitialStateVerifier mockStateVerifier;

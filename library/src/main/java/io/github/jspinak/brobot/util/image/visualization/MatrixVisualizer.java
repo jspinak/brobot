@@ -11,14 +11,14 @@ import java.util.*;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.analysis.color.ColorStatistics;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
 import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
-import org.springframework.beans.factory.annotation.Autowired;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Visualization utilities for OpenCV Mat objects, primarily for debugging and testing.
@@ -71,8 +71,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 @Component
 public class MatrixVisualizer {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     private final ImageFileUtilities imageUtils;
 
@@ -451,7 +450,9 @@ public class MatrixVisualizer {
      * @param filename base filename without extension
      */
     public void writeMatToHistory(Mat mat, String filename) {
-        String path = imageUtils.getFreePath(brobotProperties.getScreenshot().getHistoryPath() + filename);
+        String path =
+                imageUtils.getFreePath(
+                        brobotProperties.getScreenshot().getHistoryPath() + filename);
         imwrite(path + ".png", mat);
     }
 }

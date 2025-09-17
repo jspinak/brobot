@@ -60,7 +60,8 @@ public class BrobotAutoConfigurationTest extends BrobotTestBase {
         public void testBrobotPropertiesInitialization() {
             // Mock mode is already set by BrobotTestBase
             assertTrue(
-                    ExecutionEnvironment.getInstance().isMockMode(), "Mock mode should be enabled in test");
+                    ExecutionEnvironment.getInstance().isMockMode(),
+                    "Mock mode should be enabled in test");
         }
     }
 

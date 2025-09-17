@@ -391,9 +391,7 @@ public class ActionResultTest extends BrobotTestBase {
 
     @Nested
     @DisplayName("Deprecated Methods")
-    class DeprecatedMethods {
-
-    }
+    class DeprecatedMethods {}
 
     @Nested
     @DisplayName("Edge Cases")

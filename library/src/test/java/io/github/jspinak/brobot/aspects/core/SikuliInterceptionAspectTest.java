@@ -12,7 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.sikuli.script.FindFailed;
@@ -48,7 +47,8 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
     public void setupTest() {
         super.setupTest();
 
-        // Setup BrobotProperties mock with lenient to avoid issues in tests that don't check mock mode
+        // Setup BrobotProperties mock with lenient to avoid issues in tests that don't check mock
+        // mode
         lenient().when(brobotProperties.getCore()).thenReturn(mockCore);
         lenient().when(mockCore.isMock()).thenReturn(false); // Default to normal mode
 
@@ -258,12 +258,12 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
         when(joinPoint.getArgs()).thenReturn(new Object[] {"arg1"});
 
         // This tests the logging indirectly through the aspect
-        assertDoesNotThrow(() -> {
-            // The logOperationStart method is private and called internally
-            // We test it by verifying it doesn't throw when called internally
-            ReflectionTestUtils.invokeMethod(
-                    aspect, "logOperationStart", joinPoint);
-        });
+        assertDoesNotThrow(
+                () -> {
+                    // The logOperationStart method is private and called internally
+                    // We test it by verifying it doesn't throw when called internally
+                    ReflectionTestUtils.invokeMethod(aspect, "logOperationStart", joinPoint);
+                });
     }
 
     @Test
@@ -274,12 +274,13 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
         when(signature.getName()).thenReturn("testOp");
 
         // This tests the logging indirectly through the aspect
-        assertDoesNotThrow(() -> {
-            // The logOperationSuccess method is private and called internally
-            // We test it by verifying it doesn't throw when called internally
-            ReflectionTestUtils.invokeMethod(
-                    aspect, "logOperationSuccess", joinPoint, "result", 100L);
-        });
+        assertDoesNotThrow(
+                () -> {
+                    // The logOperationSuccess method is private and called internally
+                    // We test it by verifying it doesn't throw when called internally
+                    ReflectionTestUtils.invokeMethod(
+                            aspect, "logOperationSuccess", joinPoint, "result", 100L);
+                });
     }
 
     @Test
@@ -299,14 +300,16 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
         }
 
         // Verify metrics has data
-        ConcurrentHashMap<String, SikuliInterceptionAspect.OperationMetrics> metricsBefore = aspect.getMetrics();
+        ConcurrentHashMap<String, SikuliInterceptionAspect.OperationMetrics> metricsBefore =
+                aspect.getMetrics();
         assertFalse(metricsBefore.isEmpty());
 
         // Reset metrics
         aspect.resetMetrics();
 
         // Verify metrics is now empty
-        ConcurrentHashMap<String, SikuliInterceptionAspect.OperationMetrics> metricsAfter = aspect.getMetrics();
+        ConcurrentHashMap<String, SikuliInterceptionAspect.OperationMetrics> metricsAfter =
+                aspect.getMetrics();
         assertTrue(metricsAfter.isEmpty());
     }
 
@@ -355,7 +358,8 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
     public void testSanitizeArgs_WithImagePath() {
         // Test internal method for sanitizing arguments
         Object[] args = {"path/to/image.png", 100, "text"};
-        String sanitized = (String) ReflectionTestUtils.invokeMethod(aspect, "sanitizeArgs", (Object) args);
+        String sanitized =
+                (String) ReflectionTestUtils.invokeMethod(aspect, "sanitizeArgs", (Object) args);
         assertNotNull(sanitized);
         assertTrue(sanitized.contains("image.png"));
     }
@@ -365,7 +369,9 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
         // Test internal method for extracting image path
         // The method returns the full path, not just the filename
         Object[] args = {"/full/path/to/pattern.png", 123};
-        String path = (String) ReflectionTestUtils.invokeMethod(aspect, "extractImagePath", (Object) args);
+        String path =
+                (String)
+                        ReflectionTestUtils.invokeMethod(aspect, "extractImagePath", (Object) args);
         assertEquals("/full/path/to/pattern.png", path);
 
         // Test with no path

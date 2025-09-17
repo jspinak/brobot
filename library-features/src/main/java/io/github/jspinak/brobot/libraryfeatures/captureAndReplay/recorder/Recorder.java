@@ -1,10 +1,10 @@
 package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.recorder;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 
 import io.github.jspinak.brobot.config.core.BrobotProperties;
-import org.springframework.beans.factory.annotation.Autowired;
 import io.github.jspinak.brobot.util.file.SaveToFile;
 import io.github.jspinak.brobot.util.image.capture.ScreenshotRecorder;
 
@@ -20,8 +20,7 @@ import io.github.jspinak.brobot.util.image.capture.ScreenshotRecorder;
 @Component
 public class Recorder {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     private final ScreenshotRecorder captureScreenshots;
     private final CaptureUserInputs captureUserInputs;

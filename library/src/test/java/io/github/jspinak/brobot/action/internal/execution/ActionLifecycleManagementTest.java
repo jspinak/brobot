@@ -17,9 +17,9 @@ import org.mockito.MockitoAnnotations;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Image;
 import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 

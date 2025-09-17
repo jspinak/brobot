@@ -192,9 +192,8 @@ public class SearchRegionResolver {
      * @param actionConfig The action configuration that may override image regions
      * @param objectCollections Variable number of collections containing StateImages with their own
      *     search regions
-     * @return A list of all applicable search regions. If ActionConfig has defined regions,
-     *     returns those; otherwise returns the union of all regions from all images in all
-     *     collections.
+     * @return A list of all applicable search regions. If ActionConfig has defined regions, returns
+     *     those; otherwise returns the union of all regions from all images in all collections.
      */
     public List<Region> getRegionsForAllImages(
             ActionConfig actionConfig, ObjectCollection... objectCollections) {
