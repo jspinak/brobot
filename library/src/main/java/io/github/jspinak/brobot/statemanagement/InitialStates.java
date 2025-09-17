@@ -13,9 +13,10 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.navigation.service.StateService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -97,11 +98,14 @@ import lombok.extern.slf4j.Slf4j;
  * @see StateDetector
  * @see StateMemory
  * @see State
- * @see FrameworkSettings
+ * @see BrobotProperties
  */
 @Slf4j
 @Component
 public class InitialStates {
+
+    @Autowired
+    private BrobotProperties brobotProperties;
 
     private final StateDetector stateFinder;
     private final StateMemory stateMemory;
@@ -220,8 +224,8 @@ public class InitialStates {
      * @see #searchForInitialStates()
      */
     public void findInitialStates() {
-        log.info("Finding initial states (mock mode: {})", FrameworkSettings.mock);
-        if (FrameworkSettings.mock) {
+        log.info("Finding initial states (mock mode: {})", brobotProperties.getCore().isMock());
+        if (brobotProperties.getCore().isMock()) {
             mockInitialStates();
             return;
         }

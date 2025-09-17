@@ -24,15 +24,11 @@ import io.github.jspinak.brobot.annotations.AnnotationProcessor;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.config.core.BrobotPropertiesInitializer;
 import io.github.jspinak.brobot.config.core.EarlyImagePathInitializer;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
-import io.github.jspinak.brobot.config.core.FrameworkSettingsConfig;
 import io.github.jspinak.brobot.config.dpi.AutoScalingConfiguration;
-import io.github.jspinak.brobot.config.environment.ExecutionEnvironmentConfig;
 import io.github.jspinak.brobot.config.logging.SikuliXLoggingConfig;
 import io.github.jspinak.brobot.config.mock.MockConfiguration;
 import io.github.jspinak.brobot.startup.state.InitialStateAutoConfiguration;
 import io.github.jspinak.brobot.statemanagement.InitialStates;
-import io.github.jspinak.brobot.statemanagement.SearchRegionDependencyInitializer;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporterInitializer;
 
@@ -81,15 +77,11 @@ public class InitializationOrchestrator {
     @Autowired(required = false)
     private BrobotProperties brobotProperties;
 
-    @Autowired(required = false)
-    private FrameworkSettingsConfig frameworkSettingsConfig;
 
     @Autowired(required = false)
     private MockConfiguration mockConfiguration;
 
     // Environment setup components
-    @Autowired(required = false)
-    private ExecutionEnvironmentConfig executionEnvironmentConfig;
 
     @Autowired(required = false)
     private AutoScalingConfiguration autoScalingConfiguration;
@@ -127,8 +119,6 @@ public class InitializationOrchestrator {
     private io.github.jspinak.brobot.config.environment.HeadlessDiagnostics headlessDiagnostics;
 
     // Component initialization
-    @Autowired(required = false)
-    private SearchRegionDependencyInitializer searchRegionInitializer;
 
     @Autowired(required = false)
     private io.github.jspinak.brobot.initialization.StateInitializationOrchestrator
@@ -257,14 +247,11 @@ public class InitializationOrchestrator {
                 log.debug("Properties loaded with framework settings");
             }
 
-            // Apply framework settings
-            if (frameworkSettingsConfig != null) {
-                frameworkSettingsConfig.initializeFrameworkSettings();
-                phase.addCompletedStep("Framework settings applied");
-            }
+            // Framework settings are now handled by BrobotProperties
+            // No need to apply them separately
 
             // Configure mock mode if needed
-            if (mockConfiguration != null && FrameworkSettings.mock) {
+            if (mockConfiguration != null && brobotProperties.getCore().isMock()) {
                 // Mock configuration beans are automatically created in mock mode
                 phase.addCompletedStep("Mock mode configured");
                 log.info("Mock mode is ENABLED");
@@ -296,12 +283,6 @@ public class InitializationOrchestrator {
         log.info("════════════════════════════════════════════════════════════════════");
 
         try {
-            // Configure execution environment
-            if (executionEnvironmentConfig != null) {
-                executionEnvironmentConfig.initializeExecutionEnvironment();
-                phase.addCompletedStep("Execution environment configured");
-            }
-
             // Configure auto-scaling
             if (autoScalingConfiguration != null) {
                 autoScalingConfiguration.init();
@@ -363,12 +344,6 @@ public class InitializationOrchestrator {
         log.info("════════════════════════════════════════════════════════════════════");
 
         try {
-            // Initialize search region dependencies
-            if (searchRegionInitializer != null) {
-                // SearchRegionDependencyInitializer uses @PostConstruct
-                phase.addCompletedStep("Search region dependencies initialized");
-            }
-
             // Initialize console reporter
             if (consoleReporterInitializer != null) {
                 // ConsoleReporterInitializer uses @PostConstruct
@@ -501,7 +476,6 @@ public class InitializationOrchestrator {
 
             // Check for specific Brobot event listeners
             String[] importantListeners = {
-                "SearchRegionDependencyInitializer",
                 "StateInitializationOrchestrator",
                 "AutoStartupVerifier"
             };
@@ -544,7 +518,7 @@ public class InitializationOrchestrator {
         log.info("Initialization Summary:");
         log.info("  Total Duration: {}ms", totalDuration.toMillis());
         log.info("  Phases Completed: {}/{}", successfulPhases, phaseStatuses.size());
-        log.info("  Mock Mode: {}", FrameworkSettings.mock ? "ENABLED" : "DISABLED");
+        log.info("  Mock Mode: {}", brobotProperties.getCore().isMock() ? "ENABLED" : "DISABLED");
 
         // Phase details
         phaseStatuses.values().stream()
@@ -600,7 +574,7 @@ public class InitializationOrchestrator {
         // Configuration Summary
         report.append("\n📋 Configuration Summary:\n");
         report.append("  • Mock Mode: ")
-                .append(FrameworkSettings.mock ? "ENABLED" : "DISABLED")
+                .append(brobotProperties.getCore().isMock() ? "ENABLED" : "DISABLED")
                 .append("\n");
         if (brobotProperties != null && brobotProperties.getCore() != null) {
             report.append("  • Headless: ")
@@ -732,7 +706,7 @@ public class InitializationOrchestrator {
             log.error("Failed to initialize capture services", e);
             phase.addFailedStep("Capture services", e.getMessage());
             // Capture services are critical - but we'll continue to allow mock mode
-            if (!FrameworkSettings.mock) {
+            if (!brobotProperties.getCore().isMock()) {
                 log.warn("Capture services failed in non-mock mode - functionality may be limited");
             }
         }
@@ -755,7 +729,7 @@ public class InitializationOrchestrator {
 
         // Add current configuration
         Map<String, Object> config = new HashMap<>();
-        config.put("mockMode", FrameworkSettings.mock);
+        config.put("mockMode", brobotProperties.getCore().isMock());
         if (brobotProperties != null && brobotProperties.getCore() != null) {
             config.put("imagePath", brobotProperties.getCore().getImagePath());
         }

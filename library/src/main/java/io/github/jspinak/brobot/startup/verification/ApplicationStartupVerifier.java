@@ -6,7 +6,6 @@ import java.util.*;
 import org.sikuli.script.ImagePath;
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.config.core.ImagePathManager;
 import io.github.jspinak.brobot.config.core.SmartImageLoader;
 import io.github.jspinak.brobot.config.environment.ConfigurationDiagnostics;
@@ -21,6 +20,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Provides comprehensive startup verification for Brobot applications. This class handles both
@@ -59,6 +59,7 @@ public class ApplicationStartupVerifier {
     private final InitialStateVerifier initialStateVerifier;
     private final StateMemory stateMemory;
     private final StateService stateService;
+    private final BrobotProperties brobotProperties;
 
     /** Configuration for application startup verification */
     @Data
@@ -435,7 +436,7 @@ public class ApplicationStartupVerifier {
             boolean isTestMode =
                     "unit".equals(testType)
                             || "true".equals(System.getProperty("brobot.test.mode"))
-                            || FrameworkSettings.mock;
+                            || brobotProperties.getCore().isMock();
 
             if (!isTestMode && config.getUiStabilizationDelay() > 0) {
                 log.debug(

@@ -7,16 +7,20 @@ title: 'Runtime Delegation Migration Guide'
 
 ## Overview
 
-This guide helps you migrate from Brobot's runtime delegation pattern (checking `FrameworkSettings.mock` at runtime) to the cleaner profile-based architecture using Spring profiles and dependency injection.
+This guide helps you migrate from Brobot's runtime delegation pattern (checking `brobotProperties.getCore().isMock()` at runtime) to the cleaner profile-based architecture using Spring profiles and dependency injection.
 
 ## Current State: Runtime Delegation
 
 Many Brobot components currently use runtime checks:
 
 ```java
+// Note: BrobotProperties must be injected as a dependency
+@Autowired
+private BrobotProperties brobotProperties;
+
 // Example from legacy text typing implementation
 public boolean type(String text) {
-    if (FrameworkSettings.mock) {
+    if (brobotProperties.getCore().isMock()) {
         return true;  // Mock execution
     }
     // Live execution
@@ -25,8 +29,8 @@ public boolean type(String text) {
 
 // Example from SingleClickExecutor.java
 public boolean click(Location location) {
-    if (FrameworkSettings.mock) {
-        pause(FrameworkSettings.mockTimeClick);
+    if (brobotProperties.getCore().isMock()) {
+        pause(brobotProperties.getCore().isMock()TimeClick);
         return true;
     }
     // Live click implementation
@@ -50,7 +54,7 @@ public interface TypeTextExecutor {
 @Profile("test")
 public class MockTypeTextExecutor implements TypeTextExecutor {
     public boolean type(String text) {
-        pause(FrameworkSettings.mockTimeType);
+        pause(brobotProperties.getCore().isMock()TimeType);
         return true;
     }
 }
@@ -95,7 +99,7 @@ For each class with runtime delegation, extract an interface:
 // Before: SingleClickExecutor with runtime check
 public class SingleClickExecutor {
     public boolean click(Location location) {
-        if (FrameworkSettings.mock) {
+        if (brobotProperties.getCore().isMock()) {
             return mockClick(location);
         }
         return liveClick(location);
@@ -121,7 +125,7 @@ public class MockClickExecutor implements ClickExecutor {
     @Override
     public boolean click(Location location) {
         log.debug("Mock click at {}", location);
-        pause(FrameworkSettings.mockTimeClick);
+        pause(brobotProperties.getCore().isMock()TimeClick);
         return true;
     }
     
@@ -186,7 +190,7 @@ For classes with multiple responsibilities, use composition:
 // Complex class with multiple mock checks
 public class ActionExecutor {
     public ActionResult execute(ActionConfig config, ObjectCollection targets) {
-        if (FrameworkSettings.mock) {
+        if (brobotProperties.getCore().isMock()) {
             // Mock: find
             if (config instanceof PatternFindOptions) {
                 return mockFind(targets);
@@ -242,7 +246,7 @@ public class HybridExecutor {
             return liveExecutor.execute();
         } else {
             // Legacy runtime check as fallback
-            return FrameworkSettings.mock ? 
+            return brobotProperties.getCore().isMock() ? 
                 legacyMockExecute() : legacyLiveExecute();
         }
     }
@@ -257,7 +261,7 @@ public class HybridExecutor {
 ```java
 public class LegacyTextTyper {
     public boolean type(String text) {
-        if (FrameworkSettings.mock) return true;
+        if (brobotProperties.getCore().isMock()) return true;
         return screen.type(text) == 1;
     }
 }
@@ -297,7 +301,7 @@ public class LiveTextTyper implements TextTyper {
 ```java
 public class SceneProvider {
     public Scene getScene() {
-        if (FrameworkSettings.mock) {
+        if (brobotProperties.getCore().isMock()) {
             return mockSceneRepository.getRandomScene();
         }
         return screenCapture.captureScreen();
@@ -367,7 +371,7 @@ public class MigrationVerificationTest {
         // Should use mock implementation without runtime checks
         assertTrue(clickExecutor.click(new Location(0, 0)));
         
-        // Verify no access to FrameworkSettings.mock
+        // Verify no access to brobotProperties.getCore().isMock()
         // in the execution path
     }
 }

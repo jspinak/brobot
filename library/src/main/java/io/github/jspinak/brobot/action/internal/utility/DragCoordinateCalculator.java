@@ -6,13 +6,14 @@ import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.tools.history.IllustrationController;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.tools.testing.mock.action.MockDrag;
-import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Provides drag-and-drop functionality between locations with configurable timing and mock support.
@@ -47,14 +48,17 @@ import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
  */
 @Component
 public class DragCoordinateCalculator {
+
+    @Autowired
+    private BrobotProperties brobotProperties;
     private final MockDrag mock;
-    private final TimeProvider time;
+    private final TimeWrapper timeWrapper;
     private IllustrationController illustrateScreenshot;
 
     public DragCoordinateCalculator(
-            MockDrag mock, TimeProvider time, IllustrationController illustrateScreenshot) {
+            MockDrag mock, TimeWrapper timeWrapper, IllustrationController illustrateScreenshot) {
         this.mock = mock;
-        this.time = time;
+        this.timeWrapper = timeWrapper;
         this.illustrateScreenshot = illustrateScreenshot;
     }
 
@@ -132,18 +136,18 @@ public class DragCoordinateCalculator {
                 from.getCalculatedY(),
                 to.getCalculatedX(),
                 to.getCalculatedY());
-        if (FrameworkSettings.mock) return mock.drag();
+        if (brobotProperties.getCore().isMock()) return mock.drag();
 
         // Extract timing from MousePressOptions and DragOptions
         Settings.DelayBeforeMouseDown =
                 dragOptions.getMousePressOptions().getPauseBeforeMouseDown();
         Settings.DelayBeforeDrag = dragOptions.getDelayBetweenMouseDownAndMove();
         Settings.MoveMouseDelay =
-                FrameworkSettings.moveMouseDelay; // Use default as DragOptions doesn't have this
+                brobotProperties.getMouse().getMoveDelay(); // Use default as DragOptions doesn't have this
         Settings.DelayBeforeDrop = dragOptions.getMousePressOptions().getPauseBeforeMouseUp();
 
         if (!drag(from, to)) return false;
-        time.wait(dragOptions.getDelayAfterDrag());
+        timeWrapper.wait(dragOptions.getDelayAfterDrag());
         return true;
     }
 

@@ -1,33 +1,105 @@
 package io.github.jspinak.brobot.test;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInfo;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.github.jspinak.brobot.config.mock.MockModeManager;
+import io.github.jspinak.brobot.test.jackson.BrobotJacksonMixins;
+import io.github.jspinak.brobot.test.jackson.BrobotJacksonTestConfig;
 
 /**
  * Base test class for all Brobot tests. Provides common setup and configuration for consistent test
  * execution.
  *
- * <p>This base class automatically configures Brobot for testing:
+ * <p>This base class provides a foundation for testing:
  *
  * <ul>
- *   <li>Enables mock mode for headless/CI environments
- *   <li>Configures fast mock timings (0.01-0.04s for operations)
- *   <li>Prevents AWTException and HeadlessException errors
+ *   <li>Common test setup and configuration
  *   <li>Ensures tests work in Docker, CI/CD pipelines, and headless servers
+ *   <li>Provides utility methods for test scenarios
+ *   <li>Ensures proper mock mode initialization using MockModeManager
  * </ul>
  */
 public abstract class BrobotTestBase {
 
     /**
-     * Setup method that runs before each test. Configures mock mode to ensure tests work in all
-     * environments. Subclasses should override and call super.setupTest() if they need additional
-     * setup.
+     * Shared ObjectMapper configured for Brobot serialization tests. This mapper handles all
+     * problematic types (Mat, BufferedImage, SikuliX objects).
+     */
+    protected ObjectMapper testObjectMapper;
+
+    /**
+     * Global setup for all tests in the class. Sets system properties to ensure headless operation
+     * and enables mock mode.
+     */
+    @BeforeAll
+    public static void setUpBrobotEnvironment() {
+        // Set test profile to use test-specific configuration
+        System.setProperty("spring.profiles.active", "test");
+
+        // Set test mode FIRST to prevent any blocking initialization
+        System.setProperty("brobot.test.mode", "true");
+        System.setProperty("brobot.test.type", "unit");
+
+        // Disable blocking @PostConstruct operations during tests
+        System.setProperty("brobot.diagnostics.image-loading.enabled", "false");
+        System.setProperty("brobot.logging.capture.enabled", "false");
+        System.setProperty("brobot.startup.verification.enabled", "false");
+
+        // Disable all startup delays
+        System.setProperty("brobot.startup.delay", "0");
+        System.setProperty("brobot.startup.initial.delay", "0");
+        System.setProperty("brobot.startup.ui.stabilization.delay", "0");
+
+        // Ensure headless mode for all tests
+        System.setProperty("java.awt.headless", "true");
+        System.setProperty("sikuli.Debug", "0");
+
+        // Disable SikuliX splash screen and popups
+        System.setProperty("sikuli.console", "false");
+        System.setProperty("sikuli.splashscreen", "false");
+
+        // Set mock timings for fast test execution
+        System.setProperty("brobot.mock.time.find.first", "0.01");
+        System.setProperty("brobot.mock.time.find.all", "0.04");
+        System.setProperty("brobot.mock.time.click", "0.01");
+        System.setProperty("brobot.mock.time.type", "0.02");
+        System.setProperty("brobot.mock.time.move", "0.01");
+        System.setProperty("brobot.mock.time.drag", "0.03");
+        System.setProperty("brobot.mock.time.vanish", "0.05");
+        System.setProperty("brobot.mock.time.wait", "0.01");
+
+        // Enable mock mode using MockModeManager for proper synchronization
+        MockModeManager.setMockMode(true);
+    }
+
+    /**
+     * Setup method that runs before each test. Configures test environment to ensure tests work in
+     * all environments. Subclasses should override and call super.setupTest() if they need
+     * additional setup.
      */
     @BeforeEach
     public void setupTest() {
-        // Use the centralized MockModeManager for consistency
+        // Enable mock mode by default for testing using MockModeManager
         MockModeManager.setMockMode(true);
+
+        // Initialize properly configured ObjectMapper for serialization tests
+        testObjectMapper = BrobotJacksonTestConfig.createTestObjectMapper();
+        BrobotJacksonMixins.registerMixins(testObjectMapper);
+
+        // Reset any static state that might interfere between tests
+        resetStaticState();
+    }
+
+    /**
+     * Hook for subclasses to reset any static state between tests. Override this method if your
+     * tests use static fields or singletons.
+     */
+    protected void resetStaticState() {
+        // Subclasses can override to reset static state
     }
 
     /**
@@ -38,6 +110,11 @@ public abstract class BrobotTestBase {
         MockModeManager.setMockMode(false);
     }
 
+    /** Re-enables mock mode after it has been disabled. */
+    protected void enableMockMode() {
+        MockModeManager.setMockMode(true);
+    }
+
     /**
      * Checks if mock mode is currently enabled.
      *
@@ -45,5 +122,17 @@ public abstract class BrobotTestBase {
      */
     protected boolean isMockMode() {
         return MockModeManager.isMockMode();
+    }
+
+    /**
+     * Utility method to log test execution for debugging.
+     *
+     * @param testInfo Information about the current test
+     */
+    protected void logTestExecution(TestInfo testInfo) {
+        System.out.printf(
+                "Running test: %s.%s%n",
+                testInfo.getTestClass().map(Class::getSimpleName).orElse("Unknown"),
+                testInfo.getTestMethod().map(m -> m.getName()).orElse("unknown"));
     }
 }

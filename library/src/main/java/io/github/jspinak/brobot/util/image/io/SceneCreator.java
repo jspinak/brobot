@@ -7,8 +7,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Scene;
+import org.springframework.beans.factory.annotation.Autowired;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Creates Scene objects from screenshot files in a configured directory.
@@ -53,10 +54,13 @@ import io.github.jspinak.brobot.model.element.Scene;
  * </ul>
  *
  * @see Scene
- * @see FrameworkSettings#screenshotPath
+ * @see BrobotProperties
  */
 @Component
 public class SceneCreator {
+
+    @Autowired
+    private BrobotProperties brobotProperties;
 
     /**
      * Creates Scene objects from all PNG files in the screenshot directory.
@@ -84,7 +88,7 @@ public class SceneCreator {
      */
     public List<Scene> createScenesFromScreenshots() {
         List<Scene> scenes = new ArrayList<>();
-        Path screenshotPath = Paths.get(FrameworkSettings.screenshotPath);
+        Path screenshotPath = Paths.get(brobotProperties.getScreenshot().getPath());
         if (Files.exists(screenshotPath) && Files.isDirectory(screenshotPath)) {
             System.out.println(screenshotPath.toAbsolutePath());
         }
@@ -97,7 +101,7 @@ public class SceneCreator {
                     String nameWithoutSuffix = filename.replaceFirst("[.][^.]+$", "");
                     // Construct scene with relative path format
                     Scene scene =
-                            new Scene("../" + FrameworkSettings.screenshotPath + nameWithoutSuffix);
+                            new Scene("../" + brobotProperties.getScreenshot().getPath() + nameWithoutSuffix);
                     scenes.add(scene);
                 }
             }

@@ -6,10 +6,11 @@ import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateObjectMetadata;
+import org.springframework.beans.factory.annotation.Autowired;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Provides visual highlighting functionality for matches on screen with mock support.
@@ -28,10 +29,13 @@ import io.github.jspinak.brobot.model.state.StateObjectMetadata;
  *
  * @see Match
  * @see HighlightOptions
- * @see FrameworkSettings#mock
+ * @see BrobotProperties
  */
 @Component
 public class MatchHighlighter {
+
+    @Autowired
+    private BrobotProperties brobotProperties;
 
     private final BrobotLogger brobotLogger;
 
@@ -58,7 +62,7 @@ public class MatchHighlighter {
             highlightColor = highlightOptions.getHighlightColor();
         }
 
-        if (FrameworkSettings.mock && FrameworkSettings.screenshots.isEmpty()) {
+        if (brobotProperties.getCore().isMock() && brobotProperties.getScreenshot().getTestScreenshots().isEmpty()) {
             brobotLogger
                     .log()
                     .observation(
@@ -120,7 +124,7 @@ public class MatchHighlighter {
      * @param match The match to stop highlighting. Must not be null.
      */
     public void turnOff(Match match) {
-        if (!FrameworkSettings.mock || !FrameworkSettings.screenshots.isEmpty()) {
+        if (!brobotProperties.getCore().isMock() || !brobotProperties.getScreenshot().getTestScreenshots().isEmpty()) {
             // Temporarily disable SikuliX logs
             boolean previousActionLogs = Settings.ActionLogs;
             Settings.ActionLogs = false;
@@ -160,7 +164,7 @@ public class MatchHighlighter {
             highlightColor = highlightOptions.getHighlightColor();
         }
 
-        if (FrameworkSettings.mock && FrameworkSettings.screenshots.isEmpty()) {
+        if (brobotProperties.getCore().isMock() && brobotProperties.getScreenshot().getTestScreenshots().isEmpty()) {
             brobotLogger
                     .log()
                     .observation("Highlight: " + formatMatch(match))

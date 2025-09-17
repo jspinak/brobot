@@ -1,5 +1,8 @@
 package io.github.jspinak.brobot.tools.tuning.model;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
+
 /**
  * Defines maximum threshold values for action timing parameters.
  *
@@ -37,9 +40,12 @@ package io.github.jspinak.brobot.tools.tuning.model;
  * requirements, though defaults are suitable for most GUI automation scenarios.
  *
  * @see TuningExperiment
- * @see io.github.jspinak.brobot.config.core.FrameworkSettings
+ * @see io.github.jspinak.brobot.config.core.BrobotProperties
  */
 public class TuningConstraints {
+
+    @Autowired
+    private BrobotProperties brobotProperties;
 
     /**
      * Maximum pause duration in seconds before mouse down events.

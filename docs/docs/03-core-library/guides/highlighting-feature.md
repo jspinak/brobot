@@ -251,7 +251,7 @@ The highlighting feature integrates seamlessly with the Claude Automator's exist
 ### Highlights Not Appearing
 1. Verify `brobot.highlight.enabled=true`
 2. Check `brobot.highlight.auto-highlight-finds=true`
-3. Ensure not in mock mode (`brobot.mock=false`)
+3. Ensure not in mock mode (`brobot.core.mock=false`)
 
 ### Performance Issues
 1. Reduce `brobot.highlight.find.duration`

@@ -9,7 +9,8 @@ Starting with Brobot 1.1.0, the framework uses Spring's property-based configura
 ### Old Way (Pre-1.1.0)
 ```java
 // Programmatically setting values
-FrameworkSettings.mock = true;
+// Mock mode is now configured via application.properties:
+// brobot.core.mock=true;
 FrameworkSettings.moveMouseDelay = 1.0f;
 FrameworkSettings.saveSnapshots = true;
 ```
@@ -45,7 +46,8 @@ Replace any code that sets `FrameworkSettings` fields:
 // Remove this
 @PostConstruct
 public void configureBrobot() {
-    FrameworkSettings.mock = false;
+    // Mock mode is now configured via application.properties:
+// brobot.core.mock=false;
     FrameworkSettings.saveHistory = true;
     FrameworkSettings.historyPath = "my-history/";
 }
@@ -67,7 +69,7 @@ brobot:
 Or `application.properties`:
 
 ```properties
-brobot.mock=false
+brobot.core.mock=false
 brobot.screenshot.save-history=true
 brobot.screenshot.history-path=my-history/
 ```

@@ -21,7 +21,6 @@ import io.github.jspinak.brobot.action.internal.mouse.MouseDownWrapper;
 import io.github.jspinak.brobot.action.internal.mouse.MouseUpWrapper;
 import io.github.jspinak.brobot.action.internal.mouse.MoveMouseWrapper;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
@@ -60,14 +59,14 @@ public class ClickIntegrationTestUpdated extends BrobotIntegrationTestBase {
     @BeforeEach
     void setUp() {
         super.setUpBrobotEnvironment();
-        FrameworkSettings.mock = true;
+        BrobotProperties.mock = true;
 
         // No need to mock Find anymore - pure Click doesn't use it
     }
 
     @AfterEach
     void tearDown() {
-        FrameworkSettings.mock = false;
+        BrobotProperties.mock = false;
     }
 
     @Test

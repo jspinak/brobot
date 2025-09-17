@@ -3,6 +3,8 @@ package io.github.jspinak.brobot.config.core;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.beans.factory.annotation.Autowired;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Spring configuration class for the Brobot framework.
@@ -28,6 +30,9 @@ import org.springframework.context.annotation.Import;
  * @SpringBootApplication
  * @Import(BrobotConfig.class)
  * public class MyAutomationApp {
+
+    @Autowired
+    private BrobotProperties brobotProperties;
  *     public static void main(String[] args) {
  *         SpringApplication.run(MyAutomationApp.class, args);
  *     }
@@ -51,7 +56,7 @@ import org.springframework.context.annotation.Import;
  * @see org.springframework.context.annotation.Configuration
  * @see org.springframework.context.annotation.ComponentScan
  * @see ExecutionEnvironment
- * @see FrameworkSettings
+ * @see BrobotProperties
  */
 @Configuration
 @ComponentScan(basePackages = "io.github.jspinak.brobot")

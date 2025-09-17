@@ -11,7 +11,7 @@ The `MockModeManager` class provides centralized control over mock mode configur
 ## Overview
 
 Prior to the introduction of `MockModeManager`, mock mode configuration was scattered across multiple components:
-- `FrameworkSettings.mock` (legacy SikuliX setting)
+- `brobotProperties.getCore().isMock()` (legacy SikuliX setting)
 - `ExecutionEnvironment.mockMode` (runtime environment setting)
 - Various system properties (`brobot.mock.mode`, `brobot.mock`, etc.)
 
@@ -37,6 +37,10 @@ Built-in logging to help debug mock mode state across all components.
 ### Enabling Mock Mode
 
 ```java
+// Note: BrobotProperties must be injected as a dependency
+@Autowired
+private BrobotProperties brobotProperties;
+
 import io.github.jspinak.brobot.config.MockModeManager;
 
 // Enable mock mode globally
@@ -47,7 +51,7 @@ MockModeManager.setMockMode(true);
 
 ```java
 // Check if mock mode is enabled
-if (MockModeManager.isMockMode()) {
+if (brobotProperties.getCore().isMock()) {
     // Execute mock-specific logic
     System.out.println("Running in mock mode");
 } else {
@@ -74,7 +78,8 @@ Mock Mode State:
     mockMode = true
     hasDisplay = false
     canCaptureScreen = false
-  FrameworkSettings.mock = true
+  // Mock mode is now configured via application.properties:
+// brobot.core.mock=true
 ```
 
 ## Integration with Tests
@@ -132,7 +137,7 @@ public class StandaloneTest {
     
     @Test
     public void testFeature() {
-        assertTrue(MockModeManager.isMockMode());
+        assertTrue(brobotProperties.getCore().isMock());
         // Test logic
     }
 }
@@ -196,11 +201,12 @@ java -jar myapp.jar --brobot.mock.mode=true
    - `allowScreenCapture = false` (in mock mode)
 
 3. **FrameworkSettings:**
-   - `FrameworkSettings.mock = true` (via reflection)
+   - `// Mock mode is now configured via application.properties:
+// brobot.core.mock=true` (via reflection)
 
 ### Priority Order
 
-When checking mock mode status, `MockModeManager.isMockMode()` checks in this order:
+When checking mock mode status, `brobotProperties.getCore().isMock()` checks in this order:
 1. ExecutionEnvironment (if available)
 2. System properties (as fallback)
 
@@ -211,12 +217,12 @@ When checking mock mode status, `MockModeManager.isMockMode()` checks in this or
 Instead of checking individual mock flags:
 ```java
 // ❌ Don't do this
-if (FrameworkSettings.mock || ExecutionEnvironment.getInstance().isMockMode()) {
+if (brobotProperties.getCore().isMock() || ExecutionEnvironment.getInstance().isMockMode()) {
     // ...
 }
 
 // ✅ Do this
-if (MockModeManager.isMockMode()) {
+if (brobotProperties.getCore().isMock()) {
     // ...
 }
 ```
@@ -273,7 +279,8 @@ public void testModeTransition() {
 Before:
 ```java
 System.setProperty("brobot.mock", "true");
-FrameworkSettings.mock = true;
+// Mock mode is now configured via application.properties:
+// brobot.core.mock=true;
 ExecutionEnvironment env = ExecutionEnvironment.builder()
     .mockMode(true)
     .build();
@@ -289,14 +296,14 @@ MockModeManager.setMockMode(true);
 
 Before:
 ```java
-boolean isMock = FrameworkSettings.mock || 
+boolean isMock = brobotProperties.getCore().isMock() || 
                  "true".equals(System.getProperty("brobot.mock.mode")) ||
                  ExecutionEnvironment.getInstance().isMockMode();
 ```
 
 After:
 ```java
-boolean isMock = MockModeManager.isMockMode();
+boolean isMock = brobotProperties.getCore().isMock();
 ```
 
 ## Troubleshooting

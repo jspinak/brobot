@@ -69,7 +69,7 @@ spring.main.lazy-initialization=false
 
 # Mock Mode Settings - SIMPLIFIED
 # Single master switch for mock mode
-brobot.mock=true
+brobot.core.mock=true
 # Probability of action success (0.0 to 1.0)
 brobot.mock.action.success.probability=1.0
 
@@ -345,7 +345,7 @@ public class ExampleTestConfig {
 @SpringBootTest(classes = ExampleTestConfig.class)
 @ActiveProfiles("integration-example")
 @TestPropertySource(properties = {
-    "brobot.mock=true",
+    "brobot.core.mock=true",
     "logging.level.io.github.jspinak.brobot=DEBUG"
 })
 public class ExampleIntegrationTest {

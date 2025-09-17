@@ -3,9 +3,10 @@ package io.github.jspinak.brobot.action.internal.mouse;
 import org.sikuli.script.Mouse;
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Provides mouse button press-and-hold functionality with timing control and mock support.
@@ -29,17 +30,20 @@ import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
  * @see MouseUpWrapper
  * @see ClickType
  * @see Mouse#down(int)
- * @see FrameworkSettings#mock
+ * @see BrobotProperties
  */
 @Component
 public class MouseDownWrapper {
 
-    private final ClickType clickType;
-    private final TimeProvider time;
+    @Autowired
+    private BrobotProperties brobotProperties;
 
-    public MouseDownWrapper(ClickType clickType, TimeProvider time) {
+    private final ClickType clickType;
+    private final TimeWrapper timeWrapper;
+
+    public MouseDownWrapper(ClickType clickType, TimeWrapper timeWrapper) {
         this.clickType = clickType;
-        this.time = time;
+        this.timeWrapper = timeWrapper;
     }
 
     /**
@@ -68,10 +72,10 @@ public class MouseDownWrapper {
      *     indicate whether the press was successful in real mode.
      * @see MouseUpWrapper#press
      * @see ClickType.Type
-     * @see TimeProvider#wait(double)
+     * @see TimeWrapper#wait(double)
      */
     public boolean press(double pauseBeforeBegin, double totalPause, ClickType.Type type) {
-        if (FrameworkSettings.mock) {
+        if (brobotProperties.getCore().isMock()) {
             ConsoleReporter.print(
                     "<mouse-down>"); // this could be expanded if object clicks are given mock
             // actions
@@ -79,9 +83,9 @@ public class MouseDownWrapper {
             ConsoleReporter.print(" ");
             return true;
         }
-        time.wait(pauseBeforeBegin);
+        timeWrapper.wait(pauseBeforeBegin);
         Mouse.down(clickType.getTypeToSikuliButton().get(type));
-        time.wait(totalPause);
+        timeWrapper.wait(totalPause);
         return true;
     }
 }

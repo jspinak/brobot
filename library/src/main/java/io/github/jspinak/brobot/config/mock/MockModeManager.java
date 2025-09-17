@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.config.mock;
 
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
  * <ul>
  *   <li>System properties (for configuration loading)
  *   <li>ExecutionEnvironment (for runtime behavior)
- *   <li>FrameworkSettings (for SikuliX compatibility)
+ *   <li>BrobotProperties (for SikuliX compatibility)
  * </ul>
  *
  * @since 1.0
@@ -67,7 +68,7 @@ public class MockModeManager {
      * <ul>
      *   <li>All relevant system properties
      *   <li>ExecutionEnvironment configuration
-     *   <li>FrameworkSettings (if available)
+     *   <li>BrobotProperties (if available)
      * </ul>
      *
      * @param enable true to enable mock mode, false to disable
@@ -94,30 +95,11 @@ public class MockModeManager {
             log.warn("Failed to update ExecutionEnvironment: {}", e.getMessage());
         }
 
-        // 3. Update FrameworkSettings for SikuliX compatibility
-        updateFrameworkSettings(enable);
-
-        // 4. Log the final state
+        // 3. Log the final state
         logMockModeState();
     }
 
-    /**
-     * Updates FrameworkSettings.mock using reflection to avoid direct dependency.
-     *
-     * @param enable the mock mode value to set
-     */
-    private static void updateFrameworkSettings(boolean enable) {
-        try {
-            Class<?> frameworkSettingsClass =
-                    Class.forName("io.github.jspinak.brobot.config.core.FrameworkSettings");
-            frameworkSettingsClass.getField("mock").set(null, enable);
-            log.debug("Updated FrameworkSettings.mock to: {}", enable);
-        } catch (ClassNotFoundException e) {
-            log.debug("FrameworkSettings not available (expected in some configurations)");
-        } catch (Exception e) {
-            log.warn("Failed to update FrameworkSettings.mock: {}", e.getMessage());
-        }
-    }
+    // BrobotProperties configuration - Spring managed
 
     /** Logs the current mock mode state across all components for debugging. */
     public static void logMockModeState() {
@@ -151,20 +133,8 @@ public class MockModeManager {
             state.append("  ExecutionEnvironment: Not available\n");
         }
 
-        // Check FrameworkSettings
-        try {
-            Class<?> frameworkSettingsClass =
-                    Class.forName("io.github.jspinak.brobot.config.core.FrameworkSettings");
-            Object mockValue = frameworkSettingsClass.getField("mock").get(null);
-            state.append("  FrameworkSettings.mock = ").append(mockValue).append("\n");
-            Object probabilityValue =
-                    frameworkSettingsClass.getField("mockActionSuccessProbability").get(null);
-            state.append("  FrameworkSettings.mockActionSuccessProbability = ")
-                    .append(probabilityValue)
-                    .append("\n");
-        } catch (Exception e) {
-            state.append("  FrameworkSettings: Not available\n");
-        }
+        // BrobotProperties is configured via Spring dependency injection
+        state.append("  BrobotProperties: Configured via Spring\n");
 
         log.debug(state.toString());
     }

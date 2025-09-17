@@ -33,6 +33,10 @@ For Spring-based tests, see the [Test Logging Architecture](/docs/core-library/t
 :::
 
 ```java
+// Note: BrobotProperties must be injected as a dependency
+@Autowired
+private BrobotProperties brobotProperties;
+
 import io.github.jspinak.brobot.config.MockModeManager;
 import io.github.jspinak.brobot.test.logging.TestLoggerFactory;
 
@@ -40,7 +44,7 @@ import io.github.jspinak.brobot.test.logging.TestLoggerFactory;
 MockModeManager.setMockMode(true);
 
 // Check if mock mode is active
-if (MockModeManager.isMockMode()) {
+if (brobotProperties.getCore().isMock()) {
     // Execute mock-specific logic
 }
 
@@ -312,7 +316,8 @@ public class MyBrobotTest extends BrobotTestBase {
 
 `BrobotTestBase` automatically configures the following for all tests:
 
-1. **Mock Mode Activation** - Sets `FrameworkSettings.mock = true` to prevent SikuliX headless exceptions
+1. **Mock Mode Activation** - Sets `// Mock mode is now configured via application.properties:
+// brobot.core.mock=true` to prevent SikuliX headless exceptions
 2. **Fast Mock Timings** - Configures minimal delays for mock operations (0.01-0.04 seconds)
 3. **Mouse Settings** - Removes mouse pause delays for faster test execution
 4. **Screenshot Paths** - Sets up paths for mock screenshot operations
@@ -338,7 +343,7 @@ public class CustomTest extends BrobotTestBase {
         super.setupTest(); // Important: call parent setup first
         
         // Add your custom setup
-        FrameworkSettings.mockTimeFindFirst = 0.05; // Custom timing
+        brobotProperties.getCore().isMock()TimeFindFirst = 0.05; // Custom timing
         // Other custom configuration...
     }
 }

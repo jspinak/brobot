@@ -7,11 +7,12 @@ import java.util.Random;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.util.image.recognition.ImageLoader;
+import org.springframework.beans.factory.annotation.Autowired;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Generates mock scene data for testing color-based operations.
@@ -32,10 +33,13 @@ import io.github.jspinak.brobot.util.image.recognition.ImageLoader;
  * testing of color-based find operations.
  *
  * @see ImageLoader
- * @see FrameworkSettings
+ * @see BrobotProperties
  */
 @Component
 public class MockColor {
+
+    @Autowired
+    private BrobotProperties brobotProperties;
 
     private ImageLoader getImage;
 
@@ -68,7 +72,7 @@ public class MockColor {
         Mat mat = new Mat(Mat.zeros(region.h(), region.w(), CV_32F));
         Mat img =
                 getImage.getMatFromFilename(
-                        FrameworkSettings.packageName + "/" + image.getImgpath(),
+                        brobotProperties.getCore().getPackageName() + "/" + image.getImgpath(),
                         ColorCluster.ColorSchemaName.BGR);
         int n = new Random().nextInt(10);
         for (int i = 0; i < n; i++) {

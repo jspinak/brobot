@@ -33,6 +33,10 @@ This pattern maintains high cohesion since outgoing transitions use the current 
 ### Complete Example
 
 ```java
+// Note: BrobotProperties must be injected as a dependency
+@Autowired
+private BrobotProperties brobotProperties;
+
 @TransitionSet(state = PricingState.class, description = "Pricing page transitions")
 @RequiredArgsConstructor
 @Slf4j
@@ -49,7 +53,7 @@ public class PricingTransitions {
     public boolean verifyArrival() {
         log.info("Verifying arrival at Pricing state");
         // In mock mode, just return true for testing
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             log.info("Mock mode: simulating successful verification");
             return true;
         }
@@ -72,7 +76,7 @@ public class PricingTransitions {
     public boolean toHomepage() {
         log.info("Navigating from Pricing to Homepage");
         // In mock mode, just return true for testing
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             log.info("Mock mode: simulating successful navigation");
             return true;
         }
@@ -86,7 +90,7 @@ public class PricingTransitions {
     public boolean toMenu() {
         log.info("Navigating from Pricing to Menu");
         // In mock mode, just return true for testing
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             log.info("Mock mode: simulating successful navigation");
             return true;
         }
@@ -135,7 +139,7 @@ public class WorldTransitions {
     @IncomingTransition(description = "Verify arrival at World state", required = true)
     public boolean verifyArrival() {
         log.info("Verifying arrival at World state");
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             log.info("Mock mode: simulating successful verification");
             return true;
         }
@@ -159,7 +163,7 @@ public class WorldTransitions {
     @OutgoingTransition(to = HomeState.class, priority = 1, description = "Navigate from World to Home")
     public boolean toHome() {
         log.info("Navigating from World to Home");
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             log.info("Mock mode: simulating successful navigation");
             return true;
         }
@@ -172,7 +176,7 @@ public class WorldTransitions {
     @OutgoingTransition(to = IslandState.class, priority = 2, description = "Navigate from World to Island")
     public boolean toIsland() {
         log.info("Navigating from World to Island");
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             log.info("Mock mode: simulating successful navigation");
             return true;
         }
@@ -227,7 +231,7 @@ public class WorkingTransitions {
     @IncomingTransition(required = true)
     public boolean verifyArrival() {
         log.info("Verifying arrival at Working state");
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             return true;
         }
         return action.find(workingState.getWorkingIndicator()).isSuccess();
@@ -241,7 +245,7 @@ public class WorkingTransitions {
         try {
             log.info("Navigating from Working to Prompt");
 
-            if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+            if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
                 return true;
             }
 
@@ -290,7 +294,7 @@ public class MenuTransitions {
     )
     public boolean toPrevious() {
         log.info("Closing menu to return to previous state");
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             return true;
         }
         // Click close button or press ESC
@@ -301,7 +305,7 @@ public class MenuTransitions {
     @IncomingTransition
     public boolean verifyArrival() {
         log.info("Verifying arrival at Menu state");
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             return true;
         }
         return action.find(menuState.getMenuHeader()).isSuccess();

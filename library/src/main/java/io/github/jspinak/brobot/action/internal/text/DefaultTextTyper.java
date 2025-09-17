@@ -5,21 +5,25 @@ import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateString;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Primary text typing implementation that handles both mock and live environments. Automatically
- * switches between mock and live typing based on FrameworkSettings.mock.
+ * switches between mock and live typing based on brobotProperties.getCore().isMock().
  */
 @Component
 @Primary
 @Slf4j
 public class DefaultTextTyper implements TextTyper {
+
+    @Autowired
+    private BrobotProperties brobotProperties;
 
     @Override
     public boolean type(StateString stateString, ActionConfig actionConfig) {
@@ -35,7 +39,7 @@ public class DefaultTextTyper implements TextTyper {
                         ? stateString.getString()
                         : "";
 
-        if (FrameworkSettings.mock) {
+        if (brobotProperties.getCore().isMock()) {
             return mockType(textToType, modifiers);
         } else {
             return liveType(textToType, modifiers);
@@ -52,9 +56,9 @@ public class DefaultTextTyper implements TextTyper {
         ConsoleReporter.print(text);
 
         // Simulate typing delay
-        if (FrameworkSettings.mockTimeClick > 0) {
+        if (brobotProperties.getMock().getTimeClick() > 0) {
             try {
-                Thread.sleep((long) (FrameworkSettings.mockTimeClick * 1000));
+                Thread.sleep((long) (brobotProperties.getMock().getTimeClick() * 1000));
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 log.warn("Mock typing interrupted", e);

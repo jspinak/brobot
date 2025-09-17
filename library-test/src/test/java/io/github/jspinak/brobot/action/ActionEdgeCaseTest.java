@@ -13,7 +13,6 @@ import org.springframework.test.context.ContextConfiguration;
 
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;
@@ -40,7 +39,7 @@ public class ActionEdgeCaseTest extends BrobotIntegrationTestBase {
     void setUp() {
         super.setUpBrobotEnvironment();
         // Force mock mode for all tests
-        FrameworkSettings.mock = true;
+        // Mock mode is enabled via BrobotTestBase
         System.setProperty("java.awt.headless", "true");
 
         // Check if action was autowired, if not, get it from context

@@ -64,7 +64,7 @@ Brobot now includes a clean test logging architecture that follows Single Respon
 
 ```properties
 # Core testing settings
-brobot.mock=true
+brobot.core.mock=true
 brobot.core.headless=false
 brobot.core.image-path=images/
 
@@ -108,7 +108,7 @@ brobot:
 
 | Legacy (Deprecated) | Modern Equivalent |
 |--------------------|-----------------|
-| `BrobotSettings.mock` | `brobot.mock=true` |
+| `BrobotSettings.mock` | `brobot.core.mock=true` |
 | `BrobotSettings.screenshotPath` | `brobot.screenshot.path` |
 | `BrobotSettings.screenshots` | Configure via properties |
 | `ActionOptions` | `ActionConfig` (e.g., `PatternFindOptions`) |
@@ -120,7 +120,7 @@ brobot:
 ```java
 @SpringBootTest
 @TestPropertySource(properties = {
-    "brobot.mock=true",
+    "brobot.core.mock=true",
     "brobot.screenshot.path=src/test/resources/screenshots/"
 })
 class AutomationTest {

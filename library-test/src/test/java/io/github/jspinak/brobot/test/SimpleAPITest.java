@@ -15,7 +15,6 @@ import org.springframework.test.context.ContextConfiguration;
 import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.action.ActionRecord;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
@@ -55,7 +54,7 @@ public class SimpleAPITest {
 
     @BeforeEach
     void setUp() {
-        FrameworkSettings.mock = true;
+        // Mock mode is enabled via BrobotTestBase
     }
 
     @Test

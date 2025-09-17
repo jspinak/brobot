@@ -14,7 +14,7 @@ import io.github.jspinak.brobot.action.basic.vanish.VanishOptions;
 import io.github.jspinak.brobot.action.internal.execution.ActionLifecycleManagement;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 import io.github.jspinak.brobot.util.image.capture.ScreenshotCapture;
 
 /**
@@ -64,15 +64,15 @@ public class WaitVanish implements ActionInterface {
 
     private final ActionLifecycleManagement actionLifecycleManagement;
     private final ScreenshotCapture screenshotCapture;
-    private final TimeProvider time;
+    private final TimeWrapper timeWrapper;
 
     public WaitVanish(
             ActionLifecycleManagement actionLifecycleManagement,
             ScreenshotCapture screenshotCapture,
-            TimeProvider time) {
+            TimeWrapper timeWrapper) {
         this.actionLifecycleManagement = actionLifecycleManagement;
         this.screenshotCapture = screenshotCapture;
-        this.time = time;
+        this.timeWrapper = timeWrapper;
     }
 
     @Override
@@ -183,7 +183,7 @@ public class WaitVanish implements ActionInterface {
             }
 
             // Wait before next check
-            time.wait(checkInterval / 1000.0);
+            timeWrapper.wait(checkInterval / 1000.0);
         }
 
         // Timeout reached

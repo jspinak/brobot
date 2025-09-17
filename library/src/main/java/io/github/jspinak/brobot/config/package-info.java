@@ -13,7 +13,7 @@
  * <ul>
  *   <li>{@link io.github.jspinak.brobot.config.BrobotConfig} - Root Spring configuration enabling
  *       component scanning
- *   <li>{@link io.github.jspinak.brobot.config.core.FrameworkSettings} - Global settings
+ *   <li>{@link io.github.jspinak.brobot.config.core.BrobotProperties} - Global settings
  *       controlling framework behavior
  *   <li>{@link io.github.jspinak.brobot.config.environment.ExecutionEnvironment} - Runtime
  *       environment detection and configuration
@@ -114,8 +114,8 @@
  *
  * <pre>{@code
  * // Configure framework settings before Spring initialization
- * FrameworkSettings.setTimeToWaitAfterMove(500);
- * FrameworkSettings.setInitProfilesForDynamicImages(true);
+ * BrobotProperties.setTimeToWaitAfterMove(500);
+ * BrobotProperties.setInitProfilesForDynamicImages(true);
  *
  * // Set execution environment
  * ExecutionEnvironment env = ExecutionEnvironment.builder()

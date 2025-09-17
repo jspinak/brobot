@@ -5,11 +5,11 @@ import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 import io.github.jspinak.brobot.util.coordinates.CoordinateScaler;
 
 /**
@@ -60,7 +60,8 @@ public class SingleClickExecutor {
     private final MouseDownWrapper mouseDownWrapper;
     private final MouseUpWrapper mouseUpWrapper;
     private final MoveMouseWrapper moveMouseWrapper;
-    private final TimeProvider time;
+    private final TimeWrapper timeWrapper;
+    private final BrobotProperties brobotProperties;
 
     @Autowired private CoordinateScaler coordinateScaler;
 
@@ -75,11 +76,13 @@ public class SingleClickExecutor {
             MouseDownWrapper mouseDownWrapper,
             MouseUpWrapper mouseUpWrapper,
             MoveMouseWrapper moveMouseWrapper,
-            TimeProvider time) {
+            TimeWrapper timeWrapper,
+            BrobotProperties brobotProperties) {
         this.mouseDownWrapper = mouseDownWrapper;
         this.mouseUpWrapper = mouseUpWrapper;
         this.moveMouseWrapper = moveMouseWrapper;
-        this.time = time;
+        this.timeWrapper = timeWrapper;
+        this.brobotProperties = brobotProperties;
     }
 
     /**
@@ -238,7 +241,7 @@ public class SingleClickExecutor {
             double pauseAfterDown,
             double pauseBeforeUp,
             double pauseAfterUp) {
-        if (FrameworkSettings.mock) {
+        if (brobotProperties.getCore().isMock()) {
             ConsoleReporter.print("<click>");
             if (button != MouseButton.LEFT || numberOfClicks > 1) {
                 ConsoleReporter.print(button.name());
@@ -252,7 +255,7 @@ public class SingleClickExecutor {
         if (!moveMouseWrapper.move(location)) return false;
 
         // Pause before beginning click sequence
-        if (pauseBeforeBegin > 0) time.wait(pauseBeforeBegin);
+        if (pauseBeforeBegin > 0) timeWrapper.wait(pauseBeforeBegin);
 
         // Check for native double-click optimization
         if (numberOfClicks == 2
@@ -281,7 +284,7 @@ public class SingleClickExecutor {
         }
 
         // Pause after completing click sequence
-        if (pauseAfterEnd > 0) time.wait(pauseAfterEnd);
+        if (pauseAfterEnd > 0) timeWrapper.wait(pauseAfterEnd);
 
         return true;
     }

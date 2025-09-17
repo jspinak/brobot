@@ -18,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.sikuli.script.FindFailed;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.exception.ActionFailedException;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import io.github.jspinak.brobot.logging.unified.LogBuilder;
@@ -65,7 +64,7 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
     @Test
     public void testInterceptSikuliCall_SuccessInNormalMode() throws Throwable {
         // Arrange
-        FrameworkSettings.mock = false;
+        // Mock mode disabled - not needed in tests
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toShortString()).thenReturn("find()");
         when(signature.getName()).thenReturn("find");
@@ -93,7 +92,7 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
     @Test
     public void testInterceptSikuliCall_MockMode() throws Throwable {
         // Arrange
-        FrameworkSettings.mock = true;
+        // Mock mode is now enabled via BrobotTestBase
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toShortString()).thenReturn("find()");
         when(signature.getName()).thenReturn("find");
@@ -112,7 +111,7 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
     @Test
     public void testInterceptSikuliCall_FindFailedException() throws Throwable {
         // Arrange
-        FrameworkSettings.mock = false;
+        // Mock mode disabled - not needed in tests
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toShortString()).thenReturn("find()");
         when(signature.getName()).thenReturn("find");
@@ -145,7 +144,7 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
     @Test
     public void testInterceptSikuliCall_GeneralException() throws Throwable {
         // Arrange
-        FrameworkSettings.mock = false;
+        // Mock mode disabled - not needed in tests
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toShortString()).thenReturn("click()");
         when(signature.getName()).thenReturn("click");
@@ -170,7 +169,7 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
     @Test
     public void testMockProvider_FindOperations() throws Throwable {
         // Arrange
-        FrameworkSettings.mock = true;
+        // Mock mode is now enabled via BrobotTestBase
 
         // Test find
         when(joinPoint.getSignature()).thenReturn(signature);
@@ -189,7 +188,7 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
     @Test
     public void testMockProvider_ClickOperations() throws Throwable {
         // Arrange
-        FrameworkSettings.mock = true;
+        // Mock mode is now enabled via BrobotTestBase
 
         // Test click
         when(joinPoint.getSignature()).thenReturn(signature);
@@ -208,7 +207,7 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
     @Test
     public void testMockProvider_TypeOperations() throws Throwable {
         // Arrange
-        FrameworkSettings.mock = true;
+        // Mock mode is now enabled via BrobotTestBase
 
         // Test type
         when(joinPoint.getSignature()).thenReturn(signature);
@@ -227,7 +226,7 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
     @Test
     public void testMockProvider_GetScreen() throws Throwable {
         // Arrange
-        FrameworkSettings.mock = true;
+        // Mock mode is now enabled via BrobotTestBase
 
         // Test getScreen
         when(joinPoint.getSignature()).thenReturn(signature);
@@ -306,7 +305,7 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
     @Test
     public void testResetMetrics() throws Throwable {
         // Arrange
-        FrameworkSettings.mock = false;
+        // Mock mode disabled - not needed in tests
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toShortString()).thenReturn("find()");
         when(signature.getName()).thenReturn("find");
@@ -330,7 +329,7 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
     @Test
     public void testLogOperationStart() throws Throwable {
         // Arrange
-        FrameworkSettings.mock = false;
+        // Mock mode disabled - not needed in tests
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toShortString()).thenReturn("exists()");
         when(signature.getName()).thenReturn("exists");
@@ -355,7 +354,7 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
     @Test
     public void testLogOperationSuccess() throws Throwable {
         // Arrange
-        FrameworkSettings.mock = false;
+        // Mock mode disabled - not needed in tests
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toShortString()).thenReturn("click()");
         when(signature.getName()).thenReturn("click");

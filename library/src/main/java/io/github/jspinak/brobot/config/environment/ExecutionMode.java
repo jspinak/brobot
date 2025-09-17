@@ -2,7 +2,8 @@ package io.github.jspinak.brobot.config.environment;
 
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import org.springframework.beans.factory.annotation.Autowired;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Controls execution permissions and modes in the Brobot framework.
@@ -38,11 +39,14 @@ import io.github.jspinak.brobot.config.core.FrameworkSettings;
  * in action implementations.
  *
  * @since 1.0
- * @see FrameworkSettings
+ * @see BrobotProperties
  * @see ActionInterface
  */
 @Component
 public class ExecutionMode {
+
+    @Autowired
+    private BrobotProperties brobotProperties;
 
     /**
      * Determines whether the framework should execute in mock mode.
@@ -50,8 +54,8 @@ public class ExecutionMode {
      * <p>Mock mode is active when both conditions are met:
      *
      * <ol>
-     *   <li>{@link FrameworkSettings#mock} is set to true
-     *   <li>No test screenshots are configured ({@link FrameworkSettings#screenshots} is empty)
+     *   <li>{@link BrobotProperties} is set to true
+     *   <li>No test screenshots are configured ({@link BrobotProperties} is empty)
      * </ol>
      *
      * <p>The presence of test screenshots overrides mock mode because screenshots provide a more
@@ -75,10 +79,10 @@ public class ExecutionMode {
      *
      * @return true if mock mode is active and no screenshots are configured; false if real
      *     execution should occur or screenshots are available
-     * @see FrameworkSettings#mock
-     * @see FrameworkSettings#screenshots
+     * @see BrobotProperties
+     * @see BrobotProperties
      */
     public boolean isMock() {
-        return FrameworkSettings.mock && FrameworkSettings.screenshots.isEmpty();
+        return brobotProperties.getCore().isMock() && brobotProperties.getScreenshot().getTestScreenshots().isEmpty();
     }
 }

@@ -15,7 +15,6 @@ import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Pattern;
@@ -45,12 +44,12 @@ public class ClickMatchWithAddXYTestUpdated extends BrobotIntegrationTestBase {
     @BeforeEach
     void setUp() {
         super.setUpBrobotEnvironment();
-        FrameworkSettings.mock = true;
+        BrobotProperties.mock = true;
     }
 
     @AfterEach
     void tearDown() {
-        FrameworkSettings.mock = false;
+        BrobotProperties.mock = false;
     }
 
     @Test

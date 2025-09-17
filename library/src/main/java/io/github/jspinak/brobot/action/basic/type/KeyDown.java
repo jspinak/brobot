@@ -9,7 +9,7 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.internal.text.KeyDownWrapper;
 import io.github.jspinak.brobot.model.state.StateString;
-import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 
 /**
  * Presses and holds keyboard keys in the Brobot model-based GUI automation framework.
@@ -71,11 +71,11 @@ import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 public class KeyDown implements ActionInterface {
 
     private final KeyDownWrapper keyDownWrapper;
-    private final TimeProvider time;
+    private final TimeWrapper timeWrapper;
 
-    public KeyDown(KeyDownWrapper keyDownWrapper, TimeProvider time) {
+    public KeyDown(KeyDownWrapper keyDownWrapper, TimeWrapper timeWrapper) {
         this.keyDownWrapper = keyDownWrapper;
-        this.time = time;
+        this.timeWrapper = timeWrapper;
     }
 
     @Override
@@ -106,7 +106,7 @@ public class KeyDown implements ActionInterface {
 
             // Pause between keys (except after the last one)
             if (i < strings.size() - 1) {
-                time.wait(options.getPauseBetweenKeys());
+                timeWrapper.wait(options.getPauseBetweenKeys());
             }
         }
     }

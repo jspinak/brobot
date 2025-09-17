@@ -18,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import io.github.jspinak.brobot.logging.unified.LogBuilder;
 import io.github.jspinak.brobot.model.element.Region;
@@ -538,7 +537,7 @@ public class HighlightManagerTest extends BrobotTestBase {
     @Test
     public void testHighlightRegion_InMockMode() {
         // Arrange
-        FrameworkSettings.mock = true;
+        // Mock mode is now enabled via BrobotTestBase
         when(config.isEnabled()).thenReturn(true);
         when(config.isAutoHighlightFinds()).thenReturn(true);
 

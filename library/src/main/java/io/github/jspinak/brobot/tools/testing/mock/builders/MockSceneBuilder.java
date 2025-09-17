@@ -10,7 +10,7 @@ import java.util.List;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.analysis.color.*;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalysis;
 import io.github.jspinak.brobot.model.element.Image;
@@ -26,10 +26,7 @@ public class MockSceneBuilder {
 
     /** Creates a mock Scene with a valid image. Only works in mock mode. */
     public static Scene createMockScene() {
-        if (!FrameworkSettings.mock) {
-            throw new IllegalStateException("MockSceneBuilder should only be used in mock mode");
-        }
-
+        // Remove the runtime check - this is a test utility that should work regardless of mode
         Pattern pattern = createMockPattern();
         return new Scene(pattern);
     }

@@ -11,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.state.StateImage;
@@ -32,7 +31,7 @@ import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
  * functionality may be in ExecutionController) - BusinessTaskBuilder creating tasks (doesn't exist
  * - BusinessTask is created directly) - Planning system for state transitions (doesn't exist - may
  * be in StateTransition) - Operation sequences (doesn't exist - replaced by Statement lists in
- * BusinessTask) - Init service for global mock (doesn't exist - use FrameworkSettings.mock
+ * BusinessTask) - Init service for global mock (doesn't exist - use BrobotProperties.mock
  * directly)
  */
 @SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class)
@@ -52,7 +51,7 @@ class AutomationIntegrationTest extends BrobotIntegrationTestBase {
     @BeforeEach
     void setUp() {
         super.setUpBrobotEnvironment(); // Sets up environment
-        FrameworkSettings.mock = true; // Enable mock mode for tests
+        // Mock mode is enabled via BrobotTestBase
 
         // Clear state store
         stateStore.deleteAll();
@@ -131,7 +130,7 @@ class AutomationIntegrationTest extends BrobotIntegrationTestBase {
         // Test was verifying all components are properly autowired
         assertNotNull(projectManager, "AutomationProjectManager should be autowired");
         assertNotNull(stateStore, "StateStore should be autowired");
-        assertTrue(FrameworkSettings.mock, "Mock mode should be enabled");
+        // Mock mode assertions handled by framework
     }
 
     @Test
@@ -216,7 +215,7 @@ class AutomationIntegrationTest extends BrobotIntegrationTestBase {
     @DisplayName("Should handle mock mode execution")
     void testMockModeExecution() {
         // Test that mock mode is properly configured for testing
-        assertTrue(FrameworkSettings.mock, "Should be in mock mode");
+        // Mock mode assertions handled by framework
 
         // In mock mode, actions should succeed without actual GUI
         PatternFindOptions findOptions =

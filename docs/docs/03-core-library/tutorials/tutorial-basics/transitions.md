@@ -13,6 +13,10 @@ The `@TransitionSet` annotation groups all transitions for a state in one class.
 - `@IncomingTransition` method that verifies arrival at this state
 
 ```java
+// Note: BrobotProperties must be injected as a dependency
+@Autowired
+private BrobotProperties brobotProperties;
+
 @TransitionSet(state = WorldState.class, description = "World state transitions")
 @Component
 @RequiredArgsConstructor
@@ -32,7 +36,7 @@ public class WorldTransitions {
         log.info("Navigating from Home to World");
         
         // Mock mode support for testing
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             log.info("Mock mode: simulating successful navigation");
             return true;
         }
@@ -47,7 +51,7 @@ public class WorldTransitions {
     public boolean fromIsland() {
         log.info("Navigating from Island to World");
         
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             return true;
         }
         
@@ -61,7 +65,7 @@ public class WorldTransitions {
     public boolean verifyArrival() {
         log.info("Verifying arrival at World state");
         
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             return true;
         }
         
@@ -157,7 +161,7 @@ public class IslandTransitions {
     public boolean fromWorld() {
         log.info("Navigating from World to Island");
         
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             return true;
         }
         
@@ -180,7 +184,7 @@ public class IslandTransitions {
     public boolean verifyArrival() {
         log.info("Verifying arrival at Island state");
         
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             return true;
         }
         
@@ -204,13 +208,13 @@ public class SettingsTransitions {
     
     @FromTransition(from = HomeState.class, priority = 1)
     public boolean fromHome() {
-        if (FrameworkSettings.mock) return true;
+        if (brobotProperties.getCore().isMock()) return true;
         return action.click(homeState.getSettingsIcon()).isSuccess();
     }
     
     @IncomingTransition(required = true)
     public boolean verifyArrival() {
-        if (FrameworkSettings.mock) return true;
+        if (brobotProperties.getCore().isMock()) return true;
         return action.find(settingsState.getSettingsHeader()).isSuccess();
     }
 }
@@ -232,7 +236,7 @@ public class DashboardTransitions {
     public boolean fromLogin() {
         log.info("Navigating from Login to Dashboard");
         
-        if (FrameworkSettings.mock) return true;
+        if (brobotProperties.getCore().isMock()) return true;
         
         // Multi-step login process
         ActionResult result = action
@@ -253,7 +257,7 @@ public class DashboardTransitions {
     
     @IncomingTransition(required = true)
     public boolean verifyArrival() {
-        if (FrameworkSettings.mock) return true;
+        if (brobotProperties.getCore().isMock()) return true;
         
         // Wait for dashboard to load
         ActionResult validation = action.findWithTimeout(
@@ -282,7 +286,7 @@ public class GameTransitions {
     public boolean fromMainMenu() {
         log.info("Starting game from main menu");
         
-        if (FrameworkSettings.mock) return true;
+        if (brobotProperties.getCore().isMock()) return true;
         
         // Try primary action first
         ActionResult playResult = action.click(mainMenu.getPlayButton());
@@ -299,14 +303,14 @@ public class GameTransitions {
     public boolean fromPauseMenu() {
         log.info("Resuming game from pause menu");
         
-        if (FrameworkSettings.mock) return true;
+        if (brobotProperties.getCore().isMock()) return true;
         
         return action.click(pauseMenu.getResumeButton()).isSuccess();
     }
     
     @IncomingTransition(required = true)
     public boolean verifyArrival() {
-        if (FrameworkSettings.mock) return true;
+        if (brobotProperties.getCore().isMock()) return true;
         
         // Wait for game board to appear
         ActionResult waitResult = action.findWithTimeout(
@@ -340,7 +344,7 @@ public class ConfirmationTransitions {
     
     @FromTransition(from = FormState.class, priority = 1)
     public boolean fromForm() {
-        if (FrameworkSettings.mock) return true;
+        if (brobotProperties.getCore().isMock()) return true;
         
         // Configure specific action behaviors
         ClickOptions doubleClick = new ClickOptions.Builder()
@@ -368,7 +372,7 @@ public class ConfirmationTransitions {
     
     @IncomingTransition(required = true)
     public boolean verifyArrival() {
-        if (FrameworkSettings.mock) return true;
+        if (brobotProperties.getCore().isMock()) return true;
         return action.find(confirmationState.getSuccessMessage()).isSuccess();
     }
 }
@@ -398,7 +402,7 @@ src/main/java/com/example/basics/
    ```java
    @FromTransition(from = SourceState.class)
    public boolean fromSource() {
-       if (FrameworkSettings.mock) return true;
+       if (brobotProperties.getCore().isMock()) return true;
        // Real navigation logic
    }
    ```
@@ -412,7 +416,7 @@ src/main/java/com/example/basics/
    @FromTransition(from = SourceState.class)
    public boolean fromSource() {
        log.info("Navigating from Source to Target");
-       if (FrameworkSettings.mock) {
+       if (brobotProperties.getCore().isMock()) {
            log.info("Mock mode: simulating successful navigation");
            return true;
        }
@@ -425,7 +429,7 @@ src/main/java/com/example/basics/
    @FromTransition(from = SourceState.class)
    public boolean fromSource() {
        try {
-           if (FrameworkSettings.mock) return true;
+           if (brobotProperties.getCore().isMock()) return true;
            return action.click(element).isSuccess();
        } catch (Exception e) {
            log.error("Transition failed", e);
@@ -438,7 +442,7 @@ src/main/java/com/example/basics/
    ```java
    @IncomingTransition(required = true)
    public boolean verifyArrival() {
-       if (FrameworkSettings.mock) return true;
+       if (brobotProperties.getCore().isMock()) return true;
        
        // Check multiple elements for robust verification
        boolean hasHeader = action.find(state.getHeader()).isSuccess();
@@ -521,13 +525,13 @@ public class WorldTransitions {
     
     @FromTransition(from = HomeState.class, priority = 1)
     public boolean fromHome() {
-        if (FrameworkSettings.mock) return true;
+        if (brobotProperties.getCore().isMock()) return true;
         return action.click(homeState.getToWorldButton()).isSuccess();
     }
     
     @IncomingTransition(required = true)
     public boolean verifyArrival() {
-        if (FrameworkSettings.mock) return true;
+        if (brobotProperties.getCore().isMock()) return true;
         return action.find(worldState.getMinimap()).isSuccess();
     }
 }

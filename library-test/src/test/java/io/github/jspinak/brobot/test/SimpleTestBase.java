@@ -13,14 +13,14 @@ public abstract class SimpleTestBase {
         // Set system property for mock mode
         System.setProperty("brobot.mock.mode", "true");
 
-        // Set FrameworkSettings.mock directly using reflection to avoid initialization
+        // Set BrobotProperties.mock directly using reflection to avoid initialization
         // issues
         try {
             Class<?> frameworkSettingsClass =
-                    Class.forName("io.github.jspinak.brobot.config.core.FrameworkSettings");
+                    Class.forName("io.github.jspinak.brobot.config.core.BrobotProperties");
             frameworkSettingsClass.getField("mock").set(null, true);
         } catch (Exception e) {
-            // Ignore if FrameworkSettings is not available
+            // Ignore if BrobotProperties is not available
         }
     }
 }

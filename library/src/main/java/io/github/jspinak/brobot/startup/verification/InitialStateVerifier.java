@@ -4,7 +4,6 @@ import java.util.*;
 
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.state.StateEnum;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.statemanagement.StateDetector;
@@ -12,6 +11,7 @@ import io.github.jspinak.brobot.statemanagement.StateMemory;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Modern approach to initial state verification for Brobot applications.
@@ -57,6 +57,7 @@ public class InitialStateVerifier {
 
     private final StateDetector stateDetector;
     private final StateMemory stateMemory;
+    private final BrobotProperties brobotProperties;
     private final StateService stateService;
 
     /**
@@ -229,7 +230,7 @@ public class InitialStateVerifier {
                 return false;
             }
 
-            boolean result = FrameworkSettings.mock ? verifyMock() : verifyReal();
+            boolean result = brobotProperties.getCore().isMock() ? verifyMock() : verifyReal();
 
             if (!result && fallbackToAllStates) {
                 log.info("Primary verification failed, attempting fallback search");

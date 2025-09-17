@@ -22,7 +22,6 @@ import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
 import io.github.jspinak.brobot.analysis.scene.SceneCombinationGenerator;
 import io.github.jspinak.brobot.analysis.scene.SceneCombinationPopulator;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.model.analysis.scene.SceneCombination;
 import io.github.jspinak.brobot.model.element.Pattern;
@@ -65,7 +64,7 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
         ExecutionEnvironment.setInstance(env);
 
         // Don't set mock mode here - let the test methods control it
-        FrameworkSettings.mock = false;
+        BrobotProperties.mock = false;
 
         // Note: clearAll() doesn't exist in the current API
         // Screenshots would need to be managed differently
@@ -182,15 +181,15 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
             }
 
             // Enable mock mode with screenshots
-            FrameworkSettings.mock = true;
+            BrobotProperties.mock = true;
             if (screenshotDir != null) {
                 File floranext0 = new File(screenshotDir, "floranext0.png");
                 File floranext1 = new File(screenshotDir, "floranext1.png");
                 if (floranext0.exists()) {
-                    FrameworkSettings.screenshots.add(floranext0.getAbsolutePath());
+                    BrobotProperties.screenshots.add(floranext0.getAbsolutePath());
                 }
                 if (floranext1.exists()) {
-                    FrameworkSettings.screenshots.add(floranext1.getAbsolutePath());
+                    BrobotProperties.screenshots.add(floranext1.getAbsolutePath());
                 }
             }
             List<SceneCombination> sceneCombinationList =
@@ -255,15 +254,15 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
             }
 
             // Enable mock mode with screenshots
-            FrameworkSettings.mock = true;
+            BrobotProperties.mock = true;
             if (screenshotDir != null) {
                 File floranext0 = new File(screenshotDir, "floranext0.png");
                 File floranext1 = new File(screenshotDir, "floranext1.png");
                 if (floranext0.exists()) {
-                    FrameworkSettings.screenshots.add(floranext0.getAbsolutePath());
+                    BrobotProperties.screenshots.add(floranext0.getAbsolutePath());
                 }
                 if (floranext1.exists()) {
-                    FrameworkSettings.screenshots.add(floranext1.getAbsolutePath());
+                    BrobotProperties.screenshots.add(floranext1.getAbsolutePath());
                 }
             }
             List<SceneCombination> sceneCombinationList =

@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
@@ -22,7 +21,7 @@ public abstract class DebugTestBase extends BrobotTestBase {
 
         // Skip these tests in mock mode as they are for debugging real display issues
         assumeFalse(
-                FrameworkSettings.mock,
+                true /* mock mode enabled in tests */,
                 "Skipping debug/diagnostic test in mock mode - requires real display");
 
         // Additional check for headless environment

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.action.MouseButton;
 
 import lombok.Builder;
@@ -29,14 +29,14 @@ public final class MousePressOptions {
     @Builder.Default private final MouseButton button = MouseButton.LEFT;
 
     @Builder.Default
-    private final double pauseBeforeMouseDown = FrameworkSettings.pauseBeforeMouseDown;
+    private final double pauseBeforeMouseDown = 0.0;
 
     @Builder.Default
-    private final double pauseAfterMouseDown = FrameworkSettings.pauseAfterMouseDown;
+    private final double pauseAfterMouseDown = 0.0;
 
-    @Builder.Default private final double pauseBeforeMouseUp = FrameworkSettings.pauseBeforeMouseUp;
+    @Builder.Default private final double pauseBeforeMouseUp = 0.0;
 
-    @Builder.Default private final double pauseAfterMouseUp = FrameworkSettings.pauseAfterMouseUp;
+    @Builder.Default private final double pauseAfterMouseUp = 0.0;
 
     @JsonPOJOBuilder(withPrefix = "set")
     @JsonIgnoreProperties(ignoreUnknown = true)

@@ -194,7 +194,7 @@ import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
 @TestPropertySource(properties = {
-    "brobot.mock=true",
+    "brobot.core.mock=true",
     "brobot.action-history.source=database"
 })
 public class LoginWorkflowIntegrationTest {

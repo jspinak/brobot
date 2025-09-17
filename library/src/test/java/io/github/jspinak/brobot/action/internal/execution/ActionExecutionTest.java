@@ -35,7 +35,7 @@ import io.github.jspinak.brobot.tools.history.IllustrationController;
 import io.github.jspinak.brobot.tools.logging.ActionLogger;
 import io.github.jspinak.brobot.tools.logging.ExecutionSession;
 import io.github.jspinak.brobot.tools.ml.dataset.DatasetManager;
-import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 import io.github.jspinak.brobot.util.image.capture.ScreenshotCapture;
 
 /**
@@ -45,7 +45,7 @@ import io.github.jspinak.brobot.util.image.capture.ScreenshotCapture;
 @DisplayName("ActionExecution Tests")
 public class ActionExecutionTest extends BrobotTestBase {
 
-    @Mock private TimeProvider timeProvider;
+    @Mock private TimeWrapper timeWrapper;
 
     @Mock private IllustrationController illustrationController;
 
@@ -87,7 +87,7 @@ public class ActionExecutionTest extends BrobotTestBase {
         mockCloseable = MockitoAnnotations.openMocks(this);
         actionExecution =
                 new ActionExecution(
-                        timeProvider,
+                        timeWrapper,
                         illustrationController,
                         searchRegionResolver,
                         actionLifecycleManagement,

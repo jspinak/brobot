@@ -12,13 +12,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.startup.orchestration.StartupConfiguration;
 import io.github.jspinak.brobot.statemanagement.InitialStates;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Auto-configuration for initial state management in Brobot applications.
@@ -57,6 +57,7 @@ public class InitialStateAutoConfiguration {
 
     private final InitialStates initialStates;
     private final StateMemory stateMemory;
+    private final BrobotProperties brobotProperties;
 
     // Configuration properties with defaults
     @Value("${brobot.startup.verify:true}")
@@ -157,12 +158,12 @@ public class InitialStateAutoConfiguration {
                     "unit".equals(testType)
                             || "true".equals(System.getProperty("brobot.test.mode"));
 
-            if (!FrameworkSettings.mock && !isTestMode && initialDelay > 0) {
+            if (!brobotProperties.getCore().isMock() && !isTestMode && initialDelay > 0) {
                 log.info(
                         "Waiting {} seconds before initial state verification (real mode)",
                         initialDelay);
                 TimeUnit.SECONDS.sleep(initialDelay);
-            } else if (isTestMode || FrameworkSettings.mock) {
+            } else if (isTestMode || brobotProperties.getCore().isMock()) {
                 log.debug("Test/Mock mode detected - skipping initial delay");
             }
 

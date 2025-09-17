@@ -15,7 +15,7 @@ import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateLocation;
 import io.github.jspinak.brobot.model.state.StateRegion;
-import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 
 /**
  * Moves the mouse to one or more locations without embedded Find operations.
@@ -68,11 +68,11 @@ public class MoveMouse implements ActionInterface {
     private static final Logger logger = Logger.getLogger(MoveMouse.class.getName());
 
     private final MoveMouseWrapper moveMouseWrapper;
-    private final TimeProvider time;
+    private final TimeWrapper timeWrapper;
 
-    public MoveMouse(MoveMouseWrapper moveMouseWrapper, TimeProvider time) {
+    public MoveMouse(MoveMouseWrapper moveMouseWrapper, TimeWrapper timeWrapper) {
         this.moveMouseWrapper = moveMouseWrapper;
-        this.time = time;
+        this.timeWrapper = timeWrapper;
     }
 
     @Override
@@ -111,7 +111,7 @@ public class MoveMouse implements ActionInterface {
 
                     // Pause between movements (except after last one)
                     if (i < locations.size() - 1 && options != null) {
-                        time.wait(options.getPauseAfterEnd());
+                        timeWrapper.wait(options.getPauseAfterEnd());
                     }
                 } else {
                     logger.warning("Failed to move mouse to location: " + location);

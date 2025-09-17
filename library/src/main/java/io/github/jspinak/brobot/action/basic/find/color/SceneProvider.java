@@ -11,16 +11,16 @@ import org.springframework.stereotype.Component;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.capture.UnifiedCaptureService;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Image;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.element.Scene;
-import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 import io.github.jspinak.brobot.util.image.recognition.ImageLoader;
 
 import lombok.extern.slf4j.Slf4j;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Manages scene acquisition from screenshots or provided images for analysis operations.
@@ -57,14 +57,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 public class SceneProvider {
-    private final TimeProvider time;
+
+    @Autowired
+    private BrobotProperties brobotProperties;
+    private final TimeWrapper timeWrapper;
     private final ImageLoader getImage;
 
     @Autowired(required = false)
     private UnifiedCaptureService unifiedCaptureService;
 
-    public SceneProvider(TimeProvider time, ImageLoader getImage) {
-        this.time = time;
+    public SceneProvider(TimeWrapper timeWrapper, ImageLoader getImage) {
+        this.timeWrapper = timeWrapper;
         this.getImage = getImage;
     }
 
@@ -105,7 +108,7 @@ public class SceneProvider {
                         + " {}",
                 scenesToCapture,
                 takeScreenshot,
-                FrameworkSettings.mock);
+                brobotProperties.getCore().isMock());
 
         if (takeScreenshot) {
             for (int i = 0; i < scenesToCapture; i++) {
@@ -134,26 +137,26 @@ public class SceneProvider {
                     screenshot = BufferedImageUtilities.getBufferedImageFromScreen(new Region());
                 }
                 scenes.add(new Scene(new Pattern(new Image(screenshot, "screenshot" + i))));
-                if (i < scenesToCapture - 1) time.wait(secondsBetweenCaptures);
+                if (i < scenesToCapture - 1) timeWrapper.wait(secondsBetweenCaptures);
             }
             return scenes;
         }
-        if (FrameworkSettings.mock) {
+        if (brobotProperties.getCore().isMock()) {
             log.debug("[SCENE_PROVIDER] Mock mode active");
             // If no scenes are listed in the settings, use a randomly generated scene.
-            if (FrameworkSettings.screenshots.isEmpty()) {
+            if (brobotProperties.getScreenshot().getTestScreenshots().isEmpty()) {
                 log.debug("[SCENE_PROVIDER] No mock screenshots configured, using empty image");
                 scenes.add(new Scene(new Pattern(Image.getEmptyImage())));
             }
             // If scenes are listed in the settings, use them.
             else
-                for (String filename : FrameworkSettings.screenshots) {
+                for (String filename : brobotProperties.getScreenshot().getTestScreenshots()) {
                     // Check if filename is already an absolute path
                     String imagePath;
                     if (new java.io.File(filename).isAbsolute()) {
                         imagePath = filename;
                     } else {
-                        imagePath = "../" + FrameworkSettings.screenshotPath + filename;
+                        imagePath = "../" + brobotProperties.getScreenshot().getPath() + filename;
                     }
                     scenes.add(new Scene(new Pattern(new Image(imagePath))));
                 }
@@ -207,7 +210,7 @@ public class SceneProvider {
      * @return true if screenshot should be captured, false otherwise
      */
     private boolean isOkToTakeScreenshot(ObjectCollection... objectCollections) {
-        if (FrameworkSettings.mock) return false;
+        if (brobotProperties.getCore().isMock()) return false;
         // if (objectCollections.length == 0) return false;
         if (!objectCollections[0].getScenes().isEmpty()) return false;
         return true;

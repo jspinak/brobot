@@ -73,14 +73,14 @@ public class ObjectActionOptionsIntegrationTest {
          * assertEquals(Settings.DelayValue, dragOptions.getPauseAfterMouseDown());
          *
          * // For a CLICK action, pauseAfterMouseDown should be
-         * FrameworkSettings.pauseAfterMouseDown.
+         * BrobotProperties.pauseAfterMouseDown.
          * ObjectActionOptions clickOptions = new ActionOptions.Builder()
          * .setAction(ObjectActionOptions.Action.CLICK)
          * .build();
          *
          * // CORRECTED ASSERTION: Check against the application's settings constant
          * directly.
-         * assertEquals(FrameworkSettings.pauseAfterMouseDown,
+         * assertEquals(BrobotProperties.pauseAfterMouseDown,
          * clickOptions.getPauseAfterMouseDown());
          */
     }

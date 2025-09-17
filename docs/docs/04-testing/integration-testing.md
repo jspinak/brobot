@@ -22,6 +22,10 @@ Integration testing provides:
 For simple integration tests without Spring context, extend `BrobotTestBase`:
 
 ```java
+// Note: BrobotProperties must be injected as a dependency
+@Autowired
+private BrobotProperties brobotProperties;
+
 import io.github.jspinak.brobot.test.BrobotTestBase;
 
 public class WorkflowIntegrationTest extends BrobotTestBase {
@@ -66,7 +70,7 @@ public class IntegrationTest extends BrobotTestBase {
     @Test
     public void testWorkflow() {
         // Mock mode is enabled via MockModeManager
-        assertTrue(MockModeManager.isMockMode());
+        assertTrue(brobotProperties.getCore().isMock());
         // Your test logic here
     }
 }
@@ -80,8 +84,8 @@ Additional testing configuration:
 # Mock mode is automatically enabled by BrobotTestBase
 # These properties are synchronized by MockModeManager:
 brobot.mock.mode=true
-brobot.mock=true
-brobot.mock=true
+brobot.core.mock=true
+brobot.core.mock=true
 
 # Mock timing configuration
 brobot.mock.time-find-first=0.1
@@ -313,7 +317,7 @@ Mock execution provides detailed logging for debugging and analysis:
 ```java
 @SpringBootTest
 @TestPropertySource(properties = {
-    "brobot.mock=true",
+    "brobot.core.mock=true",
     "brobot.testing.send-logs=true",
     "brobot.logging.verbosity=VERBOSE"
 })
@@ -627,11 +631,11 @@ public class OptimizedTestConfig implements BeforeAllCallback {
     @Override
     public void beforeAll(ExtensionContext context) {
         // Ultra-fast mock timings for tests
-        FrameworkSettings.mockTimeFindFirst = 0.005;
-        FrameworkSettings.mockTimeFindAll = 0.01;
-        FrameworkSettings.mockTimeClick = 0.005;
-        FrameworkSettings.mockTimeMove = 0.005;
-        FrameworkSettings.mockTimeDrag = 0.01;
+        brobotProperties.getCore().isMock()TimeFindFirst = 0.005;
+        brobotProperties.getCore().isMock()TimeFindAll = 0.01;
+        brobotProperties.getCore().isMock()TimeClick = 0.005;
+        brobotProperties.getCore().isMock()TimeMove = 0.005;
+        brobotProperties.getCore().isMock()TimeDrag = 0.01;
     }
 }
 ```
