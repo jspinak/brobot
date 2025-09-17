@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.config.core;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -18,8 +19,6 @@ import io.github.jspinak.brobot.navigation.service.StateTransitionService;
 import io.github.jspinak.brobot.navigation.transition.StateTransitions;
 import io.github.jspinak.brobot.statemanagement.StateIdResolver;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-import org.springframework.beans.factory.annotation.Autowired;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Initialization service for the Brobot model-based GUI automation framework.
@@ -79,8 +78,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 @Component
 public class FrameworkInitializer {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     private final StateService allStatesInProjectService;
     private final KmeansProfileBuilder setKMeansProfiles;

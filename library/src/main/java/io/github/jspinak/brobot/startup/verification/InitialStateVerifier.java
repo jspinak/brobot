@@ -4,6 +4,7 @@ import java.util.*;
 
 import org.springframework.stereotype.Component;
 
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.state.StateEnum;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.statemanagement.StateDetector;
@@ -11,7 +12,6 @@ import io.github.jspinak.brobot.statemanagement.StateMemory;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Modern approach to initial state verification for Brobot applications.

@@ -9,7 +9,6 @@ import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 
 import lombok.extern.slf4j.Slf4j;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Verifies and logs Brobot property configuration after Spring Boot initialization. This component
@@ -75,7 +74,8 @@ public class BrobotPropertyVerifier {
                 .metadata("drawMove", brobotProperties.getIllustration().isDrawMove())
                 .metadata("drawHighlight", brobotProperties.getIllustration().isDrawHighlight())
                 .metadata(
-                        "drawRepeatedActions", brobotProperties.getIllustration().isDrawRepeatedActions())
+                        "drawRepeatedActions",
+                        brobotProperties.getIllustration().isDrawRepeatedActions())
                 .metadata("drawClassify", brobotProperties.getIllustration().isDrawClassify())
                 .metadata("drawDefine", brobotProperties.getIllustration().isDrawDefine())
                 .log();
@@ -89,7 +89,9 @@ public class BrobotPropertyVerifier {
                 .metadata("drawDrag", brobotProperties.getIllustration().isDrawDrag())
                 .metadata("drawMove", brobotProperties.getIllustration().isDrawMove())
                 .metadata("drawHighlight", brobotProperties.getIllustration().isDrawHighlight())
-                .metadata("drawRepeatedActions", brobotProperties.getIllustration().isDrawRepeatedActions())
+                .metadata(
+                        "drawRepeatedActions",
+                        brobotProperties.getIllustration().isDrawRepeatedActions())
                 .metadata("drawClassify", brobotProperties.getIllustration().isDrawClassify())
                 .metadata("drawDefine", brobotProperties.getIllustration().isDrawDefine())
                 .log();
@@ -132,7 +134,9 @@ public class BrobotPropertyVerifier {
         System.out.println("\n=== Brobot Property Verification ===");
         System.out.println("Save history: " + brobotProperties.getScreenshot().isSaveHistory());
         System.out.println("History path: " + brobotProperties.getScreenshot().getHistoryPath());
-        System.out.println("Save history (BrobotProperties): " + brobotProperties.getScreenshot().isSaveHistory());
+        System.out.println(
+                "Save history (BrobotProperties): "
+                        + brobotProperties.getScreenshot().isSaveHistory());
         ExecutionEnvironment env = ExecutionEnvironment.getInstance();
         System.out.println("Mock mode: " + env.isMockMode());
         System.out.println("Has display: " + env.hasDisplay());

@@ -13,8 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.action.ActionInterface;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.exception.ActionFailedException;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import io.github.jspinak.brobot.logging.unified.LogEvent;

@@ -57,10 +57,11 @@ public class VisualFeedbackAspect {
     private final MonitorManager monitorManager;
 
     @Autowired
-    public VisualFeedbackAspect(BrobotLogger brobotLogger,
-                               MonitorManager monitorManager,
-                               @Autowired(required = false) HighlightManager highlightManager,
-                               @Autowired(required = false) VisualFeedbackConfig visualConfig) {
+    public VisualFeedbackAspect(
+            BrobotLogger brobotLogger,
+            MonitorManager monitorManager,
+            @Autowired(required = false) HighlightManager highlightManager,
+            @Autowired(required = false) VisualFeedbackConfig visualConfig) {
         this.brobotLogger = brobotLogger;
         this.monitorManager = monitorManager;
         this.highlightManager = highlightManager;

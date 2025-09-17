@@ -12,8 +12,8 @@ import org.springframework.test.context.ActiveProfiles;
 import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /** Test to verify mock mode functionality with ActionHistory. */
 @SpringBootTest
@@ -21,8 +21,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 @Disabled("Missing PromptState and WorkingState dependencies")
 public class MockModeTest extends BrobotTestBase {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     @Autowired(required = false)
     private Action action;

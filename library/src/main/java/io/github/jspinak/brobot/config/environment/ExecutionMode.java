@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.config.environment;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
@@ -45,8 +45,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 @Component
 public class ExecutionMode {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     /**
      * Determines whether the framework should execute in mock mode.
@@ -83,6 +82,7 @@ public class ExecutionMode {
      * @see BrobotProperties
      */
     public boolean isMock() {
-        return brobotProperties.getCore().isMock() && brobotProperties.getScreenshot().getTestScreenshots().isEmpty();
+        return brobotProperties.getCore().isMock()
+                && brobotProperties.getScreenshot().getTestScreenshots().isEmpty();
     }
 }

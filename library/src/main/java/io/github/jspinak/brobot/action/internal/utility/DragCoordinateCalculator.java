@@ -2,18 +2,18 @@ package io.github.jspinak.brobot.action.internal.utility;
 
 import org.sikuli.basics.Settings;
 import org.sikuli.script.FindFailed;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.tools.history.IllustrationController;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.tools.testing.mock.action.MockDrag;
 import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Provides drag-and-drop functionality between locations with configurable timing and mock support.
@@ -49,8 +49,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 @Component
 public class DragCoordinateCalculator {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
     private final MockDrag mock;
     private final TimeWrapper timeWrapper;
     private IllustrationController illustrateScreenshot;
@@ -143,7 +142,9 @@ public class DragCoordinateCalculator {
                 dragOptions.getMousePressOptions().getPauseBeforeMouseDown();
         Settings.DelayBeforeDrag = dragOptions.getDelayBetweenMouseDownAndMove();
         Settings.MoveMouseDelay =
-                brobotProperties.getMouse().getMoveDelay(); // Use default as DragOptions doesn't have this
+                brobotProperties
+                        .getMouse()
+                        .getMoveDelay(); // Use default as DragOptions doesn't have this
         Settings.DelayBeforeDrop = dragOptions.getMousePressOptions().getPauseBeforeMouseUp();
 
         if (!drag(from, to)) return false;

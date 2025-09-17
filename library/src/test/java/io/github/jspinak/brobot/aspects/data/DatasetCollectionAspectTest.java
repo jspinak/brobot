@@ -2,8 +2,8 @@ package io.github.jspinak.brobot.aspects.data;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
-import static org.mockito.Mockito.*;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.nio.file.Files;

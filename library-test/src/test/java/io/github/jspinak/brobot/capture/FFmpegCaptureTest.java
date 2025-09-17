@@ -12,13 +12,13 @@ import javax.imageio.ImageIO;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 import io.github.jspinak.brobot.capture.provider.CaptureProvider;
 import io.github.jspinak.brobot.capture.provider.FFmpegCaptureProvider;
 import io.github.jspinak.brobot.capture.provider.SikuliXCaptureProvider;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
@@ -28,10 +28,7 @@ import io.github.jspinak.brobot.test.DisabledInCI;
  */
 @DisabledInCI
 @SpringBootTest
-@TestPropertySource(properties = {
-    "brobot.core.mock=true",
-    "brobot.core.headless=true"
-})
+@TestPropertySource(properties = {"brobot.core.mock=true", "brobot.core.headless=true"})
 public class FFmpegCaptureTest extends BrobotTestBase {
 
     @Autowired(required = false)

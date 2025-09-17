@@ -11,12 +11,12 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.navigation.service.StateService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -104,8 +104,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class InitialStates {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     private final StateDetector stateFinder;
     private final StateMemory stateMemory;

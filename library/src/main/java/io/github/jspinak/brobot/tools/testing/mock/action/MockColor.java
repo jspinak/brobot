@@ -5,14 +5,14 @@ import static org.bytedeco.opencv.global.opencv_core.CV_32F;
 import java.util.Random;
 
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.util.image.recognition.ImageLoader;
-import org.springframework.beans.factory.annotation.Autowired;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Generates mock scene data for testing color-based operations.
@@ -29,8 +29,8 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
  *   <li>Randomly placing the pattern 0-9 times within the region
  * </ul>
  *
- * <p>This component is primarily used when BrobotProperties configuration is enabled, allowing deterministic
- * testing of color-based find operations.
+ * <p>This component is primarily used when BrobotProperties configuration is enabled, allowing
+ * deterministic testing of color-based find operations.
  *
  * @see ImageLoader
  * @see BrobotProperties
@@ -38,8 +38,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 @Component
 public class MockColor {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     private ImageLoader getImage;
 

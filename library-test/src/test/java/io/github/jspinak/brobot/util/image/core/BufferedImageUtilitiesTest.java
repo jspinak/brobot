@@ -28,6 +28,8 @@ import org.mockito.MockitoAnnotations;
 import org.sikuli.script.Pattern;
 import org.sikuli.script.Screen;
 import org.sikuli.script.ScreenImage;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.config.core.SmartImageLoader;
@@ -35,8 +37,6 @@ import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.monitor.MonitorManager;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 import io.github.jspinak.brobot.test.MockMatFactory;
 
 /**
@@ -45,10 +45,7 @@ import io.github.jspinak.brobot.test.MockMatFactory;
  */
 @DisplayName("BufferedImageUtilities Tests")
 @SpringBootTest
-@TestPropertySource(properties = {
-    "brobot.core.mock=true",
-    "brobot.core.headless=true"
-})
+@TestPropertySource(properties = {"brobot.core.mock=true", "brobot.core.headless=true"})
 public class BufferedImageUtilitiesTest extends BrobotTestBase {
 
     private BufferedImageUtilities imageUtils;

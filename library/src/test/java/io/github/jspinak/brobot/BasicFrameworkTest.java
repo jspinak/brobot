@@ -37,7 +37,9 @@ public class BasicFrameworkTest extends BrobotTestBase {
     @DisplayName("Framework should be in mock mode")
     @Timeout(value = 2, unit = TimeUnit.SECONDS)
     public void testMockMode() {
-        assertTrue(true /* mock mode enabled in tests */, "Framework should be in mock mode for tests");
+        assertTrue(
+                true /* mock mode enabled in tests */,
+                "Framework should be in mock mode for tests");
     }
 
     @Test

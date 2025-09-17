@@ -1,11 +1,11 @@
 package io.github.jspinak.brobot.action.internal.mouse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.basic.mouse.ScrollOptions;
-import io.github.jspinak.brobot.model.element.Region;
-import org.springframework.beans.factory.annotation.Autowired;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
+import io.github.jspinak.brobot.model.element.Region;
 
 /**
  * Provides mouse wheel scrolling functionality with support for both real and mocked operations.
@@ -24,8 +24,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 @Component
 public class MouseWheelScroller {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     // No longer needs legacy dependency - this class is now standalone
 

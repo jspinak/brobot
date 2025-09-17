@@ -15,12 +15,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 
 /**
  * Comprehensive tests for ActionDurations mock timing configuration. Tests action duration
@@ -33,10 +33,7 @@ import org.springframework.test.context.TestPropertySource;
         matches = "true",
         disabledReason = "Test incompatible with CI environment")
 @SpringBootTest
-@TestPropertySource(properties = {
-    "brobot.core.mock=true",
-    "brobot.core.headless=true"
-})
+@TestPropertySource(properties = {"brobot.core.mock=true", "brobot.core.headless=true"})
 public class ActionDurationsTest extends BrobotTestBase {
 
     private ActionDurations actionDurations;

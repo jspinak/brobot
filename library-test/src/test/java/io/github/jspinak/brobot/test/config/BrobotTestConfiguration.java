@@ -5,13 +5,11 @@ import static org.mockito.Mockito.*;
 
 import java.awt.image.BufferedImage;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
 import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.action.ObjectCollection;

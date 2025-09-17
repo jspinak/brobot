@@ -16,6 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.state.State;
@@ -25,8 +27,6 @@ import io.github.jspinak.brobot.startup.verification.InitialStateVerifier;
 import io.github.jspinak.brobot.statemanagement.StateDetector;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 
 /**
  * Tests for InitialStateVerifier. Verifies initial state detection and verification functionality.
@@ -37,10 +37,7 @@ import org.springframework.test.context.TestPropertySource;
         matches = "true",
         disabledReason = "Test incompatible with CI environment")
 @SpringBootTest
-@TestPropertySource(properties = {
-    "brobot.core.mock=true",
-    "brobot.core.headless=true"
-})
+@TestPropertySource(properties = {"brobot.core.mock=true", "brobot.core.headless=true"})
 public class InitialStateVerifierTest extends BrobotTestBase {
 
     @Mock private StateDetector stateDetector;
@@ -146,7 +143,8 @@ public class InitialStateVerifierTest extends BrobotTestBase {
             BrobotProperties properties = mock(BrobotProperties.class);
             when(properties.getCore()).thenReturn(mock(BrobotProperties.Core.class));
             when(properties.getCore().isMock()).thenReturn(true /* mock mode enabled in tests */);
-            verifier = new InitialStateVerifier(stateDetector, stateMemory, properties, stateService);
+            verifier =
+                    new InitialStateVerifier(stateDetector, stateMemory, properties, stateService);
         }
 
         @Test
@@ -288,7 +286,8 @@ public class InitialStateVerifierTest extends BrobotTestBase {
             BrobotProperties properties = mock(BrobotProperties.class);
             when(properties.getCore()).thenReturn(mock(BrobotProperties.Core.class));
             when(properties.getCore().isMock()).thenReturn(true /* mock mode enabled in tests */);
-            verifier = new InitialStateVerifier(stateDetector, stateMemory, properties, stateService);
+            verifier =
+                    new InitialStateVerifier(stateDetector, stateMemory, properties, stateService);
         }
 
         @Test
@@ -399,7 +398,8 @@ public class InitialStateVerifierTest extends BrobotTestBase {
             BrobotProperties properties = mock(BrobotProperties.class);
             when(properties.getCore()).thenReturn(mock(BrobotProperties.Core.class));
             when(properties.getCore().isMock()).thenReturn(true /* mock mode enabled in tests */);
-            verifier = new InitialStateVerifier(stateDetector, stateMemory, properties, stateService);
+            verifier =
+                    new InitialStateVerifier(stateDetector, stateMemory, properties, stateService);
         }
 
         @Test

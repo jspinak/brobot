@@ -209,7 +209,6 @@ public class ActionMethodCoverageTest extends BrobotIntegrationTestBase {
     @Test
     @Order(10)
     @DisplayName("Test ActionType.DRAG")
-    @SuppressWarnings("deprecation")
     void testActionTypeDrag() {
         // Given
         Region fromRegion = new Region(0, 0, 50, 50);
@@ -283,7 +282,6 @@ public class ActionMethodCoverageTest extends BrobotIntegrationTestBase {
     @Test
     @Order(14)
     @DisplayName("Test perform with Unicode strings")
-    @SuppressWarnings("deprecation")
     void testPerformWithUnicodeStrings() {
         // Given
         String[] unicodeStrings = {"Hello 世界", "Привет мир", "مرحبا بالعالم", "😀😁😂🤣"};

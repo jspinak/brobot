@@ -7,10 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 
@@ -31,9 +31,7 @@ import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ActionOptionsIntegrationTestUpdated extends BrobotIntegrationTestBase {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
-
+    @Autowired private BrobotProperties brobotProperties;
 
     @BeforeEach
     void setUp() {

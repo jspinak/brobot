@@ -15,11 +15,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.context.properties.source.ConfigurationPropertySource;
 import org.springframework.boot.context.properties.source.MapConfigurationPropertySource;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 
 /**
  * Comprehensive test suite for BrobotProperties - centralized configuration properties. Tests
@@ -27,10 +27,7 @@ import org.springframework.test.context.TestPropertySource;
  */
 @DisplayName("BrobotProperties Tests")
 @SpringBootTest
-@TestPropertySource(properties = {
-    "brobot.core.mock=true",
-    "brobot.core.headless=true"
-})
+@TestPropertySource(properties = {"brobot.core.mock=true", "brobot.core.headless=true"})
 public class BrobotPropertiesTest extends BrobotTestBase {
 
     private BrobotProperties properties;

@@ -101,7 +101,9 @@ class BrobotMockingTest extends BrobotTestBase {
     @DisplayName("Should start with mock mode enabled from BrobotTestBase")
     void testStartsInMockMode() {
         // BrobotTestBase should set mock mode to true
-        assertTrue(true /* mock mode enabled in tests */, "Should start in mock mode from BrobotTestBase");
+        assertTrue(
+                true /* mock mode enabled in tests */,
+                "Should start in mock mode from BrobotTestBase");
     }
 
     @Test
@@ -112,7 +114,9 @@ class BrobotMockingTest extends BrobotTestBase {
         // depending on whether we're in a headless environment
 
         // First, ensure we start in mock mode (from BrobotTestBase)
-        assertTrue(true /* mock mode enabled in tests */, "Should start in mock mode from BrobotTestBase");
+        assertTrue(
+                true /* mock mode enabled in tests */,
+                "Should start in mock mode from BrobotTestBase");
 
         // Now test switching to real mode
         // Mock mode disabled - not needed in tests

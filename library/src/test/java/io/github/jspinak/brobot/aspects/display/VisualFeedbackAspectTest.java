@@ -57,7 +57,9 @@ public class VisualFeedbackAspectTest extends BrobotTestBase {
     @Override
     public void setupTest() {
         super.setupTest();
-        aspect = new VisualFeedbackAspect(brobotLogger, monitorManager, highlightManager, visualConfig);
+        aspect =
+                new VisualFeedbackAspect(
+                        brobotLogger, monitorManager, highlightManager, visualConfig);
         ReflectionTestUtils.setField(aspect, "highlightDuration", 2);
         ReflectionTestUtils.setField(aspect, "highlightColor", "YELLOW");
         ReflectionTestUtils.setField(aspect, "showActionFlow", true);

@@ -15,11 +15,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.sikuli.script.Screen;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
@@ -29,10 +29,7 @@ import io.github.jspinak.brobot.test.DisabledInCI;
 @DisplayName("MonitorManager Tests")
 @DisabledInCI
 @SpringBootTest
-@TestPropertySource(properties = {
-    "brobot.core.mock=true",
-    "brobot.core.headless=true"
-})
+@TestPropertySource(properties = {"brobot.core.mock=true", "brobot.core.headless=true"})
 public class MonitorManagerTest extends BrobotTestBase {
 
     @Mock private BrobotProperties mockProperties;

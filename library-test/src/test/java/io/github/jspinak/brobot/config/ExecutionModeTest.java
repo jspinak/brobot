@@ -2,20 +2,18 @@ package io.github.jspinak.brobot.config;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.ArrayList;
-
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-
-import io.github.jspinak.brobot.config.environment.ExecutionMode;
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
-import io.github.jspinak.brobot.test.TestCategories;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import io.github.jspinak.brobot.config.core.BrobotProperties;
+import io.github.jspinak.brobot.config.environment.ExecutionMode;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.TestCategories;
 
 /** Test suite for ExecutionMode. Tests the execution permission logic for determining mock mode. */
 @DisplayName("ExecutionMode Tests")
@@ -28,14 +26,10 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
         matches = "true",
         disabledReason = "Test incompatible with CI environment")
 @SpringBootTest
-@TestPropertySource(properties = {
-    "brobot.core.mock=true",
-    "brobot.core.headless=true"
-})
+@TestPropertySource(properties = {"brobot.core.mock=true", "brobot.core.headless=true"})
 public class ExecutionModeTest extends BrobotTestBase {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     private ExecutionMode executionMode;
 
@@ -44,13 +38,14 @@ public class ExecutionModeTest extends BrobotTestBase {
     public void setupTest() {
         super.setupTest();
         // Create a mock ExecutionMode for testing
-        executionMode = new ExecutionMode() {
-            @Override
-            public boolean isMock() {
-                // For testing, just return based on mock setting
-                return brobotProperties != null && brobotProperties.getCore().isMock();
-            }
-        };
+        executionMode =
+                new ExecutionMode() {
+                    @Override
+                    public boolean isMock() {
+                        // For testing, just return based on mock setting
+                        return brobotProperties != null && brobotProperties.getCore().isMock();
+                    }
+                };
 
         // Clear test screenshots for test
         if (brobotProperties != null) {
@@ -171,7 +166,10 @@ public class ExecutionModeTest extends BrobotTestBase {
             for (int i = 0; i < 100; i++) {
                 if (brobotProperties != null) {
                     if (i % 3 == 0) {
-                        brobotProperties.getScreenshot().getTestScreenshots().add("test" + i + ".png");
+                        brobotProperties
+                                .getScreenshot()
+                                .getTestScreenshots()
+                                .add("test" + i + ".png");
                     } else if (i % 5 == 0) {
                         brobotProperties.getScreenshot().getTestScreenshots().clear();
                     }

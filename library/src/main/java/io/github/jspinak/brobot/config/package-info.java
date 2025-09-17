@@ -13,8 +13,8 @@
  * <ul>
  *   <li>{@link io.github.jspinak.brobot.config.BrobotConfig} - Root Spring configuration enabling
  *       component scanning
- *   <li>{@link io.github.jspinak.brobot.config.core.BrobotProperties} - Global settings
- *       controlling framework behavior
+ *   <li>{@link io.github.jspinak.brobot.config.core.BrobotProperties} - Global settings controlling
+ *       framework behavior
  *   <li>{@link io.github.jspinak.brobot.config.environment.ExecutionEnvironment} - Runtime
  *       environment detection and configuration
  *   <li>{@link io.github.jspinak.brobot.config.environment.ExecutionMode} - Controls execution mode

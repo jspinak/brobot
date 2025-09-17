@@ -1,17 +1,17 @@
 package io.github.jspinak.brobot.action.internal.text;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateString;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Primary text typing implementation that handles both mock and live environments. Automatically
@@ -22,8 +22,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 @Slf4j
 public class DefaultTextTyper implements TextTyper {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     @Override
     public boolean type(StateString stateString, ActionConfig actionConfig) {

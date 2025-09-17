@@ -32,20 +32,16 @@ import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
  * functionality may be in ExecutionController) - BusinessTaskBuilder creating tasks (doesn't exist
  * - BusinessTask is created directly) - Planning system for state transitions (doesn't exist - may
  * be in StateTransition) - Operation sequences (doesn't exist - replaced by Statement lists in
- * BusinessTask) - Init service for global mock (doesn't exist - use brobotProperties.getCore().isMock()
- * directly)
+ * BusinessTask) - Init service for global mock (doesn't exist - use
+ * brobotProperties.getCore().isMock() directly)
  */
 @SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class)
 @TestPropertySource(
-        properties = {
-            "spring.main.lazy-initialization=true",
-            "brobot.mock.enabled=true"
-        })
+        properties = {"spring.main.lazy-initialization=true", "brobot.mock.enabled=true"})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class AutomationIntegrationTest extends BrobotIntegrationTestBase {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     @Autowired private AutomationProjectManager projectManager;
 

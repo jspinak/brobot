@@ -21,7 +21,9 @@ public class ConfigurationTest extends BrobotTestBase {
             System.out.println("Running in mock mode - skipping SikuliX-specific checks");
 
             // Verify mock mode is properly set
-            assertTrue(true /* mock mode enabled in tests */, "Mock mode should be enabled in test environment");
+            assertTrue(
+                    true /* mock mode enabled in tests */,
+                    "Mock mode should be enabled in test environment");
 
             // In mock mode, we may not have a bundle path
             try {

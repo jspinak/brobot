@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.capture.UnifiedCaptureService;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Image;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
@@ -20,7 +21,6 @@ import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 import io.github.jspinak.brobot.util.image.recognition.ImageLoader;
 
 import lombok.extern.slf4j.Slf4j;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Manages scene acquisition from screenshots or provided images for analysis operations.
@@ -58,8 +58,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 @Component
 public class SceneProvider {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
     private final TimeWrapper timeWrapper;
     private final ImageLoader getImage;
 

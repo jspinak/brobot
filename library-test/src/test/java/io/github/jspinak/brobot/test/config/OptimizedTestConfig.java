@@ -6,11 +6,9 @@ import java.util.concurrent.ForkJoinPool;
 
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
-
 
 /**
  * Optimized test configuration for integration tests. Reduces initialization overhead and optimizes

@@ -32,8 +32,7 @@ import io.github.jspinak.brobot.test.config.TestConfigurationManager;
         properties = {"spring.main.allow-bean-definition-overriding=true"})
 public abstract class BrobotIntegrationTestBase {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     private ExecutionEnvironment originalEnvironment;
     private boolean originalMockState;

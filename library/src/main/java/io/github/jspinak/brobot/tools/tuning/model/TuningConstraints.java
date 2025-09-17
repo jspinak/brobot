@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.tools.tuning.model;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
@@ -44,8 +45,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
  */
 public class TuningConstraints {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     /**
      * Maximum pause duration in seconds before mouse down events.

@@ -12,6 +12,7 @@ import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
 import io.github.jspinak.brobot.action.internal.find.SearchRegionResolver;
 import io.github.jspinak.brobot.action.internal.utility.ActionSuccessCriteria;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.control.ExecutionController;
 import io.github.jspinak.brobot.control.ExecutionStoppedException;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
@@ -25,7 +26,6 @@ import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 import io.github.jspinak.brobot.util.image.capture.ScreenshotCapture;
 
 import lombok.extern.slf4j.Slf4j;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Central orchestrator for executing GUI automation actions with full lifecycle management.
@@ -70,8 +70,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 @Slf4j
 public class ActionExecution {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
     private final TimeWrapper timeWrapper;
     private final IllustrationController illustrateScreenshot;
     private final SearchRegionResolver selectRegions;

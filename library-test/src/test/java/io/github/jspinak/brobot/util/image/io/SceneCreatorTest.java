@@ -16,11 +16,11 @@ import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 
 /**
  * Comprehensive test suite for SceneCreator - screenshot to Scene conversion utility. Tests
@@ -32,10 +32,7 @@ import org.springframework.test.context.TestPropertySource;
         matches = "true",
         disabledReason = "Test incompatible with CI environment")
 @SpringBootTest
-@TestPropertySource(properties = {
-    "brobot.core.mock=true",
-    "brobot.core.headless=true"
-})
+@TestPropertySource(properties = {"brobot.core.mock=true", "brobot.core.headless=true"})
 public class SceneCreatorTest extends BrobotTestBase {
 
     private SceneCreator sceneCreator;

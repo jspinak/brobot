@@ -1,11 +1,11 @@
 package io.github.jspinak.brobot.action.internal.text;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-import org.springframework.beans.factory.annotation.Autowired;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Handles keyboard key release operations in both real and mock modes.
@@ -46,8 +46,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 @Component
 public class KeyUpWrapper {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     /**
      * Releases all currently pressed keys.

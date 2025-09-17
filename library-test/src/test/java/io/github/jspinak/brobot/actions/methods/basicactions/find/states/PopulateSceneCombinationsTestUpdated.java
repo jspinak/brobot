@@ -18,11 +18,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
 import io.github.jspinak.brobot.analysis.scene.SceneCombinationGenerator;
 import io.github.jspinak.brobot.analysis.scene.SceneCombinationPopulator;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.model.analysis.scene.SceneCombination;
 import io.github.jspinak.brobot.model.element.Pattern;
@@ -44,9 +44,7 @@ import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
 @Disabled("CI failure - needs investigation")
 class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
-
+    @Autowired private BrobotProperties brobotProperties;
 
     private static File screenshotDir;
 
@@ -191,10 +189,12 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
                 File floranext0 = new File(screenshotDir, "floranext0.png");
                 File floranext1 = new File(screenshotDir, "floranext1.png");
                 if (floranext0.exists()) {
-                    // BrobotProperties.screenshots no longer exists - mock screenshots should be configured differently
+                    // BrobotProperties.screenshots no longer exists - mock screenshots should be
+                    // configured differently
                 }
                 if (floranext1.exists()) {
-                    // BrobotProperties.screenshots no longer exists - mock screenshots should be configured differently
+                    // BrobotProperties.screenshots no longer exists - mock screenshots should be
+                    // configured differently
                 }
             }
             List<SceneCombination> sceneCombinationList =
@@ -264,10 +264,12 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
                 File floranext0 = new File(screenshotDir, "floranext0.png");
                 File floranext1 = new File(screenshotDir, "floranext1.png");
                 if (floranext0.exists()) {
-                    // BrobotProperties.screenshots no longer exists - mock screenshots should be configured differently
+                    // BrobotProperties.screenshots no longer exists - mock screenshots should be
+                    // configured differently
                 }
                 if (floranext1.exists()) {
-                    // BrobotProperties.screenshots no longer exists - mock screenshots should be configured differently
+                    // BrobotProperties.screenshots no longer exists - mock screenshots should be
+                    // configured differently
                 }
             }
             List<SceneCombination> sceneCombinationList =

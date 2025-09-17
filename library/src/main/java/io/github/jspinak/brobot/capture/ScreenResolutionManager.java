@@ -28,8 +28,7 @@ public class ScreenResolutionManager {
     @Value("${brobot.capture.provider:JAVACV_FFMPEG}")
     private String captureProviderName;
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     @Autowired(required = false)
     private UnifiedCaptureService captureService;

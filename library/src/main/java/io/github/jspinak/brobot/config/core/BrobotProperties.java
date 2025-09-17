@@ -289,5 +289,4 @@ public class BrobotProperties {
         /** Monitor assignment for specific operations Key: operation name, Value: monitor index */
         private java.util.Map<String, Integer> operationMonitorMap = new java.util.HashMap<>();
     }
-
 }

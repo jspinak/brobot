@@ -3,19 +3,18 @@ package io.github.jspinak.brobot.tools.testing.mock.time;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import org.springframework.beans.factory.annotation.Autowired;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /** Mock durations for different Actions. */
 @Component
 public class ActionDurations {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     // Removed ActionConfig-based durations - use ActionType and Strategy-based
     // maps instead
@@ -38,8 +37,10 @@ public class ActionDurations {
                 PatternFindOptions.Strategy.FIRST, brobotProperties.getMock().getTimeFindFirst());
         strategyDurations.put(
                 PatternFindOptions.Strategy.EACH, brobotProperties.getMock().getTimeFindFirst());
-        strategyDurations.put(PatternFindOptions.Strategy.ALL, brobotProperties.getMock().getTimeFindAll());
-        strategyDurations.put(PatternFindOptions.Strategy.BEST, brobotProperties.getMock().getTimeFindAll());
+        strategyDurations.put(
+                PatternFindOptions.Strategy.ALL, brobotProperties.getMock().getTimeFindAll());
+        strategyDurations.put(
+                PatternFindOptions.Strategy.BEST, brobotProperties.getMock().getTimeFindAll());
     }
 
     // Removed deprecated methods getFindDuration(ActionConfig.Find) and

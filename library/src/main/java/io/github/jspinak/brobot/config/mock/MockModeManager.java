@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.config.mock;
 
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 
 import lombok.extern.slf4j.Slf4j;

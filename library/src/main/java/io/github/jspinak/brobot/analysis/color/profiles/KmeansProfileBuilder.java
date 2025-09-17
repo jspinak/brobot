@@ -9,18 +9,18 @@ import java.util.Set;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.TermCriteria;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.analysis.color.ColorClusterFactory;
 import io.github.jspinak.brobot.analysis.color.kmeans.KmeansCluster;
 import io.github.jspinak.brobot.analysis.color.kmeans.KmeansProfile;
 import io.github.jspinak.brobot.analysis.color.kmeans.KmeansProfilesAllSchemas;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.model.analysis.color.ColorSchema;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.util.image.core.ColorMatrixUtilities;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Generates and manages K-means clustering profiles for state images across multiple color schemas.
@@ -55,8 +55,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Component
 public class KmeansProfileBuilder {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     private ColorClusterFactory setColorCluster;
     private ColorMatrixUtilities matOps3d;

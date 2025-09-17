@@ -1,28 +1,23 @@
 package io.github.jspinak.brobot.config.mock;
 
-import jakarta.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.core.annotation.Order;
 
 import io.github.jspinak.brobot.action.internal.find.scene.ScenePatternMatcher;
 import io.github.jspinak.brobot.action.internal.text.GetTextWrapper;
 import io.github.jspinak.brobot.analysis.histogram.SingleRegionHistogramExtractor;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.config.environment.ExecutionMode;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
 import io.github.jspinak.brobot.tools.testing.mock.action.*;
-import io.github.jspinak.brobot.tools.testing.mock.state.MockStateManagement;
 import io.github.jspinak.brobot.tools.testing.mock.time.*;
 import io.github.jspinak.brobot.tools.testing.wrapper.*;
 import io.github.jspinak.brobot.util.image.recognition.ImageLoader;
 
 import lombok.extern.slf4j.Slf4j;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Configuration for mock and wrapper beans to ensure proper initialization order. This
@@ -35,8 +30,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 @Slf4j
 public class MockConfiguration {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     @Bean
     @ConditionalOnMissingBean
@@ -119,5 +113,4 @@ public class MockConfiguration {
             TimeWrapper timeWrapper) {
         return new ExecutionModeController(findWrapper, textWrapper, histogramWrapper, timeWrapper);
     }
-
 }

@@ -10,11 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.capture.BrobotCaptureService;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 import io.github.jspinak.brobot.util.file.SaveToFile;
 import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Manages continuous screenshot capture for various analysis and recording purposes.
@@ -69,8 +69,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 @Component
 public class ScreenshotRecorder {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     private final ImageFileUtilities imageUtils;
     private final TimeWrapper timeWrapper;
@@ -87,7 +86,9 @@ public class ScreenshotRecorder {
 
     @Autowired
     public ScreenshotRecorder(
-            ImageFileUtilities imageUtils, TimeWrapper timeWrapper, BrobotCaptureService captureService) {
+            ImageFileUtilities imageUtils,
+            TimeWrapper timeWrapper,
+            BrobotCaptureService captureService) {
         this.imageUtils = imageUtils;
         this.timeWrapper = timeWrapper;
         this.captureService = captureService;
@@ -121,7 +122,8 @@ public class ScreenshotRecorder {
             // Capture full screen (empty Region = full screen)
             imageUtils.saveRegionToFile(
                     new Region(),
-                    brobotProperties.getScreenshot().getPath() + brobotProperties.getScreenshot().getFilename());
+                    brobotProperties.getScreenshot().getPath()
+                            + brobotProperties.getScreenshot().getFilename());
         }
     }
 

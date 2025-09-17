@@ -368,48 +368,11 @@ public class Action {
 
     // Removed ActionConfig-based perform method without objects - use ActionConfig instead
 
-    /**
-     * Performs the specified action type with default configuration.
-     *
-     * <p>Creates an appropriate ActionConfig implementation based on the action type. This
-     * simplifies common operations where default behavior is sufficient.
-     *
-     * @param action the type of action to perform (CLICK, TYPE, etc.)
-     * @param objectCollections target objects for the action
-     * @return ActionResult containing matches and execution details
-     * @deprecated Use specific ActionConfig implementations instead (e.g., ClickOptions,
-     *     PatternFindOptions)
-     */
-    // Removed deprecated ActionType methods - use ActionType instead
+    // Removed deprecated ActionType methods - use ActionConfig instead
 
-    /**
-     * Performs the specified action type on images with default configuration.
-     *
-     * <p>Combines action type specification with automatic ObjectCollection creation for image
-     * targets. Useful for simple image-based operations like clicking on buttons or icons.
-     *
-     * @param action the type of action to perform
-     * @param stateImages target images for the action
-     * @return ActionResult containing matches found and action outcomes
-     * @deprecated Use specific ActionConfig implementations instead (e.g., ClickOptions,
-     *     PatternFindOptions)
-     */
-    // Removed deprecated ActionType methods - use ActionType instead
+    // Removed deprecated ActionType methods - use ActionConfig instead
 
-    /**
-     * Performs the specified action type with no targets and default options.
-     *
-     * <p>Handles actions that operate globally or use coordinates/text specified in ActionConfig
-     * rather than target objects. Examples include typing text, pressing keyboard shortcuts, or
-     * scrolling.
-     *
-     * @param action the type of action to perform
-     * @return ActionResult with execution details but no match data
-     * @deprecated Use specific ActionConfig implementations instead (e.g., TypeOptions,
-     *     MouseMoveOptions)
-     */
-    // Removed deprecated ActionType methods - use ActionType instead
-
+    // Removed deprecated ActionType methods - use ActionConfig instead
 
     /**
      * Performs an action with custom options on text string targets.
@@ -423,22 +386,58 @@ public class Action {
      */
     // Removed ActionConfig-based perform method for strings - use ActionConfig instead
 
-
     // ===== New Convenience Methods for ActionType enum =====
 
     /**
-     * Performs the specified action type on a location with default configuration.
+     * Performs an action with default configuration on a location.
      *
-     * <p>This convenience method enables simple one-line calls like: {@code action.perform(CLICK,
-     * location)}
+     * <p>This is a convenience method for simple operations. For actions requiring specific
+     * configuration (like custom delays, similarity thresholds, etc.), use {@link
+     * #perform(ActionConfig, ObjectCollection)} with the appropriate options class.
      *
-     * <p>The method automatically creates the appropriate ActionConfig based on the ActionType and
-     * wraps the location in an ObjectCollection.
+     * <h3>When to use this method:</h3>
+     *
+     * <ul>
+     *   <li>Simple click/move/hover operations with default settings
+     *   <li>Quick prototyping and testing
+     *   <li>When you don't need custom delays or configurations
+     * </ul>
+     *
+     * <h3>When to use the full API:</h3>
+     *
+     * <ul>
+     *   <li>Custom click delays or multiple clicks
+     *   <li>Specific mouse buttons (right-click, middle-click)
+     *   <li>Custom move speeds or trajectories
+     *   <li>Any operation requiring fine control
+     * </ul>
+     *
+     * <h3>Examples:</h3>
+     *
+     * <pre>{@code
+     * // Simple click with defaults - perfect for this method
+     * action.perform(ActionType.CLICK, location);
+     *
+     * // Simple move - also great for this method
+     * action.perform(ActionType.MOVE, centerLocation);
+     *
+     * // Complex click with configuration - use the full API
+     * ClickOptions options = new ClickOptions.Builder()
+     *     .setClickCount(2)
+     *     .setPauseAfter(1.0)
+     *     .setButton(MouseButton.RIGHT)
+     *     .build();
+     * ObjectCollection collection = ObjectCollection.withLocations(location);
+     * action.perform(options, collection);
+     * }</pre>
      *
      * @param type the type of action to perform
-     * @param location the location to act upon
+     * @param location the target location
      * @return ActionResult containing the operation results
      * @since 2.0
+     * @see #perform(ActionConfig, ObjectCollection) for full configuration control
+     * @see ClickOptions for click-specific configuration
+     * @see MouseMoveOptions for move-specific configuration
      */
     public ActionResult perform(ActionType type, Location location) {
         ActionConfig config = createDefaultConfig(type);

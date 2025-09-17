@@ -23,13 +23,13 @@ import org.springframework.test.context.ActiveProfiles;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.Find;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.model.state.StateStore;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /** Test to debug why screenshots are not being saved. */
 @SpringBootTest // (classes = ClaudeAutomatorApplication.class not available)
@@ -37,8 +37,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 @Disabled("Failing in CI - temporarily disabled for CI/CD")
 public class ScreenshotSaveDebugTest extends BrobotTestBase {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     @Autowired private Find find;
 

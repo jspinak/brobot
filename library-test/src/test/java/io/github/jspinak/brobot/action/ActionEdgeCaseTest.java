@@ -319,8 +319,7 @@ public class ActionEdgeCaseTest extends BrobotIntegrationTestBase {
         // Given
         Region[] regions = {new Region(0, 0, 100, 100), new Region(200, 200, 100, 100)};
 
-        // When - Note: This uses deprecated method
-        @SuppressWarnings("deprecation")
+        // When
         ActionResult result = action.perform(ActionType.FIND, regions);
 
         // Then - Handle null case

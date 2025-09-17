@@ -66,7 +66,8 @@ public class FrameworkInitializerTest extends BrobotTestBase {
         @DisplayName("Set mock mode from configuration")
         public void testSetMockModeFromConfiguration() {
             // true /* mock mode enabled in tests */ is already set by BrobotTestBase
-            assertTrue(true /* mock mode enabled in tests */, "Mock mode should be enabled in tests");
+            assertTrue(
+                    true /* mock mode enabled in tests */, "Mock mode should be enabled in tests");
         }
 
         @Test

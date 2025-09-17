@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionConfig;
@@ -11,14 +12,13 @@ import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.find.color.SceneProvider;
 import io.github.jspinak.brobot.action.internal.find.pixel.ColorAnalysisOrchestrator;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalyses;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalysis;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
-import org.springframework.beans.factory.annotation.Autowired;
-import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Orchestrates the creation and population of scene analysis collections for color-based matching.
@@ -54,8 +54,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 @Component
 public class SceneAnalysisCollectionBuilder {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    @Autowired private BrobotProperties brobotProperties;
 
     private final SceneProvider getScenes;
     private final ColorAnalysisOrchestrator analyzePixels;
