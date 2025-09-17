@@ -46,7 +46,7 @@
  * // Find an image using histogram matching
  * FindHistogram findHistogram = new FindHistogram(...);
  *
- * ActionOptions options = new ActionOptions.Builder()
+ * ActionConfig options = new ActionConfig.Builder()
  *     .setAction(ActionType.FIND)
  *     .setFind(Find.HISTOGRAM)
  *     .setSimilarity(0.85)  // Histogram similarity threshold

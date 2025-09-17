@@ -56,7 +56,7 @@ public class ColorClassifier {
      * Returns a 3d Mat representing the best Image match (or no match) for every cell. (x,y) on
      * different channels can have different matches. Matches are represented by the index of the
      * StateImage. The closest distance to any of the k-means profiles is compared to a threshold
-     * adjusted by the minScore in ActionOptions.
+     * adjusted by the minScore in ActionConfig.
      *
      * @param sceneAnalysis the analysis groups contain the StateImage and its k-means profiles.
      * @param colorSchemaName the color schema to use (i.e. BGR, HSV)

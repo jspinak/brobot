@@ -49,16 +49,17 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
  *
  * @see ActionLifecycle
  * @see ActionExecution
- * @see ActionOptions
+ * @see ActionConfig
  */
 @Component
 public class ActionLifecycleManagement {
 
-    @Autowired
-    private BrobotProperties brobotProperties;
+    private final BrobotProperties brobotProperties;
     private final TimeWrapper timeWrapper;
 
-    public ActionLifecycleManagement(TimeWrapper timeWrapper) {
+    @Autowired
+    public ActionLifecycleManagement(BrobotProperties brobotProperties, TimeWrapper timeWrapper) {
+        this.brobotProperties = brobotProperties;
         this.timeWrapper = timeWrapper;
     }
 
@@ -80,7 +81,7 @@ public class ActionLifecycleManagement {
      * Increments the completed sequence counter for the current action.
      *
      * <p>Called when a complete sequence of repetitions has finished. A sequence may contain one or
-     * more repetitions as configured in {@link ActionOptions}.
+     * more repetitions as configured in {@link ActionConfig}.
      *
      * @param matches The ActionResult containing the lifecycle to update
      */
@@ -127,7 +128,7 @@ public class ActionLifecycleManagement {
      * Determines if additional sequences are permitted for this action.
      *
      * <p>Compares the completed sequence count against the maximum allowed sequences configured in
-     * {@link ActionOptions#getMaxTimesToRepeatActionSequence()}.
+     * {@link ActionConfig#getMaxTimesToRepeatActionSequence()}.
      *
      * @param matches The ActionResult containing options and lifecycle data
      * @return true if more sequences can be executed, false if limit reached
@@ -220,7 +221,7 @@ public class ActionLifecycleManagement {
     /**
      * Checks if FIND FIRST strategy has achieved its goal.
      *
-     * <p>For actions configured with {@link ActionOptions.Find#FIRST}, this method determines if at
+     * <p>For actions configured with {@link ActionConfig.Find#FIRST}, this method determines if at
      * least one match has been found, which satisfies the search criteria and allows the action to
      * complete.
      *
@@ -301,8 +302,8 @@ public class ActionLifecycleManagement {
     /**
      * Checks if FIND EACH FIRST strategy has found all unique patterns.
      *
-     * <p>For actions configured with {@link ActionOptions.Find#EACH} and {@link
-     * ActionOptions.DoOnEach#FIRST}, this method verifies that at least one instance of each unique
+     * <p>For actions configured with {@link ActionConfig.Find#EACH} and {@link
+     * ActionConfig.DoOnEach#FIRST}, this method verifies that at least one instance of each unique
      * pattern has been found.
      *
      * @param matches The ActionResult containing found matches

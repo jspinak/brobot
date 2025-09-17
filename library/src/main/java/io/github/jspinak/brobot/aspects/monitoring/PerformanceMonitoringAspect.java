@@ -46,7 +46,12 @@ import lombok.extern.slf4j.Slf4j;
         matchIfMissing = true)
 public class PerformanceMonitoringAspect {
 
-    @Autowired private BrobotLogger brobotLogger;
+    private final BrobotLogger brobotLogger;
+
+    @Autowired
+    public PerformanceMonitoringAspect(BrobotLogger brobotLogger) {
+        this.brobotLogger = brobotLogger;
+    }
 
     @Value("${brobot.aspects.performance.alert-threshold:10000}")
     private long alertThresholdMillis;

@@ -61,7 +61,7 @@ public class ActionResultFactory {
         this.timeWrapper = timeWrapper;
     }
 
-    // Removed ActionOptions-based init method - use ActionConfig version instead
+    // Removed ActionConfig-based init method - use ActionConfig version instead
 
     /**
      * Creates a fully initialized ActionResult for a new action execution using ActionConfig.
@@ -110,7 +110,7 @@ public class ActionResultFactory {
         return matches;
     }
 
-    // Removed ActionOptions-based init methods - use ActionConfig versions instead
+    // Removed ActionConfig-based init methods - use ActionConfig versions instead
 
     /**
      * Initializes ActionResult with ActionConfig and a list of object collections.

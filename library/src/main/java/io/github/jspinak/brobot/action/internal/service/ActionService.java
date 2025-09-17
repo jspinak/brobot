@@ -57,7 +57,7 @@ public class ActionService {
         this.dragAction = dragAction;
     }
 
-    // Removed ActionOptions-based getAction method - use ActionConfig instead
+    // Removed ActionConfig-based getAction method - use ActionConfig instead
 
     /**
      * Registers a custom Find implementation for one-time use.

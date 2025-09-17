@@ -10,7 +10,7 @@ import lombok.Getter;
  * Configuration and result container for do-until composite actions using ActionConfig.
  *
  * <p>RepeatUntilConfigV2 is the modern replacement for RepeatUntilConfig, using the new
- * ActionConfig hierarchy instead of ActionOptions. It encapsulates the complete configuration
+ * ActionConfig hierarchy instead of ActionConfig. It encapsulates the complete configuration
  * needed to execute a pattern where one action is repeatedly performed until a condition is met. It
  * separates the configuration of the primary action (do) from the termination condition (until),
  * providing more flexibility than simpler composite actions. This separation allows different

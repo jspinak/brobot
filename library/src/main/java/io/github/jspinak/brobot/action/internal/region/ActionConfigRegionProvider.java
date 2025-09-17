@@ -12,11 +12,11 @@ import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateRegion;
 
 /**
- * Bridge between legacy ActionOptions and modern region resolution. Provides methods to extract and
+ * Bridge between legacy ActionConfig and modern region resolution. Provides methods to extract and
  * convert regions from ActionConfig configurations.
  */
 @Component
-public class ActionOptionsRegionProvider {
+public class ActionConfigRegionProvider {
 
     /** Get regions from ActionConfig for Find operations */
     public List<Region> getRegionsFromActionConfig(ActionConfig actionConfig) {

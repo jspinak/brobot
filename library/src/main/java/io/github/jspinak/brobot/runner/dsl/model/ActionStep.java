@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
  *
  * <p>An ActionStep combines action configuration with target objects, forming the basic unit of
  * execution in an {@link TaskSequence}. Each step specifies what action to perform (via
- * ActionOptions) and what to perform it on (via ObjectCollection).
+ * ActionConfig) and what to perform it on (via ObjectCollection).
  *
  * <p>This class is designed for serialization, allowing automation sequences to be defined in
  * configuration files and loaded dynamically at runtime.

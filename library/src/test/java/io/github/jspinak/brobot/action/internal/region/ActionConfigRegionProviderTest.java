@@ -21,10 +21,10 @@ import io.github.jspinak.brobot.model.element.SearchRegions;
 import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 
-@DisplayName("ActionOptionsRegionProvider Tests")
-class ActionOptionsRegionProviderTest extends BrobotTestBase {
+@DisplayName("ActionConfigRegionProvider Tests")
+class ActionConfigRegionProviderTest extends BrobotTestBase {
 
-    private ActionOptionsRegionProvider regionProvider;
+    private ActionConfigRegionProvider regionProvider;
 
     @Mock private PatternFindOptions mockPatternFindOptions;
 
@@ -37,7 +37,7 @@ class ActionOptionsRegionProviderTest extends BrobotTestBase {
     public void setupTest() {
         super.setupTest();
         MockitoAnnotations.openMocks(this);
-        regionProvider = new ActionOptionsRegionProvider();
+        regionProvider = new ActionConfigRegionProvider();
     }
 
     @Test

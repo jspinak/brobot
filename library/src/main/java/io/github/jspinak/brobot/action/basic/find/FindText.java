@@ -118,7 +118,7 @@ public class FindText {
      *   <li>Stores the analysis for later retrieval
      * </ol>
      *
-     * @param matches The ActionResult to populate with found text matches. Contains ActionOptions
+     * @param matches The ActionResult to populate with found text matches. Contains ActionConfig
      *     for search configuration and is modified to include all matches and scene analyses.
      * @param scenes The list of scenes to search for text. Each scene represents a screenshot or
      *     screen capture to be processed.

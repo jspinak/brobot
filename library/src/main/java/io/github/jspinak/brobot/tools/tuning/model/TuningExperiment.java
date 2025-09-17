@@ -31,7 +31,7 @@ import lombok.Setter;
  * <ol>
  *   <li><strong>Parameter tuning:</strong> Generate random parameters within thresholds, test them,
  *       and record results
- *   <li><strong>Configuration capture:</strong> Extract current parameters from ActionOptions for
+ *   <li><strong>Configuration capture:</strong> Extract current parameters from ActionConfig for
  *       analysis
  *   <li><strong>Performance analysis:</strong> Compare different parameter sets based on success
  *       rates and timing

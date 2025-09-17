@@ -77,7 +77,7 @@
  * </ul>
  *
  * @see io.github.jspinak.brobot.action.basic.find.Find
- * @see io.github.jspinak.brobot.action.ActionOptions
+ * @see io.github.jspinak.brobot.action.ActionConfig
  * @see io.github.jspinak.brobot.model.match.Match
  */
 package io.github.jspinak.brobot.action.internal.find;

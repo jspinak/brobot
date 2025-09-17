@@ -47,19 +47,19 @@ public class AutoScalingConfiguration {
 
     /** Bean configuration for auto-scaling settings. */
     @Bean
-    public AutoScalingSettings autoScalingSettings() {
-        return new AutoScalingSettings(
+    public AutoScalingProperties autoScalingProperties() {
+        return new AutoScalingProperties(
                 autoScalingEnabled, cacheEnabled, globalLearningEnabled, minConfidence);
     }
 
-    /** Settings holder for auto-scaling configuration. */
-    public static class AutoScalingSettings {
+    /** Properties holder for auto-scaling configuration. */
+    public static class AutoScalingProperties {
         private final boolean enabled;
         private final boolean cacheEnabled;
         private final boolean globalLearningEnabled;
         private final double minConfidence;
 
-        public AutoScalingSettings(
+        public AutoScalingProperties(
                 boolean enabled,
                 boolean cacheEnabled,
                 boolean globalLearningEnabled,

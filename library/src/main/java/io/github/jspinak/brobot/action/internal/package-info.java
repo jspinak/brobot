@@ -57,7 +57,7 @@
  *
  * <ul>
  *   <li><b>Success</b> - Evaluates action success criteria
- *   <li><b>CopyActionOptions</b> - Clones and modifies action configurations
+ *   <li><b>CopyActionConfig</b> - Clones and modifies action configurations
  *   <li><b>DragLocation</b> - Calculates drag operation coordinates
  *   <li><b>ActionText</b> - Text-related utility operations
  * </ul>
@@ -112,7 +112,7 @@
  *   <li>Implement {@link io.github.jspinak.brobot.action.ActionInterface}
  *   <li>Register in appropriate registry (BasicAction or CompositeAction)
  *   <li>Add any required internal support classes
- *   <li>Update ActionOptions with new action type if needed
+ *   <li>Update ActionConfig with new action type if needed
  * </ol>
  *
  * <h2>Thread Safety</h2>
@@ -137,6 +137,6 @@
  *
  * @see io.github.jspinak.brobot.action.Action
  * @see io.github.jspinak.brobot.action.ActionInterface
- * @see io.github.jspinak.brobot.action.ActionOptions
+ * @see io.github.jspinak.brobot.action.ActionConfig
  */
 package io.github.jspinak.brobot.action.internal;

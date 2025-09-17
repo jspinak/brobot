@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import io.github.jspinak.brobot.action.ActionInterface;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
@@ -37,6 +38,10 @@ import io.github.jspinak.brobot.testutils.TestPaths;
 @Disabled("CI failure - needs investigation")
 public class FindImageWithOffsetTestUpdated extends BrobotIntegrationTestBase {
 
+    @Autowired
+    private BrobotProperties brobotProperties;
+
+
     @BeforeAll
     public static void setupHeadlessMode() {
         System.setProperty("java.awt.headless", "true");
@@ -55,7 +60,7 @@ public class FindImageWithOffsetTestUpdated extends BrobotIntegrationTestBase {
         ExecutionEnvironment.setInstance(env);
 
         // Enable action mocking but real find operations
-        BrobotProperties.mock = true;
+        // Cannot set mock - BrobotProperties is immutable
 
         // Clear any previous screenshots
         // BrobotProperties.screenshots may not have clearAll() method
@@ -181,7 +186,7 @@ public class FindImageWithOffsetTestUpdated extends BrobotIntegrationTestBase {
         }
 
         // Add screenshot for find operation
-        BrobotProperties.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
+        // BrobotProperties.screenshots no longer exists - mock screenshots should be configured differently
 
         // Test BEST strategy with offset
         StateImage imageWithOffset =

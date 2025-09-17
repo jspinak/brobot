@@ -31,7 +31,7 @@ import io.github.jspinak.brobot.model.state.StateString;
  * <ul>
  *   <li>If no keys are specified: Releases all currently pressed keys
  *   <li>If keys are specified: Releases each key in the ObjectCollection sequentially
- *   <li>Modifier keys from ActionOptions are always released last
+ *   <li>Modifier keys from ActionConfig are always released last
  *   <li>Uses only the first ObjectCollection provided
  * </ul>
  *

@@ -24,7 +24,7 @@ import io.github.jspinak.brobot.action.basic.find.motion.FindRegionsOfMotion;
  * registry pattern allows for easy extension with custom find strategies.
  *
  * <p>This is version 2 of the registry, updated to work with the new ActionConfig hierarchy and
- * FindStrategy enum instead of ActionOptions.Find.
+ * FindStrategy enum instead of ActionConfig.Find.
  *
  * @see FindStrategy
  * @see BaseFindOptions

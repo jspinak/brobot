@@ -5,11 +5,13 @@ import static org.mockito.Mockito.*;
 
 import java.awt.image.BufferedImage;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
 import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.action.ObjectCollection;
@@ -194,8 +196,8 @@ public class BrobotTestConfiguration {
     @Bean
     @Primary
     public MockModeManager mockModeManager() {
-        // MockModeManager uses static methods
-        // The BrobotTestBase already sets mock mode via BrobotProperties.mock = true
+        // BrobotProperties is now immutable and configured via Spring
+        // Mock mode should be enabled via application-test.properties
         return new MockModeManager();
     }
 

@@ -19,6 +19,7 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.model.element.Image;
 import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 
@@ -29,10 +30,10 @@ import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 @DisplayName("ActionLifecycleManagement Tests")
 public class ActionLifecycleManagementTest extends BrobotTestBase {
 
+    @Mock private BrobotProperties mockBrobotProperties;
+    @Mock private BrobotProperties.Core mockCore;
     @Mock private TimeWrapper mockTimeWrapper;
-
     @Mock private ActionLifecycle mockLifecycle;
-
     @Mock private ActionConfig mockActionConfig;
 
     private ActionLifecycleManagement lifecycleManagement;
@@ -44,7 +45,12 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
     public void setupTest() {
         super.setupTest();
         mockCloseable = MockitoAnnotations.openMocks(this);
-        lifecycleManagement = new ActionLifecycleManagement(mockTimeWrapper);
+
+        // Setup BrobotProperties mock
+        when(mockBrobotProperties.getCore()).thenReturn(mockCore);
+        when(mockCore.isMock()).thenReturn(true);
+
+        lifecycleManagement = new ActionLifecycleManagement(mockBrobotProperties, mockTimeWrapper);
 
         testResult = new ActionResult();
         testResult.setActionLifecycle(mockLifecycle);

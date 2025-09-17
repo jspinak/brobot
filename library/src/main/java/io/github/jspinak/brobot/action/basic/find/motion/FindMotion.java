@@ -44,7 +44,7 @@ import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
  *   <li>Provides visual illustrations of detected motion
  * </ul>
  *
- * <p>The TimeBetweenIndividualActions option in ActionOptions controls the time interval (in
+ * <p>The TimeBetweenIndividualActions option in ActionConfig controls the time interval (in
  * seconds) between screenshot captures.
  *
  * @see MotionDetector

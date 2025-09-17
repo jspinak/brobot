@@ -26,7 +26,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
  * <p>The class integrates with Brobot's action system to provide:
  *
  * <ul>
- *   <li>Configurable delays at each drag stage via {@link ActionOptions}
+ *   <li>Configurable delays at each drag stage via {@link ActionConfig}
  *   <li>Mock support for testing without actual mouse movements
  *   <li>Detailed reporting of drag operations and failures
  * </ul>
@@ -42,7 +42,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
  * </ul>
  *
  * @see Location
- * @see ActionOptions
+ * @see ActionConfig
  * @see MockDrag
  * @see Settings
  */
@@ -87,7 +87,7 @@ public class DragCoordinateCalculator {
      * Executes a drag-and-drop operation with configurable timing parameters.
      *
      * <p>This method performs a complete drag-and-drop sequence from one location to another, with
-     * precise timing control at each stage. The timing parameters from {@link ActionOptions} are
+     * precise timing control at each stage. The timing parameters from {@link ActionConfig} are
      * applied to Sikuli's global settings before the drag operation begins.
      *
      * <p>The method reports the drag coordinates at HIGH output level for debugging. In mock mode,
@@ -155,7 +155,7 @@ public class DragCoordinateCalculator {
      * Executes a drag-and-drop operation using ActionConfig.
      *
      * <p>This method provides support for ActionConfig types. Currently only DragOptions is
-     * supported as ActionOptions doesn't extend ActionConfig.
+     * supported as ActionConfig doesn't extend ActionConfig.
      *
      * @param from The starting location for the drag.
      * @param to The destination location for the drag.

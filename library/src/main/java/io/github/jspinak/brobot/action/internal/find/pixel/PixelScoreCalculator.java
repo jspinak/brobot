@@ -47,7 +47,7 @@ import io.github.jspinak.brobot.util.image.visualization.MatrixVisualizer;
  * compressing differences at low similarities, matching human perception of visual similarity.
  *
  * @see PixelProfile
- * @see ActionOptions
+ * @see ActionConfig
  * @see DistanceMatrixCalculator
  */
 @Component
@@ -59,8 +59,8 @@ public class PixelScoreCalculator {
 
     // for score conversion
     private double bestScore =
-            0; // the value is the same as the target, corresponds to ActionOptions score of 100
-    private double worstScore = 255; // anything >= this is the same as an ActionOptions score of 0
+            0; // the value is the same as the target, corresponds to ActionConfig score of 100
+    private double worstScore = 255; // anything >= this is the same as an ActionConfig score of 0
     private double scoreRange = worstScore - bestScore;
     private double maxMinScoreForTanh = 3;
     private double maxTanh = Math.tanh(maxMinScoreForTanh);
@@ -140,10 +140,10 @@ public class PixelScoreCalculator {
     }
 
     /**
-     * Converts ActionOptions similarity score to PixelAnalysis distance threshold.
+     * Converts ActionConfig similarity score to PixelAnalysis distance threshold.
      *
      * <p>Uses hyperbolic tangent function to create non-linear mapping that provides better
-     * discrimination in the high-similarity range. The conversion ensures that ActionOptions score
+     * discrimination in the high-similarity range. The conversion ensures that ActionConfig score
      * of 0.7 (SikuliX default) maps appropriately.
      *
      * <p>Mathematical basis:
@@ -157,7 +157,7 @@ public class PixelScoreCalculator {
      * @param actionConfigScore similarity score (0-1, higher is better match)
      * @return pixel distance threshold (0-255, lower is better match)
      */
-    public double convertActionOptionsScoreToPixelAnalysisScoreWithTanh(double actionConfigScore) {
+    public double convertActionConfigScoreToPixelAnalysisScoreWithTanh(double actionConfigScore) {
         // Clamp input to valid range [0, 1] to handle edge cases
         actionConfigScore = Math.max(0, Math.min(1, actionConfigScore));
 
@@ -173,7 +173,7 @@ public class PixelScoreCalculator {
     }
 
     /**
-     * Linear conversion from ActionOptions to PixelAnalysis scores.
+     * Linear conversion from ActionConfig to PixelAnalysis scores.
      *
      * <p>Simple linear mapping without tanh transformation. Provided for comparison and backwards
      * compatibility.
@@ -183,7 +183,7 @@ public class PixelScoreCalculator {
      * @param actionConfigScore similarity score (0-1)
      * @return pixel distance score (0-255)
      */
-    public double convertActionOptionsScoreToPixelAnalysisScore(double actionConfigScore) {
+    public double convertActionConfigScoreToPixelAnalysisScore(double actionConfigScore) {
         ConsoleReporter.println("scoreRange: " + scoreRange);
         ConsoleReporter.println("score" + actionConfigScore);
         ConsoleReporter.println("bestScore" + bestScore);
@@ -191,7 +191,7 @@ public class PixelScoreCalculator {
     }
 
     /**
-     * Converts PixelAnalysis distance scores to ActionOptions similarity scores.
+     * Converts PixelAnalysis distance scores to ActionConfig similarity scores.
      *
      * <p>Inverse of the tanh-based conversion, mapping pixel distances back to similarity scores
      * for use in match evaluation. Uses atanh (inverse hyperbolic tangent) to maintain the
@@ -203,7 +203,7 @@ public class PixelScoreCalculator {
      * @param pixelAnalysisScore pixel distance score (0-255, lower is better)
      * @return similarity score (0-1, higher is better)
      */
-    public double convertPixelAnalysisScoreToActionOptionsScoreWithTanh(double pixelAnalysisScore) {
+    public double convertPixelAnalysisScoreToActionConfigScoreWithTanh(double pixelAnalysisScore) {
         // Clamp input to valid range
         pixelAnalysisScore = Math.max(bestScore, Math.min(worstScore, pixelAnalysisScore));
 
@@ -237,14 +237,14 @@ public class PixelScoreCalculator {
     }
 
     /**
-     * Linear conversion from PixelAnalysis to ActionOptions scores.
+     * Linear conversion from PixelAnalysis to ActionConfig scores.
      *
      * <p>Simple inverse linear mapping for backwards compatibility.
      *
      * @param pixelAnalysisScore pixel distance score (0-255)
      * @return similarity score (0-1)
      */
-    public double convertPixelAnalysisScoreToActionOptionsScore(double pixelAnalysisScore) {
+    public double convertPixelAnalysisScoreToActionConfigScore(double pixelAnalysisScore) {
         double scoreRange = worstScore - bestScore;
         return -((pixelAnalysisScore - bestScore) / (scoreRange)) + 1;
     }
@@ -269,7 +269,7 @@ public class PixelScoreCalculator {
             BaseFindOptions findOptions = (BaseFindOptions) actionConfig;
             minSimilarity = findOptions.getSimilarity();
         }
-        double threshold = convertActionOptionsScoreToPixelAnalysisScoreWithTanh(minSimilarity);
+        double threshold = convertActionConfigScoreToPixelAnalysisScoreWithTanh(minSimilarity);
 
         // Create matrices with the same type as scores
         Mat thresholdMat = new Mat(scores.size(), scores.type());

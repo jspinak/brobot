@@ -17,7 +17,7 @@
  *       io.github.jspinak.brobot.action.composite.multiple.actions.MultipleActionsObject}</b> -
  *       Container for multiple action configurations
  *   <li><b>{@link
- *       io.github.jspinak.brobot.action.composite.multiple.actions.ActionOptionsObjectCollectionPair}</b>
+ *       io.github.jspinak.brobot.action.composite.multiple.actions.ActionConfigObjectCollectionPair}</b>
  *       - Pairs action configuration with target objects
  * </ul>
  *
@@ -69,11 +69,11 @@
  * MultipleActions multiActions = new MultipleActions(...);
  *
  * // Define a sequence of actions
- * List<ActionOptionsObjectCollectionPair> workflow = new ArrayList<>();
+ * List<ActionConfigObjectCollectionPair> workflow = new ArrayList<>();
  *
  * // Step 1: Find the search box
- * workflow.add(new ActionOptionsObjectCollectionPair(
- *     new ActionOptions.Builder()
+ * workflow.add(new ActionConfigObjectCollectionPair(
+ *     new ActionConfig.Builder()
  *         .setAction(ActionType.FIND)
  *         .setFind(Find.BEST)
  *         .build(),
@@ -83,8 +83,8 @@
  * ));
  *
  * // Step 2: Click on it
- * workflow.add(new ActionOptionsObjectCollectionPair(
- *     new ActionOptions.Builder()
+ * workflow.add(new ActionConfigObjectCollectionPair(
+ *     new ActionConfig.Builder()
  *         .setAction(ActionType.CLICK)
  *         .build(),
  *     new ObjectCollection.Builder()
@@ -93,8 +93,8 @@
  * ));
  *
  * // Step 3: Type search query
- * workflow.add(new ActionOptionsObjectCollectionPair(
- *     new ActionOptions.Builder()
+ * workflow.add(new ActionConfigObjectCollectionPair(
+ *     new ActionConfig.Builder()
  *         .setAction(ActionType.TYPE)
  *         .build(),
  *     new ObjectCollection.Builder()
@@ -103,8 +103,8 @@
  * ));
  *
  * // Step 4: Press Enter
- * workflow.add(new ActionOptionsObjectCollectionPair(
- *     new ActionOptions.Builder()
+ * workflow.add(new ActionConfigObjectCollectionPair(
+ *     new ActionConfig.Builder()
  *         .setAction(ActionType.TYPE)
  *         .build(),
  *     new ObjectCollection.Builder()
@@ -113,8 +113,8 @@
  * ));
  *
  * // Step 5: Wait for results
- * workflow.add(new ActionOptionsObjectCollectionPair(
- *     new ActionOptions.Builder()
+ * workflow.add(new ActionConfigObjectCollectionPair(
+ *     new ActionConfig.Builder()
  *         .setAction(ActionType.VANISH)
  *         .setMaxWait(5.0)
  *         .build(),
@@ -126,7 +126,7 @@
  * // Execute the workflow
  * ActionResult workflowResult = multiActions.perform(
  *     new ActionResult(),
- *     workflow.toArray(new ActionOptionsObjectCollectionPair[0])
+ *     workflow.toArray(new ActionConfigObjectCollectionPair[0])
  * );
  *
  * // Check results
@@ -156,7 +156,7 @@
  *   <li>Consider timeout implications for long sequences
  * </ul>
  *
- * @see io.github.jspinak.brobot.action.ActionOptions
+ * @see io.github.jspinak.brobot.action.ActionConfig
  * @see io.github.jspinak.brobot.action.ObjectCollection
  * @see io.github.jspinak.brobot.action.ActionResult
  */

@@ -100,7 +100,7 @@ public class FindState {
      * 0.99, indicating high confidence in state identification.
      *
      * @param matches The ActionResult to populate with discovered state matches. This object is
-     *     modified to include all qualifying matches. Must contain valid ActionOptions with minimum
+     *     modified to include all qualifying matches. Must contain valid ActionConfig with minimum
      *     area settings.
      * @param objectCollections List of ObjectCollections, each representing a screenshot with its
      *     state images and scene data. Must not be null or empty.

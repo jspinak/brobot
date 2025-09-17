@@ -137,9 +137,9 @@ public class ConsoleReporter {
         return outputLevels.get(level) <= outputLevels.get(outputLevel);
     }
 
-    // Removed ActionOptions-based print method - use ActionConfig version instead
+    // Removed ActionConfig-based print method - use ActionConfig version instead
 
-    // Removed ActionOptions-based print method - use ActionConfig version instead
+    // Removed ActionConfig-based print method - use ActionConfig version instead
 
     /**
      * Reports an action performed on a StateObject with match details using modern ActionConfig.

@@ -48,8 +48,7 @@ public class PerformanceMonitoringAspectTest extends BrobotTestBase {
     @Override
     public void setupTest() {
         super.setupTest();
-        aspect = new PerformanceMonitoringAspect();
-        ReflectionTestUtils.setField(aspect, "brobotLogger", brobotLogger);
+        aspect = new PerformanceMonitoringAspect(brobotLogger);
         ReflectionTestUtils.setField(aspect, "alertThresholdMillis", 100L);
         ReflectionTestUtils.setField(aspect, "reportIntervalSeconds", 300);
         ReflectionTestUtils.setField(aspect, "trackMemoryUsage", true);

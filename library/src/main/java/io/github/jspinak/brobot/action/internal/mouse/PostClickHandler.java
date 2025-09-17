@@ -31,7 +31,7 @@ import io.github.jspinak.brobot.action.basic.click.Click;
  * Offset-based movement takes priority when both are configured.
  *
  * @see Click
- * @see ActionOptions
+ * @see ActionConfig
  * @see MoveMouseWrapper
  */
 @Component
@@ -49,7 +49,7 @@ public class PostClickHandler {
      *
      * <ol>
      *   <li>First checks if mouse movement is enabled via {@link
-     *       ActionOptions#isMoveMouseAfterAction()}
+     *       ActionConfig#isMoveMouseAfterAction()}
      *   <li>If enabled, attempts offset-based movement if defined
      *   <li>Falls back to fixed location movement if offset is not defined
      * </ol>

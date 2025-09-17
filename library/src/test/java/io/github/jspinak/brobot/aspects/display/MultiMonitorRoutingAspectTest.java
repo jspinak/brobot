@@ -48,9 +48,7 @@ public class MultiMonitorRoutingAspectTest extends BrobotTestBase {
     @Override
     public void setupTest() {
         super.setupTest();
-        aspect = new MultiMonitorRoutingAspect();
-        ReflectionTestUtils.setField(aspect, "brobotLogger", brobotLogger);
-        ReflectionTestUtils.setField(aspect, "monitorManager", monitorManager);
+        aspect = new MultiMonitorRoutingAspect(brobotLogger, monitorManager);
         ReflectionTestUtils.setField(aspect, "defaultMonitorIndex", 0);
         ReflectionTestUtils.setField(aspect, "enableLoadBalancing", true);
         ReflectionTestUtils.setField(aspect, "enableFailover", true);

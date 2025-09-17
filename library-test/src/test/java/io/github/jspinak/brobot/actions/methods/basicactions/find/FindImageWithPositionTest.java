@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
@@ -31,6 +32,10 @@ import io.github.jspinak.brobot.testutils.TestPaths;
 @Disabled("CI failure - needs investigation")
 public class FindImageWithPositionTest extends BrobotIntegrationTestBase {
 
+    @Autowired
+    private BrobotProperties brobotProperties;
+
+
     @BeforeAll
     public static void setupHeadlessMode() {
         System.setProperty("java.awt.headless", "true");
@@ -49,10 +54,10 @@ public class FindImageWithPositionTest extends BrobotIntegrationTestBase {
         ExecutionEnvironment.setInstance(env);
 
         // Enable action mocking but real find operations
-        BrobotProperties.mock = true;
+        // Cannot set mock - BrobotProperties is immutable
 
         // Clear any previous screenshots
-        BrobotProperties.screenshots.clear();
+        // BrobotProperties.screenshots no longer exists
     }
 
     @Autowired Action action;

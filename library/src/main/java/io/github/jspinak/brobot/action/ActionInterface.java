@@ -25,7 +25,7 @@ import io.github.jspinak.brobot.action.internal.execution.BasicActionRegistry;
  * <p>The perform method contract:
  *
  * <ul>
- *   <li>Receives a Matches object containing ActionOptions and accumulating results
+ *   <li>Receives a Matches object containing ActionConfig and accumulating results
  *   <li>Processes one or more ObjectCollections containing the action targets
  *   <li>Updates the Matches object with results of the action
  *   <li>May throw runtime exceptions for error conditions
@@ -122,7 +122,7 @@ public interface ActionInterface {
      * Implementations should follow these guidelines:
      *
      * <ul>
-     *   <li>Read action configuration from the ActionOptions within matches
+     *   <li>Read action configuration from the ActionConfig within matches
      *   <li>Process target objects from the ObjectCollections
      *   <li>Execute the GUI operation (click, type, find, etc.)
      *   <li>Update the matches object with results (found elements, success status)
@@ -138,10 +138,10 @@ public interface ActionInterface {
      * </ul>
      *
      * <p><strong>Implementation note:</strong> The matches parameter serves dual purposes - it
-     * provides input configuration via ActionOptions and accumulates output results. This design
+     * provides input configuration via ActionConfig and accumulates output results. This design
      * enables action chaining and comprehensive result tracking.
      *
-     * @param matches Contains ActionOptions for configuration and accumulates execution results.
+     * @param matches Contains ActionConfig for configuration and accumulates execution results.
      *     This object is modified during execution to record matches found, success/failure status,
      *     and timing information.
      * @param objectCollections Variable number of collections containing target objects

@@ -44,7 +44,7 @@ import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
  *
  * <p>The type delay mechanism is particularly important for handling applications that process
  * keystrokes asynchronously or have input validation that runs between keystrokes. By adjusting the
- * type delay through ActionOptions, automation scripts can adapt to different application behaviors
+ * type delay through ActionConfig, automation scripts can adapt to different application behaviors
  * without modifying the core logic.
  *
  * <p>This action exemplifies the framework's approach to abstracting platform-specific details

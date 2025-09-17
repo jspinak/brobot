@@ -49,7 +49,7 @@
  * <pre>{@code
  * // Detect a scene based on color profile
  * GetScenes getScenes = new GetScenes(...);
- * ActionOptions options = new ActionOptions.Builder()
+ * ActionConfig options = new ActionConfig.Builder()
  *     .setAction(ActionType.FIND)
  *     .setFind(Find.CUSTOM)
  *     .build();

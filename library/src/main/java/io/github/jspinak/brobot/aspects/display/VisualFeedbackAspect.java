@@ -51,15 +51,21 @@ import lombok.extern.slf4j.Slf4j;
         matchIfMissing = false)
 public class VisualFeedbackAspect {
 
-    @Autowired private BrobotLogger brobotLogger;
+    private final BrobotLogger brobotLogger;
+    private final HighlightManager highlightManager;
+    private final VisualFeedbackConfig visualConfig;
+    private final MonitorManager monitorManager;
 
-    @Autowired(required = false)
-    private HighlightManager highlightManager;
-
-    @Autowired(required = false)
-    private VisualFeedbackConfig visualConfig;
-
-    @Autowired private MonitorManager monitorManager;
+    @Autowired
+    public VisualFeedbackAspect(BrobotLogger brobotLogger,
+                               MonitorManager monitorManager,
+                               @Autowired(required = false) HighlightManager highlightManager,
+                               @Autowired(required = false) VisualFeedbackConfig visualConfig) {
+        this.brobotLogger = brobotLogger;
+        this.monitorManager = monitorManager;
+        this.highlightManager = highlightManager;
+        this.visualConfig = visualConfig;
+    }
 
     @Value("${brobot.aspects.visual-feedback.highlight-duration:2}")
     private int highlightDuration;

@@ -177,26 +177,9 @@ public class ActionResult {
         matchCollection.sortByScoreDescending();
     }
 
-    /**
-     * @deprecated Use {@link #sortMatchObjects()} for ascending or {@link
-     *     #sortMatchObjectsDescending()} for descending
-     */
-    @Deprecated
-    public void sortByMatchScoreDecending() {
-        sortMatchObjects();
-    }
-
     /** Sorts the match list by match score in descending order. */
     public void sortByMatchScoreDescending() {
         sortMatchObjectsDescending();
-    }
-
-    /**
-     * @deprecated Use {@link #sortBySizeDescending()} instead (typo fix)
-     */
-    @Deprecated
-    public void sortBySizeDecending() {
-        sortBySizeDescending();
     }
 
     /** Sorts matches by area in descending order. */

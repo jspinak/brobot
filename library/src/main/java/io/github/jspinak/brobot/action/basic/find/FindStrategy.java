@@ -5,7 +5,7 @@ package io.github.jspinak.brobot.action.basic.find;
  *
  * <p>This enum consolidates all find strategies that were previously scattered across different
  * options classes. It provides a unified type system for find operations while maintaining backward
- * compatibility with the original ActionOptions.Find enum.
+ * compatibility with the original ActionConfig.Find enum.
  *
  * <p>Each strategy represents a different approach to finding elements on the screen, from basic
  * pattern matching to advanced motion detection and color analysis.

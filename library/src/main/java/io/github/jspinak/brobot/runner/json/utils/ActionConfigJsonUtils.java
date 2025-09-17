@@ -21,7 +21,7 @@ import io.github.jspinak.brobot.runner.json.serializers.ActionConfigDeserializer
  * Specialized JSON serialization utility for ActionConfig objects in the Brobot framework.
  *
  * <p>ActionConfig is the base class for all action configurations in the modern Brobot API,
- * replacing the monolithic ActionOptions. This utility provides safe serialization and
+ * replacing the monolithic ActionConfig. This utility provides safe serialization and
  * deserialization for the ActionConfig hierarchy, handling polymorphic types through type
  * discriminators.
  *

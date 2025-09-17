@@ -97,7 +97,7 @@ public class ScreenshotRecorder {
      * Captures a fixed number of screenshots at regular intervals.
      *
      * <p>This blocking method takes screenshots for the specified duration, waiting between each
-     * capture. Screenshots are saved to the path configured in BrobotSettings.
+     * capture. Screenshots are saved to the path configured in BrobotProperties.
      *
      * <p>Calculation: numberOfScreenshots = secondsToCapture / captureFrequency
      *
@@ -107,7 +107,7 @@ public class ScreenshotRecorder {
      *
      * <ul>
      *   <li>Blocks the calling thread for the entire duration
-     *   <li>Saves screenshots to BrobotSettings.screenshotPath
+     *   <li>Saves screenshots to BrobotProperties screenshot path
      *   <li>Uses full screen region (new Region())
      * </ul>
      *

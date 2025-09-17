@@ -177,7 +177,7 @@ public abstract class BaseFindOptions extends ActionConfig {
         /**
          * Sets the search duration (in seconds) for finding a match. The search will continue until
          * a match is found or this duration is reached. This replaces the deprecated
-         * ActionOptions.maxWait parameter.
+         * ActionConfig.maxWait parameter.
          *
          * @param seconds The maximum duration to search for a match (default: 3.0 seconds)
          * @return this Builder instance for chaining.

@@ -23,14 +23,14 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
  * <ul>
  *   <li>Automatic discovery of PNG screenshots
  *   <li>Scene naming based on filename (without extension)
- *   <li>Configurable screenshot directory via BrobotSettings
+ *   <li>Configurable screenshot directory via BrobotProperties
  *   <li>Support for filtering by file type
  * </ul>
  *
  * <p>Directory structure:
  *
  * <ul>
- *   <li>Reads from: BrobotSettings.screenshotPath
+ *   <li>Reads from: BrobotProperties screenshot path
  *   <li>Processes: All .png files in the directory
  *   <li>Scene paths: "../screenshotPath/filename" (relative path format)
  * </ul>

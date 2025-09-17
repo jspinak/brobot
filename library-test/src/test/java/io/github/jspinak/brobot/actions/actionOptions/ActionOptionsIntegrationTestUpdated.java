@@ -3,9 +3,11 @@ package io.github.jspinak.brobot.actions.actionOptions;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
@@ -29,10 +31,14 @@ import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ActionOptionsIntegrationTestUpdated extends BrobotIntegrationTestBase {
 
+    @Autowired
+    private BrobotProperties brobotProperties;
+
+
     @BeforeEach
     void setUp() {
         super.setUpBrobotEnvironment();
-        BrobotProperties.mock = true;
+        // Cannot set mock - BrobotProperties is immutable
     }
 
     @Test

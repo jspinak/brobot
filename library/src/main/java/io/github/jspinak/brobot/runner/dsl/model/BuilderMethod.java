@@ -23,7 +23,7 @@ import lombok.Data;
  * <p>Example usage in a BuilderExpression:
  *
  * <pre>
- * // Part of a BuilderExpression that creates an ActionOptions object
+ * // Part of a BuilderExpression that creates an ActionConfig object
  * {
  *   "method": "setTimeout",
  *   "arguments": [{"expressionType": "literal", "valueType": "integer", "value": 5000}]

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import io.github.jspinak.brobot.action.ActionInterface;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.SimilarImagesFindOptions;
@@ -37,17 +38,21 @@ import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 @Disabled("CI failure - needs investigation")
 public class FindSimilarImagesTestUpdated extends BrobotIntegrationTestBase {
 
+    @Autowired
+    private BrobotProperties brobotProperties;
+
+
     @Autowired private ActionService actionService;
 
     @BeforeEach
     void setUp() {
         super.setUpBrobotEnvironment();
-        BrobotProperties.mock = true;
+        // Cannot set mock - BrobotProperties is immutable
     }
 
     @AfterEach
     void tearDown() {
-        BrobotProperties.mock = false;
+        // Cannot set mock - BrobotProperties is immutable
     }
 
     @Test

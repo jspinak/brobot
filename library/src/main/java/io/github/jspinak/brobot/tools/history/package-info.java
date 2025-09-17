@@ -91,7 +91,7 @@
  *
  * <pre>{@code
  * // Automatically visualized through action execution
- * ActionOptions options = new ActionOptions.Builder()
+ * ActionConfig options = new ActionConfig.Builder()
  *         .action(Action.CLICK)
  *         .captureScreenshots(true)
  *         .build();
@@ -129,7 +129,7 @@
  *   <li>{@code BrobotProperties.saveHistory} - Global history enable/disable
  *   <li>{@code BrobotProperties.screenshot} - Screenshot capture settings
  *   <li>Action-specific capture flags
- *   <li>Illustration directives in ActionOptions
+ *   <li>Illustration directives in ActionConfig
  * </ul>
  *
  * <h2>File Organization</h2>

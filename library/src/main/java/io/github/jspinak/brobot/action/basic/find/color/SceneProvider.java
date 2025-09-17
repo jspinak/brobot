@@ -32,7 +32,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
  * <p>Scene sources in priority order:
  *
  * <ol>
- *   <li>Mock scenes from BrobotSettings (when mocking enabled)
+ *   <li>Mock scenes from BrobotProperties (when mocking enabled)
  *   <li>Scenes from ObjectCollection parameters
  *   <li>Screenshots captured from current screen
  *   <li>Empty scene as fallback
