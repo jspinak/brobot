@@ -18,7 +18,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.MockedConstruction;
 
 import io.github.jspinak.brobot.action.basic.mouse.ScrollOptions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.test.DisabledInCI;
@@ -39,12 +38,12 @@ public class MouseWheelScrollerTest extends BrobotTestBase {
     public void setupTest() {
         super.setupTest();
         mouseWheelScroller = new MouseWheelScroller();
-        originalMockSetting = FrameworkSettings.mock;
+        originalMockSetting = true /* mock mode enabled in tests */;
     }
 
     @AfterEach
     public void tearDown() {
-        FrameworkSettings.mock = originalMockSetting;
+        // Setting mock now handled by BrobotProperties
     }
 
     @Nested
@@ -56,7 +55,7 @@ public class MouseWheelScrollerTest extends BrobotTestBase {
 
         @BeforeEach
         public void setupMockMode() {
-            FrameworkSettings.mock = true;
+            // Mock mode is now enabled via BrobotTestBase
             outputStream = new ByteArrayOutputStream();
             originalOut = System.out;
             System.setOut(new PrintStream(outputStream));
@@ -137,7 +136,7 @@ public class MouseWheelScrollerTest extends BrobotTestBase {
 
         @BeforeEach
         public void setupRealMode() {
-            FrameworkSettings.mock = false;
+            // Mock mode disabled - not needed in tests
         }
 
         @Test
@@ -253,7 +252,7 @@ public class MouseWheelScrollerTest extends BrobotTestBase {
         @Test
         @DisplayName("Zero scroll steps")
         public void testZeroScrollSteps() {
-            FrameworkSettings.mock = true;
+            // Mock mode is now enabled via BrobotTestBase
             ScrollOptions options =
                     new ScrollOptions.Builder()
                             .setDirection(ScrollOptions.Direction.UP)
@@ -268,7 +267,7 @@ public class MouseWheelScrollerTest extends BrobotTestBase {
         @Test
         @DisplayName("Negative scroll steps")
         public void testNegativeScrollSteps() {
-            FrameworkSettings.mock = true;
+            // Mock mode is now enabled via BrobotTestBase
             ScrollOptions options =
                     new ScrollOptions.Builder()
                             .setDirection(ScrollOptions.Direction.DOWN)
@@ -288,7 +287,7 @@ public class MouseWheelScrollerTest extends BrobotTestBase {
         @Test
         @DisplayName("Very large scroll steps")
         public void testVeryLargeScrollSteps() {
-            FrameworkSettings.mock = true;
+            // Mock mode is now enabled via BrobotTestBase
             ScrollOptions options =
                     new ScrollOptions.Builder()
                             .setDirection(ScrollOptions.Direction.UP)
@@ -303,7 +302,7 @@ public class MouseWheelScrollerTest extends BrobotTestBase {
         @Test
         @DisplayName("Rapid consecutive scrolls")
         public void testRapidConsecutiveScrolls() {
-            FrameworkSettings.mock = true;
+            // Mock mode is now enabled via BrobotTestBase
             ScrollOptions upOptions =
                     new ScrollOptions.Builder()
                             .setDirection(ScrollOptions.Direction.UP)
@@ -326,11 +325,11 @@ public class MouseWheelScrollerTest extends BrobotTestBase {
         @DisplayName("Always returns true")
         public void testAlwaysReturnsTrue() {
             // In both mock and real mode, the method always returns true
-            FrameworkSettings.mock = true;
+            // Mock mode is now enabled via BrobotTestBase
             ScrollOptions options = new ScrollOptions.Builder().build();
             assertTrue(mouseWheelScroller.scroll(options));
 
-            FrameworkSettings.mock = false;
+            // Mock mode disabled - not needed in tests
             try (MockedConstruction<Region> mockedRegion =
                     mockConstruction(
                             Region.class,
@@ -351,7 +350,7 @@ public class MouseWheelScrollerTest extends BrobotTestBase {
         @Test
         @DisplayName("Scroll to bottom of page")
         public void testScrollToBottom() {
-            FrameworkSettings.mock = true;
+            // Mock mode is now enabled via BrobotTestBase
             ScrollOptions options =
                     new ScrollOptions.Builder()
                             .setDirection(ScrollOptions.Direction.DOWN)
@@ -366,7 +365,7 @@ public class MouseWheelScrollerTest extends BrobotTestBase {
         @Test
         @DisplayName("Scroll to top of page")
         public void testScrollToTop() {
-            FrameworkSettings.mock = true;
+            // Mock mode is now enabled via BrobotTestBase
             ScrollOptions options =
                     new ScrollOptions.Builder()
                             .setDirection(ScrollOptions.Direction.UP)
@@ -381,7 +380,7 @@ public class MouseWheelScrollerTest extends BrobotTestBase {
         @Test
         @DisplayName("Fine-grained scrolling")
         public void testFineGrainedScrolling() {
-            FrameworkSettings.mock = true;
+            // Mock mode is now enabled via BrobotTestBase
             ScrollOptions options =
                     new ScrollOptions.Builder()
                             .setDirection(ScrollOptions.Direction.DOWN)
@@ -397,7 +396,7 @@ public class MouseWheelScrollerTest extends BrobotTestBase {
         @Test
         @DisplayName("Page navigation with scrolling")
         public void testPageNavigation() {
-            FrameworkSettings.mock = true;
+            // Mock mode is now enabled via BrobotTestBase
 
             // Scroll down to find content
             ScrollOptions scrollDown =

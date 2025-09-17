@@ -10,10 +10,11 @@ import org.springframework.stereotype.Component;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Image;
 import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Manages the execution lifecycle logic for GUI automation actions.
@@ -52,10 +53,13 @@ import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
  */
 @Component
 public class ActionLifecycleManagement {
-    private final TimeProvider time;
 
-    public ActionLifecycleManagement(TimeProvider time) {
-        this.time = time;
+    @Autowired
+    private BrobotProperties brobotProperties;
+    private final TimeWrapper timeWrapper;
+
+    public ActionLifecycleManagement(TimeWrapper timeWrapper) {
+        this.timeWrapper = timeWrapper;
     }
 
     /**
@@ -101,7 +105,7 @@ public class ActionLifecycleManagement {
             return Duration.ofSeconds(999999);
         }
         LocalDateTime start = matches.getActionLifecycle().getStartTime();
-        LocalDateTime end = time.now();
+        LocalDateTime end = timeWrapper.now();
         return Duration.between(start, end);
     }
 
@@ -195,7 +199,7 @@ public class ActionLifecycleManagement {
      */
     public boolean isOkToContinueAction(ActionResult matches, int numberOfImages) {
         // In mock mode, always stop after first iteration to prevent hanging
-        if (FrameworkSettings.mock && getCompletedRepetitions(matches) > 0) {
+        if (brobotProperties.getCore().isMock() && getCompletedRepetitions(matches) > 0) {
             return false;
         }
 

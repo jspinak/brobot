@@ -126,8 +126,8 @@
  * <p>Visualization behavior controlled by:
  *
  * <ul>
- *   <li>{@code FrameworkSettings.saveHistory} - Global history enable/disable
- *   <li>{@code FrameworkSettings.screenshot} - Screenshot capture settings
+ *   <li>{@code BrobotProperties.saveHistory} - Global history enable/disable
+ *   <li>{@code BrobotProperties.screenshot} - Screenshot capture settings
  *   <li>Action-specific capture flags
  *   <li>Illustration directives in ActionOptions
  * </ul>
@@ -165,7 +165,7 @@
  *
  * @since 1.0
  * @see io.github.jspinak.brobot.action
- * @see io.github.jspinak.brobot.config.core.FrameworkSettings
+ * @see io.github.jspinak.brobot.config.core.BrobotProperties
  * @see io.github.jspinak.brobot.model.action
  */
 package io.github.jspinak.brobot.tools.history;

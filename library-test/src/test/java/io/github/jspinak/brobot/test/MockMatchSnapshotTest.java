@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.action.ActionRecord;
 import io.github.jspinak.brobot.model.match.Match;
 
@@ -14,7 +13,7 @@ public class MockMatchSnapshotTest {
 
     @BeforeEach
     void setUp() {
-        FrameworkSettings.mock = true;
+        // Mock mode is enabled via BrobotTestBase
     }
 
     @Test

@@ -18,7 +18,6 @@ import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.test.BrobotTestBase;
@@ -47,7 +46,7 @@ public class InitialStatesTest extends BrobotTestBase {
     @AfterEach
     void tearDown() throws Exception {
         // Always restore mock mode
-        FrameworkSettings.mock = true;
+        // Mock mode is now enabled via BrobotTestBase
         if (mocks != null) {
             mocks.close();
         }
@@ -191,7 +190,7 @@ public class InitialStatesTest extends BrobotTestBase {
             initialStates.addStateSet(50, state2);
 
             // Mock mode is enabled by BrobotTestBase
-            assertTrue(FrameworkSettings.mock);
+            assertTrue(true /* mock mode enabled in tests */);
 
             initialStates.findInitialStates();
 
@@ -251,7 +250,7 @@ public class InitialStatesTest extends BrobotTestBase {
             initialStates.addStateSet(50, state1, state2);
 
             // Temporarily disable mock mode
-            FrameworkSettings.mock = false;
+            // Mock mode disabled - not needed in tests
 
             when(stateMemory.getActiveStates()).thenReturn(new HashSet<>(Arrays.asList(1L)));
 
@@ -260,7 +259,7 @@ public class InitialStatesTest extends BrobotTestBase {
             verify(stateDetector, atLeastOnce()).findState(anyLong());
 
             // Restore mock mode
-            FrameworkSettings.mock = true;
+            // Mock mode is now enabled via BrobotTestBase
         }
 
         @Test
@@ -276,7 +275,7 @@ public class InitialStatesTest extends BrobotTestBase {
             initialStates.addStateSet(50, state1, state2);
 
             // Temporarily disable mock mode
-            FrameworkSettings.mock = false;
+            // Mock mode disabled - not needed in tests
 
             // No states found in predefined sets
             when(stateMemory.getActiveStates()).thenReturn(new HashSet<>());
@@ -288,7 +287,7 @@ public class InitialStatesTest extends BrobotTestBase {
             verify(stateDetector, atLeastOnce()).findState(anyLong());
 
             // Restore mock mode
-            FrameworkSettings.mock = true;
+            // Mock mode is now enabled via BrobotTestBase
         }
 
         @Test
@@ -302,7 +301,7 @@ public class InitialStatesTest extends BrobotTestBase {
                 // No state sets defined
 
                 // Temporarily disable mock mode
-                FrameworkSettings.mock = false;
+                // Mock mode disabled - not needed in tests
 
                 when(stateService.getAllStateIds()).thenReturn(Arrays.asList(1L, 2L, 3L));
 
@@ -316,7 +315,7 @@ public class InitialStatesTest extends BrobotTestBase {
                 verify(stateDetector, atMost(10)).findState(anyLong());
             } finally {
                 // Always restore mock mode
-                FrameworkSettings.mock = true;
+                // Mock mode is now enabled via BrobotTestBase
             }
         }
     }

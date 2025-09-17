@@ -240,7 +240,7 @@ Create `application-mock.properties` for headless testing:
 
 ```properties
 # Enable Mock Mode
-brobot.mock=true
+brobot.core.mock=true
 brobot.mock.action.success.probability=0.8
 
 # GUI Access Settings for Mock Mode

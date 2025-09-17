@@ -10,7 +10,6 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 
 /**
  * Optimized test configuration for integration tests. Reduces initialization overhead and optimizes
@@ -34,17 +33,17 @@ public class OptimizedTestConfig implements BeforeAllCallback {
 
     private void optimizeTestSettings() {
         // Enable mock mode for faster execution
-        FrameworkSettings.mock = true;
+        BrobotProperties.mock = true;
 
         // Reduce wait times for mock operations
-        FrameworkSettings.mockTimeFindFirst = 0.01;
-        FrameworkSettings.mockTimeFindAll = 0.02;
-        FrameworkSettings.mockTimeClick = 0.01;
-        FrameworkSettings.mockTimeMove = 0.01;
-        FrameworkSettings.mockTimeDrag = 0.02;
-        FrameworkSettings.mockTimeFindHistogram = 0.02;
-        FrameworkSettings.mockTimeFindColor = 0.02;
-        FrameworkSettings.mockTimeClassify = 0.03;
+        BrobotProperties.mockTimeFindFirst = 0.01;
+        BrobotProperties.mockTimeFindAll = 0.02;
+        BrobotProperties.mockTimeClick = 0.01;
+        BrobotProperties.mockTimeMove = 0.01;
+        BrobotProperties.mockTimeDrag = 0.02;
+        BrobotProperties.mockTimeFindHistogram = 0.02;
+        BrobotProperties.mockTimeFindColor = 0.02;
+        BrobotProperties.mockTimeClassify = 0.03;
 
         // Configure thread pools for optimal test performance
         System.setProperty(

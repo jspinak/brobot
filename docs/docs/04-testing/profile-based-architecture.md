@@ -13,9 +13,13 @@ Brobot's profile-based architecture provides a clean separation between test and
 
 ### Previous Architecture (Runtime Delegation)
 ```java
+// Note: BrobotProperties must be injected as a dependency
+@Autowired
+private BrobotProperties brobotProperties;
+
 // Old approach - runtime checks everywhere
 public ActionResult execute(Action action) {
-    if (FrameworkSettings.mock) {
+    if (brobotProperties.getCore().isMock()) {
         return mockExecution.execute(action);
     } else {
         return liveExecution.execute(action);
@@ -48,7 +52,7 @@ Brobot provides two default configuration files:
 #### `brobot-defaults.properties`
 Production/live defaults applied to all Brobot applications:
 ```properties
-brobot.mock=false
+brobot.core.mock=false
 brobot.action.similarity=0.85
 brobot.highlight.enabled=true
 brobot.screenshot.save-history=true
@@ -57,7 +61,7 @@ brobot.screenshot.save-history=true
 #### `brobot-test-defaults.properties`
 Test-optimized defaults automatically loaded with test profile:
 ```properties
-brobot.mock=true
+brobot.core.mock=true
 brobot.action.similarity=0.70
 brobot.highlight.enabled=false
 brobot.screenshot.save-history=false
@@ -71,7 +75,7 @@ Create profile-specific configurations in your application:
 #### `application.properties`
 ```properties
 # Default/production configuration
-brobot.mock=false
+brobot.core.mock=false
 logging.level.root=WARN
 ```
 
@@ -79,7 +83,7 @@ logging.level.root=WARN
 ```properties
 # Test profile configuration
 spring.config.import=optional:classpath:brobot-test-defaults.properties
-brobot.mock=true
+brobot.core.mock=true
 logging.level.root=INFO
 
 # State probabilities for deterministic testing
@@ -90,7 +94,7 @@ myapp.mock.home-state-probability=100
 #### `application-dev.properties`
 ```properties
 # Development profile
-brobot.mock=false
+brobot.core.mock=false
 brobot.highlight.enabled=true
 brobot.logging.verbosity=VERBOSE
 logging.level.root=DEBUG
@@ -172,7 +176,8 @@ public class BrobotProfileAutoConfiguration {
         @PostConstruct
         public void configureTestEnvironment() {
             // Ensures mock mode is enabled
-            FrameworkSettings.mock = true;
+            // Mock mode is now configured via application.properties:
+// brobot.core.mock=true;
             // Optimizes for test execution
             FrameworkSettings.moveMouseDelay = 0;
             FrameworkSettings.saveSnapshots = false;
@@ -190,9 +195,10 @@ The framework validates configuration consistency:
 public static class ProfileValidator {
     @PostConstruct
     public void validateProfileConfiguration() {
-        if (isTestProfile && !FrameworkSettings.mock) {
+        if (isTestProfile && !brobotProperties.getCore().isMock()) {
             log.warn("Test profile active but mock mode disabled - fixing...");
-            FrameworkSettings.mock = true;
+            // Mock mode is now configured via application.properties:
+// brobot.core.mock=true;
         }
     }
 }
@@ -218,7 +224,7 @@ public class LoginState {
     
     @PostConstruct
     public void configure() {
-        if (FrameworkSettings.mock && mockStateManagement != null) {
+        if (brobotProperties.getCore().isMock() && mockStateManagement != null) {
             mockStateManagement.setStateProbabilities(mockProbability, "Login");
             log.info("Login state mock probability: {}%", mockProbability);
         }
@@ -270,7 +276,7 @@ public class StateTransitionTest {
 @SpringBootTest
 @ActiveProfiles("integration")
 @TestPropertySource(properties = {
-    "brobot.mock=false",  // Override for real UI testing
+    "brobot.core.mock=false",  // Override for real UI testing
     "brobot.action.similarity=0.95"  // Stricter matching
 })
 public class RealUIIntegrationTest {
@@ -309,7 +315,7 @@ src/main/resources/
 ```properties
 # application-integration.properties
 spring.profiles.include=test  # Inherit from test profile
-brobot.mock=false   # Override specific properties
+brobot.core.mock=false   # Override specific properties
 ```
 
 ### 4. Documentation
@@ -338,7 +344,7 @@ private boolean featureEnabled;
 ```java
 // Before
 @TestPropertySource(properties = {
-    "brobot.mock=true",
+    "brobot.core.mock=true",
     "logging.level=DEBUG"
 })
 
@@ -349,7 +355,7 @@ private boolean featureEnabled;
 ### Step 3: Remove Runtime Checks (Optional)
 ```java
 // Before
-if (FrameworkSettings.mock) {
+if (brobotProperties.getCore().isMock()) {
     return mockResult();
 } else {
     return liveResult();
@@ -366,7 +372,7 @@ return executor.execute();
 @Test
 public void verifyTestProfile() {
     assertTrue(environment.acceptsProfiles("test"));
-    assertTrue(FrameworkSettings.mock);
+    assertTrue(brobotProperties.getCore().isMock());
     assertNotNull(mockStateManagement);
 }
 ```

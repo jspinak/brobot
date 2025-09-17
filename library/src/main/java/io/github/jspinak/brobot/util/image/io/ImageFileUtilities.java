@@ -15,13 +15,14 @@ import javax.imageio.ImageIO;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Utility component for saving images to disk with automatic filename generation.
@@ -61,13 +62,16 @@ import lombok.extern.slf4j.Slf4j;
  * access may result in filename collisions or inconsistent numbering.
  *
  * @see BufferedImageUtilities
- * @see FrameworkSettings
+ * @see BrobotProperties
  * @see Pattern
  * @see Mat
  */
 @Slf4j
 @Component
 public class ImageFileUtilities {
+
+    @Autowired
+    private BrobotProperties brobotProperties;
 
     private final BufferedImageUtilities bufferedImageOps;
 
@@ -106,7 +110,7 @@ public class ImageFileUtilities {
     public String saveRegionToFile(Region region, String path) {
         try {
             String newPath = getFreePath(path) + ".png";
-            if (FrameworkSettings.mock) {
+            if (brobotProperties.getCore().isMock()) {
                 ConsoleReporter.format("Save file as %s \n", newPath);
                 return newPath;
             }
@@ -224,7 +228,7 @@ public class ImageFileUtilities {
      * @return unique path based on history settings
      */
     public String getFreePath() {
-        return getFreePath(FrameworkSettings.historyPath + FrameworkSettings.historyFilename);
+        return getFreePath(brobotProperties.getScreenshot().getHistoryPath() + brobotProperties.getScreenshot().getHistoryFilename());
     }
 
     /**
@@ -250,7 +254,7 @@ public class ImageFileUtilities {
      * @return the next free number for the history path
      */
     public int getFreeNumber() {
-        return getFreeNumber(FrameworkSettings.historyPath + FrameworkSettings.historyFilename);
+        return getFreeNumber(brobotProperties.getScreenshot().getHistoryPath() + brobotProperties.getScreenshot().getHistoryFilename());
     }
 
     /**

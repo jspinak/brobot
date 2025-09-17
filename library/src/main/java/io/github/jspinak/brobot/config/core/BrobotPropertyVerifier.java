@@ -9,6 +9,7 @@ import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 
 import lombok.extern.slf4j.Slf4j;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Verifies and logs Brobot property configuration after Spring Boot initialization. This component
@@ -17,6 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 public class BrobotPropertyVerifier {
+
+    @Autowired
+    private BrobotProperties brobotProperties;
 
     @Autowired private BrobotProperties properties;
 
@@ -45,8 +49,8 @@ public class BrobotPropertyVerifier {
                 .log()
                 .observation("Brobot Property Verification")
                 .metadata("saveHistory", properties.getScreenshot().isSaveHistory())
-                .metadata("historyPath", FrameworkSettings.historyPath)
-                .metadata("saveHistoryFrameworkSettings", FrameworkSettings.saveHistory)
+                .metadata("historyPath", brobotProperties.getScreenshot().getHistoryPath())
+                .metadata("saveHistoryBrobotProperties", brobotProperties.getScreenshot().isSaveHistory())
                 .metadata("illustrationEnabled", isIllustrationEnabled())
                 .log();
 
@@ -82,18 +86,18 @@ public class BrobotPropertyVerifier {
         brobotLogger
                 .log()
                 .observation("Framework Settings (Illustration Related)")
-                .metadata("drawFind", FrameworkSettings.drawFind)
-                .metadata("drawClick", FrameworkSettings.drawClick)
-                .metadata("drawDrag", FrameworkSettings.drawDrag)
-                .metadata("drawMove", FrameworkSettings.drawMove)
-                .metadata("drawHighlight", FrameworkSettings.drawHighlight)
-                .metadata("drawRepeatedActions", FrameworkSettings.drawRepeatedActions)
-                .metadata("drawClassify", FrameworkSettings.drawClassify)
-                .metadata("drawDefine", FrameworkSettings.drawDefine)
+                .metadata("drawFind", brobotProperties.getIllustration().isDrawFind())
+                .metadata("drawClick", brobotProperties.getIllustration().isDrawClick())
+                .metadata("drawDrag", brobotProperties.getIllustration().isDrawDrag())
+                .metadata("drawMove", brobotProperties.getIllustration().isDrawMove())
+                .metadata("drawHighlight", brobotProperties.getIllustration().isDrawHighlight())
+                .metadata("drawRepeatedActions", brobotProperties.getIllustration().isDrawRepeatedActions())
+                .metadata("drawClassify", brobotProperties.getIllustration().isDrawClassify())
+                .metadata("drawDefine", brobotProperties.getIllustration().isDrawDefine())
                 .log();
 
         // Provide diagnostic summary
-        if (!FrameworkSettings.saveHistory) {
+        if (!brobotProperties.getScreenshot().isSaveHistory()) {
             log.warn("Illustrations are DISABLED: saveHistory is false");
             brobotLogger
                     .log()
@@ -129,8 +133,8 @@ public class BrobotPropertyVerifier {
     public void printVerification() {
         System.out.println("\n=== Brobot Property Verification ===");
         System.out.println("Save history: " + properties.getScreenshot().isSaveHistory());
-        System.out.println("History path: " + FrameworkSettings.historyPath);
-        System.out.println("Save history (FrameworkSettings): " + FrameworkSettings.saveHistory);
+        System.out.println("History path: " + brobotProperties.getScreenshot().getHistoryPath());
+        System.out.println("Save history (BrobotProperties): " + brobotProperties.getScreenshot().isSaveHistory());
         ExecutionEnvironment env = ExecutionEnvironment.getInstance();
         System.out.println("Mock mode: " + env.isMockMode());
         System.out.println("Has display: " + env.hasDisplay());

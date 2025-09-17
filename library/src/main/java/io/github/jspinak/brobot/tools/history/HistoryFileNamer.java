@@ -13,11 +13,12 @@ import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalysis;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.file.FilenameAllocator;
+import org.springframework.beans.factory.annotation.Autowired;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Generates unique filenames for Brobot's visual history illustrations.
@@ -41,7 +42,7 @@ import io.github.jspinak.brobot.util.file.FilenameAllocator;
  *   <li>Automatic uniqueness through {@link FilenameAllocator} integration
  *   <li>Metadata encoding in filename for easy identification
  *   <li>Support for multiple naming strategies based on action type
- *   <li>Configurable base path and prefix via {@link FrameworkSettings}
+ *   <li>Configurable base path and prefix via {@link BrobotProperties}
  * </ul>
  *
  * <p>Common naming components:
@@ -57,12 +58,15 @@ import io.github.jspinak.brobot.util.file.FilenameAllocator;
  * FilenameAllocator} for filename reservation.
  *
  * @see FilenameAllocator
- * @see FrameworkSettings
+ * @see BrobotProperties
  * @see ActionResult
  * @see SceneAnalysis
  */
 @Component
 public class HistoryFileNamer {
+
+    @Autowired
+    private BrobotProperties brobotProperties;
 
     private final FilenameAllocator filenameRepo;
 
@@ -117,7 +121,7 @@ public class HistoryFileNamer {
      * @return unique filename path constructed from match data
      */
     public String getFilenameFromMatchObjects(ActionResult matches, ActionConfig actionConfig) {
-        String prefix = FrameworkSettings.historyPath + FrameworkSettings.historyFilename;
+        String prefix = brobotProperties.getScreenshot().getHistoryPath() + brobotProperties.getScreenshot().getHistoryFilename();
         ActionType actionType = getActionTypeFromConfig(actionConfig);
         Set<String> imageNames =
                 matches.getMatchList().stream()
@@ -149,7 +153,7 @@ public class HistoryFileNamer {
             SceneAnalysis sceneAnalysis,
             ActionConfig actionConfig,
             String... additionalDescription) {
-        String prefix = FrameworkSettings.historyPath;
+        String prefix = brobotProperties.getScreenshot().getHistoryPath();
         ActionType actionType = getActionTypeFromConfig(actionConfig);
         String sceneName = sceneAnalysis.getScene().getPattern().getName();
         String imageNames = sceneAnalysis.getImageNames();
@@ -214,7 +218,7 @@ public class HistoryFileNamer {
      * @return unique filename incorporating all object collection data
      */
     public String getFilename(ActionConfig actionConfig, ObjectCollection... objectCollections) {
-        String prefix = FrameworkSettings.historyPath + FrameworkSettings.historyFilename;
+        String prefix = brobotProperties.getScreenshot().getHistoryPath() + brobotProperties.getScreenshot().getHistoryFilename();
         ActionType actionType = getActionTypeFromConfig(actionConfig);
         List<String> names = new ArrayList<>();
         for (ObjectCollection objectCollection : objectCollections) {
@@ -247,7 +251,7 @@ public class HistoryFileNamer {
      * @return unique filename with action and custom name
      */
     public String getFilename(ActionType actionType, String name) {
-        String prefix = FrameworkSettings.historyPath + FrameworkSettings.historyFilename;
+        String prefix = brobotProperties.getScreenshot().getHistoryPath() + brobotProperties.getScreenshot().getHistoryFilename();
         String suffix = actionType.toString() + "_" + name;
         return filenameRepo.reserveFreePath(prefix, suffix);
     }

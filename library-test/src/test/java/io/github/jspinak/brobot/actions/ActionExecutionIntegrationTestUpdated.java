@@ -18,7 +18,6 @@ import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
@@ -35,7 +34,7 @@ import io.github.jspinak.brobot.test.utils.BrobotTestUtils;
  *
  * <p>Key changes from old API: - Uses specific config classes instead of generic ActionOptions -
  * ActionResult requires setActionConfig() before perform() - ActionService.getAction() returns
- * appropriate action implementation - Mock mode configuration through FrameworkSettings and
+ * appropriate action implementation - Mock mode configuration through BrobotProperties and
  * ExecutionEnvironment
  */
 @SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class)
@@ -57,7 +56,7 @@ class ActionExecutionIntegrationTestUpdated extends BrobotTestBase {
 
         // Additional test-specific configuration
         // Force mock mode to ensure tests don't hang
-        FrameworkSettings.mock = true;
+        // Mock mode is enabled via BrobotTestBase
 
         ExecutionEnvironment env =
                 ExecutionEnvironment.builder()
@@ -330,6 +329,6 @@ class ActionExecutionIntegrationTestUpdated extends BrobotTestBase {
     @AfterEach
     void tearDown() {
         // Reset to default
-        FrameworkSettings.mock = false;
+        // Mock mode disabled - not needed in tests
     }
 }

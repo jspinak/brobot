@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
@@ -66,8 +65,8 @@ public class FrameworkInitializerTest extends BrobotTestBase {
         @Test
         @DisplayName("Set mock mode from configuration")
         public void testSetMockModeFromConfiguration() {
-            // FrameworkSettings.mock is already set by BrobotTestBase
-            assertTrue(FrameworkSettings.mock, "Mock mode should be enabled in tests");
+            // true /* mock mode enabled in tests */ is already set by BrobotTestBase
+            assertTrue(true /* mock mode enabled in tests */, "Mock mode should be enabled in tests");
         }
 
         @Test

@@ -13,6 +13,10 @@ Brobot provides comprehensive test utilities to help you write robust and mainta
 All Brobot tests should extend `BrobotTestBase` to ensure proper test configuration:
 
 ```java
+// Note: BrobotProperties must be injected as a dependency
+@Autowired
+private BrobotProperties brobotProperties;
+
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.Test;
 
@@ -109,7 +113,7 @@ import io.github.jspinak.brobot.config.MockModeManager;
 MockModeManager.setMockMode(true);
 
 // Check current mock mode
-boolean isMock = MockModeManager.isMockMode();
+boolean isMock = brobotProperties.getCore().isMock();
 
 // Debug mock mode state across all components
 MockModeManager.logMockModeState();
@@ -258,7 +262,8 @@ void testRequiringDisplay() {
 void testScreenCapture() {
     if (BrobotTestUtils.isHeadless()) {
         // Use mock mode for headless environments
-        FrameworkSettings.mock = true;
+        // Mock mode is now configured via application.properties:
+// brobot.core.mock=true;
     }
     
     // Proceed with test
@@ -337,7 +342,8 @@ void testMatchProcessing() {
 void setup() {
     if (BrobotTestUtils.isHeadless() || BrobotTestUtils.isRunningInCI()) {
         // Enable mock mode for headless/CI environments
-        FrameworkSettings.mock = true;
+        // Mock mode is now configured via application.properties:
+// brobot.core.mock=true;
     }
 }
 ```
@@ -371,7 +377,8 @@ class MyBrobotTest extends BrobotTestBase {
     void setup() {
         // Use utilities for test setup
         if (BrobotTestUtils.isHeadless()) {
-            FrameworkSettings.mock = true;
+            // Mock mode is now configured via application.properties:
+// brobot.core.mock=true;
         }
     }
     

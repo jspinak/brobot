@@ -21,7 +21,7 @@ import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.internal.text.TextTyper;
 import io.github.jspinak.brobot.model.state.StateString;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 
 /**
  * Fixed test suite for TypeText functionality with proper mock configuration. Extends
@@ -33,7 +33,7 @@ public class TypeTextTestFixed extends BrobotTestBase {
 
     @Mock private TextTyper mockTextTyper;
 
-    @Mock private TimeProvider mockTimeProvider;
+    @Mock private TimeWrapper mockTimeWrapper;
 
     @Mock private ActionResult mockActionResult;
 
@@ -48,7 +48,7 @@ public class TypeTextTestFixed extends BrobotTestBase {
         super.setupTest(); // Enable mock mode
         MockitoAnnotations.openMocks(this);
 
-        typeText = new TypeText(mockTextTyper, mockTimeProvider);
+        typeText = new TypeText(mockTextTyper, mockTimeWrapper);
         typeOptions = new TypeOptions.Builder().build();
         when(mockActionResult.getActionConfig()).thenReturn(typeOptions);
     }
@@ -90,7 +90,7 @@ public class TypeTextTestFixed extends BrobotTestBase {
             assertEquals("SecurePass123!", capturedStrings.get(2).getString());
 
             // There should be 3 texts, so 2 pauses between them (not after the last one)
-            verify(mockTimeProvider, times(2)).wait(0.3);
+            verify(mockTimeWrapper, times(2)).wait(0.3);
         }
 
         @Test
@@ -117,7 +117,7 @@ public class TypeTextTestFixed extends BrobotTestBase {
             // Then
             verify(mockTextTyper, times(3)).type(any(StateString.class), eq(options));
             // 3 commands means 2 pauses (between commands, not after the last one)
-            verify(mockTimeProvider, times(2)).wait(1.0);
+            verify(mockTimeWrapper, times(2)).wait(1.0);
         }
 
         @Test
@@ -136,7 +136,7 @@ public class TypeTextTestFixed extends BrobotTestBase {
             // Then
             verify(mockTextTyper).type(text, options);
             // Only one text, so no pause after (pause only happens between texts)
-            verify(mockTimeProvider, never()).wait(anyDouble());
+            verify(mockTimeWrapper, never()).wait(anyDouble());
         }
 
         @Test
@@ -158,7 +158,7 @@ public class TypeTextTestFixed extends BrobotTestBase {
             // Then
             verify(mockTextTyper).type(text, options);
             // No pause when pauseAfterEnd is 0
-            verify(mockTimeProvider, never()).wait(anyDouble());
+            verify(mockTimeWrapper, never()).wait(anyDouble());
         }
     }
 

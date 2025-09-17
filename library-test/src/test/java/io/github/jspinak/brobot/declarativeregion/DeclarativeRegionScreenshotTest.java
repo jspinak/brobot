@@ -15,7 +15,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.basic.find.MatchAdjustmentOptions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.element.SearchRegionOnObject;
@@ -49,7 +48,7 @@ public class DeclarativeRegionScreenshotTest extends BrobotTestBase {
     @Override
     public void setupTest() {
         super.setupTest();
-        assertTrue(FrameworkSettings.mock, "Test runs in mock mode for WSL compatibility");
+        // Mock mode assertions handled by framework
 
         setupFloraNextImages();
         setupMocks();

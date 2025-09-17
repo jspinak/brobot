@@ -31,11 +31,25 @@ public class RobotMouseController implements MouseController {
 
     public RobotMouseController() {
         try {
+            // Check if we should preserve the headless setting
+            String preserveHeadless = System.getProperty("brobot.preserve.headless.setting");
+            if (!"true".equals(preserveHeadless)) {
+                // For GUI automation, ensure headless is false before creating Robot
+                String currentHeadless = System.getProperty("java.awt.headless");
+                if ("true".equals(currentHeadless)) {
+                    System.setProperty("java.awt.headless", "false");
+                    ConsoleReporter.println(
+                            "[Robot] Reset java.awt.headless from 'true' to 'false' for GUI"
+                                    + " automation");
+                }
+            }
+
             this.robot = new Robot();
             this.robot.setAutoDelay(10); // Small delay between events
             this.robot.setAutoWaitForIdle(true); // Wait for events to process
             this.currentPosition = MouseInfo.getPointerInfo().getLocation();
         } catch (AWTException e) {
+            ConsoleReporter.println("[Robot] Failed to initialize Robot: " + e.getMessage());
             throw new RuntimeException("Failed to initialize Robot", e);
         }
     }

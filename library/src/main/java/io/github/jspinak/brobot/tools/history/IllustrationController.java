@@ -18,7 +18,6 @@ import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
 import io.github.jspinak.brobot.action.basic.region.DefineRegionOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
@@ -26,6 +25,7 @@ import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Controls when and how action results are illustrated to prevent redundancy.
@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
  * <p>Key filtering criteria:
  *
  * <ul>
- *   <li>Action permissions: Per-action type enablement via {@link FrameworkSettings}
+ *   <li>Action permissions: Per-action type enablement via {@link BrobotProperties}
  *   <li>Illustration directives: Explicit YES/NO overrides in {@link ActionConfig}
  *   <li>Repetition detection: Suppresses duplicate illustrations for same action/objects
  *   <li>Global history setting: Master switch for all illustrations
@@ -69,13 +69,16 @@ import lombok.extern.slf4j.Slf4j;
  * consecutive operations. This state is instance-level and not thread-safe.
  *
  * @see VisualizationOrchestrator
- * @see FrameworkSettings
+ * @see BrobotProperties
  * @see ActionOptions.Illustrate
  */
 @Slf4j
 @Component
 @Getter
 public class IllustrationController {
+
+    @Autowired
+    private BrobotProperties brobotProperties;
 
     private ImageFileUtilities imageUtils;
     private ActionVisualizer draw;
@@ -109,13 +112,13 @@ public class IllustrationController {
      * <p>Called lazily on first illustration request to ensure settings are loaded.
      */
     private void setActionPermissions() {
-        actionPermissions.put(FIND, FrameworkSettings.drawFind);
-        actionPermissions.put(CLICK, FrameworkSettings.drawClick);
-        actionPermissions.put(DRAG, FrameworkSettings.drawDrag);
-        actionPermissions.put(MOVE, FrameworkSettings.drawMove);
-        actionPermissions.put(HIGHLIGHT, FrameworkSettings.drawHighlight);
-        actionPermissions.put(CLASSIFY, FrameworkSettings.drawClassify);
-        actionPermissions.put(DEFINE, FrameworkSettings.drawDefine);
+        actionPermissions.put(FIND, brobotProperties.getIllustration().isDrawFind());
+        actionPermissions.put(CLICK, brobotProperties.getIllustration().isDrawClick());
+        actionPermissions.put(DRAG, brobotProperties.getIllustration().isDrawDrag());
+        actionPermissions.put(MOVE, brobotProperties.getIllustration().isDrawMove());
+        actionPermissions.put(HIGHLIGHT, brobotProperties.getIllustration().isDrawHighlight());
+        actionPermissions.put(CLASSIFY, brobotProperties.getIllustration().isDrawClassify());
+        actionPermissions.put(DEFINE, brobotProperties.getIllustration().isDrawDefine());
     }
 
     /**
@@ -147,13 +150,13 @@ public class IllustrationController {
         // Verbose logging
         if (isVerbose()) {
             log.debug("[ILLUSTRATION] Checking if ok to illustrate:");
-            log.debug("  FrameworkSettings.saveHistory: {}", FrameworkSettings.saveHistory);
-            log.debug("  FrameworkSettings.historyPath: {}", FrameworkSettings.historyPath);
+            log.debug("  brobotProperties.getScreenshot().isSaveHistory(): {}", brobotProperties.getScreenshot().isSaveHistory());
+            log.debug("  brobotProperties.getScreenshot().getHistoryPath(): {}", brobotProperties.getScreenshot().getHistoryPath());
             log.debug("  ActionConfig.illustrate: {}", actionConfig.getIllustrate());
             log.debug("  Action type: determined at runtime");
         }
 
-        if (!FrameworkSettings.saveHistory
+        if (!brobotProperties.getScreenshot().isSaveHistory()
                 && actionConfig.getIllustrate() != ActionConfig.Illustrate.YES) {
             if (isVerbose()) {
                 log.debug("  Result: NO - saveHistory is false and illustrate is not YES");
@@ -179,12 +182,12 @@ public class IllustrationController {
             ConsoleReporter.println(action + " not set to illustrate in BrobotSettings.");
             if (isVerbose()) {
                 log.debug("  Result: NO - action {} not permitted in settings", action);
-                log.debug("  FrameworkSettings.drawFind: {}", FrameworkSettings.drawFind);
-                log.debug("  FrameworkSettings.drawClick: {}", FrameworkSettings.drawClick);
+                log.debug("  brobotProperties.getIllustration().isDrawFind(): {}", brobotProperties.getIllustration().isDrawFind());
+                log.debug("  brobotProperties.getIllustration().isDrawClick(): {}", brobotProperties.getIllustration().isDrawClick());
             }
             return false;
         }
-        if (FrameworkSettings.drawRepeatedActions) {
+        if (brobotProperties.getIllustration().isDrawRepeatedActions()) {
             if (isVerbose()) {
                 log.debug("  Result: YES - drawRepeatedActions is true");
             }
@@ -271,7 +274,7 @@ public class IllustrationController {
 
         if (isVerbose()) {
             log.debug("[ILLUSTRATION] Creating illustration for action: {}", actionType);
-            log.debug("[ILLUSTRATION] History path: {}", FrameworkSettings.historyPath);
+            log.debug("[ILLUSTRATION] History path: {}", brobotProperties.getScreenshot().getHistoryPath());
             log.debug("[ILLUSTRATION] Calling illustrationManager.draw()");
         }
 

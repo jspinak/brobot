@@ -9,7 +9,6 @@ import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 
@@ -33,7 +32,7 @@ public class ActionOptionsIntegrationTestUpdated extends BrobotIntegrationTestBa
     @BeforeEach
     void setUp() {
         super.setUpBrobotEnvironment();
-        FrameworkSettings.mock = true;
+        BrobotProperties.mock = true;
     }
 
     @Test
@@ -246,6 +245,6 @@ public class ActionOptionsIntegrationTestUpdated extends BrobotIntegrationTestBa
 
     @AfterEach
     void tearDown() {
-        FrameworkSettings.mock = false;
+        // Mock mode disabled - not needed in tests
     }
 }

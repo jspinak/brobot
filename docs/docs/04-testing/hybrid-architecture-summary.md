@@ -68,6 +68,10 @@ Comprehensive documentation created:
 
 ### For New Components
 ```java
+// Note: BrobotProperties must be injected as a dependency
+@Autowired
+private BrobotProperties brobotProperties;
+
 // 1. Define interface
 public interface ComponentExecutor {
     Result execute(Input input);
@@ -88,7 +92,7 @@ public class LiveComponentExecutor implements ComponentExecutor { }
 // Keep original for compatibility
 public class LegacyComponent {
     public Result execute() {
-        if (FrameworkSettings.mock) {
+        if (brobotProperties.getCore().isMock()) {
             return mockExecute();
         }
         return liveExecute();
@@ -110,10 +114,10 @@ public class HybridComponent {
     
     public Result execute() {
         // Try profile-based first, fall back to legacy
-        if (mock != null && FrameworkSettings.mock) {
+        if (mock != null && brobotProperties.getCore().isMock()) {
             return mock.execute();
         }
-        if (live != null && !FrameworkSettings.mock) {
+        if (live != null && !brobotProperties.getCore().isMock()) {
             return live.execute();
         }
         return legacy.execute();

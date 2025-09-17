@@ -13,8 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.exception.ActionFailedException;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import io.github.jspinak.brobot.logging.unified.LogEvent;
@@ -39,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
         matchIfMissing = true)
 public class SikuliInterceptionAspect {
 
+    @Autowired private BrobotProperties brobotProperties;
     @Autowired private BrobotLogger brobotLogger;
 
     // Screenshot capture will be implemented later
@@ -73,7 +74,7 @@ public class SikuliInterceptionAspect {
         long startTime = System.currentTimeMillis();
 
         // Check mock mode
-        if (FrameworkSettings.mock) {
+        if (brobotProperties.getCore().isMock()) {
             log.debug("Mock mode: intercepting {}", operation);
             return handleMockMode(joinPoint);
         }

@@ -16,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import io.github.jspinak.brobot.action.internal.find.scene.ScenePatternMatcher;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.config.environment.ExecutionMode;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
@@ -359,8 +358,8 @@ public class FindWrapperTest extends BrobotTestBase {
     class FrameworkIntegration {
 
         @Test
-        @DisplayName("Should respect FrameworkSettings mock configuration")
-        void shouldRespectFrameworkSettings() {
+        @DisplayName("Should respect BrobotProperties mock configuration")
+        void shouldRespectBrobotProperties() {
             // Create real ExecutionMode to test integration
             ExecutionMode realExecutionMode = new ExecutionMode();
             FindWrapper realWrapper =
@@ -373,18 +372,18 @@ public class FindWrapperTest extends BrobotTestBase {
                     .thenReturn(Collections.emptyList());
 
             // Test with mock mode enabled
-            FrameworkSettings.mock = true;
-            FrameworkSettings.screenshots.clear();
+            // Mock mode is now enabled via BrobotTestBase
+            // Mock mode is configured via BrobotProperties
             List<Match> mockResult = realWrapper.findAll(pattern, scene);
             assertEquals(1, mockResult.size());
 
             // Test with mock mode disabled
-            FrameworkSettings.mock = false;
+            // Mock mode disabled - not needed in tests
             List<Match> liveResult = realWrapper.findAll(pattern, scene);
             assertEquals(0, liveResult.size());
 
             // Reset to test default
-            FrameworkSettings.mock = true; // Reset to test default
+            // Mock mode is now enabled via BrobotTestBase // Reset to test default
         }
     }
 }

@@ -7,11 +7,15 @@ import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import org.springframework.beans.factory.annotation.Autowired;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /** Mock durations for different Actions. */
 @Component
 public class ActionDurations {
+
+    @Autowired
+    private BrobotProperties brobotProperties;
 
     // Removed ActionOptions-based durations - use ActionType and Strategy-based
     // maps instead
@@ -20,10 +24,10 @@ public class ActionDurations {
     private final Map<ActionType, Double> actionTypeDurations = new HashMap<>();
 
     {
-        actionTypeDurations.put(ActionType.CLICK, FrameworkSettings.mockTimeClick);
-        actionTypeDurations.put(ActionType.DRAG, FrameworkSettings.mockTimeDrag);
-        actionTypeDurations.put(ActionType.MOVE, FrameworkSettings.mockTimeMove);
-        actionTypeDurations.put(ActionType.CLASSIFY, FrameworkSettings.mockTimeClassify);
+        actionTypeDurations.put(ActionType.CLICK, brobotProperties.getMock().getTimeClick());
+        actionTypeDurations.put(ActionType.DRAG, brobotProperties.getMock().getTimeDrag());
+        actionTypeDurations.put(ActionType.MOVE, brobotProperties.getMock().getTimeMove());
+        actionTypeDurations.put(ActionType.CLASSIFY, brobotProperties.getMock().getTimeClassify());
     }
 
     // Pattern find strategy durations
@@ -31,11 +35,11 @@ public class ActionDurations {
 
     {
         strategyDurations.put(
-                PatternFindOptions.Strategy.FIRST, FrameworkSettings.mockTimeFindFirst);
+                PatternFindOptions.Strategy.FIRST, brobotProperties.getMock().getTimeFindFirst());
         strategyDurations.put(
-                PatternFindOptions.Strategy.EACH, FrameworkSettings.mockTimeFindFirst);
-        strategyDurations.put(PatternFindOptions.Strategy.ALL, FrameworkSettings.mockTimeFindAll);
-        strategyDurations.put(PatternFindOptions.Strategy.BEST, FrameworkSettings.mockTimeFindAll);
+                PatternFindOptions.Strategy.EACH, brobotProperties.getMock().getTimeFindFirst());
+        strategyDurations.put(PatternFindOptions.Strategy.ALL, brobotProperties.getMock().getTimeFindAll());
+        strategyDurations.put(PatternFindOptions.Strategy.BEST, brobotProperties.getMock().getTimeFindAll());
     }
 
     // Removed deprecated methods getFindDuration(ActionOptions.Find) and

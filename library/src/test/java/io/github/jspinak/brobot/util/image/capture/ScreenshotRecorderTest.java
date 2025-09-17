@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.test.DisabledInCI;
-import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 import io.github.jspinak.brobot.util.file.SaveToFile;
 import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
 
@@ -29,7 +29,7 @@ public class ScreenshotRecorderTest extends BrobotTestBase {
 
     @Mock private ImageFileUtilities imageFileUtilities;
 
-    @Mock private TimeProvider timeProvider;
+    @Mock private TimeWrapper timeWrapper;
 
     @Mock private io.github.jspinak.brobot.capture.BrobotCaptureService captureService;
 
@@ -40,14 +40,14 @@ public class ScreenshotRecorderTest extends BrobotTestBase {
     public void setupTest() {
         super.setupTest();
         screenshotRecorder =
-                new ScreenshotRecorder(imageFileUtilities, timeProvider, captureService);
+                new ScreenshotRecorder(imageFileUtilities, timeWrapper, captureService);
     }
 
     @Test
     @DisplayName("Should capture screenshots for fixed duration")
     void shouldCaptureFixedDurationScreenshots() {
         // Mock the wait method
-        doNothing().when(timeProvider).wait(anyDouble());
+        doNothing().when(timeWrapper).wait(anyDouble());
 
         // Use the actual capture method
         assertDoesNotThrow(
@@ -55,7 +55,7 @@ public class ScreenshotRecorderTest extends BrobotTestBase {
                 );
 
         // Verify wait was called
-        verify(timeProvider, atLeastOnce()).wait(anyDouble());
+        verify(timeWrapper, atLeastOnce()).wait(anyDouble());
     }
 
     @Test
@@ -91,7 +91,7 @@ public class ScreenshotRecorderTest extends BrobotTestBase {
     @Test
     @DisplayName("Should handle zero duration capture")
     void shouldHandleZeroDurationCapture() {
-        doNothing().when(timeProvider).wait(anyDouble());
+        doNothing().when(timeWrapper).wait(anyDouble());
 
         assertDoesNotThrow(() -> screenshotRecorder.capture(0, 0.1));
     }
@@ -99,7 +99,7 @@ public class ScreenshotRecorderTest extends BrobotTestBase {
     @Test
     @DisplayName("Should handle very small intervals")
     void shouldHandleVerySmallIntervals() {
-        doNothing().when(timeProvider).wait(anyDouble());
+        doNothing().when(timeWrapper).wait(anyDouble());
 
         assertDoesNotThrow(
                 () -> screenshotRecorder.capture(1, 0.001) // Very fast intervals

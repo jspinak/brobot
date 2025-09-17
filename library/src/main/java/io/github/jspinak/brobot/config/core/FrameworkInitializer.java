@@ -18,6 +18,8 @@ import io.github.jspinak.brobot.navigation.service.StateTransitionService;
 import io.github.jspinak.brobot.navigation.transition.StateTransitions;
 import io.github.jspinak.brobot.statemanagement.StateIdResolver;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+import org.springframework.beans.factory.annotation.Autowired;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Initialization service for the Brobot model-based GUI automation framework.
@@ -76,6 +78,9 @@ import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
  */
 @Component
 public class FrameworkInitializer {
+
+    @Autowired
+    private BrobotProperties brobotProperties;
 
     private final StateService allStatesInProjectService;
     private final KmeansProfileBuilder setKMeansProfiles;
@@ -181,8 +186,8 @@ public class FrameworkInitializer {
      * <p>K-means profiles are generated when:
      *
      * <ul>
-     *   <li>Dynamic images: {@link FrameworkSettings#initProfilesForDynamicImages} is true
-     *   <li>Static images: {@link FrameworkSettings#initProfilesForStaticfImages} is true
+     *   <li>Dynamic images: {@link BrobotProperties} is true
+     *   <li>Static images: {@link BrobotProperties} is true
      * </ul>
      *
      * @param state The state containing images to preprocess
@@ -194,8 +199,8 @@ public class FrameworkInitializer {
             stateImage.setIndex(lastImageIndex);
             profileSetBuilder.setMatsAndColorProfiles(stateImage);
             lastImageIndex++;
-            if (FrameworkSettings.initProfilesForDynamicImages && stateImage.isDynamic()
-                    || (FrameworkSettings.initProfilesForStaticfImages
+            if (brobotProperties.getAnalysis().isInitDynamicProfiles() && stateImage.isDynamic()
+                    || (brobotProperties.getAnalysis().isInitStaticProfiles()
                             && !stateImage.isDynamic())) {
                 setKMeansProfiles.setProfiles(stateImage);
             }

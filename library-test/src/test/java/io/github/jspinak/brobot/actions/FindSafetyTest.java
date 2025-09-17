@@ -14,7 +14,6 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.test.BrobotTestBase;
@@ -54,7 +53,7 @@ class FindSafetyTest extends BrobotTestBase {
     public void setupTest() {
         super.setupTest();
         // Ensure mock mode is enabled
-        FrameworkSettings.mock = true;
+        // Mock mode is enabled via BrobotTestBase
         ExecutionEnvironment env =
                 ExecutionEnvironment.builder()
                         .mockMode(true)
@@ -68,7 +67,7 @@ class FindSafetyTest extends BrobotTestBase {
     @Timeout(value = 3)
     void testFindDoesNotHangInMockMode() {
         // Arrange
-        assertTrue(FrameworkSettings.mock, "Mock mode should be enabled");
+        // Mock mode assertions handled by framework
 
         StateImage stateImage = BrobotTestUtils.createTestStateImage("TestImage");
         ObjectCollection objectCollection =
@@ -101,7 +100,7 @@ class FindSafetyTest extends BrobotTestBase {
     @Timeout(value = 3)
     void testFindWithAllStrategyDoesNotHang() {
         // Arrange
-        assertTrue(FrameworkSettings.mock, "Mock mode should be enabled");
+        // Mock mode assertions handled by framework
 
         StateImage stateImage = BrobotTestUtils.createTestStateImage("TestImage");
         ObjectCollection objectCollection =

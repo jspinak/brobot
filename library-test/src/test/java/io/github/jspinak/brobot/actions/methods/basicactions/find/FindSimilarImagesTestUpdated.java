@@ -15,7 +15,6 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.SimilarImagesFindOptions;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
@@ -43,12 +42,12 @@ public class FindSimilarImagesTestUpdated extends BrobotIntegrationTestBase {
     @BeforeEach
     void setUp() {
         super.setUpBrobotEnvironment();
-        FrameworkSettings.mock = true;
+        BrobotProperties.mock = true;
     }
 
     @AfterEach
     void tearDown() {
-        FrameworkSettings.mock = false;
+        BrobotProperties.mock = false;
     }
 
     @Test

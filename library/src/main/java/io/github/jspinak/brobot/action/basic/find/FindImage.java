@@ -11,12 +11,13 @@ import io.github.jspinak.brobot.action.basic.find.color.SceneProvider;
 import io.github.jspinak.brobot.action.internal.execution.ActionLifecycleManagement;
 import io.github.jspinak.brobot.action.internal.find.DefinedRegionConverter;
 import io.github.jspinak.brobot.action.internal.find.IterativePatternFinder;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Core component for finding images on screen using various search strategies.
@@ -43,6 +44,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 public class FindImage {
+
+    @Autowired
+    private BrobotProperties brobotProperties;
 
     private final DefinedRegionConverter useDefinedRegion;
     private final ActionLifecycleManagement actionLifecycleManagement;
@@ -185,11 +189,11 @@ public class FindImage {
         log.debug("[FIND_IMAGE] Starting find operation with {} state images", stateImages.size());
 
         // Add safety check to prevent infinite loops
-        int maxIterations = FrameworkSettings.mock ? 1 : 100; // In mock mode, only iterate once
+        int maxIterations = brobotProperties.getCore().isMock() ? 1 : 100; // In mock mode, only iterate once
         int iterations = 0;
 
         // Critical fix: Check mock mode BEFORE entering loop
-        if (FrameworkSettings.mock) {
+        if (brobotProperties.getCore().isMock()) {
             log.debug("[FIND_IMAGE] Mock mode detected, limiting to single iteration");
         }
 
@@ -216,7 +220,7 @@ public class FindImage {
 
             // Additional safety check for mock mode - break immediately after first
             // iteration
-            if (FrameworkSettings.mock) {
+            if (brobotProperties.getCore().isMock()) {
                 log.debug("[FIND_IMAGE] Mock mode - breaking after iteration {}", iterations);
                 break;
             }

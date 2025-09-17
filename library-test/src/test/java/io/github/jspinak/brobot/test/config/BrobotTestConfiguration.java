@@ -195,7 +195,7 @@ public class BrobotTestConfiguration {
     @Primary
     public MockModeManager mockModeManager() {
         // MockModeManager uses static methods
-        // The BrobotTestBase already sets mock mode via FrameworkSettings.mock = true
+        // The BrobotTestBase already sets mock mode via BrobotProperties.mock = true
         return new MockModeManager();
     }
 

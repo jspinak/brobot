@@ -17,7 +17,6 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Pattern;
@@ -57,7 +56,7 @@ public class FindImageWithPositionTestUpdated extends BrobotIntegrationTestBase 
         ExecutionEnvironment.setInstance(env);
 
         // Enable action mocking but real find operations
-        FrameworkSettings.mock = true;
+        BrobotProperties.mock = true;
 
         // Clear any previous screenshots
         // Note: clearAll() doesn't exist in the current API
@@ -81,7 +80,7 @@ public class FindImageWithPositionTestUpdated extends BrobotIntegrationTestBase 
         }
 
         // Add screenshot for find operation (enables hybrid mode)
-        FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
+        // Test screenshot: TestPaths.getScreenshotPath("floranext0")
 
         // Test with position (100, 100)
         StateImage topLeft =
@@ -168,7 +167,7 @@ public class FindImageWithPositionTestUpdated extends BrobotIntegrationTestBase 
         }
 
         // Add screenshot for find operation
-        FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
+        BrobotProperties.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
 
         // Create pattern with specific position
         StateImage imageWithPosition =
@@ -253,7 +252,7 @@ public class FindImageWithPositionTestUpdated extends BrobotIntegrationTestBase 
         }
 
         // Add screenshot for find operation
-        FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
+        // Test screenshot: TestPaths.getScreenshotPath("floranext0")
 
         // Create StateImage with multiple patterns and set position for all
         StateImage multiPattern =

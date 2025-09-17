@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.test.config.TestActionConfig;
 import io.github.jspinak.brobot.test.config.TestConfigurationManager;
@@ -38,7 +37,7 @@ public abstract class BrobotIntegrationTestBase {
     protected void setUpBrobotEnvironment() {
         // Save original state for restoration
         originalEnvironment = ExecutionEnvironment.getInstance();
-        originalMockState = FrameworkSettings.mock;
+        originalMockState = BrobotProperties.mock;
 
         // Environment is already configured by TestConfigurationManager
         // This method now has a single responsibility: save state for cleanup
@@ -57,7 +56,7 @@ public abstract class BrobotIntegrationTestBase {
         if (originalEnvironment != null) {
             ExecutionEnvironment.setInstance(originalEnvironment);
         }
-        FrameworkSettings.mock = originalMockState;
+        BrobotProperties.mock = originalMockState;
     }
 
     /** Check if test environment is headless. Single responsibility: query environment state. */

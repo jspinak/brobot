@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.test.BrobotTestBase;
@@ -98,7 +97,7 @@ public class SimpleInitialStatesTest extends BrobotTestBase {
     @DisplayName("Should find initial states in mock mode")
     public void testFindInitialStatesInMockMode() {
         // Set mock mode for this test
-        FrameworkSettings.mock = true;
+        // Mock mode is now enabled via BrobotTestBase
 
         State state1 = mock(State.class);
         when(state1.getId()).thenReturn(1L);
@@ -118,7 +117,7 @@ public class SimpleInitialStatesTest extends BrobotTestBase {
     @DisplayName("Should handle empty state sets in mock mode")
     public void testEmptyStateSetsInMockMode() {
         // Set mock mode for this test
-        FrameworkSettings.mock = true;
+        // Mock mode is now enabled via BrobotTestBase
 
         // No state sets added - potentialActiveStates is empty
 

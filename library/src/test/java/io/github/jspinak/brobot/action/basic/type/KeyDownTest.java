@@ -26,7 +26,7 @@ import io.github.jspinak.brobot.action.internal.text.KeyDownWrapper;
 import io.github.jspinak.brobot.model.state.StateString;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.test.DisabledInCI;
-import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 
 /**
  * Comprehensive test suite for KeyDown - presses and holds keyboard keys. Tests key press
@@ -38,7 +38,7 @@ public class KeyDownTest extends BrobotTestBase {
 
     @Mock private KeyDownWrapper mockKeyDownWrapper;
 
-    @Mock private TimeProvider mockTimeProvider;
+    @Mock private TimeWrapper mockTimeWrapper;
 
     @Mock private ActionResult mockActionResult;
 
@@ -53,7 +53,7 @@ public class KeyDownTest extends BrobotTestBase {
         super.setupTest();
         MockitoAnnotations.openMocks(this);
 
-        keyDown = new KeyDown(mockKeyDownWrapper, mockTimeProvider);
+        keyDown = new KeyDown(mockKeyDownWrapper, mockTimeWrapper);
         keyDownOptions = new KeyDownOptions.Builder().build();
 
         when(mockActionResult.getActionConfig()).thenReturn(keyDownOptions);
@@ -78,7 +78,7 @@ public class KeyDownTest extends BrobotTestBase {
             keyDown.perform(mockActionResult, mockObjectCollection);
 
             verify(mockKeyDownWrapper).press("a", "");
-            verify(mockTimeProvider, never()).wait(anyDouble());
+            verify(mockTimeWrapper, never()).wait(anyDouble());
         }
 
         @Test
@@ -93,9 +93,9 @@ public class KeyDownTest extends BrobotTestBase {
 
             keyDown.perform(mockActionResult, mockObjectCollection);
 
-            InOrder inOrder = inOrder(mockKeyDownWrapper, mockTimeProvider);
+            InOrder inOrder = inOrder(mockKeyDownWrapper, mockTimeWrapper);
             inOrder.verify(mockKeyDownWrapper).press("ctrl", "");
-            inOrder.verify(mockTimeProvider).wait(0.1);
+            inOrder.verify(mockTimeWrapper).wait(0.1);
             inOrder.verify(mockKeyDownWrapper).press("c", "");
         }
 
@@ -107,7 +107,7 @@ public class KeyDownTest extends BrobotTestBase {
             keyDown.perform(mockActionResult, mockObjectCollection);
 
             verify(mockKeyDownWrapper, never()).press(anyString(), anyString());
-            verify(mockTimeProvider, never()).wait(anyDouble());
+            verify(mockTimeWrapper, never()).wait(anyDouble());
         }
     }
 
@@ -242,7 +242,7 @@ public class KeyDownTest extends BrobotTestBase {
 
             keyDown.perform(mockActionResult, mockObjectCollection);
 
-            verify(mockTimeProvider, times(keyCount - 1)).wait(pause);
+            verify(mockTimeWrapper, times(keyCount - 1)).wait(pause);
         }
 
         @Test
@@ -261,7 +261,7 @@ public class KeyDownTest extends BrobotTestBase {
             keyDown.perform(mockActionResult, mockObjectCollection);
 
             // Should pause only between keys, not after the last one
-            verify(mockTimeProvider, times(2)).wait(0.2);
+            verify(mockTimeWrapper, times(2)).wait(0.2);
         }
     }
 

@@ -3,25 +3,23 @@ package io.github.jspinak.brobot.config.core;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Initializes the static FrameworkSettings from BrobotProperties on startup.
+ * Initializes and logs BrobotProperties configuration on startup.
  *
- * <p>This component bridges the gap between the modern property-based configuration and the legacy
- * static fields. It runs after Spring context initialization to ensure all properties are loaded
- * and resolved.
- *
- * <p>This is a transitional component that will be removed once all code migrates to using
- * BrobotProperties directly instead of FrameworkSettings.
+ * <p>This component runs after Spring context initialization to ensure all properties are loaded
+ * and logs the configuration for debugging purposes.
  *
  * @since 1.1.0
  */
@@ -34,6 +32,7 @@ public class BrobotPropertiesInitializer implements InitializingBean {
 
     private final BrobotProperties properties;
     private final MockModeResolver mockModeResolver;
+    private final ApplicationContext applicationContext;
     private boolean initialized = false;
 
     /**
@@ -43,18 +42,18 @@ public class BrobotPropertiesInitializer implements InitializingBean {
     @EventListener(ApplicationStartedEvent.class)
     public void onApplicationStarted() {
         if (!initialized) {
-            initializeFrameworkSettings();
+            initializeConfiguration();
         }
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
         if (!initialized) {
-            initializeFrameworkSettings();
+            initializeConfiguration();
         }
     }
 
-    private synchronized void initializeFrameworkSettings() {
+    private synchronized void initializeConfiguration() {
         if (initialized) {
             return;
         }
@@ -62,9 +61,6 @@ public class BrobotPropertiesInitializer implements InitializingBean {
         log.info("═══════════════════════════════════════════════════════");
         log.info("  BROBOT FRAMEWORK CONFIGURATION");
         log.info("═══════════════════════════════════════════════════════");
-
-        // Apply the loaded properties to the static settings
-        properties.applyToFrameworkSettings();
 
         // Also update ExecutionEnvironment to keep it in sync
         boolean mockMode = mockModeResolver.isMockMode();

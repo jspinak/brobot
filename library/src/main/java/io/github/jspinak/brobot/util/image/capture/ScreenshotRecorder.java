@@ -10,11 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.capture.BrobotCaptureService;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 import io.github.jspinak.brobot.util.file.SaveToFile;
 import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Manages continuous screenshot capture for various analysis and recording purposes.
@@ -63,14 +63,17 @@ import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
  *
  * @see ScreenshotCapture
  * @see SaveToFile
- * @see TimeProvider
- * @see FrameworkSettings
+ * @see TimeWrapper
+ * @see BrobotProperties
  */
 @Component
 public class ScreenshotRecorder {
 
+    @Autowired
+    private BrobotProperties brobotProperties;
+
     private final ImageFileUtilities imageUtils;
-    private final TimeProvider time;
+    private final TimeWrapper timeWrapper;
     private final BrobotCaptureService captureService;
 
     /** Flag indicating capture status (currently unused but available for future enhancements). */
@@ -84,9 +87,9 @@ public class ScreenshotRecorder {
 
     @Autowired
     public ScreenshotRecorder(
-            ImageFileUtilities imageUtils, TimeProvider time, BrobotCaptureService captureService) {
+            ImageFileUtilities imageUtils, TimeWrapper timeWrapper, BrobotCaptureService captureService) {
         this.imageUtils = imageUtils;
-        this.time = time;
+        this.timeWrapper = timeWrapper;
         this.captureService = captureService;
     }
 
@@ -114,11 +117,11 @@ public class ScreenshotRecorder {
     public void capture(int secondsToCapture, double captureFrequency) {
         int numberOfScreenshots = (int) (secondsToCapture / captureFrequency);
         for (int i = 0; i < numberOfScreenshots; i++) {
-            time.wait(captureFrequency);
+            timeWrapper.wait(captureFrequency);
             // Capture full screen (empty Region = full screen)
             imageUtils.saveRegionToFile(
                     new Region(),
-                    FrameworkSettings.screenshotPath + FrameworkSettings.screenshotFilename);
+                    brobotProperties.getScreenshot().getPath() + brobotProperties.getScreenshot().getFilename());
         }
     }
 

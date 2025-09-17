@@ -199,7 +199,7 @@ If you're getting similarity scores below 90%:
 - **Development only** - Use WSL for coding, not for running pattern matching
 - **Solutions**:
   1. Run Brobot on Windows directly (use PowerShell or Command Prompt)
-  2. Use mock mode for testing in WSL (`brobot.mock=true`)
+  2. Use mock mode for testing in WSL (`brobot.core.mock=true`)
   3. Create patterns on Windows, test on Windows
 
 ## Migration Guide

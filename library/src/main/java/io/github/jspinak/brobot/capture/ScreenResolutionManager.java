@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +27,9 @@ public class ScreenResolutionManager {
 
     @Value("${brobot.capture.provider:JAVACV_FFMPEG}")
     private String captureProviderName;
+
+    @Autowired
+    private BrobotProperties brobotProperties;
 
     @Autowired(required = false)
     private UnifiedCaptureService captureService;
@@ -82,7 +85,7 @@ public class ScreenResolutionManager {
         String provider = captureProviderName.toUpperCase();
 
         // Check if we're in mock mode or headless environment
-        if (FrameworkSettings.mock
+        if (brobotProperties.getCore().isMock()
                 || provider.contains("MOCK")
                 || GraphicsEnvironment.isHeadless()) {
             // Use default dimensions for mock/headless mode

@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.action.ActionConfig;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 
 import lombok.Getter;
 
@@ -38,7 +38,7 @@ public final class MouseMoveOptions extends ActionConfig {
     public static class Builder extends ActionConfig.Builder<Builder> {
 
         @JsonProperty("moveMouseDelay")
-        private float moveMouseDelay = FrameworkSettings.moveMouseDelay;
+        private float moveMouseDelay = 0.5f;
 
         /** Default constructor for creating a new MouseMoveOptions configuration. */
         @JsonCreator

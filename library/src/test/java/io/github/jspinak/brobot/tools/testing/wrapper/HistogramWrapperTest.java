@@ -18,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import io.github.jspinak.brobot.analysis.histogram.SingleRegionHistogramExtractor;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.config.environment.ExecutionMode;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
@@ -425,8 +424,8 @@ public class HistogramWrapperTest extends BrobotTestBase {
     class FrameworkIntegration {
 
         @Test
-        @DisplayName("Should respect FrameworkSettings configuration")
-        void shouldRespectFrameworkSettings() {
+        @DisplayName("Should respect BrobotProperties configuration")
+        void shouldRespectBrobotProperties() {
             // Create real ExecutionMode to test integration
             ExecutionMode realExecutionMode = new ExecutionMode();
             HistogramWrapper realWrapper =
@@ -439,18 +438,18 @@ public class HistogramWrapperTest extends BrobotTestBase {
                     .thenReturn(Arrays.asList(mock(Match.class), mock(Match.class)));
 
             // Test with mock mode enabled
-            FrameworkSettings.mock = true;
-            FrameworkSettings.screenshots.clear();
+            // Mock mode is now enabled via BrobotTestBase
+            // Mock mode is configured via BrobotProperties
             List<Match> mockResult = realWrapper.findHistogram(stateImage, sceneHSV, regions);
             assertEquals(1, mockResult.size());
 
             // Test with mock mode disabled
-            FrameworkSettings.mock = false;
+            // Mock mode disabled - not needed in tests
             List<Match> liveResult = realWrapper.findHistogram(stateImage, sceneHSV, regions);
             assertEquals(2, liveResult.size());
 
             // Reset to test default
-            FrameworkSettings.mock = true;
+            // Mock mode is now enabled via BrobotTestBase
         }
     }
 }

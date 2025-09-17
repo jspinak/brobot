@@ -9,6 +9,10 @@ Transitions define how to navigate between states. With the new @TransitionSet a
 ### PromptTransitions.java
 
 ```java
+// Note: BrobotProperties must be injected as a dependency
+@Autowired
+private BrobotProperties brobotProperties;
+
 package com.claude.automator.transitions;
 
 import org.springframework.stereotype.Component;
@@ -45,7 +49,7 @@ public class PromptTransitions {
         log.info("Navigating from Working to Prompt");
         
         // In mock mode, just return true for testing
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             log.info("Mock mode: simulating successful navigation");
             return true;
         }
@@ -64,7 +68,7 @@ public class PromptTransitions {
         log.info("Verifying arrival at Prompt state");
         
         // In mock mode, just return true for testing
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             log.info("Mock mode: simulating successful verification");
             return true;
         }
@@ -128,7 +132,7 @@ public class WorkingTransitions {
             log.info("Navigating from Prompt to Working");
             
             // In mock mode, just return true for testing
-            if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+            if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
                 log.info("Mock mode: simulating successful navigation");
                 return true;
             }
@@ -175,7 +179,7 @@ public class WorkingTransitions {
         log.info("Verifying arrival at Working state");
         
         // In mock mode, just return true for testing
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             log.info("Mock mode: simulating successful verification");
             return true;
         }
@@ -228,7 +232,7 @@ Always include mock mode checks for testing:
 ```java
 @FromTransition(from = SourceState.class)
 public boolean fromSource() {
-    if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+    if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
         log.info("Mock mode: simulating successful navigation");
         return true;
     }
@@ -287,13 +291,13 @@ public class WorkingTransitions {
     
     @FromTransition(from = PromptState.class, priority = 1)
     public boolean fromPrompt() {
-        if (FrameworkSettings.mock) return true;
+        if (brobotProperties.getCore().isMock()) return true;
         return action.click(promptState.getButton()).isSuccess();
     }
     
     @IncomingTransition(required = true)
     public boolean verifyArrival() {
-        if (FrameworkSettings.mock) return true;
+        if (brobotProperties.getCore().isMock()) return true;
         return action.find(workingState.getIndicator()).isSuccess();
     }
 }

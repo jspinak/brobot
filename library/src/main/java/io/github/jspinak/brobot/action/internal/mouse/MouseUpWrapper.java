@@ -3,9 +3,10 @@ package io.github.jspinak.brobot.action.internal.mouse;
 import org.sikuli.script.Mouse;
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Provides mouse button release functionality with timing control and mock support.
@@ -22,17 +23,20 @@ import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
  * @see MouseDownWrapper
  * @see ClickType
  * @see Mouse#up(int)
- * @see FrameworkSettings#mock
+ * @see BrobotProperties
  */
 @Component
 public class MouseUpWrapper {
 
-    private final ClickType clickType;
-    private final TimeProvider time;
+    @Autowired
+    private BrobotProperties brobotProperties;
 
-    public MouseUpWrapper(ClickType clickType, TimeProvider time) {
+    private final ClickType clickType;
+    private final TimeWrapper timeWrapper;
+
+    public MouseUpWrapper(ClickType clickType, TimeWrapper timeWrapper) {
         this.clickType = clickType;
-        this.time = time;
+        this.timeWrapper = timeWrapper;
     }
 
     /**
@@ -57,19 +61,19 @@ public class MouseUpWrapper {
      * @return Always returns {@code true} to indicate the operation was attempted. Does not
      *     indicate whether the release was successful in real mode.
      * @see ClickType.Type
-     * @see TimeProvider#wait(double)
+     * @see TimeWrapper#wait(double)
      */
     public boolean press(double pauseBefore, double pauseAfter, ClickType.Type type) {
-        if (FrameworkSettings.mock) {
+        if (brobotProperties.getCore().isMock()) {
             ConsoleReporter.print(
                     "<mouse-up>"); // this could be expanded if object clicks are given mock actions
             if (type != ClickType.Type.LEFT) System.out.print(type);
             System.out.print(" ");
             return true;
         }
-        time.wait(pauseBefore);
+        timeWrapper.wait(pauseBefore);
         Mouse.up(clickType.getTypeToSikuliButton().get(type));
-        time.wait(pauseAfter);
+        timeWrapper.wait(pauseAfter);
         return true;
     }
 }

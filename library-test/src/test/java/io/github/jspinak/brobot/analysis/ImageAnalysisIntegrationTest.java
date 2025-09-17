@@ -15,7 +15,6 @@ import io.github.jspinak.brobot.analysis.color.ColorAnalysis;
 import io.github.jspinak.brobot.analysis.histogram.HistogramComparator;
 import io.github.jspinak.brobot.analysis.histogram.HistogramExtractor;
 import io.github.jspinak.brobot.analysis.motion.MotionDetector;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Image;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
@@ -51,7 +50,7 @@ class ImageAnalysisIntegrationTest extends BrobotIntegrationTestBase {
     @BeforeEach
     void setUp() {
         // Enable mock mode for testing
-        FrameworkSettings.mock = true;
+        // Mock mode is enabled via BrobotTestBase
 
         // Create test Mat and Image
         createTestData();

@@ -13,7 +13,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.test.config.OptimizedTestConfig;
 import io.github.jspinak.brobot.test.config.TestActionConfig;
 import io.github.jspinak.brobot.test.config.TestConfigurationManager;
@@ -49,7 +48,7 @@ public abstract class OptimizedIntegrationTestBase {
         synchronized (SETUP_LOCK) {
             if (!globalSetupComplete) {
                 // One-time global setup
-                optimizeFrameworkSettings();
+                optimizeBrobotProperties();
                 globalSetupComplete = true;
             }
         }
@@ -61,28 +60,28 @@ public abstract class OptimizedIntegrationTestBase {
         ensureMockMode();
     }
 
-    private void optimizeFrameworkSettings() {
+    private void optimizeBrobotProperties() {
         // Enable mock mode for all tests
-        FrameworkSettings.mock = true;
+        BrobotProperties.mock = true;
 
         // Optimize timing for tests
-        FrameworkSettings.mockTimeFindFirst = 0.005;
-        FrameworkSettings.mockTimeFindAll = 0.01;
-        FrameworkSettings.mockTimeClick = 0.005;
-        FrameworkSettings.mockTimeMove = 0.005;
-        FrameworkSettings.mockTimeDrag = 0.01;
-        FrameworkSettings.mockTimeFindHistogram = 0.01;
-        FrameworkSettings.mockTimeFindColor = 0.01;
-        FrameworkSettings.mockTimeClassify = 0.015;
+        BrobotProperties.mockTimeFindFirst = 0.005;
+        BrobotProperties.mockTimeFindAll = 0.01;
+        BrobotProperties.mockTimeClick = 0.005;
+        BrobotProperties.mockTimeMove = 0.005;
+        BrobotProperties.mockTimeDrag = 0.01;
+        BrobotProperties.mockTimeFindHistogram = 0.01;
+        BrobotProperties.mockTimeFindColor = 0.01;
+        BrobotProperties.mockTimeClassify = 0.015;
 
         // Set screenshot paths for tests
-        FrameworkSettings.screenshotPath = "library-test/screenshots/";
+        BrobotProperties.screenshotPath = "library-test/screenshots/";
     }
 
     private void ensureMockMode() {
         // Ensure mock mode is always enabled for integration tests
-        if (!FrameworkSettings.mock) {
-            FrameworkSettings.mock = true;
+        if (!BrobotProperties.mock) {
+            BrobotProperties.mock = true;
         }
     }
 

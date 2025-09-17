@@ -8,13 +8,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /** Test to verify that configuration logging is working properly. */
 @SpringBootTest
 @ExtendWith(OutputCaptureExtension.class)
 public class ConfigurationLoggingTest extends BrobotTestBase {
+
+    @Autowired
+    private BrobotProperties brobotProperties;
 
     @Test
     public void testConfigurationLogsAppear(CapturedOutput output) {
@@ -38,11 +42,11 @@ public class ConfigurationLoggingTest extends BrobotTestBase {
             System.out.println("✅ Found mock timing configuration");
         }
 
-        // Verify FrameworkSettings are actually set
-        assertTrue(FrameworkSettings.mock, "Mock mode should be enabled");
+        // Verify BrobotProperties are actually set
+        assertTrue(brobotProperties.getCore().isMock(), "Mock mode should be enabled");
         assertEquals(
                 0.01,
-                FrameworkSettings.mockTimeFindFirst,
+                brobotProperties.getMock().getTimeFindFirst(),
                 0.001,
                 "Mock timing should be configured");
 
