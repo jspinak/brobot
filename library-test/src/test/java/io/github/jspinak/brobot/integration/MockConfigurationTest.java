@@ -4,11 +4,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /** Test to verify that mock mode configuration is properly applied. */
+@SpringBootTest
 public class MockConfigurationTest extends BrobotTestBase {
 
     @Autowired

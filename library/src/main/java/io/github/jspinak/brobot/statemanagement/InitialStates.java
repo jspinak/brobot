@@ -205,7 +205,7 @@ public class InitialStates {
      * Discovers and activates the initial states for automation.
      *
      * <p>Main entry point that determines which states are currently active. Behavior depends on
-     * BrobotSettings.mock:
+     * BrobotProperties configuration:
      *
      * <ul>
      *   <li>Mock mode: Randomly selects from defined state sets

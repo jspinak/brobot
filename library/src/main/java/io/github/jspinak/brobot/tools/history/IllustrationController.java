@@ -53,7 +53,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
  *   <li>The {@code drawRepeatedActions} setting can override this filtering
  * </ul>
  *
- * <p>Supported action types (configurable via BrobotSettings):
+ * <p>Supported action types (configurable via BrobotProperties):
  *
  * <ul>
  *   <li>FIND - Object detection operations
@@ -70,7 +70,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
  *
  * @see VisualizationOrchestrator
  * @see BrobotProperties
- * @see ActionOptions.Illustrate
+ * @see ActionConfig.Illustrate
  */
 @Slf4j
 @Component
@@ -105,7 +105,7 @@ public class IllustrationController {
     /**
      * Initializes action-specific illustration permissions from global settings.
      *
-     * <p>Maps each supported action type to its corresponding BrobotSettings flag. This allows
+     * <p>Maps each supported action type to its corresponding BrobotProperties flag. This allows
      * fine-grained control over which actions generate illustrations, useful for reducing visual
      * noise or focusing on specific operations.
      *
@@ -172,14 +172,14 @@ public class IllustrationController {
         // Get action type from config
         ActionType action = getActionType(actionConfig);
         if (!actionPermissions.containsKey(action)) {
-            ConsoleReporter.println(action + " not available to illustrate in BrobotSettings.");
+            ConsoleReporter.println(action + " not available to illustrate in BrobotProperties.");
             if (isVerbose()) {
                 log.debug("  Result: NO - action {} not available to illustrate", action);
             }
             return false;
         }
         if (!actionPermissions.get(action)) {
-            ConsoleReporter.println(action + " not set to illustrate in BrobotSettings.");
+            ConsoleReporter.println(action + " not set to illustrate in BrobotProperties.");
             if (isVerbose()) {
                 log.debug("  Result: NO - action {} not permitted in settings", action);
                 log.debug("  brobotProperties.getIllustration().isDrawFind(): {}", brobotProperties.getIllustration().isDrawFind());
@@ -320,8 +320,8 @@ public class IllustrationController {
      * }
      * lastCollections = Arrays.asList(objectCollections);
      *
-     * // For now, convert to ActionOptions for the visualization
-     * ActionConfig actionConfig = convertToActionOptions(actionConfig);
+     * // For now, convert to ActionConfig for the visualization
+     * ActionConfig actionConfig = convertToActionConfig(actionConfig);
      *
      * log.debug("[ILLUSTRATION] Calling illustrationManager.draw()");
      * try {
@@ -357,10 +357,10 @@ public class IllustrationController {
     }
 
     /**
-     * Maps PatternFindOptions strategy to ActionOptions.Find enum.
+     * Maps PatternFindOptions strategy to ActionConfig.Find enum.
      *
      * @param findOptions the find options to map
-     * @return corresponding ActionOptions.Find value
+     * @return corresponding ActionConfig.Find value
      */
     private PatternFindOptions.Strategy mapFindStrategy(PatternFindOptions findOptions) {
         // Just return the strategy as-is
@@ -368,13 +368,13 @@ public class IllustrationController {
     }
 
     /**
-     * Converts an ActionConfig to ActionOptions for backward compatibility. This is a temporary
+     * Converts an ActionConfig to ActionConfig for backward compatibility. This is a temporary
      * method until the illustration system is fully updated to work with ActionConfig directly.
      *
      * @param config the ActionConfig to convert
-     * @return equivalent ActionOptions
+     * @return equivalent ActionConfig
      */
-    // Removed convertToActionConfig - ActionOptions no longer exists
+    // Removed convertToActionConfig - ActionConfig no longer exists
 
     /** Helper method to check if verbose logging is enabled. */
     private boolean isVerbose() {

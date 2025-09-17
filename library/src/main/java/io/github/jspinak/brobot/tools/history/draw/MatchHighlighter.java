@@ -15,7 +15,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 /**
  * Provides visual highlighting functionality for matches on screen with mock support.
  *
- * <p>This V2 wrapper class works with ActionConfig instead of ActionOptions. It abstracts Sikuli's
+ * <p>This V2 wrapper class works with ActionConfig instead of ActionConfig. It abstracts Sikuli's
  * highlighting operations to visually indicate matched regions on the screen. It supports both
  * persistent highlights (turnOn/turnOff) and timed highlights. The class handles a Sikuli
  * limitation where Match objects don't highlight properly by converting them to Region objects.

@@ -39,8 +39,14 @@ import lombok.extern.slf4j.Slf4j;
         matchIfMissing = true)
 public class SikuliInterceptionAspect {
 
-    @Autowired private BrobotProperties brobotProperties;
-    @Autowired private BrobotLogger brobotLogger;
+    private final BrobotProperties brobotProperties;
+    private final BrobotLogger brobotLogger;
+
+    @Autowired
+    public SikuliInterceptionAspect(BrobotProperties brobotProperties, BrobotLogger brobotLogger) {
+        this.brobotProperties = brobotProperties;
+        this.brobotLogger = brobotLogger;
+    }
 
     // Screenshot capture will be implemented later
     // @Autowired(required = false)

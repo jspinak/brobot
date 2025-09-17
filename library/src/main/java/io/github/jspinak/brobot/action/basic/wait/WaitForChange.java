@@ -52,7 +52,7 @@ import io.github.jspinak.brobot.action.ObjectCollection;
  *
  * @see WaitVanish
  * @see Find
- * @see ActionOptions
+ * @see ActionConfig
  * @since 1.0
  */
 @Component

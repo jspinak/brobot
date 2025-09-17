@@ -9,7 +9,7 @@
  *
  * <ul>
  *   <li><b>{@link io.github.jspinak.brobot.action.internal.find.match.MatchAdjuster}</b> - Applies
- *       position and dimension adjustments to matches based on ActionOptions settings
+ *       position and dimension adjustments to matches based on ActionConfig settings
  *   <li><b>{@link io.github.jspinak.brobot.action.internal.find.match.MatchCollectionUtilities}</b>
  *       - Provides essential operations for managing match collections including filtering and
  *       limiting
@@ -79,7 +79,7 @@
  *
  * <ul>
  *   <li>Called by all find strategies to process results
- *   <li>Work with ActionOptions to apply user preferences
+ *   <li>Work with ActionConfig to apply user preferences
  *   <li>Support both individual and batch operations
  *   <li>Maintain consistency across different match sources
  * </ul>

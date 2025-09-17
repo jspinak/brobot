@@ -52,7 +52,12 @@ import lombok.extern.slf4j.Slf4j;
         matchIfMissing = true)
 public class StateTransitionAspect {
 
-    @Autowired private BrobotLogger brobotLogger;
+    private final BrobotLogger brobotLogger;
+
+    @Autowired
+    public StateTransitionAspect(BrobotLogger brobotLogger) {
+        this.brobotLogger = brobotLogger;
+    }
 
     @Value("${brobot.aspects.state-transition.generate-visualizations:true}")
     private boolean generateVisualizations;

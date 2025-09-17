@@ -47,7 +47,7 @@ import io.github.jspinak.brobot.tools.testing.mock.action.ExecutionModeControlle
  *
  * @see HistogramExtractor
  * @see HistogramComparator
- * @see ActionOptions
+ * @see ActionConfig
  */
 @Component
 public class FindHistogram {
@@ -73,7 +73,7 @@ public class FindHistogram {
      * <p>This method orchestrates the complete histogram matching workflow:
      *
      * <ol>
-     *   <li>Configures histogram bins from ActionOptions (hue, saturation, value)
+     *   <li>Configures histogram bins from ActionConfig (hue, saturation, value)
      *   <li>Acquires scenes (screenshots or provided images)
      *   <li>For each target image and scene combination, performs histogram matching
      *   <li>Sorts all matches by score and returns the best ones

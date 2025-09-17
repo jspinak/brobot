@@ -20,12 +20,16 @@ import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
 @Component
 public class WriteXmlDomScenes {
+
+    @Autowired
+    private BrobotProperties brobotProperties;
 
     private Document doc;
     private Element rootElement;
@@ -48,7 +52,7 @@ public class WriteXmlDomScenes {
 
     public void addScene(SceneAndObjectsForXML sceneObjects) {
         int sceneNumber = Integer.parseInt(sceneObjects.getSceneName());
-        int time = sceneNumber * FrameworkSettings.captureFrequency * 1000;
+        int time = sceneNumber * brobotProperties.getRecording().getCaptureFrequency() * 1000;
         addSceneAndObjects(
                 sceneNumber,
                 time,

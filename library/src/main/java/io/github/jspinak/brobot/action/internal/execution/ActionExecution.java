@@ -178,7 +178,7 @@ public class ActionExecution {
      * @see ActionLifecycleManagement
      * @see DatasetManager#addSetOfData
      */
-    // Removed ActionOptions-based perform method - use ActionConfig version instead
+    // Removed ActionConfig-based perform method - use ActionConfig version instead
     // The ActionConfig version is available below
     /*
      * public ActionResult perform(ActionInterface actionMethod, String
@@ -259,7 +259,7 @@ public class ActionExecution {
      * @param objectCollections Contains state images to be included in the output. Only the first
      *     collection is processed if multiple are provided.
      */
-    // Removed ActionOptions-based printAction method
+    // Removed ActionConfig-based printAction method
     /*
      * private void printAction(ActionConfig actionConfig, ObjectCollection...
      * objectCollections) {
@@ -274,7 +274,7 @@ public class ActionExecution {
      * Executes an action with complete lifecycle management using ActionConfig.
      *
      * <p>This method is the new primary entry point that accepts ActionConfig instead of
-     * ActionOptions. It provides the same comprehensive lifecycle management as the legacy method
+     * ActionConfig. It provides the same comprehensive lifecycle management as the legacy method
      * but uses the modern configuration approach.
      *
      * @param actionMethod The {@link ActionInterface} implementation containing action-specific

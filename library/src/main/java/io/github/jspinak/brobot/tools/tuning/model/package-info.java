@@ -42,7 +42,7 @@
  * <ul>
  *   <li><strong>Random Generation</strong>: Creates random values within constraint bounds for
  *       exploring the parameter space
- *   <li><strong>From Existing Configuration</strong>: Captures current ActionOptions settings as a
+ *   <li><strong>From Existing Configuration</strong>: Captures current ActionConfig settings as a
  *       baseline
  *   <li><strong>Manual Setting</strong>: Direct parameter assignment for specific tests
  * </ul>
@@ -71,11 +71,11 @@
  * experiment.generateRandomParameters(constraints);
  *
  * // Or create from existing configuration
- * ActionOptions currentOptions = getDefaultActionOptions();
- * TuningExperiment baseline = TuningExperiment.fromActionOptions(currentOptions);
+ * ActionConfig currentOptions = getDefaultActionConfig();
+ * TuningExperiment baseline = TuningExperiment.fromActionConfig(currentOptions);
  *
  * // Execute and record results
- * ActionResult result = executeWithParameters(experiment.toActionOptions());
+ * ActionResult result = executeWithParameters(experiment.toActionConfig());
  * experiment.setSuccess(result.isSuccess());
  * experiment.setTimeToAppear(result.getAppearTime());
  * experiment.setTimeStamp(System.currentTimeMillis());
@@ -112,7 +112,7 @@
  *   <li>Max wait: 0-30000ms (30 seconds for slow-loading elements)
  * </ul>
  *
- * @see io.github.jspinak.brobot.action.ActionOptions
+ * @see io.github.jspinak.brobot.action.ActionConfig
  * @see io.github.jspinak.brobot.tools.tuning.store.TuningExperimentStore
  * @since 1.0
  */

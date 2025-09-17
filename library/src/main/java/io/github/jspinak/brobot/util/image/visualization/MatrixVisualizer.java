@@ -440,9 +440,9 @@ public class MatrixVisualizer {
      *
      * <p>Uses ImageUtils to generate a unique filename, preventing overwrites when saving multiple
      * versions of the same visualization. The file is saved in PNG format to the path specified in
-     * BrobotSettings.
+     * BrobotProperties.
      *
-     * <p>File path: {BrobotSettings.historyPath}{filename}[-{number}].png
+     * <p>File path: {BrobotProperties history path}{filename}[-{number}].png
      *
      * <p>This is the preferred method for saving visualizations as it ensures unique filenames and
      * consistent directory structure.

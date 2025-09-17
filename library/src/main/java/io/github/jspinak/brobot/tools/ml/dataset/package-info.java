@@ -87,7 +87,7 @@
  * </ul>
  *
  * @see io.github.jspinak.brobot.action.ActionResult
- * @see io.github.jspinak.brobot.action.ActionOptions
+ * @see io.github.jspinak.brobot.action.ActionConfig
  * @since 1.0
  */
 package io.github.jspinak.brobot.tools.ml.dataset;

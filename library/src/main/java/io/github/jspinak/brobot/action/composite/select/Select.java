@@ -23,7 +23,7 @@ import io.github.jspinak.brobot.action.ObjectCollection;
  * </ol>
  *
  * <p>This class serves as an example of how to create custom composite Actions. ActionObjects like
- * {@link SelectActionObject} contain both {@link ActionOptions} and {@link ObjectCollection}
+ * {@link SelectActionObject} contain both {@link ActionConfig} and {@link ObjectCollection}
  * instances, providing all configuration needed for the operation. The Action class (Select)
  * implements the logic for how and when these configurations are used.
  *
@@ -64,7 +64,7 @@ public class Select {
     public boolean select(SelectActionObject sao) {
         sao.resetTotalSwipes();
         for (int i = 0; i < sao.getMaxSwipes(); i++) {
-            // Use the configuration getters that return either ActionConfig or ActionOptions
+            // Use the configuration getters that return either ActionConfig or ActionConfig
             Object findConfig = sao.getFindConfiguration();
             if (findConfig != null && findConfig instanceof ActionConfig) {
                 sao.setFoundMatches(

@@ -35,7 +35,7 @@ import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
  * <ul>
  *   <li>Uses only the first ObjectCollection provided
  *   <li>Processes multiple StateString objects within the collection sequentially
- *   <li>Modifier keys from ActionOptions are applied to each key press
+ *   <li>Modifier keys from ActionConfig are applied to each key press
  * </ul>
  *
  * <p>Common use cases:

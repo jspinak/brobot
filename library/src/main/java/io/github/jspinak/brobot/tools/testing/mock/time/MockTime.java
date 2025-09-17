@@ -116,7 +116,7 @@ public class MockTime {
         now = now.plusNanos(nanoTimeout);
     }
 
-    // Removed deprecated wait methods for ActionType and ActionOptions.Find
+    // Removed deprecated wait methods for ActionType and ActionConfig.Find
     // Use wait(ActionType) and wait(PatternFindOptions.Strategy) instead
 
     /**

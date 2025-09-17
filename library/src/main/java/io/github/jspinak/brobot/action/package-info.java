@@ -13,7 +13,7 @@
  *
  * <ul>
  *   <li><b>o_a</b> - Action parameters/options (represented by {@link
- *       io.github.jspinak.brobot.action.ActionOptions})
+ *       io.github.jspinak.brobot.action.ActionConfig})
  *   <li><b>E_a</b> - Elements acted upon (represented by {@link
  *       io.github.jspinak.brobot.action.ObjectCollection})
  *   <li><b>ζ</b> - Success function specific to the action type
@@ -58,7 +58,7 @@
  * <ul>
  *   <li>Standardized action interface for consistent execution patterns
  *   <li>Comprehensive result objects containing matches, success status, and metadata
- *   <li>Flexible configuration through ActionOptions with sensible defaults
+ *   <li>Flexible configuration through ActionConfig with sensible defaults
  *   <li>Support for both online (live GUI) and offline (mocked) execution
  *   <li>Integration with state management and transition systems
  * </ul>
@@ -107,7 +107,7 @@
  * @see io.github.jspinak.brobot.action.Action
  * @see io.github.jspinak.brobot.action.ActionInterface
  * @see io.github.jspinak.brobot.action.ActionConfig
- * @see io.github.jspinak.brobot.action.ActionOptions
+ * @see io.github.jspinak.brobot.action.ActionConfig
  * @see io.github.jspinak.brobot.action.ActionChainOptions
  * @see io.github.jspinak.brobot.action.ActionResult
  * @see io.github.jspinak.brobot.action.ObjectCollection

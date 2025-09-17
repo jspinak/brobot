@@ -26,7 +26,7 @@ import io.github.jspinak.brobot.model.match.Match;
  * </ul>
  *
  * <p>This is version 2 of the MatchAdjuster, updated to work with the new ActionConfig hierarchy
- * and MatchAdjustmentOptions instead of ActionOptions.
+ * and MatchAdjustmentOptions instead of ActionConfig.
  *
  * @see Match
  * @see MatchAdjustmentOptions

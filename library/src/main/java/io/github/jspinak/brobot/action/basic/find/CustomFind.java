@@ -80,7 +80,7 @@ public class CustomFind implements ActionInterface {
     /**
      * Standard perform method for ActionInterface compatibility.
      *
-     * <p>This method extracts the custom find strategy from the ActionOptions if one was provided,
+     * <p>This method extracts the custom find strategy from the ActionConfig if one was provided,
      * otherwise throws an exception.
      *
      * @param actionResult The result object containing action options

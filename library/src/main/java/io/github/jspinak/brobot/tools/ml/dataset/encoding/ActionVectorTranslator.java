@@ -5,7 +5,7 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.tools.ml.dataset.model.ActionVector;
 
 /**
- * Interface for bidirectional translation between ActionOptions and ActionVectors.
+ * Interface for bidirectional translation between ActionConfig and ActionVectors.
  *
  * <p>This interface defines the contract for converting GUI automation actions into numerical
  * vectors suitable for machine learning, and vice versa. Different implementations can provide
@@ -17,7 +17,7 @@ import io.github.jspinak.brobot.tools.ml.dataset.model.ActionVector;
  *
  * @see OneHotActionVectorEncoder
  * @see ActionVector
- * @see ActionOptions
+ * @see ActionConfig
  */
 public interface ActionVectorTranslator {
 

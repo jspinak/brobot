@@ -266,7 +266,7 @@ public class ContourExtractor {
      * <p>For motion detection (when scoreThresholdDist is null), returns the contour area as the
      * score.
      *
-     * <p>Note: Setting minSimilarity to 0 in ActionOptions provides the most thorough analysis but
+     * <p>Note: Setting minSimilarity to 0 in ActionConfig provides the most thorough analysis but
      * increases processing time as every pixel is evaluated.
      *
      * @param rect The bounding rectangle of the contour to score

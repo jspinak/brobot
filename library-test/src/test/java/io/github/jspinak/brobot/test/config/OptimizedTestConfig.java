@@ -6,6 +6,7 @@ import java.util.concurrent.ForkJoinPool;
 
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -32,18 +33,13 @@ public class OptimizedTestConfig implements BeforeAllCallback {
     }
 
     private void optimizeTestSettings() {
-        // Enable mock mode for faster execution
-        BrobotProperties.mock = true;
-
-        // Reduce wait times for mock operations
-        BrobotProperties.mockTimeFindFirst = 0.01;
-        BrobotProperties.mockTimeFindAll = 0.02;
-        BrobotProperties.mockTimeClick = 0.01;
-        BrobotProperties.mockTimeMove = 0.01;
-        BrobotProperties.mockTimeDrag = 0.02;
-        BrobotProperties.mockTimeFindHistogram = 0.02;
-        BrobotProperties.mockTimeFindColor = 0.02;
-        BrobotProperties.mockTimeClassify = 0.03;
+        // Note: BrobotProperties is now immutable and configured via Spring
+        // Mock mode and timing settings should be configured in application-test.properties
+        // Example properties:
+        // brobot.core.mock=true
+        // brobot.mock.time-find-first=0.01
+        // brobot.mock.time-find-all=0.02
+        // etc.
 
         // Configure thread pools for optimal test performance
         System.setProperty(

@@ -12,13 +12,13 @@ import lombok.Getter;
  * <p>DoUntilActionObject encapsulates the complete configuration needed to execute a pattern where
  * one action is repeatedly performed until a condition is met. It separates the configuration of
  * the primary action (do) from the termination condition (until), providing more flexibility than
- * simpler composite actions. This separation allows different ActionOptions for each phase of the
+ * simpler composite actions. This separation allows different ActionConfig for each phase of the
  * operation.
  *
  * <p>Key components:
  *
  * <ul>
- *   <li><b>Action configuration:</b> Separate ActionOptions and ObjectCollections for both the
+ *   <li><b>Action configuration:</b> Separate ActionConfig and ObjectCollections for both the
  *       repeated action and the termination condition
  *   <li><b>Execution control:</b> Maximum action limit to prevent infinite loops
  *   <li><b>Result tracking:</b> Captures results from both action and condition evaluations for
@@ -71,7 +71,7 @@ public class RepeatUntilConfig {
      *
      * <p>This method clears the internal counters that track how many times each object in the
      * action collection has been acted upon. This is important for actions that have limits on how
-     * many times they can act on the same object (controlled by ActionOptions.maxMatchesToActOn).
+     * many times they can act on the same object (controlled by ActionConfig.maxMatchesToActOn).
      * Only the action collection is reset, not the condition collection, as conditions are
      * typically evaluated without modification.
      *
@@ -150,7 +150,7 @@ public class RepeatUntilConfig {
         /**
          * Configures the primary action to be performed repeatedly.
          *
-         * <p>This ActionOptions defines what action is executed in the loop (e.g., CLICK, TYPE,
+         * <p>This ActionConfig defines what action is executed in the loop (e.g., CLICK, TYPE,
          * DRAG). It includes all timing, search, and behavior settings for the repeated action.
          *
          * @param actionConfig The configuration for the primary action
@@ -164,7 +164,7 @@ public class RepeatUntilConfig {
         /**
          * Configures the condition check that determines when to stop.
          *
-         * <p>This ActionOptions defines how to check the termination condition (e.g., FIND to wait
+         * <p>This ActionConfig defines how to check the termination condition (e.g., FIND to wait
          * for appearance, VANISH to wait for disappearance). The success criteria in these options
          * determine when the loop terminates.
          *

@@ -3,7 +3,8 @@ package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.recorder;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import io.github.jspinak.brobot.util.file.SaveToFile;
 import io.github.jspinak.brobot.util.image.capture.ScreenshotRecorder;
 
@@ -18,6 +19,9 @@ import io.github.jspinak.brobot.util.image.capture.ScreenshotRecorder;
  */
 @Component
 public class Recorder {
+
+    @Autowired
+    private BrobotProperties brobotProperties;
 
     private final ScreenshotRecorder captureScreenshots;
     private final CaptureUserInputs captureUserInputs;
@@ -74,8 +78,9 @@ public class Recorder {
 
     public boolean setRecordingDirectory(String directory) {
         if (recording) return false;
-        FrameworkSettings.recordingFolder = directory;
-        return true;
+        // Note: recordingFolder should be configured via properties
+        // This method is deprecated as BrobotProperties is immutable
+        return false;
     }
 
     public boolean setScreenshotDelay(int delay) {

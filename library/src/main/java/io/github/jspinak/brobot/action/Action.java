@@ -90,7 +90,7 @@ public class Action {
         this.actionChainExecutor = actionChainExecutor;
     }
 
-    // Removed ActionOptions-based perform method - use ActionConfig instead
+    // Removed ActionConfig-based perform method - use ActionConfig instead
 
     /**
      * Executes a GUI automation action with the specified configuration and target objects.
@@ -105,7 +105,7 @@ public class Action {
         return perform("", actionConfig, objectCollections);
     }
 
-    // Removed ActionOptions-based perform method with description - use ActionConfig instead
+    // Removed ActionConfig-based perform method with description - use ActionConfig instead
 
     /**
      * Executes a GUI automation action with a descriptive label using ActionConfig.
@@ -349,7 +349,7 @@ public class Action {
         return perform(typeOptions, objectCollections);
     }
 
-    // Removed ActionOptions-based perform method for StateImages - use ActionConfig instead
+    // Removed ActionConfig-based perform method for StateImages - use ActionConfig instead
 
     /**
      * Performs an action on state images with specified configuration.
@@ -366,7 +366,7 @@ public class Action {
                 actionConfig, new ObjectCollection.Builder().withImages(stateImages).build());
     }
 
-    // Removed ActionOptions-based perform method without objects - use ActionConfig instead
+    // Removed ActionConfig-based perform method without objects - use ActionConfig instead
 
     /**
      * Performs the specified action type with default configuration.
@@ -410,23 +410,6 @@ public class Action {
      */
     // Removed deprecated ActionType methods - use ActionType instead
 
-    /**
-     * Performs the specified action using text strings as targets.
-     *
-     * <p>Automatically creates an ObjectCollection containing the provided strings. Useful for
-     * text-based actions like finding text on screen or typing into fields identified by their text
-     * labels.
-     *
-     * @param action the type of action to perform
-     * @param strings text strings to use as action targets
-     * @return ActionResult containing text matches and action outcomes
-     * @deprecated Use specific ActionConfig implementations instead
-     */
-    @Deprecated
-    public ActionResult perform(ActionType action, String... strings) {
-        ObjectCollection strColl = new ObjectCollection.Builder().withStrings(strings).build();
-        return perform(action, strColl);
-    }
 
     /**
      * Performs an action with custom options on text string targets.
@@ -438,25 +421,8 @@ public class Action {
      * @param strings text strings to use as action targets
      * @return ActionResult containing matches and execution details
      */
-    // Removed ActionOptions-based perform method for strings - use ActionConfig instead
+    // Removed ActionConfig-based perform method for strings - use ActionConfig instead
 
-    /**
-     * Performs the specified action on screen regions with default options.
-     *
-     * <p>Regions define specific areas of the screen to constrain the action. This is useful for
-     * limiting searches to specific UI areas or performing actions at predetermined screen
-     * locations.
-     *
-     * @param action the type of action to perform
-     * @param regions screen areas to target or search within
-     * @return ActionResult containing regional matches and outcomes
-     * @deprecated Use specific ActionConfig implementations instead
-     */
-    @Deprecated
-    public ActionResult perform(ActionType action, Region... regions) {
-        ObjectCollection strColl = new ObjectCollection.Builder().withRegions(regions).build();
-        return perform(action, strColl);
-    }
 
     // ===== New Convenience Methods for ActionType enum =====
 

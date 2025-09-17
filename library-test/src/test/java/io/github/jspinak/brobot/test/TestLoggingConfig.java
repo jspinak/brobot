@@ -32,7 +32,7 @@ public class TestLoggingConfig {
         VerboseModeConfig verboseConfig = new VerboseModeConfig();
         verboseConfig.setShowSearchRegions(false);
         verboseConfig.setShowMatchScores(false);
-        verboseConfig.setShowActionOptions(false);
+        verboseConfig.setShowActionConfig(false);
         config.setVerbose(verboseConfig);
 
         return config;

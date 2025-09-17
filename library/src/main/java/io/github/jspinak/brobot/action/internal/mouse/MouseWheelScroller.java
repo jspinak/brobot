@@ -11,7 +11,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
  * Provides mouse wheel scrolling functionality with support for both real and mocked operations.
  *
  * <p>This is version 2 of the MouseWheel class, updated to work with the new ActionConfig hierarchy
- * and ScrollOptions instead of ActionOptions.
+ * and ScrollOptions instead of ActionConfig.
  *
  * <p>This wrapper abstracts the underlying Sikuli mouse wheel operations and integrates with
  * Brobot's action system. It handles scroll direction conversion and supports the mock mode for

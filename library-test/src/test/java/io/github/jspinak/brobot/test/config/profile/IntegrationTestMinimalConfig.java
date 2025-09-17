@@ -31,7 +31,6 @@ import io.github.jspinak.brobot.model.element.Text;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.navigation.service.StateService;
-import io.github.jspinak.brobot.statemanagement.SearchRegionDependencyInitializer;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
 
 /**
@@ -159,11 +158,6 @@ public class IntegrationTestMinimalConfig {
     @Bean
     public DynamicRegionResolver dynamicRegionResolver() {
         return mock(DynamicRegionResolver.class);
-    }
-
-    @Bean
-    public SearchRegionDependencyInitializer searchRegionDependencyInitializer() {
-        return mock(SearchRegionDependencyInitializer.class);
     }
 
     @Bean

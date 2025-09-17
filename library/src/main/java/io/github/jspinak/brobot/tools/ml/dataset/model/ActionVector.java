@@ -8,7 +8,7 @@ import lombok.Getter;
 /**
  * Represents an action as a numerical vector for machine learning applications.
  *
- * <p>ActionVector translates {@link io.github.jspinak.brobot.action.ActionOptions} into a
+ * <p>ActionVector translates {@link io.github.jspinak.brobot.action.ActionConfig} into a
  * fixed-size numeric vector suitable for neural networks and other ML algorithms. The vector uses
  * the short data type (-32,768 to 32,767) to accommodate both categorical and continuous values.
  *

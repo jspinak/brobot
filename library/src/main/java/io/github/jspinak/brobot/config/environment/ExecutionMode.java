@@ -27,7 +27,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
  * <p>Mock mode behavior:
  *
  * <ul>
- *   <li>Enabled when BrobotSettings.mock is true AND no test screenshots are configured
+ *   <li>Enabled when BrobotProperties configuration is true AND no test screenshots are configured
  *   <li>When screenshots are present, they take precedence over mock mode for testing
  *   <li>Mock mode simulates action execution with configurable timing delays
  *   <li>Useful for development, testing, and demonstrations without GUI access
@@ -69,7 +69,7 @@ public class ExecutionMode {
      * <pre>{@code
      * if (permissions.isMock()) {
      *     // Simulate action with mock timing
-     *     Thread.sleep((long)(BrobotSettings.mockTimeClick * 1000));
+     *     Thread.sleep((long)(BrobotProperties configurationTimeClick * 1000));
      *     return mockResult;
      * } else {
      *     // Perform real GUI interaction

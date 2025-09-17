@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.test;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import org.junit.jupiter.api.BeforeEach;
 
 /**
@@ -8,12 +10,16 @@ import org.junit.jupiter.api.BeforeEach;
  */
 public abstract class SimpleTestBase {
 
+    @Autowired
+    private BrobotProperties brobotProperties;
+
+
     @BeforeEach
     public void setupMockMode() {
         // Set system property for mock mode
         System.setProperty("brobot.mock.mode", "true");
 
-        // Set BrobotProperties.mock directly using reflection to avoid initialization
+        // Set brobotProperties.getCore().isMock() directly using reflection to avoid initialization
         // issues
         try {
             Class<?> frameworkSettingsClass =

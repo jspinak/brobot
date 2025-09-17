@@ -29,7 +29,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
  *   <li>Randomly placing the pattern 0-9 times within the region
  * </ul>
  *
- * <p>This component is primarily used when BrobotSettings.mock is enabled, allowing deterministic
+ * <p>This component is primarily used when BrobotProperties configuration is enabled, allowing deterministic
  * testing of color-based find operations.
  *
  * @see ImageLoader

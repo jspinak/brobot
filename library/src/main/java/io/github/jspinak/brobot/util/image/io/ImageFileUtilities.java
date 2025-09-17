@@ -222,7 +222,7 @@ public class ImageFileUtilities {
     /**
      * Gets a unique path using the default history settings.
      *
-     * <p>Convenience method that uses BrobotSettings.historyPath and BrobotSettings.historyFilename
+     * <p>Convenience method that uses BrobotProperties history path and BrobotProperties history filename
      * as the base path.
      *
      * @return unique path based on history settings

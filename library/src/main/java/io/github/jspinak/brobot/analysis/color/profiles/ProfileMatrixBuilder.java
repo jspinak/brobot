@@ -128,7 +128,7 @@ public class ProfileMatrixBuilder {
      *
      * @param img The state image to visualize
      * @param actionConfig Options specifying the visualization type: - kmeans < 0: Use default from
-     *     BrobotSettings - kmeans = 0: Show mean color profile only - kmeans > 0: Show K-means
+     *     BrobotProperties - kmeans = 0: Show mean color profile only - kmeans > 0: Show K-means
      *     clusters
      * @return A Mat containing the appropriate color profile visualization
      */

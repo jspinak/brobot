@@ -11,8 +11,8 @@
  * <ul>
  *   <li>{@link io.github.jspinak.brobot.runner.json.utils.JsonUtils} - General-purpose JSON
  *       manipulation utilities
- *   <li>{@link io.github.jspinak.brobot.runner.json.utils.ActionOptionsJsonUtils} - Utilities
- *       specific to ActionOptions processing
+ *   <li>{@link io.github.jspinak.brobot.runner.json.utils.ActionConfigJsonUtils} - Utilities
+ *       specific to ActionConfig processing
  *   <li>{@link io.github.jspinak.brobot.runner.json.utils.MatchesJsonUtils} - Utilities for match
  *       result handling
  *   <li>{@link io.github.jspinak.brobot.runner.json.utils.ObjectCollectionJsonUtils} - Helper
@@ -42,17 +42,17 @@
  * );
  * }</pre>
  *
- * <h3>ActionOptions Utilities</h3>
+ * <h3>ActionConfig Utilities</h3>
  *
  * <pre>{@code
  * // Convert to simple map
- * Map<String, Object> map = ActionOptionsJsonUtils.toMap(options);
+ * Map<String, Object> map = ActionConfigJsonUtils.toMap(options);
  *
  * // Filter null values
- * JsonNode cleaned = ActionOptionsJsonUtils.removeNulls(optionsNode);
+ * JsonNode cleaned = ActionConfigJsonUtils.removeNulls(optionsNode);
  *
  * // Merge with defaults
- * ActionOptions merged = ActionOptionsJsonUtils.mergeWithDefaults(
+ * ActionConfig merged = ActionConfigJsonUtils.mergeWithDefaults(
  *     partial,
  *     defaults
  * );

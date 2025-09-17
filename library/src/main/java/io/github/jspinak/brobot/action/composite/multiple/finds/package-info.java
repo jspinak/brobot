@@ -86,16 +86,16 @@
  * MultipleFinds multiFind = new MultipleFinds(...);
  *
  * // Define different strategies to try
- * List<ActionOptions> strategies = Arrays.asList(
- *     new ActionOptions.Builder()
+ * List<ActionConfig> strategies = Arrays.asList(
+ *     new ActionConfig.Builder()
  *         .setFind(Find.BEST)
  *         .setSimilarity(0.95)
  *         .build(),
- *     new ActionOptions.Builder()
+ *     new ActionConfig.Builder()
  *         .setFind(Find.ALL)
  *         .setSimilarity(0.85)
  *         .build(),
- *     new ActionOptions.Builder()
+ *     new ActionConfig.Builder()
  *         .setFind(Find.COLOR)
  *         .build()
  * );
@@ -110,7 +110,7 @@
  * ConfirmedFinds confirmedFind = new ConfirmedFinds(...);
  *
  * // Find with confirmation criteria
- * ActionOptions confirmOptions = new ActionOptions.Builder()
+ * ActionConfig confirmOptions = new ActionConfig.Builder()
  *     .setFind(Find.ALL)
  *     .setConfirmationImage("checked_state.png")
  *     .setConfirmationTimeout(2.0)
@@ -154,6 +154,6 @@
  *
  * @see io.github.jspinak.brobot.action.basic.find.Find
  * @see io.github.jspinak.brobot.model.Match
- * @see io.github.jspinak.brobot.action.ActionOptions.Find
+ * @see io.github.jspinak.brobot.action.ActionConfig.Find
  */
 package io.github.jspinak.brobot.action.composite.multiple.finds;

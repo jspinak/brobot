@@ -120,7 +120,7 @@ public class ActionHistory {
         if (matchSnapshot.getActionConfig() != null) {
             similarSnapshots = getSimilarSnapshots(matchSnapshot.getActionConfig());
         } else {
-            // No ActionOptions fallback - return empty list
+            // No ActionConfig fallback - return empty list
             similarSnapshots = new ArrayList<>();
         }
 
@@ -210,7 +210,7 @@ public class ActionHistory {
         return getRandomSnapshot(getSimilarSnapshots(actionConfig));
     }
 
-    // Removed deprecated getRandomSnapshot(ActionOptions) method
+    // Removed deprecated getRandomSnapshot(ActionConfig) method
 
     /**
      * Gets similar snapshots for the specified ActionConfig.
@@ -222,7 +222,7 @@ public class ActionHistory {
         return getSnapshotOfFindType(actionConfig, getFindOrVanishSnapshots(actionConfig));
     }
 
-    // Removed deprecated getSimilarSnapshots(ActionOptions) method
+    // Removed deprecated getSimilarSnapshots(ActionConfig) method
 
     private List<ActionRecord> getFindOrVanishSnapshots(ActionConfig actionConfig) {
         ActionType action = getActionTypeFromConfig(actionConfig);
@@ -236,7 +236,7 @@ public class ActionHistory {
                 .collect(toList());
     }
 
-    // Removed deprecated getFindOrVanishSnapshots(ActionOptions) method
+    // Removed deprecated getFindOrVanishSnapshots(ActionConfig) method
 
     private List<ActionRecord> getSnapshotOfFindType(
             ActionConfig actionConfig, List<ActionRecord> snapshots) {
@@ -270,7 +270,7 @@ public class ActionHistory {
         return sameTypeSnapshots;
     }
 
-    // Removed deprecated getSnapshotOfFindType(ActionOptions, List<ActionRecord>) method
+    // Removed deprecated getSnapshotOfFindType(ActionConfig, List<ActionRecord>) method
 
     public Optional<ActionRecord> getRandomSnapshot(List<ActionRecord> snapshots) {
         if (snapshots.isEmpty()) return Optional.empty();
@@ -289,7 +289,7 @@ public class ActionHistory {
         return randomSnapshot.get().getMatchList();
     }
 
-    // Removed deprecated getRandomMatchList(ActionOptions) method
+    // Removed deprecated getRandomMatchList(ActionConfig) method
 
     public String getRandomText() {
         // Use modern ActionConfig instead of deprecated ActionType
@@ -321,7 +321,7 @@ public class ActionHistory {
         if (snapshot.getActionConfig() != null) {
             return getActionTypeFromConfig(snapshot.getActionConfig());
         }
-        // No ActionOptions fallback - return default
+        // No ActionConfig fallback - return default
         return ActionType.FIND;
     }
 
@@ -330,7 +330,7 @@ public class ActionHistory {
         if (snapshot.getActionConfig() != null) {
             return getFindStrategyFromConfig(snapshot.getActionConfig());
         }
-        // No ActionOptions fallback - return default
+        // No ActionConfig fallback - return default
         return PatternFindOptions.Strategy.BEST;
     }
 

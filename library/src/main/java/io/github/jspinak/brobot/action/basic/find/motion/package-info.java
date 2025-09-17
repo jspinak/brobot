@@ -57,7 +57,7 @@
  * // Detect motion in a specific region
  * FindMotion findMotion = new FindMotion(...);
  *
- * ActionOptions options = new ActionOptions.Builder()
+ * ActionConfig options = new ActionConfig.Builder()
  *     .setAction(ActionType.FIND)
  *     .setFind(Find.MOTION)
  *     .setMaxWait(5.0)  // Observe for 5 seconds

@@ -17,7 +17,7 @@ public class ActionDurations {
     @Autowired
     private BrobotProperties brobotProperties;
 
-    // Removed ActionOptions-based durations - use ActionType and Strategy-based
+    // Removed ActionConfig-based durations - use ActionType and Strategy-based
     // maps instead
 
     // New ActionType-based durations for migration
@@ -42,7 +42,7 @@ public class ActionDurations {
         strategyDurations.put(PatternFindOptions.Strategy.BEST, brobotProperties.getMock().getTimeFindAll());
     }
 
-    // Removed deprecated methods getFindDuration(ActionOptions.Find) and
+    // Removed deprecated methods getFindDuration(ActionConfig.Find) and
     // getActionDuration(ActionType). Use the ActionType and Strategy versions
     // instead.
 

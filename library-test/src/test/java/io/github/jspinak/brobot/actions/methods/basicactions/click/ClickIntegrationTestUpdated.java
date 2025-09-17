@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import io.github.jspinak.brobot.action.ActionInterface;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.click.Click;
@@ -45,6 +46,10 @@ import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 @Disabled("CI failure - needs investigation")
 public class ClickIntegrationTestUpdated extends BrobotIntegrationTestBase {
 
+    @Autowired
+    private BrobotProperties brobotProperties;
+
+
     @Autowired private ActionService actionService;
 
     @Autowired(required = false)
@@ -59,14 +64,14 @@ public class ClickIntegrationTestUpdated extends BrobotIntegrationTestBase {
     @BeforeEach
     void setUp() {
         super.setUpBrobotEnvironment();
-        BrobotProperties.mock = true;
+        // Cannot set mock - BrobotProperties is immutable
 
         // No need to mock Find anymore - pure Click doesn't use it
     }
 
     @AfterEach
     void tearDown() {
-        BrobotProperties.mock = false;
+        // Cannot set mock - BrobotProperties is immutable
     }
 
     @Test

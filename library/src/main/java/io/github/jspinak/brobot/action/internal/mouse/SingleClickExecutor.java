@@ -157,62 +157,6 @@ public class SingleClickExecutor {
      * @deprecated This method has been removed. Use click(Location, ActionConfig) instead.
      */
 
-    /**
-     * Executes the actual click operation with proper timing and button control.
-     *
-     * <p>Implements intelligent click optimization:
-     *
-     * <ul>
-     *   <li>Uses native doubleClick() for simple left double-clicks without pauses
-     *   <li>Falls back to manual click sequences when pauses are required
-     *   <li>Handles non-standard double-clicks (right, middle) with two separate clicks
-     * </ul>
-     *
-     * <p><strong>Side effects:</strong>
-     *
-     * <ul>
-     *   <li>Moves mouse to target location
-     *   <li>Performs mouse button operations
-     *   <li>May write "2 clicks" to Report for double-click operations
-     * </ul>
-     *
-     * @param location Target location for the click
-     * @param clickOptions Configuration with click type and timing
-     * @return true if click completed, false if mouse movement failed
-     * @deprecated This method is not used anymore, replaced by performClick
-     */
-    @Deprecated
-    private boolean doClick(Location location, ClickOptions clickOptions) {
-        if (!moveMouseWrapper.move(location)) return false;
-        // if (Mouse.move(location.getSikuliLocation()) == 0) return false;
-
-        // Use default pause values for simplified ClickOptions
-        double pauseBeforeDown = 0;
-        double pauseAfterDown = 0;
-        double pauseBeforeUp = 0;
-        double pauseAfterUp = 0;
-
-        if (isSimpleLeftDoubleClick(clickOptions)) {
-            // Use scaled coordinates for doubleClick
-            org.sikuli.script.Location scaledLocation =
-                    coordinateScaler.scaleLocationToLogical(location);
-            scaledLocation.doubleClick();
-        } else {
-            int i = 1;
-            if (isTwoClicks(clickOptions)) {
-                i = 2;
-                ConsoleReporter.print("2 clicks ");
-            }
-            for (int j = 0; j < i; j++) {
-                ClickType.Type clickType =
-                        convertMouseButtonToClickType(
-                                clickOptions.getMousePressOptions().getButton());
-                mouseDownWrapper.press(pauseBeforeDown, pauseAfterDown, clickType);
-                mouseUpWrapper.press(pauseBeforeUp, pauseAfterUp, clickType);
-            }
-        }
-        return true;
-    }
 
     /**
      * Performs a click operation with full control over timing and button type.

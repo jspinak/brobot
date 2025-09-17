@@ -102,7 +102,7 @@
  * }</pre>
  *
  * @see io.github.jspinak.brobot.action.basic.find.Find
- * @see io.github.jspinak.brobot.action.ActionOptions.Find
+ * @see io.github.jspinak.brobot.action.ActionConfig.Find
  * @see io.github.jspinak.brobot.model.Match
  */
 package io.github.jspinak.brobot.action.basic.find;

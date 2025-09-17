@@ -70,7 +70,7 @@
  * experiment.generateRandomParameters(constraints);
  *
  * // Execute action with experimental parameters
- * ActionOptions options = experiment.toActionOptions();
+ * ActionConfig options = experiment.toActionConfig();
  * ActionResult result = action.perform(options);
  *
  * // Record results
@@ -119,7 +119,7 @@
  *   <li>Cross-platform parameter profiles
  * </ul>
  *
- * @see io.github.jspinak.brobot.action.ActionOptions
+ * @see io.github.jspinak.brobot.action.ActionConfig
  * @see io.github.jspinak.brobot.tools.tuning.model
  * @see io.github.jspinak.brobot.tools.tuning.store
  * @since 1.0

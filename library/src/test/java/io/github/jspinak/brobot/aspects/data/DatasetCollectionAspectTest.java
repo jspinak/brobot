@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.aspects.data;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -65,16 +66,24 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
         super.setupTest();
         mocks = MockitoAnnotations.openMocks(this);
 
-        aspect = new DatasetCollectionAspect();
-        ReflectionTestUtils.setField(aspect, "brobotLogger", brobotLogger);
+        // Mock BrobotLogger to avoid NullPointerException
+        io.github.jspinak.brobot.logging.unified.LogBuilder logBuilder =
+                mock(io.github.jspinak.brobot.logging.unified.LogBuilder.class);
+        lenient().when(brobotLogger.log()).thenReturn(logBuilder);
+        lenient().when(logBuilder.type(any())).thenReturn(logBuilder);
+        lenient().when(logBuilder.level(any())).thenReturn(logBuilder);
+        lenient().when(logBuilder.action(any())).thenReturn(logBuilder);
+        lenient().when(logBuilder.metadata(any(), any())).thenReturn(logBuilder);
+        lenient().when(logBuilder.success(anyBoolean())).thenReturn(logBuilder);
+        lenient().when(logBuilder.observation(any())).thenReturn(logBuilder);
+        lenient().when(logBuilder.error(any())).thenReturn(logBuilder);
+        lenient().when(logBuilder.duration(anyLong())).thenReturn(logBuilder);
+        lenient().doNothing().when(logBuilder).log();
+
+        aspect = new DatasetCollectionAspect(brobotLogger);
         ReflectionTestUtils.setField(aspect, "outputDir", tempDir.toString());
         ReflectionTestUtils.setField(aspect, "batchSize", 10);
         ReflectionTestUtils.setField(aspect, "maxQueueSize", 100);
-
-        // Mock BrobotLogger to avoid NullPointerException
-        lenient()
-                .when(brobotLogger.log())
-                .thenReturn(mock(io.github.jspinak.brobot.logging.unified.LogBuilder.class));
 
         // Initialize the aspect
         aspect.init();
@@ -613,8 +622,7 @@ public class DatasetCollectionAspectTest extends ConcurrentTestBase {
         @DisplayName("Should initialize properly")
         void shouldInitializeProperly() {
             // Arrange
-            DatasetCollectionAspect newAspect = new DatasetCollectionAspect();
-            ReflectionTestUtils.setField(newAspect, "brobotLogger", brobotLogger);
+            DatasetCollectionAspect newAspect = new DatasetCollectionAspect(brobotLogger);
             ReflectionTestUtils.setField(newAspect, "outputDir", tempDir.toString());
 
             // Act
