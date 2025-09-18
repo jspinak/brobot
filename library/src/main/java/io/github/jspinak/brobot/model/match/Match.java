@@ -10,6 +10,7 @@ import org.bytedeco.opencv.opencv_core.Rect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.element.Anchors;
 import io.github.jspinak.brobot.model.element.Image;
 import io.github.jspinak.brobot.model.element.Location;
@@ -187,6 +188,16 @@ public class Match {
         }
         stateImage.addPatterns(new Pattern(this));
         return stateImage;
+    }
+
+    /**
+     * Converts this Match to an ObjectCollection containing this match as a StateImage. Useful for
+     * Action methods that require ObjectCollection parameters.
+     *
+     * @return ObjectCollection containing this Match converted to a StateImage
+     */
+    public ObjectCollection toObjectCollection() {
+        return new ObjectCollection.Builder().withMatchObjectsAsStateImages(this).build();
     }
 
     @Override

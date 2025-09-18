@@ -588,4 +588,14 @@ public class StateImage implements StateObject {
 
         return this;
     }
+
+    /**
+     * Converts this StateImage to an ObjectCollection containing only this image. Useful for Action
+     * methods that require ObjectCollection parameters.
+     *
+     * @return ObjectCollection containing this StateImage
+     */
+    public ObjectCollection toObjectCollection() {
+        return new ObjectCollection.Builder().withImages(this).build();
+    }
 }

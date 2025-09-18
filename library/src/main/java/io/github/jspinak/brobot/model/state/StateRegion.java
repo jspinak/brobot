@@ -258,4 +258,14 @@ public class StateRegion implements StateObject {
             return stateRegion;
         }
     }
+
+    /**
+     * Converts this StateRegion to an ObjectCollection containing only this region. Useful for
+     * Action methods that require ObjectCollection parameters.
+     *
+     * @return ObjectCollection containing this StateRegion
+     */
+    public ObjectCollection toObjectCollection() {
+        return new ObjectCollection.Builder().withRegions(this).build();
+    }
 }

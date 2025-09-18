@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.model.state;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.github.jspinak.brobot.model.collection.ObjectCollection;
 import io.github.jspinak.brobot.model.element.Region;
 
 import lombok.Data;
@@ -98,6 +99,16 @@ public class StateString {
 
     public boolean defined() {
         return string != null && string.length() > 0;
+    }
+
+    /**
+     * Converts this StateString to an ObjectCollection containing only this string. Useful for
+     * Action methods that require ObjectCollection parameters.
+     *
+     * @return ObjectCollection containing this StateString
+     */
+    public ObjectCollection toObjectCollection() {
+        return new ObjectCollection.Builder().withStrings(this).build();
     }
 
     public static class InNullState {
