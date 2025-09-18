@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import io.github.jspinak.brobot.action.ConditionalActionChain;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionInterface;
