@@ -45,7 +45,12 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 @Component
 public class ExecutionMode {
 
-    @Autowired private BrobotProperties brobotProperties;
+    private final BrobotProperties brobotProperties;
+
+    @Autowired
+    public ExecutionMode(BrobotProperties brobotProperties) {
+        this.brobotProperties = brobotProperties;
+    }
 
     /**
      * Determines whether the framework should execute in mock mode.

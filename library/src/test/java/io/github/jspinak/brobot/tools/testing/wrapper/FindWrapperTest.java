@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import io.github.jspinak.brobot.action.internal.find.scene.ScenePatternMatcher;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.config.environment.ExecutionMode;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
@@ -360,8 +361,17 @@ public class FindWrapperTest extends BrobotTestBase {
         @Test
         @DisplayName("Should respect BrobotProperties mock configuration")
         void shouldRespectBrobotProperties() {
+            // Create BrobotProperties mock
+            BrobotProperties mockBrobotProperties = mock(BrobotProperties.class);
+            BrobotProperties.Core core = new BrobotProperties.Core();
+            BrobotProperties.Screenshot screenshot = new BrobotProperties.Screenshot();
+            screenshot.setTestScreenshots(Collections.emptyList());
+
+            when(mockBrobotProperties.getCore()).thenReturn(core);
+            when(mockBrobotProperties.getScreenshot()).thenReturn(screenshot);
+
             // Create real ExecutionMode to test integration
-            ExecutionMode realExecutionMode = new ExecutionMode();
+            ExecutionMode realExecutionMode = new ExecutionMode(mockBrobotProperties);
             FindWrapper realWrapper =
                     new FindWrapper(realExecutionMode, mockFind, scenePatternMatcher);
 
@@ -372,18 +382,14 @@ public class FindWrapperTest extends BrobotTestBase {
                     .thenReturn(Collections.emptyList());
 
             // Test with mock mode enabled
-            // Mock mode is now enabled via BrobotTestBase
-            // Mock mode is configured via BrobotProperties
+            core.setMock(true);
             List<Match> mockResult = realWrapper.findAll(pattern, scene);
             assertEquals(1, mockResult.size());
 
             // Test with mock mode disabled
-            // Mock mode disabled - not needed in tests
+            core.setMock(false);
             List<Match> liveResult = realWrapper.findAll(pattern, scene);
             assertEquals(0, liveResult.size());
-
-            // Reset to test default
-            // Mock mode is now enabled via BrobotTestBase // Reset to test default
         }
     }
 }

@@ -24,6 +24,7 @@ import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
 import io.github.jspinak.brobot.action.internal.find.SearchRegionResolver;
 import io.github.jspinak.brobot.action.internal.utility.ActionSuccessCriteria;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.control.ExecutionController;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import io.github.jspinak.brobot.model.element.Region;
@@ -71,6 +72,8 @@ public class ActionExecutionTest extends BrobotTestBase {
 
     @Mock private StateMemory stateMemory;
 
+    @Mock private BrobotProperties brobotProperties;
+
     @Mock private ActionInterface actionInterface;
 
     @Mock private ActionConfig actionConfig;
@@ -85,8 +88,15 @@ public class ActionExecutionTest extends BrobotTestBase {
     public void setupTest() {
         super.setupTest();
         mockCloseable = MockitoAnnotations.openMocks(this);
+
+        // Setup BrobotProperties mock
+        BrobotProperties.Dataset dataset = new BrobotProperties.Dataset();
+        dataset.setBuild(false);
+        when(brobotProperties.getDataset()).thenReturn(dataset);
+
         actionExecution =
                 new ActionExecution(
+                        brobotProperties,
                         timeWrapper,
                         illustrationController,
                         searchRegionResolver,
