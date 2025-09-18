@@ -5,11 +5,11 @@ import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 import io.github.jspinak.brobot.util.coordinates.CoordinateScaler;
 
 /**
@@ -60,7 +60,8 @@ public class SingleClickExecutor {
     private final MouseDownWrapper mouseDownWrapper;
     private final MouseUpWrapper mouseUpWrapper;
     private final MoveMouseWrapper moveMouseWrapper;
-    private final TimeProvider time;
+    private final TimeWrapper timeWrapper;
+    private final BrobotProperties brobotProperties;
 
     @Autowired private CoordinateScaler coordinateScaler;
 
@@ -75,11 +76,13 @@ public class SingleClickExecutor {
             MouseDownWrapper mouseDownWrapper,
             MouseUpWrapper mouseUpWrapper,
             MoveMouseWrapper moveMouseWrapper,
-            TimeProvider time) {
+            TimeWrapper timeWrapper,
+            BrobotProperties brobotProperties) {
         this.mouseDownWrapper = mouseDownWrapper;
         this.mouseUpWrapper = mouseUpWrapper;
         this.moveMouseWrapper = moveMouseWrapper;
-        this.time = time;
+        this.timeWrapper = timeWrapper;
+        this.brobotProperties = brobotProperties;
     }
 
     /**
@@ -149,67 +152,7 @@ public class SingleClickExecutor {
      *   <li>Performs mouse button press and release
      *   <li>In mock mode, writes click information to Report
      * </ul>
-     *
-     * @param location Target location for the click operation
-     * @deprecated This method has been removed. Use click(Location, ActionConfig) instead.
      */
-
-    /**
-     * Executes the actual click operation with proper timing and button control.
-     *
-     * <p>Implements intelligent click optimization:
-     *
-     * <ul>
-     *   <li>Uses native doubleClick() for simple left double-clicks without pauses
-     *   <li>Falls back to manual click sequences when pauses are required
-     *   <li>Handles non-standard double-clicks (right, middle) with two separate clicks
-     * </ul>
-     *
-     * <p><strong>Side effects:</strong>
-     *
-     * <ul>
-     *   <li>Moves mouse to target location
-     *   <li>Performs mouse button operations
-     *   <li>May write "2 clicks" to Report for double-click operations
-     * </ul>
-     *
-     * @param location Target location for the click
-     * @param clickOptions Configuration with click type and timing
-     * @return true if click completed, false if mouse movement failed
-     * @deprecated This method is not used anymore, replaced by performClick
-     */
-    @Deprecated
-    private boolean doClick(Location location, ClickOptions clickOptions) {
-        if (!moveMouseWrapper.move(location)) return false;
-        // if (Mouse.move(location.getSikuliLocation()) == 0) return false;
-
-        // Use default pause values for simplified ClickOptions
-        double pauseBeforeDown = 0;
-        double pauseAfterDown = 0;
-        double pauseBeforeUp = 0;
-        double pauseAfterUp = 0;
-
-        if (isSimpleLeftDoubleClick(clickOptions)) {
-            // Use scaled coordinates for doubleClick
-            org.sikuli.script.Location scaledLocation =
-                    coordinateScaler.scaleLocationToLogical(location);
-            scaledLocation.doubleClick();
-        } else {
-            int i = 1;
-            if (isTwoClicks(clickOptions)) {
-                i = 2;
-                ConsoleReporter.print("2 clicks ");
-            }
-            for (int j = 0; j < i; j++) {
-                ClickType.Type clickType =
-                        convertMouseButtonToClickType(
-                                clickOptions.getMousePressOptions().getButton());
-                mouseDownWrapper.press(pauseBeforeDown, pauseAfterDown, clickType);
-                mouseUpWrapper.press(pauseBeforeUp, pauseAfterUp, clickType);
-            }
-        }
-        return true;
-    }
 
     /**
      * Performs a click operation with full control over timing and button type.
@@ -238,7 +181,7 @@ public class SingleClickExecutor {
             double pauseAfterDown,
             double pauseBeforeUp,
             double pauseAfterUp) {
-        if (FrameworkSettings.mock) {
+        if (brobotProperties.getCore().isMock()) {
             ConsoleReporter.print("<click>");
             if (button != MouseButton.LEFT || numberOfClicks > 1) {
                 ConsoleReporter.print(button.name());
@@ -252,7 +195,7 @@ public class SingleClickExecutor {
         if (!moveMouseWrapper.move(location)) return false;
 
         // Pause before beginning click sequence
-        if (pauseBeforeBegin > 0) time.wait(pauseBeforeBegin);
+        if (pauseBeforeBegin > 0) timeWrapper.wait(pauseBeforeBegin);
 
         // Check for native double-click optimization
         if (numberOfClicks == 2
@@ -281,7 +224,7 @@ public class SingleClickExecutor {
         }
 
         // Pause after completing click sequence
-        if (pauseAfterEnd > 0) time.wait(pauseAfterEnd);
+        if (pauseAfterEnd > 0) timeWrapper.wait(pauseAfterEnd);
 
         return true;
     }

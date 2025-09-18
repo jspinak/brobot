@@ -23,7 +23,7 @@ import org.springframework.test.context.ActiveProfiles;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.Find;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.State;
@@ -36,6 +36,8 @@ import io.github.jspinak.brobot.test.BrobotTestBase;
 @ActiveProfiles("linux")
 @Disabled("Failing in CI - temporarily disabled for CI/CD")
 public class ScreenshotSaveDebugTest extends BrobotTestBase {
+
+    @Autowired private BrobotProperties brobotProperties;
 
     @Autowired private Find find;
 
@@ -52,21 +54,21 @@ public class ScreenshotSaveDebugTest extends BrobotTestBase {
         System.out.println("Directory exists: " + Files.exists(historyPath));
         System.out.println("Directory writable: " + Files.isWritable(historyPath));
 
-        // Check FrameworkSettings
+        // Check BrobotProperties
         System.out.println("\nFramework Settings:");
-        System.out.println("saveHistory: " + FrameworkSettings.saveHistory);
-        System.out.println("historyPath: " + FrameworkSettings.historyPath);
-        System.out.println("drawFind: " + FrameworkSettings.drawFind);
+        System.out.println("saveHistory: " + brobotProperties.getScreenshot().isSaveHistory());
+        System.out.println("historyPath: " + brobotProperties.getScreenshot().getHistoryPath());
+        System.out.println("drawFind: " + brobotProperties.getIllustration().isDrawFind());
 
         // Force enable
-        FrameworkSettings.saveHistory = true;
-        FrameworkSettings.historyPath = historyPath.toString() + "/";
-        FrameworkSettings.drawFind = true;
-        FrameworkSettings.drawHighlight = true;
+        // Settings are configured via application properties
+        // Settings are configured via application properties
+        // Settings are configured via application properties
+        // Settings are configured via application properties
 
         System.out.println("\nAfter forcing:");
-        System.out.println("saveHistory: " + FrameworkSettings.saveHistory);
-        System.out.println("historyPath: " + FrameworkSettings.historyPath);
+        System.out.println("saveHistory: " + brobotProperties.getScreenshot().isSaveHistory());
+        System.out.println("historyPath: " + brobotProperties.getScreenshot().getHistoryPath());
     }
 
     @Test

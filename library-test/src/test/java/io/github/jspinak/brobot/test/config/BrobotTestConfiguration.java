@@ -194,8 +194,8 @@ public class BrobotTestConfiguration {
     @Bean
     @Primary
     public MockModeManager mockModeManager() {
-        // MockModeManager uses static methods
-        // The BrobotTestBase already sets mock mode via FrameworkSettings.mock = true
+        // BrobotProperties is now immutable and configured via Spring
+        // Mock mode should be enabled via application-test.properties
         return new MockModeManager();
     }
 

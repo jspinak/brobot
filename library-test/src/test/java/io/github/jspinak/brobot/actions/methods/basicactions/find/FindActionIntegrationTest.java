@@ -17,7 +17,6 @@ import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;
@@ -70,7 +69,7 @@ public class FindActionIntegrationTest {
     void setUp() {
         // Tests will run in mock mode, which is suitable for integration testing
         // the Action flow without actual image recognition
-        FrameworkSettings.mock = true;
+        // Mock mode is enabled via BrobotTestBase
     }
 
     @Autowired Action action;

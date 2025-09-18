@@ -26,7 +26,7 @@
  * <ul>
  *   <li>Timestamp-based image naming for chronological ordering
  *   <li>Centralized recording folder management
- *   <li>Integration with FrameworkSettings for configuration
+ *   <li>Integration with BrobotProperties for configuration
  *   <li>Automatic folder structure creation
  * </ul>
  *
@@ -95,7 +95,7 @@
  *   <li>Timestamp-based folder naming: recordings/{timestamp}/
  *   <li>Chronological image naming: {base}-{milliseconds}.png
  *   <li>Automatic directory creation
- *   <li>Configurable base paths via FrameworkSettings
+ *   <li>Configurable base paths via BrobotProperties
  * </ul>
  *
  * <h2>Design Principles</h2>

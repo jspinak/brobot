@@ -14,6 +14,10 @@ The system separates OpenCV operations into three distinct layers:
 ### 2. Result-Oriented Design
 All OpenCV operations return result objects instead of raw Mat objects:
 ```java
+// Note: BrobotProperties must be injected as a dependency
+@Autowired
+private BrobotProperties brobotProperties;
+
 public interface MotionAnalyzer {
     MotionResult analyzeMotion(List<BufferedImage> images);
 }
@@ -168,7 +172,7 @@ public class OpenCVMockConfiguration {
 ### Properties Configuration
 ```properties
 # Enable mock mode
-brobot.mock=true
+brobot.core.mock=true
 
 # Mock data generation settings
 brobot.opencv.mock.motion.default-confidence=0.85
@@ -205,7 +209,7 @@ Ensures mock and real implementations maintain consistency:
 @ParameterizedTest
 @ValueSource(booleans = {true, false})
 void testMotionDetectionContract(boolean useMock) {
-    FrameworkSettings.mock = useMock;
+    brobotProperties.getCore().isMock() = useMock;
     PixelAnalyzer analyzer = getAnalyzer();
     
     List<BufferedImage> images = loadTestImages();
@@ -222,7 +226,8 @@ Validates mock performance characteristics:
 ```java
 @Test
 void testMockPerformance() {
-    FrameworkSettings.mock = true;
+    // Mock mode is now configured via application.properties:
+// brobot.core.mock=true;
     PixelAnalyzer analyzer = getAnalyzer();
     
     long startTime = System.currentTimeMillis();

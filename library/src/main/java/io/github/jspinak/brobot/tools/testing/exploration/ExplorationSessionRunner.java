@@ -253,7 +253,7 @@ public class ExplorationSessionRunner {
      * @param sessionId the unique test session identifier for correlation
      * @param actionConfig configuration for the action to perform (e.g., CLICK, FIND)
      * @param objectCollections the UI elements to perform the action on
-     * @see Action#perform(ActionOptions, ObjectCollection...) for action execution
+     * @see Action#perform(ActionConfig, ObjectCollection...) for action execution
      * @see ActionLogger#logAction(String, ActionResult, ObjectCollection) for logging
      */
     private void logAction(
@@ -279,7 +279,7 @@ public class ExplorationSessionRunner {
      * @param actionConfig the action configuration specifying what to do
      * @param objectCollections the target UI elements for the action
      * @return ActionResult containing success status and action details
-     * @see Action#perform(ActionOptions, ObjectCollection...) for the underlying implementation
+     * @see Action#perform(ActionConfig, ObjectCollection...) for the underlying implementation
      */
     private ActionResult performAction(
             ActionConfig actionConfig, ObjectCollection... objectCollections) {

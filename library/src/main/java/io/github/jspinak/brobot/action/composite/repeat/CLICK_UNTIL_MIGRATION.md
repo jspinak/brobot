@@ -7,10 +7,10 @@ The `ClickUntil` action and `ClickUntilOptions` are deprecated in Brobot 1.1.0+.
 
 ### Old Way (Deprecated)
 ```java
-// Using ClickUntil with ActionOptions
-ActionOptions options = new ActionOptions.Builder()
+// Using ClickUntil with ActionConfig
+ActionConfig options = new ActionConfig.Builder()
     .setAction(ActionType.CLICK_UNTIL)
-    .setClickUntil(ActionOptions.ClickUntil.OBJECTS_VANISH)
+    .setClickUntil(ActionConfig.ClickUntil.OBJECTS_VANISH)
     .setMaxTimesToRepeatActionSequence(10)
     .build();
 action.perform(options, closeButton);

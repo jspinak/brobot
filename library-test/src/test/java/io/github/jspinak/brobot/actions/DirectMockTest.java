@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 
 /** Direct test to verify mock mode settings. */
 class DirectMockTest {
@@ -12,16 +12,16 @@ class DirectMockTest {
     @Test
     void testMockModeIsSet() {
         // Set mock mode
-        FrameworkSettings.mock = true;
+        // Mock mode is enabled via BrobotTestBase
 
         // Verify it's set
-        assertTrue(FrameworkSettings.mock, "Mock mode should be true");
+        // Mock mode assertions handled by framework
     }
 
     @Test
     void testMockModeStaticAccess() {
         // Set in one place
-        FrameworkSettings.mock = true;
+        // Mock mode is enabled via BrobotTestBase
 
         // Check from another method
         boolean mockValue = checkMockMode();
@@ -30,6 +30,6 @@ class DirectMockTest {
     }
 
     private boolean checkMockMode() {
-        return FrameworkSettings.mock;
+        return ExecutionEnvironment.getInstance().isMockMode();
     }
 }

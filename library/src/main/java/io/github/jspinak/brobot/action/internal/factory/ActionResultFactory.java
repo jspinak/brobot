@@ -11,7 +11,7 @@ import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.internal.execution.ActionLifecycle;
 import io.github.jspinak.brobot.action.internal.find.scene.SceneAnalysisCollectionBuilder;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalyses;
-import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -47,21 +47,21 @@ import lombok.Setter;
 public class ActionResultFactory {
 
     private final SceneAnalysisCollectionBuilder getSceneAnalysisCollection;
-    private final TimeProvider time;
+    private final TimeWrapper timeWrapper;
 
     /**
      * Constructs a MatchesInitializer with required dependencies.
      *
      * @param getSceneAnalysisCollection Service for creating scene analysis data
-     * @param time Time service for lifecycle tracking
+     * @param timeWrapper Time service for lifecycle tracking
      */
     public ActionResultFactory(
-            SceneAnalysisCollectionBuilder getSceneAnalysisCollection, TimeProvider time) {
+            SceneAnalysisCollectionBuilder getSceneAnalysisCollection, TimeWrapper timeWrapper) {
         this.getSceneAnalysisCollection = getSceneAnalysisCollection;
-        this.time = time;
+        this.timeWrapper = timeWrapper;
     }
 
-    // Removed ActionOptions-based init method - use ActionConfig version instead
+    // Removed ActionConfig-based init method - use ActionConfig version instead
 
     /**
      * Creates a fully initialized ActionResult for a new action execution using ActionConfig.
@@ -88,7 +88,7 @@ public class ActionResultFactory {
             maxWait = findOptions.getSearchDuration();
         }
 
-        matches.setActionLifecycle(new ActionLifecycle(time.now(), maxWait));
+        matches.setActionLifecycle(new ActionLifecycle(timeWrapper.now(), maxWait));
         matches.setActionConfig(actionConfig);
         matches.setActionDescription(actionDescription);
 
@@ -110,7 +110,7 @@ public class ActionResultFactory {
         return matches;
     }
 
-    // Removed ActionOptions-based init methods - use ActionConfig versions instead
+    // Removed ActionConfig-based init methods - use ActionConfig versions instead
 
     /**
      * Initializes ActionResult with ActionConfig and a list of object collections.

@@ -5,7 +5,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 
 /**
@@ -53,8 +52,8 @@ public class TestConfigurationManager
 
         ExecutionEnvironment.setInstance(env);
 
-        // Set FrameworkSettings for backward compatibility
-        FrameworkSettings.mock = !isIntegrationTest;
+        // Set BrobotProperties for backward compatibility
+        // Mock mode configured via ExecutionEnvironment
 
         // Log configuration
         // Note: isVerboseLogging() method doesn't exist in ExecutionEnvironment

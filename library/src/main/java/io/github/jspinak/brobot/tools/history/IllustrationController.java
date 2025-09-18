@@ -18,7 +18,7 @@ import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
 import io.github.jspinak.brobot.action.basic.region.DefineRegionOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
  * <p>Key filtering criteria:
  *
  * <ul>
- *   <li>Action permissions: Per-action type enablement via {@link FrameworkSettings}
+ *   <li>Action permissions: Per-action type enablement via {@link BrobotProperties}
  *   <li>Illustration directives: Explicit YES/NO overrides in {@link ActionConfig}
  *   <li>Repetition detection: Suppresses duplicate illustrations for same action/objects
  *   <li>Global history setting: Master switch for all illustrations
@@ -53,7 +53,7 @@ import lombok.extern.slf4j.Slf4j;
  *   <li>The {@code drawRepeatedActions} setting can override this filtering
  * </ul>
  *
- * <p>Supported action types (configurable via BrobotSettings):
+ * <p>Supported action types (configurable via BrobotProperties):
  *
  * <ul>
  *   <li>FIND - Object detection operations
@@ -69,13 +69,15 @@ import lombok.extern.slf4j.Slf4j;
  * consecutive operations. This state is instance-level and not thread-safe.
  *
  * @see VisualizationOrchestrator
- * @see FrameworkSettings
- * @see ActionOptions.Illustrate
+ * @see BrobotProperties
+ * @see ActionConfig.Illustrate
  */
 @Slf4j
 @Component
 @Getter
 public class IllustrationController {
+
+    @Autowired private BrobotProperties brobotProperties;
 
     private ImageFileUtilities imageUtils;
     private ActionVisualizer draw;
@@ -102,20 +104,20 @@ public class IllustrationController {
     /**
      * Initializes action-specific illustration permissions from global settings.
      *
-     * <p>Maps each supported action type to its corresponding BrobotSettings flag. This allows
+     * <p>Maps each supported action type to its corresponding BrobotProperties flag. This allows
      * fine-grained control over which actions generate illustrations, useful for reducing visual
      * noise or focusing on specific operations.
      *
      * <p>Called lazily on first illustration request to ensure settings are loaded.
      */
     private void setActionPermissions() {
-        actionPermissions.put(FIND, FrameworkSettings.drawFind);
-        actionPermissions.put(CLICK, FrameworkSettings.drawClick);
-        actionPermissions.put(DRAG, FrameworkSettings.drawDrag);
-        actionPermissions.put(MOVE, FrameworkSettings.drawMove);
-        actionPermissions.put(HIGHLIGHT, FrameworkSettings.drawHighlight);
-        actionPermissions.put(CLASSIFY, FrameworkSettings.drawClassify);
-        actionPermissions.put(DEFINE, FrameworkSettings.drawDefine);
+        actionPermissions.put(FIND, brobotProperties.getIllustration().isDrawFind());
+        actionPermissions.put(CLICK, brobotProperties.getIllustration().isDrawClick());
+        actionPermissions.put(DRAG, brobotProperties.getIllustration().isDrawDrag());
+        actionPermissions.put(MOVE, brobotProperties.getIllustration().isDrawMove());
+        actionPermissions.put(HIGHLIGHT, brobotProperties.getIllustration().isDrawHighlight());
+        actionPermissions.put(CLASSIFY, brobotProperties.getIllustration().isDrawClassify());
+        actionPermissions.put(DEFINE, brobotProperties.getIllustration().isDrawDefine());
     }
 
     /**
@@ -147,13 +149,17 @@ public class IllustrationController {
         // Verbose logging
         if (isVerbose()) {
             log.debug("[ILLUSTRATION] Checking if ok to illustrate:");
-            log.debug("  FrameworkSettings.saveHistory: {}", FrameworkSettings.saveHistory);
-            log.debug("  FrameworkSettings.historyPath: {}", FrameworkSettings.historyPath);
+            log.debug(
+                    "  brobotProperties.getScreenshot().isSaveHistory(): {}",
+                    brobotProperties.getScreenshot().isSaveHistory());
+            log.debug(
+                    "  brobotProperties.getScreenshot().getHistoryPath(): {}",
+                    brobotProperties.getScreenshot().getHistoryPath());
             log.debug("  ActionConfig.illustrate: {}", actionConfig.getIllustrate());
             log.debug("  Action type: determined at runtime");
         }
 
-        if (!FrameworkSettings.saveHistory
+        if (!brobotProperties.getScreenshot().isSaveHistory()
                 && actionConfig.getIllustrate() != ActionConfig.Illustrate.YES) {
             if (isVerbose()) {
                 log.debug("  Result: NO - saveHistory is false and illustrate is not YES");
@@ -169,22 +175,26 @@ public class IllustrationController {
         // Get action type from config
         ActionType action = getActionType(actionConfig);
         if (!actionPermissions.containsKey(action)) {
-            ConsoleReporter.println(action + " not available to illustrate in BrobotSettings.");
+            ConsoleReporter.println(action + " not available to illustrate in BrobotProperties.");
             if (isVerbose()) {
                 log.debug("  Result: NO - action {} not available to illustrate", action);
             }
             return false;
         }
         if (!actionPermissions.get(action)) {
-            ConsoleReporter.println(action + " not set to illustrate in BrobotSettings.");
+            ConsoleReporter.println(action + " not set to illustrate in BrobotProperties.");
             if (isVerbose()) {
                 log.debug("  Result: NO - action {} not permitted in settings", action);
-                log.debug("  FrameworkSettings.drawFind: {}", FrameworkSettings.drawFind);
-                log.debug("  FrameworkSettings.drawClick: {}", FrameworkSettings.drawClick);
+                log.debug(
+                        "  brobotProperties.getIllustration().isDrawFind(): {}",
+                        brobotProperties.getIllustration().isDrawFind());
+                log.debug(
+                        "  brobotProperties.getIllustration().isDrawClick(): {}",
+                        brobotProperties.getIllustration().isDrawClick());
             }
             return false;
         }
-        if (FrameworkSettings.drawRepeatedActions) {
+        if (brobotProperties.getIllustration().isDrawRepeatedActions()) {
             if (isVerbose()) {
                 log.debug("  Result: YES - drawRepeatedActions is true");
             }
@@ -271,7 +281,9 @@ public class IllustrationController {
 
         if (isVerbose()) {
             log.debug("[ILLUSTRATION] Creating illustration for action: {}", actionType);
-            log.debug("[ILLUSTRATION] History path: {}", FrameworkSettings.historyPath);
+            log.debug(
+                    "[ILLUSTRATION] History path: {}",
+                    brobotProperties.getScreenshot().getHistoryPath());
             log.debug("[ILLUSTRATION] Calling illustrationManager.draw()");
         }
 
@@ -317,8 +329,8 @@ public class IllustrationController {
      * }
      * lastCollections = Arrays.asList(objectCollections);
      *
-     * // For now, convert to ActionOptions for the visualization
-     * ActionConfig actionConfig = convertToActionOptions(actionConfig);
+     * // For now, convert to ActionConfig for the visualization
+     * ActionConfig actionConfig = convertToActionConfig(actionConfig);
      *
      * log.debug("[ILLUSTRATION] Calling illustrationManager.draw()");
      * try {
@@ -354,10 +366,10 @@ public class IllustrationController {
     }
 
     /**
-     * Maps PatternFindOptions strategy to ActionOptions.Find enum.
+     * Maps PatternFindOptions strategy to ActionConfig.Find enum.
      *
      * @param findOptions the find options to map
-     * @return corresponding ActionOptions.Find value
+     * @return corresponding ActionConfig.Find value
      */
     private PatternFindOptions.Strategy mapFindStrategy(PatternFindOptions findOptions) {
         // Just return the strategy as-is
@@ -365,13 +377,13 @@ public class IllustrationController {
     }
 
     /**
-     * Converts an ActionConfig to ActionOptions for backward compatibility. This is a temporary
+     * Converts an ActionConfig to ActionConfig for backward compatibility. This is a temporary
      * method until the illustration system is fully updated to work with ActionConfig directly.
      *
      * @param config the ActionConfig to convert
-     * @return equivalent ActionOptions
+     * @return equivalent ActionConfig
      */
-    // Removed convertToActionConfig - ActionOptions no longer exists
+    // Removed convertToActionConfig - ActionConfig no longer exists
 
     /** Helper method to check if verbose logging is enabled. */
     private boolean isVerbose() {

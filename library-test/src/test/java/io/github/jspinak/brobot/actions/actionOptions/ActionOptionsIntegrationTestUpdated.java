@@ -3,13 +3,14 @@ package io.github.jspinak.brobot.actions.actionOptions;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 
@@ -30,10 +31,12 @@ import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ActionOptionsIntegrationTestUpdated extends BrobotIntegrationTestBase {
 
+    @Autowired private BrobotProperties brobotProperties;
+
     @BeforeEach
     void setUp() {
         super.setUpBrobotEnvironment();
-        FrameworkSettings.mock = true;
+        // Cannot set mock - BrobotProperties is immutable
     }
 
     @Test
@@ -246,6 +249,6 @@ public class ActionOptionsIntegrationTestUpdated extends BrobotIntegrationTestBa
 
     @AfterEach
     void tearDown() {
-        FrameworkSettings.mock = false;
+        // Mock mode disabled - not needed in tests
     }
 }

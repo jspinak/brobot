@@ -255,7 +255,7 @@
  *
  * @since 1.0
  * @see io.github.jspinak.brobot.action.ActionResult
- * @see io.github.jspinak.brobot.action.ActionOptions
+ * @see io.github.jspinak.brobot.action.ActionConfig
  * @see io.github.jspinak.brobot.ConsoleReporter.Report
  */
 package io.github.jspinak.brobot.model.action;

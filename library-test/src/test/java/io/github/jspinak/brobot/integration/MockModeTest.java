@@ -12,7 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /** Test to verify mock mode functionality with ActionHistory. */
@@ -21,14 +21,15 @@ import io.github.jspinak.brobot.test.BrobotTestBase;
 @Disabled("Missing PromptState and WorkingState dependencies")
 public class MockModeTest extends BrobotTestBase {
 
+    @Autowired private BrobotProperties brobotProperties;
+
     @Autowired(required = false)
     private Action action;
 
     @BeforeEach
     public void setup() {
         // Ensure mock mode is enabled
-        FrameworkSettings.mock = true;
-        System.out.println("Mock mode enabled: " + FrameworkSettings.mock);
+        System.out.println("Mock mode enabled: " + brobotProperties.getCore().isMock());
     }
 
     @Test
@@ -67,7 +68,7 @@ public class MockModeTest extends BrobotTestBase {
         }
 
         System.out.println("\n=== Testing Mock Find ===");
-        System.out.println("Mock mode: " + FrameworkSettings.mock);
+        System.out.println("Mock mode: " + brobotProperties.getCore().isMock());
 
         // Create state and try to find
         // PromptState promptState = new PromptState();

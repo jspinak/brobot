@@ -69,7 +69,7 @@
  *
  * // Find optimal parameters
  * TuningExperiment best = store.getBestPerformingExperiment();
- * ActionOptions optimal = best.toActionOptions();
+ * ActionConfig optimal = best.toActionConfig();
  * }</pre>
  *
  * <h2>Report Generation</h2>

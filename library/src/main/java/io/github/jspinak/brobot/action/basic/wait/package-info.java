@@ -36,7 +36,7 @@
  *
  * <h2>Configuration Options</h2>
  *
- * <p>Through {@link io.github.jspinak.brobot.action.ActionOptions}:
+ * <p>Through {@link io.github.jspinak.brobot.action.ActionConfig}:
  *
  * <ul>
  *   <li><b>Timeout</b> - Maximum time to wait for the condition
@@ -51,7 +51,7 @@
  * // Wait for a loading spinner to disappear
  * WaitVanish waitVanish = new WaitVanish(...);
  *
- * ActionOptions vanishOptions = new ActionOptions.Builder()
+ * ActionConfig vanishOptions = new ActionConfig.Builder()
  *     .setAction(ActionType.VANISH)
  *     .setMaxWait(30.0)  // Wait up to 30 seconds
  *     .build();
@@ -69,7 +69,7 @@
  * // Monitor a region for any changes
  * OnChange onChange = new OnChange(...);
  *
- * ActionOptions changeOptions = new ActionOptions.Builder()
+ * ActionConfig changeOptions = new ActionConfig.Builder()
  *     .setAction(ActionType.ON_CHANGE)
  *     .setMaxWait(10.0)
  *     .setPollInterval(0.5)  // Check every 500ms

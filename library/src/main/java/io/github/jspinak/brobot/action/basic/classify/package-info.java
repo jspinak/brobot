@@ -48,7 +48,7 @@
  * // Classify elements in a region
  * Classify classify = new Classify(...);
  *
- * ActionOptions classifyOptions = new ActionOptions.Builder()
+ * ActionConfig classifyOptions = new ActionConfig.Builder()
  *     .setAction(ActionType.CLASSIFY)
  *     .setConfidenceThreshold(0.8)  // Minimum 80% confidence
  *     .build();

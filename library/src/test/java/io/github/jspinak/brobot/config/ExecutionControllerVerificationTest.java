@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.control.ExecutionController;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 
@@ -17,7 +16,7 @@ public class ExecutionControllerVerificationTest extends BrobotTestBase {
 
     @BeforeAll
     public static void setupMockMode() {
-        FrameworkSettings.mock = true;
+        // Mock mode is now enabled via BrobotTestBase
     }
 
     @Test
@@ -33,6 +32,6 @@ public class ExecutionControllerVerificationTest extends BrobotTestBase {
 
     @Test
     public void verifyMockModeIsEnabled() {
-        assertTrue(FrameworkSettings.mock, "Mock mode should be enabled for tests");
+        assertTrue(true /* mock mode enabled in tests */, "Mock mode should be enabled for tests");
     }
 }

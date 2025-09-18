@@ -1,8 +1,9 @@
 package io.github.jspinak.brobot.action.internal.text;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
@@ -45,6 +46,8 @@ import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 @Component
 public class KeyUpWrapper {
 
+    @Autowired private BrobotProperties brobotProperties;
+
     /**
      * Releases all currently pressed keys.
      *
@@ -67,7 +70,7 @@ public class KeyUpWrapper {
      */
     public void release() {
         ConsoleReporter.format("release all keys| ");
-        if (FrameworkSettings.mock) return;
+        if (brobotProperties.getCore().isMock()) return;
         new Region().sikuli().keyUp();
     }
 
@@ -89,7 +92,7 @@ public class KeyUpWrapper {
      */
     public void release(String key) {
         ConsoleReporter.format("release %s| ", key);
-        if (FrameworkSettings.mock) return;
+        if (brobotProperties.getCore().isMock()) return;
         new Region().sikuli().keyUp(key);
     }
 
@@ -119,7 +122,7 @@ public class KeyUpWrapper {
      * @see org.sikuli.script.Key
      */
     public void release(int key) {
-        if (FrameworkSettings.mock) {
+        if (brobotProperties.getCore().isMock()) {
             ConsoleReporter.format("release %d| ", key);
             return;
         }

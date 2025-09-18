@@ -14,7 +14,7 @@ import io.github.jspinak.brobot.action.internal.find.IterativePatternFinder;
 /**
  * V2 component for finding images on screen using various search strategies.
  *
- * <p>This V2 class works with BaseFindOptions instead of ActionOptions. It implements the primary
+ * <p>This V2 class works with BaseFindOptions instead of ActionConfig. It implements the primary
  * image matching functionality in Brobot, supporting multiple find strategies including finding all
  * matches, finding the best match, finding one match per state object, and finding matches per
  * scene. It integrates with the action lifecycle management to handle iterative searches and exit
@@ -68,7 +68,7 @@ public class ImageFinder {
      */
     void findAll(ActionResult matches, List<ObjectCollection> objectCollections) {
         // For now, delegate to legacy implementation
-        // TODO: Update when ActionResult is migrated to use ActionConfig instead of ActionOptions
+        // TODO: Update when ActionResult is migrated to use ActionConfig instead of ActionConfig
         legacyFindImage.findAll(matches, objectCollections);
     }
 

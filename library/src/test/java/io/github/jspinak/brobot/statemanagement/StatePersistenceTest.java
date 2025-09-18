@@ -10,6 +10,7 @@ import org.junit.jupiter.api.*;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.state.special.SpecialStateType;
 import io.github.jspinak.brobot.navigation.service.StateService;
@@ -369,8 +370,14 @@ public class StatePersistenceTest extends BrobotTestBase {
             StateMemory mockMemory = mock(StateMemory.class);
             when(mockMemory.getActiveStates()).thenReturn(new HashSet<>());
 
+            // Create and configure BrobotProperties mock
+            BrobotProperties brobotProperties = mock(BrobotProperties.class);
+            BrobotProperties.Core core = new BrobotProperties.Core();
+            core.setMock(true);
+            when(brobotProperties.getCore()).thenReturn(core);
+
             InitialStates initialStates =
-                    new InitialStates(stateDetector, mockMemory, stateService);
+                    new InitialStates(brobotProperties, stateDetector, mockMemory, stateService);
 
             State initialState = createMockState(1L, "InitialState");
             when(stateService.getState(1L)).thenReturn(Optional.of(initialState));

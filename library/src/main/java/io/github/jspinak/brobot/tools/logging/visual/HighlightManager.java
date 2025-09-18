@@ -8,7 +8,7 @@ import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import io.github.jspinak.brobot.logging.unified.LogEvent;
 import io.github.jspinak.brobot.model.element.Region;
@@ -38,6 +38,8 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Slf4j
 public class HighlightManager {
+
+    @Autowired private BrobotProperties brobotProperties;
 
     /** Represents a region with its state and object context for better logging. */
     public static class RegionWithContext {
@@ -416,7 +418,7 @@ public class HighlightManager {
             int borderWidth,
             String type,
             Double score) {
-        if (FrameworkSettings.mock) {
+        if (brobotProperties.getCore().isMock()) {
             // In mock mode, just log the highlight action
             brobotLogger
                     .log()

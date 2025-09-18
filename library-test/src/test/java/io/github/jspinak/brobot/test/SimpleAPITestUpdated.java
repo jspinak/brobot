@@ -14,7 +14,6 @@ import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.action.ActionRecord;
 import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.model.element.Pattern;
@@ -40,12 +39,12 @@ public class SimpleAPITestUpdated extends BrobotIntegrationTestBase {
     @BeforeEach
     void setUp() {
         super.setUpBrobotEnvironment();
-        FrameworkSettings.mock = true;
+        // Mock mode is enabled via BrobotTestBase
     }
 
     @AfterEach
     void tearDown() {
-        FrameworkSettings.mock = false;
+        // Mock mode disabled - not needed in tests
     }
 
     @Test

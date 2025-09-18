@@ -42,7 +42,7 @@ import io.github.jspinak.brobot.model.state.StateImage;
  * application-specific drag behaviors.
  *
  * @see Drag
- * @see ActionOptions
+ * @see ActionConfig
  * @see Positions
  */
 @Component
@@ -189,7 +189,7 @@ public class CommonDrag {
      * </ul>
      *
      * @param matches The ActionResult object tracking the operation. This method modifies its
-     *     ActionOptions to include the drag offsets.
+     *     ActionConfig to include the drag offsets.
      * @param from The image to drag from its current location
      * @param xOff Horizontal offset in pixels (positive = right, negative = left)
      * @param yOff Vertical offset in pixels (positive = down, negative = up)

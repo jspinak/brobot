@@ -23,11 +23,16 @@ Ensure your tests extend `BrobotTestBase`:
 
 **Before:**
 ```java
+// Note: BrobotProperties must be injected as a dependency
+@Autowired
+private BrobotProperties brobotProperties;
+
 public class MyTest {
     @BeforeEach
     public void setup() {
         System.setProperty("brobot.mock", "true");
-        FrameworkSettings.mock = true;
+        // Mock mode is now configured via application.properties:
+// brobot.core.mock=true;
     }
 }
 ```
@@ -47,7 +52,7 @@ Update code that checks mock mode status:
 
 **Before:**
 ```java
-if (FrameworkSettings.mock) {
+if (brobotProperties.getCore().isMock()) {
     // mock logic
 }
 
@@ -66,7 +71,7 @@ if (ExecutionEnvironment.getInstance().isMockMode()) {
 ```java
 import io.github.jspinak.brobot.config.MockModeManager;
 
-if (MockModeManager.isMockMode()) {
+if (brobotProperties.getCore().isMock()) {
     // mock logic
 }
 ```
@@ -80,7 +85,8 @@ Update code that sets mock mode:
 // Multiple places to set
 System.setProperty("brobot.mock", "true");
 System.setProperty("brobot.mock.mode", "true");
-FrameworkSettings.mock = true;
+// Mock mode is now configured via application.properties:
+// brobot.core.mock=true;
 
 ExecutionEnvironment env = ExecutionEnvironment.builder()
     .mockMode(true)
@@ -102,13 +108,14 @@ MockModeManager.setMockMode(true);
 ```java
 @SpringBootTest
 @TestPropertySource(properties = {
-    "brobot.mock=true",
-    "brobot.mock=true"
+    "brobot.core.mock=true",
+    "brobot.core.mock=true"
 })
 public class IntegrationTest {
     @BeforeEach
     public void setup() {
-        FrameworkSettings.mock = true;
+        // Mock mode is now configured via application.properties:
+// brobot.core.mock=true;
     }
 }
 ```
@@ -131,7 +138,7 @@ public abstract class CustomTestBase {
     public void setupMockMode() {
         System.setProperty("brobot.mock.mode", "true");
         try {
-            Field mockField = FrameworkSettings.class.getField("mock");
+            Field mockField = BrobotProperties.class.getField("mock");
             mockField.set(null, true);
         } catch (Exception e) {
             // Handle error
@@ -166,7 +173,8 @@ public void testWithConditionalMock() {
     
     if (useMock) {
         System.setProperty("brobot.mock", "true");
-        FrameworkSettings.mock = true;
+        // Mock mode is now configured via application.properties:
+// brobot.core.mock=true;
     }
     
     // Test logic
@@ -194,16 +202,19 @@ public void testWithConditionalMock() {
 @Test
 public void testModeSwitch() {
     // Start with mock
-    FrameworkSettings.mock = true;
+    // Mock mode is now configured via application.properties:
+// brobot.core.mock=true;
     // ... mock tests ...
     
     // Switch to real
-    FrameworkSettings.mock = false;
+    // Mock mode is now configured via application.properties:
+// brobot.core.mock=false;
     System.setProperty("brobot.mock", "false");
     // ... real tests ...
     
     // Back to mock
-    FrameworkSettings.mock = true;
+    // Mock mode is now configured via application.properties:
+// brobot.core.mock=true;
     System.setProperty("brobot.mock", "true");
 }
 ```
@@ -274,7 +285,7 @@ public class MyTest extends BrobotTestBase {
 MockModeManager.logMockModeState();
 
 // Ensure using MockModeManager everywhere
-if (MockModeManager.isMockMode()) { // Not FrameworkSettings.mock
+if (brobotProperties.getCore().isMock()) { // Not brobotProperties.getCore().isMock()
     // mock logic
 }
 ```
@@ -285,8 +296,8 @@ if (MockModeManager.isMockMode()) { // Not FrameworkSettings.mock
 
 **Solution:** Search for and replace all direct mock settings:
 ```bash
-# Find direct FrameworkSettings.mock assignments
-grep -r "FrameworkSettings.mock\s*=" .
+# Find direct brobotProperties.getCore().isMock() assignments
+grep -r "brobotProperties.getCore().isMock()\s*=" .
 
 # Find system property settings
 grep -r "setProperty.*mock" .
@@ -316,7 +327,7 @@ Changes to mock configuration only need updates in one place
 ## Checklist
 
 - [ ] All test classes extend `BrobotTestBase`
-- [ ] Replaced all `FrameworkSettings.mock` checks with `MockModeManager.isMockMode()`
+- [ ] Replaced all `brobotProperties.getCore().isMock()` checks with `brobotProperties.getCore().isMock()`
 - [ ] Replaced all mock mode settings with `MockModeManager.setMockMode()`
 - [ ] Removed redundant system property settings
 - [ ] Verified tests pass in both local and CI environments

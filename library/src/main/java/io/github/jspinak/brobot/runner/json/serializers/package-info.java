@@ -8,7 +8,7 @@
  * <h2>Serializers</h2>
  *
  * <ul>
- *   <li>{@link io.github.jspinak.brobot.runner.json.serializers.ActionOptionsSerializer} -
+ *   <li>{@link io.github.jspinak.brobot.runner.json.serializers.ActionConfigSerializer} -
  *       Serializes action configuration with readable format
  *   <li>{@link io.github.jspinak.brobot.runner.json.serializers.MatchesSerializer} - Serializes
  *       ActionResult with match information
@@ -33,11 +33,11 @@
  *
  * <h2>Serialization Examples</h2>
  *
- * <h3>ActionOptions</h3>
+ * <h3>ActionConfig</h3>
  *
  * <pre>{@code
  * // Java object
- * ActionOptions options = new ActionOptions.Builder()
+ * ActionConfig options = new ActionConfig.Builder()
  *     .action(Action.CLICK)
  *     .similarity(0.95)
  *     .pauseAfter(1000)
@@ -126,7 +126,7 @@
  * <p>The package includes utility classes for common operations:
  *
  * <ul>
- *   <li>ActionOptionsJsonUtils - Helper methods for ActionOptions
+ *   <li>ActionConfigJsonUtils - Helper methods for ActionConfig
  *   <li>MatchesJsonUtils - Helper methods for match results
  *   <li>ObjectCollectionJsonUtils - Collection handling utilities
  *   <li>JsonUtils - General JSON utilities

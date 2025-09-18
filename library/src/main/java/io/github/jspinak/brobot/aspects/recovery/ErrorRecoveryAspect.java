@@ -39,7 +39,12 @@ import lombok.extern.slf4j.Slf4j;
         matchIfMissing = false)
 public class ErrorRecoveryAspect {
 
-    @Autowired private BrobotLogger brobotLogger;
+    private final BrobotLogger brobotLogger;
+
+    @Autowired
+    public ErrorRecoveryAspect(BrobotLogger brobotLogger) {
+        this.brobotLogger = brobotLogger;
+    }
 
     // Circuit breaker state
     private final ConcurrentHashMap<String, CircuitBreaker> circuitBreakers =

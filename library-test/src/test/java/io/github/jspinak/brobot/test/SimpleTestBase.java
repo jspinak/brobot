@@ -1,6 +1,9 @@
 package io.github.jspinak.brobot.test;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Simple base test class for tests that don't require Spring context. Sets up mock mode to ensure
@@ -8,19 +11,21 @@ import org.junit.jupiter.api.BeforeEach;
  */
 public abstract class SimpleTestBase {
 
+    @Autowired private BrobotProperties brobotProperties;
+
     @BeforeEach
     public void setupMockMode() {
         // Set system property for mock mode
         System.setProperty("brobot.mock.mode", "true");
 
-        // Set FrameworkSettings.mock directly using reflection to avoid initialization
+        // Set brobotProperties.getCore().isMock() directly using reflection to avoid initialization
         // issues
         try {
             Class<?> frameworkSettingsClass =
-                    Class.forName("io.github.jspinak.brobot.config.core.FrameworkSettings");
+                    Class.forName("io.github.jspinak.brobot.config.core.BrobotProperties");
             frameworkSettingsClass.getField("mock").set(null, true);
         } catch (Exception e) {
-            // Ignore if FrameworkSettings is not available
+            // Ignore if BrobotProperties is not available
         }
     }
 }

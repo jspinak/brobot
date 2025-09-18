@@ -11,9 +11,10 @@ import java.util.*;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.analysis.color.ColorStatistics;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
@@ -69,6 +70,8 @@ import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
  */
 @Component
 public class MatrixVisualizer {
+
+    @Autowired private BrobotProperties brobotProperties;
 
     private final ImageFileUtilities imageUtils;
 
@@ -436,9 +439,9 @@ public class MatrixVisualizer {
      *
      * <p>Uses ImageUtils to generate a unique filename, preventing overwrites when saving multiple
      * versions of the same visualization. The file is saved in PNG format to the path specified in
-     * BrobotSettings.
+     * BrobotProperties.
      *
-     * <p>File path: {BrobotSettings.historyPath}{filename}[-{number}].png
+     * <p>File path: {BrobotProperties history path}{filename}[-{number}].png
      *
      * <p>This is the preferred method for saving visualizations as it ensures unique filenames and
      * consistent directory structure.
@@ -447,7 +450,9 @@ public class MatrixVisualizer {
      * @param filename base filename without extension
      */
     public void writeMatToHistory(Mat mat, String filename) {
-        String path = imageUtils.getFreePath(FrameworkSettings.historyPath + filename);
+        String path =
+                imageUtils.getFreePath(
+                        brobotProperties.getScreenshot().getHistoryPath() + filename);
         imwrite(path + ".png", mat);
     }
 }

@@ -7,7 +7,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.test.context.ContextConfiguration;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 
 /**
@@ -32,7 +31,7 @@ public class TestEnvironmentInitializer
         String testResourcePath = projectRoot + "/src/test/resources/";
 
         // Set paths in BrobotSettings
-        FrameworkSettings.screenshotPath = "screenshots/";
+        // Screenshot path: screenshots/
 
         // Configure BrobotEnvironment based on test type
         ExecutionEnvironment env;
@@ -48,7 +47,7 @@ public class TestEnvironmentInitializer
                             .verboseLogging(true)
                             .build();
 
-            FrameworkSettings.mock = false;
+            // Mock mode disabled - not needed in tests
 
             // Set ImagePath bundle path if not in full mock mode
             if (!env.shouldSkipSikuliX()) {
@@ -69,7 +68,7 @@ public class TestEnvironmentInitializer
                             .allowScreenCapture(false)
                             .build();
 
-            FrameworkSettings.mock = true;
+            // Mock mode is enabled via BrobotTestBase
         }
 
         ExecutionEnvironment.setInstance(env);
@@ -81,6 +80,6 @@ public class TestEnvironmentInitializer
 
         System.out.println("Test environment initialized: " + env.getEnvironmentInfo());
         System.out.println("Working directory: " + projectRoot);
-        System.out.println("FrameworkSettings.mock: " + FrameworkSettings.mock);
+        System.out.println("Mock mode: " + ExecutionEnvironment.getInstance().isMockMode());
     }
 }

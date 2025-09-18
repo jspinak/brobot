@@ -12,7 +12,7 @@ import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
 import io.github.jspinak.brobot.action.internal.find.SearchRegionResolver;
 import io.github.jspinak.brobot.action.internal.utility.ActionSuccessCriteria;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.control.ExecutionController;
 import io.github.jspinak.brobot.control.ExecutionStoppedException;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
@@ -22,7 +22,7 @@ import io.github.jspinak.brobot.tools.logging.ActionLogger;
 import io.github.jspinak.brobot.tools.logging.ExecutionSession;
 import io.github.jspinak.brobot.tools.logging.model.LogData;
 import io.github.jspinak.brobot.tools.ml.dataset.DatasetManager;
-import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 import io.github.jspinak.brobot.util.image.capture.ScreenshotCapture;
 
 import lombok.extern.slf4j.Slf4j;
@@ -69,7 +69,9 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Slf4j
 public class ActionExecution {
-    private final TimeProvider time;
+
+    private final BrobotProperties brobotProperties;
+    private final TimeWrapper timeWrapper;
     private final IllustrationController illustrateScreenshot;
     private final SearchRegionResolver selectRegions;
     private final ActionLifecycleManagement actionLifecycleManagement;
@@ -90,7 +92,8 @@ public class ActionExecution {
      * for comprehensive action execution. Each dependency handles a specific aspect of the
      * execution lifecycle.
      *
-     * @param time Provides timing services including wait operations and duration tracking
+     * @param brobotProperties Configuration properties for the framework
+     * @param timeWrapper Provides timing services including wait operations and duration tracking
      * @param illustrateScreenshot Captures and annotates screenshots for visual documentation
      * @param selectRegions Identifies screen regions relevant to the action
      * @param actionLifecycleManagement Controls action repetition, sequences, and termination
@@ -101,9 +104,12 @@ public class ActionExecution {
      * @param captureScreenshot Captures raw screenshots for error documentation
      * @param automationSession Manages session context and identifiers
      * @param executionController Controls execution flow with pause/resume/stop functionality
+     * @param brobotLogger Logger for framework-level events
+     * @param stateMemory State management and history
      */
     public ActionExecution(
-            TimeProvider time,
+            BrobotProperties brobotProperties,
+            TimeWrapper timeWrapper,
             IllustrationController illustrateScreenshot,
             SearchRegionResolver selectRegions,
             ActionLifecycleManagement actionLifecycleManagement,
@@ -116,7 +122,8 @@ public class ActionExecution {
             @Autowired(required = false) ExecutionController executionController,
             BrobotLogger brobotLogger,
             StateMemory stateMemory) {
-        this.time = time;
+        this.brobotProperties = brobotProperties;
+        this.timeWrapper = timeWrapper;
         this.illustrateScreenshot = illustrateScreenshot;
         this.selectRegions = selectRegions;
         this.actionLifecycleManagement = actionLifecycleManagement;
@@ -149,7 +156,7 @@ public class ActionExecution {
      *   <li>Captures illustrated screenshots (if enabled)
      *   <li>Applies post-action pause (if configured)
      *   <li>Records duration and logs results
-     *   <li>Collects training data (if {@link FrameworkSettings#buildDataset} is enabled)
+     *   <li>Collects training data (if {@link BrobotProperties} is enabled)
      * </ol>
      *
      * <p><strong>Side effects:</strong>
@@ -175,7 +182,7 @@ public class ActionExecution {
      * @see ActionLifecycleManagement
      * @see DatasetManager#addSetOfData
      */
-    // Removed ActionOptions-based perform method - use ActionConfig version instead
+    // Removed ActionConfig-based perform method - use ActionConfig version instead
     // The ActionConfig version is available below
     /*
      * public ActionResult perform(ActionInterface actionMethod, String
@@ -215,7 +222,7 @@ public class ActionExecution {
      *
      * Duration duration = actionLifecycleManagement.getCurrentDuration(matches);
      * matches.setDuration(duration);
-     * if (FrameworkSettings.buildDataset) datasetManager.addSetOfData(matches);
+     * if (brobotProperties.getDataset().isEnabled()) datasetManager.addSetOfData(matches);
      * // Removed direct console output - logging is handled by
      * ActionLifecycleAspect which respects QUIET mode
      * // ConsoleReporter.println(actionConfig.getAction() + " " +
@@ -256,7 +263,7 @@ public class ActionExecution {
      * @param objectCollections Contains state images to be included in the output. Only the first
      *     collection is processed if multiple are provided.
      */
-    // Removed ActionOptions-based printAction method
+    // Removed ActionConfig-based printAction method
     /*
      * private void printAction(ActionConfig actionConfig, ObjectCollection...
      * objectCollections) {
@@ -271,7 +278,7 @@ public class ActionExecution {
      * Executes an action with complete lifecycle management using ActionConfig.
      *
      * <p>This method is the new primary entry point that accepts ActionConfig instead of
-     * ActionOptions. It provides the same comprehensive lifecycle management as the legacy method
+     * ActionConfig. It provides the same comprehensive lifecycle management as the legacy method
      * but uses the modern configuration approach.
      *
      * @param actionMethod The {@link ActionInterface} implementation containing action-specific
@@ -300,7 +307,7 @@ public class ActionExecution {
             // Handle before action logging
             handleBeforeActionLogging(actionConfig, objectCollections);
 
-            time.wait(actionConfig.getPauseBeforeBegin());
+            timeWrapper.wait(actionConfig.getPauseBeforeBegin());
 
             while (actionLifecycleManagement.isMoreSequencesAllowed(matches)) {
                 // Check pause point before each sequence
@@ -320,7 +327,7 @@ public class ActionExecution {
                     selectRegions.getRegionsForAllImages(actionConfig, objectCollections),
                     actionConfig,
                     objectCollections);
-            time.wait(actionConfig.getPauseAfterEnd());
+            timeWrapper.wait(actionConfig.getPauseAfterEnd());
 
             // Handle after action logging
             handleAfterActionLogging(actionConfig, matches, objectCollections);
@@ -334,7 +341,7 @@ public class ActionExecution {
 
         Duration duration = actionLifecycleManagement.getCurrentDuration(matches);
         matches.setDuration(duration);
-        if (FrameworkSettings.buildDataset) datasetManager.addSetOfData(matches);
+        if (brobotProperties.getDataset().isBuild()) datasetManager.addSetOfData(matches);
         // Removed direct console output - logging is handled by ActionLifecycleAspect
         // which respects QUIET mode
         // ConsoleReporter.println(actionConfig.getClass().getSimpleName() + " " +

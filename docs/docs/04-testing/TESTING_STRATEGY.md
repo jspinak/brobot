@@ -28,6 +28,10 @@ This document outlines the comprehensive testing strategy for the Brobot framewo
 All Brobot tests MUST extend `BrobotTestBase`:
 
 ```java
+// Note: BrobotProperties must be injected as a dependency
+@Autowired
+private BrobotProperties brobotProperties;
+
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.config.MockModeManager;
 
@@ -35,7 +39,7 @@ public class MyTest extends BrobotTestBase {
     @Test
     public void testFeature() {
         // Mock mode is automatically enabled via MockModeManager
-        assertTrue(MockModeManager.isMockMode());
+        assertTrue(brobotProperties.getCore().isMock());
         // Test runs in headless environment
     }
 }
@@ -141,8 +145,8 @@ public void testImmutability() {
 @DisplayName("Action works in mock mode")
 public void testActionInMockMode() {
     // Given - mock mode enabled by BrobotTestBase via MockModeManager
-    assertTrue(MockModeManager.isMockMode());
-    // This also ensures FrameworkSettings.mock is synchronized
+    assertTrue(brobotProperties.getCore().isMock());
+    // This also ensures brobotProperties.getCore().isMock() is synchronized
     
     // When - perform action
     ActionResult result = action.perform(config, objectCollection);
@@ -361,7 +365,7 @@ jobs:
 
 1. **HeadlessException in CI**
    - **Solution**: Ensure all tests extend `BrobotTestBase`
-   - **Check**: `FrameworkSettings.mock` should be `true`
+   - **Check**: `brobotProperties.getCore().isMock()` should be `true`
 
 2. **Slow Test Execution**
    - **Solution**: Use mock mode for unit tests
@@ -379,7 +383,7 @@ jobs:
 
 1. **Always use BrobotTestBase** for consistent behavior
    - Automatically configures mock mode via `MockModeManager`
-   - Use `MockModeManager.isMockMode()` instead of checking individual flags
+   - Use `brobotProperties.getCore().isMock()` instead of checking individual flags
 2. **Use setXxx() naming** in all builder calls
 3. **Group related tests** with `@Nested` classes
 4. **Use descriptive names** with `@DisplayName`

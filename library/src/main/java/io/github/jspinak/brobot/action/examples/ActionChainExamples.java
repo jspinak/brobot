@@ -100,7 +100,7 @@ public class ActionChainExamples {
 
         // Old way (with ActionResultCombo):
         // ActionResultCombo combo = new ActionResultCombo();
-        // combo.setActionOptions(clickOptions);
+        // combo.setActionConfig(clickOptions);
         // combo.setResultOptions(findOptions);
         // ...
 

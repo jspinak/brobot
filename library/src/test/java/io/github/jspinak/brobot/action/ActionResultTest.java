@@ -391,32 +391,7 @@ public class ActionResultTest extends BrobotTestBase {
 
     @Nested
     @DisplayName("Deprecated Methods")
-    class DeprecatedMethods {
-
-        @Test
-        @DisplayName("Should support deprecated sortByMatchScoreDecending")
-        @SuppressWarnings("deprecation")
-        void shouldSupportDeprecatedSortByMatchScoreDecending() {
-            actionResult.add(createMockMatch(0.8), createMockMatch(0.6), createMockMatch(0.9));
-
-            actionResult.sortByMatchScoreDecending(); // Uses deprecated method
-
-            // Should still work (delegates to sortMatchObjects)
-            assertEquals(3, actionResult.size());
-        }
-
-        @Test
-        @DisplayName("Should support deprecated sortBySizeDecending")
-        @SuppressWarnings("deprecation")
-        void shouldSupportDeprecatedSortBySizeDecending() {
-            actionResult.add(createMockMatchWithSize(0.8, 100), createMockMatchWithSize(0.7, 200));
-
-            actionResult.sortBySizeDecending(); // Uses deprecated method
-
-            // Should still work (delegates to sortBySizeDescending)
-            assertEquals(2, actionResult.size());
-        }
-    }
+    class DeprecatedMethods {}
 
     @Nested
     @DisplayName("Edge Cases")

@@ -18,15 +18,17 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class BrobotPropertyVerifier {
 
-    @Autowired private BrobotProperties properties;
-
-    @Autowired private BrobotLogger brobotLogger;
-
-    // Remove autowiring - use singleton instance instead to avoid Spring creating a
-    // new instance
+    private final BrobotProperties brobotProperties;
+    private final BrobotLogger brobotLogger;
 
     // Flag to ensure properties are only verified once
     private static boolean propertiesVerified = false;
+
+    @Autowired
+    public BrobotPropertyVerifier(BrobotProperties brobotProperties, BrobotLogger brobotLogger) {
+        this.brobotProperties = brobotProperties;
+        this.brobotLogger = brobotLogger;
+    }
 
     /**
      * Logs property verification after application is ready. This ensures all properties have been
@@ -44,9 +46,8 @@ public class BrobotPropertyVerifier {
         brobotLogger
                 .log()
                 .observation("Brobot Property Verification")
-                .metadata("saveHistory", properties.getScreenshot().isSaveHistory())
-                .metadata("historyPath", FrameworkSettings.historyPath)
-                .metadata("saveHistoryFrameworkSettings", FrameworkSettings.saveHistory)
+                .metadata("saveHistory", brobotProperties.getScreenshot().isSaveHistory())
+                .metadata("historyPath", brobotProperties.getScreenshot().getHistoryPath())
                 .metadata("illustrationEnabled", isIllustrationEnabled())
                 .log();
 
@@ -67,33 +68,36 @@ public class BrobotPropertyVerifier {
         brobotLogger
                 .log()
                 .observation("Illustration Settings")
-                .metadata("drawFind", properties.getIllustration().isDrawFind())
-                .metadata("drawClick", properties.getIllustration().isDrawClick())
-                .metadata("drawDrag", properties.getIllustration().isDrawDrag())
-                .metadata("drawMove", properties.getIllustration().isDrawMove())
-                .metadata("drawHighlight", properties.getIllustration().isDrawHighlight())
+                .metadata("drawFind", brobotProperties.getIllustration().isDrawFind())
+                .metadata("drawClick", brobotProperties.getIllustration().isDrawClick())
+                .metadata("drawDrag", brobotProperties.getIllustration().isDrawDrag())
+                .metadata("drawMove", brobotProperties.getIllustration().isDrawMove())
+                .metadata("drawHighlight", brobotProperties.getIllustration().isDrawHighlight())
                 .metadata(
-                        "drawRepeatedActions", properties.getIllustration().isDrawRepeatedActions())
-                .metadata("drawClassify", properties.getIllustration().isDrawClassify())
-                .metadata("drawDefine", properties.getIllustration().isDrawDefine())
+                        "drawRepeatedActions",
+                        brobotProperties.getIllustration().isDrawRepeatedActions())
+                .metadata("drawClassify", brobotProperties.getIllustration().isDrawClassify())
+                .metadata("drawDefine", brobotProperties.getIllustration().isDrawDefine())
                 .log();
 
         // Log framework settings that affect illustrations
         brobotLogger
                 .log()
                 .observation("Framework Settings (Illustration Related)")
-                .metadata("drawFind", FrameworkSettings.drawFind)
-                .metadata("drawClick", FrameworkSettings.drawClick)
-                .metadata("drawDrag", FrameworkSettings.drawDrag)
-                .metadata("drawMove", FrameworkSettings.drawMove)
-                .metadata("drawHighlight", FrameworkSettings.drawHighlight)
-                .metadata("drawRepeatedActions", FrameworkSettings.drawRepeatedActions)
-                .metadata("drawClassify", FrameworkSettings.drawClassify)
-                .metadata("drawDefine", FrameworkSettings.drawDefine)
+                .metadata("drawFind", brobotProperties.getIllustration().isDrawFind())
+                .metadata("drawClick", brobotProperties.getIllustration().isDrawClick())
+                .metadata("drawDrag", brobotProperties.getIllustration().isDrawDrag())
+                .metadata("drawMove", brobotProperties.getIllustration().isDrawMove())
+                .metadata("drawHighlight", brobotProperties.getIllustration().isDrawHighlight())
+                .metadata(
+                        "drawRepeatedActions",
+                        brobotProperties.getIllustration().isDrawRepeatedActions())
+                .metadata("drawClassify", brobotProperties.getIllustration().isDrawClassify())
+                .metadata("drawDefine", brobotProperties.getIllustration().isDrawDefine())
                 .log();
 
         // Provide diagnostic summary
-        if (!FrameworkSettings.saveHistory) {
+        if (!brobotProperties.getScreenshot().isSaveHistory()) {
             log.warn("Illustrations are DISABLED: saveHistory is false");
             brobotLogger
                     .log()
@@ -128,9 +132,11 @@ public class BrobotPropertyVerifier {
      */
     public void printVerification() {
         System.out.println("\n=== Brobot Property Verification ===");
-        System.out.println("Save history: " + properties.getScreenshot().isSaveHistory());
-        System.out.println("History path: " + FrameworkSettings.historyPath);
-        System.out.println("Save history (FrameworkSettings): " + FrameworkSettings.saveHistory);
+        System.out.println("Save history: " + brobotProperties.getScreenshot().isSaveHistory());
+        System.out.println("History path: " + brobotProperties.getScreenshot().getHistoryPath());
+        System.out.println(
+                "Save history (BrobotProperties): "
+                        + brobotProperties.getScreenshot().isSaveHistory());
         ExecutionEnvironment env = ExecutionEnvironment.getInstance();
         System.out.println("Mock mode: " + env.isMockMode());
         System.out.println("Has display: " + env.hasDisplay());
@@ -139,13 +145,13 @@ public class BrobotPropertyVerifier {
     }
 
     private boolean isIllustrationEnabled() {
-        return properties.getScreenshot().isSaveHistory()
-                && (properties.getIllustration().isDrawFind()
-                        || properties.getIllustration().isDrawClick()
-                        || properties.getIllustration().isDrawDrag()
-                        || properties.getIllustration().isDrawMove()
-                        || properties.getIllustration().isDrawHighlight()
-                        || properties.getIllustration().isDrawClassify()
-                        || properties.getIllustration().isDrawDefine());
+        return brobotProperties.getScreenshot().isSaveHistory()
+                && (brobotProperties.getIllustration().isDrawFind()
+                        || brobotProperties.getIllustration().isDrawClick()
+                        || brobotProperties.getIllustration().isDrawDrag()
+                        || brobotProperties.getIllustration().isDrawMove()
+                        || brobotProperties.getIllustration().isDrawHighlight()
+                        || brobotProperties.getIllustration().isDrawClassify()
+                        || brobotProperties.getIllustration().isDrawDefine());
     }
 }

@@ -141,7 +141,7 @@ public class MockModeMotionTest extends BrobotTestBase {
     @Test
     @DisplayName("Demonstration: Mock mode vs Real mode handling")
     void demonstrateMockVsRealMode() {
-        boolean inMockMode = true; // This would be FrameworkSettings.mock
+        boolean inMockMode = true; // This would be true /* mock mode enabled in tests */
 
         Mat result;
         if (inMockMode) {

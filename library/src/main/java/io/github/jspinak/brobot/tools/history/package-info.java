@@ -91,7 +91,7 @@
  *
  * <pre>{@code
  * // Automatically visualized through action execution
- * ActionOptions options = new ActionOptions.Builder()
+ * ActionConfig options = new ActionConfig.Builder()
  *         .action(Action.CLICK)
  *         .captureScreenshots(true)
  *         .build();
@@ -126,10 +126,10 @@
  * <p>Visualization behavior controlled by:
  *
  * <ul>
- *   <li>{@code FrameworkSettings.saveHistory} - Global history enable/disable
- *   <li>{@code FrameworkSettings.screenshot} - Screenshot capture settings
+ *   <li>{@code BrobotProperties.saveHistory} - Global history enable/disable
+ *   <li>{@code BrobotProperties.screenshot} - Screenshot capture settings
  *   <li>Action-specific capture flags
- *   <li>Illustration directives in ActionOptions
+ *   <li>Illustration directives in ActionConfig
  * </ul>
  *
  * <h2>File Organization</h2>
@@ -165,7 +165,7 @@
  *
  * @since 1.0
  * @see io.github.jspinak.brobot.action
- * @see io.github.jspinak.brobot.config.core.FrameworkSettings
+ * @see io.github.jspinak.brobot.config.core.BrobotProperties
  * @see io.github.jspinak.brobot.model.action
  */
 package io.github.jspinak.brobot.tools.history;

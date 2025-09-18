@@ -18,7 +18,7 @@ import io.github.jspinak.brobot.model.action.MouseButton;
  * who may not be familiar with all available options.
  *
  * <p>This is the modern replacement for {@link ActionShortcuts}, using the new ActionConfig
- * architecture instead of the deprecated ActionOptions.
+ * architecture instead of the deprecated ActionConfig.
  *
  * <p>Predefined configurations:
  *

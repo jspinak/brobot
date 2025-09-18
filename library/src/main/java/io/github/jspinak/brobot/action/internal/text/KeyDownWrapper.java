@@ -1,8 +1,9 @@
 package io.github.jspinak.brobot.action.internal.text;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
@@ -50,6 +51,8 @@ import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 @Component
 public class KeyDownWrapper {
 
+    @Autowired private BrobotProperties brobotProperties;
+
     /**
      * Presses and holds a key with optional modifier keys.
      *
@@ -79,7 +82,7 @@ public class KeyDownWrapper {
      * @param modifiers Modifier keys to hold with the primary key (e.g., "CTRL", "ALT+SHIFT")
      */
     public void press(String key, String modifiers) {
-        if (FrameworkSettings.mock) {
+        if (brobotProperties.getCore().isMock()) {
             ConsoleReporter.format("hold %s %s| ", modifiers, key);
             return;
         }

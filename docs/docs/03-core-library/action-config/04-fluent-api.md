@@ -432,7 +432,7 @@ ActionConfig searchWithLogging = find(searchButton)
     .withSuccessLog("Search initiated successfully");
 ```
 
-See the [Automatic Action Logging Guide](../guides/automatic-action-logging.md) for more details.
+See the [Automatic Action Logging Guide](../../07-logging/automatic-action-logging.md) for more details.
 
 #### Manual Logging
 

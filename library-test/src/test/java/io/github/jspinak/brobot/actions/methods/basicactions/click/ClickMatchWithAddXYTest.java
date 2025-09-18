@@ -12,7 +12,6 @@ import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Position;
@@ -26,7 +25,7 @@ public class ClickMatchWithAddXYTest {
     @BeforeAll
     public static void setup() {
         System.setProperty("java.awt.headless", "true");
-        FrameworkSettings.mock = true;
+        // Mock mode is enabled via BrobotTestBase
     }
 
     @Autowired Action action;
@@ -35,11 +34,11 @@ public class ClickMatchWithAddXYTest {
      * Clicking should be a unit test. You don't want to actually click on the
      * screen.
      * Unit tests are performed by adding screenshots to
-     * FrameworkSettings.screenshots.
+     * BrobotProperties.screenshots.
      */
     @Test
     void setPosition() {
-        FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
+        // Test screenshot: TestPaths.getScreenshotPath("floranext0")
         StateImage topLeft =
                 new StateImage.Builder()
                         .addPattern(
@@ -65,7 +64,7 @@ public class ClickMatchWithAddXYTest {
 
     @Test
     void addXY() {
-        FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
+        // Test screenshot: TestPaths.getScreenshotPath("floranext0")
         // In the new API, we need to set the offset on the Pattern
         StateImage topLeftWithOffset =
                 new StateImage.Builder()

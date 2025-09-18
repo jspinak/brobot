@@ -81,7 +81,7 @@
  *   <li>Atomic operations for counters
  * </ul>
  *
- * @see io.github.jspinak.brobot.action.ActionOptions
+ * @see io.github.jspinak.brobot.action.ActionConfig
  * @see io.github.jspinak.brobot.action.ActionResult
  */
 package io.github.jspinak.brobot.action.internal.utility;

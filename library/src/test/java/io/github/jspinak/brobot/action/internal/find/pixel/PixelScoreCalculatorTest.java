@@ -145,7 +145,7 @@ public class PixelScoreCalculatorTest extends BrobotTestBase {
                 double similarity, double expectedPixelScore) {
             // Act
             double pixelScore =
-                    pixelScoreCalculator.convertActionOptionsScoreToPixelAnalysisScore(similarity);
+                    pixelScoreCalculator.convertActionConfigScoreToPixelAnalysisScore(similarity);
 
             // Assert
             assertTrue(pixelScore >= 0.0 && pixelScore <= 255.0);
@@ -162,11 +162,11 @@ public class PixelScoreCalculatorTest extends BrobotTestBase {
         void shouldUseTanhConversionFunction() {
             // Test that conversion uses hyperbolic tangent
             double score1 =
-                    pixelScoreCalculator.convertActionOptionsScoreToPixelAnalysisScoreWithTanh(0.3);
+                    pixelScoreCalculator.convertActionConfigScoreToPixelAnalysisScoreWithTanh(0.3);
             double score2 =
-                    pixelScoreCalculator.convertActionOptionsScoreToPixelAnalysisScoreWithTanh(0.5);
+                    pixelScoreCalculator.convertActionConfigScoreToPixelAnalysisScoreWithTanh(0.5);
             double score3 =
-                    pixelScoreCalculator.convertActionOptionsScoreToPixelAnalysisScoreWithTanh(0.7);
+                    pixelScoreCalculator.convertActionConfigScoreToPixelAnalysisScoreWithTanh(0.7);
 
             // Verify non-linear conversion
             assertTrue(score1 > score2); // Lower similarity = higher pixel score
@@ -184,10 +184,10 @@ public class PixelScoreCalculatorTest extends BrobotTestBase {
         void shouldConvertPixelScoreBackToSimilarity(double originalSimilarity) {
             // Act - convert to pixel score and back
             double pixelScore =
-                    pixelScoreCalculator.convertActionOptionsScoreToPixelAnalysisScoreWithTanh(
+                    pixelScoreCalculator.convertActionConfigScoreToPixelAnalysisScoreWithTanh(
                             originalSimilarity);
             double convertedSimilarity =
-                    pixelScoreCalculator.convertPixelAnalysisScoreToActionOptionsScoreWithTanh(
+                    pixelScoreCalculator.convertPixelAnalysisScoreToActionConfigScoreWithTanh(
                             pixelScore);
 
             // Assert - should get approximately the same similarity back
@@ -348,7 +348,7 @@ public class PixelScoreCalculatorTest extends BrobotTestBase {
             // Arrange
             Mat scores = new Mat(10, 10, CV_32F);
             double pixelScore =
-                    pixelScoreCalculator.convertActionOptionsScoreToPixelAnalysisScoreWithTanh(
+                    pixelScoreCalculator.convertActionConfigScoreToPixelAnalysisScoreWithTanh(
                             threshold);
             scores.put(new Scalar(pixelScore + 10)); // Above threshold (worse score)
 
@@ -370,7 +370,7 @@ public class PixelScoreCalculatorTest extends BrobotTestBase {
             Mat scores = new Mat(10, 10, CV_32F);
             double threshold = 0.7;
             double pixelScore =
-                    pixelScoreCalculator.convertActionOptionsScoreToPixelAnalysisScoreWithTanh(0.8);
+                    pixelScoreCalculator.convertActionConfigScoreToPixelAnalysisScoreWithTanh(0.8);
             scores.put(new Scalar(pixelScore)); // Better than threshold
 
             PatternFindOptions findOptions =
@@ -530,8 +530,7 @@ public class PixelScoreCalculatorTest extends BrobotTestBase {
         void shouldHandleNegativeDistances() {
             // Test conversion with extreme values
             double pixelScore =
-                    pixelScoreCalculator.convertActionOptionsScoreToPixelAnalysisScoreWithTanh(
-                            -0.1);
+                    pixelScoreCalculator.convertActionConfigScoreToPixelAnalysisScoreWithTanh(-0.1);
 
             // Assert
             assertTrue(pixelScore >= 0 && pixelScore <= 255); // Should handle negative input
@@ -542,10 +541,10 @@ public class PixelScoreCalculatorTest extends BrobotTestBase {
         void shouldHandleInfiniteValues() {
             // Test conversion with extreme values
             double pixelScore1 =
-                    pixelScoreCalculator.convertActionOptionsScoreToPixelAnalysisScoreWithTanh(
+                    pixelScoreCalculator.convertActionConfigScoreToPixelAnalysisScoreWithTanh(
                             2.0); // Above 1.0
             double pixelScore2 =
-                    pixelScoreCalculator.convertPixelAnalysisScoreToActionOptionsScoreWithTanh(
+                    pixelScoreCalculator.convertPixelAnalysisScoreToActionConfigScoreWithTanh(
                             300); // Above 255
 
             // Assert - should handle gracefully

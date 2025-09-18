@@ -72,7 +72,7 @@
  * // Construct objects using builder pattern
  * {
  *   "type": "builder",
- *   "className": "ActionOptions",
+ *   "className": "ActionConfig",
  *   "methods": [
  *     {"name": "action", "arguments": [{"type": "literal", "value": "CLICK"}]},
  *     {"name": "pauseAfter", "arguments": [{"type": "literal", "value": 500}]}

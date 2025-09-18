@@ -68,7 +68,7 @@
  *
  * SelectActionObject selection = new SelectActionObject.Builder()
  *     .when("login_button.png").then(
- *         new ActionOptions.Builder()
+ *         new ActionConfig.Builder()
  *             .setAction(ActionType.CLICK)
  *             .build(),
  *         new ObjectCollection.Builder()
@@ -76,7 +76,7 @@
  *             .build()
  *     )
  *     .when("logout_button.png").then(
- *         new ActionOptions.Builder()
+ *         new ActionConfig.Builder()
  *             .setAction(ActionType.CLICK)
  *             .build(),
  *         new ObjectCollection.Builder()
@@ -84,7 +84,7 @@
  *             .build()
  *     )
  *     .otherwise(
- *         new ActionOptions.Builder()
+ *         new ActionConfig.Builder()
  *             .setAction(ActionType.TYPE)
  *             .build(),
  *         new ObjectCollection.Builder()
@@ -159,6 +159,6 @@
  *
  * @see io.github.jspinak.brobot.action.composite.select.Select
  * @see io.github.jspinak.brobot.action.composite.select.CommonSelect
- * @see io.github.jspinak.brobot.action.ActionOptions
+ * @see io.github.jspinak.brobot.action.ActionConfig
  */
 package io.github.jspinak.brobot.action.composite.select;

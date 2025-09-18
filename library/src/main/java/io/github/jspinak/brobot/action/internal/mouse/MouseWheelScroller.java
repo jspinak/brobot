@@ -1,27 +1,30 @@
 package io.github.jspinak.brobot.action.internal.mouse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.basic.mouse.ScrollOptions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Region;
 
 /**
  * Provides mouse wheel scrolling functionality with support for both real and mocked operations.
  *
  * <p>This is version 2 of the MouseWheel class, updated to work with the new ActionConfig hierarchy
- * and ScrollOptions instead of ActionOptions.
+ * and ScrollOptions instead of ActionConfig.
  *
  * <p>This wrapper abstracts the underlying Sikuli mouse wheel operations and integrates with
  * Brobot's action system. It handles scroll direction conversion and supports the mock mode for
  * testing purposes where actual scrolling is logged but not performed.
  *
  * @see ScrollOptions
- * @see FrameworkSettings#mock
+ * @see BrobotProperties
  * @since 2.0
  */
 @Component
 public class MouseWheelScroller {
+
+    @Autowired private BrobotProperties brobotProperties;
 
     // No longer needs legacy dependency - this class is now standalone
 
@@ -41,7 +44,7 @@ public class MouseWheelScroller {
      *     not guarantee the scroll was successful in real mode.
      */
     public boolean scroll(ScrollOptions scrollOptions) {
-        if (FrameworkSettings.mock) {
+        if (brobotProperties.getCore().isMock()) {
             System.out.println(
                     "Mock: scroll "
                             + scrollOptions.getDirection()

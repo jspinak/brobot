@@ -17,10 +17,11 @@ import org.mockito.MockitoAnnotations;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Image;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 
 /**
  * Test suite for ActionLifecycleManagement class. Tests lifecycle control logic for GUI automation
@@ -29,10 +30,10 @@ import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 @DisplayName("ActionLifecycleManagement Tests")
 public class ActionLifecycleManagementTest extends BrobotTestBase {
 
-    @Mock private TimeProvider mockTimeProvider;
-
+    @Mock private BrobotProperties mockBrobotProperties;
+    @Mock private BrobotProperties.Core mockCore;
+    @Mock private TimeWrapper mockTimeWrapper;
     @Mock private ActionLifecycle mockLifecycle;
-
     @Mock private ActionConfig mockActionConfig;
 
     private ActionLifecycleManagement lifecycleManagement;
@@ -44,7 +45,12 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
     public void setupTest() {
         super.setupTest();
         mockCloseable = MockitoAnnotations.openMocks(this);
-        lifecycleManagement = new ActionLifecycleManagement(mockTimeProvider);
+
+        // Setup BrobotProperties mock
+        when(mockBrobotProperties.getCore()).thenReturn(mockCore);
+        when(mockCore.isMock()).thenReturn(true);
+
+        lifecycleManagement = new ActionLifecycleManagement(mockBrobotProperties, mockTimeWrapper);
 
         testResult = new ActionResult();
         testResult.setActionLifecycle(mockLifecycle);
@@ -165,7 +171,7 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
             LocalDateTime start = LocalDateTime.of(2024, 1, 1, 10, 0, 0);
             LocalDateTime current = LocalDateTime.of(2024, 1, 1, 10, 0, 30);
             when(mockLifecycle.getStartTime()).thenReturn(start);
-            when(mockTimeProvider.now()).thenReturn(current);
+            when(mockTimeWrapper.now()).thenReturn(current);
 
             // Act
             Duration duration = lifecycleManagement.getCurrentDuration(testResult);
@@ -173,7 +179,7 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
             // Assert
             assertEquals(30, duration.getSeconds());
             verify(mockLifecycle).getStartTime();
-            verify(mockTimeProvider).now();
+            verify(mockTimeWrapper).now();
         }
 
         @Test
@@ -182,7 +188,7 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
             // Arrange
             LocalDateTime now = LocalDateTime.now();
             when(mockLifecycle.getStartTime()).thenReturn(now);
-            when(mockTimeProvider.now()).thenReturn(now);
+            when(mockTimeWrapper.now()).thenReturn(now);
 
             // Act
             Duration duration = lifecycleManagement.getCurrentDuration(testResult);
@@ -199,7 +205,7 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
             LocalDateTime start = LocalDateTime.of(2024, 1, 1, 10, 0, 0);
             LocalDateTime end = start.plusSeconds(seconds);
             when(mockLifecycle.getStartTime()).thenReturn(start);
-            when(mockTimeProvider.now()).thenReturn(end);
+            when(mockTimeWrapper.now()).thenReturn(end);
 
             // Act
             Duration duration = lifecycleManagement.getCurrentDuration(testResult);
@@ -219,7 +225,7 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
             // Arrange
             when(mockLifecycle.getCompletedRepetitions()).thenReturn(0);
             when(mockLifecycle.getStartTime()).thenReturn(LocalDateTime.now());
-            when(mockTimeProvider.now()).thenReturn(LocalDateTime.now());
+            when(mockTimeWrapper.now()).thenReturn(LocalDateTime.now());
 
             // Act
             boolean shouldContinue = lifecycleManagement.isOkToContinueAction(testResult, 1);
@@ -235,7 +241,7 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
             when(mockLifecycle.getCompletedRepetitions()).thenReturn(1);
             LocalDateTime start = LocalDateTime.now();
             when(mockLifecycle.getStartTime()).thenReturn(start);
-            when(mockTimeProvider.now()).thenReturn(start.plusSeconds(15)); // Exceeds default 10s
+            when(mockTimeWrapper.now()).thenReturn(start.plusSeconds(15)); // Exceeds default 10s
 
             // Act
             boolean shouldContinue = lifecycleManagement.isOkToContinueAction(testResult, 1);
@@ -252,7 +258,7 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
                     .thenReturn(0); // Changed to 0 for first iteration
             LocalDateTime start = LocalDateTime.now();
             when(mockLifecycle.getStartTime()).thenReturn(start);
-            when(mockTimeProvider.now()).thenReturn(start.plusSeconds(5));
+            when(mockTimeWrapper.now()).thenReturn(start.plusSeconds(5));
 
             // Act
             boolean shouldContinue = lifecycleManagement.isOkToContinueAction(testResult, 1);
@@ -273,7 +279,7 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
                     .thenReturn(0); // Changed to 0 for first iteration
             LocalDateTime start = LocalDateTime.now();
             when(mockLifecycle.getStartTime()).thenReturn(start);
-            when(mockTimeProvider.now()).thenReturn(start.plusSeconds(15)); // Within 20s limit
+            when(mockTimeWrapper.now()).thenReturn(start.plusSeconds(15)); // Within 20s limit
 
             // Act
             boolean shouldContinue = lifecycleManagement.isOkToContinueAction(testResult, 1);
@@ -298,7 +304,7 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
             when(mockLifecycle.getCompletedRepetitions()).thenReturn(1);
             LocalDateTime start = LocalDateTime.now();
             when(mockLifecycle.getStartTime()).thenReturn(start);
-            when(mockTimeProvider.now()).thenReturn(start.plusSeconds(1));
+            when(mockTimeWrapper.now()).thenReturn(start.plusSeconds(1));
 
             // Act
             boolean shouldContinue = lifecycleManagement.isOkToContinueAction(testResult, 1);
@@ -321,7 +327,7 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
                     .thenReturn(0); // Changed to 0 for first iteration
             LocalDateTime start = LocalDateTime.now();
             when(mockLifecycle.getStartTime()).thenReturn(start);
-            when(mockTimeProvider.now()).thenReturn(start.plusSeconds(1));
+            when(mockTimeWrapper.now()).thenReturn(start.plusSeconds(1));
 
             // Act
             boolean shouldContinue = lifecycleManagement.isOkToContinueAction(testResult, 1);

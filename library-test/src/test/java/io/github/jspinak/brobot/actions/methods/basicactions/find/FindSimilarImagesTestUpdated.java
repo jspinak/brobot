@@ -15,7 +15,7 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.SimilarImagesFindOptions;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
@@ -38,17 +38,19 @@ import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 @Disabled("CI failure - needs investigation")
 public class FindSimilarImagesTestUpdated extends BrobotIntegrationTestBase {
 
+    @Autowired private BrobotProperties brobotProperties;
+
     @Autowired private ActionService actionService;
 
     @BeforeEach
     void setUp() {
         super.setUpBrobotEnvironment();
-        FrameworkSettings.mock = true;
+        // Cannot set mock - BrobotProperties is immutable
     }
 
     @AfterEach
     void tearDown() {
-        FrameworkSettings.mock = false;
+        // Cannot set mock - BrobotProperties is immutable
     }
 
     @Test

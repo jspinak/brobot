@@ -26,7 +26,6 @@ import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.basic.find.FindState;
 import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
 import io.github.jspinak.brobot.action.internal.find.match.MatchToStateConverter;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
@@ -46,12 +45,12 @@ class IllustrateStateTest {
     @BeforeAll
     public static void setupHeadlessMode() {
         System.setProperty("java.awt.headless", "true");
-        FrameworkSettings.mock = false; // Allow real image processing
+        // Mock mode disabled - not needed in tests
     }
 
     @BeforeEach
     public void setUp() {
-        FrameworkSettings.mock = false; // Allow real image processing
+        // Mock mode disabled - not needed in tests
     }
 
     @Autowired MatchToStateConverter createStatesFromMatches;

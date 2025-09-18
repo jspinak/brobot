@@ -1,8 +1,9 @@
 package io.github.jspinak.brobot.config.environment;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Controls execution permissions and modes in the Brobot framework.
@@ -26,7 +27,7 @@ import io.github.jspinak.brobot.config.core.FrameworkSettings;
  * <p>Mock mode behavior:
  *
  * <ul>
- *   <li>Enabled when BrobotSettings.mock is true AND no test screenshots are configured
+ *   <li>Enabled when BrobotProperties configuration is true AND no test screenshots are configured
  *   <li>When screenshots are present, they take precedence over mock mode for testing
  *   <li>Mock mode simulates action execution with configurable timing delays
  *   <li>Useful for development, testing, and demonstrations without GUI access
@@ -38,11 +39,18 @@ import io.github.jspinak.brobot.config.core.FrameworkSettings;
  * in action implementations.
  *
  * @since 1.0
- * @see FrameworkSettings
+ * @see BrobotProperties
  * @see ActionInterface
  */
 @Component
 public class ExecutionMode {
+
+    private final BrobotProperties brobotProperties;
+
+    @Autowired
+    public ExecutionMode(BrobotProperties brobotProperties) {
+        this.brobotProperties = brobotProperties;
+    }
 
     /**
      * Determines whether the framework should execute in mock mode.
@@ -50,8 +58,8 @@ public class ExecutionMode {
      * <p>Mock mode is active when both conditions are met:
      *
      * <ol>
-     *   <li>{@link FrameworkSettings#mock} is set to true
-     *   <li>No test screenshots are configured ({@link FrameworkSettings#screenshots} is empty)
+     *   <li>{@link BrobotProperties} is set to true
+     *   <li>No test screenshots are configured ({@link BrobotProperties} is empty)
      * </ol>
      *
      * <p>The presence of test screenshots overrides mock mode because screenshots provide a more
@@ -65,7 +73,7 @@ public class ExecutionMode {
      * <pre>{@code
      * if (permissions.isMock()) {
      *     // Simulate action with mock timing
-     *     Thread.sleep((long)(BrobotSettings.mockTimeClick * 1000));
+     *     Thread.sleep((long)(BrobotProperties configurationTimeClick * 1000));
      *     return mockResult;
      * } else {
      *     // Perform real GUI interaction
@@ -75,10 +83,11 @@ public class ExecutionMode {
      *
      * @return true if mock mode is active and no screenshots are configured; false if real
      *     execution should occur or screenshots are available
-     * @see FrameworkSettings#mock
-     * @see FrameworkSettings#screenshots
+     * @see BrobotProperties
+     * @see BrobotProperties
      */
     public boolean isMock() {
-        return FrameworkSettings.mock && FrameworkSettings.screenshots.isEmpty();
+        return brobotProperties.getCore().isMock()
+                && brobotProperties.getScreenshot().getTestScreenshots().isEmpty();
     }
 }

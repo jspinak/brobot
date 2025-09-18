@@ -17,7 +17,7 @@ import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Pattern;
@@ -40,15 +40,17 @@ import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 @Disabled("CI failure - needs investigation")
 public class DoubleClickTestUpdated extends BrobotIntegrationTestBase {
 
+    @Autowired private BrobotProperties brobotProperties;
+
     @BeforeEach
     void setUp() {
         super.setUpBrobotEnvironment();
-        FrameworkSettings.mock = true;
+        // Cannot set mock - BrobotProperties is immutable
     }
 
     @AfterEach
     void tearDown() {
-        FrameworkSettings.mock = false;
+        // Cannot set mock - BrobotProperties is immutable
     }
 
     @Autowired private ActionService actionService;

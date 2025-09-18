@@ -91,7 +91,7 @@
  *   <li>Minimal overhead for common operations
  * </ul>
  *
- * @see io.github.jspinak.brobot.action.ActionOptions
+ * @see io.github.jspinak.brobot.action.ActionConfig
  * @see java.awt.Desktop
  */
 package io.github.jspinak.brobot.action.internal.app;
