@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.action;
 
 import java.util.Optional;
 
-import io.github.jspinak.brobot.action.internal.execution.BasicActionRegistry;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
@@ -20,6 +19,7 @@ import io.github.jspinak.brobot.action.basic.vanish.VanishOptions;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
 import io.github.jspinak.brobot.action.internal.execution.ActionChainExecutor;
 import io.github.jspinak.brobot.action.internal.execution.ActionExecution;
+import io.github.jspinak.brobot.action.internal.execution.BasicActionRegistry;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
@@ -397,7 +397,8 @@ public class Action {
      * Performs an action with default configuration on a location.
      *
      * <p>This is a convenience method for simple operations. For actions requiring specific
-     * configuration (like custom delays, similarity thresholds, etc.), use  with the appropriate options class.
+     * configuration (like custom delays, similarity thresholds, etc.), use with the appropriate
+     * options class.
      *
      * <h3>When to use this method:</h3>
      *
