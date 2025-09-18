@@ -104,8 +104,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class InitialStates {
 
-    @Autowired private BrobotProperties brobotProperties;
-
+    private final BrobotProperties brobotProperties;
     private final StateDetector stateFinder;
     private final StateMemory stateMemory;
     private final StateService allStatesInProjectService;
@@ -134,9 +133,11 @@ public class InitialStates {
     private final Map<Set<Long>, Integer> potentialActiveStates = new HashMap<>();
 
     public InitialStates(
+            BrobotProperties brobotProperties,
             StateDetector stateFinder,
             StateMemory stateMemory,
             StateService allStatesInProjectService) {
+        this.brobotProperties = brobotProperties;
         this.stateFinder = stateFinder;
         this.stateMemory = stateMemory;
         this.allStatesInProjectService = allStatesInProjectService;

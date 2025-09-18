@@ -122,8 +122,11 @@ public class ComprehensiveTestConfig {
     @Primary
     @ConditionalOnMissingBean
     public InitialStates initialStates(
-            StateDetector stateDetector, StateMemory stateMemory, StateService stateService) {
-        return new InitialStates(stateDetector, stateMemory, stateService);
+            BrobotProperties brobotProperties,
+            StateDetector stateDetector,
+            StateMemory stateMemory,
+            StateService stateService) {
+        return new InitialStates(brobotProperties, stateDetector, stateMemory, stateService);
     }
 
     @Bean

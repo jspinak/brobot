@@ -70,7 +70,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ActionExecution {
 
-    @Autowired private BrobotProperties brobotProperties;
+    private final BrobotProperties brobotProperties;
     private final TimeWrapper timeWrapper;
     private final IllustrationController illustrateScreenshot;
     private final SearchRegionResolver selectRegions;
@@ -92,6 +92,7 @@ public class ActionExecution {
      * for comprehensive action execution. Each dependency handles a specific aspect of the
      * execution lifecycle.
      *
+     * @param brobotProperties Configuration properties for the framework
      * @param timeWrapper Provides timing services including wait operations and duration tracking
      * @param illustrateScreenshot Captures and annotates screenshots for visual documentation
      * @param selectRegions Identifies screen regions relevant to the action
@@ -103,8 +104,11 @@ public class ActionExecution {
      * @param captureScreenshot Captures raw screenshots for error documentation
      * @param automationSession Manages session context and identifiers
      * @param executionController Controls execution flow with pause/resume/stop functionality
+     * @param brobotLogger Logger for framework-level events
+     * @param stateMemory State management and history
      */
     public ActionExecution(
+            BrobotProperties brobotProperties,
             TimeWrapper timeWrapper,
             IllustrationController illustrateScreenshot,
             SearchRegionResolver selectRegions,
@@ -118,6 +122,7 @@ public class ActionExecution {
             @Autowired(required = false) ExecutionController executionController,
             BrobotLogger brobotLogger,
             StateMemory stateMemory) {
+        this.brobotProperties = brobotProperties;
         this.timeWrapper = timeWrapper;
         this.illustrateScreenshot = illustrateScreenshot;
         this.selectRegions = selectRegions;
