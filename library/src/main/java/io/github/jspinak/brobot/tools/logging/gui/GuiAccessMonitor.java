@@ -10,6 +10,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.sikuli.script.Screen;
 import org.springframework.stereotype.Component;
 
+import io.github.jspinak.brobot.config.environment.HeadlessDetector;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,7 @@ public class GuiAccessMonitor {
 
     private final BrobotLogger brobotLogger;
     private final GuiAccessConfig config;
+    private final HeadlessDetector headlessDetector;
 
     public GuiAccessConfig getConfig() {
         return config;
@@ -107,9 +109,8 @@ public class GuiAccessMonitor {
     /** Performs a silent check without logging. */
     private boolean performSilentCheck() {
         try {
-            return !GraphicsEnvironment.isHeadless()
-                    && GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice()
-                            != null;
+            // Use centralized headless detector
+            return !headlessDetector.isHeadless();
         } catch (Exception e) {
             return false;
         }
@@ -118,19 +119,36 @@ public class GuiAccessMonitor {
     /** Checks if running in headless mode. */
     private boolean checkHeadlessMode(List<GuiAccessProblem> problems) {
         try {
-            if (GraphicsEnvironment.isHeadless()) {
+            // Use centralized headless detection
+            boolean isHeadless = headlessDetector.isHeadless();
+
+            log.info(
+                    "[GuiAccessMonitor] Headless check result: {}",
+                    isHeadless ? "HEADLESS" : "GUI AVAILABLE");
+
+            if (isHeadless) {
+                log.error("[GuiAccessMonitor] Detected as HEADLESS - adding problem");
+
+                // Get detailed status for problem description
+                String statusReport = headlessDetector.getStatusReport();
+
                 problems.add(
                         new GuiAccessProblem(
                                 "Headless Environment",
-                                "Application is running in headless mode - no display available",
+                                "Application is running in headless mode - no display available\n"
+                                        + statusReport,
                                 GuiAccessProblem.Severity.ERROR,
                                 List.of(
                                         "Run with display access (not in headless mode)",
                                         "Use virtual display (Xvfb on Linux)",
-                                        "Enable remote display forwarding")));
+                                        "Enable remote display forwarding",
+                                        "Set java.awt.headless=false explicitly")));
                 return true;
+            } else {
+                log.info("[GuiAccessMonitor] NOT headless - display should be available");
             }
         } catch (Exception e) {
+            log.error("[GuiAccessMonitor] Exception during headless check", e);
             problems.add(
                     new GuiAccessProblem(
                             "Display Check Failed",
