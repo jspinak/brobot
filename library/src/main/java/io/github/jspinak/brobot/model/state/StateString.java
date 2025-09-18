@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.model.state;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.basic.type.TypeText;
 import io.github.jspinak.brobot.model.element.Region;
 
 import lombok.Data;
@@ -69,9 +70,7 @@ public class StateString {
 
     private StateObject.Type objectType = StateObject.Type.STRING;
     private String name;
-    private Region
-            searchRegion; // sometimes we need to hover over or click on a region before typing the
-    // string
+    private Region searchRegion; // hover over or click on a region before typing
     private String ownerStateName = "null";
     private Long ownerStateId = null;
     private int timesActedOn = 0;
@@ -98,7 +97,7 @@ public class StateString {
     }
 
     public boolean defined() {
-        return string != null && string.length() > 0;
+        return string != null && !string.isEmpty();
     }
 
     /**

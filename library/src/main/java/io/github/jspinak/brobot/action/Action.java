@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.action;
 
 import java.util.Optional;
 
+import io.github.jspinak.brobot.action.internal.execution.BasicActionRegistry;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
@@ -58,7 +59,6 @@ import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
  * @see ActionConfig
  * @see ActionInterface
  * @see BasicActionRegistry
- * @see CompositeActionRegistry
  * @see ActionResult
  * @author Joshua Spinak
  */
@@ -397,8 +397,7 @@ public class Action {
      * Performs an action with default configuration on a location.
      *
      * <p>This is a convenience method for simple operations. For actions requiring specific
-     * configuration (like custom delays, similarity thresholds, etc.), use {@link
-     * #perform(ActionConfig, ObjectCollection)} with the appropriate options class.
+     * configuration (like custom delays, similarity thresholds, etc.), use  with the appropriate options class.
      *
      * <h3>When to use this method:</h3>
      *
@@ -440,7 +439,6 @@ public class Action {
      * @param location the target location
      * @return ActionResult containing the operation results
      * @since 2.0
-     * @see #perform(ActionConfig, ObjectCollection) for full configuration control
      * @see ClickOptions for click-specific configuration
      * @see MouseMoveOptions for move-specific configuration
      */

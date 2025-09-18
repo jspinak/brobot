@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.action.basic.type;
 
 import java.util.List;
 
+import io.github.jspinak.brobot.action.basic.click.Click;
 import org.sikuli.basics.Settings;
 import org.springframework.stereotype.Component;
 
