@@ -34,7 +34,6 @@ import io.github.jspinak.brobot.action.internal.execution.BasicActionRegistry;
  * transparently handle both simple and complex operations through a uniform interface.
  *
  * @see BasicActionRegistry
- * @see CompositeActionRegistry
  * @see ActionInterface
  */
 @Component
