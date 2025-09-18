@@ -88,7 +88,8 @@ class RobotCaptureProviderTest {
             double detectedScale = (double) ReflectionTestUtils.getField(provider, "detectedScale");
             boolean scaleToPhysical =
                     (boolean) ReflectionTestUtils.getField(provider, "scaleToPhysical");
-            boolean scaleDetected = (boolean) ReflectionTestUtils.getField(provider, "scaleDetected");
+            boolean scaleDetected =
+                    (boolean) ReflectionTestUtils.getField(provider, "scaleDetected");
 
             if (scaleToPhysical && scaleDetected) {
                 // Dimensions should be scaled

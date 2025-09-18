@@ -49,7 +49,8 @@ public class InitialStatesTest extends BrobotTestBase {
         core.setMock(true);
         when(brobotProperties.getCore()).thenReturn(core);
 
-        initialStates = new InitialStates(brobotProperties, stateDetector, stateMemory, stateService);
+        initialStates =
+                new InitialStates(brobotProperties, stateDetector, stateMemory, stateService);
     }
 
     @AfterEach
@@ -255,7 +256,7 @@ public class InitialStatesTest extends BrobotTestBase {
         public void testNormalModeSearch() {
             // Set up to run in normal mode
             BrobotProperties.Core core = new BrobotProperties.Core();
-            core.setMock(false);  // Disable mock mode for this test
+            core.setMock(false); // Disable mock mode for this test
             when(brobotProperties.getCore()).thenReturn(core);
 
             State state1 = createMockState(1L, "State1");
@@ -279,7 +280,7 @@ public class InitialStatesTest extends BrobotTestBase {
         public void testSearchAllStatesIfNoneFound() {
             // Set up to run in normal mode
             BrobotProperties.Core core = new BrobotProperties.Core();
-            core.setMock(false);  // Disable mock mode for this test
+            core.setMock(false); // Disable mock mode for this test
             when(brobotProperties.getCore()).thenReturn(core);
 
             State state1 = createMockState(1L, "State1");
