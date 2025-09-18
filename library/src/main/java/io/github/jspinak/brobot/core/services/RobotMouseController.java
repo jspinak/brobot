@@ -4,8 +4,10 @@ import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import io.github.jspinak.brobot.config.environment.HeadlessDetector;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
 /**
@@ -28,32 +30,28 @@ public class RobotMouseController implements MouseController {
     private Point currentPosition;
     private static final int CLICK_DELAY = 50; // ms between press and release
     private static final int MOVE_DELAY = 10; // ms after moving mouse
+    private final HeadlessDetector headlessDetector;
 
-    public RobotMouseController() {
+    @Autowired
+    public RobotMouseController(HeadlessDetector headlessDetector) {
+        this.headlessDetector = headlessDetector;
         Robot tempRobot = null;
         try {
-            // Check if we should preserve the headless setting
-            String preserveHeadless = System.getProperty("brobot.preserve.headless.setting");
-            if (!"true".equals(preserveHeadless)) {
-                // For GUI automation, ensure headless is false before creating Robot
-                String currentHeadless = System.getProperty("java.awt.headless");
-                if ("true".equals(currentHeadless)) {
-                    System.setProperty("java.awt.headless", "false");
-                    ConsoleReporter.println(
-                            "[Robot] Reset java.awt.headless from 'true' to 'false' for GUI"
-                                    + " automation");
-                }
-            }
+            // Use centralized headless detection
+            ConsoleReporter.println("[RobotMouseController] Checking display availability...");
 
-            // Check if we're in headless mode after the property setting
-            if (GraphicsEnvironment.isHeadless()) {
+            if (headlessDetector.isHeadless()) {
                 ConsoleReporter.println(
-                        "[Robot] Running in headless environment - Robot creation skipped");
+                        "[RobotMouseController] Headless environment detected - Robot creation"
+                                + " skipped");
+                ConsoleReporter.println(
+                        "[RobotMouseController] Status: " + headlessDetector.getStatusReport());
                 this.robot = null;
                 this.currentPosition = new Point(0, 0);
                 return;
             }
 
+            ConsoleReporter.println("[RobotMouseController] Display available - creating Robot");
             tempRobot = new Robot();
             tempRobot.setAutoDelay(10); // Small delay between events
             tempRobot.setAutoWaitForIdle(true); // Wait for events to process
