@@ -37,15 +37,8 @@ public class ExecutionModeTest extends BrobotTestBase {
     @Override
     public void setupTest() {
         super.setupTest();
-        // Create a mock ExecutionMode for testing
-        executionMode =
-                new ExecutionMode() {
-                    @Override
-                    public boolean isMock() {
-                        // For testing, just return based on mock setting
-                        return brobotProperties != null && brobotProperties.getCore().isMock();
-                    }
-                };
+        // Create ExecutionMode with injected BrobotProperties
+        executionMode = new ExecutionMode(brobotProperties);
 
         // Clear test screenshots for test
         if (brobotProperties != null) {
@@ -90,8 +83,8 @@ public class ExecutionModeTest extends BrobotTestBase {
                 brobotProperties.getScreenshot().getTestScreenshots().add("test1.png");
             }
 
-            // Our test ExecutionMode doesn't check screenshots, just mock flag
-            assertTrue(executionMode.isMock());
+            // When screenshots are present, isMock() should return false
+            assertFalse(executionMode.isMock());
         }
 
         @Test
@@ -116,8 +109,8 @@ public class ExecutionModeTest extends BrobotTestBase {
                 brobotProperties.getScreenshot().getTestScreenshots().add("single.png");
             }
 
-            // Our test ExecutionMode doesn't check screenshots
-            assertTrue(executionMode.isMock());
+            // Screenshots override mock mode - should return false
+            assertFalse(executionMode.isMock());
         }
 
         @Test
@@ -130,8 +123,8 @@ public class ExecutionModeTest extends BrobotTestBase {
                 brobotProperties.getScreenshot().getTestScreenshots().add("screen3.png");
             }
 
-            // Our test ExecutionMode doesn't check screenshots
-            assertTrue(executionMode.isMock());
+            // Screenshots override mock mode - should return false
+            assertFalse(executionMode.isMock());
             if (brobotProperties != null) {
                 assertEquals(3, brobotProperties.getScreenshot().getTestScreenshots().size());
             }
@@ -145,13 +138,14 @@ public class ExecutionModeTest extends BrobotTestBase {
                 brobotProperties.getScreenshot().getTestScreenshots().add("temp.png");
             }
 
-            // Our test ExecutionMode doesn't check screenshots
-            assertTrue(executionMode.isMock());
+            // With screenshots, should return false
+            assertFalse(executionMode.isMock());
 
             if (brobotProperties != null) {
                 brobotProperties.getScreenshot().getTestScreenshots().clear();
             }
 
+            // After clearing screenshots, should return true (mock mode restored)
             assertTrue(executionMode.isMock());
         }
     }
@@ -175,16 +169,20 @@ public class ExecutionModeTest extends BrobotTestBase {
                     }
                 }
 
-                // Our test ExecutionMode always returns true in mock mode
-                assertTrue(executionMode.isMock());
+                // Check based on whether screenshots are present
+                boolean expectedMock =
+                        brobotProperties.getScreenshot().getTestScreenshots().isEmpty();
+                assertEquals(expectedMock, executionMode.isMock());
             }
         }
 
         @Test
         @DisplayName("Should handle empty string in screenshots")
         void shouldHandleEmptyStringInScreenshots() {
-            // Mock mode is now enabled via BrobotTestBase
-            // Method call removed - was using BrobotProperties;
+            // Mock mode is enabled via BrobotTestBase
+            if (brobotProperties != null) {
+                brobotProperties.getScreenshot().getTestScreenshots().add("");
+            }
 
             // Even empty string counts as a screenshot
             assertFalse(executionMode.isMock());
@@ -193,8 +191,10 @@ public class ExecutionModeTest extends BrobotTestBase {
         @Test
         @DisplayName("Should handle null in screenshots list")
         void shouldHandleNullInScreenshotsList() {
-            // Mock mode is now enabled via BrobotTestBase
-            // Method call removed - was using BrobotProperties;
+            // Mock mode is enabled via BrobotTestBase
+            if (brobotProperties != null) {
+                brobotProperties.getScreenshot().getTestScreenshots().add(null);
+            }
 
             // Null entry still makes list non-empty
             assertFalse(executionMode.isMock());
@@ -216,11 +216,18 @@ public class ExecutionModeTest extends BrobotTestBase {
         })
         void shouldHandleVariousConfigurationCombinations(
                 boolean mock, int screenshotCount, boolean expectedResult) {
-            // Setting mock now handled by BrobotProperties
-            // Method call removed - was using BrobotProperties;
+            // Set mock mode
+            brobotProperties.getCore().setMock(mock);
 
+            // Clear screenshots first
+            brobotProperties.getScreenshot().getTestScreenshots().clear();
+
+            // Add screenshots
             for (int i = 0; i < screenshotCount; i++) {
-                // Method call removed - was using BrobotProperties;
+                brobotProperties
+                        .getScreenshot()
+                        .getTestScreenshots()
+                        .add("screenshot" + i + ".png");
             }
 
             assertEquals(expectedResult, executionMode.isMock());
@@ -235,8 +242,8 @@ public class ExecutionModeTest extends BrobotTestBase {
         @DisplayName("Should support unit test mode")
         void shouldSupportUnitTestMode() {
             // Unit tests typically use mock mode
-            // Mock mode is now enabled via BrobotTestBase
-            // Method call removed - was using BrobotProperties;
+            brobotProperties.getCore().setMock(true);
+            brobotProperties.getScreenshot().getTestScreenshots().clear();
 
             assertTrue(executionMode.isMock());
         }
@@ -245,8 +252,7 @@ public class ExecutionModeTest extends BrobotTestBase {
         @DisplayName("Should support integration test mode")
         void shouldSupportIntegrationTestMode() {
             // Integration tests might use screenshots
-            // Mock mode is now enabled via BrobotTestBase
-            // Method call removed - was using BrobotProperties;
+            brobotProperties.getScreenshot().getTestScreenshots().add("integration-test.png");
 
             assertFalse(executionMode.isMock());
         }
@@ -255,8 +261,8 @@ public class ExecutionModeTest extends BrobotTestBase {
         @DisplayName("Should support production mode")
         void shouldSupportProductionMode() {
             // Production typically has mock disabled
-            // Mock mode disabled - not needed in tests
-            // Method call removed - was using BrobotProperties;
+            brobotProperties.getCore().setMock(false);
+            brobotProperties.getScreenshot().getTestScreenshots().clear();
 
             assertFalse(executionMode.isMock());
         }
@@ -269,8 +275,8 @@ public class ExecutionModeTest extends BrobotTestBase {
         @Test
         @DisplayName("Should be consistent across multiple instances")
         void shouldBeConsistentAcrossMultipleInstances() {
-            ExecutionMode mode1 = new ExecutionMode();
-            ExecutionMode mode2 = new ExecutionMode();
+            ExecutionMode mode1 = new ExecutionMode(brobotProperties);
+            ExecutionMode mode2 = new ExecutionMode(brobotProperties);
 
             // Mock mode is now enabled via BrobotTestBase
             // Method call removed - was using BrobotProperties;
@@ -285,13 +291,16 @@ public class ExecutionModeTest extends BrobotTestBase {
         @Test
         @DisplayName("Should reflect immediate setting changes")
         void shouldReflectImmediateSettingChanges() {
-            // Mock mode disabled - not needed in tests
+            // Start with mock disabled
+            brobotProperties.getCore().setMock(false);
             assertFalse(executionMode.isMock());
 
-            // Mock mode is now enabled via BrobotTestBase
+            // Enable mock mode
+            brobotProperties.getCore().setMock(true);
             assertTrue(executionMode.isMock());
 
-            // Method call removed - was using BrobotProperties;
+            // Add screenshot (should override mock mode)
+            brobotProperties.getScreenshot().getTestScreenshots().add("test.png");
             assertFalse(executionMode.isMock());
         }
     }
