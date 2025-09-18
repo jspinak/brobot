@@ -22,41 +22,39 @@ import lombok.Data;
 @ConfigurationProperties(prefix = "brobot.gui-access")
 public class GuiAccessConfig {
 
-    /** Whether to report GUI access problems to console/logs. Default: true */
-    private boolean reportProblems = true;
+    /** Whether to report GUI access problems to console/logs. */
+    private boolean reportProblems;
 
-    /** Whether to show verbose error details. Default: true */
-    private boolean verboseErrors = true;
+    /** Whether to show verbose error details. */
+    private boolean verboseErrors;
 
-    /** Whether to suggest solutions for detected problems. Default: true */
-    private boolean suggestSolutions = true;
+    /** Whether to suggest solutions for detected problems. */
+    private boolean suggestSolutions;
 
-    /** Whether to check GUI access on startup. Default: true */
-    private boolean checkOnStartup = true;
+    /** Whether to check GUI access on startup. */
+    private boolean checkOnStartup;
 
-    /**
-     * Whether to continue execution despite GUI problems. Default: true (continue with warnings)
-     */
-    private boolean continueOnError = true;
+    /** Whether to continue execution despite GUI problems. */
+    private boolean continueOnError;
 
-    /** Interval in seconds between GUI access checks (0 = no periodic checks). Default: 0 */
-    private int checkInterval = 0;
+    /** Interval in seconds between GUI access checks (0 = no periodic checks). */
+    private int checkInterval;
 
-    /** Whether to log successful GUI checks. Default: false (only log problems) */
-    private boolean logSuccessfulChecks = false;
+    /** Whether to log successful GUI checks. */
+    private boolean logSuccessfulChecks;
 
-    /** Whether to include platform-specific advice. Default: true */
-    private boolean platformSpecificAdvice = true;
+    /** Whether to include platform-specific advice. */
+    private boolean platformSpecificAdvice;
 
-    /** Whether to check for screen recording permissions on macOS. Default: true */
-    private boolean checkMacPermissions = true;
+    /** Whether to check for screen recording permissions on macOS. */
+    private boolean checkMacPermissions;
 
-    /** Whether to warn about remote desktop sessions. Default: true */
-    private boolean warnRemoteDesktop = true;
+    /** Whether to warn about remote desktop sessions. */
+    private boolean warnRemoteDesktop;
 
-    /** Minimum required screen width. Default: 800 */
-    private int minScreenWidth = 800;
+    /** Minimum required screen width. */
+    private int minScreenWidth;
 
-    /** Minimum required screen height. Default: 600 */
-    private int minScreenHeight = 600;
+    /** Minimum required screen height. */
+    private int minScreenHeight;
 }
