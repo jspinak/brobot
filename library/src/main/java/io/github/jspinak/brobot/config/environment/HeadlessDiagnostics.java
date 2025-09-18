@@ -84,6 +84,16 @@ public class HeadlessDiagnostics {
     private void testScreenCapture() {
         log.info("Testing screen capture capability...");
 
+        // Check which capture provider is being used
+        String captureProvider = System.getProperty("brobot.capture.provider", "AUTO");
+
+        if (captureProvider.toUpperCase().contains("FFMPEG")
+                || captureProvider.toUpperCase().contains("JAVACV")) {
+            log.info("Using FFmpeg capture provider - skipping SikuliX screen capture test");
+            brobotLogger.observation("FFmpeg capture provider active - SikuliX test skipped");
+            return;
+        }
+
         try {
             Screen screen = new Screen();
 
