@@ -77,7 +77,7 @@
  * // Highlight a region for visual confirmation
  * Highlight highlight = new Highlight(...);
  *
- * ActionOptions highlightOptions = new ActionOptions.Builder()
+ * ActionConfig highlightOptions = new ActionConfig.Builder()
  *     .setAction(ActionType.HIGHLIGHT)
  *     .setHighlightDuration(3.0)  // Show for 3 seconds
  *     .setHighlightColor("RED")

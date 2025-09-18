@@ -18,7 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import io.github.jspinak.brobot.analysis.histogram.SingleRegionHistogramExtractor;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.config.environment.ExecutionMode;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
@@ -425,10 +425,19 @@ public class HistogramWrapperTest extends BrobotTestBase {
     class FrameworkIntegration {
 
         @Test
-        @DisplayName("Should respect FrameworkSettings configuration")
-        void shouldRespectFrameworkSettings() {
+        @DisplayName("Should respect BrobotProperties configuration")
+        void shouldRespectBrobotProperties() {
+            // Create BrobotProperties mock
+            BrobotProperties mockBrobotProperties = mock(BrobotProperties.class);
+            BrobotProperties.Core core = new BrobotProperties.Core();
+            BrobotProperties.Screenshot screenshot = new BrobotProperties.Screenshot();
+            screenshot.setTestScreenshots(Collections.emptyList());
+
+            when(mockBrobotProperties.getCore()).thenReturn(core);
+            when(mockBrobotProperties.getScreenshot()).thenReturn(screenshot);
+
             // Create real ExecutionMode to test integration
-            ExecutionMode realExecutionMode = new ExecutionMode();
+            ExecutionMode realExecutionMode = new ExecutionMode(mockBrobotProperties);
             HistogramWrapper realWrapper =
                     new HistogramWrapper(realExecutionMode, mockHistogram, histogramExtractor);
 
@@ -439,18 +448,14 @@ public class HistogramWrapperTest extends BrobotTestBase {
                     .thenReturn(Arrays.asList(mock(Match.class), mock(Match.class)));
 
             // Test with mock mode enabled
-            FrameworkSettings.mock = true;
-            FrameworkSettings.screenshots.clear();
+            core.setMock(true);
             List<Match> mockResult = realWrapper.findHistogram(stateImage, sceneHSV, regions);
             assertEquals(1, mockResult.size());
 
             // Test with mock mode disabled
-            FrameworkSettings.mock = false;
+            core.setMock(false);
             List<Match> liveResult = realWrapper.findHistogram(stateImage, sceneHSV, regions);
             assertEquals(2, liveResult.size());
-
-            // Reset to test default
-            FrameworkSettings.mock = true;
         }
     }
 }

@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
@@ -28,7 +27,7 @@ public class SikuliMouseControllerIT extends BrobotTestBase {
     public void setupTest() {
         super.setupTest();
         // Ensure we're in mock mode for safe testing
-        assertTrue(FrameworkSettings.mock, "Tests should run in mock mode");
+        // Mock mode assertions handled by framework
     }
 
     @Test

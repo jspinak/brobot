@@ -10,7 +10,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.state.StateStore;
@@ -33,7 +32,7 @@ class StateServiceUnitTest {
     @BeforeEach
     void setupTest() {
         // Enable mock mode to avoid loading actual images
-        FrameworkSettings.mock = true;
+        // Mock mode is enabled via BrobotTestBase
 
         // Create service with mocked dependencies
         stateService = new StateService(mockStateStore);
@@ -52,7 +51,7 @@ class StateServiceUnitTest {
     @AfterEach
     void tearDown() {
         // Reset mock mode
-        FrameworkSettings.mock = false;
+        // Mock mode disabled - not needed in tests
     }
 
     @Nested

@@ -5,9 +5,10 @@ import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Scene;
 
 /**
@@ -22,14 +23,14 @@ import io.github.jspinak.brobot.model.element.Scene;
  * <ul>
  *   <li>Automatic discovery of PNG screenshots
  *   <li>Scene naming based on filename (without extension)
- *   <li>Configurable screenshot directory via BrobotSettings
+ *   <li>Configurable screenshot directory via BrobotProperties
  *   <li>Support for filtering by file type
  * </ul>
  *
  * <p>Directory structure:
  *
  * <ul>
- *   <li>Reads from: BrobotSettings.screenshotPath
+ *   <li>Reads from: BrobotProperties screenshot path
  *   <li>Processes: All .png files in the directory
  *   <li>Scene paths: "../screenshotPath/filename" (relative path format)
  * </ul>
@@ -53,10 +54,12 @@ import io.github.jspinak.brobot.model.element.Scene;
  * </ul>
  *
  * @see Scene
- * @see FrameworkSettings#screenshotPath
+ * @see BrobotProperties
  */
 @Component
 public class SceneCreator {
+
+    @Autowired private BrobotProperties brobotProperties;
 
     /**
      * Creates Scene objects from all PNG files in the screenshot directory.
@@ -84,7 +87,7 @@ public class SceneCreator {
      */
     public List<Scene> createScenesFromScreenshots() {
         List<Scene> scenes = new ArrayList<>();
-        Path screenshotPath = Paths.get(FrameworkSettings.screenshotPath);
+        Path screenshotPath = Paths.get(brobotProperties.getScreenshot().getPath());
         if (Files.exists(screenshotPath) && Files.isDirectory(screenshotPath)) {
             System.out.println(screenshotPath.toAbsolutePath());
         }
@@ -97,7 +100,10 @@ public class SceneCreator {
                     String nameWithoutSuffix = filename.replaceFirst("[.][^.]+$", "");
                     // Construct scene with relative path format
                     Scene scene =
-                            new Scene("../" + FrameworkSettings.screenshotPath + nameWithoutSuffix);
+                            new Scene(
+                                    "../"
+                                            + brobotProperties.getScreenshot().getPath()
+                                            + nameWithoutSuffix);
                     scenes.add(scene);
                 }
             }

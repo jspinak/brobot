@@ -52,9 +52,9 @@ public class MatchContentExtractor {
      * Captures both visual and text content from matched regions.
      *
      * <p>This method should run after all adjustments are made to the match objects, including
-     * position shifts, match fusion, and other transformations specified by ActionOptions. The
-     * order is critical because these adjustments affect the underlying regions from which content
-     * is captured.
+     * position shifts, match fusion, and other transformations specified by ActionConfig. The order
+     * is critical because these adjustments affect the underlying regions from which content is
+     * captured.
      *
      * <p>The method performs two operations:
      *
@@ -76,7 +76,7 @@ public class MatchContentExtractor {
      *
      * <p>This method extracts the image data (Mat/BufferedImage) from the scene at the regions
      * defined by each match. The scene to use is determined by the {@code
-     * sceneToUseForCaptureAfterFusingMatches} setting in ActionOptions, which allows capturing from
+     * sceneToUseForCaptureAfterFusingMatches} setting in ActionConfig, which allows capturing from
      * different scenes than where the match was originally found.
      *
      * <p>This flexibility is useful when:

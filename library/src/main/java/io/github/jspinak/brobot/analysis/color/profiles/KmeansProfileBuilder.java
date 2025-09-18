@@ -9,13 +9,14 @@ import java.util.Set;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.TermCriteria;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.analysis.color.ColorClusterFactory;
 import io.github.jspinak.brobot.analysis.color.kmeans.KmeansCluster;
 import io.github.jspinak.brobot.analysis.color.kmeans.KmeansProfile;
 import io.github.jspinak.brobot.analysis.color.kmeans.KmeansProfilesAllSchemas;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.model.analysis.color.ColorSchema;
 import io.github.jspinak.brobot.model.state.StateImage;
@@ -54,6 +55,8 @@ import io.github.jspinak.brobot.util.image.core.ColorMatrixUtilities;
 @Component
 public class KmeansProfileBuilder {
 
+    @Autowired private BrobotProperties brobotProperties;
+
     private ColorClusterFactory setColorCluster;
     private ColorMatrixUtilities matOps3d;
     private ProfileSetBuilder setAllProfiles;
@@ -82,7 +85,7 @@ public class KmeansProfileBuilder {
      */
     public void setProfiles(StateImage img) {
         KmeansProfilesAllSchemas kmeansProfilesAllSchemas = new KmeansProfilesAllSchemas();
-        for (int i = 1; i <= FrameworkSettings.maxKMeansToStoreInProfile; i++) {
+        for (int i = 1; i <= brobotProperties.getAnalysis().getMaxKMeansToStore(); i++) {
             addNewProfiles(kmeansProfilesAllSchemas, img, i);
         }
         img.setKmeansProfilesAllSchemas(kmeansProfilesAllSchemas);
@@ -99,7 +102,7 @@ public class KmeansProfileBuilder {
      * @param means The number of cluster centers to use for K-means clustering
      */
     public void addNewProfiles(KmeansProfilesAllSchemas kmeansProfiles, StateImage img, int means) {
-        for (int i = 1; i <= FrameworkSettings.maxKMeansToStoreInProfile; i++) {
+        for (int i = 1; i <= brobotProperties.getAnalysis().getMaxKMeansToStore(); i++) {
             KmeansProfile kmeansProfilesForBGR =
                     getProfile(img.getOneColumnBGRMat(), means, ColorCluster.ColorSchemaName.BGR);
             kmeansProfiles.addKmeansProfile(ColorCluster.ColorSchemaName.BGR, kmeansProfilesForBGR);

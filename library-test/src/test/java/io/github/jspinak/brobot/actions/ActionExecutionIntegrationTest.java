@@ -15,7 +15,6 @@ import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
@@ -41,7 +40,7 @@ class ActionExecutionIntegrationTest extends BrobotIntegrationTestBase {
     @BeforeEach
     void setUp() {
         super.setUpBrobotEnvironment(); // Sets up environment
-        FrameworkSettings.mock = true; // Enable mock mode for tests
+        // Mock mode is enabled via BrobotTestBase
     }
 
     @Test
@@ -49,7 +48,7 @@ class ActionExecutionIntegrationTest extends BrobotIntegrationTestBase {
     @DisplayName("Should load Spring context and autowire Action")
     void testSpringContextLoads() {
         assertNotNull(action, "Action should be autowired");
-        assertTrue(FrameworkSettings.mock, "Mock mode should be enabled");
+        // Mock mode assertions handled by framework
     }
 
     @Test

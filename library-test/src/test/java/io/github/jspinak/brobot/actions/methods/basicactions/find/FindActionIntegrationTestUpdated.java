@@ -14,7 +14,6 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;
@@ -39,12 +38,12 @@ public class FindActionIntegrationTestUpdated extends BrobotIntegrationTestBase 
     @BeforeEach
     void setUp() {
         super.setUpBrobotEnvironment();
-        FrameworkSettings.mock = true;
+        // Mock mode is enabled via BrobotTestBase
     }
 
     @AfterEach
     void tearDown() {
-        FrameworkSettings.mock = false;
+        // Mock mode disabled - not needed in tests
     }
 
     @Autowired private ActionService actionService;

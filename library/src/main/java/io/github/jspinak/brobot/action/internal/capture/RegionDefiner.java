@@ -20,7 +20,7 @@ import io.github.jspinak.brobot.model.element.Region;
 /**
  * V2 version that provides reusable helper methods for the various Define actions.
  *
- * <p>This V2 class works with ActionConfig instead of ActionOptions. It centralizes common logic
+ * <p>This V2 class works with ActionConfig instead of ActionConfig. It centralizes common logic
  * required by different 'Define' operations, primarily for adjusting a {@link Region} based on
  * {@link MatchAdjustmentOptions} and for finding initial matches that define the boundaries of a
  * new region. It ensures consistent behavior across all region definition strategies.
@@ -121,7 +121,7 @@ public class RegionDefiner {
      * define-specific adjustments.
      *
      * <p>For now, this delegates to the legacy implementation as ActionResult still uses
-     * ActionOptions internally.
+     * ActionConfig internally.
      *
      * @param matches The ActionResult object that contains the configuration and to which the
      *     resulting Match objects will be added.

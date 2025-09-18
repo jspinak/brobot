@@ -123,7 +123,7 @@ public class ActionHistoryPersistence {
         String json = Files.readString(path);
 
         try {
-            // Automatically migrates legacy ActionOptions format if needed
+            // Automatically migrates legacy ActionConfig format if needed
             ActionHistory history = objectMapper.readValue(json, ActionHistory.class);
             log.info("Loaded ActionHistory from {}", path);
             return history;

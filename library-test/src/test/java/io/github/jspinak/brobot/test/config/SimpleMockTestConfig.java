@@ -11,7 +11,6 @@ import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.internal.execution.ActionChainExecutor;
 import io.github.jspinak.brobot.action.internal.execution.ActionExecution;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.statemanagement.StateDetector;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
@@ -25,7 +24,7 @@ public class SimpleMockTestConfig {
 
     static {
         // Ensure mock mode is enabled before any beans are created
-        FrameworkSettings.mock = true;
+        // Mock mode is enabled via BrobotTestBase
         System.setProperty("brobot.core.mockMode", "true");
         System.setProperty("java.awt.headless", "true");
     }

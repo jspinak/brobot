@@ -44,9 +44,14 @@ import lombok.extern.slf4j.Slf4j;
         matchIfMissing = false)
 public class MultiMonitorRoutingAspect {
 
-    @Autowired private BrobotLogger brobotLogger;
+    private final BrobotLogger brobotLogger;
+    private final MonitorManager monitorManager;
 
-    @Autowired private MonitorManager monitorManager;
+    @Autowired
+    public MultiMonitorRoutingAspect(BrobotLogger brobotLogger, MonitorManager monitorManager) {
+        this.brobotLogger = brobotLogger;
+        this.monitorManager = monitorManager;
+    }
 
     @Value("${brobot.aspects.multi-monitor.default-monitor:0}")
     private int defaultMonitorIndex;

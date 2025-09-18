@@ -18,7 +18,7 @@ Brobot's mock mode provides a powerful testing framework that simulates GUI auto
 
 ### What Mock Mode Does
 
-When mock mode is enabled (via `brobot.mock=true` property or `MockModeManager.setMockMode(true)`):
+When mock mode is enabled (via `brobot.core.mock=true` property or `MockModeManager.setMockMode(true)`):
 
 1. **No screen capture** - Brobot doesn't capture actual screens
 2. **No real pattern matching** - Image patterns aren't matched against real screens
@@ -44,7 +44,7 @@ Brobot uses simplified mock configuration properties:
 ```properties
 # application.properties
 # Single master switch for mock mode
-brobot.mock=true
+brobot.core.mock=true
 
 # Probability of action success (0.0 to 1.0, default 1.0)
 brobot.mock.action.success.probability=0.95
@@ -53,13 +53,17 @@ brobot.mock.action.success.probability=0.95
 #### Programmatic Configuration
 
 ```java
+// Note: BrobotProperties must be injected as a dependency
+@Autowired
+private BrobotProperties brobotProperties;
+
 import io.github.jspinak.brobot.config.mock.MockModeManager;
 
 // Enable mock mode globally
 MockModeManager.setMockMode(true);
 
 // Check if mock mode is enabled
-if (MockModeManager.isMockMode()) {
+if (brobotProperties.getCore().isMock()) {
     // Mock-specific logic
 }
 
@@ -70,7 +74,7 @@ MockModeManager.logMockModeState();
 The `MockModeManager` automatically synchronizes mock mode across:
 - System properties (`brobot.mock`)
 - `ExecutionEnvironment` (for runtime behavior)
-- `FrameworkSettings.mock` (for compatibility)
+- `brobotProperties.getCore().isMock()` (for compatibility)
 
 ### Action Success Probability
 
@@ -114,7 +118,7 @@ public class LoginState {
     
     @PostConstruct
     public void configureMockProbability() {
-        if (FrameworkSettings.mock && mockStateManagement != null) {
+        if (brobotProperties.getCore().isMock() && mockStateManagement != null) {
             mockStateManagement.setStateProbabilities(MOCK_PROBABILITY, "Login");
             log.debug("Configured Login state mock probability to {}%", MOCK_PROBABILITY);
         }
@@ -264,10 +268,10 @@ Keep mock-specific configuration separate:
 
 ```properties
 # application.properties
-brobot.mock=false  # Production
+brobot.core.mock=false  # Production
 
 # application-test.properties
-brobot.mock=true   # Testing
+brobot.core.mock=true   # Testing
 ```
 
 ### 5. Clean State Between Tests
@@ -355,7 +359,7 @@ public void handleStateTransition(StateTransitionEvent event) {
 ```java
 @Test
 public void verifyMockSetup() {
-    assertTrue(FrameworkSettings.mock, "Mock mode should be enabled");
+    assertTrue(brobotProperties.getCore().isMock(), "Mock mode should be enabled");
     assertNotNull(mockStateManagement, "MockStateManagement should be available");
 }
 ```
@@ -389,13 +393,13 @@ public class TargetStateTransitions {
     
     @FromTransition(from = SourceState.class, priority = 1)
     public boolean fromSource() {
-        if (FrameworkSettings.mock) return true;
+        if (brobotProperties.getCore().isMock()) return true;
         return action.click(sourceState.getButton()).isSuccess();
     }
     
     @IncomingTransition(required = true)
     public boolean verifyArrival() {
-        if (FrameworkSettings.mock) return true;
+        if (brobotProperties.getCore().isMock()) return true;
         return action.find(targetState.getElement()).isSuccess();
     }
 }
@@ -406,7 +410,7 @@ public class TargetStateTransitions {
 **Solution**: Verify configuration:
 
 ```properties
-brobot.mock=true
+brobot.core.mock=true
 ```
 
 ## Enhanced Mock Infrastructure

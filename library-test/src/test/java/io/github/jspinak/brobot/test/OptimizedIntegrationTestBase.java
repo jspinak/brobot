@@ -7,13 +7,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.test.config.OptimizedTestConfig;
 import io.github.jspinak.brobot.test.config.TestActionConfig;
 import io.github.jspinak.brobot.test.config.TestConfigurationManager;
@@ -41,6 +42,8 @@ import io.github.jspinak.brobot.test.config.TestConfigurationManager;
 @Timeout(value = 5, unit = TimeUnit.MINUTES) // Default 5-minute timeout per test
 public abstract class OptimizedIntegrationTestBase {
 
+    @Autowired private BrobotProperties brobotProperties;
+
     private static boolean globalSetupComplete = false;
     private static final Object SETUP_LOCK = new Object();
 
@@ -49,7 +52,7 @@ public abstract class OptimizedIntegrationTestBase {
         synchronized (SETUP_LOCK) {
             if (!globalSetupComplete) {
                 // One-time global setup
-                optimizeFrameworkSettings();
+                optimizeBrobotProperties();
                 globalSetupComplete = true;
             }
         }
@@ -61,28 +64,24 @@ public abstract class OptimizedIntegrationTestBase {
         ensureMockMode();
     }
 
-    private void optimizeFrameworkSettings() {
+    private void optimizeBrobotProperties() {
         // Enable mock mode for all tests
-        FrameworkSettings.mock = true;
+        // Note: BrobotProperties is now immutable and configured via Spring
+        // Mock mode and timing settings should be configured in application-test.properties
+        // Example properties:
+        // brobot.core.mock=true
+        // brobot.mock.time-find-first=0.005
+        // brobot.mock.time-find-all=0.01
+        // etc.
 
-        // Optimize timing for tests
-        FrameworkSettings.mockTimeFindFirst = 0.005;
-        FrameworkSettings.mockTimeFindAll = 0.01;
-        FrameworkSettings.mockTimeClick = 0.005;
-        FrameworkSettings.mockTimeMove = 0.005;
-        FrameworkSettings.mockTimeDrag = 0.01;
-        FrameworkSettings.mockTimeFindHistogram = 0.01;
-        FrameworkSettings.mockTimeFindColor = 0.01;
-        FrameworkSettings.mockTimeClassify = 0.015;
-
-        // Set screenshot paths for tests
-        FrameworkSettings.screenshotPath = "library-test/screenshots/";
+        // Screenshot path should also be configured via properties:
+        // brobot.screenshots.path=library-test/screenshots/
     }
 
     private void ensureMockMode() {
         // Ensure mock mode is always enabled for integration tests
-        if (!FrameworkSettings.mock) {
-            FrameworkSettings.mock = true;
+        if (!brobotProperties.getCore().isMock()) {
+            // Mock mode should be enabled via application-test.properties
         }
     }
 

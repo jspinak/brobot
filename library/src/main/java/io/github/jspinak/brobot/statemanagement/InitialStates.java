@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.navigation.service.StateService;
 
@@ -97,12 +97,13 @@ import lombok.extern.slf4j.Slf4j;
  * @see StateDetector
  * @see StateMemory
  * @see State
- * @see FrameworkSettings
+ * @see BrobotProperties
  */
 @Slf4j
 @Component
 public class InitialStates {
 
+    private final BrobotProperties brobotProperties;
     private final StateDetector stateFinder;
     private final StateMemory stateMemory;
     private final StateService allStatesInProjectService;
@@ -131,9 +132,11 @@ public class InitialStates {
     private final Map<Set<Long>, Integer> potentialActiveStates = new HashMap<>();
 
     public InitialStates(
+            BrobotProperties brobotProperties,
             StateDetector stateFinder,
             StateMemory stateMemory,
             StateService allStatesInProjectService) {
+        this.brobotProperties = brobotProperties;
         this.stateFinder = stateFinder;
         this.stateMemory = stateMemory;
         this.allStatesInProjectService = allStatesInProjectService;
@@ -201,7 +204,7 @@ public class InitialStates {
      * Discovers and activates the initial states for automation.
      *
      * <p>Main entry point that determines which states are currently active. Behavior depends on
-     * BrobotSettings.mock:
+     * BrobotProperties configuration:
      *
      * <ul>
      *   <li>Mock mode: Randomly selects from defined state sets
@@ -220,8 +223,8 @@ public class InitialStates {
      * @see #searchForInitialStates()
      */
     public void findInitialStates() {
-        log.info("Finding initial states (mock mode: {})", FrameworkSettings.mock);
-        if (FrameworkSettings.mock) {
+        log.info("Finding initial states (mock mode: {})", brobotProperties.getCore().isMock());
+        if (brobotProperties.getCore().isMock()) {
             mockInitialStates();
             return;
         }

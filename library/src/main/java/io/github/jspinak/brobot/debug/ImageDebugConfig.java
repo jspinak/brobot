@@ -40,20 +40,20 @@ public class ImageDebugConfig {
     /** Output directory for debug files. */
     private String outputDir = "debug/image-finding";
 
-    /** Visual debugging settings. */
-    private VisualSettings visual = new VisualSettings();
+    /** Visual debugging properties. */
+    private VisualProperties visual = new VisualProperties();
 
-    /** Logging settings. */
-    private LogSettings log = new LogSettings();
+    /** Logging properties. */
+    private LogProperties log = new LogProperties();
 
-    /** Real-time monitoring settings. */
-    private RealTimeSettings realtime = new RealTimeSettings();
+    /** Real-time monitoring properties. */
+    private RealTimeProperties realtime = new RealTimeProperties();
 
-    /** Console output settings. */
-    private ConsoleSettings console = new ConsoleSettings();
+    /** Console output properties. */
+    private ConsoleProperties console = new ConsoleProperties();
 
     @Data
-    public static class VisualSettings {
+    public static class VisualProperties {
         private boolean enabled = true;
         private boolean showSearchRegions = true;
         private boolean showMatchScores = true;
@@ -64,7 +64,7 @@ public class ImageDebugConfig {
     }
 
     @Data
-    public static class LogSettings {
+    public static class LogProperties {
         private boolean similarityScores = true;
         private boolean searchTime = true;
         private boolean patternDetails = true;
@@ -74,14 +74,14 @@ public class ImageDebugConfig {
     }
 
     @Data
-    public static class RealTimeSettings {
+    public static class RealTimeProperties {
         private boolean enabled = false;
         private int port = 8888;
         private boolean autoOpen = false;
     }
 
     @Data
-    public static class ConsoleSettings {
+    public static class ConsoleProperties {
         private boolean useColors = true;
         private boolean showBox = true;
         private boolean showTimestamp = true;

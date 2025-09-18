@@ -36,6 +36,10 @@ Starting with Brobot v1.0.0, ActionHistory can be configured directly in the Sta
 ### Basic Usage
 
 ```java
+// Note: BrobotProperties must be injected as a dependency
+@Autowired
+private BrobotProperties brobotProperties;
+
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.tools.testing.mock.history.MockActionHistoryFactory;
@@ -272,7 +276,7 @@ public class MyState {
 
 ```java
 // Check if mock mode is enabled
-if (FrameworkSettings.mock) {
+if (brobotProperties.getCore().isMock()) {
     stateImage = new StateImage.Builder()
         .addPatterns("pattern.png")
         .withActionHistory(MockActionHistoryFactory.reliable(region))

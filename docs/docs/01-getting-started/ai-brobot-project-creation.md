@@ -1,11 +1,53 @@
 # Brobot AI Implementation Guide - Complete Reference
 
+## 🔥 QUICK REFERENCE CARD
+
+### Do's and Don'ts at a Glance
+
+| ✅ DO | ❌ DON'T |
+|-------|---------|
+| Use `Navigation.openState("Menu")` | Create a TransitionManager class |
+| States: Objects only (StateImage, StateString) | States: Add methods like `clickButton()` or `isActive()` |
+| Transitions: Methods only | Transitions: Create StateImage objects |
+| One TransitionSet per State | Multiple transition classes per state |
+| Use `ClickOptions.setPauseAfterEnd(2.0)` | Use `Thread.sleep(2000)` |
+| State class: `MenuState` | State class: `Menu` |
+| Navigate with: `openState("Menu")` | Navigate with: `openState("MenuState")` |
+| `@State` annotation only | `@State` + `@Component` |
+| Use Brobot's `Action` service | Use SikuliX directly or java.awt.Robot |
+
+## FUNDAMENTAL PRINCIPLES
+
+### The Brobot Architecture Philosophy
+
+Brobot follows a strict separation of concerns:
+
+| Component | Purpose | What it Contains | What it NEVER Contains |
+|-----------|---------|------------------|------------------------|
+| **State Classes** | Data containers | StateImage/StateString objects only | Methods, business logic, actions |
+| **TransitionSet Classes** | Navigation logic | Methods for state transitions | StateImage objects, state data |
+| **Navigation Service** | Orchestrates transitions | Path finding and execution | Direct state manipulation |
+| **Action Service** | Performs UI operations | Click, type, find methods | Thread.sleep(), direct SikuliX calls |
+
+### Key Architecture Rules
+
+1. **States are Pure Data** - Think of them as structs or POJOs. They hold UI element definitions, nothing else.
+2. **One TransitionSet Per State** - Each state has exactly ONE TransitionSet class managing ALL its transitions.
+3. **Never Create a TransitionManager** - Use Navigation service. A central TransitionManager is an anti-pattern.
+4. **State Names are Automatic** - Derived from class name minus "State" suffix. No StateEnum field needed.
+5. **@State Includes @Component** - Never add @Component to State classes.
+6. **ActionHistory is Optional** - Only needed for mock mode testing, not required for production.
+
 ## CRITICAL RULES - NEVER VIOLATE THESE
 
 ### Rule 1: NEVER Use External Functions
 **These will BREAK the entire model-based automation system:**
 
 ```java
+// Note: BrobotProperties must be injected as a dependency
+@Autowired
+private BrobotProperties brobotProperties;
+
 // ❌ ABSOLUTELY FORBIDDEN - These break everything:
 Thread.sleep(2000);                          // Breaks mock testing completely
 action.pause(2.0);                           // This method DOES NOT EXIST in Brobot
@@ -76,10 +118,104 @@ navigation.openState("Pricing");  // ✅ CORRECT - for PricingState class
 navigation.openState("MenuState"); // ❌ WRONG - don't include "State"
 ```
 
+### Rule 4: State Classes Have Objects, Not Methods
+
+**CRITICAL: State classes are pure data containers**
+
+```java
+// ✅ CORRECT State class - ONLY objects, NO methods
+@State  // @State includes @Component, don't add it separately
+@Getter
+public class MenuState {
+    // ONLY StateImage/StateString objects
+    private final StateImage logo;
+    private final StateImage pricingButton;
+
+    public MenuState() {
+        // Initialize objects in constructor
+        logo = new StateImage.Builder()
+            .addPatterns("menu/menu-logo")
+            .setName("Menu Logo")
+            .build();
+
+        pricingButton = new StateImage.Builder()
+            .addPatterns("menu/menu-pricing")
+            .setName("Pricing Button")
+            .build();
+    }
+    // NO ACTION METHODS HERE!
+}
+
+// ❌ WRONG State class - has methods
+@State
+public class MenuState {
+    private final StateImage logo;
+
+    // ❌ WRONG - States should NOT have action methods
+    public void clickLogo() {
+        action.click(logo);
+    }
+
+    // ❌ WRONG - States should NOT have business logic
+    public boolean isActive() {
+        return action.find(logo).isSuccess();
+    }
+}
+```
+
+### Rule 5: Transition Classes Have Methods, Not State Objects
+
+**CRITICAL: Transition classes contain navigation logic only**
+
+```java
+// ✅ CORRECT Transition class - methods only, receives state via DI
+@TransitionSet(state = MenuState.class)
+@RequiredArgsConstructor
+public class MenuTransitions {
+    // Only inject the state and action service
+    private final MenuState menuState;  // The state this TransitionSet manages
+    private final Action action;
+
+    // Methods for navigation
+    @OutgoingTransition(to = PricingState.class)
+    public boolean toPricing() {
+        return action.click(menuState.getPricingButton()).isSuccess();
+    }
+
+    @IncomingTransition
+    public boolean verifyArrival() {
+        return action.find(menuState.getLogo()).isSuccess();
+    }
+}
+
+// ❌ WRONG Transition class - has StateImage objects
+@TransitionSet(state = MenuState.class)
+public class MenuTransitions {
+    // ❌ WRONG - Don't define StateImages in transitions
+    private final StateImage pricingButton;
+
+    // ❌ WRONG - Don't initialize objects here
+    public MenuTransitions() {
+        pricingButton = new StateImage.Builder()...
+    }
+}
+```
+
 ## COMPLETE PROJECT STRUCTURE
 
 ```
 my-automation-project/
+├── images/
+│   ├── menu/
+│   │   ├── menu-logo.png
+│   │   ├── menu-pricing.png
+│   │   └── menu-home.png
+│   ├── pricing/
+│   │   ├── pricing-start_for_free.png
+│   │   └── pricing-header.png
+│   └── homepage/
+│       ├── start_for_free_big.png
+│       └── enter_your_email.png
 ├── src/
 │   ├── main/
 │   │   ├── java/
@@ -97,17 +233,6 @@ my-automation-project/
 │   │   │           └── AutomationRunner.java
 │   │   └── resources/
 │   │       ├── application.properties
-│   │       └── images/
-│   │           ├── menu/
-│   │           │   ├── menu-logo.png
-│   │           │   ├── menu-pricing.png
-│   │           │   └── menu-home.png
-│   │           ├── pricing/
-│   │           │   ├── pricing-start_for_free.png
-│   │           │   └── pricing-header.png
-│   │           └── homepage/
-│   │               ├── start_for_free_big.png
-│   │               └── enter_your_email.png
 │   └── test/
 │       └── java/
 │           └── com/example/automation/
@@ -123,21 +248,23 @@ my-automation-project/
 ```java
 package com.example.automation.states;
 
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import io.github.jspinak.brobot.state.annotations.State;
 import io.github.jspinak.brobot.stateStructure.model.state.StateImage;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * State classes are pure data containers - ONLY objects, NO methods
+ * The state name is automatically derived from class name minus "State" suffix
+ * @State annotation includes @Component - don't add @Component separately
+ */
 @State(initial = true)  // Mark as initial state if this is where automation starts
 @Getter
 @Slf4j
 public class MenuState {
+    // NO StateEnum field needed - state name is derived from class name
 
-    // State enum for identification
-    private final StateEnum stateEnum = StateEnum.MENU;
-
-    // All UI elements in this state
+    // All UI elements in this state - ONLY StateImage/StateString objects
     private final StateImage logo;
     private final StateImage pricingButton;
     private final StateImage homeButton;
@@ -147,6 +274,7 @@ public class MenuState {
         log.info("Initializing MenuState");
 
         // Initialize each UI element with proper configuration
+        // ActionHistory is OPTIONAL - only needed if you want to use mock mode
         logo = new StateImage.Builder()
             .addPatterns("menu/menu-logo")  // Path relative to images/ folder
             .setName("Menu Logo")
@@ -167,6 +295,7 @@ public class MenuState {
             .setName("Search Box")
             .build();
     }
+    // NO METHODS HERE - States are data containers only!
 }
 ```
 
@@ -395,7 +524,7 @@ brobot.action.pause-after-end=0.0
 brobot.action.move-mouse-delay=0.5
 ```
 
-### 6. Complete State Class with Mock Mode Support
+### 6. Complete State Class with Mock Mode Support (OPTIONAL)
 
 ```java
 package com.example.automation.states;
@@ -403,19 +532,20 @@ package com.example.automation.states;
 import io.github.jspinak.brobot.state.annotations.State;
 import io.github.jspinak.brobot.stateStructure.model.state.StateImage;
 import io.github.jspinak.brobot.primatives.region.Region;
-import io.github.jspinak.brobot.config.mock.MockStateManagement;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.tools.testing.mock.history.MockActionHistoryFactory;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import javax.annotation.PostConstruct;
 
-@State(initial = true)  // Mark as initial state
+/**
+ * Example of State with mock mode support
+ * ActionHistory is ONLY needed if you want to test without real GUI
+ * If you're only running against real application, ActionHistory is not necessary
+ */
+@State(initial = true)
 @Getter
 @Slf4j
 public class MenuState {
-
+    // State classes have ONLY objects, NO methods
 
     private final StateImage logo;
     private final StateImage pricingButton;
@@ -431,10 +561,11 @@ public class MenuState {
 
         // Create StateImages with ActionHistory for mock mode
         // WITHOUT ActionHistory, patterns will NEVER be found in mock mode!
+        // But ActionHistory is OPTIONAL - only add it if you need mock testing
         logo = new StateImage.Builder()
             .addPatterns("menu/menu-logo")
             .setName("Menu Logo")
-            // ActionHistory is REQUIRED for mock mode
+            // ActionHistory is OPTIONAL - only for mock mode testing
             .withActionHistory(MockActionHistoryFactory.reliableButton(logoRegion))
             .build();
 
@@ -451,9 +582,7 @@ public class MenuState {
             .withActionHistory(MockActionHistoryFactory.reliableButton(homeRegion))
             .build();
     }
-
-    // No need to configure state probabilities - defaults to 100%
-    // The ActionHistory in StateImages is what makes mock mode work
+    // NO METHODS in State classes - they are data containers only
 }
 ```
 
@@ -467,7 +596,7 @@ Simply set these properties in `application.properties`:
 
 ```properties
 # Enable mock mode - this is the ONLY required setting
-brobot.mock=true
+brobot.core.mock=true
 
 # Optional: Control action success probability (default is 1.0 = 100%)
 brobot.mock.action.success.probability=1.0
@@ -505,7 +634,7 @@ public class AutomationRunner implements CommandLineRunner {
         // In mock mode, actions use ActionHistory instead of real GUI
 
         log.info("Starting automation (Mock mode: {})",
-                io.github.jspinak.brobot.config.core.FrameworkSettings.mock);
+                io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock());
 
         // Navigate to Pricing
         log.info("Navigating to Pricing page");
@@ -539,7 +668,7 @@ Use Spring profiles or separate property files:
 
 ```properties
 # Live mode - interact with real GUI
-brobot.mock=false
+brobot.core.mock=false
 
 # Other production settings
 brobot.screenshot.save-history=true
@@ -550,7 +679,7 @@ brobot.logging.verbosity=VERBOSE
 
 ```properties
 # Enable mock mode - uses ActionHistory instead of real GUI
-brobot.mock=true
+brobot.core.mock=true
 
 # Optional: Control success probability (default 1.0 = 100%)
 brobot.mock.action.success.probability=1.0
@@ -583,7 +712,7 @@ java -jar my-automation.jar
 1. **Same Code**: Your automation code is identical for live and mock mode
 2. **ActionHistory Required**: StateImages MUST have ActionHistory or patterns won't be found
 3. **No Test Framework**: No JUnit, no @SpringBootTest, no separate test classes
-4. **Property-Driven**: Switch between modes with just `brobot.mock=true/false`
+4. **Property-Driven**: Switch between modes with just `brobot.core.mock=true/false`
 5. **Fast Execution**: Mock actions complete in milliseconds (0.01s vs 1-2s for real)
 6. **CI/CD Ready**: Works in headless environments without displays
 
@@ -733,6 +862,72 @@ DragOptions dragOptions = new DragOptions.Builder()
 action.drag(fromImage, toImage, dragOptions);
 ```
 
+### Clean Logging with ActionConfig Options
+
+All ActionConfig builders support embedded logging messages for cleaner, more maintainable code:
+
+```java
+// PatternFindOptions with embedded logging
+PatternFindOptions findOptions = new PatternFindOptions.Builder()
+    .withBeforeActionLog("Searching for submit button...")
+    .withSuccessLog("Submit button found at {location}")
+    .withFailureLog("Submit button not found - check if page loaded")
+    .setWaitTime(5.0)
+    .setSimilarity(0.85)
+    .build();
+
+// ClickOptions with embedded logging
+ClickOptions clickOptions = new ClickOptions.Builder()
+    .withBeforeActionLog("Clicking login button...")
+    .withSuccessLog("Login button clicked successfully")
+    .withFailureLog("Failed to click login button")
+    .setPauseAfterEnd(1.0)
+    .build();
+
+// TypeOptions with embedded logging
+TypeOptions typeOptions = new TypeOptions.Builder()
+    .withBeforeActionLog("Entering username...")
+    .withSuccessLog("Username entered")
+    .withFailureLog("Failed to enter username")
+    .build();
+```
+
+#### Best Practices for Logging in Transitions
+
+```java
+@IncomingTransition
+public boolean verifyArrival() {
+    // Embed all logging directly in the options - no separate log statements needed
+    PatternFindOptions findOptions = new PatternFindOptions.Builder()
+        .withBeforeActionLog("Verifying arrival at " + stateName + "...")
+        .withSuccessLog("Successfully arrived at " + stateName)
+        .withFailureLog("Failed to verify arrival at " + stateName)
+        .setWaitTime(5.0)
+        .build();
+
+    return action.find(stateIdentifier, findOptions).isSuccess();
+}
+
+@OutgoingTransition(to = TargetState.class)
+public boolean toTarget() {
+    // All logging handled by the options configuration
+    ClickOptions clickOptions = new ClickOptions.Builder()
+        .withBeforeActionLog("Navigating to Target...")
+        .withSuccessLog("Navigation successful")
+        .withFailureLog("Navigation failed - element not found")
+        .setPauseBeforeBegin(0.5)
+        .setPauseAfterEnd(1.0)
+        .build();
+
+    return action.click(navigationButton, clickOptions).isSuccess();
+}
+```
+
+This approach eliminates the need for:
+- Separate log statements before/after actions
+- Manual if/else blocks for success/failure logging
+- Redundant logging code across transitions
+
 ### Conditional Action Chains
 
 ```java
@@ -831,22 +1026,152 @@ transition.execute();
 navigation.openState("Target");
 ```
 
+## COMMON MISTAKES TO AVOID
+
+### ❌ Creating a TransitionManager Class
+```java
+// ❌ WRONG - Don't create this class!
+@Component
+public class TransitionManager {
+    public void navigateToMenu() { ... }
+    public void navigateToSettings() { ... }
+}
+
+// ✅ CORRECT - Use Navigation service
+@Component
+public class MyRunner {
+    @Autowired
+    private Navigation navigation;
+
+    public void run() {
+        navigation.openState("Menu");
+    }
+}
+```
+
+### ❌ Adding Methods to State Classes
+```java
+// ❌ WRONG - States should not have methods
+@State
+public class MenuState {
+    private StateImage logo;
+
+    public void clickLogo() {  // ❌ NO!
+        action.click(logo);
+    }
+
+    public boolean isActive() { // ❌ NO!
+        return action.find(logo).isSuccess();
+    }
+}
+
+// ✅ CORRECT - States are data only
+@State
+public class MenuState {
+    private final StateImage logo;
+
+    public MenuState() {
+        logo = new StateImage.Builder()
+            .addPatterns("menu/logo")
+            .build();
+    }
+    // NO METHODS - just getters via @Getter
+}
+```
+
+### ❌ Creating StateImage Objects in Transitions
+```java
+// ❌ WRONG - Transitions should not create StateImages
+@TransitionSet(state = MenuState.class)
+public class MenuTransitions {
+    private final StateImage button = new StateImage.Builder()... // ❌ NO!
+}
+
+// ✅ CORRECT - Transitions only use injected state
+@TransitionSet(state = MenuState.class)
+public class MenuTransitions {
+    private final MenuState menuState;  // ✅ Get StateImages from here
+    private final Action action;
+}
+```
+
+### ❌ Using Old State Names Without "State" Suffix
+```java
+// ❌ WRONG - These will cause import/compilation errors
+@Autowired
+private MainScreen mainScreen;        // ❌ Class doesn't exist
+@Autowired
+private Processing processing;        // ❌ Class doesn't exist
+
+// ✅ CORRECT - Use proper State class names
+@Autowired
+private MainScreenState mainScreenState;  // ✅
+@Autowired
+private ProcessingState processingState;  // ✅
+```
+
+### ❌ Adding StateEnum Field
+```java
+// ❌ WRONG - StateEnum field is not needed
+@State
+public class MenuState {
+    private final StateEnum stateEnum = StateEnum.MENU;  // ❌ NOT NEEDED
+}
+
+// ✅ CORRECT - State name is derived automatically
+@State
+public class MenuState {
+    // State name "Menu" is automatically derived from class name
+}
+```
+
 ## CHECKLIST FOR NEW BROBOT PROJECT
 
 - [ ] Project structure follows standard layout (states/, transitions/ folders)
 - [ ] All State classes end with "State"
+- [ ] State classes have ONLY objects (StateImage/StateString), NO methods
 - [ ] Each state has ONE TransitionSet class with ALL its transitions
+- [ ] TransitionSet classes have ONLY methods, NO StateImage objects
+- [ ] NO TransitionManager class exists (use Navigation service)
 - [ ] @OutgoingTransition methods navigate FROM the state TO other states
 - [ ] Only ONE @IncomingTransition method per TransitionSet
 - [ ] Images organized in folders by state name
 - [ ] application.properties configured with brobot settings
 - [ ] Spring Boot main class scans both project and brobot packages
-- [ ] **ActionHistory configured in StateImage.Builder for ALL patterns that need to be found in mock mode**
+- [ ] ActionHistory configured in StateImage.Builder ONLY if mock mode needed
 - [ ] NO Thread.sleep() anywhere in code
 - [ ] NO direct SikuliX calls
 - [ ] NO java.awt.Robot usage
 - [ ] Navigation.openState() used for all state transitions
 - [ ] Pauses configured via ActionConfig options, not action.pause()
+
+## Special Keys and Keyboard Input
+
+When typing special keys (ENTER, ESC, TAB, etc.), use the SikuliX Key constants:
+
+```java
+import org.sikuli.script.Key;
+
+// Special keys use SikuliX Key constants (recommended)
+action.type(Key.ENTER, typeOptions);  // Press ENTER
+action.type(Key.ESC, typeOptions);    // Press ESC
+action.type(Key.TAB, typeOptions);    // Press TAB
+
+// Or define as StateString for reusability
+StateString enterKey = new StateString.Builder()
+    .withString(Key.ENTER)  // Uses SikuliX Key constant
+    .setName("Enter Key")
+    .build();
+
+// Alternative: Direct Unicode (if you prefer not to import Key)
+action.type("\n", typeOptions);      // ENTER
+action.type("\u001b", typeOptions);  // ESC
+action.type("\t", typeOptions);      // TAB
+```
+
+**Important**: Do NOT use string literals like `"ESC"` or `"ENTER"` - these will type the letters, not press the key!
+
+For complete special keys documentation, see: [Special Keys Guide](../03-core-library/keyboard/special-keys-guide.md)
 
 ## IMPORTANT REMINDERS
 
@@ -859,6 +1184,7 @@ navigation.openState("Target");
 7. **Pauses are in ActionConfig** - Use setPauseBeforeBegin/setPauseAfterEnd
 8. **One TransitionSet per state** - All transitions for a state in one class
 9. **OutgoingTransition + IncomingTransition** - OutgoingTransitions navigate FROM the state, IncomingTransition verifies arrival
+10. **Special keys use Unicode** - Use `"\n"` for ENTER, `"\u001b"` for ESC, not string literals
 
 ---
 

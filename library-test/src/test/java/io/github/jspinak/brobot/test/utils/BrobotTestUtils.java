@@ -65,9 +65,10 @@ public class BrobotTestUtils {
     public static ActionResult createSuccessfulResult(int matchCount) {
         ActionResult result = new ActionResult();
         result.setSuccess(true);
-        List<Match> matches = createTestMatches(matchCount);
-        result.setMatchList(matches);
-        result.setDuration(Duration.ofMillis(100 + random.nextInt(900)));
+        for (Match match : createTestMatches(matchCount)) {
+            result.add(match);
+        }
+        result.getTimingData().setTotalDuration(Duration.ofMillis(100 + random.nextInt(900)));
         return result;
     }
 
@@ -75,7 +76,7 @@ public class BrobotTestUtils {
     public static ActionResult createFailedResult() {
         ActionResult result = new ActionResult();
         result.setSuccess(false);
-        result.setDuration(Duration.ofMillis(100 + random.nextInt(900)));
+        result.getTimingData().setTotalDuration(Duration.ofMillis(100 + random.nextInt(900)));
         return result;
     }
 

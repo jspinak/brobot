@@ -10,7 +10,7 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.internal.text.TextTyper;
 import io.github.jspinak.brobot.model.state.StateString;
-import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 
 /**
  * Types text to the window in focus in the Brobot model-based GUI automation framework.
@@ -44,7 +44,7 @@ import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
  *
  * <p>The type delay mechanism is particularly important for handling applications that process
  * keystrokes asynchronously or have input validation that runs between keystrokes. By adjusting the
- * type delay through ActionOptions, automation scripts can adapt to different application behaviors
+ * type delay through ActionConfig, automation scripts can adapt to different application behaviors
  * without modifying the core logic.
  *
  * <p>This action exemplifies the framework's approach to abstracting platform-specific details
@@ -66,11 +66,11 @@ public class TypeText implements ActionInterface {
     }
 
     private final TextTyper textTyper;
-    private final TimeProvider time;
+    private final TimeWrapper timeWrapper;
 
-    public TypeText(TextTyper textTyper, TimeProvider time) {
+    public TypeText(TextTyper textTyper, TimeWrapper timeWrapper) {
         this.textTyper = textTyper;
-        this.time = time;
+        this.timeWrapper = timeWrapper;
     }
 
     @Override
@@ -98,7 +98,7 @@ public class TypeText implements ActionInterface {
 
             // Pause between typing different strings (except after the last one)
             if (i < strings.size() - 1 && typeOptions.getPauseAfterEnd() > 0) {
-                time.wait(typeOptions.getPauseAfterEnd());
+                timeWrapper.wait(typeOptions.getPauseAfterEnd());
             }
         }
 

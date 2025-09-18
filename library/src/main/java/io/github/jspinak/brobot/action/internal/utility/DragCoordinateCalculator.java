@@ -2,17 +2,18 @@ package io.github.jspinak.brobot.action.internal.utility;
 
 import org.sikuli.basics.Settings;
 import org.sikuli.script.FindFailed;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.tools.history.IllustrationController;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.tools.testing.mock.action.MockDrag;
-import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 
 /**
  * Provides drag-and-drop functionality between locations with configurable timing and mock support.
@@ -25,7 +26,7 @@ import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
  * <p>The class integrates with Brobot's action system to provide:
  *
  * <ul>
- *   <li>Configurable delays at each drag stage via {@link ActionOptions}
+ *   <li>Configurable delays at each drag stage via {@link ActionConfig}
  *   <li>Mock support for testing without actual mouse movements
  *   <li>Detailed reporting of drag operations and failures
  * </ul>
@@ -41,20 +42,22 @@ import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
  * </ul>
  *
  * @see Location
- * @see ActionOptions
+ * @see ActionConfig
  * @see MockDrag
  * @see Settings
  */
 @Component
 public class DragCoordinateCalculator {
+
+    @Autowired private BrobotProperties brobotProperties;
     private final MockDrag mock;
-    private final TimeProvider time;
+    private final TimeWrapper timeWrapper;
     private IllustrationController illustrateScreenshot;
 
     public DragCoordinateCalculator(
-            MockDrag mock, TimeProvider time, IllustrationController illustrateScreenshot) {
+            MockDrag mock, TimeWrapper timeWrapper, IllustrationController illustrateScreenshot) {
         this.mock = mock;
-        this.time = time;
+        this.timeWrapper = timeWrapper;
         this.illustrateScreenshot = illustrateScreenshot;
     }
 
@@ -83,7 +86,7 @@ public class DragCoordinateCalculator {
      * Executes a drag-and-drop operation with configurable timing parameters.
      *
      * <p>This method performs a complete drag-and-drop sequence from one location to another, with
-     * precise timing control at each stage. The timing parameters from {@link ActionOptions} are
+     * precise timing control at each stage. The timing parameters from {@link ActionConfig} are
      * applied to Sikuli's global settings before the drag operation begins.
      *
      * <p>The method reports the drag coordinates at HIGH output level for debugging. In mock mode,
@@ -132,18 +135,20 @@ public class DragCoordinateCalculator {
                 from.getCalculatedY(),
                 to.getCalculatedX(),
                 to.getCalculatedY());
-        if (FrameworkSettings.mock) return mock.drag();
+        if (brobotProperties.getCore().isMock()) return mock.drag();
 
         // Extract timing from MousePressOptions and DragOptions
         Settings.DelayBeforeMouseDown =
                 dragOptions.getMousePressOptions().getPauseBeforeMouseDown();
         Settings.DelayBeforeDrag = dragOptions.getDelayBetweenMouseDownAndMove();
         Settings.MoveMouseDelay =
-                FrameworkSettings.moveMouseDelay; // Use default as DragOptions doesn't have this
+                brobotProperties
+                        .getMouse()
+                        .getMoveDelay(); // Use default as DragOptions doesn't have this
         Settings.DelayBeforeDrop = dragOptions.getMousePressOptions().getPauseBeforeMouseUp();
 
         if (!drag(from, to)) return false;
-        time.wait(dragOptions.getDelayAfterDrag());
+        timeWrapper.wait(dragOptions.getDelayAfterDrag());
         return true;
     }
 
@@ -151,7 +156,7 @@ public class DragCoordinateCalculator {
      * Executes a drag-and-drop operation using ActionConfig.
      *
      * <p>This method provides support for ActionConfig types. Currently only DragOptions is
-     * supported as ActionOptions doesn't extend ActionConfig.
+     * supported as ActionConfig doesn't extend ActionConfig.
      *
      * @param from The starting location for the drag.
      * @param to The destination location for the drag.

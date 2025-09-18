@@ -17,7 +17,7 @@
  * <h3>Custom Serializers</h3>
  *
  * <ul>
- *   <li><b>ActionOptions</b> - Serializes action configurations
+ *   <li><b>ActionConfig</b> - Serializes action configurations
  *   <li><b>ActionResult</b> - Serializes match results
  *   <li><b>ObjectCollection</b> - Handles state references
  *   <li><b>Mat</b> - Converts OpenCV matrices to base64
@@ -55,7 +55,7 @@
  *
  * <h2>Serialization Examples</h2>
  *
- * <h3>ActionOptions</h3>
+ * <h3>ActionConfig</h3>
  *
  * <pre>{@code
  * {

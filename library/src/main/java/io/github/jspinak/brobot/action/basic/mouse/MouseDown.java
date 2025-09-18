@@ -53,7 +53,7 @@ import io.github.jspinak.brobot.action.internal.mouse.MouseDownWrapper;
  * @see MouseUp
  * @see MouseMove
  * @see Click
- * @see ActionOptions
+ * @see ActionConfig
  */
 @Component
 public class MouseDown implements ActionInterface {

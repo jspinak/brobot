@@ -53,7 +53,7 @@
  * <p>Each action step combines:
  *
  * <ul>
- *   <li><b>ActionOptions</b> - What action to perform and how
+ *   <li><b>ActionConfig</b> - What action to perform and how
  *   <li><b>ObjectCollection</b> - What objects to perform it on
  * </ul>
  *
@@ -61,7 +61,7 @@
  *
  * <pre>{@code
  * ActionStep clickLogin = new ActionStep(
- *     new ActionOptions.Builder()
+ *     new ActionConfig.Builder()
  *         .action(Action.CLICK)
  *         .pauseAfter(1000)
  *         .build(),
@@ -119,7 +119,7 @@
  * </ul>
  *
  * @since 1.0
- * @see io.github.jspinak.brobot.action.ActionOptions
+ * @see io.github.jspinak.brobot.action.ActionConfig
  * @see io.github.jspinak.brobot.model.ObjectCollection
  * @see io.github.jspinak.brobot.runner.dsl.BusinessTask
  */

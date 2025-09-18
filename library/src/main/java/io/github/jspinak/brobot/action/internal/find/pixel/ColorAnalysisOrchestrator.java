@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionConfig;
@@ -20,7 +21,7 @@ import io.github.jspinak.brobot.action.basic.find.color.GetPixelAnalysisCollecti
 import io.github.jspinak.brobot.analysis.color.DistanceMatrixCalculator;
 import io.github.jspinak.brobot.analysis.color.SceneScoreCalculator;
 import io.github.jspinak.brobot.analysis.color.profiles.KmeansProfileBuilder;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.model.analysis.color.PixelProfile;
 import io.github.jspinak.brobot.model.analysis.color.PixelProfiles;
@@ -63,6 +64,8 @@ import io.github.jspinak.brobot.model.state.StateImage;
  */
 @Component
 public class ColorAnalysisOrchestrator {
+
+    @Autowired private BrobotProperties brobotProperties;
 
     private DistanceMatrixCalculator getDistanceMatrix;
     private GetPixelAnalysisCollectionScores getPixelAnalysisCollectionScores;
@@ -129,7 +132,10 @@ public class ColorAnalysisOrchestrator {
         // Simplified logic - check config type to determine profile method
         String configType = actionConfig.getClass().getSimpleName();
         if (configType.contains("Classify") || configType.contains("Color")) {
-            int kMeans = FrameworkSettings.kMeansInProfile; // Use default k-means value
+            int kMeans =
+                    brobotProperties
+                            .getAnalysis()
+                            .getKMeansInProfile(); // Use default k-means value
             return img.getKmeansProfilesAllSchemas().getColorProfiles(kMeans);
         } else { // Default to mean color profile
             return Collections.singletonList(img.getColorCluster());
@@ -202,7 +208,8 @@ public class ColorAnalysisOrchestrator {
             Set<StateImage> targetImgs,
             Set<StateImage> allImgs,
             ActionConfig actionConfig) {
-        setKMeansProfiles.addKMeansIfNeeded(allImgs, FrameworkSettings.kMeansInProfile);
+        setKMeansProfiles.addKMeansIfNeeded(
+                allImgs, brobotProperties.getAnalysis().getKMeansInProfile());
         List<PixelProfiles> pixelAnalysisCollections = new ArrayList<>();
         allImgs.forEach(
                 img ->

@@ -14,7 +14,7 @@ import io.github.jspinak.brobot.action.internal.execution.ActionChainExecutor;
 import io.github.jspinak.brobot.action.internal.execution.ActionExecution;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
 import io.github.jspinak.brobot.config.core.BrobotConfiguration;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.logging.modular.VerboseFormatter;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.navigation.transition.StateNavigator;
@@ -39,7 +39,7 @@ public class ComprehensiveTestConfig {
 
     static {
         // Ensure mock mode is enabled before any beans are created
-        FrameworkSettings.mock = true;
+        // Mock mode is enabled via BrobotTestBase
         System.setProperty("brobot.core.mockMode", "true");
         System.setProperty("java.awt.headless", "true");
         System.setProperty("brobot.test.mode", "true");
@@ -123,8 +123,11 @@ public class ComprehensiveTestConfig {
     @Primary
     @ConditionalOnMissingBean
     public InitialStates initialStates(
-            StateDetector stateDetector, StateMemory stateMemory, StateService stateService) {
-        return new InitialStates(stateDetector, stateMemory, stateService);
+            BrobotProperties brobotProperties,
+            StateDetector stateDetector,
+            StateMemory stateMemory,
+            StateService stateService) {
+        return new InitialStates(brobotProperties, stateDetector, stateMemory, stateService);
     }
 
     @Bean

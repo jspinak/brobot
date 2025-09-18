@@ -27,7 +27,7 @@ import lombok.Getter;
  * parameters. The runtime state fields are modified by the {@link Select} class during operation
  * execution.
  *
- * <p><b>Migration Note:</b> This class now supports both ActionOptions (legacy) and ActionConfig
+ * <p><b>Migration Note:</b> This class now supports both ActionConfig (legacy) and ActionConfig
  * (modern) APIs. New code should use the ActionConfig setters. The getters intelligently return the
  * appropriate configuration based on which was set.
  *
@@ -112,12 +112,12 @@ public class SelectActionObject {
         this.success = success;
     }
 
-    // Custom getters that return either ActionConfig or ActionOptions based on what was set
+    // Custom getters that return either ActionConfig or ActionConfig based on what was set
 
     /**
      * Gets the swipe configuration, preferring ActionConfig if set.
      *
-     * @return ActionConfig if set, otherwise ActionOptions, or null if neither set
+     * @return ActionConfig if set, otherwise ActionConfig, or null if neither set
      */
     public ActionConfig getSwipeConfiguration() {
         return swipeActionConfig;
@@ -126,7 +126,7 @@ public class SelectActionObject {
     /**
      * Gets the find configuration, preferring ActionConfig if set.
      *
-     * @return ActionConfig if set, otherwise ActionOptions, or null if neither set
+     * @return ActionConfig if set, otherwise ActionConfig, or null if neither set
      */
     public ActionConfig getFindConfiguration() {
         return findActionConfig;
@@ -135,7 +135,7 @@ public class SelectActionObject {
     /**
      * Gets the click configuration, preferring ActionConfig if set.
      *
-     * @return ActionConfig if set, otherwise ActionOptions, or null if neither set
+     * @return ActionConfig if set, otherwise ActionConfig, or null if neither set
      */
     public ActionConfig getClickConfiguration() {
         return clickActionConfig;
@@ -144,7 +144,7 @@ public class SelectActionObject {
     /**
      * Gets the confirmation configuration, preferring ActionConfig if set.
      *
-     * @return ActionConfig if set, otherwise ActionOptions, or null if neither set
+     * @return ActionConfig if set, otherwise ActionConfig, or null if neither set
      */
     public ActionConfig getConfirmConfiguration() {
         return confirmActionConfig;
@@ -157,7 +157,7 @@ public class SelectActionObject {
      * needed for a select operation. All setter methods return the builder instance for method
      * chaining.
      *
-     * <p><b>Migration Note:</b> The builder now supports both ActionOptions (legacy) and
+     * <p><b>Migration Note:</b> The builder now supports both ActionConfig (legacy) and
      * ActionConfig (modern) APIs. New code should use the ActionConfig setters.
      */
     public static class Builder {
@@ -188,7 +188,7 @@ public class SelectActionObject {
             return this;
         }
 
-        // Removed deprecated setSwipeActionOptions method
+        // Removed deprecated setSwipeActionConfig method
 
         /**
          * Sets the swipe configuration using ActionConfig (modern API).
@@ -206,7 +206,7 @@ public class SelectActionObject {
             return this;
         }
 
-        // Removed deprecated setFindActionOptions method
+        // Removed deprecated setFindActionConfig method
 
         /**
          * Sets the find configuration using ActionConfig (modern API).
@@ -219,7 +219,7 @@ public class SelectActionObject {
             return this;
         }
 
-        // Removed deprecated setClickActionOptions method
+        // Removed deprecated setClickActionConfig method
 
         /**
          * Sets the click configuration using ActionConfig (modern API).
@@ -238,7 +238,7 @@ public class SelectActionObject {
             return this;
         }
 
-        // Removed deprecated setConfirmActionOptions method
+        // Removed deprecated setConfirmActionConfig method
 
         /**
          * Sets the confirmation configuration using ActionConfig (modern API).

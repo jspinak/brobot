@@ -23,9 +23,9 @@ import io.github.jspinak.brobot.model.state.StateImage;
  * class, making it easier to perform common selection operations that involve swiping through a
  * region until finding and clicking on target images.
  *
- * <p>This class now supports both ActionOptions (legacy) and ActionConfig (modern) APIs. New code
+ * <p>This class now supports both ActionConfig (legacy) and ActionConfig (modern) APIs. New code
  * should use the selectWithConfig methods that accept PatternFindOptions.Strategy instead of
- * ActionOptions.Find. The legacy select methods are maintained for backward compatibility.
+ * ActionConfig.Find. The legacy select methods are maintained for backward compatibility.
  *
  * @see Select
  * @see SelectActionObject
@@ -81,7 +81,7 @@ public class CommonSelect {
      * <p>This method performs a selection operation similar to the simpler select method, but adds
      * an additional verification step. After clicking on found images, it will search for
      * confirmation images to verify that the action had the desired effect. The operation
-     * constructs all necessary {@link ActionOptions} and {@link ObjectCollection} instances
+     * constructs all necessary {@link ActionConfig} and {@link ObjectCollection} instances
      * internally.
      *
      * <p>The method sets up:
@@ -118,16 +118,16 @@ public class CommonSelect {
                 new ObjectCollection.Builder().withLocations(swipeFrom).build();
         ObjectCollection swipeToObjColl =
                 new ObjectCollection.Builder().withLocations(swipeTo).build();
-        DragOptions swipeActionOptions =
+        DragOptions swipeActionConfig =
                 new DragOptions.Builder()
                         .setMousePressOptions(
                                 MousePressOptions.builder().setPauseBeforeMouseUp(0.5).build())
                         .build();
         ObjectCollection findObjectCollection =
                 new ObjectCollection.Builder().withImages(images).build();
-        PatternFindOptions findActionOptions =
+        PatternFindOptions findActionConfig =
                 new PatternFindOptions.Builder().setStrategy(findStrategy).build();
-        ClickOptions clickActionOptions =
+        ClickOptions clickActionConfig =
                 new ClickOptions.Builder()
                         .setNumberOfClicks(clicksPerImage)
                         .setPressOptions(
@@ -135,7 +135,7 @@ public class CommonSelect {
                         .build();
         ObjectCollection confirmationObjectCollection =
                 new ObjectCollection.Builder().withImages(confirmationImages).build();
-        PatternFindOptions confirmActionOptions =
+        PatternFindOptions confirmActionConfig =
                 new PatternFindOptions.Builder()
                         .setStrategy(PatternFindOptions.Strategy.FIRST)
                         .build();
@@ -143,12 +143,12 @@ public class CommonSelect {
                 new SelectActionObject.Builder()
                         .setSwipeFromObjColl(swipeFromObjColl)
                         .setSwipeToObjColl(swipeToObjColl)
-                        .setSwipeActionConfig(swipeActionOptions)
+                        .setSwipeActionConfig(swipeActionConfig)
                         .setFindObjectCollection(findObjectCollection)
-                        .setFindActionConfig(findActionOptions)
-                        .setClickActionConfig(clickActionOptions)
+                        .setFindActionConfig(findActionConfig)
+                        .setClickActionConfig(clickActionConfig)
                         .setConfirmationObjectCollection(confirmationObjectCollection)
-                        .setConfirmActionConfig(confirmActionOptions)
+                        .setConfirmActionConfig(confirmActionConfig)
                         .setMaxSwipes(maxSwipes)
                         .build();
         select.select(selectActionObject);

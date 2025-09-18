@@ -6,10 +6,11 @@ import java.util.List;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionConfig;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.model.analysis.color.ColorInfo;
 import io.github.jspinak.brobot.model.element.Location;
@@ -40,6 +41,8 @@ import io.github.jspinak.brobot.util.image.visualization.MatBuilder;
  */
 @Component
 public class ProfileMatrixBuilder {
+
+    @Autowired private BrobotProperties brobotProperties;
 
     private final ImageLoader getImage;
 
@@ -124,14 +127,14 @@ public class ProfileMatrixBuilder {
      *
      * @param img The state image to visualize
      * @param actionConfig Options specifying the visualization type: - kmeans < 0: Use default from
-     *     BrobotSettings - kmeans = 0: Show mean color profile only - kmeans > 0: Show K-means
+     *     BrobotProperties - kmeans = 0: Show mean color profile only - kmeans > 0: Show K-means
      *     clusters
      * @return A Mat containing the appropriate color profile visualization
      */
     public Mat getProfilesMat(StateImage img, ActionConfig actionConfig) {
         // For now, use default k-means value from framework settings
         // Different ActionConfig implementations could have different k-means settings
-        int kMeans = FrameworkSettings.kMeansInProfile;
+        int kMeans = brobotProperties.getAnalysis().getKMeansInProfile();
         if (kMeans == 0) return getProfilesMat(img);
         return getKmeansProfilesMat(img, kMeans);
     }

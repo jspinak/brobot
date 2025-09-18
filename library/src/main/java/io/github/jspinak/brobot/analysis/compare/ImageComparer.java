@@ -109,7 +109,7 @@ public class ImageComparer {
      * live) to find all occurrences of the smaller pattern within the larger one.
      *
      * <p>The comparison is currently optimized for simplicity, returning the best scoring match
-     * when multiple instances are found. Future enhancements may include ActionOptions to customize
+     * when multiple instances are found. Future enhancements may include ActionConfig to customize
      * comparison strategies (e.g., weighting multiple matches vs. single high-quality matches).
      *
      * <p>Note: This method handles null inputs gracefully by returning a NoMatch.

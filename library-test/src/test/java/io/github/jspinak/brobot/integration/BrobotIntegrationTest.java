@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import io.github.jspinak.brobot.config.core.BrobotProperties;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /** Test to verify that Brobot library's auto-configuration is working correctly. */
@@ -48,7 +47,7 @@ public class BrobotIntegrationTest extends BrobotTestBase {
     }
 
     @Test
-    public void testFrameworkSettingsAreConfigured() {
+    public void testBrobotPropertiesAreConfigured() {
         System.out.println("\n=== FRAMEWORK SETTINGS TEST ===");
 
         // Wait a bit for initialization
@@ -58,18 +57,19 @@ public class BrobotIntegrationTest extends BrobotTestBase {
             // ignore
         }
 
-        // Check that FrameworkSettings are updated from properties
-        System.out.println("FrameworkSettings values:");
-        System.out.println("  mock = " + FrameworkSettings.mock);
-        System.out.println("  mockTimeFindFirst = " + FrameworkSettings.mockTimeFindFirst);
+        // Check that BrobotProperties are updated from properties
+        System.out.println("BrobotProperties values:");
+        System.out.println("  mock = " + brobotProperties.getCore().isMock());
+        System.out.println(
+                "  mockTimeFindFirst = " + brobotProperties.getMock().getTimeFindFirst());
 
-        assertTrue(FrameworkSettings.mock, "FrameworkSettings.mock should be true");
+        assertTrue(brobotProperties.getCore().isMock(), "Mock mode should be true");
         assertEquals(
                 0.01,
-                FrameworkSettings.mockTimeFindFirst,
+                brobotProperties.getMock().getTimeFindFirst(),
                 0.001,
-                "FrameworkSettings mock time should be configured");
+                "Mock time should be configured");
 
-        System.out.println("\n✅ FrameworkSettings are properly configured from Brobot library!");
+        System.out.println("\n✅ BrobotProperties are properly configured from Brobot library!");
     }
 }

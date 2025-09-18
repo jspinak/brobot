@@ -30,6 +30,10 @@ Brobot provides two approaches for defining states: the traditional approach sho
 This approach uses manual registration with the StateService:
 
 ```java
+// Note: BrobotProperties must be injected as a dependency
+@Autowired
+private BrobotProperties brobotProperties;
+
 @Component
 @Getter
 public class Home { 
@@ -155,7 +159,7 @@ public class GamePlayTransitions {
     @FromTransition(from = GameMenuState.class, priority = 1)
     public boolean fromMenu() {
         // In mock mode, return true for testing
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             return true;
         }
         // Direct, readable access to state components
@@ -165,7 +169,7 @@ public class GamePlayTransitions {
     @IncomingTransition(required = true)
     public boolean verifyArrival() {
         // Verify we're in the game play state
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             return true;
         }
         return action.find(gamePlayState.getGameBoard()).isSuccess();

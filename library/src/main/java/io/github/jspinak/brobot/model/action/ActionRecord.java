@@ -17,7 +17,7 @@ import io.github.jspinak.brobot.model.state.special.SpecialStateType;
 
 import lombok.Data;
 
-// ActionOptions and UNIVERSAL find strategy have been removed
+// ActionConfig and UNIVERSAL find strategy have been removed
 // Use PatternFindOptions.Strategy instead
 
 /**
@@ -85,7 +85,7 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ActionRecord {
 
-    // ActionOptions field removed - use actionConfig instead
+    // ActionConfig field removed - use actionConfig instead
 
     /**
      * The ActionConfig can be queried to find which settings lead to success. This is the new API
@@ -296,11 +296,11 @@ public class ActionRecord {
             return this;
         }
 
-        // Removed setActionOptions - use setActionConfig instead
+        // Removed setActionConfig - use setActionConfig instead
 
-        // Removed setActionOptions - use setActionConfig instead
+        // Removed setActionConfig - use setActionConfig instead
 
-        // Removed setActionOptions - use setActionConfig instead
+        // Removed setActionConfig - use setActionConfig instead
 
         public Builder setMatchList(List<Match> matchList) {
             this.matchList = matchList;

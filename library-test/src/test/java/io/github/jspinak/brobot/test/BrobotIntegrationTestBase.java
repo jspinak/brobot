@@ -2,12 +2,13 @@ package io.github.jspinak.brobot.test;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.test.config.TestActionConfig;
 import io.github.jspinak.brobot.test.config.TestConfigurationManager;
@@ -31,6 +32,8 @@ import io.github.jspinak.brobot.test.config.TestConfigurationManager;
         properties = {"spring.main.allow-bean-definition-overriding=true"})
 public abstract class BrobotIntegrationTestBase {
 
+    @Autowired private BrobotProperties brobotProperties;
+
     private ExecutionEnvironment originalEnvironment;
     private boolean originalMockState;
 
@@ -38,7 +41,7 @@ public abstract class BrobotIntegrationTestBase {
     protected void setUpBrobotEnvironment() {
         // Save original state for restoration
         originalEnvironment = ExecutionEnvironment.getInstance();
-        originalMockState = FrameworkSettings.mock;
+        originalMockState = brobotProperties.getCore().isMock();
 
         // Environment is already configured by TestConfigurationManager
         // This method now has a single responsibility: save state for cleanup
@@ -57,7 +60,8 @@ public abstract class BrobotIntegrationTestBase {
         if (originalEnvironment != null) {
             ExecutionEnvironment.setInstance(originalEnvironment);
         }
-        FrameworkSettings.mock = originalMockState;
+        // Note: We cannot restore mock state as BrobotProperties is now immutable via Spring
+        // Test configurations should be handled via Spring profiles
     }
 
     /** Check if test environment is headless. Single responsibility: query environment state. */

@@ -3,10 +3,11 @@ package io.github.jspinak.brobot.action.internal.text;
 import java.awt.image.BufferedImage;
 
 import org.sikuli.script.OCR;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.tools.testing.mock.action.MockText;
 
@@ -30,10 +31,12 @@ import io.github.jspinak.brobot.tools.testing.mock.action.MockText;
  * @see OCR
  * @see Match#setText(String)
  * @see MockText
- * @see FrameworkSettings#mock
+ * @see BrobotProperties
  */
 @Component
 public class GetTextWrapper {
+
+    @Autowired private BrobotProperties brobotProperties;
 
     private final MockText mockText;
 
@@ -85,7 +88,7 @@ public class GetTextWrapper {
      * @see MockText#getString(Match)
      */
     public String getTextFromMatch(Match match) {
-        if (FrameworkSettings.mock) return mockText.getString(match);
+        if (brobotProperties.getCore().isMock()) return mockText.getString(match);
         return match.getText();
     }
 

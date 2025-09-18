@@ -4,7 +4,7 @@
 This guide covers testing strategies for motion detection components in Brobot, including proper use of the OpenCV mock system and best practices for writing reliable tests.
 
 ## Prerequisites
-- Understanding of Brobot's mock mode (FrameworkSettings.mock)
+- Understanding of Brobot's mock mode (brobotProperties.getCore().isMock())
 - Familiarity with OpenCV concepts (Mat, pixel analysis)
 - Knowledge of Spring dependency injection
 
@@ -13,6 +13,10 @@ This guide covers testing strategies for motion detection components in Brobot, 
 ### Extending BrobotTestBase
 All motion detection tests must extend `BrobotTestBase`:
 ```java
+// Note: BrobotProperties must be injected as a dependency
+@Autowired
+private BrobotProperties brobotProperties;
+
 import io.github.jspinak.brobot.test.BrobotTestBase;
 
 public class MotionDetectionTest extends BrobotTestBase {
@@ -35,7 +39,7 @@ public class MotionDetectionTest extends BrobotTestBase {
 Configure mock behavior in test resources:
 ```properties
 # src/test/resources/application-test.properties
-brobot.mock=true
+brobot.core.mock=true
 brobot.opencv.mock.motion.default-confidence=0.75
 brobot.opencv.mock.motion.region-count=2
 brobot.opencv.mock.replay.enabled=true
@@ -135,7 +139,8 @@ public class MotionTestConfig {
 @EnableRecording  // Custom annotation to enable recording
 public void recordRealMotionData() {
     // This test will record real OpenCV outputs when run with mock=false
-    FrameworkSettings.mock = false;
+    // Mock mode is now configured via application.properties:
+// brobot.core.mock=false;
     
     List<BufferedImage> images = loadRealWorldSequence();
     MotionResult result = motionAnalyzer.analyzeMotion(images);
@@ -147,7 +152,8 @@ public void recordRealMotionData() {
 @Test
 @UseRecording("recordRealMotionData")  // Replay recorded data
 public void testWithRecordedData() {
-    FrameworkSettings.mock = true;
+    // Mock mode is now configured via application.properties:
+// brobot.core.mock=true;
     
     List<BufferedImage> images = loadRealWorldSequence();
     MotionResult result = motionAnalyzer.analyzeMotion(images);
@@ -186,12 +192,14 @@ public void testMockRealContract() {
     List<BufferedImage> testImages = loadStandardTestSequence();
     
     // Test with mock
-    FrameworkSettings.mock = true;
+    // Mock mode is now configured via application.properties:
+// brobot.core.mock=true;
     MotionResult mockResult = motionAnalyzer.analyzeMotion(testImages);
     
     // Test with real (if available)
     if (isOpenCVAvailable()) {
-        FrameworkSettings.mock = false;
+        // Mock mode is now configured via application.properties:
+// brobot.core.mock=false;
         MotionResult realResult = motionAnalyzer.analyzeMotion(testImages);
         
         // Results should be structurally similar
@@ -254,7 +262,8 @@ class EdgeCaseTests {
 @Test
 @Timeout(value = 1, unit = TimeUnit.SECONDS)
 public void testMockPerformance() {
-    FrameworkSettings.mock = true;
+    // Mock mode is now configured via application.properties:
+// brobot.core.mock=true;
     List<BufferedImage> images = loadLargeImageSequence();  // 10 HD images
     
     long startTime = System.nanoTime();
@@ -275,7 +284,8 @@ public void testMockPerformance() {
 ```java
 @Test
 public void testMemoryEfficiency() {
-    FrameworkSettings.mock = true;
+    // Mock mode is now configured via application.properties:
+// brobot.core.mock=true;
     
     Runtime runtime = Runtime.getRuntime();
     long initialMemory = runtime.totalMemory() - runtime.freeMemory();
@@ -312,7 +322,7 @@ public class MotionDetectionIntegrationTest extends BrobotTestBase {
         // Verify correct bean is loaded based on mock mode
         PixelAnalyzer analyzer = context.getBean(PixelAnalyzer.class);
         
-        if (FrameworkSettings.mock) {
+        if (brobotProperties.getCore().isMock()) {
             assertInstanceOf(MockPixelAnalyzer.class, analyzer);
         } else {
             assertInstanceOf(OpenCVPixelAnalyzer.class, analyzer);

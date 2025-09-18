@@ -51,7 +51,7 @@ import lombok.Setter;
  * <p>Key identifiers for tracking include:
  *
  * <ul>
- *   <li>Test iteration number (from BrobotSettings.testIteration)
+ *   <li>Test iteration number (from BrobotProperties test iteration)
  *   <li>Timestamp-based unique identifiers
  *   <li>Session-specific UUIDs
  * </ul>

@@ -38,7 +38,7 @@ public class IllustrationContext {
     /** The current action being executed. */
     private final ActionType currentAction;
 
-    /** Configuration for the current action (ActionConfig or ActionOptions). */
+    /** Configuration for the current action (ActionConfig or ActionConfig). */
     private final Object currentActionConfig;
 
     /** Result of the last action executed. */

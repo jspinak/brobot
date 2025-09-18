@@ -1,14 +1,15 @@
 package io.github.jspinak.brobot.tools.testing.mock.action;
 
-import static io.github.jspinak.brobot.config.core.FrameworkSettings.mockActionSuccessProbability;
-import static io.github.jspinak.brobot.config.core.FrameworkSettings.mockTimeDrag;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.tools.testing.mock.time.MockTime;
 
 @Component
 public class MockDrag {
+
+    @Autowired private BrobotProperties brobotProperties;
 
     private final MockTime mockTime;
 
@@ -23,8 +24,8 @@ public class MockDrag {
      * @return true if the action succeeds based on mockActionSuccessProbability
      */
     public boolean drag() {
-        mockTime.wait(mockTimeDrag);
+        mockTime.wait(brobotProperties.getMock().getTimeDrag());
         // Use the configured success probability to determine if the action succeeds
-        return Math.random() < mockActionSuccessProbability;
+        return Math.random() < brobotProperties.getMock().getActionSuccessProbability();
     }
 }

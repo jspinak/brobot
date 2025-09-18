@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 
 import io.github.jspinak.brobot.config.core.BrobotAutoConfiguration;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
@@ -56,11 +56,12 @@ public class BrobotAutoConfigurationTest extends BrobotTestBase {
         }
 
         @Test
-        @DisplayName("FrameworkSettings is initialized correctly")
-        public void testFrameworkSettingsInitialization() {
-            // FrameworkSettings.mock is already set by BrobotTestBase
+        @DisplayName("BrobotProperties is initialized correctly")
+        public void testBrobotPropertiesInitialization() {
+            // Mock mode is already set by BrobotTestBase
             assertTrue(
-                    FrameworkSettings.mock, "FrameworkSettings.mock should be true in test mode");
+                    ExecutionEnvironment.getInstance().isMockMode(),
+                    "Mock mode should be enabled in test");
         }
     }
 

@@ -33,11 +33,11 @@ import io.github.jspinak.brobot.action.ActionType;
  *       </ul>
  * </ul>
  *
- * <p>The class supports custom success criteria through ActionOptions, allowing actions to override
+ * <p>The class supports custom success criteria through ActionConfig, allowing actions to override
  * default behavior when needed. This flexibility is crucial for complex automation scenarios where
  * success depends on application-specific conditions.
  *
- * @see ActionOptions#getSuccessCriteria()
+ * @see ActionConfig#getSuccessCriteria()
  * @see ActionResult#setSuccess(boolean)
  */
 @Component
@@ -103,7 +103,7 @@ public class ActionSuccessCriteria {
      * <p>This method implements a two-tier evaluation system:
      *
      * <ol>
-     *   <li>Custom criteria: If ActionOptions contains custom success criteria, that takes
+     *   <li>Custom criteria: If ActionConfig contains custom success criteria, that takes
      *       precedence
      *   <li>Default criteria: Otherwise, uses the standard criteria defined for the action type
      * </ol>

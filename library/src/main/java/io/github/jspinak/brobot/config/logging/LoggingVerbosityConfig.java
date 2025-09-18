@@ -86,7 +86,7 @@ public class LoggingVerbosityConfig {
         private boolean showMatchScores = true;
 
         /** Whether to show action options in verbose mode. Default: true */
-        private boolean showActionOptions = true;
+        private boolean showActionConfig = true;
 
         /** Whether to show performance breakdown in verbose mode. Default: true */
         private boolean showPerformanceBreakdown = true;

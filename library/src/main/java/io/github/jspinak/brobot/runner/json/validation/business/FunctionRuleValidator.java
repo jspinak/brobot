@@ -1106,21 +1106,21 @@ public class FunctionRuleValidator {
                 List<Map<String, Object>> args =
                         (List<Map<String, Object>>) statement.get("arguments");
 
-                return !args.isEmpty() && isActionOptionsWithWait(args.getFirst());
+                return !args.isEmpty() && isActionConfigWithWait(args.getFirst());
             }
         }
 
         return false;
     }
 
-    /** Determines if an expression is ActionOptions with wait settings. */
-    private boolean isActionOptionsWithWait(Map<String, Object> expression) {
+    /** Determines if an expression is ActionConfig with wait settings. */
+    private boolean isActionConfigWithWait(Map<String, Object> expression) {
         if (!expression.containsKey("expressionType")) {
             return false;
         }
 
         // This is a simplified check - in a real implementation, we'd examine
-        // the ActionOptions builder methods for setMaxWait calls
+        // the ActionConfig builder methods for setMaxWait calls
         return expression.get("expressionType").equals("builder");
     }
 

@@ -155,6 +155,9 @@ public class BrobotProperties {
 
         /** Simulated time for classify operation (seconds) */
         private double timeClassify = 0.4;
+
+        /** Mock action success probability (0.0 to 1.0) */
+        private double actionSuccessProbability = 1.0;
     }
 
     @Getter
@@ -285,75 +288,5 @@ public class BrobotProperties {
 
         /** Monitor assignment for specific operations Key: operation name, Value: monitor index */
         private java.util.Map<String, Integer> operationMonitorMap = new java.util.HashMap<>();
-    }
-
-    /**
-     * Updates the static FrameworkSettings with values from this configuration. This provides
-     * backward compatibility during migration.
-     */
-    public void applyToFrameworkSettings() {
-        // Core settings
-        FrameworkSettings.mock = core.mock;
-        FrameworkSettings.packageName = core.packageName;
-
-        // Mouse settings
-        FrameworkSettings.moveMouseDelay = mouse.moveDelay;
-        FrameworkSettings.pauseBeforeMouseDown = mouse.pauseBeforeDown;
-        FrameworkSettings.pauseAfterMouseDown = mouse.pauseAfterDown;
-        FrameworkSettings.pauseBeforeMouseUp = mouse.pauseBeforeUp;
-        FrameworkSettings.pauseAfterMouseUp = mouse.pauseAfterUp;
-        FrameworkSettings.xMoveAfterMouseDown = mouse.xMoveAfterDown;
-        FrameworkSettings.yMoveAfterMouseDown = mouse.yMoveAfterDown;
-
-        // Mock timings
-        FrameworkSettings.mockTimeFindFirst = mock.timeFindFirst;
-        FrameworkSettings.mockTimeFindAll = mock.timeFindAll;
-        FrameworkSettings.mockTimeDrag = mock.timeDrag;
-        FrameworkSettings.mockTimeClick = mock.timeClick;
-        FrameworkSettings.mockTimeMove = mock.timeMove;
-        FrameworkSettings.mockTimeFindHistogram = mock.timeFindHistogram;
-        FrameworkSettings.mockTimeFindColor = mock.timeFindColor;
-        FrameworkSettings.mockTimeClassify = mock.timeClassify;
-
-        // Screenshot settings
-        FrameworkSettings.saveSnapshots = screenshot.saveSnapshots;
-        FrameworkSettings.saveHistory = screenshot.saveHistory;
-        FrameworkSettings.screenshotPath = screenshot.path;
-        FrameworkSettings.screenshotFilename = screenshot.filename;
-        FrameworkSettings.historyPath = screenshot.historyPath;
-        FrameworkSettings.historyFilename = screenshot.historyFilename;
-        FrameworkSettings.screenshots = screenshot.testScreenshots;
-        FrameworkSettings.testScreenshotsPath = screenshot.testPath;
-
-        // Illustration settings
-        FrameworkSettings.drawFind = illustration.drawFind;
-        FrameworkSettings.drawClick = illustration.drawClick;
-        FrameworkSettings.drawDrag = illustration.drawDrag;
-        FrameworkSettings.drawMove = illustration.drawMove;
-        FrameworkSettings.drawHighlight = illustration.drawHighlight;
-        FrameworkSettings.drawRepeatedActions = illustration.drawRepeatedActions;
-        FrameworkSettings.drawClassify = illustration.drawClassify;
-        FrameworkSettings.drawDefine = illustration.drawDefine;
-
-        // Analysis settings
-        FrameworkSettings.kMeansInProfile = analysis.kMeansInProfile;
-        FrameworkSettings.maxKMeansToStoreInProfile = analysis.maxKMeansToStore;
-        FrameworkSettings.initProfilesForStaticfImages = analysis.initStaticProfiles;
-        FrameworkSettings.initProfilesForDynamicImages = analysis.initDynamicProfiles;
-        FrameworkSettings.includeStateImageObjectsFromActiveStatesInAnalysis =
-                analysis.includeStateObjects;
-
-        // Recording settings
-        FrameworkSettings.secondsToCapture = recording.secondsToCapture;
-        FrameworkSettings.captureFrequency = recording.captureFrequency;
-        FrameworkSettings.recordingFolder = recording.folder;
-
-        // Dataset settings
-        FrameworkSettings.buildDataset = dataset.build;
-        FrameworkSettings.datasetPath = dataset.path;
-
-        // Testing settings
-        FrameworkSettings.testIteration = testing.iteration;
-        FrameworkSettings.sendLogs = testing.sendLogs;
     }
 }

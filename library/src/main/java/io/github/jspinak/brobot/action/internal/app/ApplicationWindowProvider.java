@@ -2,9 +2,10 @@ package io.github.jspinak.brobot.action.internal.app;
 
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.tools.testing.mock.environment.MockFocusedWindow;
 
@@ -22,10 +23,12 @@ import io.github.jspinak.brobot.tools.testing.mock.environment.MockFocusedWindow
  *
  * @see org.sikuli.script.App#focusedWindow()
  * @see MockFocusedWindow
- * @see FrameworkSettings#mock
+ * @see BrobotProperties
  */
 @Component
 public class ApplicationWindowProvider {
+
+    @Autowired private BrobotProperties brobotProperties;
 
     private final MockFocusedWindow mock;
 
@@ -56,7 +59,7 @@ public class ApplicationWindowProvider {
      * @see Region
      */
     public Optional<Region> focusedWindow() {
-        if (FrameworkSettings.mock) return Optional.of(mock.getFocusedWindow());
+        if (brobotProperties.getCore().isMock()) return Optional.of(mock.getFocusedWindow());
         org.sikuli.script.Region reg = org.sikuli.script.App.focusedWindow();
         if (reg == null) return Optional.empty();
         return Optional.of(new Region(reg));

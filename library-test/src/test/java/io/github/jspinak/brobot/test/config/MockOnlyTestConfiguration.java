@@ -5,7 +5,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 
 /**
@@ -22,7 +21,7 @@ public class MockOnlyTestConfiguration
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
         // Force mock mode regardless of test type
-        FrameworkSettings.mock = true;
+        // Mock mode is enabled via BrobotTestBase
 
         // Configure environment for mock testing
         ExecutionEnvironment environment =

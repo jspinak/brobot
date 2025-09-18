@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.config.core;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
@@ -42,13 +43,15 @@ public class BrobotAutoConfiguration {
 
     /**
      * Provides BrobotPropertiesInitializer if not already defined by the application. This ensures
-     * backward compatibility with FrameworkSettings.
+     * backward compatibility with BrobotProperties.
      */
     @Bean
     @ConditionalOnMissingBean
     public BrobotPropertiesInitializer brobotPropertiesInitializer(
-            BrobotProperties properties, MockModeResolver mockModeResolver) {
-        return new BrobotPropertiesInitializer(properties, mockModeResolver);
+            BrobotProperties properties,
+            MockModeResolver mockModeResolver,
+            ApplicationContext applicationContext) {
+        return new BrobotPropertiesInitializer(properties, mockModeResolver, applicationContext);
     }
 
     /**

@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.startup.verification.InitialStateVerifier;
 
 import lombok.RequiredArgsConstructor;
@@ -38,6 +38,7 @@ public class StartupRunner implements ApplicationRunner {
 
     private final InitialStateVerifier stateVerifier;
     private final StartupConfiguration configuration;
+    private final BrobotProperties brobotProperties;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
@@ -51,7 +52,7 @@ public class StartupRunner implements ApplicationRunner {
         boolean isTestMode =
                 "unit".equals(testType)
                         || "true".equals(System.getProperty("brobot.test.mode"))
-                        || FrameworkSettings.mock;
+                        || brobotProperties.getCore().isMock();
 
         if (!isTestMode && configuration.getStartupDelay() > 0) {
             log.info(

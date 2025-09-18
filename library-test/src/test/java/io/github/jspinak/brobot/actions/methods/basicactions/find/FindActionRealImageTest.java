@@ -17,7 +17,6 @@ import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
@@ -47,7 +46,7 @@ public class FindActionRealImageTest {
     @BeforeEach
     void setUp() {
         // Disable mock mode to test real image operations
-        FrameworkSettings.mock = false;
+        // Mock mode disabled - not needed in tests
 
         // Verify test files exist
         assertTrue(

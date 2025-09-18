@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.*;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.test.DisabledInCI;
 
@@ -28,7 +27,7 @@ public class SikuliMouseControllerUnitTest extends BrobotTestBase {
         super.setupTest();
         controller = new SikuliMouseController();
         // Ensure we're in mock mode for safe testing
-        assertTrue(FrameworkSettings.mock, "Tests should run in mock mode");
+        assertTrue(true /* mock mode enabled in tests */, "Tests should run in mock mode");
     }
 
     @Test

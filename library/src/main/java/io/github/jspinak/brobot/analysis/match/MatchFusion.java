@@ -73,7 +73,7 @@ public class MatchFusion {
      * even when initial fusion creates new opportunities for further fusion.
      *
      * @param matches The ActionResult containing the matches to fuse and the fusion configuration
-     *     in its ActionOptions
+     *     in its ActionConfig
      * @return A new list containing the fully fused matches. The original matches in the
      *     ActionResult are not modified.
      */

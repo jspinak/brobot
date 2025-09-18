@@ -26,7 +26,7 @@ import io.github.jspinak.brobot.action.internal.text.TextTyper;
 import io.github.jspinak.brobot.model.state.StateString;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.test.DisabledInCI;
-import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 
 /**
  * Comprehensive test suite for TypeText - types text to focused window. Tests text typing
@@ -38,7 +38,7 @@ public class TypeTextTest extends BrobotTestBase {
 
     @Mock private TextTyper mockTextTyper;
 
-    @Mock private TimeProvider mockTimeProvider;
+    @Mock private TimeWrapper mockTimeWrapper;
 
     @Mock private ActionResult mockActionResult;
 
@@ -53,7 +53,7 @@ public class TypeTextTest extends BrobotTestBase {
     public void setupTest() {
         super.setupTest();
         MockitoAnnotations.openMocks(this);
-        typeText = new TypeText(mockTextTyper, mockTimeProvider);
+        typeText = new TypeText(mockTextTyper, mockTimeWrapper);
         typeOptions = new TypeOptions.Builder().build();
         originalTypeDelay = Settings.TypeDelay;
 
@@ -73,7 +73,7 @@ public class TypeTextTest extends BrobotTestBase {
             typeText.perform(mockActionResult, mockObjectCollection);
 
             verify(mockTextTyper, times(1)).type(stateString, typeOptions);
-            verify(mockTimeProvider, never()).wait(anyDouble());
+            verify(mockTimeWrapper, never()).wait(anyDouble());
         }
 
         @Test
@@ -93,7 +93,7 @@ public class TypeTextTest extends BrobotTestBase {
             verify(mockTextTyper).type(str1, options);
             verify(mockTextTyper).type(str2, options);
             verify(mockTextTyper).type(str3, options);
-            verify(mockTimeProvider, times(2)).wait(0.5); // Pause between strings, not after last
+            verify(mockTimeWrapper, times(2)).wait(0.5); // Pause between strings, not after last
         }
 
         @Test
@@ -199,7 +199,7 @@ public class TypeTextTest extends BrobotTestBase {
 
             typeText.perform(mockActionResult, mockObjectCollection);
 
-            verify(mockTimeProvider).wait(1.0);
+            verify(mockTimeWrapper).wait(1.0);
         }
 
         @Test
@@ -215,7 +215,7 @@ public class TypeTextTest extends BrobotTestBase {
             typeText.perform(mockActionResult, mockObjectCollection);
 
             // Should only pause once (between strings), not after the last one
-            verify(mockTimeProvider, times(1)).wait(1.0);
+            verify(mockTimeWrapper, times(1)).wait(1.0);
         }
 
         @ParameterizedTest
@@ -234,7 +234,7 @@ public class TypeTextTest extends BrobotTestBase {
 
             typeText.perform(mockActionResult, mockObjectCollection);
 
-            verify(mockTimeProvider, times(expectedPauses)).wait(pause);
+            verify(mockTimeWrapper, times(expectedPauses)).wait(pause);
         }
     }
 
@@ -283,7 +283,7 @@ public class TypeTextTest extends BrobotTestBase {
 
             verify(mockTextTyper).type(str1, options);
             verify(mockTextTyper).type(str2, options);
-            verify(mockTimeProvider).wait(0.5);
+            verify(mockTimeWrapper).wait(0.5);
         }
     }
 
@@ -309,7 +309,7 @@ public class TypeTextTest extends BrobotTestBase {
             typeText.perform(mockActionResult, mockObjectCollection);
 
             verify(mockTextTyper, never()).type(any(), any());
-            verify(mockTimeProvider, never()).wait(anyDouble());
+            verify(mockTimeWrapper, never()).wait(anyDouble());
         }
 
         @Test
@@ -367,11 +367,11 @@ public class TypeTextTest extends BrobotTestBase {
             typeText.perform(mockActionResult, mockObjectCollection);
 
             // Verify all three strings are typed in order
-            InOrder inOrder = inOrder(mockTextTyper, mockTimeProvider);
+            InOrder inOrder = inOrder(mockTextTyper, mockTimeWrapper);
             inOrder.verify(mockTextTyper).type(username, options);
-            inOrder.verify(mockTimeProvider).wait(0.3);
+            inOrder.verify(mockTimeWrapper).wait(0.3);
             inOrder.verify(mockTextTyper).type(password, options);
-            inOrder.verify(mockTimeProvider).wait(0.3);
+            inOrder.verify(mockTimeWrapper).wait(0.3);
             inOrder.verify(mockTextTyper).type(confirmPassword, options);
         }
 
@@ -395,7 +395,7 @@ public class TypeTextTest extends BrobotTestBase {
             typeText.perform(mockActionResult, mockObjectCollection);
 
             verify(mockTextTyper, times(3)).type(any(StateString.class), eq(options));
-            verify(mockTimeProvider, times(2)).wait(1.0);
+            verify(mockTimeWrapper, times(2)).wait(1.0);
         }
 
         @Test
@@ -430,7 +430,7 @@ public class TypeTextTest extends BrobotTestBase {
             typeText.perform(mockActionResult, mockObjectCollection);
 
             verify(mockTextTyper).type(str, options);
-            verify(mockTimeProvider, never()).wait(anyDouble());
+            verify(mockTimeWrapper, never()).wait(anyDouble());
         }
 
         @Test
@@ -448,7 +448,7 @@ public class TypeTextTest extends BrobotTestBase {
 
             verify(mockTextTyper).type(str1, options);
             verify(mockTextTyper).type(str2, options);
-            verify(mockTimeProvider).wait(2.0);
+            verify(mockTimeWrapper).wait(2.0);
         }
     }
 }

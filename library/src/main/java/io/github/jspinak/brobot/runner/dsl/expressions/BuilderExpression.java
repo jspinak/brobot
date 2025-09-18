@@ -26,7 +26,7 @@ import lombok.EqualsAndHashCode;
  * <pre>
  * {
  *   "expressionType": "builder",
- *   "builderType": "ActionOptionsBuilder",
+ *   "builderType": "ActionConfigBuilder",
  *   "methods": [
  *     {"name": "setTimeout", "arguments": [{"expressionType": "literal", "valueType": "integer", "value": 5000}]},
  *     {"name": "setRetries", "arguments": [{"expressionType": "literal", "valueType": "integer", "value": 3}]},
@@ -44,7 +44,7 @@ import lombok.EqualsAndHashCode;
 public class BuilderExpression extends Expression {
     /**
      * The type of builder to instantiate. This should correspond to a known builder class in the
-     * automation framework (e.g., "ActionOptionsBuilder", "RegionBuilder").
+     * automation framework (e.g., "ActionConfigBuilder", "RegionBuilder").
      */
     private String builderType;
 

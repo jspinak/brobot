@@ -65,7 +65,20 @@ public class MonitorManager {
 
     /** Initialize monitor information and cache available monitors */
     private void initializeMonitors() {
-        // First check if headless mode is forced via system property
+        // Check if we should preserve the headless setting
+        String preserveHeadless = System.getProperty("brobot.preserve.headless.setting");
+        if (!"true".equals(preserveHeadless)) {
+            // For GUI automation, ensure headless is false before checking
+            String currentHeadless = System.getProperty("java.awt.headless");
+            if ("true".equals(currentHeadless)) {
+                System.setProperty("java.awt.headless", "false");
+                log.info(
+                        "Reset java.awt.headless from 'true' to 'false' for GUI automation in"
+                                + " MonitorManager");
+            }
+        }
+
+        // Now check if headless mode is still forced
         String headlessProperty = System.getProperty("java.awt.headless");
         boolean forcedHeadless = "true".equalsIgnoreCase(headlessProperty);
 

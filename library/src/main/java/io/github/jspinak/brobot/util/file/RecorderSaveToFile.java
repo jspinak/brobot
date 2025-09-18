@@ -18,10 +18,11 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.io.FilenameUtils;
 import org.sikuli.basics.Debug;
 import org.sikuli.script.Image;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 
 /**
  * Implementation of SaveToFile for recording automation sessions to disk.
@@ -34,7 +35,7 @@ import io.github.jspinak.brobot.config.core.FrameworkSettings;
  *
  * <ul>
  *   <li>Timestamp-based image naming using millisecond precision
- *   <li>Centralized recording folder from {@link FrameworkSettings}
+ *   <li>Centralized recording folder from {@link BrobotProperties}
  *   <li>XML formatting with proper indentation
  *   <li>PNG format for all saved images
  * </ul>
@@ -65,21 +66,23 @@ import io.github.jspinak.brobot.config.core.FrameworkSettings;
  * </ul>
  *
  * @see SaveToFile
- * @see FrameworkSettings#recordingFolder
+ * @see BrobotProperties
  */
 @Component
 public class RecorderSaveToFile implements SaveToFile {
 
+    @Autowired private BrobotProperties brobotProperties;
+
     /**
      * Creates the default recording folder from global settings.
      *
-     * <p>Uses the path configured in {@link FrameworkSettings#recordingFolder} as the default
-     * location for all recording outputs.
+     * <p>Uses the path configured in {@link BrobotProperties} as the default location for all
+     * recording outputs.
      *
      * @return File object representing the recording folder
      */
     public File createFolder() {
-        return new File(FrameworkSettings.recordingFolder);
+        return new File(brobotProperties.getRecording().getFolder());
     }
 
     /**

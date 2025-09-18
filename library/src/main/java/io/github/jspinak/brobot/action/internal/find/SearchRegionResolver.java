@@ -25,7 +25,7 @@ import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
  *
  * <ol>
  *   <li>Fixed/defined regions on the pattern or image
- *   <li>Search regions specified in ActionOptions
+ *   <li>Search regions specified in ActionConfig
  *   <li>Search regions defined on the pattern or image
  *   <li>Default full-screen region (fallback)
  * </ol>
@@ -71,7 +71,7 @@ public class SearchRegionResolver {
      * <p>This method implements the following priority order:
      *
      * <ol>
-     *   <li>Search regions from ActionOptions (highest priority)
+     *   <li>Search regions from ActionConfig (highest priority)
      *   <li>Fixed regions from individual Patterns within the StateImage
      *   <li>Search regions from individual Patterns within the StateImage
      *   <li>Default full-screen region if no regions are found
@@ -138,7 +138,7 @@ public class SearchRegionResolver {
      * <p>This method implements the following priority order:
      *
      * <ol>
-     *   <li>Search regions from ActionOptions (highest priority)
+     *   <li>Search regions from ActionConfig (highest priority)
      *   <li>Fixed regions from the Pattern
      *   <li>Search regions from the Pattern
      *   <li>Default full-screen region if no regions are found
@@ -163,13 +163,13 @@ public class SearchRegionResolver {
     }
 
     /**
-     * Selects search regions when only ActionOptions are available.
+     * Selects search regions when only ActionConfig are available.
      *
      * <p>This method is used when there are no pattern or image-specific regions to consider. It
      * ensures that at least one region is always returned for the search operation.
      *
      * @param actionConfig The action configuration containing optional search regions
-     * @return The regions specified in ActionOptions, or a default full-screen region if no regions
+     * @return The regions specified in ActionConfig, or a default full-screen region if no regions
      *     are defined
      */
     public List<Region> getRegions(ActionConfig actionConfig) {
@@ -186,15 +186,14 @@ public class SearchRegionResolver {
      * Collects search regions from multiple ObjectCollections.
      *
      * <p>This method aggregates all search regions from the provided collections of images. If
-     * ActionOptions contains any defined regions, those take precedence over the regions defined in
+     * ActionConfig contains any defined regions, those take precedence over the regions defined in
      * the individual images.
      *
      * @param actionConfig The action configuration that may override image regions
      * @param objectCollections Variable number of collections containing StateImages with their own
      *     search regions
-     * @return A list of all applicable search regions. If ActionOptions has defined regions,
-     *     returns those; otherwise returns the union of all regions from all images in all
-     *     collections.
+     * @return A list of all applicable search regions. If ActionConfig has defined regions, returns
+     *     those; otherwise returns the union of all regions from all images in all collections.
      */
     public List<Region> getRegionsForAllImages(
             ActionConfig actionConfig, ObjectCollection... objectCollections) {

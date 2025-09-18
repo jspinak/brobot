@@ -58,7 +58,7 @@ import lombok.extern.slf4j.Slf4j;
         matchIfMissing = false)
 public class DatasetCollectionAspect {
 
-    @Autowired private BrobotLogger brobotLogger;
+    private final BrobotLogger brobotLogger;
 
     @Value("${brobot.aspects.dataset.output-dir:./ml-datasets}")
     private String outputDir;
@@ -87,6 +87,11 @@ public class DatasetCollectionAspect {
 
     // Random for sampling
     private final Random random = new Random();
+
+    @Autowired
+    public DatasetCollectionAspect(BrobotLogger brobotLogger) {
+        this.brobotLogger = brobotLogger;
+    }
 
     @PostConstruct
     public void init() {

@@ -51,7 +51,7 @@ public class LoginTest extends BrobotTestBase {
     @Test
     public void testLogin() {
         // Mock mode is already enabled
-        assertTrue(MockModeManager.isMockMode());
+        assertTrue(brobotProperties.getCore().isMock());
     }
 }
 ```
@@ -64,8 +64,8 @@ If not using `BrobotTestBase`, configure through `application.properties`:
 # Enable mock mode for unit testing
 brobot.mock.mode=true
 # These are automatically synchronized by MockModeManager:
-brobot.mock=true
-brobot.mock=true
+brobot.core.mock=true
+brobot.core.mock=true
 
 # Screenshot configuration
 brobot.screenshot.path=screenshots/
@@ -398,7 +398,7 @@ This migration ensures better type safety, clearer separation of concerns, and m
 ## Troubleshooting
 
 - **No matches found**: Verify screenshot path configuration in properties
-- **Unexpected results**: Check mock mode is enabled (`brobot.mock=true`)
+- **Unexpected results**: Check mock mode is enabled (`brobot.core.mock=true`)
 - **Slow tests**: Adjust mock timings in properties for faster execution
 - **Flaky tests**: Ensure screenshots represent stable UI states
 - **API conflicts**: Use ActionConfig classes instead of deprecated ActionOptions

@@ -48,7 +48,7 @@
  * ActionVector vector = encoder.toVector(result);
  *
  * // Decoding back to action options (partial implementation)
- * ActionOptions decoded = encoder.toActionOptions(vector);
+ * ActionConfig decoded = encoder.toActionConfig(vector);
  * }</pre>
  *
  * <h2>Highlight Color Support</h2>
@@ -79,7 +79,7 @@
  *   <li>Implement the {@link
  *       io.github.jspinak.brobot.tools.ml.dataset.encoding.ActionVectorTranslator} interface
  *   <li>Define your vector structure and document the position mappings
- *   <li>Implement both toVector() and toActionOptions() methods
+ *   <li>Implement both toVector() and toActionConfig() methods
  *   <li>Consider implementing toObjectCollection() for spatial data reconstruction
  *   <li>Ensure thread safety if the encoder maintains state
  * </ol>

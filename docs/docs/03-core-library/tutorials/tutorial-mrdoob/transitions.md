@@ -15,6 +15,10 @@ Transitions define how to navigate between states. With the new @TransitionSet a
 ### HomepageTransitions.java
 
 ```java
+// Note: BrobotProperties must be injected as a dependency
+@Autowired
+private BrobotProperties brobotProperties;
+
 package com.example.mrdoob.transitions;
 
 import org.springframework.stereotype.Component;
@@ -51,7 +55,7 @@ public class HomepageTransitions {
         log.info("Navigating from Harmony to Homepage");
         
         // Mock mode support for testing
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             log.info("Mock mode: simulating successful navigation");
             return true;
         }
@@ -69,7 +73,7 @@ public class HomepageTransitions {
         log.info("Verifying arrival at Homepage");
         
         // Mock mode support for testing
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             log.info("Mock mode: simulating successful verification");
             return true;
         }
@@ -128,7 +132,7 @@ public class HarmonyTransitions {
         log.info("Navigating from Homepage to Harmony");
         
         // Mock mode support for testing
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             log.info("Mock mode: simulating successful navigation");
             return true;
         }
@@ -144,7 +148,7 @@ public class HarmonyTransitions {
         log.info("Navigating from About to Harmony");
         
         // Mock mode support for testing
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             log.info("Mock mode: simulating successful navigation");
             return true;
         }
@@ -162,7 +166,7 @@ public class HarmonyTransitions {
         log.info("Verifying arrival at Harmony");
         
         // Mock mode support for testing
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             log.info("Mock mode: simulating successful verification");
             return true;
         }
@@ -220,7 +224,7 @@ public class AboutTransitions {
         log.info("Navigating from Harmony to About");
         
         // Mock mode support for testing
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             log.info("Mock mode: simulating successful navigation");
             return true;
         }
@@ -237,7 +241,7 @@ public class AboutTransitions {
         log.info("Verifying arrival at About");
         
         // Mock mode support for testing
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
+        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
             log.info("Mock mode: simulating successful verification");
             return true;
         }
@@ -296,19 +300,19 @@ public class HarmonyTransitions {
     
     @FromTransition(from = Homepage.class, priority = 1)
     public boolean fromHomepage() {
-        if (FrameworkSettings.mock) return true;
+        if (brobotProperties.getCore().isMock()) return true;
         return action.click(homepage.getHarmony()).isSuccess();
     }
     
     @FromTransition(from = About.class, priority = 2)
     public boolean fromAbout() {
-        if (FrameworkSettings.mock) return true;
+        if (brobotProperties.getCore().isMock()) return true;
         return action.click(about.getBackButton()).isSuccess();
     }
     
     @IncomingTransition(required = true)
     public boolean verifyArrival() {
-        if (FrameworkSettings.mock) return true;
+        if (brobotProperties.getCore().isMock()) return true;
         return action.find(harmony.getAboutLink()).isSuccess();
     }
 }

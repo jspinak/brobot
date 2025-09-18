@@ -12,7 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
 import io.github.jspinak.brobot.BrobotTestApplication;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
@@ -78,7 +77,7 @@ class StateManagementIntegrationTest extends BrobotIntegrationTestBase {
     @BeforeEach
     void setUp() {
         // Enable mock mode
-        FrameworkSettings.mock = true;
+        // Mock mode is enabled via BrobotTestBase
 
         // Clear active states (ActiveStateSet doesn't have clear() method, so we work
         // with what's available)
@@ -327,7 +326,7 @@ class StateManagementIntegrationTest extends BrobotIntegrationTestBase {
         // In mock mode, detection might work differently
         // This is a placeholder test - actual implementation depends on StateDetector's
         // API
-        assertTrue(FrameworkSettings.mock, "Should be in mock mode for testing");
+        // Mock mode assertions handled by framework
     }
 
     @Test

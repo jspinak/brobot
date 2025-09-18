@@ -115,7 +115,7 @@ public class ActionLifecycleAspect {
         // Extract action options from ActionResult
         Object actionConfig = actionResult != null ? actionResult.getActionConfig() : null;
         if (actionConfig == null && actionResult != null) {
-            // Try legacy ActionOptions
+            // Try legacy ActionConfig
             actionConfig = actionResult.getActionConfig();
         }
 
@@ -243,7 +243,7 @@ public class ActionLifecycleAspect {
         String actionType = extractActionType(actionConfig, action);
         context.setActionType(actionType);
 
-        context.setActionOptions(actionConfig);
+        context.setActionConfig(actionConfig);
         context.setObjectCollection(objectCollection);
         context.setThreadName(Thread.currentThread().getName());
         return context;
@@ -270,12 +270,12 @@ public class ActionLifecycleAspect {
             }
         }
 
-        // Check if it's the legacy ActionOptions
+        // Check if it's the legacy ActionConfig
         if (actionConfig != null
                 && actionConfig
                         .getClass()
                         .getName()
-                        .equals("io.github.jspinak.brobot.action.ActionOptions")) {
+                        .equals("io.github.jspinak.brobot.action.ActionConfig")) {
             try {
                 // Use reflection to get the action enum value
                 Object actionEnum =
@@ -284,7 +284,7 @@ public class ActionLifecycleAspect {
                     return actionEnum.toString();
                 }
             } catch (Exception e) {
-                log.debug("Could not extract action from ActionOptions: {}", e.getMessage());
+                log.debug("Could not extract action from ActionConfig: {}", e.getMessage());
             }
         }
 
@@ -454,7 +454,7 @@ public class ActionLifecycleAspect {
             return actionConfig;
         }
 
-        public void setActionOptions(Object actionConfig) {
+        public void setActionConfig(Object actionConfig) {
             this.actionConfig = actionConfig;
         }
 

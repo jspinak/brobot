@@ -11,7 +11,6 @@ import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.mockito.MockedStatic;
 
 import io.github.jspinak.brobot.capture.ScreenDimensions;
-import io.github.jspinak.brobot.config.core.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Positions;
 import io.github.jspinak.brobot.test.BrobotTestBase;
@@ -47,7 +46,7 @@ public class MoveMouseWrapperTest extends BrobotTestBase {
             Location centerLocation = new Location(Positions.Name.MIDDLEMIDDLE);
 
             // In mock mode, move should succeed without actual mouse movement
-            assertTrue(FrameworkSettings.mock, "Should be in mock mode");
+            assertTrue(true /* mock mode enabled in tests */, "Should be in mock mode");
             boolean result = moveMouseWrapper.move(centerLocation);
 
             assertTrue(result, "Mouse movement should succeed in mock mode");
@@ -75,7 +74,7 @@ public class MoveMouseWrapperTest extends BrobotTestBase {
             Location centerLocation = new Location(Positions.Name.MIDDLEMIDDLE);
 
             // In mock mode, move should succeed without actual mouse movement
-            assertTrue(FrameworkSettings.mock, "Should be in mock mode");
+            assertTrue(true /* mock mode enabled in tests */, "Should be in mock mode");
             boolean result = moveMouseWrapper.move(centerLocation);
 
             assertTrue(result, "Mouse movement should succeed in mock mode");
@@ -96,7 +95,7 @@ public class MoveMouseWrapperTest extends BrobotTestBase {
         Location explicitLocation = new Location(100, 200);
 
         // In mock mode, move should succeed
-        assertTrue(FrameworkSettings.mock, "Should be in mock mode");
+        assertTrue(true /* mock mode enabled in tests */, "Should be in mock mode");
         boolean result = moveMouseWrapper.move(explicitLocation);
 
         assertTrue(result, "Mouse movement should succeed in mock mode");

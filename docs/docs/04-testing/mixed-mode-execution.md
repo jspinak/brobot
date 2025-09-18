@@ -56,6 +56,10 @@ brobot.hybrid.enabled=true
 ### Programmatic Activation
 
 ```java
+// Note: BrobotProperties must be injected as a dependency
+@Autowired
+private BrobotProperties brobotProperties;
+
 @SpringBootTest
 @TestPropertySource(properties = {
     "brobot.hybrid.enabled=true"
@@ -206,7 +210,7 @@ public interface ClickExecutor {
 public class MockClickExecutor implements ClickExecutor {
     public boolean click(Location location) {
         log.info("Mock click at {}", location);
-        pause(FrameworkSettings.mockTimeClick);
+        pause(brobotProperties.getCore().isMock()TimeClick);
         return true;
     }
 }
@@ -240,16 +244,16 @@ public class HybridClickExecutor implements ClickExecutor {
     public boolean click(Location location) {
         // Profile-based selection
         if (!useLegacyMode) {
-            if (FrameworkSettings.mock && mockExecutor != null) {
+            if (brobotProperties.getCore().isMock() && mockExecutor != null) {
                 return mockExecutor.click(location);
             }
-            if (!FrameworkSettings.mock && liveExecutor != null) {
+            if (!brobotProperties.getCore().isMock() && liveExecutor != null) {
                 return liveExecutor.click(location);
             }
         }
         
         // Runtime-based fallback
-        if (FrameworkSettings.mock) {
+        if (brobotProperties.getCore().isMock()) {
             return mockClick(location);
         } else {
             return liveClick(location);
@@ -321,13 +325,13 @@ Verify expected mode before critical operations:
 
 ```java
 private void assertMockMode() {
-    if (!FrameworkSettings.mock) {
+    if (!brobotProperties.getCore().isMock()) {
         throw new IllegalStateException("Expected mock mode but was live");
     }
 }
 
 private void assertLiveMode() {
-    if (FrameworkSettings.mock) {
+    if (brobotProperties.getCore().isMock()) {
         throw new IllegalStateException("Expected live mode but was mock");
     }
 }
@@ -339,12 +343,13 @@ Use try-finally to ensure mode restoration:
 
 ```java
 public void temporaryMockExecution(Runnable action) {
-    boolean originalMode = FrameworkSettings.mock;
+    boolean originalMode = brobotProperties.getCore().isMock();
     try {
-        FrameworkSettings.mock = true;
+        // Mock mode is now configured via application.properties:
+// brobot.core.mock=true;
         action.run();
     } finally {
-        FrameworkSettings.mock = originalMode;
+        brobotProperties.getCore().isMock() = originalMode;
     }
 }
 ```
@@ -355,7 +360,7 @@ Include current mode in log messages:
 
 ```java
 public void logModeAware(String message) {
-    String mode = FrameworkSettings.mock ? "MOCK" : "LIVE";
+    String mode = brobotProperties.getCore().isMock() ? "MOCK" : "LIVE";
     log.info("[{}] {}", mode, message);
 }
 ```
@@ -411,7 +416,7 @@ public class HybridIntegrationTest {
 @ParameterizedTest
 @ValueSource(booleans = {true, false})
 public void testInBothModes(boolean mockMode) {
-    FrameworkSettings.mock = mockMode;
+    brobotProperties.getCore().isMock() = mockMode;
     
     ActionResult result = executor.execute();
     
@@ -446,13 +451,13 @@ if (!(executor instanceof HybridTextTyper)) {
 // Add mode verification
 @BeforeEach
 public void verifyInitialMode() {
-    log.info("Initial mode: {}", FrameworkSettings.mock ? "MOCK" : "LIVE");
+    log.info("Initial mode: {}", brobotProperties.getCore().isMock() ? "MOCK" : "LIVE");
     log.info("Hybrid enabled: {}", hybridConfig.isEnabled());
 }
 
 @AfterEach
 public void logFinalMode() {
-    log.info("Final mode: {}", FrameworkSettings.mock ? "MOCK" : "LIVE");
+    log.info("Final mode: {}", brobotProperties.getCore().isMock() ? "MOCK" : "LIVE");
 }
 ```
 
