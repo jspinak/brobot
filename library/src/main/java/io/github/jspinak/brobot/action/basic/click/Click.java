@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import io.github.jspinak.brobot.action.ConditionalActionChain;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ConditionalActionChain;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.config.mock.MockModeManager;
 import io.github.jspinak.brobot.model.element.Location;
