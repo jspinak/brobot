@@ -21,7 +21,7 @@ public class ImageLoadingInitializer {
 
     private final ImagePathManager imagePathManager;
 
-    @Value("${brobot.screenshot.path:images}")
+    @Value("${brobot.core.image-path:images}")
     private String imagePath;
 
     @PostConstruct

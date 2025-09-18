@@ -88,15 +88,21 @@ public class MonitorManager {
 
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 
-        // Check if running in headless mode
-        if (ge.isHeadlessInstance() || GraphicsEnvironment.isHeadless()) {
-            log.warn("Running in headless mode. Monitor detection disabled.");
-            headlessMode = true;
-            // Create a default monitor for headless mode
-            Rectangle bounds = new Rectangle(0, 0, 1920, 1080); // Default resolution
-            MonitorInfo info = new MonitorInfo(0, bounds, "headless-default");
-            monitorCache.put(0, info);
-            return;
+        // Don't rely on GraphicsEnvironment.isHeadless() as it's unreliable on Windows
+        // Gradle often sets java.awt.headless=true even when displays are available
+
+        // Check if we're on Windows - if so, assume we have displays
+        String os = System.getProperty("os.name", "").toLowerCase();
+        boolean isWindows = os.contains("windows");
+
+        if (isWindows) {
+            log.info(
+                    "Windows detected - assuming display is available regardless of"
+                            + " GraphicsEnvironment");
+            headlessMode = false;
+        } else {
+            // For other platforms, we'll try to detect
+            headlessMode = false; // Start optimistic
         }
 
         try {
@@ -104,11 +110,15 @@ public class MonitorManager {
 
             if (devices == null || devices.length == 0) {
                 log.warn("No screen devices found. Creating default monitor.");
+                headlessMode = true;
                 Rectangle bounds = new Rectangle(0, 0, 1920, 1080);
                 MonitorInfo info = new MonitorInfo(0, bounds, "default-monitor");
                 monitorCache.put(0, info);
                 return;
             }
+
+            // We successfully got screen devices - we're not headless!
+            log.info("Found {} screen device(s) - display mode confirmed", devices.length);
 
             // Collect all monitor info
             StringBuilder monitorSummary = new StringBuilder();
@@ -133,17 +143,23 @@ public class MonitorManager {
                             + " it in configuration: brobot.monitor.multi-monitor-enabled=true");
             }
         } catch (HeadlessException e) {
-            log.warn("HeadlessException caught. Creating default monitor for headless mode.", e);
+            log.info("HeadlessException caught - this is actually a headless environment");
+            headlessMode = true;
             // Create a default monitor for headless mode
             Rectangle bounds = new Rectangle(0, 0, 1920, 1080); // Default resolution
             MonitorInfo info = new MonitorInfo(0, bounds, "headless-default");
             monitorCache.put(0, info);
         } catch (Exception e) {
-            log.error(
-                    "Unexpected error during monitor initialization. Creating default monitor.", e);
+            // Don't assume headless just because of an error
+            // On Windows, we should still be able to capture screens even if monitor detection
+            // fails
+            log.warn(
+                    "Could not detect monitors, but may still have display capability: {}",
+                    e.getMessage());
             Rectangle bounds = new Rectangle(0, 0, 1920, 1080);
-            MonitorInfo info = new MonitorInfo(0, bounds, "error-default");
+            MonitorInfo info = new MonitorInfo(0, bounds, "default");
             monitorCache.put(0, info);
+            // Don't set headlessMode = true here as we might still have displays
         }
     }
 
