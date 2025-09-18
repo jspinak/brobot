@@ -41,7 +41,8 @@ public class SimpleInitialStatesTest extends BrobotTestBase {
         core.setMock(true);
         when(brobotProperties.getCore()).thenReturn(core);
 
-        initialStates = new InitialStates(brobotProperties, stateDetector, stateMemory, stateService);
+        initialStates =
+                new InitialStates(brobotProperties, stateDetector, stateMemory, stateService);
     }
 
     @Test

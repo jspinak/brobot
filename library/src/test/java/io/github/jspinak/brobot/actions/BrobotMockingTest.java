@@ -120,7 +120,9 @@ class BrobotMockingTest extends BrobotTestBase {
 
         // In tests, we stay in mock mode for reliability, so we don't actually switch
         // We just verify that the framework handles the concept of real mode
-        assertTrue(true /* mock mode remains enabled */, "Framework remains stable in test environment");
+        assertTrue(
+                true /* mock mode remains enabled */,
+                "Framework remains stable in test environment");
 
         // In headless environments, real operations may fail, which is expected
         try {
