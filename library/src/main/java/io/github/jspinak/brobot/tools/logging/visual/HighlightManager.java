@@ -39,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class HighlightManager {
 
-    @Autowired private BrobotProperties brobotProperties;
+    private final BrobotProperties brobotProperties;
 
     /** Represents a region with its state and object context for better logging. */
     public static class RegionWithContext {
@@ -77,11 +77,13 @@ public class HighlightManager {
 
     @Autowired
     public HighlightManager(
+            BrobotProperties brobotProperties,
             VisualFeedbackConfig config,
             BrobotLogger brobotLogger,
             HighlightWrapper highlightWrapper,
             @Autowired(required = false) StateMemory stateMemory,
             CoordinateScaler coordinateScaler) {
+        this.brobotProperties = brobotProperties;
         this.config = config;
         this.brobotLogger = brobotLogger;
         this.highlightWrapper = highlightWrapper;

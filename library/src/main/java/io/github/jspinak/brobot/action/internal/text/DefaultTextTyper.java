@@ -22,7 +22,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DefaultTextTyper implements TextTyper {
 
-    @Autowired private BrobotProperties brobotProperties;
+    private final BrobotProperties brobotProperties;
+
+    @Autowired
+    public DefaultTextTyper(BrobotProperties brobotProperties) {
+        this.brobotProperties = brobotProperties;
+    }
 
     @Override
     public boolean type(StateString stateString, ActionConfig actionConfig) {

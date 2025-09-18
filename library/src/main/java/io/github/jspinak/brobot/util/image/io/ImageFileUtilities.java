@@ -70,8 +70,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class ImageFileUtilities {
 
-    @Autowired private BrobotProperties brobotProperties;
-
+    private final BrobotProperties brobotProperties;
     private final BufferedImageUtilities bufferedImageOps;
 
     /**
@@ -80,7 +79,10 @@ public class ImageFileUtilities {
      */
     private Map<String, Integer> lastFilenumber = new HashMap<>();
 
-    public ImageFileUtilities(BufferedImageUtilities bufferedImageOps) {
+    @Autowired
+    public ImageFileUtilities(
+            BrobotProperties brobotProperties, BufferedImageUtilities bufferedImageOps) {
+        this.brobotProperties = brobotProperties;
         this.bufferedImageOps = bufferedImageOps;
     }
 

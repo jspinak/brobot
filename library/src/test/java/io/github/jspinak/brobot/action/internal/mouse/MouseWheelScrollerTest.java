@@ -15,9 +15,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 
 import io.github.jspinak.brobot.action.basic.mouse.ScrollOptions;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.test.DisabledInCI;
@@ -33,11 +35,13 @@ public class MouseWheelScrollerTest extends BrobotTestBase {
     private MouseWheelScroller mouseWheelScroller;
     private boolean originalMockSetting;
 
+    @Mock private BrobotProperties brobotProperties;
+
     @BeforeEach
     @Override
     public void setupTest() {
         super.setupTest();
-        mouseWheelScroller = new MouseWheelScroller();
+        mouseWheelScroller = new MouseWheelScroller(brobotProperties);
         originalMockSetting = true /* mock mode enabled in tests */;
     }
 

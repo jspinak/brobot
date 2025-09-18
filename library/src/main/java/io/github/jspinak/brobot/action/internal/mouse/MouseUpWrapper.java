@@ -28,12 +28,14 @@ import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 @Component
 public class MouseUpWrapper {
 
-    @Autowired private BrobotProperties brobotProperties;
-
+    private final BrobotProperties brobotProperties;
     private final ClickType clickType;
     private final TimeWrapper timeWrapper;
 
-    public MouseUpWrapper(ClickType clickType, TimeWrapper timeWrapper) {
+    @Autowired
+    public MouseUpWrapper(
+            BrobotProperties brobotProperties, ClickType clickType, TimeWrapper timeWrapper) {
+        this.brobotProperties = brobotProperties;
         this.clickType = clickType;
         this.timeWrapper = timeWrapper;
     }

@@ -58,16 +58,21 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class SceneProvider {
 
-    @Autowired private BrobotProperties brobotProperties;
+    private final BrobotProperties brobotProperties;
     private final TimeWrapper timeWrapper;
     private final ImageLoader getImage;
+    private final UnifiedCaptureService unifiedCaptureService;
 
-    @Autowired(required = false)
-    private UnifiedCaptureService unifiedCaptureService;
-
-    public SceneProvider(TimeWrapper timeWrapper, ImageLoader getImage) {
+    @Autowired
+    public SceneProvider(
+            BrobotProperties brobotProperties,
+            TimeWrapper timeWrapper,
+            ImageLoader getImage,
+            @Autowired(required = false) UnifiedCaptureService unifiedCaptureService) {
+        this.brobotProperties = brobotProperties;
         this.timeWrapper = timeWrapper;
         this.getImage = getImage;
+        this.unifiedCaptureService = unifiedCaptureService;
     }
 
     /**

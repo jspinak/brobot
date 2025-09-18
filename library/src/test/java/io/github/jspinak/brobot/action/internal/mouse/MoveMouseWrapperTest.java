@@ -8,12 +8,15 @@ import java.awt.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.mockito.Mock;
 import org.mockito.MockedStatic;
 
 import io.github.jspinak.brobot.capture.ScreenDimensions;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Positions;
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.util.coordinates.CoordinateScaler;
 
 /** Tests for MoveMouseWrapper coordinate scaling functionality. */
 @DisabledIfEnvironmentVariable(
@@ -24,11 +27,14 @@ public class MoveMouseWrapperTest extends BrobotTestBase {
 
     private MoveMouseWrapper moveMouseWrapper;
 
+    @Mock private BrobotProperties brobotProperties;
+    @Mock private CoordinateScaler coordinateScaler;
+
     @BeforeEach
     @Override
     public void setupTest() {
         super.setupTest();
-        moveMouseWrapper = new MoveMouseWrapper();
+        moveMouseWrapper = new MoveMouseWrapper(brobotProperties, coordinateScaler);
     }
 
     @Test

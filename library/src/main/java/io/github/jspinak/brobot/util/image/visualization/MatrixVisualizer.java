@@ -71,8 +71,7 @@ import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
 @Component
 public class MatrixVisualizer {
 
-    @Autowired private BrobotProperties brobotProperties;
-
+    private final BrobotProperties brobotProperties;
     private final ImageFileUtilities imageUtils;
 
     /**
@@ -81,7 +80,9 @@ public class MatrixVisualizer {
      */
     int uniqueNumber = 0; // used to make filenames unique
 
-    public MatrixVisualizer(ImageFileUtilities imageUtils) {
+    @Autowired
+    public MatrixVisualizer(BrobotProperties brobotProperties, ImageFileUtilities imageUtils) {
+        this.brobotProperties = brobotProperties;
         this.imageUtils = imageUtils;
     }
 

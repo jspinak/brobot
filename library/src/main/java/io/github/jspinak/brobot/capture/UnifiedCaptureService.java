@@ -35,19 +35,25 @@ import io.github.jspinak.brobot.capture.provider.CaptureProvider;
 @Primary
 public class UnifiedCaptureService {
 
-    @Autowired private BrobotCaptureService delegateService;
+    private final BrobotCaptureService delegateService;
+    private final String providerConfig;
+    private final boolean enableLogging;
+    private final boolean autoRetry;
+    private final int retryCount;
 
-    @Value("${brobot.capture.provider:SIKULIX}")
-    private String providerConfig;
-
-    @Value("${brobot.capture.enable-logging:false}")
-    private boolean enableLogging;
-
-    @Value("${brobot.capture.auto-retry:true}")
-    private boolean autoRetry;
-
-    @Value("${brobot.capture.retry-count:3}")
-    private int retryCount;
+    @Autowired
+    public UnifiedCaptureService(
+            BrobotCaptureService delegateService,
+            @Value("${brobot.capture.provider:SIKULIX}") String providerConfig,
+            @Value("${brobot.capture.enable-logging:false}") boolean enableLogging,
+            @Value("${brobot.capture.auto-retry:true}") boolean autoRetry,
+            @Value("${brobot.capture.retry-count:3}") int retryCount) {
+        this.delegateService = delegateService;
+        this.providerConfig = providerConfig;
+        this.enableLogging = enableLogging;
+        this.autoRetry = autoRetry;
+        this.retryCount = retryCount;
+    }
 
     @PostConstruct
     public void init() {

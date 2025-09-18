@@ -9,11 +9,12 @@ import io.github.jspinak.brobot.tools.testing.mock.time.MockTime;
 @Component
 public class MockDrag {
 
-    @Autowired private BrobotProperties brobotProperties;
-
+    private final BrobotProperties brobotProperties;
     private final MockTime mockTime;
 
-    public MockDrag(MockTime mockTime) {
+    @Autowired
+    public MockDrag(BrobotProperties brobotProperties, MockTime mockTime) {
+        this.brobotProperties = brobotProperties;
         this.mockTime = mockTime;
     }
 

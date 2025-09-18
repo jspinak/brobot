@@ -45,15 +45,21 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class BrobotShutdownHandler {
 
-    @Autowired(required = false)
-    private UnifiedCaptureService unifiedCaptureService;
-
-    @Autowired(required = false)
-    private BrobotCaptureService brobotCaptureService;
-
-    @Autowired private ApplicationContext applicationContext;
+    private final UnifiedCaptureService unifiedCaptureService;
+    private final BrobotCaptureService brobotCaptureService;
+    private final ApplicationContext applicationContext;
 
     private volatile boolean shutdownInProgress = false;
+
+    @Autowired
+    public BrobotShutdownHandler(
+            @Autowired(required = false) UnifiedCaptureService unifiedCaptureService,
+            @Autowired(required = false) BrobotCaptureService brobotCaptureService,
+            ApplicationContext applicationContext) {
+        this.unifiedCaptureService = unifiedCaptureService;
+        this.brobotCaptureService = brobotCaptureService;
+        this.applicationContext = applicationContext;
+    }
 
     /**
      * Handles application context closing event. This is triggered when Spring context is shutting

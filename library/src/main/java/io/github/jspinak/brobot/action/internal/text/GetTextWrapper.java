@@ -36,11 +36,12 @@ import io.github.jspinak.brobot.tools.testing.mock.action.MockText;
 @Component
 public class GetTextWrapper {
 
-    @Autowired private BrobotProperties brobotProperties;
-
+    private final BrobotProperties brobotProperties;
     private final MockText mockText;
 
-    public GetTextWrapper(MockText mockText) {
+    @Autowired
+    public GetTextWrapper(BrobotProperties brobotProperties, MockText mockText) {
+        this.brobotProperties = brobotProperties;
         this.mockText = mockText;
     }
 

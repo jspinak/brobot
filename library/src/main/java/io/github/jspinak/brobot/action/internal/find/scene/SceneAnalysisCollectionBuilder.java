@@ -54,18 +54,20 @@ import io.github.jspinak.brobot.statemanagement.StateMemory;
 @Component
 public class SceneAnalysisCollectionBuilder {
 
-    @Autowired private BrobotProperties brobotProperties;
-
+    private final BrobotProperties brobotProperties;
     private final SceneProvider getScenes;
     private final ColorAnalysisOrchestrator analyzePixels;
     private final StateService allStates;
     private final StateMemory stateMemory;
 
+    @Autowired
     public SceneAnalysisCollectionBuilder(
+            BrobotProperties brobotProperties,
             SceneProvider getScenes,
             ColorAnalysisOrchestrator analyzePixels,
             StateService allStates,
             StateMemory stateMemory) {
+        this.brobotProperties = brobotProperties;
         this.getScenes = getScenes;
         this.analyzePixels = analyzePixels;
         this.allStates = allStates;

@@ -65,18 +65,20 @@ import io.github.jspinak.brobot.model.state.StateImage;
 @Component
 public class ColorAnalysisOrchestrator {
 
-    @Autowired private BrobotProperties brobotProperties;
+    private final BrobotProperties brobotProperties;
+    private final DistanceMatrixCalculator getDistanceMatrix;
+    private final GetPixelAnalysisCollectionScores getPixelAnalysisCollectionScores;
+    private final KmeansProfileBuilder setKMeansProfiles;
+    private final SceneScoreCalculator getSceneAnalysisScores;
 
-    private DistanceMatrixCalculator getDistanceMatrix;
-    private GetPixelAnalysisCollectionScores getPixelAnalysisCollectionScores;
-    private KmeansProfileBuilder setKMeansProfiles;
-    private SceneScoreCalculator getSceneAnalysisScores;
-
+    @Autowired
     public ColorAnalysisOrchestrator(
+            BrobotProperties brobotProperties,
             DistanceMatrixCalculator getDistanceMatrix,
             GetPixelAnalysisCollectionScores getPixelAnalysisCollectionScores,
             KmeansProfileBuilder setKMeansProfiles,
             SceneScoreCalculator getSceneAnalysisScores) {
+        this.brobotProperties = brobotProperties;
         this.getDistanceMatrix = getDistanceMatrix;
         this.getPixelAnalysisCollectionScores = getPixelAnalysisCollectionScores;
         this.setKMeansProfiles = setKMeansProfiles;

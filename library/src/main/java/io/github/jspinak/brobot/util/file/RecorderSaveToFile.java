@@ -71,7 +71,12 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 @Component
 public class RecorderSaveToFile implements SaveToFile {
 
-    @Autowired private BrobotProperties brobotProperties;
+    private final BrobotProperties brobotProperties;
+
+    @Autowired
+    public RecorderSaveToFile(BrobotProperties brobotProperties) {
+        this.brobotProperties = brobotProperties;
+    }
 
     /**
      * Creates the default recording folder from global settings.

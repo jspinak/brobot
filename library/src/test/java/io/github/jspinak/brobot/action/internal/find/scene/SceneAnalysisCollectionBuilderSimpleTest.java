@@ -19,6 +19,7 @@ import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.find.color.SceneProvider;
 import io.github.jspinak.brobot.action.internal.find.pixel.ColorAnalysisOrchestrator;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalyses;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.navigation.service.StateService;
@@ -30,6 +31,8 @@ import io.github.jspinak.brobot.tools.testing.mock.builders.MockSceneBuilder;
 class SceneAnalysisCollectionBuilderSimpleTest extends BrobotTestBase {
 
     private SceneAnalysisCollectionBuilder builder;
+
+    @Mock private BrobotProperties brobotProperties;
 
     @Mock private SceneProvider sceneProvider;
 
@@ -55,7 +58,11 @@ class SceneAnalysisCollectionBuilderSimpleTest extends BrobotTestBase {
         scene = MockSceneBuilder.createMockScene(); // Create proper Scene with Pattern and Image
         builder =
                 new SceneAnalysisCollectionBuilder(
-                        sceneProvider, colorAnalysisOrchestrator, stateService, stateMemory);
+                        brobotProperties,
+                        sceneProvider,
+                        colorAnalysisOrchestrator,
+                        stateService,
+                        stateMemory);
     }
 
     @Test

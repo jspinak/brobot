@@ -65,11 +65,12 @@ import io.github.jspinak.brobot.util.file.FilenameAllocator;
 @Component
 public class HistoryFileNamer {
 
-    @Autowired private BrobotProperties brobotProperties;
-
+    private final BrobotProperties brobotProperties;
     private final FilenameAllocator filenameRepo;
 
-    public HistoryFileNamer(FilenameAllocator filenameRepo) {
+    @Autowired
+    public HistoryFileNamer(BrobotProperties brobotProperties, FilenameAllocator filenameRepo) {
+        this.brobotProperties = brobotProperties;
         this.filenameRepo = filenameRepo;
     }
 

@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import io.github.jspinak.brobot.logging.unified.LogBuilder;
 import io.github.jspinak.brobot.model.element.Region;
@@ -38,6 +39,8 @@ import io.github.jspinak.brobot.tools.testing.wrapper.HighlightWrapper;
 public class HighlightManagerTest extends BrobotTestBase {
 
     private HighlightManager highlightManager;
+
+    @Mock private BrobotProperties brobotProperties;
 
     @Mock private VisualFeedbackConfig config;
 
@@ -106,7 +109,12 @@ public class HighlightManagerTest extends BrobotTestBase {
 
         highlightManager =
                 new HighlightManager(
-                        config, brobotLogger, highlightWrapper, stateMemory, coordinateScaler);
+                        brobotProperties,
+                        config,
+                        brobotLogger,
+                        highlightWrapper,
+                        stateMemory,
+                        coordinateScaler);
 
         // Set up default wrapper behavior
         // lenient().when(highlightWrapper.isAvailable()).thenReturn(true); // COMMENTED
@@ -585,7 +593,12 @@ public class HighlightManagerTest extends BrobotTestBase {
         // Use reflection to test private method
         HighlightManager manager =
                 new HighlightManager(
-                        config, brobotLogger, highlightWrapper, stateMemory, coordinateScaler);
+                        brobotProperties,
+                        config,
+                        brobotLogger,
+                        highlightWrapper,
+                        stateMemory,
+                        coordinateScaler);
 
         assertEquals("red", invokeGetColorName(manager, Color.RED));
         assertEquals("green", invokeGetColorName(manager, Color.GREEN));
@@ -603,7 +616,12 @@ public class HighlightManagerTest extends BrobotTestBase {
     public void testGetColorName_CustomColors() {
         HighlightManager manager =
                 new HighlightManager(
-                        config, brobotLogger, highlightWrapper, stateMemory, coordinateScaler);
+                        brobotProperties,
+                        config,
+                        brobotLogger,
+                        highlightWrapper,
+                        stateMemory,
+                        coordinateScaler);
 
         // Test color approximation
         assertEquals("red", invokeGetColorName(manager, new Color(220, 50, 50)));

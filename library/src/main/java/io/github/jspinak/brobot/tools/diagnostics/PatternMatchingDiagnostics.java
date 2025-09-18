@@ -38,13 +38,15 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class PatternMatchingDiagnostics {
 
-    @Autowired private Action action;
+    private final Action action;
 
     private static final String DEBUG_DIR = "pattern-matching-debug";
     private static final DateTimeFormatter TIMESTAMP =
             DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
 
-    public PatternMatchingDiagnostics() {
+    @Autowired
+    public PatternMatchingDiagnostics(Action action) {
+        this.action = action;
         // Create debug directory if it doesn't exist
         new File(DEBUG_DIR).mkdirs();
     }

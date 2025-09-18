@@ -41,13 +41,15 @@ public class ActionLifecycleAspectTest extends BrobotTestBase {
     @Override
     public void setupTest() {
         super.setupTest();
-        aspect = new ActionLifecycleAspect();
-        ReflectionTestUtils.setField(aspect, "actionLoggingService", actionLoggingService);
-        ReflectionTestUtils.setField(aspect, "preActionPause", 0);
-        ReflectionTestUtils.setField(aspect, "postActionPause", 0);
-        ReflectionTestUtils.setField(aspect, "logEvents", true);
-        ReflectionTestUtils.setField(aspect, "captureBeforeScreenshot", false);
-        ReflectionTestUtils.setField(aspect, "captureAfterScreenshot", false);
+        aspect =
+                new ActionLifecycleAspect(
+                        actionLoggingService,
+                        0, // preActionPause
+                        0, // postActionPause
+                        true, // logEvents
+                        false, // captureBeforeScreenshot
+                        false // captureAfterScreenshot
+                        );
     }
 
     @Test

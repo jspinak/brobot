@@ -69,8 +69,7 @@ import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
 @Component
 public class ScreenshotRecorder {
 
-    @Autowired private BrobotProperties brobotProperties;
-
+    private final BrobotProperties brobotProperties;
     private final ImageFileUtilities imageUtils;
     private final TimeWrapper timeWrapper;
     private final BrobotCaptureService captureService;
@@ -86,9 +85,11 @@ public class ScreenshotRecorder {
 
     @Autowired
     public ScreenshotRecorder(
+            BrobotProperties brobotProperties,
             ImageFileUtilities imageUtils,
             TimeWrapper timeWrapper,
             BrobotCaptureService captureService) {
+        this.brobotProperties = brobotProperties;
         this.imageUtils = imageUtils;
         this.timeWrapper = timeWrapper;
         this.captureService = captureService;

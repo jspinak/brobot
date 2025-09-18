@@ -78,8 +78,7 @@ import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 @Component
 public class FrameworkInitializer {
 
-    @Autowired private BrobotProperties brobotProperties;
-
+    private final BrobotProperties brobotProperties;
     private final StateService allStatesInProjectService;
     private final KmeansProfileBuilder setKMeansProfiles;
     private final StateIdResolver stateManagementService;
@@ -100,20 +99,24 @@ public class FrameworkInitializer {
      * <p>Dependencies are injected by Spring to ensure proper initialization order and availability
      * of all required services.
      *
+     * @param brobotProperties Configuration properties for Brobot framework
      * @param allStatesInProjectService Service for accessing all defined states
-     * @param setAllProfiles Service for generating color profiles for images
      * @param setKMeansProfiles Service for creating k-means clustering profiles
+     * @param setAllProfiles Service for generating color profiles for images
      * @param stateManagementService Service for state structure operations
      * @param stateTransitionsInProjectService Service for managing state transitions
      * @param stateTransitionsRepository Repository for storing transition data
      */
+    @Autowired
     public FrameworkInitializer(
+            BrobotProperties brobotProperties,
             StateService allStatesInProjectService,
             KmeansProfileBuilder setKMeansProfiles,
             ProfileSetBuilder setAllProfiles,
             StateIdResolver stateManagementService,
             StateTransitionService stateTransitionsInProjectService,
             StateTransitionStore stateTransitionsRepository) {
+        this.brobotProperties = brobotProperties;
         this.allStatesInProjectService = allStatesInProjectService;
         this.setKMeansProfiles = setKMeansProfiles;
         this.profileSetBuilder = setAllProfiles;

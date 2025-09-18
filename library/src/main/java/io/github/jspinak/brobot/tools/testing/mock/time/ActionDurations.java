@@ -14,7 +14,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 @Component
 public class ActionDurations {
 
-    @Autowired private BrobotProperties brobotProperties;
+    private final BrobotProperties brobotProperties;
 
     // Removed ActionConfig-based durations - use ActionType and Strategy-based
     // maps instead
@@ -22,17 +22,20 @@ public class ActionDurations {
     // New ActionType-based durations for migration
     private final Map<ActionType, Double> actionTypeDurations = new HashMap<>();
 
-    {
+    // Pattern find strategy durations
+    private final Map<PatternFindOptions.Strategy, Double> strategyDurations = new HashMap<>();
+
+    @Autowired
+    public ActionDurations(BrobotProperties brobotProperties) {
+        this.brobotProperties = brobotProperties;
+
+        // Initialize action type durations
         actionTypeDurations.put(ActionType.CLICK, brobotProperties.getMock().getTimeClick());
         actionTypeDurations.put(ActionType.DRAG, brobotProperties.getMock().getTimeDrag());
         actionTypeDurations.put(ActionType.MOVE, brobotProperties.getMock().getTimeMove());
         actionTypeDurations.put(ActionType.CLASSIFY, brobotProperties.getMock().getTimeClassify());
-    }
 
-    // Pattern find strategy durations
-    private final Map<PatternFindOptions.Strategy, Double> strategyDurations = new HashMap<>();
-
-    {
+        // Initialize strategy durations
         strategyDurations.put(
                 PatternFindOptions.Strategy.FIRST, brobotProperties.getMock().getTimeFindFirst());
         strategyDurations.put(
