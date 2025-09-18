@@ -9,6 +9,7 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
@@ -18,6 +19,14 @@ import org.springframework.test.util.ReflectionTestUtils;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 
 @ExtendWith(MockitoExtension.class)
+@DisabledIfEnvironmentVariable(
+        named = "CI",
+        matches = "true",
+        disabledReason = "Disabled in CI/CD - requires display")
+@DisabledIfEnvironmentVariable(
+        named = "GITHUB_ACTIONS",
+        matches = "true",
+        disabledReason = "Disabled in GitHub Actions - requires display")
 class RobotCaptureProviderTest extends BrobotTestBase {
 
     private static final Logger log = LoggerFactory.getLogger(RobotCaptureProviderTest.class);
