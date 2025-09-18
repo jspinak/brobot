@@ -60,30 +60,26 @@ public class ImagePathManager {
 
         log.info("Initializing ImagePathManager with base path: {}", basePath);
 
-        // Try each resolver strategy
-        Optional<Path> resolvedPath = Optional.empty();
-        for (PathResolver resolver : resolvers) {
-            resolvedPath = resolver.resolve(basePath);
-            if (resolvedPath.isPresent()) {
-                log.info("Path resolved using {}: {}", resolver.getName(), resolvedPath.get());
-                break;
-            }
+        // Simply use the path as configured - no JAR extraction or complex resolution
+        // Images should be in the directory specified by the user
+        Path path = Paths.get(basePath);
+
+        // If it's not absolute, resolve relative to working directory
+        if (!path.isAbsolute()) {
+            path = Paths.get(System.getProperty("user.dir")).resolve(basePath);
         }
 
-        if (resolvedPath.isEmpty()) {
-            log.warn("Could not resolve image path: {}. Using fallback.", basePath);
-            resolvedPath = createFallbackPath(basePath);
-        }
-
-        primaryImagePath =
-                resolvedPath.orElseThrow(
-                        () ->
-                                new IllegalStateException(
-                                        "Failed to initialize image path: " + basePath));
+        primaryImagePath = path;
+        log.info("Image path set to: {}", primaryImagePath.toAbsolutePath());
 
         // Ensure the directory exists
         try {
-            Files.createDirectories(primaryImagePath);
+            if (!Files.exists(primaryImagePath)) {
+                Files.createDirectories(primaryImagePath);
+                log.info("Created image directory: {}", primaryImagePath);
+            } else {
+                log.info("Using existing image directory: {}", primaryImagePath);
+            }
         } catch (IOException e) {
             log.warn("Could not create directory: {}", primaryImagePath, e);
         }
@@ -112,6 +108,11 @@ public class ImagePathManager {
             }
         }
         log.warn("Could not resolve additional path: {}", path);
+    }
+
+    /** Get the primary image path */
+    public Path getPrimaryImagePath() {
+        return primaryImagePath;
     }
 
     /** Get all configured image paths */
@@ -475,38 +476,20 @@ public class ImagePathManager {
         }
     }
 
+    /**
+     * @deprecated JAR resolution is not needed - use WorkingDirectoryResolver instead
+     */
+    @Deprecated
     private class JarRelativeResolver implements PathResolver {
         @Override
         public Optional<Path> resolve(String basePath) {
-            if (basePath == null || basePath.isEmpty()) {
-                return Optional.empty();
-            }
-            try {
-                URL jarUrl = getClass().getProtectionDomain().getCodeSource().getLocation();
-                if (jarUrl.toString().endsWith(".jar")) {
-                    Path jarPath = Paths.get(jarUrl.toURI());
-                    Path jarDir = jarPath.getParent();
-                    Path resolved = jarDir.resolve(basePath);
-
-                    if (Files.exists(resolved) && Files.isDirectory(resolved)) {
-                        return Optional.of(resolved);
-                    }
-
-                    // Try extracting from JAR
-                    Path extracted = extractImagesFromJar(basePath);
-                    if (extracted != null) {
-                        return Optional.of(extracted);
-                    }
-                }
-            } catch (Exception e) {
-                log.debug("JarRelativeResolver failed: {}", e.getMessage());
-            }
+            // No longer extract from JARs - just return empty
             return Optional.empty();
         }
 
         @Override
         public String getName() {
-            return "JarRelativeResolver";
+            return "JarRelativeResolver (deprecated)";
         }
     }
 
