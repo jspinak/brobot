@@ -24,7 +24,12 @@ import io.github.jspinak.brobot.model.element.Region;
 @Component
 public class MouseWheelScroller {
 
-    @Autowired private BrobotProperties brobotProperties;
+    private final BrobotProperties brobotProperties;
+
+    @Autowired
+    public MouseWheelScroller(BrobotProperties brobotProperties) {
+        this.brobotProperties = brobotProperties;
+    }
 
     // No longer needs legacy dependency - this class is now standalone
 

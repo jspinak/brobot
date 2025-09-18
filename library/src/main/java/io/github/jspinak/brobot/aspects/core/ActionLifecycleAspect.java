@@ -48,23 +48,32 @@ import lombok.extern.slf4j.Slf4j;
         matchIfMissing = true)
 public class ActionLifecycleAspect {
 
-    @Autowired private ActionLoggingService actionLoggingService;
+    private final ActionLoggingService actionLoggingService;
 
     // Pause configuration
-    @Value("${brobot.action.pre-pause:0}")
-    private int preActionPause;
+    private final int preActionPause;
+    private final int postActionPause;
+    private final boolean logEvents;
+    private final boolean captureBeforeScreenshot;
+    private final boolean captureAfterScreenshot;
 
-    @Value("${brobot.action.post-pause:0}")
-    private int postActionPause;
-
-    @Value("${brobot.aspects.action-lifecycle.log-events:true}")
-    private boolean logEvents;
-
-    @Value("${brobot.aspects.action-lifecycle.capture-before-screenshot:false}")
-    private boolean captureBeforeScreenshot;
-
-    @Value("${brobot.aspects.action-lifecycle.capture-after-screenshot:true}")
-    private boolean captureAfterScreenshot;
+    @Autowired
+    public ActionLifecycleAspect(
+            ActionLoggingService actionLoggingService,
+            @Value("${brobot.action.pre-pause:0}") int preActionPause,
+            @Value("${brobot.action.post-pause:0}") int postActionPause,
+            @Value("${brobot.aspects.action-lifecycle.log-events:true}") boolean logEvents,
+            @Value("${brobot.aspects.action-lifecycle.capture-before-screenshot:false}")
+                    boolean captureBeforeScreenshot,
+            @Value("${brobot.aspects.action-lifecycle.capture-after-screenshot:true}")
+                    boolean captureAfterScreenshot) {
+        this.actionLoggingService = actionLoggingService;
+        this.preActionPause = preActionPause;
+        this.postActionPause = postActionPause;
+        this.logEvents = logEvents;
+        this.captureBeforeScreenshot = captureBeforeScreenshot;
+        this.captureAfterScreenshot = captureAfterScreenshot;
+    }
 
     // Thread-local storage for action context
     private final ThreadLocal<ActionContext> actionContext = new ThreadLocal<>();

@@ -77,14 +77,11 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 public class IllustrationController {
 
-    @Autowired private BrobotProperties brobotProperties;
-
-    private ImageFileUtilities imageUtils;
-    private ActionVisualizer draw;
-    private VisualizationOrchestrator illustrationManager;
-
-    @Autowired(required = false)
-    private LoggingVerbosityConfig loggingConfig;
+    private final BrobotProperties brobotProperties;
+    private final ImageFileUtilities imageUtils;
+    private final ActionVisualizer draw;
+    private final VisualizationOrchestrator illustrationManager;
+    private final LoggingVerbosityConfig loggingConfig;
 
     private List<ObjectCollection> lastCollections = new ArrayList<>();
     private ActionType lastAction = ActionType.TYPE;
@@ -92,13 +89,18 @@ public class IllustrationController {
 
     private Map<ActionType, Boolean> actionPermissions = new HashMap<>();
 
+    @Autowired
     public IllustrationController(
+            BrobotProperties brobotProperties,
             ImageFileUtilities imageUtils,
             ActionVisualizer draw,
-            VisualizationOrchestrator illustrationManager) {
+            VisualizationOrchestrator illustrationManager,
+            @Autowired(required = false) LoggingVerbosityConfig loggingConfig) {
+        this.brobotProperties = brobotProperties;
         this.imageUtils = imageUtils;
         this.draw = draw;
         this.illustrationManager = illustrationManager;
+        this.loggingConfig = loggingConfig;
     }
 
     /**

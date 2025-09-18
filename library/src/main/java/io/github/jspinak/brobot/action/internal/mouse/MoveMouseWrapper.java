@@ -51,9 +51,14 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class MoveMouseWrapper {
 
-    @Autowired private BrobotProperties brobotProperties;
+    private final BrobotProperties brobotProperties;
+    private final CoordinateScaler coordinateScaler;
 
-    @Autowired private CoordinateScaler coordinateScaler;
+    @Autowired
+    public MoveMouseWrapper(BrobotProperties brobotProperties, CoordinateScaler coordinateScaler) {
+        this.brobotProperties = brobotProperties;
+        this.coordinateScaler = coordinateScaler;
+    }
 
     /**
      * Performs the actual mouse movement using SikuliX.

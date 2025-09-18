@@ -42,8 +42,7 @@ import io.github.jspinak.brobot.util.image.visualization.MatBuilder;
 @Component
 public class ProfileMatrixBuilder {
 
-    @Autowired private BrobotProperties brobotProperties;
-
+    private final BrobotProperties brobotProperties;
     private final ImageLoader getImage;
 
     /** Default width and height for visualization thumbnails in pixels */
@@ -52,7 +51,9 @@ public class ProfileMatrixBuilder {
     /** Spacing between visualization elements in pixels */
     private int spaceBetween = 2;
 
-    public ProfileMatrixBuilder(ImageLoader getImage) {
+    @Autowired
+    public ProfileMatrixBuilder(BrobotProperties brobotProperties, ImageLoader getImage) {
+        this.brobotProperties = brobotProperties;
         this.getImage = getImage;
     }
 

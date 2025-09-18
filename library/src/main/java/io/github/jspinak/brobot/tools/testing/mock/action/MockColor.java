@@ -38,11 +38,12 @@ import io.github.jspinak.brobot.util.image.recognition.ImageLoader;
 @Component
 public class MockColor {
 
-    @Autowired private BrobotProperties brobotProperties;
+    private final BrobotProperties brobotProperties;
+    private final ImageLoader getImage;
 
-    private ImageLoader getImage;
-
-    public MockColor(ImageLoader getImage) {
+    @Autowired
+    public MockColor(BrobotProperties brobotProperties, ImageLoader getImage) {
+        this.brobotProperties = brobotProperties;
         this.getImage = getImage;
     }
 

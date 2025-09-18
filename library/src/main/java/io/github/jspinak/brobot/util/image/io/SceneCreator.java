@@ -59,7 +59,12 @@ import io.github.jspinak.brobot.model.element.Scene;
 @Component
 public class SceneCreator {
 
-    @Autowired private BrobotProperties brobotProperties;
+    private final BrobotProperties brobotProperties;
+
+    @Autowired
+    public SceneCreator(BrobotProperties brobotProperties) {
+        this.brobotProperties = brobotProperties;
+    }
 
     /**
      * Creates Scene objects from all PNG files in the screenshot directory.

@@ -28,9 +28,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class CaptureConfiguration {
 
-    @Autowired private UnifiedCaptureService captureService;
+    private final UnifiedCaptureService captureService;
+    private final Environment env;
 
-    @Autowired private Environment env;
+    @Autowired
+    public CaptureConfiguration(UnifiedCaptureService captureService, Environment env) {
+        this.captureService = captureService;
+        this.env = env;
+    }
 
     /** Provider presets for quick switching. */
     public enum CaptureMode {

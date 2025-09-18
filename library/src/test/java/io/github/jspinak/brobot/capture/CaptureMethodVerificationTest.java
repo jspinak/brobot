@@ -1,8 +1,10 @@
 package io.github.jspinak.brobot.capture;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.test.DisabledInCI;
@@ -15,13 +17,22 @@ import io.github.jspinak.brobot.test.DisabledInCI;
 @DisabledInCI
 public class CaptureMethodVerificationTest extends BrobotTestBase {
 
+    @Mock private BrobotCaptureService brobotCaptureService;
+
     @Test
     public void testUnifiedCaptureServiceIsAvailable() {
         // In a real Spring context, UnifiedCaptureService should be available
         // This test runs in mock mode, so we just verify the structure is correct
 
-        // Create a mock UnifiedCaptureService
-        UnifiedCaptureService mockService = new UnifiedCaptureService();
+        // Create a mock UnifiedCaptureService with required constructor parameters
+        UnifiedCaptureService mockService =
+                new UnifiedCaptureService(
+                        brobotCaptureService,
+                        "SIKULIX", // providerConfig
+                        false, // enableLogging
+                        true, // autoRetry
+                        3 // retryCount
+                        );
         assertNotNull(mockService);
 
         // Verify it has the expected methods

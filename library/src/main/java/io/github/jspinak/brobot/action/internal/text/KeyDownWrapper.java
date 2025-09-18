@@ -51,7 +51,12 @@ import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 @Component
 public class KeyDownWrapper {
 
-    @Autowired private BrobotProperties brobotProperties;
+    private final BrobotProperties brobotProperties;
+
+    @Autowired
+    public KeyDownWrapper(BrobotProperties brobotProperties) {
+        this.brobotProperties = brobotProperties;
+    }
 
     /**
      * Presses and holds a key with optional modifier keys.

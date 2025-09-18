@@ -49,13 +49,18 @@ import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 @Component
 public class DragCoordinateCalculator {
 
-    @Autowired private BrobotProperties brobotProperties;
+    private final BrobotProperties brobotProperties;
     private final MockDrag mock;
     private final TimeWrapper timeWrapper;
-    private IllustrationController illustrateScreenshot;
+    private final IllustrationController illustrateScreenshot;
 
+    @Autowired
     public DragCoordinateCalculator(
-            MockDrag mock, TimeWrapper timeWrapper, IllustrationController illustrateScreenshot) {
+            BrobotProperties brobotProperties,
+            MockDrag mock,
+            TimeWrapper timeWrapper,
+            IllustrationController illustrateScreenshot) {
+        this.brobotProperties = brobotProperties;
         this.mock = mock;
         this.timeWrapper = timeWrapper;
         this.illustrateScreenshot = illustrateScreenshot;

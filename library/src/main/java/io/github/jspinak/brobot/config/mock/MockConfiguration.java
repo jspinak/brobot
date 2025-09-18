@@ -35,7 +35,7 @@ public class MockConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public ActionDurations actionDurations() {
-        return new ActionDurations();
+        return new ActionDurations(brobotProperties);
     }
 
     @Bean
@@ -69,13 +69,13 @@ public class MockConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public MockColor mockColor(ImageLoader imageLoader) {
-        return new MockColor(imageLoader);
+        return new MockColor(brobotProperties, imageLoader);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public MockDrag mockDrag(MockTime mockTime) {
-        return new MockDrag(mockTime);
+        return new MockDrag(brobotProperties, mockTime);
     }
 
     @Bean

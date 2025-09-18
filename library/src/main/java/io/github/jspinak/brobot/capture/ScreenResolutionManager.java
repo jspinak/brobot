@@ -25,19 +25,25 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 public class ScreenResolutionManager {
 
-    @Value("${brobot.capture.provider:JAVACV_FFMPEG}")
-    private String captureProviderName;
-
-    @Autowired private BrobotProperties brobotProperties;
-
-    @Autowired(required = false)
-    private UnifiedCaptureService captureService;
+    private final String captureProviderName;
+    private final BrobotProperties brobotProperties;
+    private final UnifiedCaptureService captureService;
 
     private int screenWidth;
     private int screenHeight;
     private boolean isPhysicalResolution;
     private double dpiScaleX = 1.0;
     private double dpiScaleY = 1.0;
+
+    @Autowired
+    public ScreenResolutionManager(
+            @Value("${brobot.capture.provider:JAVACV_FFMPEG}") String captureProviderName,
+            BrobotProperties brobotProperties,
+            @Autowired(required = false) UnifiedCaptureService captureService) {
+        this.captureProviderName = captureProviderName;
+        this.brobotProperties = brobotProperties;
+        this.captureService = captureService;
+    }
 
     // Cached values for common resolutions
     private static final int PHYSICAL_WIDTH_1080P = 1920;

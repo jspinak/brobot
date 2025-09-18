@@ -45,18 +45,20 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class FindImage {
 
-    @Autowired private BrobotProperties brobotProperties;
-
+    private final BrobotProperties brobotProperties;
     private final DefinedRegionConverter useDefinedRegion;
     private final ActionLifecycleManagement actionLifecycleManagement;
     private final SceneProvider getScenes;
     private final IterativePatternFinder findPatternsIteration;
 
+    @Autowired
     public FindImage(
+            BrobotProperties brobotProperties,
             DefinedRegionConverter useDefinedRegion,
             ActionLifecycleManagement actionLifecycleManagement,
             SceneProvider getScenes,
             IterativePatternFinder findPatternsIteration) {
+        this.brobotProperties = brobotProperties;
         this.useDefinedRegion = useDefinedRegion;
         this.actionLifecycleManagement = actionLifecycleManagement;
         this.getScenes = getScenes;

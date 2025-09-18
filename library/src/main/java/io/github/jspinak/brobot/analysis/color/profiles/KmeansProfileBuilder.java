@@ -55,23 +55,26 @@ import io.github.jspinak.brobot.util.image.core.ColorMatrixUtilities;
 @Component
 public class KmeansProfileBuilder {
 
-    @Autowired private BrobotProperties brobotProperties;
-
-    private ColorClusterFactory setColorCluster;
-    private ColorMatrixUtilities matOps3d;
-    private ProfileSetBuilder setAllProfiles;
+    private final BrobotProperties brobotProperties;
+    private final ColorClusterFactory setColorCluster;
+    private final ColorMatrixUtilities matOps3d;
+    private final ProfileSetBuilder setAllProfiles;
 
     /**
      * Constructs a KmeansProfileBuilder instance with required dependencies.
      *
+     * @param brobotProperties Configuration properties for Brobot framework
      * @param setColorCluster Component for creating color clusters from image data
      * @param matOps3d Utility for 3D matrix operations on multi-channel images
      * @param setAllProfiles Component for comprehensive profile initialization
      */
+    @Autowired
     public KmeansProfileBuilder(
+            BrobotProperties brobotProperties,
             ColorClusterFactory setColorCluster,
             ColorMatrixUtilities matOps3d,
             ProfileSetBuilder setAllProfiles) {
+        this.brobotProperties = brobotProperties;
         this.setColorCluster = setColorCluster;
         this.matOps3d = matOps3d;
         this.setAllProfiles = setAllProfiles;

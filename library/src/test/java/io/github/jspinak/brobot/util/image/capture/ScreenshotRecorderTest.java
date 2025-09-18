@@ -33,6 +33,8 @@ public class ScreenshotRecorderTest extends BrobotTestBase {
 
     @Mock private io.github.jspinak.brobot.capture.BrobotCaptureService captureService;
 
+    @Mock private io.github.jspinak.brobot.config.core.BrobotProperties brobotProperties;
+
     private ScreenshotRecorder screenshotRecorder;
 
     @BeforeEach
@@ -40,7 +42,8 @@ public class ScreenshotRecorderTest extends BrobotTestBase {
     public void setupTest() {
         super.setupTest();
         screenshotRecorder =
-                new ScreenshotRecorder(imageFileUtilities, timeWrapper, captureService);
+                new ScreenshotRecorder(
+                        brobotProperties, imageFileUtilities, timeWrapper, captureService);
     }
 
     @Test

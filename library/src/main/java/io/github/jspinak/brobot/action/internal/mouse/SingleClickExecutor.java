@@ -62,8 +62,7 @@ public class SingleClickExecutor {
     private final MoveMouseWrapper moveMouseWrapper;
     private final TimeWrapper timeWrapper;
     private final BrobotProperties brobotProperties;
-
-    @Autowired private CoordinateScaler coordinateScaler;
+    private final CoordinateScaler coordinateScaler;
 
     /**
      * Constructs a ClickLocationOnce with required mouse operation wrappers.
@@ -72,17 +71,20 @@ public class SingleClickExecutor {
      * @param mouseUpWrapper Handles mouse button release operations
      * @param moveMouseWrapper Handles mouse movement to target location
      */
+    @Autowired
     public SingleClickExecutor(
             MouseDownWrapper mouseDownWrapper,
             MouseUpWrapper mouseUpWrapper,
             MoveMouseWrapper moveMouseWrapper,
             TimeWrapper timeWrapper,
-            BrobotProperties brobotProperties) {
+            BrobotProperties brobotProperties,
+            CoordinateScaler coordinateScaler) {
         this.mouseDownWrapper = mouseDownWrapper;
         this.mouseUpWrapper = mouseUpWrapper;
         this.moveMouseWrapper = moveMouseWrapper;
         this.timeWrapper = timeWrapper;
         this.brobotProperties = brobotProperties;
+        this.coordinateScaler = coordinateScaler;
     }
 
     /**

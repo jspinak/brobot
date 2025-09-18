@@ -46,7 +46,12 @@ import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 @Component
 public class KeyUpWrapper {
 
-    @Autowired private BrobotProperties brobotProperties;
+    private final BrobotProperties brobotProperties;
+
+    @Autowired
+    public KeyUpWrapper(BrobotProperties brobotProperties) {
+        this.brobotProperties = brobotProperties;
+    }
 
     /**
      * Releases all currently pressed keys.

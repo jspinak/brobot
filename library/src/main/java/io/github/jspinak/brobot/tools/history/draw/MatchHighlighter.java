@@ -34,11 +34,12 @@ import io.github.jspinak.brobot.model.state.StateObjectMetadata;
 @Component
 public class MatchHighlighter {
 
-    @Autowired private BrobotProperties brobotProperties;
-
+    private final BrobotProperties brobotProperties;
     private final BrobotLogger brobotLogger;
 
-    public MatchHighlighter(BrobotLogger brobotLogger) {
+    @Autowired
+    public MatchHighlighter(BrobotProperties brobotProperties, BrobotLogger brobotLogger) {
+        this.brobotProperties = brobotProperties;
         this.brobotLogger = brobotLogger;
     }
 

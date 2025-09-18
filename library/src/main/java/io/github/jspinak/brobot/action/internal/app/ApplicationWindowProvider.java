@@ -28,11 +28,12 @@ import io.github.jspinak.brobot.tools.testing.mock.environment.MockFocusedWindow
 @Component
 public class ApplicationWindowProvider {
 
-    @Autowired private BrobotProperties brobotProperties;
-
+    private final BrobotProperties brobotProperties;
     private final MockFocusedWindow mock;
 
-    public ApplicationWindowProvider(MockFocusedWindow mock) {
+    @Autowired
+    public ApplicationWindowProvider(BrobotProperties brobotProperties, MockFocusedWindow mock) {
+        this.brobotProperties = brobotProperties;
         this.mock = mock;
     }
 

@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.model.state;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import io.github.jspinak.brobot.model.collection.ObjectCollection;
+import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.element.Region;
 
 import lombok.Data;
