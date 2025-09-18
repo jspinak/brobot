@@ -45,22 +45,23 @@ public class HeadlessDetector {
             @Value("${brobot.headless:false}") boolean brobotHeadless,
             @Value("${brobot.headless.debug:false}") boolean debugEnabled) {
 
-        // Check multiple sources for headless configuration
-        // Priority: 1) brobot.headless property, 2) java.awt.headless system property, 3) default
-        // to false
-        String javaHeadlessProperty = System.getProperty("java.awt.headless");
+        // Only use the brobot.headless property - ignore java.awt.headless
+        // because GraphicsEnvironment may already be initialized incorrectly
+        this.headlessMode = brobotHeadless;
 
-        if (brobotHeadless) {
-            this.headlessMode = true;
+        if (this.headlessMode) {
             log.info("[HeadlessDetector] Headless mode ENABLED via brobot.headless property");
-        } else if ("true".equalsIgnoreCase(javaHeadlessProperty)) {
-            this.headlessMode = true;
-            log.info(
-                    "[HeadlessDetector] Headless mode ENABLED via java.awt.headless system"
-                            + " property");
         } else {
-            this.headlessMode = false;
             log.info("[HeadlessDetector] Headless mode DISABLED (GUI mode enabled)");
+        }
+
+        // Log warning if there's a mismatch with java.awt.headless
+        String javaHeadlessProperty = System.getProperty("java.awt.headless");
+        if ("true".equalsIgnoreCase(javaHeadlessProperty) && !this.headlessMode) {
+            log.warn(
+                    "[HeadlessDetector] WARNING: java.awt.headless is set to 'true' but "
+                            + "brobot.headless is 'false'. This may cause issues. "
+                            + "Please start with -Djava.awt.headless=false");
         }
 
         if (debugEnabled) {

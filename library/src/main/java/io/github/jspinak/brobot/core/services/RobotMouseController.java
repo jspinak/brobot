@@ -55,12 +55,27 @@ public class RobotMouseController implements MouseController {
             tempRobot = new Robot();
             tempRobot.setAutoDelay(10); // Small delay between events
             tempRobot.setAutoWaitForIdle(true); // Wait for events to process
-            this.currentPosition = MouseInfo.getPointerInfo().getLocation();
+
+            // Try to get current mouse position, but don't fail if we can't
+            try {
+                this.currentPosition = MouseInfo.getPointerInfo().getLocation();
+            } catch (Exception mouseEx) {
+                ConsoleReporter.println(
+                        "[RobotMouseController] Warning: Could not get mouse position: "
+                                + mouseEx.getMessage());
+                this.currentPosition = new Point(0, 0);
+            }
         } catch (AWTException e) {
             ConsoleReporter.println(
                     "[Robot] Failed to initialize Robot: "
                             + e.getMessage()
                             + " - Running in degraded mode");
+            tempRobot = null;
+            this.currentPosition = new Point(0, 0);
+        } catch (HeadlessException e) {
+            ConsoleReporter.println(
+                    "[Robot] HeadlessException: GraphicsEnvironment is headless. "
+                            + "Please start with -Djava.awt.headless=false");
             tempRobot = null;
             this.currentPosition = new Point(0, 0);
         }

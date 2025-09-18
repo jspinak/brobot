@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @Order(1) // Run early in startup
 public class ImagePathResolver {
 
-    @Value("${brobot.screenshot.path:images}")
+    @Value("${brobot.core.image-path:images}")
     private String configuredPath;
 
     private String resolvedPath;
