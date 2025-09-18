@@ -388,6 +388,7 @@ public class Action {
         ObjectCollection strColl = new ObjectCollection.Builder().withRegions(regions).build();
         return perform(action, strColl);
     }
+
     // Removed ActionConfig-based perform method for strings - use ActionConfig instead
 
     // ===== New Convenience Methods for ActionType enum =====
@@ -596,5 +597,4 @@ public class Action {
                         "ActionType " + type + " is not yet supported in convenience methods");
         }
     }
-
 }

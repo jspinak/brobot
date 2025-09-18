@@ -225,4 +225,14 @@ public class StateLocation implements StateObject {
             return stateLocation;
         }
     }
+
+    /**
+     * Converts this StateLocation to an ObjectCollection containing only this location. Useful for
+     * Action methods that require ObjectCollection parameters.
+     *
+     * @return ObjectCollection containing this StateLocation
+     */
+    public ObjectCollection toObjectCollection() {
+        return new ObjectCollection.Builder().withLocations(this).build();
+    }
 }
