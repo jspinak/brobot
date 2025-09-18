@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
+import io.github.jspinak.brobot.config.environment.ForceNonHeadlessInitializer;
 import io.github.jspinak.brobot.tools.logging.gui.GuiAccessConfig;
 
 /**
@@ -40,6 +41,12 @@ import io.github.jspinak.brobot.tools.logging.gui.GuiAccessConfig;
     io.github.jspinak.brobot.debug.ImageDebugConfig.class
 })
 public class BrobotAutoConfiguration {
+
+    static {
+        // Force non-headless mode as early as possible
+        // This runs before Spring Boot initializes AWT classes
+        ForceNonHeadlessInitializer.init();
+    }
 
     /**
      * Provides BrobotPropertiesInitializer if not already defined by the application. This ensures
