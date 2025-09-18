@@ -34,8 +34,10 @@ public class GuiAccessConfig {
     /** Whether to check GUI access on startup. Default: true */
     private boolean checkOnStartup = true;
 
-    /** Whether to continue execution despite GUI problems. Default: false (fail fast) */
-    private boolean continueOnError = false;
+    /**
+     * Whether to continue execution despite GUI problems. Default: true (continue with warnings)
+     */
+    private boolean continueOnError = true;
 
     /** Interval in seconds between GUI access checks (0 = no periodic checks). Default: 0 */
     private int checkInterval = 0;
