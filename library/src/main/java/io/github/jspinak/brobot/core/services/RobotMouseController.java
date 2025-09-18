@@ -24,12 +24,13 @@ import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 @Component("robotMouseController")
 public class RobotMouseController implements MouseController {
 
-    private final Robot robot;
+    private Robot robot; // Made non-final to allow conditional initialization
     private Point currentPosition;
     private static final int CLICK_DELAY = 50; // ms between press and release
     private static final int MOVE_DELAY = 10; // ms after moving mouse
 
     public RobotMouseController() {
+        Robot tempRobot = null;
         try {
             // Check if we should preserve the headless setting
             String preserveHeadless = System.getProperty("brobot.preserve.headless.setting");
@@ -44,18 +45,36 @@ public class RobotMouseController implements MouseController {
                 }
             }
 
-            this.robot = new Robot();
-            this.robot.setAutoDelay(10); // Small delay between events
-            this.robot.setAutoWaitForIdle(true); // Wait for events to process
+            // Check if we're in headless mode after the property setting
+            if (GraphicsEnvironment.isHeadless()) {
+                ConsoleReporter.println(
+                        "[Robot] Running in headless environment - Robot creation skipped");
+                this.robot = null;
+                this.currentPosition = new Point(0, 0);
+                return;
+            }
+
+            tempRobot = new Robot();
+            tempRobot.setAutoDelay(10); // Small delay between events
+            tempRobot.setAutoWaitForIdle(true); // Wait for events to process
             this.currentPosition = MouseInfo.getPointerInfo().getLocation();
         } catch (AWTException e) {
-            ConsoleReporter.println("[Robot] Failed to initialize Robot: " + e.getMessage());
-            throw new RuntimeException("Failed to initialize Robot", e);
+            ConsoleReporter.println(
+                    "[Robot] Failed to initialize Robot: "
+                            + e.getMessage()
+                            + " - Running in degraded mode");
+            tempRobot = null;
+            this.currentPosition = new Point(0, 0);
         }
+        this.robot = tempRobot;
     }
 
     @Override
     public synchronized boolean moveTo(int x, int y) {
+        if (robot == null) {
+            ConsoleReporter.println("[RobotMouseController] Robot not available in headless mode");
+            return false;
+        }
         try {
             // Smooth mouse movement (optional - can make it instant)
             smoothMove(x, y);
@@ -92,6 +111,7 @@ public class RobotMouseController implements MouseController {
 
     /** Smooth mouse movement for more natural appearance. Can be disabled for instant movement. */
     private void smoothMove(int targetX, int targetY) {
+        if (robot == null) return;
         Point current = MouseInfo.getPointerInfo().getLocation();
         int steps = 10; // Number of intermediate positions
 
@@ -108,11 +128,17 @@ public class RobotMouseController implements MouseController {
 
     /** Instant mouse movement (no smoothing). */
     private void instantMove(int x, int y) {
-        robot.mouseMove(x, y);
+        if (robot != null) {
+            robot.mouseMove(x, y);
+        }
     }
 
     @Override
     public synchronized boolean click(int x, int y, MouseButton button) {
+        if (robot == null) {
+            ConsoleReporter.println("[RobotMouseController] Robot not available in headless mode");
+            return false;
+        }
         try {
             // Move to position first
             if (!moveTo(x, y)) {
@@ -137,6 +163,10 @@ public class RobotMouseController implements MouseController {
 
     @Override
     public synchronized boolean doubleClick(int x, int y, MouseButton button) {
+        if (robot == null) {
+            ConsoleReporter.println("[RobotMouseController] Robot not available in headless mode");
+            return false;
+        }
         try {
             // Move to location
             if (!moveTo(x, y)) {
@@ -177,6 +207,10 @@ public class RobotMouseController implements MouseController {
 
     @Override
     public synchronized boolean drag(int fromX, int fromY, int toX, int toY, MouseButton button) {
+        if (robot == null) {
+            ConsoleReporter.println("[RobotMouseController] Robot not available in headless mode");
+            return false;
+        }
         try {
             // Move to start position
             if (!moveTo(fromX, fromY)) {
@@ -222,6 +256,10 @@ public class RobotMouseController implements MouseController {
 
     @Override
     public synchronized boolean mouseDown(MouseButton button) {
+        if (robot == null) {
+            ConsoleReporter.println("[RobotMouseController] Robot not available in headless mode");
+            return false;
+        }
         try {
             int buttonMask = getButtonMask(button);
             robot.mousePress(buttonMask);
@@ -238,6 +276,10 @@ public class RobotMouseController implements MouseController {
 
     @Override
     public synchronized boolean mouseUp(MouseButton button) {
+        if (robot == null) {
+            ConsoleReporter.println("[RobotMouseController] Robot not available in headless mode");
+            return false;
+        }
         try {
             int buttonMask = getButtonMask(button);
             robot.mouseRelease(buttonMask);
@@ -254,6 +296,10 @@ public class RobotMouseController implements MouseController {
 
     @Override
     public synchronized boolean scroll(int wheelAmt) {
+        if (robot == null) {
+            ConsoleReporter.println("[RobotMouseController] Robot not available in headless mode");
+            return false;
+        }
         try {
             robot.mouseWheel(wheelAmt);
             ConsoleReporter.println("[RobotMouseController] Scrolled by " + wheelAmt);
@@ -266,6 +312,10 @@ public class RobotMouseController implements MouseController {
 
     // Legacy method for backward compatibility
     public synchronized boolean scroll(int direction, int amount) {
+        if (robot == null) {
+            ConsoleReporter.println("[RobotMouseController] Robot not available in headless mode");
+            return false;
+        }
         try {
             // Positive direction = scroll down, negative = scroll up
             int wheelAmt = direction > 0 ? amount : -amount;
@@ -286,6 +336,9 @@ public class RobotMouseController implements MouseController {
 
     @Override
     public int[] getPosition() {
+        if (robot == null) {
+            return new int[] {0, 0};
+        }
         Point p = MouseInfo.getPointerInfo().getLocation();
         return new int[] {p.x, p.y};
     }
@@ -306,6 +359,11 @@ public class RobotMouseController implements MouseController {
 
     /** Type text using Robot. */
     public void type(String text) {
+        if (robot == null) {
+            ConsoleReporter.println(
+                    "[RobotMouseController] Robot not available in headless mode - cannot type");
+            return;
+        }
         for (char c : text.toCharArray()) {
             typeChar(c);
         }
@@ -313,6 +371,7 @@ public class RobotMouseController implements MouseController {
 
     /** Type a single character. */
     private void typeChar(char c) {
+        if (robot == null) return;
         boolean shift = Character.isUpperCase(c) || isShiftChar(c);
 
         if (shift) {
@@ -422,6 +481,12 @@ public class RobotMouseController implements MouseController {
 
     /** Press a special key (like ESC, ENTER, etc). */
     public void pressKey(int keyCode) {
+        if (robot == null) {
+            ConsoleReporter.println(
+                    "[RobotMouseController] Robot not available in headless mode - cannot press"
+                            + " key");
+            return;
+        }
         robot.keyPress(keyCode);
         robot.delay(10);
         robot.keyRelease(keyCode);
@@ -429,6 +494,12 @@ public class RobotMouseController implements MouseController {
 
     /** Perform key combination (like Ctrl+C). */
     public void keyCombo(int... keyCodes) {
+        if (robot == null) {
+            ConsoleReporter.println(
+                    "[RobotMouseController] Robot not available in headless mode - cannot perform"
+                            + " key combo");
+            return;
+        }
         // Press all keys
         for (int keyCode : keyCodes) {
             robot.keyPress(keyCode);
