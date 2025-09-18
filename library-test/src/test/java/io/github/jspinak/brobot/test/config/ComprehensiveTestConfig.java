@@ -14,6 +14,7 @@ import io.github.jspinak.brobot.action.internal.execution.ActionChainExecutor;
 import io.github.jspinak.brobot.action.internal.execution.ActionExecution;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
 import io.github.jspinak.brobot.config.core.BrobotConfiguration;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.logging.modular.VerboseFormatter;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.navigation.transition.StateNavigator;
