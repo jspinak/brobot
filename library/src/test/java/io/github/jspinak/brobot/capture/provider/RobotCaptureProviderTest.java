@@ -11,12 +11,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @ExtendWith(MockitoExtension.class)
 class RobotCaptureProviderTest extends BrobotTestBase {
@@ -40,8 +39,12 @@ class RobotCaptureProviderTest extends BrobotTestBase {
         hasDisplay = System.getenv("DISPLAY") != null;
 
         // Log environment for debugging
-        log.info("Test Environment: CI={}, Headless={}, Display={}, Mock={}",
-                isCI, isHeadless, hasDisplay, isInMockMode());
+        log.info(
+                "Test Environment: CI={}, Headless={}, Display={}, Mock={}",
+                isCI,
+                isHeadless,
+                hasDisplay,
+                isInMockMode());
 
         if (isCI) {
             log.info("Running in CI environment - using relaxed assertions");
@@ -51,8 +54,9 @@ class RobotCaptureProviderTest extends BrobotTestBase {
     private boolean isInMockMode() {
         // Check if we're in mock mode (from BrobotTestBase)
         try {
-            return (boolean) ReflectionTestUtils.getField(
-                Class.forName("org.sikuli.script.support.FrameworkSettings"), "mock");
+            return (boolean)
+                    ReflectionTestUtils.getField(
+                            Class.forName("org.sikuli.script.support.FrameworkSettings"), "mock");
         } catch (Exception e) {
             return true; // Default to mock in test environment
         }
@@ -78,8 +82,12 @@ class RobotCaptureProviderTest extends BrobotTestBase {
             assertTrue(available, "Provider should be available with display");
         }
 
-        log.info("Provider availability: {} (Mock={}, Headless={}, Display={})",
-                available, isInMockMode(), isHeadless, hasDisplay);
+        log.info(
+                "Provider availability: {} (Mock={}, Headless={}, Display={})",
+                available,
+                isInMockMode(),
+                isHeadless,
+                hasDisplay);
     }
 
     @Test
@@ -114,18 +122,27 @@ class RobotCaptureProviderTest extends BrobotTestBase {
         if (isCI || isInMockMode()) {
             // Common CI/mock resolutions
             boolean validResolution =
-                (capture.getWidth() == 1920 && capture.getHeight() == 1080) || // Common mock
-                (capture.getWidth() == 1024 && capture.getHeight() == 768) ||  // Xvfb default
-                (capture.getWidth() == 800 && capture.getHeight() == 600) ||   // Minimal
-                (capture.getWidth() > 0 && capture.getHeight() > 0);           // Any valid size
+                    (capture.getWidth() == 1920 && capture.getHeight() == 1080)
+                            || // Common mock
+                            (capture.getWidth() == 1024 && capture.getHeight() == 768)
+                            || // Xvfb default
+                            (capture.getWidth() == 800 && capture.getHeight() == 600)
+                            || // Minimal
+                            (capture.getWidth() > 0 && capture.getHeight() > 0); // Any valid size
 
-            assertTrue(validResolution,
-                String.format("CI/Mock resolution %dx%d should be valid",
-                    capture.getWidth(), capture.getHeight()));
+            assertTrue(
+                    validResolution,
+                    String.format(
+                            "CI/Mock resolution %dx%d should be valid",
+                            capture.getWidth(), capture.getHeight()));
         }
 
-        log.info("Screen captured: {}x{} (CI={}, Mock={})",
-                capture.getWidth(), capture.getHeight(), isCI, isInMockMode());
+        log.info(
+                "Screen captured: {}x{} (CI={}, Mock={})",
+                capture.getWidth(),
+                capture.getHeight(),
+                isCI,
+                isInMockMode());
     }
 
     @Test
@@ -155,24 +172,36 @@ class RobotCaptureProviderTest extends BrobotTestBase {
         // Different validation for different environments
         if (isInMockMode() || isCI) {
             // In mock/CI mode, dimensions may not match exactly
-            log.info("Mock/CI capture: {}x{} for region {}x{}",
-                    capture.getWidth(), capture.getHeight(),
-                    region.width, region.height);
+            log.info(
+                    "Mock/CI capture: {}x{} for region {}x{}",
+                    capture.getWidth(),
+                    capture.getHeight(),
+                    region.width,
+                    region.height);
 
             // Just ensure we got something reasonable
-            assertTrue(capture.getWidth() > 0 && capture.getHeight() > 0,
+            assertTrue(
+                    capture.getWidth() > 0 && capture.getHeight() > 0,
                     "Mock/CI capture should have valid dimensions");
         } else {
             // In real mode, check for exact or scaled match
             double detectedScale = (double) ReflectionTestUtils.getField(provider, "detectedScale");
-            boolean scaleToPhysical = (boolean) ReflectionTestUtils.getField(provider, "scaleToPhysical");
-            boolean scaleDetected = (boolean) ReflectionTestUtils.getField(provider, "scaleDetected");
+            boolean scaleToPhysical =
+                    (boolean) ReflectionTestUtils.getField(provider, "scaleToPhysical");
+            boolean scaleDetected =
+                    (boolean) ReflectionTestUtils.getField(provider, "scaleDetected");
 
             if (scaleToPhysical && scaleDetected) {
                 // Allow 1 pixel tolerance for scaling
-                assertEquals((int) (region.width * detectedScale), capture.getWidth(), 1,
+                assertEquals(
+                        (int) (region.width * detectedScale),
+                        capture.getWidth(),
+                        1,
                         "Scaled width should match");
-                assertEquals((int) (region.height * detectedScale), capture.getHeight(), 1,
+                assertEquals(
+                        (int) (region.height * detectedScale),
+                        capture.getHeight(),
+                        1,
                         "Scaled height should match");
             } else {
                 // Exact match expected
@@ -291,7 +320,8 @@ class RobotCaptureProviderTest extends BrobotTestBase {
             return;
         }
 
-        GraphicsDevice[] devices = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+        GraphicsDevice[] devices =
+                GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
         log.info("Testing with {} screen(s)", devices.length);
 
         // In CI, we might only have one virtual screen
@@ -309,8 +339,11 @@ class RobotCaptureProviderTest extends BrobotTestBase {
                 assertTrue(capture.getHeight() > 0, "Screen " + i + " height should be positive");
                 successfulCaptures++;
 
-                log.info("Successfully captured screen {}: {}x{}",
-                        i, capture.getWidth(), capture.getHeight());
+                log.info(
+                        "Successfully captured screen {}: {}x{}",
+                        i,
+                        capture.getWidth(),
+                        capture.getHeight());
             } catch (IOException | ArrayIndexOutOfBoundsException e) {
                 // Some screens might not be accessible, especially in CI
                 log.warn("Could not capture screen {}: {}", i, e.getMessage());
