@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.action;
 
 import java.util.Optional;
 
+import io.github.jspinak.brobot.model.state.StateString;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
@@ -57,8 +58,6 @@ import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
  * @since 1.0
  * @see ActionConfig
  * @see ActionInterface
- * @see BasicActionRegistry
- * @see CompositeActionRegistry
  * @see ActionResult
  * @author Joshua Spinak
  */
@@ -90,8 +89,6 @@ public class Action {
         this.actionChainExecutor = actionChainExecutor;
     }
 
-    // Removed ActionOptions-based perform method - use ActionConfig instead
-
     /**
      * Executes a GUI automation action with the specified configuration and target objects.
      *
@@ -104,8 +101,6 @@ public class Action {
     public ActionResult perform(ActionConfig actionConfig, ObjectCollection... objectCollections) {
         return perform("", actionConfig, objectCollections);
     }
-
-    // Removed ActionOptions-based perform method with description - use ActionConfig instead
 
     /**
      * Executes a GUI automation action with a descriptive label using ActionConfig.
@@ -341,15 +336,18 @@ public class Action {
      * <p>This method types text from StateString objects in the collections. If the collections
      * also contain images, it will first find and click on them before typing.
      *
-     * @param objectCollections collections containing strings to type
+     * @param stateStrings contain strings to type
      * @return ActionResult containing the type operation results
      */
-    public ActionResult type(ObjectCollection... objectCollections) {
+    public ActionResult type(StateString... stateStrings) {
+        if (stateStrings == null) stateStrings = new StateString[0];
         TypeOptions typeOptions = new TypeOptions.Builder().build();
-        return perform(typeOptions, objectCollections);
+        ObjectCollection collection =
+                new ObjectCollection.Builder()
+                        .withStrings(stateStrings)
+                        .build();
+        return perform(typeOptions, collection);
     }
-
-    // Removed ActionOptions-based perform method for StateImages - use ActionConfig instead
 
     /**
      * Performs an action on state images with specified configuration.
@@ -366,8 +364,6 @@ public class Action {
                 actionConfig, new ObjectCollection.Builder().withImages(stateImages).build());
     }
 
-    // Removed ActionOptions-based perform method without objects - use ActionConfig instead
-
     /**
      * Performs the specified action type with default configuration.
      *
@@ -380,7 +376,6 @@ public class Action {
      * @deprecated Use specific ActionConfig implementations instead (e.g., ClickOptions,
      *     PatternFindOptions)
      */
-    // Removed deprecated ActionType methods - use ActionType instead
 
     /**
      * Performs the specified action type on images with default configuration.
@@ -394,7 +389,6 @@ public class Action {
      * @deprecated Use specific ActionConfig implementations instead (e.g., ClickOptions,
      *     PatternFindOptions)
      */
-    // Removed deprecated ActionType methods - use ActionType instead
 
     /**
      * Performs the specified action type with no targets and default options.
@@ -408,7 +402,6 @@ public class Action {
      * @deprecated Use specific ActionConfig implementations instead (e.g., TypeOptions,
      *     MouseMoveOptions)
      */
-    // Removed deprecated ActionType methods - use ActionType instead
 
     /**
      * Performs the specified action using text strings as targets.
@@ -438,7 +431,6 @@ public class Action {
      * @param strings text strings to use as action targets
      * @return ActionResult containing matches and execution details
      */
-    // Removed ActionOptions-based perform method for strings - use ActionConfig instead
 
     /**
      * Performs the specified action on screen regions with default options.
@@ -627,7 +619,5 @@ public class Action {
                         "ActionType " + type + " is not yet supported in convenience methods");
         }
     }
-
-    // Duplicate createDefaultConfig method removed - using the one above
 
 }
