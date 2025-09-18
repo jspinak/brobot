@@ -47,10 +47,8 @@ public class MockProperties {
      *   <li>CI/CD pipeline execution
      *   <li>Demonstrations without live applications
      * </ul>
-     *
-     * <p>Default: false (real execution mode)
      */
-    private boolean enabled = false;
+    private boolean enabled;
 
     /**
      * Probability of action success in mock mode (0.0 to 1.0).
@@ -58,7 +56,7 @@ public class MockProperties {
      * <p>Controls how often simulated actions succeed:
      *
      * <ul>
-     *   <li>1.0 = All actions always succeed (default)
+     *   <li>1.0 = All actions always succeed
      *   <li>0.95 = 95% success rate (realistic simulation)
      *   <li>0.5 = 50% success rate (stress testing)
      *   <li>0.0 = All actions always fail (failure testing)
@@ -66,8 +64,6 @@ public class MockProperties {
      *
      * <p>This applies to actions like click, type, and drag. Find operations still require
      * ActionSnapshots for proper match simulation.
-     *
-     * <p>Default: 1.0 (100% success)
      */
     private ActionSuccessProbability action = new ActionSuccessProbability();
 
@@ -75,8 +71,8 @@ public class MockProperties {
     @Data
     public static class ActionSuccessProbability {
 
-        /** Success probability for all actions (0.0 to 1.0). Default: 1.0 (100% success rate) */
-        private double successProbability = 1.0;
+        /** Success probability for all actions (0.0 to 1.0). */
+        private double successProbability;
 
         /**
          * Validates and returns the success probability, ensuring it's within valid range.

@@ -42,72 +42,72 @@ public class ConsoleActionConfig {
         VERBOSE
     }
 
-    /** Whether console action reporting is enabled. Default: true */
-    private boolean enabled = true;
+    /** Whether console action reporting is enabled. */
+    private boolean enabled;
 
-    /** The verbosity level for console output. Default: NORMAL */
-    private Level level = Level.NORMAL;
+    /** The verbosity level for console output. */
+    private Level level;
 
     /**
      * Whether to show detailed match information (location, score). Only applies when level is
-     * VERBOSE. Default: true
+     * VERBOSE.
      */
-    private boolean showMatchDetails = true;
+    private boolean showMatchDetails;
 
-    /** Whether to show timing information for actions. Default: true */
-    private boolean showTiming = true;
+    /** Whether to show timing information for actions. */
+    private boolean showTiming;
 
-    /** Whether to use colored output (requires ANSI support). Default: true */
-    private boolean useColors = true;
+    /** Whether to use colored output (requires ANSI support). */
+    private boolean useColors;
 
-    /** Whether to use unicode icons in output. Default: true */
-    private boolean useIcons = true;
+    /** Whether to use unicode icons in output. */
+    private boolean useIcons;
 
     // Action type filters
 
-    /** Whether to report FIND actions. Default: true */
-    private boolean reportFind = true;
+    /** Whether to report FIND actions. */
+    private boolean reportFind;
 
-    /** Whether to report CLICK actions. Default: true */
-    private boolean reportClick = true;
+    /** Whether to report CLICK actions. */
+    private boolean reportClick;
 
-    /** Whether to report TYPE actions. Default: true */
-    private boolean reportType = true;
+    /** Whether to report TYPE actions. */
+    private boolean reportType;
 
-    /** Whether to report DRAG actions. Default: true */
-    private boolean reportDrag = true;
+    /** Whether to report DRAG actions. */
+    private boolean reportDrag;
 
-    /** Whether to report HIGHLIGHT actions. Default: false */
-    private boolean reportHighlight = false;
+    /** Whether to report HIGHLIGHT actions. */
+    private boolean reportHighlight;
 
-    /** Whether to report state transitions. Default: true */
-    private boolean reportTransitions = true;
+    /** Whether to report state transitions. */
+    private boolean reportTransitions;
 
     // Performance thresholds
 
     /**
      * Threshold in milliseconds for performance warnings. Actions taking longer than this will
-     * trigger a warning. Default: 1000ms
+     * trigger a warning.
      */
-    private long performanceWarnThreshold = 1000;
+    private long performanceWarnThreshold;
 
     /**
      * Threshold in milliseconds for performance errors. Actions taking longer than this will be
-     * highlighted as errors. Default: 5000ms
+     * highlighted as errors.
      */
-    private long performanceErrorThreshold = 5000;
+    private long performanceErrorThreshold;
 
     // Output formatting
 
-    /** Prefix for indented output (e.g., match details). Default: " └─ " */
-    private String indentPrefix = "   └─ ";
+    /** Prefix for indented output (e.g., match details). */
+    private String indentPrefix;
 
-    /** Maximum length for displayed text before truncation. Default: 50 */
-    private int maxTextLength = 50;
+    /** Maximum length for displayed text before truncation. */
+    private int maxTextLength;
 
-    /** Whether to group related actions together. Default: false */
-    private boolean groupRelatedActions = false;
+    /** Whether to group related actions together. */
+    private boolean groupRelatedActions;
 
-    /** Time window in milliseconds for grouping related actions. Default: 100ms */
-    private long groupingTimeWindow = 100;
+    /** Time window in milliseconds for grouping related actions. */
+    private long groupingTimeWindow;
 }

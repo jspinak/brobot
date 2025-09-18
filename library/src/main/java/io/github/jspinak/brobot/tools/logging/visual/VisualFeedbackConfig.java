@@ -26,36 +26,36 @@ import lombok.Data;
 @ConfigurationProperties(prefix = "brobot.highlight")
 public class VisualFeedbackConfig {
 
-    /** Whether visual highlighting is enabled globally. Default: true */
-    private boolean enabled = true;
+    /** Whether visual highlighting is enabled globally. */
+    private boolean enabled;
 
-    /** Whether to automatically highlight successful finds. Default: true */
-    private boolean autoHighlightFinds = true;
+    /** Whether to automatically highlight successful finds. */
+    private boolean autoHighlightFinds;
 
-    /** Whether to automatically highlight search regions before searching. Default: false */
-    private boolean autoHighlightSearchRegions = false;
+    /** Whether to automatically highlight search regions before searching. */
+    private boolean autoHighlightSearchRegions;
 
     /** Configuration for find highlighting. */
     @Data
     @ConfigurationProperties(prefix = "brobot.highlight.find")
     public static class FindHighlightConfig {
-        /** Color for highlighting found images. Default: Green (#00FF00) */
-        private String color = "#00FF00";
+        /** Color for highlighting found images. */
+        private String color;
 
-        /** Duration in seconds to show the highlight. Default: 2.0 seconds */
-        private double duration = 2.0;
+        /** Duration in seconds to show the highlight. */
+        private double duration;
 
-        /** Border width in pixels. Default: 3 */
-        private int borderWidth = 3;
+        /** Border width in pixels. */
+        private int borderWidth;
 
-        /** Whether to flash the highlight. Default: false */
-        private boolean flash = false;
+        /** Whether to flash the highlight. */
+        private boolean flash;
 
-        /** Number of times to flash if enabled. Default: 2 */
-        private int flashCount = 2;
+        /** Number of times to flash if enabled. */
+        private int flashCount;
 
-        /** Flash interval in milliseconds. Default: 300ms */
-        private long flashInterval = 300;
+        /** Flash interval in milliseconds. */
+        private long flashInterval;
 
         /** Converts the color string to a Color object. */
         public Color getColorObject() {
@@ -72,23 +72,23 @@ public class VisualFeedbackConfig {
     @Data
     @ConfigurationProperties(prefix = "brobot.highlight.search-region")
     public static class SearchRegionHighlightConfig {
-        /** Color for highlighting search regions. Default: Blue (#0000FF) */
-        private String color = "#0000FF";
+        /** Color for highlighting search regions. */
+        private String color;
 
-        /** Duration in seconds to show the highlight. Default: 1.0 seconds */
-        private double duration = 1.0;
+        /** Duration in seconds to show the highlight. */
+        private double duration;
 
-        /** Border width in pixels. Default: 2 */
-        private int borderWidth = 2;
+        /** Border width in pixels. */
+        private int borderWidth;
 
-        /** Opacity for filled highlights (0.0 to 1.0). Default: 0.3 */
-        private double opacity = 0.3;
+        /** Opacity for filled highlights (0.0 to 1.0). */
+        private double opacity;
 
-        /** Whether to fill the region or just show border. Default: false */
-        private boolean filled = false;
+        /** Whether to fill the region or just show border. */
+        private boolean filled;
 
-        /** Whether to show region dimensions as text. Default: false */
-        private boolean showDimensions = false;
+        /** Whether to show region dimensions as text. */
+        private boolean showDimensions;
 
         /** Converts the color string to a Color object. */
         public Color getColorObject() {
@@ -111,17 +111,17 @@ public class VisualFeedbackConfig {
     @Data
     @ConfigurationProperties(prefix = "brobot.highlight.error")
     public static class ErrorHighlightConfig {
-        /** Whether to highlight areas where finds failed. Default: false */
-        private boolean enabled = false;
+        /** Whether to highlight areas where finds failed. */
+        private boolean enabled;
 
-        /** Color for error highlights. Default: Red (#FF0000) */
-        private String color = "#FF0000";
+        /** Color for error highlights. */
+        private String color;
 
-        /** Duration in seconds to show the error highlight. Default: 3.0 seconds */
-        private double duration = 3.0;
+        /** Duration in seconds to show the error highlight. */
+        private double duration;
 
-        /** Whether to show a cross mark on failed areas. Default: true */
-        private boolean showCrossMark = true;
+        /** Whether to show a cross mark on failed areas. */
+        private boolean showCrossMark;
 
         /** Converts the color string to a Color object. */
         public Color getColorObject() {
@@ -138,20 +138,20 @@ public class VisualFeedbackConfig {
     @Data
     @ConfigurationProperties(prefix = "brobot.highlight.click")
     public static class ClickHighlightConfig {
-        /** Whether to highlight click locations. Default: true */
-        private boolean enabled = true;
+        /** Whether to highlight click locations. */
+        private boolean enabled;
 
-        /** Color for click highlights. Default: Yellow (#FFFF00) */
-        private String color = "#FFFF00";
+        /** Color for click highlights. */
+        private String color;
 
-        /** Duration in seconds to show the click highlight. Default: 0.5 seconds */
-        private double duration = 0.5;
+        /** Duration in seconds to show the click highlight. */
+        private double duration;
 
-        /** Radius of the click indicator circle. Default: 20 pixels */
-        private int radius = 20;
+        /** Radius of the click indicator circle. */
+        private int radius;
 
-        /** Whether to show ripple effect. Default: true */
-        private boolean rippleEffect = true;
+        /** Whether to show ripple effect. */
+        private boolean rippleEffect;
 
         /** Converts the color string to a Color object. */
         public Color getColorObject() {
@@ -164,8 +164,8 @@ public class VisualFeedbackConfig {
         }
     }
 
-    private final FindHighlightConfig find = new FindHighlightConfig();
-    private final SearchRegionHighlightConfig searchRegion = new SearchRegionHighlightConfig();
-    private final ErrorHighlightConfig error = new ErrorHighlightConfig();
-    private final ClickHighlightConfig click = new ClickHighlightConfig();
+    private FindHighlightConfig find = new FindHighlightConfig();
+    private SearchRegionHighlightConfig searchRegion = new SearchRegionHighlightConfig();
+    private ErrorHighlightConfig error = new ErrorHighlightConfig();
+    private ClickHighlightConfig click = new ClickHighlightConfig();
 }
