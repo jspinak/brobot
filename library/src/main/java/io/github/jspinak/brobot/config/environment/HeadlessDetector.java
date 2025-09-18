@@ -113,12 +113,24 @@ public class HeadlessDetector {
         // Step 1: Check if explicitly forced to non-headless
         String headlessProperty = System.getProperty("java.awt.headless");
         if ("false".equalsIgnoreCase(headlessProperty)) {
-            if (debugLoggingEnabled) {
-                log.info(
-                        "[HeadlessDetector] ✓ Explicitly set to non-headless via"
-                                + " java.awt.headless=false");
+            // Even if java.awt.headless=false, we need to verify display access
+            // because GraphicsEnvironment might have been initialized as headless
+            boolean displayVerified = verifyDisplayAccess();
+            if (displayVerified) {
+                if (debugLoggingEnabled) {
+                    log.info(
+                            "[HeadlessDetector] ✓ Explicitly set to non-headless and display"
+                                    + " access verified");
+                }
+                return false;
+            } else {
+                if (debugLoggingEnabled) {
+                    log.warn(
+                            "[HeadlessDetector] ⚠ java.awt.headless=false but display access"
+                                    + " failed - treating as headless");
+                }
+                return true;
             }
-            return false;
         }
 
         // Step 2: Check if explicitly forced to headless

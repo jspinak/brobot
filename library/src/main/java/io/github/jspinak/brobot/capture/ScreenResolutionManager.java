@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.capture;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 import jakarta.annotation.PostConstruct;
 
@@ -101,7 +102,56 @@ public class ScreenResolutionManager {
             return;
         }
 
-        // Determine resolution based on capture provider
+        // Try to get actual captured resolution from the capture service
+        if (captureService != null) {
+            try {
+                // Capture a test image to determine actual resolution
+                BufferedImage testCapture = captureService.captureScreen();
+                if (testCapture != null) {
+                    screenWidth = testCapture.getWidth();
+                    screenHeight = testCapture.getHeight();
+
+                    // Determine if this is physical or logical resolution
+                    // FFmpeg and Robot providers capture at physical resolution
+                    if (provider.contains("JAVACV_FFMPEG")
+                            || provider.contains("FFMPEG")
+                            || provider.contains("ROBOT")) {
+                        isPhysicalResolution = true;
+
+                        // Calculate DPI scale if we're getting physical resolution
+                        Dimension logicalSize = Toolkit.getDefaultToolkit().getScreenSize();
+                        dpiScaleX = (double) screenWidth / logicalSize.width;
+                        dpiScaleY = (double) screenHeight / logicalSize.height;
+
+                        log.debug(
+                                "Detected physical resolution from capture: {}x{}",
+                                screenWidth,
+                                screenHeight);
+                        if (Math.abs(dpiScaleX - 1.0) > 0.01) {
+                            log.debug(
+                                    "DPI scale: {}x{}",
+                                    String.format("%.2f", dpiScaleX),
+                                    String.format("%.2f", dpiScaleY));
+                        }
+                    } else {
+                        isPhysicalResolution = false;
+                        dpiScaleX = 1.0;
+                        dpiScaleY = 1.0;
+                        log.debug(
+                                "Detected logical resolution from capture: {}x{}",
+                                screenWidth,
+                                screenHeight);
+                    }
+                    return;
+                }
+            } catch (Exception e) {
+                log.warn(
+                        "Could not capture test image for resolution detection: {}",
+                        e.getMessage());
+            }
+        }
+
+        // Fallback to old detection method if capture service is not available
         if (provider.contains("JAVACV_FFMPEG")
                 || provider.contains("FFMPEG")
                 || provider.contains("ROBOT")) {
@@ -119,7 +169,6 @@ public class ScreenResolutionManager {
         // For physical resolution providers, we need to detect the actual screen size
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice gd = ge.getDefaultScreenDevice();
-        DisplayMode dm = gd.getDisplayMode();
 
         // Try to get physical resolution
         // On Windows with DPI scaling, this might still return logical dimensions

@@ -382,19 +382,13 @@ public class SmartImageLoader {
         return null;
     }
 
+    /**
+     * @deprecated JAR loading is not used - images should be in the configured directory
+     */
+    @Deprecated
     private BufferedImage tryLoadFromJar(String imageName) {
-        try {
-            // Extract images from JAR if needed
-            Path extracted = pathManager.extractImagesFromJar("images");
-            if (extracted != null) {
-                Path imagePath = extracted.resolve(imageName);
-                if (Files.exists(imagePath)) {
-                    return ImageIO.read(imagePath.toFile());
-                }
-            }
-        } catch (Exception e) {
-            log.debug("Failed to load from JAR extraction: {}", e.getMessage());
-        }
+        // Images should be in the configured directory, not in JAR
+        log.debug("JAR loading not used - images should be in configured directory");
         return null;
     }
 
