@@ -99,6 +99,24 @@ All ActionConfig classes inherit these properties from the base class:
 
 To start using ActionConfig:
 
+### Option 1: Convenience Methods (Recommended for Simple Operations)
+
+As of Brobot 2.1, the simplest way to perform common actions is through convenience methods:
+
+```java
+// Direct actions without ObjectCollection
+action.click(region);
+action.type("text");
+action.find(pattern);
+action.move(location);
+```
+
+These methods handle the ObjectCollection creation for you. See [Convenience Methods](./18-convenience-methods.md) for details.
+
+### Option 2: Traditional ActionConfig Approach
+
+For more complex operations or when you need fine control:
+
 1. Choose the appropriate Options class for your action
 2. Use the builder to configure it
 3. Pass it to the `action.perform()` method

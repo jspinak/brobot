@@ -10,6 +10,35 @@ This page provides a comprehensive index of all ActionConfig examples, organized
 
 ## Quick Start Examples
 
+### Convenience Methods (New in 2.1)
+
+The simplest way to perform common actions:
+
+```java
+// Direct clicking
+action.click(region);           // Click a region
+action.click(location);          // Click a location
+action.click(match);             // Click a match
+
+// Direct typing
+action.type("Hello World");     // Type text
+
+// Direct finding
+action.find(pattern);            // Find a pattern
+
+// Direct mouse operations
+action.move(location);           // Move to location
+action.move(region);             // Move to region center
+action.drag(from, to);           // Drag between points
+
+// Other conveniences
+action.highlight(region);        // Highlight for debugging
+action.scroll(Direction.DOWN, 3); // Scroll down
+action.vanish(pattern);          // Wait for disappearance
+```
+
+See [Convenience Methods Documentation](./18-convenience-methods.md) for complete details.
+
 ### Basic Actions
 
 #### Click Examples

@@ -21,7 +21,17 @@ ActionOptions options = new ActionOptions.Builder()
     .build();
 ```
 
-### New API (ActionConfig)
+### New API Options
+
+#### Option 1: Convenience Methods (Simplest - New in 2.1)
+```java
+// Direct actions without configuration objects
+action.click(region);
+action.type("text");
+action.find(pattern);
+```
+
+#### Option 2: ActionConfig Classes (Full Control)
 ```java
 // Type-specific configuration classes
 ClickOptions clickOptions = new ClickOptions.Builder()
@@ -33,6 +43,48 @@ PatternFindOptions findOptions = new PatternFindOptions.Builder()
     .setSimilarity(0.8)
     .build();
 ```
+
+## Migration Paths
+
+### Path A: Migrate to Convenience Methods (Recommended for Simple Operations)
+
+For straightforward operations without complex configuration, migrate directly to convenience methods:
+
+#### Before (ActionOptions)
+```java
+// Click action - verbose with ActionOptions
+ActionOptions clickOpt = new ActionOptions.Builder()
+    .setAction(ActionType.CLICK)
+    .build();
+ObjectCollection oc = new ObjectCollection.Builder()
+    .withRegions(region)
+    .build();
+action.perform(clickOpt, oc);
+
+// Type action - verbose with ActionOptions
+ActionOptions typeOpt = new ActionOptions.Builder()
+    .setAction(ActionType.TYPE)
+    .build();
+ObjectCollection textOc = new ObjectCollection.Builder()
+    .withStrings("Hello")
+    .build();
+action.perform(typeOpt, textOc);
+```
+
+#### After (Convenience Methods)
+```java
+// Click action - simple
+action.click(region);
+
+// Type action - simple
+action.type("Hello");
+```
+
+This is the simplest migration path and works for 80% of use cases. See [Convenience Methods Documentation](./18-convenience-methods.md) for complete details.
+
+### Path B: Migrate to ActionConfig Classes (For Complex Operations)
+
+Use this path when you need fine-grained control or complex configurations.
 
 ## Migration Steps
 

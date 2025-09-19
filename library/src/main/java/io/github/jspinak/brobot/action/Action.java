@@ -22,6 +22,7 @@ import io.github.jspinak.brobot.action.internal.execution.ActionExecution;
 import io.github.jspinak.brobot.action.internal.execution.BasicActionRegistry;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
 import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
@@ -344,6 +345,258 @@ public class Action {
         TypeOptions typeOptions = new TypeOptions.Builder().build();
         return perform(typeOptions, objectCollections);
     }
+
+    // ========== NEW CONVENIENCE METHODS ==========
+
+    /**
+     * Clicks on the specified region.
+     *
+     * <p>This is a convenience method equivalent to: {@code
+     * click(ObjectCollection.builder().withRegions(region).build())}
+     *
+     * <p>For complex operations involving multiple objects or conditions, use the ObjectCollection
+     * variant or ConditionalActionChain.
+     *
+     * @param region The region to click
+     * @return ActionResult containing the operation outcome
+     * @see #click(ObjectCollection) for the canonical implementation
+     * @since 2.1
+     */
+    public ActionResult click(Region region) {
+        return click(new ObjectCollection.Builder().withRegions(region).build());
+    }
+
+    /**
+     * Clicks on the specified location.
+     *
+     * <p>This is a convenience method that clicks at a specific screen coordinate. The location is
+     * automatically wrapped in an ObjectCollection for processing.
+     *
+     * @param location The location to click
+     * @return ActionResult containing the operation outcome
+     * @see #click(ObjectCollection) for the canonical implementation
+     * @since 2.1
+     */
+    public ActionResult click(Location location) {
+        return click(new ObjectCollection.Builder().withLocations(location).build());
+    }
+
+    /**
+     * Clicks on the region of the specified match.
+     *
+     * <p>This convenience method extracts the region from a match result and clicks on it. Useful
+     * for clicking on previously found elements without manual region extraction.
+     *
+     * @param match The match whose region should be clicked
+     * @return ActionResult containing the operation outcome
+     * @see #click(ObjectCollection) for the canonical implementation
+     * @since 2.1
+     */
+    public ActionResult click(Match match) {
+        return click(new ObjectCollection.Builder().withRegions(match.getRegion()).build());
+    }
+
+    /**
+     * Types the specified text string.
+     *
+     * <p>This is a convenience method for typing plain text without needing to wrap it in an
+     * ObjectCollection. The text is typed at the current cursor position or active input field.
+     *
+     * @param text The text to type
+     * @return ActionResult containing the operation outcome
+     * @see #type(ObjectCollection) for the canonical implementation
+     * @since 2.1
+     */
+    public ActionResult type(String text) {
+        return type(new ObjectCollection.Builder().withStrings(text).build());
+    }
+
+    /**
+     * Finds the specified pattern on screen.
+     *
+     * <p>This convenience method searches for a single pattern without needing to wrap it in a
+     * StateImage and ObjectCollection. Uses default find options.
+     *
+     * @param pattern The pattern to search for
+     * @return ActionResult containing found matches
+     * @see #find(ObjectCollection) for the canonical implementation
+     * @since 2.1
+     */
+    public ActionResult find(Pattern pattern) {
+        StateImage stateImage = new StateImage.Builder().addPattern(pattern).build();
+        return find(new ObjectCollection.Builder().withImages(stateImage).build());
+    }
+
+    /**
+     * Moves the mouse to the specified location.
+     *
+     * <p>This convenience method moves the mouse cursor to a specific screen coordinate. The
+     * movement uses default speed and path settings.
+     *
+     * @param location The location to move to
+     * @return ActionResult containing the operation outcome
+     * @see #perform(ActionConfig, ObjectCollection...) for the canonical implementation
+     * @since 2.1
+     */
+    public ActionResult move(Location location) {
+        MouseMoveOptions moveOptions = new MouseMoveOptions.Builder().build();
+        return perform(moveOptions, new ObjectCollection.Builder().withLocations(location).build());
+    }
+
+    /**
+     * Moves the mouse to the center of the specified region.
+     *
+     * <p>This convenience method calculates the center point of a region and moves the mouse cursor
+     * there. Useful for hovering over UI elements.
+     *
+     * @param region The region to move to (cursor moves to center)
+     * @return ActionResult containing the operation outcome
+     * @see #perform(ActionConfig, ObjectCollection...) for the canonical implementation
+     * @since 2.1
+     */
+    public ActionResult move(Region region) {
+        MouseMoveOptions moveOptions = new MouseMoveOptions.Builder().build();
+        return perform(moveOptions, new ObjectCollection.Builder().withRegions(region).build());
+    }
+
+    /**
+     * Moves the mouse to the center of the specified match.
+     *
+     * <p>This convenience method extracts the region from a match and moves the mouse to its
+     * center. Useful for hovering over previously found elements.
+     *
+     * @param match The match whose center should be moved to
+     * @return ActionResult containing the operation outcome
+     * @see #perform(ActionConfig, ObjectCollection...) for the canonical implementation
+     * @since 2.1
+     */
+    public ActionResult move(Match match) {
+        return move(match.getRegion());
+    }
+
+    /**
+     * Highlights the specified region on screen.
+     *
+     * <p>This convenience method draws a visual highlight around a region for debugging or user
+     * feedback purposes. The highlight duration uses default settings.
+     *
+     * @param region The region to highlight
+     * @return ActionResult containing the operation outcome
+     * @see #perform(ActionConfig, ObjectCollection...) for the canonical implementation
+     * @since 2.1
+     */
+    public ActionResult highlight(Region region) {
+        HighlightOptions highlightOptions = new HighlightOptions.Builder().build();
+        return perform(
+                highlightOptions, new ObjectCollection.Builder().withRegions(region).build());
+    }
+
+    /**
+     * Highlights the region of the specified match.
+     *
+     * <p>This convenience method highlights a previously found match, useful for visual debugging
+     * of pattern matching results.
+     *
+     * @param match The match to highlight
+     * @return ActionResult containing the operation outcome
+     * @see #perform(ActionConfig, ObjectCollection...) for the canonical implementation
+     * @since 2.1
+     */
+    public ActionResult highlight(Match match) {
+        return highlight(match.getRegion());
+    }
+
+    /**
+     * Drags from one location to another.
+     *
+     * <p>This convenience method performs a drag operation between two screen coordinates. Uses
+     * default mouse button (left) and drag speed settings.
+     *
+     * @param from The starting location
+     * @param to The ending location
+     * @return ActionResult containing the operation outcome
+     * @see #perform(ActionConfig, ObjectCollection...) for the canonical implementation
+     * @since 2.1
+     */
+    public ActionResult drag(Location from, Location to) {
+        DragOptions dragOptions = new DragOptions.Builder().build();
+        ObjectCollection fromCollection =
+                new ObjectCollection.Builder().withLocations(from).build();
+        ObjectCollection toCollection = new ObjectCollection.Builder().withLocations(to).build();
+        return perform(dragOptions, fromCollection, toCollection);
+    }
+
+    /**
+     * Drags from one region's center to another region's center.
+     *
+     * <p>This convenience method performs a drag operation between the centers of two regions.
+     * Useful for dragging UI elements from one area to another.
+     *
+     * @param from The starting region (drag starts from center)
+     * @param to The ending region (drag ends at center)
+     * @return ActionResult containing the operation outcome
+     * @see #perform(ActionConfig, ObjectCollection...) for the canonical implementation
+     * @since 2.1
+     */
+    public ActionResult drag(Region from, Region to) {
+        DragOptions dragOptions = new DragOptions.Builder().build();
+        ObjectCollection fromCollection = new ObjectCollection.Builder().withRegions(from).build();
+        ObjectCollection toCollection = new ObjectCollection.Builder().withRegions(to).build();
+        return perform(dragOptions, fromCollection, toCollection);
+    }
+
+    /**
+     * Scrolls the mouse wheel at the current cursor position.
+     *
+     * <p>This convenience method performs mouse wheel scrolling. Positive values scroll down,
+     * negative values scroll up. The amount represents the number of "notches" to scroll.
+     *
+     * @param direction The scroll direction (UP or DOWN)
+     * @param steps The number of scroll steps
+     * @return ActionResult containing the operation outcome
+     * @see #perform(ActionConfig, ObjectCollection...) for the canonical implementation
+     * @since 2.1
+     */
+    public ActionResult scroll(ScrollOptions.Direction direction, int steps) {
+        ScrollOptions scrollOptions =
+                new ScrollOptions.Builder().setDirection(direction).setScrollSteps(steps).build();
+        return perform(scrollOptions, new ObjectCollection.Builder().build());
+    }
+
+    /**
+     * Waits for the specified image to vanish from the screen.
+     *
+     * <p>This convenience method repeatedly checks if an image is no longer visible. Uses default
+     * timeout and check interval settings.
+     *
+     * @param stateImage The image to wait for vanishing
+     * @return ActionResult indicating success when image vanishes
+     * @see #perform(ActionConfig, ObjectCollection...) for the canonical implementation
+     * @since 2.1
+     */
+    public ActionResult vanish(StateImage stateImage) {
+        VanishOptions vanishOptions = new VanishOptions.Builder().build();
+        return perform(
+                vanishOptions, new ObjectCollection.Builder().withImages(stateImage).build());
+    }
+
+    /**
+     * Waits for the specified pattern to vanish from the screen.
+     *
+     * <p>This convenience method checks if a pattern is no longer visible. The pattern is
+     * automatically wrapped in a StateImage for processing.
+     *
+     * @param pattern The pattern to wait for vanishing
+     * @return ActionResult indicating success when pattern vanishes
+     * @see #perform(ActionConfig, ObjectCollection...) for the canonical implementation
+     * @since 2.1
+     */
+    public ActionResult vanish(Pattern pattern) {
+        StateImage stateImage = new StateImage.Builder().addPattern(pattern).build();
+        return vanish(stateImage);
+    }
+
+    // ========== END NEW CONVENIENCE METHODS ==========
 
     /**
      * Performs an action on state images with specified configuration.
