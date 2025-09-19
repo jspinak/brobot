@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionInterface;
@@ -16,6 +17,7 @@ import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateLocation;
 import io.github.jspinak.brobot.model.state.StateRegion;
+import io.github.jspinak.brobot.util.coordinates.CoordinateScaler;
 
 /**
  * Performs click operations on GUI elements without embedded Find operations.
@@ -47,6 +49,9 @@ import io.github.jspinak.brobot.model.state.StateRegion;
 public class Click implements ActionInterface {
 
     private static final Logger logger = Logger.getLogger(Click.class.getName());
+
+    @Autowired(required = false)
+    private CoordinateScaler coordinateScaler;
 
     @Override
     public Type getActionType() {
@@ -158,12 +163,23 @@ public class Click implements ActionInterface {
             logger.info(
                     "GraphicsEnvironment.isHeadless(): "
                             + java.awt.GraphicsEnvironment.isHeadless());
-            logger.info("Location to click: " + location);
+            logger.info("Location to click (capture coords): " + location);
+
+            // Scale coordinates if needed (from physical capture to logical SikuliX)
+            org.sikuli.script.Location sikuliLoc;
+            if (coordinateScaler != null && coordinateScaler.isScalingNeeded()) {
+                sikuliLoc = coordinateScaler.scaleLocationToLogical(location);
+                logger.info("Scaled to logical coords: " + sikuliLoc);
+                double[] factors = coordinateScaler.getScaleFactors();
+                logger.info(String.format("Scale factors: X=%.3f, Y=%.3f", factors[0], factors[1]));
+            } else {
+                sikuliLoc = location.sikuli();
+                logger.info("No scaling needed, using original coords");
+            }
             logger.info("========================");
 
             // Use SikuliX directly - it handles Robot internally
             // Following Brobot 1.0.7 pattern of simplicity
-            org.sikuli.script.Location sikuliLoc = location.sikuli();
             sikuliLoc.click();
 
             // Small pause after click

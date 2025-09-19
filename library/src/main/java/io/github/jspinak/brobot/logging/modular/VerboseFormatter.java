@@ -78,7 +78,7 @@ public class VerboseFormatter implements ActionLogFormatter {
                 .append("\n");
         formatted
                 .append("Status:     ")
-                .append(context.isSuccess() ? "SUCCESS ✓" : "FAILED ✗")
+                .append(context.isSuccess() ? "SUCCESS [OK]" : "FAILED [X]")
                 .append("\n");
 
         if (context.getExecutionDuration() != null && !context.getExecutionDuration().isZero()) {

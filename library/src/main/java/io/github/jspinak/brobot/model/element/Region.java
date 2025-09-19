@@ -15,6 +15,7 @@ import io.github.jspinak.brobot.capture.ScreenDimensions;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateRegion;
+import io.github.jspinak.brobot.util.coordinates.CoordinateScaler;
 import io.github.jspinak.brobot.util.region.RegionUtils;
 
 import lombok.Getter;
@@ -153,6 +154,44 @@ public class Region implements Comparable<Region> {
 
         try {
             return new org.sikuli.script.Region(x, y, w, h);
+        } catch (org.sikuli.script.SikuliXception e) {
+            // Handle headless environment gracefully
+            // This happens when tests run in CI/CD without display
+            return null;
+        }
+    }
+
+    /**
+     * Converts this Region to a SikuliX Region with coordinate scaling.
+     *
+     * <p>When captures are done at physical resolution (e.g., 1920x1080 with FFmpeg) but SikuliX
+     * operations work in logical resolution (e.g., 1536x864 with 125% DPI), regions need to be
+     * scaled appropriately.
+     *
+     * @param coordinateScaler The scaler to use for converting coordinates
+     * @return A SikuliX Region with scaled coordinates, or null if SikuliX operations should be
+     *     skipped or an error occurs
+     * @since 1.1
+     */
+    @JsonIgnore
+    public org.sikuli.script.Region sikuliScaled(CoordinateScaler coordinateScaler) {
+        ExecutionEnvironment env = ExecutionEnvironment.getInstance();
+
+        if (env.shouldSkipSikuliX()) {
+            // Return null when SikuliX operations should be skipped
+            return null;
+        }
+
+        try {
+            if (coordinateScaler != null && coordinateScaler.isScalingNeeded()) {
+                // Scale the region from capture coordinates to logical coordinates
+                Region scaledRegion = coordinateScaler.scaleRegionToLogical(this);
+                return new org.sikuli.script.Region(
+                        scaledRegion.x(), scaledRegion.y(), scaledRegion.w(), scaledRegion.h());
+            } else {
+                // No scaling needed, return regular sikuli region
+                return new org.sikuli.script.Region(x, y, w, h);
+            }
         } catch (org.sikuli.script.SikuliXception e) {
             // Handle headless environment gracefully
             // This happens when tests run in CI/CD without display

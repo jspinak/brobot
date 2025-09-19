@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionInterface;
@@ -12,6 +13,7 @@ import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateRegion;
+import io.github.jspinak.brobot.util.coordinates.CoordinateScaler;
 
 /**
  * Highlights regions on screen without embedded Find operations.
@@ -42,6 +44,9 @@ import io.github.jspinak.brobot.model.state.StateRegion;
 public class Highlight implements ActionInterface {
 
     private static final Logger logger = Logger.getLogger(Highlight.class.getName());
+
+    @Autowired(required = false)
+    private CoordinateScaler coordinateScaler;
 
     @Override
     public Type getActionType() {
@@ -102,8 +107,20 @@ public class Highlight implements ActionInterface {
     /** Performs the actual highlight operation on the specified region. */
     private boolean highlightRegion(Region region) {
         try {
-            // Get Sikuli region and highlight
-            org.sikuli.script.Region sikuliRegion = region.sikuli();
+            // Get scaled Sikuli region if coordinate scaling is needed
+            org.sikuli.script.Region sikuliRegion;
+            if (coordinateScaler != null && coordinateScaler.isScalingNeeded()) {
+                sikuliRegion = region.sikuliScaled(coordinateScaler);
+                logger.fine("Highlighting scaled region (from capture to logical coords)");
+            } else {
+                sikuliRegion = region.sikuli();
+                logger.fine("Highlighting region without scaling");
+            }
+
+            if (sikuliRegion == null) {
+                logger.warning("Cannot highlight - SikuliX region is null (headless mode?)");
+                return false;
+            }
 
             // Perform the highlight with default duration
             sikuliRegion.highlight(2.0);
