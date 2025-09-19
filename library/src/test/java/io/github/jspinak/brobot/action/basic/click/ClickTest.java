@@ -6,14 +6,18 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.core.services.MouseController;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateLocation;
@@ -27,7 +31,10 @@ import io.github.jspinak.brobot.test.DisabledInCI;
  */
 @DisplayName("Click Action Tests")
 @DisabledInCI
+@ExtendWith(MockitoExtension.class)
 public class ClickTest extends BrobotTestBase {
+
+    @Mock private MouseController mouseController;
 
     private Click click;
     private ActionResult actionResult;

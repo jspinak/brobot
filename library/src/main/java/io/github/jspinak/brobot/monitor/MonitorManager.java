@@ -73,26 +73,8 @@ public class MonitorManager {
         }
 
         log.debug("[MonitorManager] Lazy initialization of monitors...");
-        // Check if we should preserve the headless setting
-        String preserveHeadless = System.getProperty("brobot.preserve.headless.setting");
-        if (!"true".equals(preserveHeadless)) {
-            // For GUI automation, ensure headless is false before checking
-            String currentHeadless = System.getProperty("java.awt.headless");
-            if ("true".equals(currentHeadless)) {
-                System.setProperty("java.awt.headless", "false");
-                log.info(
-                        "Reset java.awt.headless from 'true' to 'false' for GUI automation in"
-                                + " MonitorManager");
-            }
-        }
-
-        // Now check if headless mode is still forced
-        String headlessProperty = System.getProperty("java.awt.headless");
-        boolean forcedHeadless = "true".equalsIgnoreCase(headlessProperty);
-
-        if (forcedHeadless) {
-            log.info("Headless mode forced via java.awt.headless=true property");
-        }
+        // NO headless property manipulation - let SikuliX handle it
+        // Following Brobot 1.0.7 pattern: don't try to be clever about environment
 
         // IMPORTANT: This line triggers GraphicsEnvironment initialization
         // If called too early (during Spring startup), it may incorrectly detect headless
@@ -109,22 +91,9 @@ public class MonitorManager {
             return;
         }
 
-        // Don't rely on GraphicsEnvironment.isHeadless() as it's unreliable on Windows
-        // Gradle often sets java.awt.headless=true even when displays are available
-
-        // Check if we're on Windows - if so, assume we have displays
-        String os = System.getProperty("os.name", "").toLowerCase();
-        boolean isWindows = os.contains("windows");
-
-        if (isWindows) {
-            log.info(
-                    "Windows detected - assuming display is available regardless of"
-                            + " GraphicsEnvironment");
-            headlessMode = false;
-        } else {
-            // For other platforms, we'll try to detect
-            headlessMode = false; // Start optimistic
-        }
+        // Simple approach: try to get monitors, if it fails we're headless
+        // Don't try to detect or manipulate headless state
+        headlessMode = false; // Assume we have displays until proven otherwise
 
         try {
             GraphicsDevice[] devices = ge.getScreenDevices();

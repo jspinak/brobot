@@ -16,9 +16,11 @@ import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 
@@ -35,6 +37,8 @@ import io.github.jspinak.brobot.test.BrobotTestBase;
 @TestPropertySource(properties = {"brobot.core.mock=true", "brobot.core.headless=true"})
 public class SceneCreatorTest extends BrobotTestBase {
 
+    @Autowired private BrobotProperties brobotProperties;
+
     private SceneCreator sceneCreator;
     // Screenshot path is now handled via BrobotProperties
 
@@ -44,7 +48,7 @@ public class SceneCreatorTest extends BrobotTestBase {
     @Override
     public void setupTest() {
         super.setupTest();
-        sceneCreator = new SceneCreator();
+        sceneCreator = new SceneCreator(brobotProperties);
 
         // Screenshot path is now configured via BrobotProperties
     }

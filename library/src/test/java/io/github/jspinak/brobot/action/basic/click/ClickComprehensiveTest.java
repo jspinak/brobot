@@ -9,13 +9,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.core.services.MouseController;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Positions;
 import io.github.jspinak.brobot.model.element.Region;
@@ -33,7 +37,10 @@ import io.github.jspinak.brobot.test.DisabledInCI;
  */
 @DisplayName("Comprehensive Click Action Tests")
 @DisabledInCI
+@ExtendWith(MockitoExtension.class)
 public class ClickComprehensiveTest extends BrobotTestBase {
+
+    @Mock private MouseController mouseController;
 
     private Click click;
     private ActionResult actionResult;
@@ -42,7 +49,7 @@ public class ClickComprehensiveTest extends BrobotTestBase {
     @Override
     public void setupTest() {
         super.setupTest();
-        // Use real Click class instead of mock to test actual behavior
+        // Create Click with mocked MouseController
         click = new Click();
 
         actionResult = new ActionResult();

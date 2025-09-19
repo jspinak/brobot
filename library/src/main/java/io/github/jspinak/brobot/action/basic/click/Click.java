@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionInterface;
@@ -49,14 +47,6 @@ import io.github.jspinak.brobot.model.state.StateRegion;
 public class Click implements ActionInterface {
 
     private static final Logger logger = Logger.getLogger(Click.class.getName());
-
-    private final io.github.jspinak.brobot.core.services.MouseController mouseController;
-
-    @Autowired
-    public Click(
-            @Qualifier("robotMouseController") io.github.jspinak.brobot.core.services.MouseController mouseController) {
-        this.mouseController = mouseController;
-    }
 
     @Override
     public Type getActionType() {
@@ -162,29 +152,10 @@ public class Click implements ActionInterface {
                 return true;
             }
 
-            // Use MouseController directly instead of SikuliX
-            int x = location.getCalculatedX();
-            int y = location.getCalculatedY();
-
-            // Check if mouse controller is available
-            if (!mouseController.isAvailable()) {
-                logger.warning("MouseController not available for clicking");
-                // Fallback to SikuliX if needed
-                org.sikuli.script.Location sikuliLoc = location.sikuli();
-                sikuliLoc.click();
-            } else {
-                // Use our MouseController (RobotMouseController)
-                boolean success =
-                        mouseController.click(
-                                x,
-                                y,
-                                io.github.jspinak.brobot.core.services.MouseController.MouseButton
-                                        .LEFT);
-                if (!success) {
-                    logger.warning("MouseController click failed at " + x + ", " + y);
-                    return false;
-                }
-            }
+            // Use SikuliX directly - it handles Robot creation lazily
+            // This avoids early GraphicsEnvironment initialization issues
+            org.sikuli.script.Location sikuliLoc = location.sikuli();
+            sikuliLoc.click();
 
             // Small pause after click
             Thread.sleep(100);
