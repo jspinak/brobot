@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -22,6 +23,7 @@ import io.github.jspinak.brobot.test.BrobotTestBase;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ActionLoggingService Tests")
+@Timeout(value = 10, unit = java.util.concurrent.TimeUnit.SECONDS)
 public class ActionLoggingServiceTest extends BrobotTestBase {
 
     @Mock private ActionLogFormatter quietFormatter;

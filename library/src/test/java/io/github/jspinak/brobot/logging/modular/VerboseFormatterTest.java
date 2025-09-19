@@ -81,7 +81,7 @@ public class VerboseFormatterTest extends BrobotTestBase {
         assertTrue(result.contains("=== ACTION EXECUTION ==="));
         assertTrue(result.contains("Type:       CLICK"));
         assertTrue(result.contains("Primary:    Dashboard.RefreshButton"));
-        assertTrue(result.contains("Status:     SUCCESS ✓"));
+        assertTrue(result.contains("Status:     SUCCESS [OK]"));
         assertTrue(result.contains("Duration:   500ms"));
 
         // Verify timestamp format
@@ -110,7 +110,7 @@ public class VerboseFormatterTest extends BrobotTestBase {
 
         // Assert
         assertNotNull(result);
-        assertTrue(result.contains("Status:     FAILED ✗"));
+        assertTrue(result.contains("Status:     FAILED [X]"));
         assertTrue(result.contains("Exception:  RuntimeException"));
         assertTrue(result.contains("Message:    Pattern not found after 3 attempts"));
     }
