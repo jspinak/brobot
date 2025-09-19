@@ -41,7 +41,7 @@ public class MouseWheelScrollerTest extends BrobotTestBase {
     @Override
     public void setupTest() {
         super.setupTest();
-        mouseWheelScroller = new MouseWheelScroller(brobotProperties);
+        mouseWheelScroller = new MouseWheelScroller(brobotProperties, null);
         originalMockSetting = true /* mock mode enabled in tests */;
     }
 

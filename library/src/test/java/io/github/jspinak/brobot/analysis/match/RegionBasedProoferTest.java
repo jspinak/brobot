@@ -35,7 +35,7 @@ public class RegionBasedProoferTest extends BrobotTestBase {
     @Override
     public void setupTest() {
         super.setupTest();
-        regionBasedProofer = new RegionBasedProofer(searchRegionResolver);
+        regionBasedProofer = new RegionBasedProofer(searchRegionResolver, null);
     }
 
     @Nested
@@ -45,7 +45,7 @@ public class RegionBasedProoferTest extends BrobotTestBase {
         @Test
         @DisplayName("Should create proofer with search region resolver")
         void shouldCreateProoferWithResolver() {
-            RegionBasedProofer proofer = new RegionBasedProofer(searchRegionResolver);
+            RegionBasedProofer proofer = new RegionBasedProofer(searchRegionResolver, null);
             assertNotNull(proofer);
         }
     }

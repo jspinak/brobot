@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
 
 import lombok.extern.slf4j.Slf4j;
@@ -159,6 +160,25 @@ public class Find implements ActionInterface {
                                     .getStateObjectData()
                                     .getStateObjectName()
                             : "NULL");
+        }
+
+        // Populate ActionMetrics if not already set
+        if (matches.getActionMetrics() == null) {
+            ActionResult.ActionMetrics metrics = new ActionResult.ActionMetrics();
+            metrics.setMatchCount(matches.size());
+            metrics.setExecutionTimeMs(0); // This would need proper timing
+
+            // Set best match confidence if matches exist
+            if (!matches.getMatchList().isEmpty()) {
+                double bestScore =
+                        matches.getMatchList().stream()
+                                .mapToDouble(Match::getScore)
+                                .max()
+                                .orElse(0.0);
+                metrics.setBestMatchConfidence(bestScore);
+            }
+
+            matches.setActionMetrics(metrics);
         }
     }
 }
