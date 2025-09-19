@@ -42,6 +42,13 @@ public class MyTest extends BrobotTestBase {
 }
 ```
 
+**Note on Headless Detection**: Brobot no longer auto-detects headless environments. For CI/CD pipelines, explicitly set:
+```properties
+# application-ci.properties
+brobot.headless=true  # Explicitly declare headless environment
+brobot.mock=true      # Enable mock mode for testing
+```
+
 #### 2. Focus on Logic, Not Physical Operations
 Good CI/CD tests should focus on:
 - **Configuration validation**: Testing builder patterns and options
@@ -90,14 +97,19 @@ public void testWithMocking() {
 
 **Conditional Tests** (Platform-specific):
 ```java
+@Autowired
+private HeadlessDetector headlessDetector;
+
 @Test
 public void testPlatformSpecific() {
     assumeFalse(System.getenv("CI") != null, "Skipping in CI");
-    assumeFalse(GraphicsEnvironment.isHeadless(), "Skipping in headless");
-    
-    // Platform-specific test
+    assumeFalse(headlessDetector.isHeadless(), "Skipping in configured headless mode");
+
+    // Platform-specific test that requires display
 }
 ```
+
+**Important**: Use `HeadlessDetector.isHeadless()` instead of `GraphicsEnvironment.isHeadless()` for consistent behavior. The HeadlessDetector uses the configured `brobot.headless` property value.
 
 ### Remaining Disabled Tests to Address
 

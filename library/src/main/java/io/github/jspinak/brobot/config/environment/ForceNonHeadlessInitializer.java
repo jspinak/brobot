@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.config.environment;
 
 import java.awt.*;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
 /**
  * Forces non-headless mode by intercepting GraphicsEnvironment initialization. This class MUST be
@@ -19,7 +18,7 @@ public class ForceNonHeadlessInitializer {
 
     private static void forceNonHeadlessMode() {
         try {
-            // 1. Set the property first
+            // 1. Set the property first - MUST be done before any AWT class is loaded
             String currentHeadless = System.getProperty("java.awt.headless");
             System.out.println(
                     "[ForceNonHeadlessInitializer] Current java.awt.headless = " + currentHeadless);
@@ -28,87 +27,130 @@ public class ForceNonHeadlessInitializer {
             System.setProperty("java.awt.headless", "false");
             System.out.println("[ForceNonHeadlessInitializer] Set java.awt.headless = false");
 
-            // 2. Try to override GraphicsEnvironment if it's already initialized
+            // 2. Check if GraphicsEnvironment is already initialized
+            boolean alreadyHeadless = false;
             try {
-                Class<?> geClass = Class.forName("java.awt.GraphicsEnvironment");
+                // This will load GraphicsEnvironment if not already loaded
+                alreadyHeadless = GraphicsEnvironment.isHeadless();
 
-                // Check if it's already initialized as headless
-                Method isHeadlessMethod = geClass.getMethod("isHeadless");
-                boolean currentlyHeadless = (Boolean) isHeadlessMethod.invoke(null);
-
-                if (currentlyHeadless) {
+                if (alreadyHeadless) {
                     System.out.println(
-                            "[ForceNonHeadlessInitializer] GraphicsEnvironment is headless,"
-                                    + " attempting to override...");
+                            "[ForceNonHeadlessInitializer] WARNING: GraphicsEnvironment is already"
+                                    + " initialized as headless");
+                    System.out.println(
+                            "[ForceNonHeadlessInitializer] Due to Java module restrictions, we"
+                                    + " cannot override this at runtime");
+                    System.out.println(
+                            "[ForceNonHeadlessInitializer] SOLUTION: You MUST add"
+                                    + " -Djava.awt.headless=false to JVM arguments");
 
-                    // Try to access and modify the internal headless field
-                    Field[] fields = geClass.getDeclaredFields();
-                    for (Field field : fields) {
-                        if (field.getName().contains("headless")
-                                || field.getName().contains("Headless")) {
-                            field.setAccessible(true);
-                            if (field.getType() == boolean.class
-                                    || field.getType() == Boolean.class) {
-                                field.set(null, false);
-                                System.out.println(
-                                        "[ForceNonHeadlessInitializer] Reset field: "
-                                                + field.getName()
-                                                + " to false");
-                            }
-                        }
-                    }
+                    // Try reflection with explicit module opening (won't work without --add-opens)
+                    attemptReflectionOverride();
 
-                    // Try to force re-initialization
-                    try {
-                        Method getLocalGE =
-                                geClass.getDeclaredMethod("getLocalGraphicsEnvironment");
-                        getLocalGE.setAccessible(true);
-                        getLocalGE.invoke(null);
-                    } catch (Exception e) {
-                        // Expected if method doesn't exist
-                    }
-
-                    forcedNonHeadless = true;
                 } else {
                     System.out.println(
                             "[ForceNonHeadlessInitializer] GraphicsEnvironment is already"
-                                    + " non-headless");
+                                    + " non-headless - good!");
                 }
 
-            } catch (ClassNotFoundException e) {
-                System.out.println(
-                        "[ForceNonHeadlessInitializer] GraphicsEnvironment not yet loaded - good"
-                                + " timing!");
+            } catch (HeadlessException e) {
+                System.err.println(
+                        "[ForceNonHeadlessInitializer] HeadlessException when checking"
+                                + " GraphicsEnvironment");
+                alreadyHeadless = true;
             }
 
-            // 3. Set additional properties that might help
+            // 3. Set additional properties that might help future initializations
             System.setProperty("java.awt.headless", "false");
-            System.setProperty("awt.toolkit", "sun.awt.windows.WToolkit"); // Force Windows toolkit
 
-            // 4. Verify the setting took effect
-            boolean isHeadless = GraphicsEnvironment.isHeadless();
-            System.out.println(
-                    "[ForceNonHeadlessInitializer] Final GraphicsEnvironment.isHeadless() = "
-                            + isHeadless);
-
-            if (!isHeadless) {
-                System.out.println(
-                        "[ForceNonHeadlessInitializer] ✓ Successfully configured non-headless"
-                                + " mode");
+            // Detect OS and set appropriate toolkit
+            String os = System.getProperty("os.name", "").toLowerCase();
+            if (os.contains("windows")) {
+                System.setProperty("awt.toolkit", "sun.awt.windows.WToolkit");
+            } else if (os.contains("mac")) {
+                System.setProperty("awt.toolkit", "sun.lwawt.macosx.LWCToolkit");
             } else {
+                // Linux/Unix
+                System.setProperty("awt.toolkit", "sun.awt.X11.XToolkit");
+            }
+
+            // 4. Final verification
+            if (alreadyHeadless) {
                 System.err.println(
-                        "[ForceNonHeadlessInitializer] ✗ Failed to configure non-headless mode");
+                        "[ForceNonHeadlessInitializer]"
+                                + " =============================================");
                 System.err.println(
-                        "[ForceNonHeadlessInitializer] Add -Djava.awt.headless=false to JVM"
-                                + " arguments or gradle.properties");
+                        "[ForceNonHeadlessInitializer] CRITICAL: GraphicsEnvironment is HEADLESS");
+                System.err.println("[ForceNonHeadlessInitializer] ");
+                System.err.println(
+                        "[ForceNonHeadlessInitializer] To fix this, use ONE of these solutions:");
+                System.err.println("[ForceNonHeadlessInitializer] ");
+                System.err.println("[ForceNonHeadlessInitializer] 1. Add JVM argument:");
+                System.err.println("[ForceNonHeadlessInitializer]    -Djava.awt.headless=false");
+                System.err.println("[ForceNonHeadlessInitializer] ");
+                System.err.println(
+                        "[ForceNonHeadlessInitializer] 2. With module system (Java 9+), also add:");
+                System.err.println(
+                        "[ForceNonHeadlessInitializer]    --add-opens"
+                                + " java.desktop/java.awt=ALL-UNNAMED");
+                System.err.println("[ForceNonHeadlessInitializer] ");
+                System.err.println("[ForceNonHeadlessInitializer] 3. In gradle.properties, add:");
+                System.err.println(
+                        "[ForceNonHeadlessInitializer]   "
+                                + " org.gradle.jvmargs=-Djava.awt.headless=false");
+                System.err.println(
+                        "[ForceNonHeadlessInitializer]"
+                                + " =============================================");
+            } else {
+                System.out.println(
+                        "[ForceNonHeadlessInitializer] ✓ GraphicsEnvironment is non-headless");
             }
 
             initialized = true;
 
         } catch (Exception e) {
-            System.err.println(
-                    "[ForceNonHeadlessInitializer] Error forcing non-headless mode: " + e);
+            System.err.println("[ForceNonHeadlessInitializer] Unexpected error: " + e);
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Attempts to override headless via reflection. This will only work if --add-opens
+     * java.desktop/java.awt=ALL-UNNAMED is set.
+     */
+    private static void attemptReflectionOverride() {
+        try {
+            Class<?> geClass = GraphicsEnvironment.class;
+
+            // Try to find and modify the headless field
+            Field[] fields = geClass.getDeclaredFields();
+            for (Field field : fields) {
+                if (field.getName().equals("headless")) {
+                    try {
+                        field.setAccessible(true);
+                        field.set(null, Boolean.FALSE);
+                        System.out.println(
+                                "[ForceNonHeadlessInitializer] Successfully overrode headless field"
+                                        + " via reflection");
+                        forcedNonHeadless = true;
+                        return;
+                    } catch (Exception e) {
+                        System.out.println(
+                                "[ForceNonHeadlessInitializer] Cannot override due to module"
+                                        + " restrictions: "
+                                        + e.getMessage());
+                        System.out.println(
+                                "[ForceNonHeadlessInitializer] To enable reflection, add JVM"
+                                        + " argument:");
+                        System.out.println(
+                                "[ForceNonHeadlessInitializer]   --add-opens"
+                                        + " java.desktop/java.awt=ALL-UNNAMED");
+                        return;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Silently fail - reflection not critical
         }
     }
 

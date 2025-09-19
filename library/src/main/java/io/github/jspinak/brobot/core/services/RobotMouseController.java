@@ -149,8 +149,9 @@ public class RobotMouseController implements MouseController {
     @Override
     public synchronized boolean click(int x, int y, MouseButton button) {
         if (robot == null) {
-            ConsoleReporter.println("[RobotMouseController] Robot not available in headless mode");
-            return false;
+            ConsoleReporter.println(
+                    "[RobotMouseController] Robot not available, attempting fallback click");
+            return RobotForcedInitializer.performFallbackClick(x, y);
         }
         try {
             // Move to position first
