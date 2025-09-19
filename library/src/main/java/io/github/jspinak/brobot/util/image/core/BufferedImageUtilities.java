@@ -159,12 +159,9 @@ public class BufferedImageUtilities {
         boolean shouldLog = !loggedImages.contains(path);
         if (shouldLog) {
             loggedImages.add(path);
-            File file = new File(path);
-            if (!file.isAbsolute()) {
-                file = new File(System.getProperty("user.dir"), path);
-            }
-            String status = file.exists() ? "found" : "not found";
-            ConsoleReporter.println("[IMAGE] " + path + " (" + status + ")");
+            // Don't log status here - let the actual loading code report success/failure
+            // The "not found" message is misleading when SikuliX can find it in ImagePath
+            ConsoleReporter.println("[IMAGE] " + path);
         }
 
         // Try SmartImageLoader first if available
