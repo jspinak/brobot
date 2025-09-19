@@ -162,23 +162,23 @@ public class Find implements ActionInterface {
                             : "NULL");
         }
 
-        // Populate ActionMetrics if not already set
-        if (matches.getActionMetrics() == null) {
-            ActionResult.ActionMetrics metrics = new ActionResult.ActionMetrics();
-            metrics.setMatchCount(matches.size());
-            metrics.setExecutionTimeMs(0); // This would need proper timing
-
-            // Set best match confidence if matches exist
-            if (!matches.getMatchList().isEmpty()) {
-                double bestScore =
-                        matches.getMatchList().stream()
-                                .mapToDouble(Match::getScore)
-                                .max()
-                                .orElse(0.0);
-                metrics.setBestMatchConfidence(bestScore);
-            }
-
+        // Update ActionMetrics with match information
+        ActionResult.ActionMetrics metrics = matches.getActionMetrics();
+        if (metrics == null) {
+            metrics = new ActionResult.ActionMetrics();
             matches.setActionMetrics(metrics);
+        }
+
+        // Always update match count and best score
+        metrics.setMatchCount(matches.size());
+
+        // Set best match confidence if matches exist
+        if (!matches.getMatchList().isEmpty()) {
+            double bestScore =
+                    matches.getMatchList().stream().mapToDouble(Match::getScore).max().orElse(0.0);
+            metrics.setBestMatchConfidence(bestScore);
+        } else {
+            metrics.setBestMatchConfidence(0.0);
         }
     }
 }
