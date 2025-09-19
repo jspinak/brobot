@@ -14,6 +14,17 @@ Brobot's mock mode provides a powerful testing framework that simulates GUI auto
 - **Development** when the target application is unavailable
 - **Testing state transitions** and automation flow logic
 
+### Mock Mode vs Headless Mode
+
+**Important Distinction**:
+- **Mock Mode** (`brobot.mock`): Simulates actions and pattern matching for testing without real screen interaction
+- **Headless Mode** (`brobot.headless`): Indicates no display is available (e.g., server environments, CI/CD)
+
+These are independent settings:
+- You can run mock mode with a display (development testing)
+- You can run mock mode without a display (CI/CD testing)
+- Headless environments typically use mock mode, but mock mode doesn't require headless
+
 ## Core Concepts
 
 ### What Mock Mode Does
@@ -43,12 +54,18 @@ Brobot uses simplified mock configuration properties:
 
 ```properties
 # application.properties
-# Single master switch for mock mode
-brobot.core.mock=true
+# Enable mock mode (simulated actions)
+brobot.mock=true
 
 # Probability of action success (0.0 to 1.0, default 1.0)
 brobot.mock.action.success.probability=0.95
+
+# Headless configuration (if no display available)
+brobot.headless=false  # Set to true for CI/CD environments
+brobot.headless.debug=false  # Enable for headless detection debugging
 ```
+
+**Note**: The `brobot.headless` property must be explicitly set. Auto-detection has been removed due to reliability issues on Windows systems.
 
 #### Programmatic Configuration
 

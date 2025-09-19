@@ -29,7 +29,9 @@ public class MonitorManager {
 
     public MonitorManager(BrobotProperties properties) {
         this.properties = properties;
-        initializeMonitors();
+        // DEFER initialization to avoid triggering GraphicsEnvironment too early
+        // This was causing headless detection issues on Windows
+        // initializeMonitors() will be called lazily when first needed
         if (properties.getMonitor().getOperationMonitorMap() != null) {
             operationMonitorMap.putAll(properties.getMonitor().getOperationMonitorMap());
         }
@@ -64,7 +66,13 @@ public class MonitorManager {
     }
 
     /** Initialize monitor information and cache available monitors */
-    private void initializeMonitors() {
+    private synchronized void initializeMonitors() {
+        // Only initialize once
+        if (!monitorCache.isEmpty()) {
+            return;
+        }
+
+        log.debug("[MonitorManager] Lazy initialization of monitors...");
         // Check if we should preserve the headless setting
         String preserveHeadless = System.getProperty("brobot.preserve.headless.setting");
         if (!"true".equals(preserveHeadless)) {
@@ -86,7 +94,20 @@ public class MonitorManager {
             log.info("Headless mode forced via java.awt.headless=true property");
         }
 
-        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        // IMPORTANT: This line triggers GraphicsEnvironment initialization
+        // If called too early (during Spring startup), it may incorrectly detect headless
+        // That's why we now defer this call until monitors are actually needed
+        GraphicsEnvironment ge = null;
+        try {
+            ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        } catch (HeadlessException e) {
+            log.info("[MonitorManager] Running in headless environment - using default monitor");
+            headlessMode = true;
+            Rectangle bounds = new Rectangle(0, 0, 1920, 1080);
+            MonitorInfo info = new MonitorInfo(0, bounds, "headless-default");
+            monitorCache.put(0, info);
+            return;
+        }
 
         // Don't rely on GraphicsEnvironment.isHeadless() as it's unreliable on Windows
         // Gradle often sets java.awt.headless=true even when displays are available
@@ -264,26 +285,36 @@ public class MonitorManager {
 
     /** Check if monitor index is valid */
     public boolean isValidMonitorIndex(int index) {
-        return index >= 0 && index < getMonitorCount();
+        // Ensure monitors are initialized (lazy initialization)
+        initializeMonitors();
+        return index >= 0 && index < monitorCache.size();
     }
 
     /** Get total number of monitors */
     public int getMonitorCount() {
+        // Ensure monitors are initialized (lazy initialization)
+        initializeMonitors();
         return monitorCache.size();
     }
 
     /** Get the index of the primary monitor */
     public int getPrimaryMonitorIndex() {
+        // Ensure monitors are initialized (lazy initialization)
+        initializeMonitors();
         return primaryMonitorIndex;
     }
 
     /** Get monitor information */
     public MonitorInfo getMonitorInfo(int index) {
+        // Ensure monitors are initialized (lazy initialization)
+        initializeMonitors();
         return monitorCache.get(index);
     }
 
     /** Get all monitor information */
     public List<MonitorInfo> getAllMonitorInfo() {
+        // Ensure monitors are initialized (lazy initialization)
+        initializeMonitors();
         return new ArrayList<>(monitorCache.values());
     }
 

@@ -1,7 +1,5 @@
 package io.github.jspinak.brobot.config.environment;
 
-import java.awt.GraphicsEnvironment;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -44,29 +42,23 @@ public class HeadlessDetector {
     private final boolean headlessMode;
     private final boolean forcedMode;
 
-    static {
-        // Ensure ForceNonHeadlessInitializer runs first
-        ForceNonHeadlessInitializer.init();
-    }
+    // REMOVED static initializer to prevent early GraphicsEnvironment initialization
+    // This was causing headless detection issues on Windows
 
     public HeadlessDetector(
             @Value("${brobot.headless:false}") boolean brobotHeadless,
             @Value("${brobot.headless.debug:false}") boolean debugEnabled) {
 
-        // Check if ForceNonHeadlessInitializer succeeded
-        this.forcedMode = ForceNonHeadlessInitializer.wasForcedNonHeadless();
+        // Don't call ForceNonHeadlessInitializer as it triggers GraphicsEnvironment
+        this.forcedMode = false;
 
         // Use property setting, but warn if GraphicsEnvironment disagrees
         this.headlessMode = brobotHeadless;
 
-        // Check actual GraphicsEnvironment state
-        boolean actualHeadless = false;
-        try {
-            actualHeadless = GraphicsEnvironment.isHeadless();
-        } catch (Exception e) {
-            log.warn("[HeadlessDetector] Could not check GraphicsEnvironment: {}", e.getMessage());
-            actualHeadless = true; // Assume headless if we can't check
-        }
+        // DON'T check GraphicsEnvironment.isHeadless() here as it triggers initialization
+        // This was causing the headless detection problem on Windows
+        // We rely on the configured property value instead
+        boolean actualHeadless = false; // We'll assume non-headless unless told otherwise
 
         if (this.headlessMode) {
             log.info("[HeadlessDetector] Headless mode ENABLED via brobot.headless property");
@@ -94,15 +86,9 @@ public class HeadlessDetector {
             log.debug("[HeadlessDetector] Detailed Configuration:");
             log.debug("  brobot.headless: {}", brobotHeadless);
             log.debug("  java.awt.headless property: {}", System.getProperty("java.awt.headless"));
-            log.debug("  GraphicsEnvironment.isHeadless(): {}", actualHeadless);
-            log.debug("  ForceNonHeadlessInitializer forced: {}", forcedMode);
+            // Don't call GraphicsEnvironment.isHeadless() or ForceNonHeadlessInitializer methods
+            // as they trigger early initialization
             log.debug("  Final headless mode: {}", this.headlessMode);
-
-            // Print full diagnostics
-            String diagnostics = ForceNonHeadlessInitializer.getDiagnostics();
-            for (String line : diagnostics.split("\n")) {
-                log.debug("  {}", line);
-            }
         }
     }
 
@@ -179,19 +165,8 @@ public class HeadlessDetector {
                 .append(System.getProperty("java.awt.headless"))
                 .append("\n");
 
-        // Check current GraphicsEnvironment state
-        try {
-            boolean actualHeadless = GraphicsEnvironment.isHeadless();
-            report.append("  GraphicsEnvironment.isHeadless(): ")
-                    .append(actualHeadless)
-                    .append("\n");
-        } catch (Exception e) {
-            report.append("  GraphicsEnvironment.isHeadless(): Error - ")
-                    .append(e.getMessage())
-                    .append("\n");
-        }
-
-        report.append("  ForceNonHeadlessInitializer forced: ").append(forcedMode).append("\n");
+        // Don't check GraphicsEnvironment.isHeadless() as it triggers initialization
+        report.append("  GraphicsEnvironment check: SKIPPED (to avoid early initialization)\n");
         report.append("  OS: ").append(System.getProperty("os.name")).append("\n");
         return report.toString();
     }

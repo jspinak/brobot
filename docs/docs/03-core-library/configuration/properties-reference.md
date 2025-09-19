@@ -4,6 +4,7 @@ This document provides a comprehensive reference for all Brobot configuration pr
 
 ## Table of Contents
 - [Image Find Debugging](#image-find-debugging)
+- [Headless Detection](#headless-detection)
 - [Mock Mode](#mock-mode)
 - [Automation Runner](#automation-runner)
 - [Core Settings](#core-settings)
@@ -77,15 +78,38 @@ Properties for the comprehensive image finding debug system. See [Image Find Deb
 
 ---
 
-## Mock Mode
+## Headless Detection
 
-Properties for running Brobot in mock mode for testing without GUI.
+Properties for configuring headless mode detection. Brobot no longer auto-detects headless environments due to reliability issues.
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `brobot.mock` | boolean | `false` | Enable mock mode |
+| `brobot.headless` | boolean | `false` | Explicitly set headless mode (GUI unavailable) |
+| `brobot.headless.debug` | boolean | `false` | Enable debug logging for headless detection |
+
+**Important Notes:**
+- Headless mode must be explicitly configured via `brobot.headless` property
+- Auto-detection has been removed due to false positives on Windows systems
+- Defaults to `false` (assumes GUI is available)
+- For CI/CD environments, set `brobot.headless=true`
+- This is separate from mock mode - headless means no display, mock means simulated actions
+
+---
+
+## Mock Mode
+
+Properties for running Brobot in mock mode for testing without actual screen interaction.
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `brobot.mock` | boolean | `false` | Enable mock mode (simulated actions) |
 | `brobot.mock.action.success.probability` | double | `1.0` | Probability of action success (0.0-1.0) |
 | `brobot.screenshot.path` | string | `images` | Path to mock screenshots |
+
+**Mock vs Headless:**
+- **Mock Mode**: Simulates actions for testing, can run with or without display
+- **Headless Mode**: No display available, often used in CI/CD environments
+- Both can be used together for CI/CD testing
 
 ---
 
@@ -236,12 +260,16 @@ logging.level.io.github.jspinak.brobot.action.basic.find=DEBUG
 ```
 
 #### Mock Profile
-Create `application-mock.properties` for headless testing:
+Create `application-mock.properties` for testing without screen interaction:
 
 ```properties
-# Enable Mock Mode
-brobot.core.mock=true
+# Enable Mock Mode (simulated actions)
+brobot.mock=true
 brobot.mock.action.success.probability=0.8
+
+# Headless Configuration (if running in CI/CD without display)
+brobot.headless=true
+brobot.headless.debug=false
 
 # GUI Access Settings for Mock Mode
 brobot.gui-access.continue-on-error=true
@@ -323,6 +351,7 @@ export BROBOT_FIND_SIMILARITY=0.7
 
 ## Related Documentation
 
+- [Headless Configuration Guide](./headless-configuration.md) - Configuring headless detection
 - [Image Find Debugging Guide](../tools/image-find-debugging.md) - Comprehensive debugging system
 - [Automation Runner Guide](../automation-runner.md) - Failure handling and retry logic
 - [Mock Mode Guide](../../04-testing/mock-mode-guide.md) - Testing without GUI
