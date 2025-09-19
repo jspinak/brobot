@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.startup;
 
+import java.awt.GraphicsEnvironment;
+
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;

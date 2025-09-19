@@ -7,10 +7,12 @@ import java.awt.event.InputEvent;
 import org.sikuli.script.Button;
 import org.sikuli.script.Location;
 import org.sikuli.script.Mouse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+import io.github.jspinak.brobot.util.coordinates.CoordinateScaler;
 
 /**
  * Sikuli-based implementation of the MouseController interface.
@@ -39,10 +41,26 @@ public class SikuliMouseController implements MouseController {
     private static final int SIKULI_RIGHT = java.awt.event.InputEvent.BUTTON3_DOWN_MASK;
     private static final int SIKULI_MIDDLE = java.awt.event.InputEvent.BUTTON2_DOWN_MASK;
 
+    private final CoordinateScaler coordinateScaler;
+
+    @Autowired
+    public SikuliMouseController(@Autowired(required = false) CoordinateScaler coordinateScaler) {
+        this.coordinateScaler = coordinateScaler;
+    }
+
     @Override
     public synchronized boolean moveTo(int x, int y) {
         try {
-            Location location = new Location(x, y);
+            // Scale coordinates if needed (from physical to logical)
+            Location location;
+            if (coordinateScaler != null && coordinateScaler.isScalingNeeded()) {
+                io.github.jspinak.brobot.model.element.Location brobotLoc =
+                        new io.github.jspinak.brobot.model.element.Location(x, y);
+                location = coordinateScaler.scaleLocationToLogical(brobotLoc);
+            } else {
+                location = new Location(x, y);
+            }
+
             // Use hover() instead of mouseMove() for better stability
             Location result = location.hover();
             boolean success = result != null;
@@ -70,13 +88,15 @@ public class SikuliMouseController implements MouseController {
                 return false;
             }
 
-            // Move to the location first
-            if (!moveTo(x, y)) {
-                return false;
+            // Scale coordinates if needed (from physical to logical)
+            Location location;
+            if (coordinateScaler != null && coordinateScaler.isScalingNeeded()) {
+                io.github.jspinak.brobot.model.element.Location brobotLoc =
+                        new io.github.jspinak.brobot.model.element.Location(x, y);
+                location = coordinateScaler.scaleLocationToLogical(brobotLoc);
+            } else {
+                location = new Location(x, y);
             }
-
-            // Use Sikuli's click method
-            Location location = new Location(x, y);
             boolean success = false;
 
             if (button == MouseButton.LEFT) {
@@ -119,8 +139,15 @@ public class SikuliMouseController implements MouseController {
             // Sikuli's doubleClick only supports left button
             // For other buttons, simulate with two clicks
             if (button == MouseButton.LEFT) {
-                // Use Sikuli's double-click
-                Location location = new Location(x, y);
+                // Scale coordinates if needed (from physical to logical)
+                Location location;
+                if (coordinateScaler != null && coordinateScaler.isScalingNeeded()) {
+                    io.github.jspinak.brobot.model.element.Location brobotLoc =
+                            new io.github.jspinak.brobot.model.element.Location(x, y);
+                    location = coordinateScaler.scaleLocationToLogical(brobotLoc);
+                } else {
+                    location = new Location(x, y);
+                }
                 location.doubleClick();
                 return true;
             } else {
@@ -171,8 +198,19 @@ public class SikuliMouseController implements MouseController {
     public synchronized boolean drag(
             int startX, int startY, int endX, int endY, MouseButton button) {
         try {
-            Location startLoc = new Location(startX, startY);
-            Location endLoc = new Location(endX, endY);
+            // Scale coordinates if needed (from physical to logical)
+            Location startLoc, endLoc;
+            if (coordinateScaler != null && coordinateScaler.isScalingNeeded()) {
+                io.github.jspinak.brobot.model.element.Location brobotStartLoc =
+                        new io.github.jspinak.brobot.model.element.Location(startX, startY);
+                io.github.jspinak.brobot.model.element.Location brobotEndLoc =
+                        new io.github.jspinak.brobot.model.element.Location(endX, endY);
+                startLoc = coordinateScaler.scaleLocationToLogical(brobotStartLoc);
+                endLoc = coordinateScaler.scaleLocationToLogical(brobotEndLoc);
+            } else {
+                startLoc = new Location(startX, startY);
+                endLoc = new Location(endX, endY);
+            }
 
             // Move to start location
             if (!moveTo(startX, startY)) {
@@ -233,8 +271,16 @@ public class SikuliMouseController implements MouseController {
             }
 
             // Create a small region at the mouse location for wheel operation
-            org.sikuli.script.Region region =
-                    new org.sikuli.script.Region(location.x, location.y, 1, 1);
+            org.sikuli.script.Region region;
+            if (coordinateScaler != null && coordinateScaler.isScalingNeeded()) {
+                // Scale the mouse location from physical to logical coordinates
+                io.github.jspinak.brobot.model.element.Location brobotLoc =
+                        new io.github.jspinak.brobot.model.element.Location(location.x, location.y);
+                Location scaledLoc = coordinateScaler.scaleLocationToLogical(brobotLoc);
+                region = new org.sikuli.script.Region(scaledLoc.x, scaledLoc.y, 1, 1);
+            } else {
+                region = new org.sikuli.script.Region(location.x, location.y, 1, 1);
+            }
 
             // Sikuli wheel method: positive = down, negative = up
             // Robot's mouseWheel: positive = down, negative = up
@@ -259,6 +305,8 @@ public class SikuliMouseController implements MouseController {
             if (currentLoc == null) {
                 return null;
             }
+            // Mouse.at() returns logical coordinates which is what we want
+            // The caller can scale if needed
             return new int[] {currentLoc.x, currentLoc.y};
         } catch (Exception e) {
             ConsoleReporter.println(

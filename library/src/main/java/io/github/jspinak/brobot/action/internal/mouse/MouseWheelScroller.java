@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import io.github.jspinak.brobot.action.basic.mouse.ScrollOptions;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.util.coordinates.CoordinateScaler;
 
 /**
  * Provides mouse wheel scrolling functionality with support for both real and mocked operations.
@@ -25,10 +26,14 @@ import io.github.jspinak.brobot.model.element.Region;
 public class MouseWheelScroller {
 
     private final BrobotProperties brobotProperties;
+    private final CoordinateScaler coordinateScaler;
 
     @Autowired
-    public MouseWheelScroller(BrobotProperties brobotProperties) {
+    public MouseWheelScroller(
+            BrobotProperties brobotProperties,
+            @Autowired(required = false) CoordinateScaler coordinateScaler) {
         this.brobotProperties = brobotProperties;
+        this.coordinateScaler = coordinateScaler;
     }
 
     // No longer needs legacy dependency - this class is now standalone
@@ -62,7 +67,21 @@ public class MouseWheelScroller {
         // Convert Direction to Sikuli's expected integer values
         int scrollDirection = (scrollOptions.getDirection() == ScrollOptions.Direction.UP) ? -1 : 1;
 
-        new Region().sikuli().wheel(scrollDirection, scrollOptions.getScrollSteps());
+        // Create a region at the current mouse position (full screen)
+        // and use scaled coordinates if needed
+        Region screenRegion = new Region();
+        org.sikuli.script.Region sikuliRegion;
+
+        if (coordinateScaler != null && coordinateScaler.isScalingNeeded()) {
+            // Use scaled region for scrolling to ensure correct position
+            sikuliRegion = screenRegion.sikuliScaled(coordinateScaler);
+        } else {
+            sikuliRegion = screenRegion.sikuli();
+        }
+
+        if (sikuliRegion != null) {
+            sikuliRegion.wheel(scrollDirection, scrollOptions.getScrollSteps());
+        }
         return true;
     }
 }
