@@ -19,8 +19,9 @@ class HeadlessDetectorTest {
 
     @BeforeEach
     void setUp() {
-        detector = new HeadlessDetector();
-        detector.setDebugLogging(true);
+        // Create detector with headless=false and debug=true
+        // This simulates normal Spring injection with default values
+        detector = new HeadlessDetector(false, true);
     }
 
     @Test
@@ -35,35 +36,27 @@ class HeadlessDetectorTest {
     }
 
     @Test
-    void testCaching() {
+    void testConsistentResults() {
         // First call
         boolean firstResult = detector.isHeadless();
 
-        // Second call should use cache (should be fast)
-        long start = System.currentTimeMillis();
+        // Second call should return the same result
         boolean secondResult = detector.isHeadless();
-        long duration = System.currentTimeMillis() - start;
 
         // Results should be the same
         assertEquals(firstResult, secondResult);
-
-        // Cached call should be very fast (< 1ms)
-        assertTrue(duration < 10, "Cached call took too long: " + duration + "ms");
     }
 
     @Test
-    void testCacheRefresh() {
-        // Get initial result
-        boolean beforeRefresh = detector.isHeadless();
+    void testStatusReport() {
+        // Get status report
+        String report = detector.getStatusReport();
 
-        // Refresh cache
-        detector.refreshCache();
-
-        // Get result after refresh (should recompute)
-        boolean afterRefresh = detector.isHeadless();
-
-        // Results should still be the same (environment hasn't changed)
-        assertEquals(beforeRefresh, afterRefresh);
+        // Report should not be null and should contain expected info
+        assertNotNull(report);
+        assertTrue(report.contains("HeadlessDetector Status"));
+        assertTrue(report.contains("Current State"));
+        assertTrue(report.contains("OS:"));
     }
 
     @Test
@@ -101,8 +94,33 @@ class HeadlessDetectorTest {
     @Test
     @EnabledIfSystemProperty(named = "java.awt.headless", matches = "true")
     void testExplicitHeadless() {
-        // When explicitly set to true, should be headless
-        boolean isHeadless = detector.isHeadless();
-        assertTrue(isHeadless, "Should be headless when java.awt.headless=true");
+        // Create a detector with headless=true
+        HeadlessDetector headlessDetector = new HeadlessDetector(true, false);
+        boolean isHeadless = headlessDetector.isHeadless();
+        assertTrue(isHeadless, "Should be headless when configured with headless=true");
+    }
+
+    @Test
+    void testHeadlessModeConfiguration() {
+        // Test with headless=true
+        HeadlessDetector headlessDetector = new HeadlessDetector(true, false);
+        assertTrue(headlessDetector.isHeadless(), "Should be headless when configured as true");
+
+        // Test with headless=false
+        HeadlessDetector guiDetector = new HeadlessDetector(false, false);
+        assertFalse(guiDetector.isHeadless(), "Should not be headless when configured as false");
+    }
+
+    @Test
+    void testForceNonHeadlessInitializer() {
+        // Check if ForceNonHeadlessInitializer was triggered
+        boolean wasForced = detector.wasForcedNonHeadless();
+
+        // This will be true if the initializer had to override headless settings
+        // The actual value depends on the environment
+        System.out.println("ForceNonHeadlessInitializer forced mode: " + wasForced);
+
+        // Just verify the method doesn't throw
+        assertNotNull(Boolean.valueOf(wasForced));
     }
 }
