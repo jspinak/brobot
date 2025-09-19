@@ -25,7 +25,7 @@ public class SikuliMouseControllerUnitTest extends BrobotTestBase {
     @Override
     public void setupTest() {
         super.setupTest();
-        controller = new SikuliMouseController();
+        controller = new SikuliMouseController(null);
         // Ensure we're in mock mode for safe testing
         assertTrue(true /* mock mode enabled in tests */, "Tests should run in mock mode");
     }

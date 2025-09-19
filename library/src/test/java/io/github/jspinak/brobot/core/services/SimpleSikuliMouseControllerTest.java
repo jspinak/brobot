@@ -14,7 +14,7 @@ public class SimpleSikuliMouseControllerTest extends BrobotTestBase {
     @Test
     void testBasicFunctionality() {
         // Create controller - should work in mock mode
-        SikuliMouseController controller = new SikuliMouseController();
+        SikuliMouseController controller = new SikuliMouseController(null);
 
         // Test basic operations don't throw exceptions in mock mode
         assertDoesNotThrow(() -> controller.moveTo(100, 100));
