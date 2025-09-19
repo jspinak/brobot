@@ -412,6 +412,22 @@ public class Action {
     }
 
     /**
+     * Types the text from the specified StateString.
+     *
+     * <p>This convenience method enables typing text that has state context without needing to wrap
+     * it in an ObjectCollection. The StateString includes state ownership and optional spatial
+     * context for where to click before typing.
+     *
+     * @param stateString The StateString containing text and optional context
+     * @return ActionResult containing the operation outcome
+     * @see #type(ObjectCollection) for the canonical implementation
+     * @since 2.1
+     */
+    public ActionResult type(StateString stateString) {
+        return type(new ObjectCollection.Builder().withStateStrings(stateString).build());
+    }
+
+    /**
      * Finds the specified pattern on screen.
      *
      * <p>This convenience method searches for a single pattern without needing to wrap it in a

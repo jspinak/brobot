@@ -79,6 +79,13 @@ if (match != null) {
 // Type plain text
 action.type("user@example.com");
 
+// Type with state context (new in 2.1)
+StateString stateString = new StateString.Builder()
+    .withString("password123")
+    .withOwnerStateName("LoginPage")
+    .build();
+action.type(stateString);
+
 // Type in a specific field (find and click, then type)
 action.click(usernameField);
 action.type("username123");
@@ -91,11 +98,14 @@ action.type("username123");
 Pattern pattern = new Pattern("button.png");
 ActionResult result = action.find(pattern);
 
-// Traditional approach still works
+// Find a StateImage directly
 StateImage image = new StateImage.Builder()
     .addPattern(pattern)
     .build();
 ActionResult result = action.find(image);
+
+// Find multiple StateImages
+ActionResult results = action.find(submitButton, cancelButton);
 ```
 
 ### Mouse Movement
@@ -187,6 +197,25 @@ public void login(String username, String password) {
 
     // Wait for loading to complete
     action.vanish(loadingSpinner);
+}
+
+// Alternative using StateString for better state context
+public void loginWithStateContext() {
+    StateString username = new StateString.Builder()
+        .withString("user@example.com")
+        .withOwnerStateName("LoginPage")
+        .withSearchRegion(usernameFieldRegion)
+        .build();
+
+    StateString password = new StateString.Builder()
+        .withString("secure123")
+        .withOwnerStateName("LoginPage")
+        .withSearchRegion(passwordFieldRegion)
+        .build();
+
+    action.type(username);
+    action.type(password);
+    action.click(submitButton);
 }
 ```
 
@@ -327,12 +356,14 @@ if (result.isSuccess()) {
 | Method | Description | Since |
 |--------|-------------|--------|
 | `type(String text)` | Type plain text | 2.1 |
+| `type(StateString stateString)` | Type text with state context | 2.1 |
 
 ### Find Methods
 
 | Method | Description | Since |
 |--------|-------------|--------|
 | `find(Pattern pattern)` | Find a pattern on screen | 2.1 |
+| `find(StateImage... images)` | Find one or more StateImages | 2.0 |
 
 ### Move Methods
 
