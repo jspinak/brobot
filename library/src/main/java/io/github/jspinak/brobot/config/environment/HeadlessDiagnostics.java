@@ -28,6 +28,13 @@ public class HeadlessDiagnostics {
     public void diagnoseHeadlessMode() {
         log.info("=== Headless Mode Diagnostics ===");
 
+        // Debug: Log the timing of this check
+        System.out.println("[HeadlessDiagnostics] Called at: " + System.currentTimeMillis());
+        System.out.println("[HeadlessDiagnostics] StackTrace for timing analysis:");
+        for (int i = 0; i < Math.min(5, Thread.currentThread().getStackTrace().length); i++) {
+            System.out.println("  " + Thread.currentThread().getStackTrace()[i]);
+        }
+
         // Check various headless indicators
         boolean awtHeadless = GraphicsEnvironment.isHeadless();
         String headlessProperty = System.getProperty("java.awt.headless");

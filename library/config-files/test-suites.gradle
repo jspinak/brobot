@@ -177,20 +177,20 @@ tasks.withType(Test).configureEach {
     // Common test configuration
     useJUnitPlatform()
     
-    // JVM settings for headless execution
+    // JVM settings - removed headless to match 1.0.7
     jvmArgs = [
         '-XX:+UseG1GC',
-        '-Djava.awt.headless=true',
         '-Dbrobot.mock=true',
         '-Dsikuli.Debug=0'
+        // Removed headless=true to match 1.0.7
     ]
-    
-    // System properties
+
+    // System properties - removed headless to match 1.0.7
     systemProperties = [
-        'java.awt.headless': 'true',
         'brobot.mock': 'true',
         'sikuli.Debug': '0',
         'test.suite': name
+        // Removed headless=true to match 1.0.7
     ]
     
     // Logging

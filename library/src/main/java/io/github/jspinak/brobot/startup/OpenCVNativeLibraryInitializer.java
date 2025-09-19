@@ -45,6 +45,11 @@ public class OpenCVNativeLibraryInitializer
      * loaded by the JVM.
      */
     static {
+        // Debug headless state very early
+        System.out.println(
+                "[OpenCV Init - Static] java.awt.headless="
+                        + System.getProperty("java.awt.headless"));
+
         // Suppress debug output BEFORE loading libraries
         System.setProperty("org.bytedeco.javacpp.logger.debug", "false");
         System.setProperty("org.bytedeco.javacv.debug", "false");
@@ -56,6 +61,11 @@ public class OpenCVNativeLibraryInitializer
 
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
+        // Debug headless state during Spring initialization
+        System.out.println(
+                "[OpenCV Init - Spring] java.awt.headless="
+                        + System.getProperty("java.awt.headless"));
+
         ConfigurableEnvironment env = applicationContext.getEnvironment();
 
         // Check if we should skip native library loading (e.g., in mock mode)
