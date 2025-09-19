@@ -152,8 +152,17 @@ public class Click implements ActionInterface {
                 return true;
             }
 
-            // Use SikuliX directly - it handles Robot creation lazily
-            // This avoids early GraphicsEnvironment initialization issues
+            // Debug logging for headless issue
+            logger.info("=== Click Debug Info ===");
+            logger.info("java.awt.headless property: " + System.getProperty("java.awt.headless"));
+            logger.info(
+                    "GraphicsEnvironment.isHeadless(): "
+                            + java.awt.GraphicsEnvironment.isHeadless());
+            logger.info("Location to click: " + location);
+            logger.info("========================");
+
+            // Use SikuliX directly - it handles Robot internally
+            // Following Brobot 1.0.7 pattern of simplicity
             org.sikuli.script.Location sikuliLoc = location.sikuli();
             sikuliLoc.click();
 
@@ -165,6 +174,10 @@ public class Click implements ActionInterface {
 
         } catch (Exception e) {
             logger.warning("Failed to click at location " + location + ": " + e.getMessage());
+            logger.warning("Exception type: " + e.getClass().getName());
+            if (e.getCause() != null) {
+                logger.warning("Cause: " + e.getCause().getMessage());
+            }
             return false;
         }
     }
