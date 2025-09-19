@@ -176,8 +176,8 @@ test {
         '-XX:+UseG1GC',
         '-XX:MaxGCPauseMillis=200',
         '-XX:+ParallelRefProcEnabled',
-        '-Djava.awt.headless=true',
-        '-Dbrobot.mock=true'
+        '-Dbrobot.mock=true'  // Only set mock mode for tests
+        // Removed headless=true to match 1.0.7 - let SikuliX determine environment
     ]
     
     // Timeout to prevent hanging tests
@@ -196,9 +196,9 @@ test {
     
     // System properties for tests
     systemProperties = [
-        'java.awt.headless': 'true',
-        'brobot.mock': 'true',
+        'brobot.mock': 'true',  // Use mock mode for tests
         'sikuli.Debug': '0'
+        // Removed headless=true to match 1.0.7 - let environment be detected naturally
     ]
 }
 
@@ -322,9 +322,9 @@ task e2eTest(type: Test) {
     // E2E tests should run sequentially
     maxParallelForks = 1
     forkEvery = 0
-    
+
     // E2E tests may need display
-    systemProperty 'java.awt.headless', 'false'
+    // Let environment be detected naturally like in 1.0.7
     systemProperty 'brobot.mock', 'false'
     
     testLogging {
