@@ -22,9 +22,11 @@ action.click(match);             // Click a match
 
 // Direct typing
 action.type("Hello World");     // Type text
+action.type(stateString);       // Type with state context
 
 // Direct finding
 action.find(pattern);            // Find a pattern
+action.find(stateImage);         // Find a StateImage
 
 // Direct mouse operations
 action.move(location);           // Move to location
