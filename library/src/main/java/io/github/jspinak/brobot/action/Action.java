@@ -26,6 +26,7 @@ import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.state.StateString;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
 /**
@@ -359,7 +360,7 @@ public class Action {
      *
      * @param region The region to click
      * @return ActionResult containing the operation outcome
-     * @see #click(ObjectCollection) for the canonical implementation
+     * @see #click(ObjectCollection...) for the canonical implementation
      * @since 2.1
      */
     public ActionResult click(Region region) {
@@ -374,7 +375,7 @@ public class Action {
      *
      * @param location The location to click
      * @return ActionResult containing the operation outcome
-     * @see #click(ObjectCollection) for the canonical implementation
+     * @see #click(ObjectCollection...) for the canonical implementation
      * @since 2.1
      */
     public ActionResult click(Location location) {
@@ -389,7 +390,7 @@ public class Action {
      *
      * @param match The match whose region should be clicked
      * @return ActionResult containing the operation outcome
-     * @see #click(ObjectCollection) for the canonical implementation
+     * @see #click(ObjectCollection...) for the canonical implementation
      * @since 2.1
      */
     public ActionResult click(Match match) {
@@ -404,7 +405,7 @@ public class Action {
      *
      * @param text The text to type
      * @return ActionResult containing the operation outcome
-     * @see #type(ObjectCollection) for the canonical implementation
+     * @see #type(ObjectCollection...) for the canonical implementation
      * @since 2.1
      */
     public ActionResult type(String text) {
@@ -420,11 +421,11 @@ public class Action {
      *
      * @param stateString The StateString containing text and optional context
      * @return ActionResult containing the operation outcome
-     * @see #type(ObjectCollection) for the canonical implementation
+     * @see #type(ObjectCollection...) for the canonical implementation
      * @since 2.1
      */
     public ActionResult type(StateString stateString) {
-        return type(new ObjectCollection.Builder().withStateStrings(stateString).build());
+        return type(new ObjectCollection.Builder().withStrings(stateString).build());
     }
 
     /**
@@ -435,7 +436,7 @@ public class Action {
      *
      * @param pattern The pattern to search for
      * @return ActionResult containing found matches
-     * @see #find(ObjectCollection) for the canonical implementation
+     * @see #find(ObjectCollection...) for the canonical implementation
      * @since 2.1
      */
     public ActionResult find(Pattern pattern) {
@@ -630,17 +631,6 @@ public class Action {
     }
 
     /**
-     * Performs an action with custom options on text string targets.
-     *
-     * <p>Provides full control over action configuration while working with text targets. The
-     * strings are automatically wrapped in an ObjectCollection.
-     *
-     * @param actionConfig detailed configuration for the action
-     * @param strings text strings to use as action targets
-     * @return ActionResult containing matches and execution details
-     */
-
-    /**
      * Performs the specified action on screen regions with default options.
      *
      * <p>Regions define specific areas of the screen to constrain the action. This is useful for
@@ -658,9 +648,7 @@ public class Action {
         return perform(action, strColl);
     }
 
-    // Removed ActionConfig-based perform method for strings - use ActionConfig instead
-
-    // ===== New Convenience Methods for ActionType enum =====
+    // ===== Convenience Methods for ActionType enum =====
 
     /**
      * Performs an action with default configuration on a location.
@@ -809,60 +797,45 @@ public class Action {
      * @since 2.0
      */
     private ActionConfig createDefaultConfig(ActionType type) {
-        switch (type) {
-            case CLICK:
-                return new ClickOptions.Builder().build();
-            case DOUBLE_CLICK:
-                return new ClickOptions.Builder().setNumberOfClicks(2).build();
-            case RIGHT_CLICK:
-                return new ClickOptions.Builder()
-                        .setPressOptions(
-                                MousePressOptions.builder()
-                                        .setButton(
-                                                io.github.jspinak.brobot.model.action.MouseButton
-                                                        .RIGHT)
-                                        .build())
-                        .build();
-            case MIDDLE_CLICK:
-                return new ClickOptions.Builder()
-                        .setPressOptions(
-                                MousePressOptions.builder()
-                                        .setButton(
-                                                io.github.jspinak.brobot.model.action.MouseButton
-                                                        .MIDDLE)
-                                        .build())
-                        .build();
-            case HIGHLIGHT:
-                return new HighlightOptions.Builder().build();
-            case TYPE:
-                return new TypeOptions.Builder().build();
-            case HOVER:
-                return new MouseMoveOptions.Builder().build();
-            case MOVE:
-                return new MouseMoveOptions.Builder().build();
-            case DRAG:
-                return new DragOptions.Builder().build();
-            case FIND:
-                return new PatternFindOptions.Builder().build();
-            case WAIT_VANISH:
-                return new VanishOptions.Builder().build();
-            case SCROLL_UP:
-                return new ScrollOptions.Builder().setDirection(ScrollOptions.Direction.UP).build();
-            case SCROLL_DOWN:
-                return new ScrollOptions.Builder()
-                        .setDirection(ScrollOptions.Direction.DOWN)
-                        .build();
-            case KEY_DOWN:
-                return new KeyDownOptions.Builder().build();
-            case KEY_UP:
-                return new KeyUpOptions.Builder().build();
-            case MOUSE_DOWN:
-                return new MouseDownOptions.Builder().build();
-            case MOUSE_UP:
-                return new MouseUpOptions.Builder().build();
-            default:
-                throw new IllegalArgumentException(
-                        "ActionType " + type + " is not yet supported in convenience methods");
-        }
+        return switch (type) {
+            case CLICK -> new ClickOptions.Builder().build();
+            case DOUBLE_CLICK -> new ClickOptions.Builder().setNumberOfClicks(2).build();
+            case RIGHT_CLICK ->
+                    new ClickOptions.Builder()
+                            .setPressOptions(
+                                    MousePressOptions.builder()
+                                            .setButton(
+                                                    io.github.jspinak.brobot.model.action
+                                                            .MouseButton.RIGHT)
+                                            .build())
+                            .build();
+            case MIDDLE_CLICK ->
+                    new ClickOptions.Builder()
+                            .setPressOptions(
+                                    MousePressOptions.builder()
+                                            .setButton(
+                                                    io.github.jspinak.brobot.model.action
+                                                            .MouseButton.MIDDLE)
+                                            .build())
+                            .build();
+            case HIGHLIGHT -> new HighlightOptions.Builder().build();
+            case TYPE -> new TypeOptions.Builder().build();
+            case HOVER -> new MouseMoveOptions.Builder().build();
+            case MOVE -> new MouseMoveOptions.Builder().build();
+            case DRAG -> new DragOptions.Builder().build();
+            case FIND -> new PatternFindOptions.Builder().build();
+            case WAIT_VANISH -> new VanishOptions.Builder().build();
+            case SCROLL_UP ->
+                    new ScrollOptions.Builder().setDirection(ScrollOptions.Direction.UP).build();
+            case SCROLL_DOWN ->
+                    new ScrollOptions.Builder().setDirection(ScrollOptions.Direction.DOWN).build();
+            case KEY_DOWN -> new KeyDownOptions.Builder().build();
+            case KEY_UP -> new KeyUpOptions.Builder().build();
+            case MOUSE_DOWN -> new MouseDownOptions.Builder().build();
+            case MOUSE_UP -> new MouseUpOptions.Builder().build();
+            default ->
+                    throw new IllegalArgumentException(
+                            "ActionType " + type + " is not yet supported in convenience methods");
+        };
     }
 }
