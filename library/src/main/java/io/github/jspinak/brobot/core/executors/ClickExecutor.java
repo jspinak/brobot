@@ -30,7 +30,7 @@ public class ClickExecutor {
 
     private final MouseController mouseController;
 
-    public ClickExecutor(@Qualifier("sikuliMouseController") MouseController mouseController) {
+    public ClickExecutor(@Qualifier("robotMouseController") MouseController mouseController) {
         this.mouseController = mouseController;
     }
 

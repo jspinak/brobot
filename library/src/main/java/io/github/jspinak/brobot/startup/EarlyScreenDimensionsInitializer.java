@@ -44,13 +44,13 @@ public class EarlyScreenDimensionsInitializer
         int screenWidth;
         int screenHeight;
 
-        // Check if we're in mock mode or headless environment
-        if (provider.contains("MOCK") || GraphicsEnvironment.isHeadless()) {
-            // Use default dimensions for mock/headless mode
+        // Check if we're using mock provider first
+        if (provider.contains("MOCK")) {
+            // Use default dimensions for mock mode
             screenWidth = 1920;
             screenHeight = 1080;
             log.info(
-                    "Using MOCK/HEADLESS resolution: {}x{} for provider: {}",
+                    "Using MOCK resolution: {}x{} for provider: {}",
                     screenWidth,
                     screenHeight,
                     provider);
@@ -58,10 +58,27 @@ public class EarlyScreenDimensionsInitializer
                 || provider.contains("FFMPEG")
                 || provider.contains("ROBOT")) {
             // These providers capture at physical resolution
-            // For Windows with 125% DPI scaling: 1920x1080 physical
-            screenWidth = detectPhysicalResolution();
-            screenHeight = detectPhysicalHeight();
-            log.info("Using PHYSICAL resolution for provider: {}", provider);
+            // FFmpeg works independently of GraphicsEnvironment, so it can work even in "headless"
+            // environments
+            try {
+                screenWidth = detectPhysicalResolution();
+                screenHeight = detectPhysicalHeight();
+                log.info(
+                        "Using PHYSICAL resolution: {}x{} for provider: {}",
+                        screenWidth,
+                        screenHeight,
+                        provider);
+            } catch (Exception e) {
+                // If detection fails, use default dimensions
+                screenWidth = 1920;
+                screenHeight = 1080;
+                log.info(
+                        "Using default resolution: {}x{} for provider: {} (detection failed: {})",
+                        screenWidth,
+                        screenHeight,
+                        provider,
+                        e.getMessage());
+            }
         } else {
             // SikuliX and AUTO capture at logical resolution
             // Get logical dimensions from AWT
@@ -94,67 +111,99 @@ public class EarlyScreenDimensionsInitializer
     }
 
     private static int detectPhysicalResolution() {
-        // Try to detect physical resolution
+        // For FFmpeg, we try to detect physical resolution even if GraphicsEnvironment reports
+        // headless
+        // because FFmpeg can capture screens independently of Java's AWT/Swing
         try {
+            // First try to get screen size without triggering GraphicsEnvironment
             Toolkit toolkit = Toolkit.getDefaultToolkit();
             Dimension screenSize = toolkit.getScreenSize();
 
             // Check for known DPI scaling patterns
             if (screenSize.width == 1536 && screenSize.height == 864) {
                 // 125% DPI scaling detected - return physical resolution
+                log.debug("Detected 125% DPI scaling, returning physical width: 1920");
                 return 1920;
             }
 
-            // Try to get DPI scale from graphics configuration
-            try {
-                GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-                GraphicsDevice gd = ge.getDefaultScreenDevice();
-                GraphicsConfiguration gc = gd.getDefaultConfiguration();
-                double scaleX = gc.getDefaultTransform().getScaleX();
-                if (scaleX > 1.0) {
-                    return (int) Math.round(screenSize.width * scaleX);
+            // Try to get DPI scale from graphics configuration if available
+            if (!GraphicsEnvironment.isHeadless()) {
+                try {
+                    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+                    GraphicsDevice gd = ge.getDefaultScreenDevice();
+                    GraphicsConfiguration gc = gd.getDefaultConfiguration();
+                    double scaleX = gc.getDefaultTransform().getScaleX();
+                    if (scaleX > 1.0) {
+                        int physicalWidth = (int) Math.round(screenSize.width * scaleX);
+                        log.debug(
+                                "Detected DPI scale {}x, returning physical width: {}",
+                                scaleX,
+                                physicalWidth);
+                        return physicalWidth;
+                    }
+                } catch (Exception e) {
+                    log.debug("Could not detect DPI scale: {}", e.getMessage());
                 }
-            } catch (Exception e) {
-                log.debug("Could not detect DPI scale: {}", e.getMessage());
             }
 
             // Default to detected size or 1920
-            return screenSize.width > 0 ? screenSize.width : 1920;
+            int width = screenSize.width > 0 ? screenSize.width : 1920;
+            log.debug("Using detected width: {}", width);
+            return width;
         } catch (HeadlessException e) {
-            log.debug("HeadlessException in detectPhysicalResolution, using default: 1920");
+            // Even in headless mode, FFmpeg can work, so return default resolution
+            log.debug(
+                    "Toolkit reports headless, using default width: 1920 (FFmpeg can still"
+                            + " capture)");
             return 1920;
         }
     }
 
     private static int detectPhysicalHeight() {
-        // Try to detect physical resolution
+        // For FFmpeg, we try to detect physical resolution even if GraphicsEnvironment reports
+        // headless
+        // because FFmpeg can capture screens independently of Java's AWT/Swing
         try {
+            // First try to get screen size without triggering GraphicsEnvironment
             Toolkit toolkit = Toolkit.getDefaultToolkit();
             Dimension screenSize = toolkit.getScreenSize();
 
             // Check for known DPI scaling patterns
             if (screenSize.width == 1536 && screenSize.height == 864) {
                 // 125% DPI scaling detected - return physical resolution
+                log.debug("Detected 125% DPI scaling, returning physical height: 1080");
                 return 1080;
             }
 
-            // Try to get DPI scale from graphics configuration
-            try {
-                GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-                GraphicsDevice gd = ge.getDefaultScreenDevice();
-                GraphicsConfiguration gc = gd.getDefaultConfiguration();
-                double scaleY = gc.getDefaultTransform().getScaleY();
-                if (scaleY > 1.0) {
-                    return (int) Math.round(screenSize.height * scaleY);
+            // Try to get DPI scale from graphics configuration if available
+            if (!GraphicsEnvironment.isHeadless()) {
+                try {
+                    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+                    GraphicsDevice gd = ge.getDefaultScreenDevice();
+                    GraphicsConfiguration gc = gd.getDefaultConfiguration();
+                    double scaleY = gc.getDefaultTransform().getScaleY();
+                    if (scaleY > 1.0) {
+                        int physicalHeight = (int) Math.round(screenSize.height * scaleY);
+                        log.debug(
+                                "Detected DPI scale {}x, returning physical height: {}",
+                                scaleY,
+                                physicalHeight);
+                        return physicalHeight;
+                    }
+                } catch (Exception e) {
+                    log.debug("Could not detect DPI scale: {}", e.getMessage());
                 }
-            } catch (Exception e) {
-                log.debug("Could not detect DPI scale: {}", e.getMessage());
             }
 
             // Default to detected size or 1080
-            return screenSize.height > 0 ? screenSize.height : 1080;
+            int height = screenSize.height > 0 ? screenSize.height : 1080;
+            log.debug("Using detected height: {}", height);
+            return height;
         } catch (HeadlessException e) {
-            log.debug("HeadlessException in detectPhysicalHeight, using default: 1080");
+            // Even in headless mode, FFmpeg can work, so return default resolution
+            log.debug(
+                    "Toolkit reports headless, using default height: 1080 (FFmpeg can still"
+                            + " capture)");
             return 1080;
         }
     }
