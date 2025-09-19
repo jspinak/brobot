@@ -1,11 +1,16 @@
 package io.github.jspinak.brobot.capture;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestPropertySource;
 
 /** Tests that verify the default capture provider configuration. */
@@ -20,7 +25,12 @@ import org.springframework.test.context.TestPropertySource;
         named = "CI",
         matches = "true",
         disabledReason = "Test incompatible with CI environment")
+@ExtendWith(MockitoExtension.class)
 class DefaultProviderTest {
+
+    @Mock private UnifiedCaptureService mockCaptureService;
+
+    @Mock private Environment mockEnvironment;
 
     @Value("${brobot.capture.provider:AUTO}")
     private String defaultProvider;
@@ -56,7 +66,7 @@ class DefaultProviderTest {
 
     @Test
     void testRecommendedModeIsSikuliX() {
-        CaptureConfiguration config = new CaptureConfiguration();
+        CaptureConfiguration config = new CaptureConfiguration(mockCaptureService, mockEnvironment);
         CaptureConfiguration.CaptureMode recommended = config.getRecommendedMode();
 
         assertEquals(

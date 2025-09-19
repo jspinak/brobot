@@ -4,6 +4,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
+import io.github.jspinak.brobot.config.environment.HeadlessDetector;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import io.github.jspinak.brobot.tools.logging.gui.GuiAccessConfig;
 import io.github.jspinak.brobot.tools.logging.gui.GuiAccessMonitor;
@@ -17,8 +18,9 @@ import io.github.jspinak.brobot.tools.logging.gui.GuiAccessMonitor;
 @ConditionalOnMissingBean(name = "guiAccessMonitor")
 public class MockGuiAccessMonitor extends GuiAccessMonitor {
 
-    public MockGuiAccessMonitor(BrobotLogger logger, GuiAccessConfig config) {
-        super(logger, config);
+    public MockGuiAccessMonitor(
+            BrobotLogger logger, GuiAccessConfig config, HeadlessDetector headlessDetector) {
+        super(logger, config, headlessDetector);
     }
 
     @Override

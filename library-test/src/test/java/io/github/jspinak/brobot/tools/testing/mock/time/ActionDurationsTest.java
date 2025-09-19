@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.tools.testing.mock.time;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.lang.reflect.Field;
 import java.util.HashSet;
@@ -14,12 +15,14 @@ import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
 import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
@@ -36,6 +39,8 @@ import io.github.jspinak.brobot.test.BrobotTestBase;
 @TestPropertySource(properties = {"brobot.core.mock=true", "brobot.core.headless=true"})
 public class ActionDurationsTest extends BrobotTestBase {
 
+    @Mock private BrobotProperties mockBrobotProperties;
+
     private ActionDurations actionDurations;
 
     // Store original BrobotProperties values
@@ -46,8 +51,17 @@ public class ActionDurationsTest extends BrobotTestBase {
     @Override
     public void setupTest() {
         super.setupTest();
-        // Mock time values are configured via BrobotProperties
-        actionDurations = new ActionDurations();
+        // Set up mock BrobotProperties with default values
+        BrobotProperties.Mock mockConfig = new BrobotProperties.Mock();
+        mockConfig.setTimeClick(0.01);
+        mockConfig.setTimeDrag(0.02);
+        mockConfig.setTimeMove(0.01);
+        mockConfig.setTimeClassify(0.03);
+        mockConfig.setTimeFindFirst(0.01);
+        mockConfig.setTimeFindAll(0.04);
+        when(mockBrobotProperties.getMock()).thenReturn(mockConfig);
+
+        actionDurations = new ActionDurations(mockBrobotProperties);
     }
 
     @Nested
@@ -213,7 +227,7 @@ public class ActionDurationsTest extends BrobotTestBase {
             // Setting mockTimeClassify now handled by BrobotProperties
 
             // Create new instance
-            ActionDurations newDurations = new ActionDurations();
+            ActionDurations newDurations = new ActionDurations(mockBrobotProperties);
 
             // Verify it uses the custom values
             assertEquals(1.5, newDurations.getActionDuration(ActionType.CLICK));
@@ -230,7 +244,7 @@ public class ActionDurationsTest extends BrobotTestBase {
             // Setting mockTimeFindAll now handled by BrobotProperties
 
             // Create new instance
-            ActionDurations newDurations = new ActionDurations();
+            ActionDurations newDurations = new ActionDurations(mockBrobotProperties);
 
             // Verify find strategies use the custom values
             assertEquals(
@@ -307,9 +321,9 @@ public class ActionDurationsTest extends BrobotTestBase {
         @DisplayName("Should have consistent initialization order")
         void shouldHaveConsistentInitializationOrder() {
             // Create multiple instances and verify consistency
-            ActionDurations durations1 = new ActionDurations();
-            ActionDurations durations2 = new ActionDurations();
-            ActionDurations durations3 = new ActionDurations();
+            ActionDurations durations1 = new ActionDurations(mockBrobotProperties);
+            ActionDurations durations2 = new ActionDurations(mockBrobotProperties);
+            ActionDurations durations3 = new ActionDurations(mockBrobotProperties);
 
             // All should return same values
             assertEquals(
@@ -355,7 +369,7 @@ public class ActionDurationsTest extends BrobotTestBase {
         @DisplayName("Should handle zero duration values")
         void shouldHandleZeroDurationValues() {
             // Setting mockTimeClick now handled by BrobotProperties
-            ActionDurations zeroDurations = new ActionDurations();
+            ActionDurations zeroDurations = new ActionDurations(mockBrobotProperties);
 
             double duration = zeroDurations.getActionDuration(ActionType.CLICK);
             assertEquals(0.0, duration);
@@ -366,7 +380,7 @@ public class ActionDurationsTest extends BrobotTestBase {
         void shouldHandleNegativeDurationValues() {
             // This shouldn't happen in practice, but test defensive behavior
             // Setting mockTimeClick now handled by BrobotProperties
-            ActionDurations negativeDurations = new ActionDurations();
+            ActionDurations negativeDurations = new ActionDurations(mockBrobotProperties);
 
             double duration = negativeDurations.getActionDuration(ActionType.CLICK);
             assertEquals(
@@ -377,7 +391,7 @@ public class ActionDurationsTest extends BrobotTestBase {
         @DisplayName("Should handle very large duration values")
         void shouldHandleVeryLargeDurationValues() {
             // Setting mockTimeClick now handled by BrobotProperties
-            ActionDurations largeDurations = new ActionDurations();
+            ActionDurations largeDurations = new ActionDurations(mockBrobotProperties);
 
             double duration = largeDurations.getActionDuration(ActionType.CLICK);
             assertEquals(Double.MAX_VALUE, duration);
@@ -387,7 +401,7 @@ public class ActionDurationsTest extends BrobotTestBase {
         @DisplayName("Should handle NaN duration values")
         void shouldHandleNaNDurationValues() {
             // Setting mockTimeClick now handled by BrobotProperties
-            ActionDurations nanDurations = new ActionDurations();
+            ActionDurations nanDurations = new ActionDurations(mockBrobotProperties);
 
             double duration = nanDurations.getActionDuration(ActionType.CLICK);
             assertTrue(Double.isNaN(duration));

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Brobot's headless detection has been redesigned to use explicit configuration rather than auto-detection. This change was made due to reliability issues with automatic detection, particularly on Windows systems where `GraphicsEnvironment.isHeadless()` could incorrectly return `true` even with displays available.
+Starting with Brobot 1.1.0, headless mode is **explicitly configured** via properties rather than auto-detected. This simplifies the codebase and avoids issues with Java's unreliable `GraphicsEnvironment.isHeadless()` detection, particularly on Windows systems.
 
 ## Configuration
 
@@ -14,9 +14,6 @@ Headless mode must be explicitly configured via properties:
 # application.properties
 # Explicitly set headless mode (default: false)
 brobot.headless=false
-
-# Enable debug logging for headless detection
-brobot.headless.debug=false
 ```
 
 ### Property Values
@@ -24,22 +21,20 @@ brobot.headless.debug=false
 | Value | Description | Use Case |
 |-------|-------------|----------|
 | `false` (default) | GUI is available | Normal desktop environments, Windows/Mac/Linux with displays |
-| `true` | No display available | CI/CD pipelines, headless servers, Docker containers |
+| `true` | No display available | CI/CD pipelines, headless servers, Docker containers, test environments |
 
 ## How It Works
 
-### HeadlessDetector
+### Simple Configuration-Based Approach
 
-The `HeadlessDetector` component reads the configured property value:
+The `HeadlessDetector` component simply reads the configured property value:
 
 ```java
 @Component
 public class HeadlessDetector {
 
-    public HeadlessDetector(
-        @Value("${brobot.headless:false}") boolean brobotHeadless,
-        @Value("${brobot.headless.debug:false}") boolean debugEnabled) {
-        // Uses configured value, NOT auto-detection
+    public HeadlessDetector(@Value("${brobot.headless:false}") boolean brobotHeadless) {
+        // Uses configured value ONLY - no auto-detection
         this.headlessMode = brobotHeadless;
     }
 
@@ -49,25 +44,14 @@ public class HeadlessDetector {
 }
 ```
 
-### ForceNonHeadlessInitializer
+### No More Complex Workarounds
 
-To prevent Java's `GraphicsEnvironment` from incorrectly detecting headless mode, Brobot includes `ForceNonHeadlessInitializer`:
+Previous versions attempted various workarounds for headless detection issues. These have been **removed** in favor of the simpler approach:
 
-```java
-public class ForceNonHeadlessInitializer {
-    static {
-        // Runs very early in application startup
-        // Sets java.awt.headless=false before AWT classes load
-        // Attempts to override incorrect GraphicsEnvironment initialization
-    }
-}
-```
-
-This initializer:
-1. Sets `java.awt.headless=false` system property early
-2. Attempts to override `GraphicsEnvironment` if already initialized
-3. Forces Windows toolkit on Windows systems
-4. Logs diagnostic information about the headless state
+- ❌ **Removed**: `ForceNonHeadlessInitializer`
+- ❌ **Removed**: `RobotForcedInitializer`
+- ❌ **Removed**: Direct Robot manipulation
+- ✅ **Kept**: Simple property-based configuration
 
 ## Common Scenarios
 
@@ -104,26 +88,46 @@ brobot.headless=false
 brobot.headless=true
 ```
 
+## Why We Changed
+
+### The Problem with Auto-Detection
+
+Java's `GraphicsEnvironment.isHeadless()` has several issues:
+
+1. **Cached Results**: Once called, the result is cached and cannot change
+2. **Gradle Interference**: Gradle often sets `java.awt.headless=true` before the JVM starts
+3. **Timing Issues**: Early initialization can lock in the wrong headless state
+4. **Platform Inconsistency**: Different behavior on different operating systems
+
+### The Solution: Explicit Configuration
+
+By using explicit configuration:
+- **Predictable**: You know exactly what mode you're in
+- **Simple**: No complex detection logic or workarounds
+- **Reliable**: Works consistently across all platforms
+- **Testable**: Easy to test both modes
+
 ## Troubleshooting
 
-### Issue: HeadlessException on Windows
+### Issue: Getting HeadlessException
 
-**Symptom**: Getting `HeadlessException` even though Windows has displays
-
-**Solution**:
-1. Ensure `brobot.headless=false` in properties
-2. Add JVM argument: `-Djava.awt.headless=false`
-3. Check Gradle properties for `systemProp.java.awt.headless=false`
-
-### Issue: GraphicsEnvironment.isHeadless() Returns True
-
-**Symptom**: Java's `GraphicsEnvironment` incorrectly detects headless
-
-**Explanation**: This is why Brobot uses explicit configuration. The `ForceNonHeadlessInitializer` attempts to fix this, but if `GraphicsEnvironment` is already initialized by Gradle or another tool, it may be too late.
+**Symptom**: `HeadlessException` when running automation
 
 **Solution**:
-- Use `HeadlessDetector.isHeadless()` instead of `GraphicsEnvironment.isHeadless()`
-- The HeadlessDetector uses your configured value, not auto-detection
+1. Ensure `brobot.headless=false` in your properties
+2. If using Gradle, add to `gradle.properties`:
+   ```properties
+   org.gradle.jvmargs=-Djava.awt.headless=false
+   ```
+
+### Issue: Click Actions Not Working
+
+**Symptom**: Images are found but clicks fail
+
+**Solution**:
+- This is likely a headless detection issue
+- Ensure `brobot.headless=false` is set
+- The click action now uses SikuliX directly, which handles Robot initialization lazily
 
 ### Issue: Different Behavior in Tests
 
@@ -135,57 +139,6 @@ brobot.headless=true
 public class MyTest extends BrobotTestBase {
     // Mock mode is automatically enabled
     // Headless-safe testing environment
-}
-```
-
-## Debugging Headless Issues
-
-### Enable Debug Logging
-
-```properties
-brobot.headless.debug=true
-```
-
-This will log:
-- Current `java.awt.headless` property value
-- `GraphicsEnvironment.isHeadless()` result
-- Configured `brobot.headless` value
-- Whether `ForceNonHeadlessInitializer` had to override settings
-
-### Run Diagnostic Tool
-
-```bash
-# From project root
-java -cp library/build/classes/java/main io.github.jspinak.brobot.debug.HeadlessDebugger
-```
-
-This tool provides comprehensive information about:
-- System properties
-- JVM arguments
-- Environment variables
-- GraphicsEnvironment state
-- Display availability
-
-## Migration from Auto-Detection
-
-If you're upgrading from a version that used auto-detection:
-
-### Before (Auto-Detection)
-```java
-// Old approach - unreliable
-if (GraphicsEnvironment.isHeadless()) {
-    // Handle headless
-}
-```
-
-### After (Explicit Configuration)
-```java
-@Autowired
-private HeadlessDetector headlessDetector;
-
-// New approach - reliable
-if (headlessDetector.isHeadless()) {
-    // Handle headless based on configuration
 }
 ```
 
@@ -201,18 +154,19 @@ if (headlessDetector.isHeadless()) {
    # application-dev.properties
    brobot.headless=false
 
-   # application-prod.properties
-   brobot.headless=true  # If running on headless server
+   # application-ci.properties
+   brobot.headless=true
    ```
 
-3. **Test both modes**: Ensure your automation handles both configurations
-
-4. **Use HeadlessDetector, not GraphicsEnvironment**:
+3. **Use HeadlessDetector, not GraphicsEnvironment**:
    ```java
    // Good
+   @Autowired
+   private HeadlessDetector headlessDetector;
+
    if (headlessDetector.isHeadless()) { }
 
-   // Avoid
+   // Avoid - unreliable
    if (GraphicsEnvironment.isHeadless()) { }
    ```
 
@@ -228,13 +182,13 @@ Both can be used together for CI/CD testing.
 ### Screen Capture
 When `brobot.headless=true`, ensure appropriate capture provider:
 ```properties
-brobot.capture.provider=FFMPEG  # Works in headless environments
+brobot.capture.provider=MOCK  # Use mock provider for headless
 ```
 
 ## Summary
 
-- Headless mode is now **explicitly configured** via `brobot.headless` property
-- Auto-detection has been **removed** due to reliability issues
+- Headless mode is **explicitly configured** via `brobot.headless` property
+- Auto-detection has been **removed** for simplicity and reliability
 - Default is `false` (assumes display is available)
-- Use `HeadlessDetector` service instead of `GraphicsEnvironment.isHeadless()`
-- `ForceNonHeadlessInitializer` helps prevent incorrect Java detection
+- No more complex workarounds or Robot initialization tricks
+- SikuliX handles all low-level details automatically

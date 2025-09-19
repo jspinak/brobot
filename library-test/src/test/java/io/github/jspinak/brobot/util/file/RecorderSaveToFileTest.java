@@ -70,7 +70,7 @@ public class RecorderSaveToFileTest extends BrobotTestBase {
     public void setupTest() {
         super.setupTest();
         MockitoAnnotations.openMocks(this);
-        saveToFile = new RecorderSaveToFile();
+        saveToFile = new RecorderSaveToFile(brobotProperties);
 
         // Recording folder is now configured via BrobotProperties
 

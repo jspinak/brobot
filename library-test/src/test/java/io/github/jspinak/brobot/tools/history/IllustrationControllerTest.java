@@ -24,6 +24,7 @@ import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.test.BrobotTestBase;
@@ -49,6 +50,8 @@ public class IllustrationControllerTest extends BrobotTestBase {
 
     @Mock private LoggingVerbosityConfig mockLoggingConfig;
 
+    @Mock private BrobotProperties mockBrobotProperties;
+
     private IllustrationController illustrationController;
 
     // Store original settings to restore after tests
@@ -63,9 +66,18 @@ public class IllustrationControllerTest extends BrobotTestBase {
 
         // Settings are configured via BrobotProperties in application-test.properties
 
+        // Set up default behavior for BrobotProperties
+        when(mockBrobotProperties.getScreenshot()).thenReturn(new BrobotProperties.Screenshot());
+        when(mockBrobotProperties.getIllustration())
+                .thenReturn(new BrobotProperties.Illustration());
+
         illustrationController =
                 new IllustrationController(
-                        mockImageUtils, mockActionVisualizer, mockVisualizationOrchestrator);
+                        mockBrobotProperties,
+                        mockImageUtils,
+                        mockActionVisualizer,
+                        mockVisualizationOrchestrator,
+                        mockLoggingConfig);
     }
 
     @org.junit.jupiter.api.AfterEach
@@ -354,7 +366,11 @@ public class IllustrationControllerTest extends BrobotTestBase {
             // Inject logging config
             illustrationController =
                     new IllustrationController(
-                            mockImageUtils, mockActionVisualizer, mockVisualizationOrchestrator);
+                            mockBrobotProperties,
+                            mockImageUtils,
+                            mockActionVisualizer,
+                            mockVisualizationOrchestrator,
+                            mockLoggingConfig);
 
             // Use reflection to set the logging config
             try {
