@@ -33,7 +33,7 @@ public class MainPageTransitions {
     }
 
     @OutgoingTransition(
-            to = ModalDialogState.class,
+            activate = {ModalDialogState.class},
             staysVisible = true, // MainPage stays visible behind modal
             pathCost = 0,
             description = "Open modal dialog over main page")
@@ -44,7 +44,7 @@ public class MainPageTransitions {
     }
 
     @OutgoingTransition(
-            to = SettingsPageState.class,
+            activate = {SettingsPageState.class},
             pathCost = 1,
             description = "Navigate to settings page")
     public boolean toSettings() {
@@ -53,7 +53,7 @@ public class MainPageTransitions {
     }
 
     @OutgoingTransition(
-            to = CurrentState.class, // Self-transition
+            activate = {CurrentState.class}, // Self-transition
             pathCost = 2,
             description = "Refresh main page")
     public boolean refresh() {
@@ -63,7 +63,7 @@ public class MainPageTransitions {
     }
 
     @OutgoingTransition(
-            to = CurrentState.class, // Self-transition
+            activate = {CurrentState.class}, // Self-transition
             pathCost = 3,
             description = "Load next page of results")
     public boolean nextPage() {

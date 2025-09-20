@@ -59,7 +59,7 @@ import lombok.extern.slf4j.Slf4j;
  *   <li><b>Phase 4: State Activation</b> - Initial state discovery and activation
  * </ol>
  *
- * @since 1.3.0
+ * @since 1.1.0
  */
 @Slf4j
 @Component

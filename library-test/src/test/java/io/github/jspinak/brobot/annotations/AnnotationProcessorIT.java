@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.annotations;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import java.util.List;
 import java.util.Map;
@@ -70,7 +71,7 @@ public class AnnotationProcessorIT extends BrobotTestBase {
 
     @TransitionSet(state = TestState2.class)
     public static class TestTransition1 {
-        @OutgoingTransition(to = TestState1.class)
+        @OutgoingTransition(activate = {TestState1.class})
         public boolean toTestState1() {
             return true;
         }
@@ -268,24 +269,26 @@ public class AnnotationProcessorIT extends BrobotTestBase {
             Class<?> targetState = transitionAnnotation.state();
             assertEquals(TestState2.class, targetState, "Target state should be TestState2");
 
-            // Verify FromTransition methods
+            // Verify OutgoingTransition methods
             java.lang.reflect.Method[] methods = TestTransition1.class.getDeclaredMethods();
-            boolean hasFromTransition = false;
-            boolean hasToTransition = false;
+            boolean hasOutgoingTransition = false;
+            boolean hasIncomingTransition = false;
 
             for (java.lang.reflect.Method method : methods) {
-                if (method.isAnnotationPresent(FromTransition.class)) {
-                    hasFromTransition = true;
-                    FromTransition fromAnnotation = method.getAnnotation(FromTransition.class);
-                    assertEquals(TestState1.class, fromAnnotation.from());
+                if (method.isAnnotationPresent(OutgoingTransition.class)) {
+                    hasOutgoingTransition = true;
+                    OutgoingTransition outAnnotation =
+                            method.getAnnotation(OutgoingTransition.class);
+                    assertArrayEquals(new Class<?>[] {TestState1.class}, outAnnotation.activate());
                 }
                 if (method.isAnnotationPresent(IncomingTransition.class)) {
-                    hasToTransition = true;
+                    hasIncomingTransition = true;
                 }
             }
 
-            assertTrue(hasFromTransition, "Should have at least one @FromTransition method");
-            assertTrue(hasToTransition, "Should have an @IncomingTransition method");
+            assertTrue(
+                    hasOutgoingTransition, "Should have at least one @OutgoingTransition method");
+            assertTrue(hasIncomingTransition, "Should have an @IncomingTransition method");
             assertEquals("", transitionAnnotation.description()); // Default description
         }
     }

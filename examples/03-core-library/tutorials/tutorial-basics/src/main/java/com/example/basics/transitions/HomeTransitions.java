@@ -67,7 +67,7 @@ public class HomeTransitions {
      * Verify that we have successfully arrived at the Home state. Checks for the presence of key
      * home state elements.
      */
-    @IncomingTransition(description = "Verify arrival at Home state", required = true)
+    @IncomingTransition(description = "Verify arrival at Home state")
     public boolean verifyArrival() {
         log.info("Verifying arrival at Home state");
         // In mock mode, just return true for testing

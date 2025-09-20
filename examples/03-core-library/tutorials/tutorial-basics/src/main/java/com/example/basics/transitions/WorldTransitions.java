@@ -67,7 +67,7 @@ public class WorldTransitions {
      * Verify that we have successfully arrived at the World state. Checks for the presence of world
      * map elements.
      */
-    @IncomingTransition(description = "Verify arrival at World state", required = true)
+    @IncomingTransition(description = "Verify arrival at World state")
     public boolean verifyArrival() {
         log.info("Verifying arrival at World state");
         // In mock mode, just return true for testing

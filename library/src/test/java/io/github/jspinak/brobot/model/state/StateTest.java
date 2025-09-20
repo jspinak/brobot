@@ -71,7 +71,7 @@ public class StateTest extends BrobotTestBase {
             assertFalse(newState.isBlocking());
             assertEquals(100, newState.getBaseProbabilityExists());
             assertEquals(0, newState.getProbabilityExists());
-            assertEquals(1, newState.getPathScore());
+            assertEquals(1, newState.getPathCost());
         }
 
         @Test
@@ -84,7 +84,7 @@ public class StateTest extends BrobotTestBase {
             state.setId(id);
             state.setName(name);
             state.setBlocking(true);
-            state.setPathScore(5);
+            state.setPathCost(5);
             state.setLastAccessed(now);
             state.setBaseProbabilityExists(80);
             state.setProbabilityExists(75);
@@ -93,7 +93,7 @@ public class StateTest extends BrobotTestBase {
             assertEquals(id, state.getId());
             assertEquals(name, state.getName());
             assertTrue(state.isBlocking());
-            assertEquals(5, state.getPathScore());
+            assertEquals(5, state.getPathCost());
             assertEquals(now, state.getLastAccessed());
             assertEquals(80, state.getBaseProbabilityExists());
             assertEquals(75, state.getProbabilityExists());
@@ -482,15 +482,15 @@ public class StateTest extends BrobotTestBase {
         @Test
         @DisplayName("Default path score is 1")
         public void testDefaultPathScore() {
-            assertEquals(1, state.getPathScore());
+            assertEquals(1, state.getPathCost());
         }
 
         @ParameterizedTest
         @ValueSource(ints = {1, 5, 10, 100})
         @DisplayName("Set various path scores")
         public void testSetPathScore(int score) {
-            state.setPathScore(score);
-            assertEquals(score, state.getPathScore());
+            state.setPathCost(score);
+            assertEquals(score, state.getPathCost());
         }
     }
 
@@ -505,7 +505,7 @@ public class StateTest extends BrobotTestBase {
             state.setId(1L);
             state.setName("LoginState");
             state.setBlocking(true);
-            state.setPathScore(2);
+            state.setPathCost(2);
             state.setBaseProbabilityExists(90);
             state.setProbabilityToBaseProbability();
 
@@ -534,7 +534,7 @@ public class StateTest extends BrobotTestBase {
             assertEquals(1L, state.getId());
             assertEquals("LoginState", state.getName());
             assertTrue(state.isBlocking());
-            assertEquals(2, state.getPathScore());
+            assertEquals(2, state.getPathCost());
             assertEquals(90, state.getProbabilityExists());
             assertEquals(3, state.getStateText().size());
             assertEquals(1, state.getStateImages().size());

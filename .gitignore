@@ -115,7 +115,12 @@ library/show_coverage.sh
 runner/ACTION_RECORD_PERSISTENCE_PLAN.md
 library/check-coverage-improvement.py
 library-test/reports/
+library-test/scripts/
 hanging_tests.txt
+fix_brobot_properties_mock.py
+fix_screenshot_references.py
+project-docs/
+
 
 # GitHub workflows (should be in root repo, not library)
 library/.github/

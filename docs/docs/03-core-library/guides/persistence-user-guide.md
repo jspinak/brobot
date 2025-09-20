@@ -12,14 +12,14 @@ The Brobot Persistence Module allows you to record and analyze automation execut
 <dependency>
     <groupId>io.github.jspinak</groupId>
     <artifactId>brobot-persistence</artifactId>
-    <version>1.2.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```gradle
-implementation 'io.github.jspinak:brobot-persistence:1.2.0'
+implementation 'io.github.jspinak:brobot-persistence:1.1.0'
 ```
 
 ## Quick Start

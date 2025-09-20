@@ -2,7 +2,7 @@
 
 ## Implementation Complete ✅
 
-As of version 1.2.0, Brobot now provides complete automatic initial state handling. States marked with `@State(initial = true)` are automatically detected, configured, and activated at application startup.
+As of version 1.1.0, Brobot now provides complete automatic initial state handling. States marked with `@State(initial = true)` are automatically detected, configured, and activated at application startup.
 
 ## Current Implementation
 

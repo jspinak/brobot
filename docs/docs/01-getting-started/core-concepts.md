@@ -66,6 +66,19 @@ All operations in Brobot, from a simple click to a complex drag-and-drop, are bu
 
 [Learn more on the detailed Action Hierarchy page...](action-hierarchy.md)
 
+## Intelligent Pathfinding
+
+When navigating between states, Brobot uses a cost-based pathfinding system to automatically select the most efficient route. Each state and transition has an associated cost (default: 1), and the framework calculates the total cost of all possible paths to find the optimal route.
+
+Key concepts:
+- **Path Cost** = Sum of all state costs + Sum of all transition costs
+- **Lower costs are preferred** - The path with the lowest total cost is automatically selected
+- **Configurable costs** - Set custom costs to prefer certain routes or discourage expensive operations
+
+This intelligent pathfinding means you can simply request to navigate to a target state, and Brobot will automatically find and execute the best path to get there.
+
+[Learn more about pathfinding and path costs...](../03-core-library/guides/pathfinding-and-costs.md)
+
 ## State-Aware Scheduling
 
 For continuous monitoring and background automation tasks, Brobot provides state-aware scheduling capabilities. This feature automatically validates and manages active states before executing scheduled tasks, ensuring your automation runs with the correct GUI context.

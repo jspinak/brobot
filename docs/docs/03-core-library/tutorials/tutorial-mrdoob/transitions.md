@@ -5,7 +5,7 @@ sidebar_position: 5
 # Transitions
 
 :::info Version Note
-This tutorial has been updated for Brobot 1.2.0+ with the new @TransitionSet annotation system.
+This tutorial has been updated for Brobot 1.1.0+ with the new @TransitionSet annotation system.
 :::
  
 Transitions define how to navigate between states. With the new @TransitionSet annotation system, all transitions for a state are grouped together in a single class, providing better organization and clearer intent.
@@ -68,7 +68,7 @@ public class HomepageTransitions {
      * Verify that we have successfully arrived at the Homepage state.
      * Checks for the presence of homepage-specific elements.
      */
-    @IncomingTransition(description = "Verify arrival at Homepage", required = true)
+    @IncomingTransition(description = "Verify arrival at Homepage")
     public boolean verifyArrival() {
         log.info("Verifying arrival at Homepage");
         
@@ -161,7 +161,7 @@ public class HarmonyTransitions {
      * Verify that we have successfully arrived at the Harmony state.
      * Checks for the presence of harmony-specific elements.
      */
-    @IncomingTransition(description = "Verify arrival at Harmony", required = true)
+    @IncomingTransition(description = "Verify arrival at Harmony")
     public boolean verifyArrival() {
         log.info("Verifying arrival at Harmony");
         
@@ -236,7 +236,7 @@ public class AboutTransitions {
      * Verify that we have successfully arrived at the About state.
      * Checks for the presence of about-specific elements.
      */
-    @IncomingTransition(description = "Verify arrival at About", required = true)
+    @IncomingTransition(description = "Verify arrival at About")
     public boolean verifyArrival() {
         log.info("Verifying arrival at About");
         
@@ -291,7 +291,7 @@ public class HarmonyToAboutTransition {
 }
 ```
 
-#### After (Unified Transition Classes - v1.2.0+)
+#### After (Unified Transition Classes - v1.1.0+)
 ```java
 // All transitions for Harmony in ONE class
 @TransitionSet(state = Harmony.class)
@@ -310,7 +310,7 @@ public class HarmonyTransitions {
         return action.click(about.getBackButton()).isSuccess();
     }
     
-    @IncomingTransition(required = true)
+    @IncomingTransition
     public boolean verifyArrival() {
         if (brobotProperties.getCore().isMock()) return true;
         return action.find(harmony.getAboutLink()).isSuccess();

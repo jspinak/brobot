@@ -47,7 +47,7 @@ import lombok.extern.slf4j.Slf4j;
  * brobot.startup.activate-first-only: true # Only activate first found state
  * </pre>
  *
- * @since 1.2.0
+ * @since 1.1.0
  */
 @Configuration
 @RequiredArgsConstructor

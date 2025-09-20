@@ -267,7 +267,7 @@ public class PersistenceAdapterService {
 <dependency>
     <groupId>io.github.jspinak</groupId>
     <artifactId>brobot-persistence</artifactId>
-    <version>1.2.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 

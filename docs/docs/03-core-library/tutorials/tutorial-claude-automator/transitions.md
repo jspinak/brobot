@@ -2,7 +2,7 @@
 
 ## Overview
 
-Transitions define how to navigate between states. With the new @TransitionSet annotation system (Brobot 1.2.0+), all transitions for a state are grouped together in a single class, providing better organization and clearer intent.
+Transitions define how to navigate between states. With the new @TransitionSet annotation system (Brobot 1.1.0+), all transitions for a state are grouped together in a single class, providing better organization and clearer intent.
 
 ## Modern Approach: Unified Transition Classes
 
@@ -63,7 +63,7 @@ public class PromptTransitions {
      * Verify that we have successfully arrived at the Prompt state.
      * Checks for the presence of the Claude prompt input area.
      */
-    @IncomingTransition(description = "Verify arrival at Prompt state", required = true)
+    @IncomingTransition(description = "Verify arrival at Prompt state")
     public boolean verifyArrival() {
         log.info("Verifying arrival at Prompt state");
         
@@ -174,7 +174,7 @@ public class WorkingTransitions {
      * Verify that we have successfully arrived at the Working state.
      * Checks for the presence of the working indicator.
      */
-    @IncomingTransition(description = "Verify arrival at Working state", required = true)
+    @IncomingTransition(description = "Verify arrival at Working state")
     public boolean verifyArrival() {
         log.info("Verifying arrival at Working state");
         
@@ -221,9 +221,8 @@ All transitions for a state are in ONE class:
 - **description**: Optional documentation
 
 ```java
-@IncomingTransition(description = "Verification logic", required = true)
+@IncomingTransition(description = "Verification logic")
 ```
-- **required**: Whether verification must succeed (default: false)
 - **description**: Optional documentation
 
 ### 3. **Mock Mode Support**
@@ -262,7 +261,7 @@ ActionResult result = action.perform(chainedAction, target);
 
 ## Comparison: Old vs New
 
-### Old Approach (Pre-1.2.0)
+### Old Approach (Pre-1.1.0)
 Multiple separate transition classes:
 ```java
 // Separate file for each transition
@@ -282,7 +281,7 @@ public class WorkingToPromptTransition {
 }
 ```
 
-### New Approach (1.2.0+)
+### New Approach (1.1.0+)
 All transitions for a state in ONE class:
 ```java
 @TransitionSet(state = WorkingState.class)
@@ -295,7 +294,7 @@ public class WorkingTransitions {
         return action.click(promptState.getButton()).isSuccess();
     }
     
-    @IncomingTransition(required = true)
+    @IncomingTransition
     public boolean verifyArrival() {
         if (brobotProperties.getCore().isMock()) return true;
         return action.find(workingState.getIndicator()).isSuccess();

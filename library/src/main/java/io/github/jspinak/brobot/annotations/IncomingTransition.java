@@ -9,14 +9,16 @@ import java.lang.annotation.*;
  * <p>The annotated method should:
  *
  * <ul>
- *   <li>Return boolean (true if state is confirmed, false otherwise)
+ *   <li>Return boolean (must return true for transition to be considered successful)
  *   <li>Verify the presence of unique elements that confirm the state is active
  *   <li>Be a member of a class annotated with @TransitionSet
  *   <li>There should be only ONE @IncomingTransition method per @TransitionSet class
  * </ul>
  *
  * <p>This transition is executed to confirm successful navigation to the target state, regardless
- * of which state we came from. It verifies the state is active and ready.
+ * of which state we came from. The transition will only succeed if this method returns true. If
+ * no @IncomingTransition is defined for a transition class, the framework assumes the transition
+ * was successful (equivalent to having an @IncomingTransition that always returns true).
  *
  * <p>Example usage:
  *
@@ -48,13 +50,4 @@ public @interface IncomingTransition {
      * @return the timeout in seconds
      */
     int timeout() default 5;
-
-    /**
-     * Whether this verification is required for the transition to be considered successful. If
-     * false, failure of this verification will log a warning but not fail the transition. Default
-     * is true.
-     *
-     * @return whether this verification is required
-     */
-    boolean required() default true;
 }

@@ -67,7 +67,7 @@ public class IslandTransitions {
      * Verify that we have successfully arrived at the Island state. Checks for the presence of
      * island-specific elements.
      */
-    @IncomingTransition(description = "Verify arrival at Island state", required = true)
+    @IncomingTransition(description = "Verify arrival at Island state")
     public boolean verifyArrival() {
         log.info("Verifying arrival at Island state");
         // In mock mode, just return true for testing

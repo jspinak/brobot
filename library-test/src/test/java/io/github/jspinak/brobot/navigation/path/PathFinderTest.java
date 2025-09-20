@@ -57,8 +57,8 @@ class PathFinderTest {
             State targetState = mock(State.class);
             when(startState.getId()).thenReturn(1L);
             when(targetState.getId()).thenReturn(2L);
-            when(startState.getPathScore()).thenReturn(10);
-            when(targetState.getPathScore()).thenReturn(10);
+            when(startState.getPathCost()).thenReturn(10);
+            when(targetState.getPathCost()).thenReturn(10);
 
             // Setup state names
             when(stateService.getStateName(1L)).thenReturn("StartState");
@@ -102,9 +102,9 @@ class PathFinderTest {
             when(startState.getId()).thenReturn(1L);
             when(intermediateState.getId()).thenReturn(2L);
             when(targetState.getId()).thenReturn(3L);
-            when(startState.getPathScore()).thenReturn(10);
-            when(intermediateState.getPathScore()).thenReturn(5);
-            when(targetState.getPathScore()).thenReturn(10);
+            when(startState.getPathCost()).thenReturn(10);
+            when(intermediateState.getPathCost()).thenReturn(5);
+            when(targetState.getPathCost()).thenReturn(10);
 
             // Setup state names
             when(stateService.getStateName(1L)).thenReturn("StartState");
@@ -183,9 +183,9 @@ class PathFinderTest {
             when(startState1.getId()).thenReturn(1L);
             when(startState2.getId()).thenReturn(2L);
             when(targetState.getId()).thenReturn(3L);
-            when(startState1.getPathScore()).thenReturn(10);
-            when(startState2.getPathScore()).thenReturn(15);
-            when(targetState.getPathScore()).thenReturn(10);
+            when(startState1.getPathCost()).thenReturn(10);
+            when(startState2.getPathCost()).thenReturn(15);
+            when(targetState.getPathCost()).thenReturn(10);
 
             // Setup state names
             when(stateService.getStateName(1L)).thenReturn("StartState1");
@@ -243,10 +243,10 @@ class PathFinderTest {
             State state2 = mock(State.class);
             State state3 = mock(State.class);
             State state4 = mock(State.class);
-            when(state1.getPathScore()).thenReturn(10);
-            when(state2.getPathScore()).thenReturn(10);
-            when(state3.getPathScore()).thenReturn(10);
-            when(state4.getPathScore()).thenReturn(10);
+            when(state1.getPathCost()).thenReturn(10);
+            when(state2.getPathCost()).thenReturn(10);
+            when(state3.getPathCost()).thenReturn(10);
+            when(state4.getPathCost()).thenReturn(10);
             when(stateService.getState(1L)).thenReturn(Optional.of(state1));
             when(stateService.getState(2L)).thenReturn(Optional.of(state2));
             when(stateService.getState(3L)).thenReturn(Optional.of(state3));
@@ -289,10 +289,10 @@ class PathFinderTest {
             when(state2.getId()).thenReturn(2L);
             when(state3.getId()).thenReturn(3L);
             when(targetState.getId()).thenReturn(4L);
-            when(startState.getPathScore()).thenReturn(10);
-            when(state2.getPathScore()).thenReturn(10);
-            when(state3.getPathScore()).thenReturn(10);
-            when(targetState.getPathScore()).thenReturn(10);
+            when(startState.getPathCost()).thenReturn(10);
+            when(state2.getPathCost()).thenReturn(10);
+            when(state3.getPathCost()).thenReturn(10);
+            when(targetState.getPathCost()).thenReturn(10);
 
             // Setup state names
             when(stateService.getStateName(1L)).thenReturn("Start");
@@ -358,9 +358,9 @@ class PathFinderTest {
             when(startState.getId()).thenReturn(1L);
             when(intermediateState.getId()).thenReturn(2L);
             when(targetState.getId()).thenReturn(3L);
-            when(startState.getPathScore()).thenReturn(10);
-            when(intermediateState.getPathScore()).thenReturn(20);
-            when(targetState.getPathScore()).thenReturn(15);
+            when(startState.getPathCost()).thenReturn(10);
+            when(intermediateState.getPathCost()).thenReturn(20);
+            when(targetState.getPathCost()).thenReturn(15);
 
             // Setup state names and states
             when(stateService.getStateName(1L)).thenReturn("Start");
@@ -410,9 +410,9 @@ class PathFinderTest {
             when(start1.getId()).thenReturn(1L);
             when(start2.getId()).thenReturn(2L);
             when(targetState.getId()).thenReturn(3L);
-            when(start1.getPathScore()).thenReturn(5); // Lower score path
-            when(start2.getPathScore()).thenReturn(20); // Higher score path
-            when(targetState.getPathScore()).thenReturn(10);
+            when(start1.getPathCost()).thenReturn(5); // Lower score path
+            when(start2.getPathCost()).thenReturn(20); // Higher score path
+            when(targetState.getPathCost()).thenReturn(10);
 
             // Setup state names
             when(stateService.getStateName(1L)).thenReturn("Start1");
@@ -475,7 +475,7 @@ class PathFinderTest {
             // Setup state with self-loop
             State state = mock(State.class);
             when(state.getId()).thenReturn(1L);
-            when(state.getPathScore()).thenReturn(10);
+            when(state.getPathCost()).thenReturn(10);
 
             when(stateService.getStateName(1L)).thenReturn("State");
             when(stateService.getState(1L)).thenReturn(Optional.of(state));
@@ -509,8 +509,8 @@ class PathFinderTest {
             State targetState = mock(State.class);
             when(startState.getId()).thenReturn(1L);
             when(targetState.getId()).thenReturn(2L);
-            when(startState.getPathScore()).thenReturn(10);
-            when(targetState.getPathScore()).thenReturn(10);
+            when(startState.getPathCost()).thenReturn(10);
+            when(targetState.getPathCost()).thenReturn(10);
 
             // Setup state names
             when(stateService.getStateName(1L)).thenReturn("Start");

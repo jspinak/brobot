@@ -69,7 +69,7 @@ public class StateJsonParserTestUpdated {
         assertTrue(state.getStateText().contains("TestText1"));
         assertTrue(state.getStateText().contains("TestText2"));
         assertTrue(state.isBlocking());
-        assertEquals(5, state.getPathScore());
+        assertEquals(5, state.getPathCost());
         assertEquals(80, state.getBaseProbabilityExists());
 
         // Verify usable area
@@ -105,7 +105,7 @@ public class StateJsonParserTestUpdated {
         state.setStateText(stateTextSet);
 
         state.setBlocking(true);
-        state.setPathScore(3);
+        state.setPathCost(3);
         state.setBaseProbabilityExists(90);
         state.setUsableArea(new Region(50, 50, 1000, 800));
 
@@ -176,7 +176,7 @@ public class StateJsonParserTestUpdated {
         assertTrue(deserializedState.getStateText().contains("Text2"));
         assertTrue(deserializedState.getStateText().contains("Text3"));
         assertTrue(deserializedState.isBlocking());
-        assertEquals(3, deserializedState.getPathScore());
+        assertEquals(3, deserializedState.getPathCost());
         assertEquals(90, deserializedState.getBaseProbabilityExists());
 
         // Verify usable area

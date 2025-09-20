@@ -165,10 +165,12 @@ public class PathFinder {
 
     private void setPathScore(Path path) {
         int score = 0;
+        // Sum state costs
         for (Long stateId : path.getStates()) {
             Optional<State> state = allStates.getState(stateId);
-            if (state.isPresent()) score += state.get().getPathScore();
+            if (state.isPresent()) score += state.get().getPathCost();
         }
+        // Sum transition costs
         for (StateTransition stateTrans : path.getTransitions()) {
             score += stateTrans.getPathCost();
         }

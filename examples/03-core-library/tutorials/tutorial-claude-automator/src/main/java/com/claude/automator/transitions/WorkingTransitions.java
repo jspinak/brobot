@@ -79,7 +79,7 @@ public class WorkingTransitions {
      * Verify that we have successfully arrived at the Working state. Checks for the presence of the
      * working indicator.
      */
-    @IncomingTransition(description = "Verify arrival at Working state", required = true)
+    @IncomingTransition(description = "Verify arrival at Working state")
     public boolean verifyArrival() {
         log.info("Verifying arrival at Working state");
         // In mock mode, just return true for testing

@@ -49,7 +49,7 @@ public class PricingTransitions {
      * Verify that we have successfully arrived at the Pricing state.
      * Checks for the presence of pricing-specific elements.
      */
-    @IncomingTransition(description = "Verify arrival at Pricing state", required = true)
+    @IncomingTransition(description = "Verify arrival at Pricing state")
     public boolean verifyArrival() {
         log.info("Verifying arrival at Pricing state");
         // In mock mode, just return true for testing
@@ -72,7 +72,7 @@ public class PricingTransitions {
     /**
      * Navigate from Pricing to Homepage by clicking the home/logo button.
      */
-    @OutgoingTransition(to = HomepageState.class, pathCost = 1, description = "Navigate from Pricing to Homepage")
+    @OutgoingTransition(activate = {HomepageState.class}, pathCost = 1, description = "Navigate from Pricing to Homepage")
     public boolean toHomepage() {
         log.info("Navigating from Pricing to Homepage");
         // In mock mode, just return true for testing
@@ -86,7 +86,7 @@ public class PricingTransitions {
     /**
      * Navigate from Pricing to Menu by clicking the menu icon.
      */
-    @OutgoingTransition(to = MenuState.class, pathCost = 2, description = "Navigate from Pricing to Menu")
+    @OutgoingTransition(activate = {MenuState.class}, pathCost = 2, description = "Navigate from Pricing to Menu")
     public boolean toMenu() {
         log.info("Navigating from Pricing to Menu");
         // In mock mode, just return true for testing
@@ -111,15 +111,13 @@ Marks a class as containing all transitions for a specific state:
 Verifies successful arrival at the state:
 - **description**: Documentation for the verification
 - **timeout**: Verification timeout in seconds (optional)
-- **required**: Whether verification must succeed (default: false)
 
 #### @OutgoingTransition
-Defines a transition FROM the current state TO another state:
-- **to**: The target state class (required)
-- **activate**: Additional states to activate during this transition (array of state classes)
-- **exit**: States to deactivate during this transition (array of state classes)
+Defines a transition FROM the current state TO other states:
+- **activate**: States to activate during this transition (required array of state classes)
+- **exit**: States to deactivate during this transition (optional array of state classes)
 - **staysVisible**: Whether the originating state remains visible after transition (default: false)
-- **pathCost**: Path-finding cost - LOWER costs are preferred when multiple paths exist (default: 0)
+- **pathCost**: Path-finding cost - LOWER costs are preferred when multiple paths exist (default: 1 as of v1.3.0)
 - **description**: Documentation for this transition
 
 ## World State Example
@@ -138,7 +136,7 @@ public class WorldTransitions {
     /**
      * Verify arrival at World state by checking for the world map.
      */
-    @IncomingTransition(description = "Verify arrival at World state", required = true)
+    @IncomingTransition(description = "Verify arrival at World state")
     public boolean verifyArrival() {
         log.info("Verifying arrival at World state");
         if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
@@ -162,7 +160,7 @@ public class WorldTransitions {
     /**
      * Navigate from World to Home by clicking the home button.
      */
-    @OutgoingTransition(to = HomeState.class, pathCost = 1, description = "Navigate from World to Home")
+    @OutgoingTransition(activate = {HomeState.class}, pathCost = 1, description = "Navigate from World to Home")
     public boolean toHome() {
         log.info("Navigating from World to Home");
         if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
@@ -175,7 +173,7 @@ public class WorldTransitions {
     /**
      * Navigate from World to Island by clicking on an island.
      */
-    @OutgoingTransition(to = IslandState.class, pathCost = 2, description = "Navigate from World to Island")
+    @OutgoingTransition(activate = {IslandState.class}, pathCost = 2, description = "Navigate from World to Island")
     public boolean toIsland() {
         log.info("Navigating from World to Island");
         if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
@@ -211,7 +209,7 @@ public class SettingsModalTransitions {
      * Dashboard state is reactivated when modal closes.
      */
     @OutgoingTransition(
-        to = DashboardState.class,
+        activate = {DashboardState.class},
         exit = {SettingsModalState.class},  // Explicitly exit the modal
         pathCost = 0
     )
@@ -227,7 +225,7 @@ public class DashboardTransitions {
      * Open settings modal while keeping dashboard visible in background.
      */
     @OutgoingTransition(
-        to = SettingsModalState.class,
+        activate = {SettingsModalState.class},
         staysVisible = true,  // Dashboard remains visible behind modal
         pathCost = 1
     )
@@ -247,8 +245,7 @@ public class LoginTransitions {
      * Login transition that activates multiple UI components.
      */
     @OutgoingTransition(
-        to = DashboardState.class,  // Primary target
-        activate = {SidebarState.class, HeaderState.class, FooterState.class},  // Additional states
+        activate = {DashboardState.class, SidebarState.class, HeaderState.class, FooterState.class},
         exit = {LoginState.class, SplashScreenState.class},  // Clean up login-related states
         staysVisible = false,  // Login state is deactivated (default)
         pathCost = 0  // Preferred path
@@ -303,7 +300,7 @@ public class WorkingTransitions {
     private final WorkingState workingState;
     private final Action action;
     
-    @IncomingTransition(required = true)
+    @IncomingTransition
     public boolean verifyArrival() {
         log.info("Verifying arrival at Working state");
         if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
@@ -315,7 +312,7 @@ public class WorkingTransitions {
     /**
      * Navigate from Working to Prompt when work is complete.
      */
-    @OutgoingTransition(to = PromptState.class, priority = 1)
+    @OutgoingTransition(activate = {PromptState.class}, pathCost = 1)
     public boolean toPrompt() {
         try {
             log.info("Navigating from Working to Prompt");
@@ -338,10 +335,10 @@ public class WorkingTransitions {
 
 ## The Formal Model (Under the Hood)
 
-The academic paper provides a formal definition for a transition as a tuple **t = (A, S<sub>t</sub><sup>def</sup>)**. 
+The academic paper provides a formal definition for a transition as a tuple **t = (A, S<sub>t</sub><sup>def</sup>)**.
 
 * **A** is a **process**, which is a sequence of one or more actions `(a¹, a², ..., aⁿ)`. This corresponds to the method body in your @OutgoingTransition methods.
-* **S<sub>t</sub><sup>def</sup>** is the **intended state information**. This is handled automatically by the framework based on the @TransitionSet's state parameter and the @OutgoingTransition's to parameter.
+* **S<sub>t</sub><sup>def</sup>** is the **intended state information**. This is handled automatically by the framework based on the @TransitionSet's state parameter and the @OutgoingTransition's activate parameter.
 
 ## Multi-State Activation and Pathfinding
 
@@ -404,7 +401,7 @@ public class DashboardTransitions {
     private final DashboardState dashboardState;
     private final LoginState loginState;
 
-    @OutgoingTransition(to = LoginState.class)
+    @OutgoingTransition(activate = {LoginState.class})
     public boolean toLogin() {
         log.info("Navigating from Dashboard to Login");
         // This transition would be configured to activate multiple states
@@ -531,11 +528,11 @@ public class MenuTransitions {
     
     /**
      * Close menu and return to whatever state was underneath.
-     * This uses the PREVIOUS special state for dynamic navigation.
+     * This uses the PreviousState special marker for dynamic navigation.
      */
     @OutgoingTransition(
-        to = io.github.jspinak.brobot.model.state.special.SpecialStateType.PREVIOUS.class,
-        priority = 1,
+        activate = {io.github.jspinak.brobot.model.state.special.PreviousState.class},
+        pathCost = 1,
         description = "Close menu and return to previous state"
     )
     public boolean toPrevious() {
@@ -602,13 +599,52 @@ public class PricingTransitionsTest {
 }
 ```
 
+## Path Costs and Pathfinding
+
+Brobot uses a cost-based pathfinding system to automatically select the best path between states. Understanding path costs is essential for predictable navigation.
+
+### Default Path Costs (v1.1.0+)
+
+- **States**: Default pathCost = 1
+- **Transitions**: Default pathCost = 1
+- **Total Path Cost** = Sum of all state costs + Sum of all transition costs
+
+### Quick Example
+
+```java
+@State  // Default state pathCost = 1
+public class HomePage { }
+
+@State(pathCost = 5)  // Expensive state
+public class SlowLoadingPage { }
+
+@TransitionSet(state = HomePage.class)
+public class HomeTransitions {
+
+    @OutgoingTransition(to = Settings.class)  // Default pathCost = 1
+    public boolean normalRoute() { ... }
+
+    @OutgoingTransition(to = Settings.class, pathCost = 0)  // Free transition
+    public boolean keyboardShortcut() { ... }
+
+    @OutgoingTransition(to = Settings.class, pathCost = 10)  // Expensive fallback
+    public boolean slowRoute() { ... }
+}
+```
+
+When multiple paths exist, Brobot automatically selects the path with the **lowest total cost**.
+
+### Learn More
+
+For comprehensive documentation on pathfinding, cost calculation, and advanced patterns, see the [**Pathfinding and Path Costs Guide**](/docs/core-library/guides/pathfinding-and-costs).
+
 ## Best Practices
 
 1. **Always include mock mode support** for testing environments
 2. **Use descriptive method names** like `toMenu()`, `toHomepage()` for outgoing transitions
 3. **Add logging** to track navigation flow during debugging
-4. **Verify critical elements** in ToTransition to ensure state is truly active
-5. **Set appropriate priorities** when multiple paths exist to the same state
+4. **Verify critical elements** in IncomingTransition to ensure state is truly active
+5. **Set appropriate path costs** - use defaults for normal operations, 0 for free, higher for fallbacks
 6. **Handle exceptions** gracefully in complex transitions
 7. **Keep transitions focused** - each method should do one thing well
 8. **Minimize dependencies** - each transition class should only need its own state

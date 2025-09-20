@@ -34,7 +34,7 @@
  *     private final Action action;
  *     private final DashboardState dashboardState;
  *
- *     @OutgoingTransition(to = SettingsState.class)
+ *     @OutgoingTransition(activate = {SettingsState.class})
  *     public boolean toSettings() {
  *         // Navigate from Dashboard to Settings
  *         return action.click(dashboardState.getSettingsButton()).isSuccess();

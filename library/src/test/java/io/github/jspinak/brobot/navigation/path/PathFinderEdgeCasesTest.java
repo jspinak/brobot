@@ -165,7 +165,7 @@ class PathFinderEdgeCasesTest extends BrobotTestBase {
                     .thenReturn(new HashSet<>(Arrays.asList(3L)));
 
             State mockState = mock(State.class);
-            when(mockState.getPathScore()).thenReturn(10);
+            when(mockState.getPathCost()).thenReturn(10);
             when(mockStateService.getState(anyLong())).thenReturn(Optional.of(mockState));
 
             Paths result = pathFinder.getPathsToState(fromStates, 3L);
@@ -201,7 +201,7 @@ class PathFinderEdgeCasesTest extends BrobotTestBase {
                                     Arrays.asList(1L, 2L, 5L))); // Multiple parents including cycle
 
             State mockState = mock(State.class);
-            when(mockState.getPathScore()).thenReturn(5);
+            when(mockState.getPathCost()).thenReturn(5);
             when(mockStateService.getState(anyLong())).thenReturn(Optional.of(mockState));
 
             Paths result = pathFinder.getPathsToState(fromStates, 6L);
@@ -236,7 +236,7 @@ class PathFinderEdgeCasesTest extends BrobotTestBase {
             }
 
             State mockState = mock(State.class);
-            when(mockState.getPathScore()).thenReturn(1);
+            when(mockState.getPathCost()).thenReturn(1);
             when(mockStateService.getState(anyLong())).thenReturn(Optional.of(mockState));
 
             Paths result = pathFinder.getPathsToState(fromStates, target);
@@ -279,7 +279,7 @@ class PathFinderEdgeCasesTest extends BrobotTestBase {
                     .thenReturn(new HashSet<>(Arrays.asList(0L)));
 
             State mockState = mock(State.class);
-            when(mockState.getPathScore()).thenReturn(1);
+            when(mockState.getPathCost()).thenReturn(1);
             when(mockStateService.getState(anyLong())).thenReturn(Optional.of(mockState));
 
             Paths result = pathFinder.getPathsToState(fromStates, 10L);
@@ -336,9 +336,9 @@ class PathFinderEdgeCasesTest extends BrobotTestBase {
                     .thenReturn(new HashSet<>(Arrays.asList(1L)));
 
             State state1 = mock(State.class);
-            when(state1.getPathScore()).thenReturn(-10);
+            when(state1.getPathCost()).thenReturn(-10);
             State state2 = mock(State.class);
-            when(state2.getPathScore()).thenReturn(-5);
+            when(state2.getPathCost()).thenReturn(-5);
 
             when(mockStateService.getState(1L)).thenReturn(Optional.of(state1));
             when(mockStateService.getState(2L)).thenReturn(Optional.of(state2));
@@ -361,9 +361,9 @@ class PathFinderEdgeCasesTest extends BrobotTestBase {
                     .thenReturn(new HashSet<>(Arrays.asList(1L)));
 
             State state1 = mock(State.class);
-            when(state1.getPathScore()).thenReturn(Integer.MAX_VALUE / 2);
+            when(state1.getPathCost()).thenReturn(Integer.MAX_VALUE / 2);
             State state2 = mock(State.class);
-            when(state2.getPathScore()).thenReturn(Integer.MAX_VALUE / 2);
+            when(state2.getPathCost()).thenReturn(Integer.MAX_VALUE / 2);
 
             when(mockStateService.getState(1L)).thenReturn(Optional.of(state1));
             when(mockStateService.getState(2L)).thenReturn(Optional.of(state2));
@@ -398,7 +398,7 @@ class PathFinderEdgeCasesTest extends BrobotTestBase {
                     .thenReturn(new HashSet<>(Arrays.asList(3L)));
 
             State mockState = mock(State.class);
-            when(mockState.getPathScore()).thenReturn(5);
+            when(mockState.getPathCost()).thenReturn(5);
             when(mockStateService.getState(anyLong())).thenReturn(Optional.of(mockState));
 
             Paths result = pathFinder.getPathsToState(fromStates, 10L);
@@ -436,7 +436,7 @@ class PathFinderEdgeCasesTest extends BrobotTestBase {
                     .thenReturn(new HashSet<>(Arrays.asList(1L)));
 
             State mockState = mock(State.class);
-            when(mockState.getPathScore()).thenReturn(10);
+            when(mockState.getPathCost()).thenReturn(10);
             when(mockStateService.getState(anyLong())).thenReturn(Optional.of(mockState));
 
             Paths result = pathFinder.getPathsToState(fromStates, 10L);

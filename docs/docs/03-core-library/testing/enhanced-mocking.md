@@ -219,7 +219,7 @@ public void testWithStructuredData() {
     TestScenario loginScenario = testDataBuilder
         .scenario("comprehensive_login_test")
         .withDescription("Complete login flow with variations")
-        .withVersion("1.2.0")
+        .withVersion("1.1.0")
         .withBaselineData()
         .withStateImage("login_button", "login_btn.png")
         .withStateImage("username_field", "username_input.png") 

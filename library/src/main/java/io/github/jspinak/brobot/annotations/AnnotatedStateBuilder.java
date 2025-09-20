@@ -88,6 +88,10 @@ public class AnnotatedStateBuilder {
                     stateName);
         }
 
+        // Set pathCost from annotation (default is 1)
+        stateBuilder.setPathCost(stateAnnotation.pathCost());
+        log.trace("Set pathCost {} for state '{}'", stateAnnotation.pathCost(), stateName);
+
         State state = stateBuilder.build();
         log.info(
                 "Built state '{}' with {} total components",

@@ -115,6 +115,42 @@ public class HomeState {
 }
 ```
 
+### Setting State Path Costs
+
+States can have a pathCost that affects pathfinding decisions. The total cost of a path includes both state and transition costs:
+
+```java
+@State  // Default pathCost = 1
+@Getter
+@Slf4j
+public class NormalState {
+    // Standard state with default cost
+}
+
+@State(pathCost = 0)  // Free state (no cost)
+@Getter
+@Slf4j
+public class TransientState {
+    // State that doesn't add to path cost (e.g., loading screens)
+}
+
+@State(pathCost = 5)  // Expensive state
+@Getter
+@Slf4j
+public class SlowLoadingState {
+    // Higher cost discourages routing through this state
+}
+
+@State(initial = true, pathCost = 0)  // Initial state with no cost
+@Getter
+@Slf4j
+public class StartState {
+    // Common pattern: initial states often have 0 cost
+}
+```
+
+**Note**: As of v1.1.0, the default pathCost for states is 1. Lower total path costs are preferred during pathfinding. For comprehensive pathfinding documentation, see the [Pathfinding and Path Costs Guide](/docs/core-library/guides/pathfinding-and-costs).
+
 ### State Components and Direct Access
 
 The modern approach encourages exposing frequently-used components:
@@ -176,7 +212,7 @@ public class GamePlayTransitions {
         return action.click(menuState.getPlayButton()).isSuccess();
     }
     
-    @IncomingTransition(required = true)
+    @IncomingTransition
     public boolean verifyArrival() {
         // Verify we're in the game play state
         if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {

@@ -210,7 +210,7 @@ public class JsonTestDataBuilder {
 
         // Set state properties
         state.setBlocking(false);
-        state.setPathScore(1);
+        state.setPathCost(1);
 
         return state;
     }

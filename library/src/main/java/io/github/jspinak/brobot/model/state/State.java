@@ -114,7 +114,13 @@ public class State {
     private Set<String> hiddenStateNames = new HashSet<>(); // used when initializing states in code
 
     private Set<Long> hiddenStateIds = new HashSet<>(); // used at runtime
-    private int pathScore = 1; // larger path scores discourage taking a path with this state
+
+    /**
+     * Path-finding cost for this state. The total cost of a path is the sum of all state costs and
+     * transition costs. Lower costs are preferred in pathfinding. Default is 1 for normal states.
+     */
+    private int pathCost = 1;
+
     /*
     LocalDateTime, to be persisted with JPA, requires the @Converter annotation and code to convert the value
     to a format for the database and back to a Java entity.
@@ -263,7 +269,7 @@ public class State {
         private boolean blocking = false;
         private final Set<String> canHide = new HashSet<>();
         private final Set<String> hidden = new HashSet<>();
-        private int pathScore = 1;
+        private int pathCost = 1;
         private LocalDateTime lastAccessed;
         private int baseProbabilityExists = 100;
         private final List<Scene> scenes = new ArrayList<>();
@@ -316,8 +322,8 @@ public class State {
             return this;
         }
 
-        public Builder setPathScore(int score) {
-            this.pathScore = score;
+        public Builder setPathCost(int cost) {
+            this.pathCost = cost;
             return this;
         }
 
@@ -356,7 +362,7 @@ public class State {
             state.blocking = blocking;
             state.canHide = canHide;
             state.hiddenStateNames = hidden;
-            state.pathScore = pathScore;
+            state.pathCost = pathCost;
             state.baseProbabilityExists = baseProbabilityExists;
             state.scenes = scenes;
             state.usableArea = usableArea;

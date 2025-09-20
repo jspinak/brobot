@@ -5,7 +5,7 @@ package io.github.jspinak.brobot.model.state.special;
 /**
  * Marker class for transitions targeting the current active state.
  *
- * <p>This class is used with @OutgoingTransition(to = CurrentState.class) to indicate a
+ * <p>This class is used with @OutgoingTransition(activate = {CurrentState.class}) to indicate a
  * self-transition or a transition that targets the currently active state. This is particularly
  * useful when an action modifies the current state without navigating away, or when transitioning
  * between overlapping states where both remain active.
@@ -37,7 +37,7 @@ package io.github.jspinak.brobot.model.state.special;
  *
  *     // Better approach - using CurrentState for re-entry
  *     @OutgoingTransition(
- *         to = CurrentState.class,  // Re-enter Island state
+ *         activate = {CurrentState.class},  // Re-enter Island state
  *         pathCost = 0,
  *         description = "Capture new island (re-enter Island from World)"
  *     )
@@ -54,7 +54,7 @@ package io.github.jspinak.brobot.model.state.special;
  * <pre>{@code
  * // Data refresh
  * @OutgoingTransition(
- *     to = CurrentState.class,
+ *     activate = {CurrentState.class},
  *     pathCost = 5,
  *     description = "Refresh current page"
  * )
@@ -64,7 +64,7 @@ package io.github.jspinak.brobot.model.state.special;
  *
  * // Pagination
  * @OutgoingTransition(
- *     to = CurrentState.class,
+ *     activate = {CurrentState.class},
  *     pathCost = 2,
  *     description = "Load next page of results"
  * )

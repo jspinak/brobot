@@ -50,9 +50,9 @@ class SimplePathMapIntegrationTest {
     @DisplayName("Should build path map and find simple path")
     void testSimplePathMap() {
         // Create states with path scores
-        State start = new State.Builder("Start").setPathScore(0).build();
-        State middle = new State.Builder("Middle").setPathScore(10).build();
-        State end = new State.Builder("End").setPathScore(0).build();
+        State start = new State.Builder("Start").setPathCost(0).build();
+        State middle = new State.Builder("Middle").setPathCost(10).build();
+        State end = new State.Builder("End").setPathCost(0).build();
 
         // Save states
         stateService.save(start);
@@ -106,10 +106,10 @@ class SimplePathMapIntegrationTest {
     @DisplayName("Should find shortest path among multiple paths")
     void testMultiplePaths() {
         // Create diamond pattern
-        State start = new State.Builder("Start").setPathScore(0).build();
-        State pathA = new State.Builder("PathA").setPathScore(20).build();
-        State pathB = new State.Builder("PathB").setPathScore(5).build();
-        State end = new State.Builder("End").setPathScore(0).build();
+        State start = new State.Builder("Start").setPathCost(0).build();
+        State pathA = new State.Builder("PathA").setPathCost(20).build();
+        State pathB = new State.Builder("PathB").setPathCost(5).build();
+        State end = new State.Builder("End").setPathCost(0).build();
 
         stateService.save(start);
         stateService.save(pathA);
@@ -172,10 +172,10 @@ class SimplePathMapIntegrationTest {
     @DisplayName("Should handle complex graph with cycles")
     void testComplexGraphWithCycles() {
         // Create states
-        State hub = new State.Builder("Hub").setPathScore(5).build();
-        State nodeA = new State.Builder("NodeA").setPathScore(10).build();
-        State nodeB = new State.Builder("NodeB").setPathScore(15).build();
-        State target = new State.Builder("Target").setPathScore(0).build();
+        State hub = new State.Builder("Hub").setPathCost(5).build();
+        State nodeA = new State.Builder("NodeA").setPathCost(10).build();
+        State nodeB = new State.Builder("NodeB").setPathCost(15).build();
+        State target = new State.Builder("Target").setPathCost(0).build();
 
         stateService.save(hub);
         stateService.save(nodeA);
