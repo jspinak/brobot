@@ -143,7 +143,15 @@ public class InitialStateAutoConfiguration {
             matchIfMissing = true)
     public void autoActivateInitialStates(ApplicationReadyEvent event) {
         if (!initialStates.hasRegisteredInitialStates()) {
-            log.debug("No initial states registered, skipping auto-activation");
+            log.warn("════════════════════════════════════════════════════════");
+            log.warn("  ⚠️  NO INITIAL STATES REGISTERED");
+            log.warn("════════════════════════════════════════════════════════");
+            log.warn("Brobot cannot perform pathfinding without active states.");
+            log.warn("To register initial states, use one of these methods:");
+            log.warn("  1. Add @State(initial = true) annotation to state classes");
+            log.warn("  2. Call InitialStates.addStateSet() during initialization");
+            log.warn("  3. Use InitialStateVerifier.verify() to manually set states");
+            log.warn("════════════════════════════════════════════════════════");
             return;
         }
 
@@ -178,7 +186,13 @@ public class InitialStateAutoConfiguration {
                         "✅ Successfully activated initial states: {}",
                         stateMemory.getActiveStateNames());
             } else {
-                log.warn("⚠️ No initial states could be activated");
+                log.warn(
+                        "⚠️ No initial states could be activated. Navigation will fail without"
+                                + " active states.");
+                log.warn("To fix this issue, use one of these methods:");
+                log.warn("  1. Add @State(initial = true) annotation to your state classes");
+                log.warn("  2. Call InitialStates.addStateSet() to register initial states");
+                log.warn("  3. Use InitialStateVerifier.verify() to manually activate states");
                 if (fallbackSearch) {
                     log.info("Fallback search is enabled, will search all states");
                 }

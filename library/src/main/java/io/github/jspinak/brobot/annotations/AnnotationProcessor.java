@@ -468,7 +468,7 @@ public class AnnotationProcessor {
                                     }
                                 })
                         .addToActivate(toName) // Use state name, it will be converted to ID
-                        .setScore(priority)
+                        .setPathCost(priority)
                         .build();
 
         // CRITICAL FIX: Convert state names to IDs for the joint table

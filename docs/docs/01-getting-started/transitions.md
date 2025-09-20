@@ -72,7 +72,7 @@ public class PricingTransitions {
     /**
      * Navigate from Pricing to Homepage by clicking the home/logo button.
      */
-    @OutgoingTransition(to = HomepageState.class, priority = 1, description = "Navigate from Pricing to Homepage")
+    @OutgoingTransition(to = HomepageState.class, pathCost = 1, description = "Navigate from Pricing to Homepage")
     public boolean toHomepage() {
         log.info("Navigating from Pricing to Homepage");
         // In mock mode, just return true for testing
@@ -86,7 +86,7 @@ public class PricingTransitions {
     /**
      * Navigate from Pricing to Menu by clicking the menu icon.
      */
-    @OutgoingTransition(to = MenuState.class, priority = 2, description = "Navigate from Pricing to Menu")
+    @OutgoingTransition(to = MenuState.class, pathCost = 2, description = "Navigate from Pricing to Menu")
     public boolean toMenu() {
         log.info("Navigating from Pricing to Menu");
         // In mock mode, just return true for testing
@@ -116,9 +116,11 @@ Verifies successful arrival at the state:
 #### @OutgoingTransition
 Defines a transition FROM the current state TO another state:
 - **to**: The target state class (required)
-- **priority**: Transition priority - higher values are preferred when multiple paths exist (default: 0)
+- **activate**: Additional states to activate during this transition (array of state classes)
+- **exit**: States to deactivate during this transition (array of state classes)
+- **staysVisible**: Whether the originating state remains visible after transition (default: false)
+- **pathCost**: Path-finding cost - LOWER costs are preferred when multiple paths exist (default: 0)
 - **description**: Documentation for this transition
-- **timeout**: Timeout in seconds (optional)
 
 ## World State Example
 
@@ -160,7 +162,7 @@ public class WorldTransitions {
     /**
      * Navigate from World to Home by clicking the home button.
      */
-    @OutgoingTransition(to = HomeState.class, priority = 1, description = "Navigate from World to Home")
+    @OutgoingTransition(to = HomeState.class, pathCost = 1, description = "Navigate from World to Home")
     public boolean toHome() {
         log.info("Navigating from World to Home");
         if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
@@ -173,7 +175,7 @@ public class WorldTransitions {
     /**
      * Navigate from World to Island by clicking on an island.
      */
-    @OutgoingTransition(to = IslandState.class, priority = 2, description = "Navigate from World to Island")
+    @OutgoingTransition(to = IslandState.class, pathCost = 2, description = "Navigate from World to Island")
     public boolean toIsland() {
         log.info("Navigating from World to Island");
         if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
@@ -182,6 +184,79 @@ public class WorldTransitions {
         }
         // Click on first island
         return action.click(worldState.getIsland1()).isSuccess();
+    }
+}
+```
+
+## Advanced OutgoingTransition Examples
+
+### Modal Dialog with Origin State Visible
+
+```java
+@TransitionSet(state = SettingsModalState.class)
+@RequiredArgsConstructor
+@Slf4j
+public class SettingsModalTransitions {
+
+    private final SettingsModalState settingsModalState;
+    private final Action action;
+
+    @IncomingTransition
+    public boolean verifyArrival() {
+        return action.find(settingsModalState.getCloseButton()).isSuccess();
+    }
+
+    /**
+     * Close the modal and return to dashboard.
+     * Dashboard state is reactivated when modal closes.
+     */
+    @OutgoingTransition(
+        to = DashboardState.class,
+        exit = {SettingsModalState.class},  // Explicitly exit the modal
+        pathCost = 0
+    )
+    public boolean closeToDashboard() {
+        return action.click(settingsModalState.getCloseButton()).isSuccess();
+    }
+}
+
+@TransitionSet(state = DashboardState.class)
+public class DashboardTransitions {
+
+    /**
+     * Open settings modal while keeping dashboard visible in background.
+     */
+    @OutgoingTransition(
+        to = SettingsModalState.class,
+        staysVisible = true,  // Dashboard remains visible behind modal
+        pathCost = 1
+    )
+    public boolean openSettingsModal() {
+        return action.click(dashboardState.getSettingsButton()).isSuccess();
+    }
+}
+```
+
+### Complex Multi-State Activation
+
+```java
+@TransitionSet(state = LoginState.class)
+public class LoginTransitions {
+
+    /**
+     * Login transition that activates multiple UI components.
+     */
+    @OutgoingTransition(
+        to = DashboardState.class,  // Primary target
+        activate = {SidebarState.class, HeaderState.class, FooterState.class},  // Additional states
+        exit = {LoginState.class, SplashScreenState.class},  // Clean up login-related states
+        staysVisible = false,  // Login state is deactivated (default)
+        pathCost = 0  // Preferred path
+    )
+    public boolean login() {
+        action.type(loginState.getUsernameField(), "user@example.com");
+        action.type(loginState.getPasswordField(), "password");
+        return action.click(loginState.getLoginButton()).isSuccess();
     }
 }
 ```
@@ -267,6 +342,177 @@ The academic paper provides a formal definition for a transition as a tuple **t 
 
 * **A** is a **process**, which is a sequence of one or more actions `(a¹, a², ..., aⁿ)`. This corresponds to the method body in your @OutgoingTransition methods.
 * **S<sub>t</sub><sup>def</sup>** is the **intended state information**. This is handled automatically by the framework based on the @TransitionSet's state parameter and the @OutgoingTransition's to parameter.
+
+## Multi-State Activation and Pathfinding
+
+Brobot supports transitions that activate multiple states simultaneously. This is useful for scenarios where opening one state brings multiple UI elements or panels into view.
+
+> **📖 For complete pathfinding details, see [Pathfinding & Multi-State Activation](pathfinding.md)**
+
+### Core Concept: No Primary Target State
+
+**Critical Understanding**: In Brobot, transitions don't have a "primary" target. ALL states in the `activate` set are treated equally for pathfinding purposes.
+
+```java
+// All four states are equal - any can be used as a path node
+transition.setActivate(Set.of("Dashboard", "Sidebar", "Header", "Footer"));
+```
+
+### Configuring Multi-State Transitions
+
+While transitions are defined using the `@TransitionSet` and `@OutgoingTransition` annotations, the underlying transition model supports activating and exiting multiple states. This can be configured programmatically through the transition's `activate` and `exit` sets:
+
+```java
+// In the transition configuration or builder
+transition.setActivate(Set.of(dashboardId, sidebarId, headerId));
+transition.setExit(Set.of(loginId));
+```
+
+### How Pathfinding Uses Multi-State Transitions
+
+When a transition activates multiple states, **each activated state becomes a potential path node** for future navigation:
+
+```java
+// Given: Login transition activates [Dashboard, Sidebar, Menu]
+// Then pathfinder can use:
+//   Login → Dashboard → TargetState
+//   Login → Sidebar → TargetState
+//   Login → Menu → TargetState
+// Whichever path exists and is shortest will be used
+```
+
+### Important Behavior: IncomingTransitions for All Activated States
+
+**When a transition activates multiple states, each activated state's `@IncomingTransition` method is executed to verify successful arrival.** This ensures that all expected UI elements are present before the transition is considered successful.
+
+#### Execution Order:
+1. **OutgoingTransition** executes (leaving the source state)
+2. **Primary target state's IncomingTransition** executes (first state in the `activate` array)
+3. **Each additional state's IncomingTransition** executes in sequence
+4. States are only marked as active if their IncomingTransition succeeds
+
+### Example: Dashboard with Multiple Panels
+
+```java
+// Transition that activates multiple UI panels
+@TransitionSet(state = DashboardState.class)
+@RequiredArgsConstructor
+@Slf4j
+public class DashboardTransitions {
+
+    private final Action action;
+    private final DashboardState dashboardState;
+    private final LoginState loginState;
+
+    @OutgoingTransition(to = LoginState.class)
+    public boolean toLogin() {
+        log.info("Navigating from Dashboard to Login");
+        // This transition would be configured to activate multiple states
+        // The actual multi-state activation is handled by the framework
+        return action.click(dashboardState.getLogoutButton()).isSuccess();
+    }
+
+    @IncomingTransition
+    public boolean verifyArrival() {
+        log.info("Verifying Dashboard with all panels is visible");
+        return action.find(dashboardState.getMainContent()).isSuccess();
+    }
+}
+
+// Each activated state verifies its own presence
+@TransitionSet(state = DashboardState.class)
+public class DashboardTransitions {
+    @IncomingTransition
+    public boolean verifyArrival() {
+        log.info("Verifying Dashboard is visible");
+        return action.find(dashboardState.getMainContent()).isSuccess();
+    }
+}
+
+@TransitionSet(state = NavigationBarState.class)
+public class NavigationBarTransitions {
+    @IncomingTransition
+    public boolean verifyArrival() {
+        log.info("Verifying NavigationBar is visible");
+        return action.find(navBarState.getMenuItems()).isSuccess();
+    }
+}
+
+@TransitionSet(state = StatusPanelState.class)
+public class StatusPanelTransitions {
+    @IncomingTransition
+    public boolean verifyArrival() {
+        log.info("Verifying StatusPanel is visible");
+        return action.find(statusPanel.getStatusIndicator()).isSuccess();
+    }
+}
+```
+
+### State Management in Transitions
+
+The underlying `StateTransition` interface provides mechanisms for managing state activation and deactivation:
+
+#### Activate Set
+States to be activated during the transition:
+```java
+// In the transition configuration
+transition.setActivate(Set.of(gameBoardId, scorePanelId, timerId));
+```
+
+#### Exit Set
+States to be deactivated (exited) during the transition:
+```java
+// States that should be deactivated
+transition.setExit(Set.of(mainMenuId, settingsId));
+```
+
+#### StaysVisible Property
+Controls whether the source state remains visible after transition:
+```java
+// Keep source state visible (e.g., for overlays)
+transition.setStaysVisibleAfterTransition(StateTransition.StaysVisible.TRUE);
+
+// Hide source state (default behavior)
+transition.setStaysVisibleAfterTransition(StateTransition.StaysVisible.FALSE);
+
+// Inherit from StateTransitions container
+transition.setStaysVisibleAfterTransition(StateTransition.StaysVisible.NONE);
+```
+
+### Common Patterns
+
+#### 1. Modal Dialog Pattern
+Keep the background state visible while showing an overlay:
+```java
+// In the transition configuration
+transition.setActivate(Set.of(settingsModalId));
+transition.setStaysVisibleAfterTransition(StateTransition.StaysVisible.TRUE);
+// Dashboard remains visible in background
+```
+
+#### 2. Complete State Replacement
+Replace the current state entirely:
+```java
+// Activate new states and exit the old one
+transition.setActivate(Set.of(dashboardId, sidebarId));
+transition.setExit(Set.of(loginId));  // Explicitly deactivate Login
+```
+
+#### 3. Tab Switching
+Activate new tab content while deactivating old tab:
+```java
+// Switch from Tab1 to Tab2
+transition.setActivate(Set.of(tab2ContentId));
+transition.setExit(Set.of(tab1ContentId));  // Deactivate old tab
+// Tab navigation bar (separate state) remains active
+```
+
+### Benefits of Multi-State Activation
+
+1. **Atomic Operations**: All states are verified together, ensuring UI consistency
+2. **Better Error Detection**: If any expected element is missing, the transition fails
+3. **Cleaner Code**: One transition handles complex UI changes
+4. **Accurate Model**: Reflects how modern UIs actually work with multiple components
 
 ## Dynamic Transitions for Hidden States
 

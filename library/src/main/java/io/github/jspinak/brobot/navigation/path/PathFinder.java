@@ -85,6 +85,15 @@ public class PathFinder {
             return new Paths(new ArrayList<>());
         }
 
+        // Handle empty start states
+        if (startStates == null || startStates.isEmpty()) {
+            String errorMsg =
+                    "Cannot find path: No active start states. "
+                            + "Please ensure initial states are set before attempting navigation.";
+            ConsoleReporter.println(MessageFormatter.fail + " " + errorMsg);
+            return new Paths(new ArrayList<>());
+        }
+
         String targetStateName = allStates.getStateName(targetState);
         String startStatesString =
                 startStates.stream()
@@ -161,8 +170,8 @@ public class PathFinder {
             if (state.isPresent()) score += state.get().getPathScore();
         }
         for (StateTransition stateTrans : path.getTransitions()) {
-            score += stateTrans.getScore();
+            score += stateTrans.getPathCost();
         }
-        path.setScore(score);
+        path.setPathCost(score);
     }
 }
