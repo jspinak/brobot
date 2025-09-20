@@ -99,8 +99,15 @@ for (Match match : matches.getMatchList()) {
 
 ### 4. Right-Click Menu
 ```java
+// To right-click, use ifFound with ClickOptions configured for right-click
+ClickOptions rightClickOptions = new ClickOptions.Builder()
+    .setPressOptions(MousePressOptions.builder()
+        .setButton(MouseButton.RIGHT)
+        .build())
+    .build();
+
 ConditionalActionChain.find(findOptions)
-    .ifFoundRightClick()
+    .ifFound(rightClickOptions)
     .then(findDeleteOptions)
     .ifFoundClick()
     .perform(action, objectCollection);

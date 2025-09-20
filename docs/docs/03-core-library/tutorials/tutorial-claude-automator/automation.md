@@ -199,34 +199,43 @@ ActionResult result = action.perform(
 
 ### Enhanced Monitoring with State Validation
 
-The framework now supports state-aware scheduling, which automatically validates and manages active states at the beginning of each scheduled cycle.
+The framework provides state-aware scheduling that automatically validates and manages active states before executing each scheduled task.
 
-### StateAwareScheduler Component
+### Using StateAwareScheduler
 
 ```java
 @Component
 @RequiredArgsConstructor
-public class StateAwareScheduler {
-    private final StateDetector stateDetector;
-    private final StateMemory stateMemory;
-    private final StateService stateService;
-    
-    public void scheduleWithStateCheck(
-            ScheduledExecutorService scheduler,
-            Runnable task,
-            StateCheckConfiguration config,
-            long initialDelay,
-            long period,
-            TimeUnit unit) {
-        
-        scheduler.scheduleAtFixedRate(() -> {
-            try {
-                performStateCheck(config);
-                task.run();
-            } catch (Exception e) {
-                log.error("Error in state-aware scheduled task", e);
-            }
-        }, initialDelay, period, unit);
+public class ClaudeStateMonitor {
+    private final StateAwareScheduler stateAwareScheduler;
+    private final ScheduledExecutorService scheduler =
+        Executors.newScheduledThreadPool(1);
+
+    public void startMonitoring() {
+        StateCheckConfiguration config = new StateCheckConfiguration.Builder()
+            .withRequiredStates(List.of("Prompt", "Working"))
+            .withRebuildOnMismatch(true)
+            .withCheckMode(StateCheckConfiguration.CheckMode.CHECK_INACTIVE_ONLY)
+            .withMaxIterations(1000)  // Stop after 1000 iterations
+            .build();
+
+        // The scheduler automatically validates states before running your task
+        // No need to manually call performStateCheck
+        stateAwareScheduler.scheduleWithStateCheck(
+            scheduler,
+            this::monitorClaudeWindow,  // Your task
+            config,                      // State requirements
+            0,                          // Initial delay
+            5,                          // Period
+            TimeUnit.SECONDS
+        );
+    }
+
+    private void monitorClaudeWindow() {
+        // This code runs AFTER automatic state validation
+        // Required states are already verified to be active
+        log.info("Claude window is in expected state, performing monitoring...");
+        // Your monitoring logic here
     }
 }
 ```
@@ -237,7 +246,9 @@ public class StateAwareScheduler {
 StateCheckConfiguration config = new StateCheckConfiguration.Builder()
     .withRequiredStates(List.of("Prompt", "Working"))  // States that must be active
     .withRebuildOnMismatch(true)                       // Auto-rebuild if states missing
+    .withCheckMode(StateCheckConfiguration.CheckMode.CHECK_INACTIVE_ONLY)  // Efficient checking
     .withSkipIfStatesMissing(false)                    // Continue even if states missing
+    .withMaxIterations(500)                             // Optional iteration limit
     .build();
 ```
 
@@ -271,8 +282,9 @@ public class ClaudeMonitoringAutomationV2 {
     }
     
     private void getClaudeWorking() {
-        // Task runs after state validation
-        // States are guaranteed to be checked/rebuilt
+        // Task runs AFTER automatic state validation
+        // The scheduler has already verified "Prompt" and "Working" states
+        // No need to manually check states - they're guaranteed to be active
         if (selectClaudePrompt()) {
             checkClaudeIconStatus();
         }
