@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
  *   <li>Batch export multiple histories
  * </ul>
  *
- * @since 1.2.0
+ * @since 1.1.0
  */
 @Component
 @RequiredArgsConstructor

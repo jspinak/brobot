@@ -34,7 +34,7 @@ public class ModalDialogTransitions {
     }
 
     @OutgoingTransition(
-            to = PreviousState.class, // Return to whatever state was hidden
+            activate = {PreviousState.class}, // Return to whatever state was hidden
             staysVisible = false, // Modal closes completely
             pathCost = 0,
             description = "Confirm and close modal, returning to previous state")
@@ -46,7 +46,7 @@ public class ModalDialogTransitions {
     }
 
     @OutgoingTransition(
-            to = PreviousState.class, // Return to whatever state was hidden
+            activate = {PreviousState.class}, // Return to whatever state was hidden
             staysVisible = false, // Modal closes completely
             pathCost = 0,
             description = "Cancel and close modal, returning to previous state")
@@ -58,7 +58,7 @@ public class ModalDialogTransitions {
     }
 
     @OutgoingTransition(
-            to = PreviousState.class, // Return to whatever state was hidden
+            activate = {PreviousState.class}, // Return to whatever state was hidden
             staysVisible = false, // Modal closes completely
             pathCost = 0,
             description = "Close modal with X button, returning to previous state")

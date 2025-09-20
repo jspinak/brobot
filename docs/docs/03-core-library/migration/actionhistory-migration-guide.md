@@ -7,7 +7,7 @@ sidebar_position: 1
 
 ## Overview
 
-Brobot 1.2.0 introduces a major API modernization, transitioning from the legacy `ActionOptions` system to the new `ActionConfig` hierarchy. This guide helps you migrate your existing code to the modern API.
+Brobot 1.1.0 introduces a major API modernization, transitioning from the legacy `ActionOptions` system to the new `ActionConfig` hierarchy. This guide helps you migrate your existing code to the modern API.
 
 ## Why Migrate?
 
@@ -21,8 +21,8 @@ Brobot 1.2.0 introduces a major API modernization, transitioning from the legacy
 
 ### Deprecation Timeline
 
-- **1.2.0**: Deprecation warnings introduced, migration tools available
-- **1.3.0**: Enhanced warnings, deprecated methods marked for removal
+- **1.1.0**: Deprecation warnings introduced, migration tools available
+- **1.2.0**: Enhanced warnings, deprecated methods marked for removal
 - **2.0.0**: Legacy API removed completely
 
 ## Quick Start Migration
@@ -33,7 +33,7 @@ The fastest way to migrate is using the automated migration tool:
 
 ```bash
 # Download the migration tool
-wget https://github.com/jspinak/brobot/releases/download/v1.2.0/brobot-migration-tool.jar
+wget https://github.com/jspinak/brobot/releases/download/v1.1.0/brobot-migration-tool.jar
 
 # Analyze your project
 java -jar brobot-migration-tool.jar --path /your/project --mode analyze

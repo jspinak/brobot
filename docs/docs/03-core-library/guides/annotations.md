@@ -191,7 +191,7 @@ public class DashboardTransitions {
 Verifies successful arrival at the state:
 
 ```java
-@IncomingTransition(description = "Verify settings modal is open", required = true)
+@IncomingTransition(description = "Verify settings modal is open")
 public boolean verifyArrival() {
     return action.find(settingsState.getCloseButton()).isSuccess() &&
            action.find(settingsState.getSettingsTitle()).isSuccess();

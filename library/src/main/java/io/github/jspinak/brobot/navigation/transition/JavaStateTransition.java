@@ -95,7 +95,7 @@ public class JavaStateTransition implements StateTransition {
     ;
     private Set<Long> exit = new HashSet<>();
     ;
-    private int pathCost = 0;
+    private int pathCost = 1; // Default cost is 1 for normal transitions
     private int timesSuccessful = 0;
 
     @Override
@@ -147,7 +147,7 @@ public class JavaStateTransition implements StateTransition {
         private StaysVisible staysVisibleAfterTransition = StaysVisible.NONE;
         private Set<String> activate = new HashSet<>();
         private Set<String> exit = new HashSet<>();
-        private int pathCost = 0;
+        private int pathCost = 1; // Default cost is 1 for normal transitions
 
         /**
          * Sets the transition logic function.

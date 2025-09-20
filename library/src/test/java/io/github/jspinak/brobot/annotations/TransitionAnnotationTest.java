@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.annotations;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -44,12 +45,14 @@ public class TransitionAnnotationTest extends BrobotTestBase {
     @TransitionSet(state = PricingState.class)
     static class PricingTransitions {
 
-        @OutgoingTransition(to = MenuState.class, pathCost = 1)
+        @OutgoingTransition(
+                activate = {MenuState.class},
+                pathCost = 1)
         public boolean toMenu() {
             return true;
         }
 
-        @OutgoingTransition(to = HomepageState.class)
+        @OutgoingTransition(activate = {HomepageState.class})
         public boolean toHomepage() {
             return true;
         }
@@ -67,12 +70,15 @@ public class TransitionAnnotationTest extends BrobotTestBase {
             description = "All transitions from Contact page")
     static class ContactTransitions {
 
-        @OutgoingTransition(to = MenuState.class, pathCost = 10, description = "Navigate to menu")
+        @OutgoingTransition(
+                activate = {MenuState.class},
+                pathCost = 10,
+                description = "Navigate to menu")
         public boolean toMenuWithPathCost() {
             return true;
         }
 
-        @OutgoingTransition(to = PricingState.class)
+        @OutgoingTransition(activate = {PricingState.class})
         public boolean toPricing() {
             return true;
         }
@@ -87,17 +93,21 @@ public class TransitionAnnotationTest extends BrobotTestBase {
     @TransitionSet(state = CheckoutState.class)
     static class CheckoutTransitions {
 
-        @OutgoingTransition(to = PricingState.class, pathCost = 1)
+        @OutgoingTransition(
+                activate = {PricingState.class},
+                pathCost = 1)
         public boolean toPricingQuickCheckout() {
             return true;
         }
 
-        @OutgoingTransition(to = PricingState.class, pathCost = 2)
-        public boolean fromPricingStandardCheckout() {
+        @OutgoingTransition(
+                activate = {PricingState.class},
+                pathCost = 2)
+        public boolean toPricingStandardCheckout() {
             return true;
         }
 
-        @IncomingTransition(required = false)
+        @IncomingTransition
         public boolean verifyCheckoutPage() {
             return true;
         }
@@ -163,7 +173,7 @@ public class TransitionAnnotationTest extends BrobotTestBase {
             TransitionSet annotation = ContactTransitions.class.getAnnotation(TransitionSet.class);
             assertNotNull(annotation);
             assertEquals("contact_page", annotation.name());
-            assertEquals("All transitions to Contact page", annotation.description());
+            assertEquals("All transitions from Contact page", annotation.description());
         }
 
         @Test
@@ -207,21 +217,21 @@ public class TransitionAnnotationTest extends BrobotTestBase {
         @Test
         @DisplayName("Should detect @OutgoingTransition on methods")
         void shouldDetectOutgoingTransitionOnMethods() throws NoSuchMethodException {
-            Method fromMenu = PricingTransitions.class.getMethod("fromMenu");
-            Method fromHomepage = PricingTransitions.class.getMethod("fromHomepage");
+            Method toMenu = PricingTransitions.class.getMethod("toMenu");
+            Method toHomepage = PricingTransitions.class.getMethod("toHomepage");
 
-            assertTrue(fromMenu.isAnnotationPresent(OutgoingTransition.class));
-            assertTrue(fromHomepage.isAnnotationPresent(OutgoingTransition.class));
+            assertTrue(toMenu.isAnnotationPresent(OutgoingTransition.class));
+            assertTrue(toHomepage.isAnnotationPresent(OutgoingTransition.class));
         }
 
         @Test
-        @DisplayName("Should extract source state from @OutgoingTransition")
-        void shouldExtractSourceState() throws NoSuchMethodException {
-            Method fromMenu = PricingTransitions.class.getMethod("fromMenu");
-            OutgoingTransition annotation = fromMenu.getAnnotation(OutgoingTransition.class);
+        @DisplayName("Should extract target states from @OutgoingTransition")
+        void shouldExtractTargetStates() throws NoSuchMethodException {
+            Method toMenu = PricingTransitions.class.getMethod("toMenu");
+            OutgoingTransition annotation = toMenu.getAnnotation(OutgoingTransition.class);
 
             assertNotNull(annotation);
-            assertEquals(MenuState.class, annotation.to());
+            assertArrayEquals(new Class<?>[] {MenuState.class}, annotation.activate());
         }
 
         @Test
@@ -234,12 +244,12 @@ public class TransitionAnnotationTest extends BrobotTestBase {
         }
 
         @Test
-        @DisplayName("Should have default pathCost of 0")
+        @DisplayName("Should have default pathCost of 1")
         void shouldHaveDefaultPathCost() throws NoSuchMethodException {
             Method toHomepage = PricingTransitions.class.getMethod("toHomepage");
             OutgoingTransition annotation = toHomepage.getAnnotation(OutgoingTransition.class);
 
-            assertEquals(0, annotation.pathCost());
+            assertEquals(1, annotation.pathCost());
         }
 
         @Test
@@ -273,8 +283,12 @@ public class TransitionAnnotationTest extends BrobotTestBase {
                             .filter(m -> m.isAnnotationPresent(OutgoingTransition.class))
                             .filter(
                                     m ->
-                                            m.getAnnotation(OutgoingTransition.class).to()
-                                                    == PricingState.class)
+                                            Arrays.asList(
+                                                            m.getAnnotation(
+                                                                            OutgoingTransition
+                                                                                    .class)
+                                                                    .activate())
+                                                    .contains(PricingState.class))
                             .collect(Collectors.toList());
 
             assertEquals(2, fromPricing.size(), "Should have 2 transitions from PricingState");
@@ -285,7 +299,7 @@ public class TransitionAnnotationTest extends BrobotTestBase {
         void shouldSortTransitionsByPathCost() throws NoSuchMethodException {
             Method quickCheckout = CheckoutTransitions.class.getMethod("toPricingQuickCheckout");
             Method standardCheckout =
-                    CheckoutTransitions.class.getMethod("fromPricingStandardCheckout");
+                    CheckoutTransitions.class.getMethod("toPricingStandardCheckout");
 
             OutgoingTransition quick = quickCheckout.getAnnotation(OutgoingTransition.class);
             OutgoingTransition standard = standardCheckout.getAnnotation(OutgoingTransition.class);
@@ -316,7 +330,6 @@ public class TransitionAnnotationTest extends BrobotTestBase {
             assertNotNull(annotation);
             assertEquals("", annotation.description());
             assertEquals(5, annotation.timeout());
-            assertTrue(annotation.required());
         }
 
         @Test
@@ -328,16 +341,6 @@ public class TransitionAnnotationTest extends BrobotTestBase {
             assertNotNull(annotation);
             assertEquals("Verify contact form is visible", annotation.description());
             assertEquals(15, annotation.timeout());
-        }
-
-        @Test
-        @DisplayName("Should support required attribute")
-        void shouldSupportRequiredAttribute() throws NoSuchMethodException {
-            Method verifyCheckout = CheckoutTransitions.class.getMethod("verifyCheckoutPage");
-            IncomingTransition annotation = verifyCheckout.getAnnotation(IncomingTransition.class);
-
-            assertNotNull(annotation);
-            assertFalse(annotation.required());
         }
 
         @Test
@@ -379,14 +382,14 @@ public class TransitionAnnotationTest extends BrobotTestBase {
             assertEquals(PricingState.class, annotation.state());
 
             Method[] methods = PricingTransitions.class.getDeclaredMethods();
-            List<Class<?>> sourceStates =
+            List<Class<?>> targetStates =
                     Arrays.stream(methods)
                             .filter(m -> m.isAnnotationPresent(OutgoingTransition.class))
-                            .map(m -> m.getAnnotation(OutgoingTransition.class).to())
+                            .map(m -> m.getAnnotation(OutgoingTransition.class).activate()[0])
                             .collect(Collectors.toList());
 
-            assertTrue(sourceStates.contains(MenuState.class));
-            assertTrue(sourceStates.contains(HomepageState.class));
+            assertTrue(targetStates.contains(MenuState.class));
+            assertTrue(targetStates.contains(HomepageState.class));
         }
 
         @Test
@@ -406,8 +409,12 @@ public class TransitionAnnotationTest extends BrobotTestBase {
                                 .filter(m -> m.isAnnotationPresent(OutgoingTransition.class))
                                 .filter(
                                         m ->
-                                                m.getAnnotation(OutgoingTransition.class).to()
-                                                        == MenuState.class)
+                                                Arrays.asList(
+                                                                m.getAnnotation(
+                                                                                OutgoingTransition
+                                                                                        .class)
+                                                                        .activate())
+                                                        .contains(MenuState.class))
                                 .count();
             }
 
@@ -422,15 +429,15 @@ public class TransitionAnnotationTest extends BrobotTestBase {
             Class<?> targetState = tsAnnotation.state();
 
             Method[] methods = PricingTransitions.class.getDeclaredMethods();
-            List<Class<?>> sourceStates =
+            List<Class<?>> targetStates =
                     Arrays.stream(methods)
                             .filter(m -> m.isAnnotationPresent(OutgoingTransition.class))
-                            .map(m -> m.getAnnotation(OutgoingTransition.class).to())
+                            .map(m -> m.getAnnotation(OutgoingTransition.class).activate()[0])
                             .collect(Collectors.toList());
 
             // All source states should transition to PricingState
-            assertFalse(sourceStates.isEmpty());
-            sourceStates.forEach(
+            assertFalse(targetStates.isEmpty());
+            targetStates.forEach(
                     source -> {
                         assertNotNull(source, "Source state should not be null");
                         // Conceptually, all these source states lead to targetState (PricingState)
@@ -508,14 +515,15 @@ public class TransitionAnnotationTest extends BrobotTestBase {
         @Test
         @DisplayName("Should access OutgoingTransition annotation methods via reflection")
         void shouldAccessOutgoingTransitionMethods() throws NoSuchMethodException {
-            assertNotNull(OutgoingTransition.class.getMethod("to"));
+            assertNotNull(OutgoingTransition.class.getMethod("activate"));
             assertNotNull(OutgoingTransition.class.getMethod("pathCost"));
             assertNotNull(OutgoingTransition.class.getMethod("description"));
             assertNotNull(OutgoingTransition.class.getMethod("activate"));
             assertNotNull(OutgoingTransition.class.getMethod("exit"));
             assertNotNull(OutgoingTransition.class.getMethod("staysVisible"));
 
-            assertEquals(Class.class, OutgoingTransition.class.getMethod("to").getReturnType());
+            assertEquals(
+                    Class[].class, OutgoingTransition.class.getMethod("activate").getReturnType());
             assertEquals(int.class, OutgoingTransition.class.getMethod("pathCost").getReturnType());
             assertEquals(
                     String.class,
@@ -533,14 +541,11 @@ public class TransitionAnnotationTest extends BrobotTestBase {
         void shouldAccessIncomingTransitionMethods() throws NoSuchMethodException {
             assertNotNull(IncomingTransition.class.getMethod("description"));
             assertNotNull(IncomingTransition.class.getMethod("timeout"));
-            assertNotNull(IncomingTransition.class.getMethod("required"));
 
             assertEquals(
                     String.class,
                     IncomingTransition.class.getMethod("description").getReturnType());
             assertEquals(int.class, IncomingTransition.class.getMethod("timeout").getReturnType());
-            assertEquals(
-                    boolean.class, IncomingTransition.class.getMethod("required").getReturnType());
         }
 
         @Test
@@ -575,11 +580,11 @@ public class TransitionAnnotationTest extends BrobotTestBase {
         @DisplayName("Should work with Spring's annotation utilities for OutgoingTransition")
         void shouldWorkWithSpringAnnotationUtilsForOutgoingTransition()
                 throws NoSuchMethodException {
-            Method fromMenu = PricingTransitions.class.getMethod("fromMenu");
+            Method toMenu = PricingTransitions.class.getMethod("toMenu");
             OutgoingTransition annotation =
-                    AnnotationUtils.findAnnotation(fromMenu, OutgoingTransition.class);
+                    AnnotationUtils.findAnnotation(toMenu, OutgoingTransition.class);
             assertNotNull(annotation);
-            assertEquals(MenuState.class, annotation.to());
+            assertArrayEquals(new Class<?>[] {MenuState.class}, annotation.activate());
         }
 
         @Test
@@ -590,7 +595,6 @@ public class TransitionAnnotationTest extends BrobotTestBase {
             IncomingTransition annotation =
                     AnnotationUtils.findAnnotation(verifyArrival, IncomingTransition.class);
             assertNotNull(annotation);
-            assertTrue(annotation.required());
         }
 
         @Test
@@ -641,8 +645,8 @@ public class TransitionAnnotationTest extends BrobotTestBase {
         void shouldHandleTransitionSetWithoutIncomingTransition() {
             @TransitionSet(state = MenuState.class)
             class OnlyOutgoingTransitions {
-                @OutgoingTransition(to = HomepageState.class)
-                public boolean fromHome() {
+                @OutgoingTransition(activate = {HomepageState.class})
+                public boolean toHome() {
                     return true;
                 }
             }
@@ -679,12 +683,12 @@ public class TransitionAnnotationTest extends BrobotTestBase {
             Method[] methods = PricingTransitions.class.getDeclaredMethods();
             Arrays.stream(methods)
                     .filter(m -> m.isAnnotationPresent(OutgoingTransition.class))
-                    .map(m -> m.getAnnotation(OutgoingTransition.class).to())
+                    .map(m -> m.getAnnotation(OutgoingTransition.class).activate()[0])
                     .forEach(
-                            sourceState ->
+                            activateState ->
                                     assertTrue(
-                                            sourceState.isAnnotationPresent(State.class),
-                                            sourceState.getSimpleName()
+                                            activateState.isAnnotationPresent(State.class),
+                                            activateState.getSimpleName()
                                                     + " should be annotated with @State"));
         }
 
@@ -710,13 +714,13 @@ public class TransitionAnnotationTest extends BrobotTestBase {
         @Test
         @DisplayName("Should compare annotations for equality")
         void shouldCompareAnnotationsForEquality() throws NoSuchMethodException {
-            Method fromMenu1 = PricingTransitions.class.getMethod("fromMenu");
-            Method fromMenu2 = PricingTransitions.class.getMethod("fromMenu");
-            Method fromHomepage = PricingTransitions.class.getMethod("fromHomepage");
+            Method toMenu1 = PricingTransitions.class.getMethod("toMenu");
+            Method toMenu2 = PricingTransitions.class.getMethod("toMenu");
+            Method toHomepage = PricingTransitions.class.getMethod("toHomepage");
 
-            OutgoingTransition annotation1 = fromMenu1.getAnnotation(OutgoingTransition.class);
-            OutgoingTransition annotation2 = fromMenu2.getAnnotation(OutgoingTransition.class);
-            OutgoingTransition annotation3 = fromHomepage.getAnnotation(OutgoingTransition.class);
+            OutgoingTransition annotation1 = toMenu1.getAnnotation(OutgoingTransition.class);
+            OutgoingTransition annotation2 = toMenu2.getAnnotation(OutgoingTransition.class);
+            OutgoingTransition annotation3 = toHomepage.getAnnotation(OutgoingTransition.class);
 
             assertEquals(annotation1, annotation2);
             assertNotEquals(annotation1, annotation3);

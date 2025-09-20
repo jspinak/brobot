@@ -244,9 +244,9 @@ public class PathFinderTest extends BrobotTestBase {
 
             // Short path: Start -> ShortPath -> Target (score 2)
             // Long path: Start -> LongPath1 -> LongPath2 -> Target (score 5)
-            shortPath.setPathScore(1);
-            longPath1.setPathScore(2);
-            longPath2.setPathScore(2);
+            shortPath.setPathCost(1);
+            longPath1.setPathCost(2);
+            longPath2.setPathCost(2);
 
             when(stateService.getState(2L)).thenReturn(Optional.of(shortPath));
             when(stateService.getState(3L)).thenReturn(Optional.of(longPath1));
@@ -496,7 +496,7 @@ public class PathFinderTest extends BrobotTestBase {
         State state = mock(State.class);
         when(state.getId()).thenReturn(id);
         when(state.getName()).thenReturn(name);
-        when(state.getPathScore()).thenReturn(1);
+        when(state.getPathCost()).thenReturn(1);
         return state;
     }
 }

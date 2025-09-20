@@ -33,7 +33,7 @@ public class SettingsPageTransitions {
     }
 
     @OutgoingTransition(
-            to = MainPageState.class,
+            activate = {MainPageState.class},
             pathCost = 1,
             description = "Navigate back to main page")
     public boolean backToMain() {
@@ -42,7 +42,7 @@ public class SettingsPageTransitions {
     }
 
     @OutgoingTransition(
-            to = ModalDialogState.class,
+            activate = {ModalDialogState.class},
             staysVisible = true, // Settings stays visible behind modal
             pathCost = 0,
             description = "Open modal dialog over settings page")
@@ -53,7 +53,7 @@ public class SettingsPageTransitions {
     }
 
     @OutgoingTransition(
-            to = CurrentState.class, // Self-transition
+            activate = {CurrentState.class}, // Self-transition
             pathCost = 2,
             description = "Save settings and stay on page")
     public boolean saveSettings() {

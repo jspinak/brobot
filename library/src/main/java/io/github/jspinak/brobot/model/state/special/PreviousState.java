@@ -5,8 +5,8 @@ package io.github.jspinak.brobot.model.state.special;
 /**
  * Marker class for transitions that should return to the previous (hidden) state.
  *
- * <p>This class is used with @OutgoingTransition(to = PreviousState.class) to indicate a dynamic
- * transition that returns to whatever state was covered by an overlay.
+ * <p>This class is used with @OutgoingTransition(activate = {PreviousState.class}) to indicate a
+ * dynamic transition that returns to whatever state was covered by an overlay.
  *
  * <p>When a state overlays another (e.g., a menu opens over a game screen), the covered state is
  * tracked as "hidden". Transitions to PreviousState will dynamically resolve to return to that
@@ -16,8 +16,8 @@ package io.github.jspinak.brobot.model.state.special;
  *
  * <pre>{@code
  * @OutgoingTransition(
- *     to = PreviousState.class,
- *     pathCost = 0,
+ *     activate = {PreviousState.class},
+ *     pathCost = 0,  // Override default of 1 for free transitions
  *     description = "Close menu and return to previous state"
  * )
  * public boolean closeMenu() {

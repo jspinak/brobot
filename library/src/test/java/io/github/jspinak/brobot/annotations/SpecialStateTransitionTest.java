@@ -60,7 +60,7 @@ class SpecialStateTransitionTest {
         }
 
         @OutgoingTransition(
-                to = PreviousState.class,
+                activate = {PreviousState.class},
                 pathCost = 0,
                 description = "Return to previous state")
         public boolean returnToPrevious() {
@@ -68,7 +68,7 @@ class SpecialStateTransitionTest {
         }
 
         @OutgoingTransition(
-                to = CurrentState.class,
+                activate = {CurrentState.class},
                 pathCost = 5,
                 description = "Stay in current state")
         public boolean refreshCurrent() {

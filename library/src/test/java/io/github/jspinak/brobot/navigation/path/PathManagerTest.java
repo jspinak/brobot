@@ -48,11 +48,11 @@ class PathManagerTest extends BrobotTestBase {
 
             // Mock states with different scores
             State state1 = mock(State.class);
-            when(state1.getPathScore()).thenReturn(10);
+            when(state1.getPathCost()).thenReturn(10);
             State state2 = mock(State.class);
-            when(state2.getPathScore()).thenReturn(20);
+            when(state2.getPathCost()).thenReturn(20);
             State state3 = mock(State.class);
-            when(state3.getPathScore()).thenReturn(15);
+            when(state3.getPathCost()).thenReturn(15);
 
             when(mockStateService.getState(1L)).thenReturn(Optional.of(state1));
             when(mockStateService.getState(2L)).thenReturn(Optional.of(state2));
@@ -71,7 +71,7 @@ class PathManagerTest extends BrobotTestBase {
 
             // Only state 2 exists
             State state2 = mock(State.class);
-            when(state2.getPathScore()).thenReturn(20);
+            when(state2.getPathCost()).thenReturn(20);
 
             when(mockStateService.getState(1L)).thenReturn(Optional.empty());
             when(mockStateService.getState(2L)).thenReturn(Optional.of(state2));
@@ -100,9 +100,9 @@ class PathManagerTest extends BrobotTestBase {
             path.setStates(new ArrayList<>(Arrays.asList(1L, 2L)));
 
             State state1 = mock(State.class);
-            when(state1.getPathScore()).thenReturn(-10);
+            when(state1.getPathCost()).thenReturn(-10);
             State state2 = mock(State.class);
-            when(state2.getPathScore()).thenReturn(30);
+            when(state2.getPathCost()).thenReturn(30);
 
             when(mockStateService.getState(1L)).thenReturn(Optional.of(state1));
             when(mockStateService.getState(2L)).thenReturn(Optional.of(state2));
@@ -119,11 +119,11 @@ class PathManagerTest extends BrobotTestBase {
             path.setStates(new ArrayList<>(Arrays.asList(1L, 2L, 3L)));
 
             State state1 = mock(State.class);
-            when(state1.getPathScore()).thenReturn(Integer.MAX_VALUE / 3);
+            when(state1.getPathCost()).thenReturn(Integer.MAX_VALUE / 3);
             State state2 = mock(State.class);
-            when(state2.getPathScore()).thenReturn(Integer.MAX_VALUE / 3);
+            when(state2.getPathCost()).thenReturn(Integer.MAX_VALUE / 3);
             State state3 = mock(State.class);
-            when(state3.getPathScore()).thenReturn(Integer.MAX_VALUE / 3);
+            when(state3.getPathCost()).thenReturn(Integer.MAX_VALUE / 3);
 
             when(mockStateService.getState(1L)).thenReturn(Optional.of(state1));
             when(mockStateService.getState(2L)).thenReturn(Optional.of(state2));
@@ -391,7 +391,7 @@ class PathManagerTest extends BrobotTestBase {
     // Helper method to mock state with score
     private void mockStateWithScore(Long stateId, int score) {
         State state = mock(State.class);
-        when(state.getPathScore()).thenReturn(score);
+        when(state.getPathCost()).thenReturn(score);
         when(mockStateService.getState(stateId)).thenReturn(Optional.of(state));
     }
 }

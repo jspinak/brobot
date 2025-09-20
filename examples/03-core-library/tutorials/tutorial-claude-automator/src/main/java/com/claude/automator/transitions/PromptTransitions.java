@@ -56,7 +56,7 @@ public class PromptTransitions {
      * Verify that we have successfully arrived at the Prompt state. Checks for the presence of the
      * Claude prompt input area.
      */
-    @IncomingTransition(description = "Verify arrival at Prompt state", required = true)
+    @IncomingTransition(description = "Verify arrival at Prompt state")
     public boolean verifyArrival() {
         log.info("Verifying arrival at Prompt state");
         // In mock mode, just return true for testing

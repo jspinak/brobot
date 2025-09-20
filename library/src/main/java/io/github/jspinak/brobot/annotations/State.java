@@ -92,4 +92,23 @@ public @interface State {
      * @since 1.2.0
      */
     String[] profiles() default {};
+
+    /**
+     * Path-finding cost for reaching this state. The total cost of a path is the sum of all state
+     * costs and transition costs in that path. Lower costs are preferred when multiple paths exist.
+     * Default is 1.
+     *
+     * <p>Example uses:
+     *
+     * <ul>
+     *   <li>0 - Free state (no cost to be in this state)
+     *   <li>1 - Normal state (default)
+     *   <li>5 - Slightly expensive state (e.g., requires loading)
+     *   <li>10+ - Expensive state to reach (e.g., error recovery states)
+     * </ul>
+     *
+     * @return the path cost for being in this state
+     * @since 1.3.0
+     */
+    int pathCost() default 1;
 }

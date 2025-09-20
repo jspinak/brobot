@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
  *   <li>Comparative analysis between histories
  * </ul>
  *
- * @since 1.2.0
+ * @since 1.1.0
  */
 @Component
 @RequiredArgsConstructor

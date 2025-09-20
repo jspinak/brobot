@@ -42,7 +42,7 @@ import lombok.extern.slf4j.Slf4j;
  *   <li>Session management with timestamps
  * </ul>
  *
- * @since 1.2.0
+ * @since 1.1.0
  */
 @Component
 @Slf4j

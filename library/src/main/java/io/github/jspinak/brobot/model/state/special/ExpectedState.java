@@ -5,9 +5,9 @@ package io.github.jspinak.brobot.model.state.special;
 /**
  * Marker class for transitions to an expected state determined at runtime.
  *
- * <p>This class is used with @OutgoingTransition(to = ExpectedState.class) to indicate a transition
- * where the target state is determined dynamically based on the application's expected behavior or
- * user configuration.
+ * <p>This class is used with @OutgoingTransition(activate = {ExpectedState.class}) to indicate a
+ * transition where the target state is determined dynamically based on the application's expected
+ * behavior or user configuration.
  *
  * <p>Use cases include:
  *
@@ -21,7 +21,7 @@ package io.github.jspinak.brobot.model.state.special;
  *
  * <pre>{@code
  * @OutgoingTransition(
- *     to = ExpectedState.class,
+ *     activate = {ExpectedState.class},
  *     pathCost = 10,
  *     description = "Navigate to user's default page"
  * )

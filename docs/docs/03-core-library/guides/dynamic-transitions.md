@@ -57,7 +57,7 @@ Brobot provides special marker classes for dynamic transitions:
 public class ModalDialogTransitions {
 
     @OutgoingTransition(
-        to = PreviousState.class,  // Returns to whatever opened this modal
+        activate = {PreviousState.class},  // Returns to whatever opened this modal
         pathCost = 0,
         description = "Close modal and return to previous state"
     )
@@ -89,7 +89,7 @@ public class IslandTransitions {
 
     // Better approach - using CurrentState for re-entry
     @OutgoingTransition(
-        to = CurrentState.class,  // Re-enter Island state
+        activate = {CurrentState.class},  // Re-enter Island state
         pathCost = 0,
         description = "Capture new island (re-enter Island from World)"
     )
@@ -121,7 +121,7 @@ public class IslandTransitions {
 public class SearchResultsTransitions {
 
     @OutgoingTransition(
-        to = CurrentState.class,  // Stay on search results
+        activate = {CurrentState.class},  // Stay on search results
         pathCost = 2,
         description = "Load more results"
     )
@@ -131,7 +131,7 @@ public class SearchResultsTransitions {
     }
 
     @OutgoingTransition(
-        to = CurrentState.class,
+        activate = {CurrentState.class},
         pathCost = 3,
         description = "Sort results by price"
     )
@@ -142,7 +142,7 @@ public class SearchResultsTransitions {
     }
 
     @OutgoingTransition(
-        to = CurrentState.class,
+        activate = {CurrentState.class},
         pathCost = 5,
         description = "Refresh search results"
     )
@@ -170,13 +170,13 @@ public class SearchResultsTransitions {
 
 1. **Multiple transitions with different path costs**:
 ```java
-@OutgoingTransition(to = AdminDashboard.class, pathCost = 0)
+@OutgoingTransition(activate = {AdminDashboard.class}, pathCost = 0)
 public boolean loginAsAdmin() {
     if (!user.isAdmin()) return false;
     return performLogin();
 }
 
-@OutgoingTransition(to = UserHome.class, pathCost = 0)
+@OutgoingTransition(activate = {UserHome.class}, pathCost = 0)
 public boolean loginAsUser() {
     if (user.isAdmin()) return false;
     return performLogin();
@@ -185,7 +185,7 @@ public boolean loginAsUser() {
 
 2. **Conditional logic in transition methods**:
 ```java
-@OutgoingTransition(to = HomePage.class, pathCost = 0)
+@OutgoingTransition(activate = {HomePage.class}, pathCost = 0)
 public boolean navigateToHome() {
     // The HomePage state can handle different user types internally
     return action.click(homeButton).isSuccess();
@@ -195,7 +195,7 @@ public boolean navigateToHome() {
 3. **State detection after transition**:
 ```java
 // Let the framework detect which state we ended up in
-@OutgoingTransition(to = HomePage.class, pathCost = 10)
+@OutgoingTransition(activate = {HomePage.class}, pathCost = 10)
 public boolean attemptNavigation() {
     action.click(navigationButton);
     // Framework will verify actual state after transition
@@ -219,7 +219,7 @@ public boolean attemptNavigation() {
 public class UnknownStateTransitions {
 
     @OutgoingTransition(
-        to = HomePage.class,
+        activate = {HomePage.class},
         pathCost = 10,
         description = "Recover to home"
     )
@@ -230,7 +230,7 @@ public class UnknownStateTransitions {
     }
 
     @OutgoingTransition(
-        to = LoginPage.class,
+        activate = {LoginPage.class},
         pathCost = 20,
         description = "Recover to login if session expired"
     )
@@ -241,7 +241,7 @@ public class UnknownStateTransitions {
 }
 
 // INCORRECT: Never transition TO UnknownState
-// @OutgoingTransition(to = UnknownState.class) // ❌ DON'T DO THIS
+// @OutgoingTransition(activate = {UnknownState.class}) // ❌ DON'T DO THIS
 ```
 
 ## Complete Working Example: Special States
@@ -336,7 +336,7 @@ public class ModalDialogTransitions {
     }
 
     @OutgoingTransition(
-            to = PreviousState.class, // Return to whatever state was hidden
+            activate = {PreviousState.class}, // Return to whatever state was hidden
             staysVisible = false, // Modal closes completely
             pathCost = 0,
             description = "Confirm and close modal, returning to previous state")
@@ -348,7 +348,7 @@ public class ModalDialogTransitions {
     }
 
     @OutgoingTransition(
-            to = PreviousState.class, // Return to whatever state was hidden
+            activate = {PreviousState.class}, // Return to whatever state was hidden
             staysVisible = false, // Modal closes completely
             pathCost = 0,
             description = "Cancel and close modal, returning to previous state")
@@ -360,7 +360,7 @@ public class ModalDialogTransitions {
     }
 
     @OutgoingTransition(
-            to = PreviousState.class, // Return to whatever state was hidden
+            activate = {PreviousState.class}, // Return to whatever state was hidden
             staysVisible = false, // Modal closes completely
             pathCost = 0,
             description = "Close modal with X button, returning to previous state")
@@ -411,7 +411,7 @@ public class MainPageTransitions {
     }
 
     @OutgoingTransition(
-            to = ModalDialogState.class,
+            activate = {ModalDialogState.class},
             staysVisible = true, // MainPage stays visible behind modal
             pathCost = 0,
             description = "Open modal dialog over main page")
@@ -422,7 +422,7 @@ public class MainPageTransitions {
     }
 
     @OutgoingTransition(
-            to = SettingsPageState.class,
+            activate = {SettingsPageState.class},
             pathCost = 1,
             description = "Navigate to settings page")
     public boolean toSettings() {
@@ -431,7 +431,7 @@ public class MainPageTransitions {
     }
 
     @OutgoingTransition(
-            to = CurrentState.class, // Self-transition
+            activate = {CurrentState.class}, // Self-transition
             pathCost = 2,
             description = "Refresh main page")
     public boolean refresh() {
@@ -441,7 +441,7 @@ public class MainPageTransitions {
     }
 
     @OutgoingTransition(
-            to = CurrentState.class, // Self-transition
+            activate = {CurrentState.class}, // Self-transition
             pathCost = 3,
             description = "Load next page of results")
     public boolean nextPage() {
@@ -462,7 +462,7 @@ public class DataGridTransitions {
     private final Action action;
 
     @OutgoingTransition(
-        to = CurrentState.class,  // Stay in same state
+        activate = {CurrentState.class},  // Stay in same state
         pathCost = 5,
         description = "Load next page of data"
     )
@@ -471,7 +471,7 @@ public class DataGridTransitions {
     }
 
     @OutgoingTransition(
-        to = CurrentState.class,
+        activate = {CurrentState.class},
         pathCost = 5,
         description = "Load previous page of data"
     )
@@ -480,7 +480,7 @@ public class DataGridTransitions {
     }
 
     @OutgoingTransition(
-        to = CurrentState.class,
+        activate = {CurrentState.class},
         pathCost = 3,
         description = "Sort by column"
     )
@@ -489,7 +489,7 @@ public class DataGridTransitions {
     }
 
     @OutgoingTransition(
-        to = CurrentState.class,
+        activate = {CurrentState.class},
         pathCost = 2,
         description = "Apply filter"
     )
@@ -524,7 +524,7 @@ public class HelpDialog {
 // Transitions maintain the hidden state stack
 @TransitionSet(state = HelpDialog.class)
 public class HelpDialogTransitions {
-    @OutgoingTransition(to = PreviousState.class, pathCost = 0)
+    @OutgoingTransition(activate = {PreviousState.class}, pathCost = 0)
     public boolean closeHelp() {
         // Returns to Menu (which is covering Settings)
         return action.click(closeButton).isSuccess();
@@ -533,7 +533,7 @@ public class HelpDialogTransitions {
 
 @TransitionSet(state = MenuOverlay.class)
 public class MenuTransitions {
-    @OutgoingTransition(to = PreviousState.class, pathCost = 0)
+    @OutgoingTransition(activate = {PreviousState.class}, pathCost = 0)
     public boolean closeMenu() {
         // Returns to Settings (or whatever was covered)
         return action.click(closeButton).isSuccess();
@@ -585,13 +585,13 @@ Always have a fallback plan if dynamic transitions might fail:
 @TransitionSet(state = MenuState.class)
 public class MenuTransitions {
 
-    @OutgoingTransition(to = PreviousState.class, pathCost = 0)
+    @OutgoingTransition(activate = {PreviousState.class}, pathCost = 0)
     public boolean closeToPrevious() {
         // Primary: try to return to previous
         return action.click(closeButton).isSuccess();
     }
 
-    @OutgoingTransition(to = HomePage.class, pathCost = 10)
+    @OutgoingTransition(activate = {HomePage.class}, pathCost = 10)
     public boolean closeToHome() {
         // Fallback: go to home if previous fails
         return action.click(homeButton).isSuccess();

@@ -37,7 +37,7 @@ import java.lang.annotation.*;
  *
  * <pre>{@code
  * // Simple transition to a specific state
- * @OutgoingTransition(to = PricingState.class, pathCost = 1)
+ * @OutgoingTransition(activate = {PricingState.class})  // pathCost defaults to 1
  * public boolean toPricing() {
  *     log.info("Navigating from Homepage to Pricing");
  *     return action.click(homepageState.getPricingLink()).isSuccess();
@@ -45,7 +45,7 @@ import java.lang.annotation.*;
  *
  * // Return to hidden state (dynamic transition)
  * @OutgoingTransition(
- *     to = PreviousState.class,  // Returns to whatever state was covered
+ *     activate = {PreviousState.class},  // Returns to whatever state was covered
  *     pathCost = 0,
  *     description = "Close modal and return to previous state"
  * )
@@ -55,7 +55,7 @@ import java.lang.annotation.*;
  *
  * // Self-transition (stays in current state)
  * @OutgoingTransition(
- *     to = CurrentState.class,  // Stay in or re-enter current state
+ *     activate = {CurrentState.class},  // Stay in or re-enter current state
  *     pathCost = 2,
  *     description = "Load more results"
  * )
@@ -65,7 +65,7 @@ import java.lang.annotation.*;
  *
  * // Modal overlay - keep origin visible
  * @OutgoingTransition(
- *     to = SettingsModalState.class,
+ *     activate = {SettingsModalState.class},
  *     staysVisible = true,  // dashboard remains visible behind modal
  *     pathCost = 2
  * )
@@ -75,8 +75,7 @@ import java.lang.annotation.*;
  *
  * // Complex transition with multiple state changes
  * @OutgoingTransition(
- *     to = DashboardState.class,
- *     activate = {SidebarState.class, HeaderState.class},
+ *     activate = {DashboardState.class, SidebarState.class, HeaderState.class},
  *     exit = {LoginState.class},
  *     staysVisible = false,  // originating state is deactivated (default)
  *     pathCost = 0  // preferred path (lower cost)
@@ -94,29 +93,27 @@ import java.lang.annotation.*;
 public @interface OutgoingTransition {
 
     /**
-     * The primary target state class for this transition. This transition will navigate FROM the
-     * state defined in @TransitionSet TO this target state.
+     * States to activate during this transition. This transition will navigate FROM the state
+     * defined in @TransitionSet and activate all states in this array.
      *
-     * <p>Can be one of:
+     * <p>Can include:
      *
      * <ul>
-     *   <li>A regular state class (e.g., {@code HomeState.class})
+     *   <li>Regular state classes (e.g., {@code HomeState.class})
      *   <li>{@code PreviousState.class} - Returns to the most recently hidden state
      *   <li>{@code CurrentState.class} - Self-transition or re-enters current state
      *   <li>{@code ExpectedState.class} - (Future) Runtime-determined state
      * </ul>
      *
-     * @return the target state class or special state marker
-     */
-    Class<?> to();
-
-    /**
-     * Additional states to activate during this transition. The 'to' state is always activated;
-     * this specifies additional states.
+     * <p>For single-target transitions, use a single-element array: {@code activate =
+     * {TargetState.class}}
      *
-     * @return array of additional state classes to activate
+     * <p>For multi-state transitions, include all states to activate: {@code activate =
+     * {MainState.class, SidePanel.class, Header.class}}
+     *
+     * @return array of state classes to activate (required, must have at least one)
      */
-    Class<?>[] activate() default {};
+    Class<?>[] activate();
 
     /**
      * States to exit/deactivate during this transition. Note: The originating state's deactivation
@@ -135,12 +132,22 @@ public @interface OutgoingTransition {
     boolean staysVisible() default false;
 
     /**
-     * Path-finding cost - LOWER costs are preferred when multiple paths exist. Higher costs
-     * discourage using this transition in pathfinding. Default is 0 (most preferred).
+     * Path-finding cost for this transition. The total cost of a path is the sum of all state costs
+     * and transition costs in that path. Lower costs are preferred when multiple paths exist.
+     * Higher costs discourage using this transition in pathfinding. Default is 1.
+     *
+     * <p>Example uses:
+     *
+     * <ul>
+     *   <li>0 - Free transition (no cost)
+     *   <li>1 - Normal transition (default)
+     *   <li>5 - Slightly expensive transition
+     *   <li>10+ - Expensive/fallback transition
+     * </ul>
      *
      * @return the path cost for this transition
      */
-    int pathCost() default 0;
+    int pathCost() default 1;
 
     /**
      * Optional description of this transition. Useful for documentation and debugging.

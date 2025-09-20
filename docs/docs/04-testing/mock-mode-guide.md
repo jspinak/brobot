@@ -414,7 +414,7 @@ public class TargetStateTransitions {
         return action.click(sourceState.getButton()).isSuccess();
     }
     
-    @IncomingTransition(required = true)
+    @IncomingTransition
     public boolean verifyArrival() {
         if (brobotProperties.getCore().isMock()) return true;
         return action.find(targetState.getElement()).isSuccess();

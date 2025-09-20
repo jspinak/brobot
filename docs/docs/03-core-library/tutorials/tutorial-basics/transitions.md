@@ -4,7 +4,7 @@ sidebar_position: 5
 
 # Transitions
 
-Transitions define how your automation moves between states. With Brobot's modern `@TransitionSet` annotation system (1.2.0+), all transitions for a state are grouped together in a single class, providing better organization and clearer intent.
+Transitions define how your automation moves between states. With Brobot's modern `@TransitionSet` annotation system (1.1.0+), all transitions for a state are grouped together in a single class, providing better organization and clearer intent.
 
 ## Modern Transition Definition with @TransitionSet
 
@@ -61,7 +61,7 @@ public class WorldTransitions {
     /**
      * Verify that we have successfully arrived at the World state.
      */
-    @IncomingTransition(description = "Verify arrival at World state", required = true)
+    @IncomingTransition(description = "Verify arrival at World state")
     public boolean verifyArrival() {
         log.info("Verifying arrival at World state");
         
@@ -111,7 +111,6 @@ Verifies successful arrival at the state:
 ```java
 @IncomingTransition(
     description = "Verification logic",  // Optional: documentation
-    required = true                       // Optional: must succeed (default: false)
 )
 public boolean verifyArrival() {
     // Verification logic
@@ -180,7 +179,7 @@ public class IslandTransitions {
     /**
      * Verify arrival at Island state.
      */
-    @IncomingTransition(required = true)
+    @IncomingTransition
     public boolean verifyArrival() {
         log.info("Verifying arrival at Island state");
         
@@ -212,7 +211,7 @@ public class SettingsTransitions {
         return action.click(homeState.getSettingsIcon()).isSuccess();
     }
     
-    @IncomingTransition(required = true)
+    @IncomingTransition
     public boolean verifyArrival() {
         if (brobotProperties.getCore().isMock()) return true;
         return action.find(settingsState.getSettingsHeader()).isSuccess();
@@ -255,7 +254,7 @@ public class DashboardTransitions {
         return false;
     }
     
-    @IncomingTransition(required = true)
+    @IncomingTransition
     public boolean verifyArrival() {
         if (brobotProperties.getCore().isMock()) return true;
         
@@ -308,7 +307,7 @@ public class GameTransitions {
         return action.click(pauseMenu.getResumeButton()).isSuccess();
     }
     
-    @IncomingTransition(required = true)
+    @IncomingTransition
     public boolean verifyArrival() {
         if (brobotProperties.getCore().isMock()) return true;
         
@@ -370,7 +369,7 @@ public class ConfirmationTransitions {
         return action.perform(chainedAction, targets).isSuccess();
     }
     
-    @IncomingTransition(required = true)
+    @IncomingTransition
     public boolean verifyArrival() {
         if (brobotProperties.getCore().isMock()) return true;
         return action.find(confirmationState.getSuccessMessage()).isSuccess();
@@ -440,7 +439,7 @@ src/main/java/com/example/basics/
 
 5. **Verify Critical Elements in IncomingTransition**
    ```java
-   @IncomingTransition(required = true)
+   @IncomingTransition
    public boolean verifyArrival() {
        if (brobotProperties.getCore().isMock()) return true;
        
@@ -505,7 +504,7 @@ public class WorldTransitionsTest {
 
 If migrating from the old `@Transition` annotation:
 
-### Old Format (Pre-1.2.0)
+### Old Format (Pre-1.1.0)
 ```java
 // Separate class for each transition
 @Transition(from = HomeState.class, to = WorldState.class)
@@ -516,7 +515,7 @@ public class HomeToWorldTransition {
 }
 ```
 
-### New Format (1.2.0+)
+### New Format (1.1.0+)
 ```java
 // All transitions for a state in one class
 @TransitionSet(state = WorldState.class)
@@ -529,7 +528,7 @@ public class WorldTransitions {
         return action.click(homeState.getToWorldButton()).isSuccess();
     }
     
-    @IncomingTransition(required = true)
+    @IncomingTransition
     public boolean verifyArrival() {
         if (brobotProperties.getCore().isMock()) return true;
         return action.find(worldState.getMinimap()).isSuccess();

@@ -737,7 +737,7 @@ repositories {
 
 dependencies {
     // Brobot Framework
-    implementation 'io.github.jspinak:brobot:1.2.0'
+    implementation 'io.github.jspinak:brobot:1.1.0'
 
     // Spring Boot
     implementation 'org.springframework.boot:spring-boot-starter'
@@ -778,7 +778,7 @@ test {
 
     <properties>
         <java.version>21</java.version>
-        <brobot.version>1.2.0</brobot.version>
+        <brobot.version>1.1.0</brobot.version>
         <lombok.version>1.18.32</lombok.version>
     </properties>
 

@@ -80,7 +80,7 @@ public class AnnotationProcessorTest extends BrobotTestBase {
     // Test transition class using TransitionSet
     @io.github.jspinak.brobot.annotations.TransitionSet(state = SimpleState.class)
     static class TestTransition {
-        @io.github.jspinak.brobot.annotations.OutgoingTransition(to = TestState.class)
+        @io.github.jspinak.brobot.annotations.OutgoingTransition(activate = {TestState.class})
         public boolean toTestState() {
             return true;
         }
@@ -332,7 +332,7 @@ public class AnnotationProcessorTest extends BrobotTestBase {
             // Setup transition with invalid method name
             @TransitionSet(state = SimpleState.class)
             class InvalidTransition {
-                @OutgoingTransition(to = TestState.class)
+                @OutgoingTransition(activate = {TestState.class})
                 public boolean toTestState() {
                     return false;
                 }

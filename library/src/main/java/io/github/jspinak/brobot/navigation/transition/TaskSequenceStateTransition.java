@@ -84,7 +84,7 @@ public class TaskSequenceStateTransition implements StateTransition {
     private StaysVisible staysVisibleAfterTransition = StaysVisible.NONE;
     private Set<Long> activate = new HashSet<>();
     private Set<Long> exit = new HashSet<>();
-    private int pathCost = 0;
+    private int pathCost = 1; // Default cost is 1 for normal transitions
     private int timesSuccessful = 0;
 
     @JsonIgnore
