@@ -115,15 +115,15 @@ public class StateTransitionTest extends BrobotTestBase {
     }
 
     @Test
-    @DisplayName("Should get and set score for path finding")
-    void testScore() {
+    @DisplayName("Should get and set path cost for path finding")
+    void testPathCost() {
         // When
-        taskSequenceTransition.setScore(100);
-        javaTransition.setScore(-50);
+        taskSequenceTransition.setPathCost(100);
+        javaTransition.setPathCost(-50);
 
         // Then
-        assertEquals(100, taskSequenceTransition.getScore());
-        assertEquals(-50, javaTransition.getScore());
+        assertEquals(100, taskSequenceTransition.getPathCost());
+        assertEquals(-50, javaTransition.getPathCost());
     }
 
     @Test
@@ -176,7 +176,7 @@ public class StateTransitionTest extends BrobotTestBase {
     @DisplayName("Should provide toString for debugging")
     void testToString() {
         // Given
-        taskSequenceTransition.setScore(10);
+        taskSequenceTransition.setPathCost(10);
         Set<Long> activate = Set.of(1L, 2L);
         taskSequenceTransition.setActivate(activate);
 
@@ -228,20 +228,20 @@ public class StateTransitionTest extends BrobotTestBase {
                         () -> {
                             StateTransition transition = new TaskSequenceStateTransition();
                             transition.setActivate(Set.of(3L, 4L, 5L)); // Activate multiple states
-                            transition.setScore(50); // Medium priority
+                            transition.setPathCost(50); // Medium cost
 
                             assertEquals(3, transition.getActivate().size());
-                            assertEquals(50, transition.getScore());
+                            assertEquals(50, transition.getPathCost());
                         }),
                 dynamicTest(
                         "High-reliability transition",
                         () -> {
                             StateTransition transition = new TaskSequenceStateTransition();
                             transition.setTimesSuccessful(100);
-                            transition.setScore(5); // Low score (preferred)
+                            transition.setPathCost(5); // Low cost (preferred)
 
                             assertEquals(100, transition.getTimesSuccessful());
-                            assertEquals(5, transition.getScore());
+                            assertEquals(5, transition.getPathCost());
                         }));
     }
 
@@ -310,13 +310,13 @@ public class StateTransitionTest extends BrobotTestBase {
         StateTransition normal = new TaskSequenceStateTransition();
         StateTransition discouraged = new TaskSequenceStateTransition();
 
-        preferred.setScore(10);
-        normal.setScore(50);
-        discouraged.setScore(100);
+        preferred.setPathCost(10);
+        normal.setPathCost(50);
+        discouraged.setPathCost(100);
 
-        // Then - Lower scores are preferred
-        assertTrue(preferred.getScore() < normal.getScore());
-        assertTrue(normal.getScore() < discouraged.getScore());
+        // Then - Lower costs are preferred
+        assertTrue(preferred.getPathCost() < normal.getPathCost());
+        assertTrue(normal.getPathCost() < discouraged.getPathCost());
 
         // Path finder would prefer: preferred > normal > discouraged
     }

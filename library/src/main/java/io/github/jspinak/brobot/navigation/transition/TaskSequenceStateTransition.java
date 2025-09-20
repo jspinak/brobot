@@ -26,7 +26,7 @@ import lombok.Data;
  *   <li><b>Activation Set</b>: State IDs to activate after successful transition
  *   <li><b>Exit Set</b>: State IDs to deactivate after successful transition
  *   <li><b>Visibility Control</b>: Whether source state remains visible post-transition
- *   <li><b>Path Score</b>: Weight for path-finding algorithms (higher = less preferred)
+ *   <li><b>Path Cost</b>: Weight for path-finding algorithms (higher = less preferred)
  * </ul>
  *
  * <p>Design patterns and integration:
@@ -84,13 +84,23 @@ public class TaskSequenceStateTransition implements StateTransition {
     private StaysVisible staysVisibleAfterTransition = StaysVisible.NONE;
     private Set<Long> activate = new HashSet<>();
     private Set<Long> exit = new HashSet<>();
-    private int score = 0;
+    private int pathCost = 0;
     private int timesSuccessful = 0;
 
     @JsonIgnore
     @Override
     public Optional<TaskSequence> getTaskSequenceOptional() {
         return Optional.ofNullable(actionDefinition);
+    }
+
+    @Override
+    public int getPathCost() {
+        return pathCost;
+    }
+
+    @Override
+    public void setPathCost(int pathCost) {
+        this.pathCost = pathCost;
     }
 
     @Override

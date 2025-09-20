@@ -21,6 +21,16 @@ The example below shows a screen with multiple states active simultaneously, eac
 
 ![States Example](/img/states3.png)
 
+#### Impact on Pathfinding
+
+**Important**: Brobot's pathfinding system leverages multi-state activation. When a transition activates multiple states simultaneously (e.g., Login → [Dashboard, Sidebar, Menu]), **each activated state becomes a potential path node** for future navigation. This means:
+
+- More navigation paths are automatically available
+- States can be reached through unexpected routes
+- The pathfinder considers ALL activated states equally (no "primary" target)
+
+> **📖 See [Pathfinding & Multi-State Activation](pathfinding.md) for detailed explanation**
+
 ## Defining States in Code
 
 Brobot provides two approaches for defining states: the traditional approach shown in the research paper and the modern annotation-based approach introduced in version 1.1.0+.

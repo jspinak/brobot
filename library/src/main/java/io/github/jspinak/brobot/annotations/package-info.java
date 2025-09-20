@@ -32,16 +32,15 @@
  * @Slf4j
  * public class DashboardTransitions {
  *     private final Action action;
- *     private final LoginState loginState;
  *     private final DashboardState dashboardState;
  *
- *     @FromTransition(from = LoginState.class)
- *     public boolean fromLogin() {
- *         // Transition logic from login to dashboard
- *         return action.click(loginState.getLoginButton()).isSuccess();
+ *     @OutgoingTransition(to = SettingsState.class)
+ *     public boolean toSettings() {
+ *         // Navigate from Dashboard to Settings
+ *         return action.click(dashboardState.getSettingsButton()).isSuccess();
  *     }
  *
- *     @ToTransition
+ *     @IncomingTransition
  *     public boolean verifyArrival() {
  *         // Verify we've arrived at the dashboard
  *         return action.find(dashboardState.getDashboardHeader()).isSuccess();

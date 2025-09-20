@@ -17,6 +17,8 @@ import io.github.jspinak.brobot.statemanagement.StateVisibilityManager;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.tools.logging.MessageFormatter;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Orchestrates complex state transitions in the Brobot framework.
  *
@@ -86,6 +88,7 @@ import io.github.jspinak.brobot.tools.logging.MessageFormatter;
  * @see StateVisibilityManager
  * @see StateMemory
  */
+@Slf4j
 @Component
 public class TransitionExecutor {
 
@@ -281,8 +284,28 @@ public class TransitionExecutor {
                                 .getState(stateName)
                                 .ifPresent(State::setProbabilityToBaseProbability));
         StateTransition fromTrsn = transitions.getFromTransition();
-        statesToActivate.forEach(
-                this::doTransitionTo); // do remaining ToTransitions for cascading states
+
+        // Execute IncomingTransition for each additional activated state
+        if (!statesToActivate.isEmpty()) {
+            log.trace(
+                    "Executing IncomingTransitions for additional activated states: {}",
+                    statesToActivate);
+            statesToActivate.forEach(
+                    stateId -> {
+                        String stateName = allStatesInProjectService.getStateName(stateId);
+                        log.trace(
+                                "Executing IncomingTransition for state {} ({})",
+                                stateId,
+                                stateName);
+                        boolean success = doTransitionTo(stateId);
+                        if (!success) {
+                            log.warn(
+                                    "IncomingTransition failed for state {} ({})",
+                                    stateId,
+                                    stateName);
+                        }
+                    }); // Execute IncomingTransitions for all additional activated states
+        }
         fromTrsn.getExit().forEach(this::exitState); // exit all States to exit
 
         // Verify the primary target state is active
@@ -334,7 +357,7 @@ public class TransitionExecutor {
     }
 
     /**
-     * Executes the ToTransition for a specific target state.
+     * Executes the IncomingTransition (stored as transitionFinish) for a specific target state.
      *
      * <p>Handles the complete activation sequence for a state:
      *
@@ -342,12 +365,15 @@ public class TransitionExecutor {
      *   <li>Skip if state already active (cycle prevention)
      *   <li>Verify state exists in the system
      *   <li>Reset state probability to base value
-     *   <li>Execute transition finish actions
+     *   <li>Execute IncomingTransition (transitionFinish) to verify state arrival
      *   <li>Update probability based on success/failure
      *   <li>Process hidden states if successful
      *   <li>Execute cascading transitions
      *   <li>Process exit states
      * </ol>
+     *
+     * <p>Note: The transitionFinish field contains the @IncomingTransition method that verifies
+     * successful arrival at this state.
      *
      * <p>Side effects:
      *
@@ -359,7 +385,7 @@ public class TransitionExecutor {
      * </ul>
      *
      * @param toStateName ID of the state to activate
-     * @return true if state successfully activated
+     * @return true if state successfully activated (IncomingTransition succeeded)
      */
     private boolean doTransitionTo(Long toStateName) {
         if (stateMemory.getActiveStates().contains(toStateName))

@@ -73,7 +73,7 @@ class PathFinderTest {
                     .thenReturn(parentStates);
 
             StateTransition transition = mock(StateTransition.class);
-            lenient().when(transition.getScore()).thenReturn(5);
+            lenient().when(transition.getPathCost()).thenReturn(5);
             when(stateTransitionService.getTransition(1L, 2L)).thenReturn(Optional.of(transition));
 
             // Execute
@@ -127,8 +127,8 @@ class PathFinderTest {
 
             StateTransition transition1 = mock(StateTransition.class);
             StateTransition transition2 = mock(StateTransition.class);
-            lenient().when(transition1.getScore()).thenReturn(5);
-            lenient().when(transition2.getScore()).thenReturn(5);
+            lenient().when(transition1.getPathCost()).thenReturn(5);
+            lenient().when(transition2.getPathCost()).thenReturn(5);
             when(stateTransitionService.getTransition(1L, 2L)).thenReturn(Optional.of(transition1));
             when(stateTransitionService.getTransition(2L, 3L)).thenReturn(Optional.of(transition2));
 
@@ -204,8 +204,8 @@ class PathFinderTest {
 
             StateTransition transition1 = mock(StateTransition.class);
             StateTransition transition2 = mock(StateTransition.class);
-            lenient().when(transition1.getScore()).thenReturn(5);
-            lenient().when(transition2.getScore()).thenReturn(3);
+            lenient().when(transition1.getPathCost()).thenReturn(5);
+            lenient().when(transition2.getPathCost()).thenReturn(3);
             when(stateTransitionService.getTransition(1L, 3L)).thenReturn(Optional.of(transition1));
             when(stateTransitionService.getTransition(2L, 3L)).thenReturn(Optional.of(transition2));
 
@@ -259,7 +259,7 @@ class PathFinderTest {
                     .thenReturn(parentStates);
 
             StateTransition transition = mock(StateTransition.class);
-            lenient().when(transition.getScore()).thenReturn(5);
+            lenient().when(transition.getPathCost()).thenReturn(5);
             when(stateTransitionService.getTransition(2L, 4L)).thenReturn(Optional.of(transition));
 
             // Execute
@@ -322,9 +322,9 @@ class PathFinderTest {
             StateTransition transition1 = mock(StateTransition.class);
             StateTransition transition2 = mock(StateTransition.class);
             StateTransition transition3 = mock(StateTransition.class);
-            lenient().when(transition1.getScore()).thenReturn(5);
-            lenient().when(transition2.getScore()).thenReturn(5);
-            lenient().when(transition3.getScore()).thenReturn(5);
+            lenient().when(transition1.getPathCost()).thenReturn(5);
+            lenient().when(transition2.getPathCost()).thenReturn(5);
+            lenient().when(transition3.getPathCost()).thenReturn(5);
             when(stateTransitionService.getTransition(1L, 2L)).thenReturn(Optional.of(transition1));
             when(stateTransitionService.getTransition(2L, 3L)).thenReturn(Optional.of(transition2));
             when(stateTransitionService.getTransition(3L, 4L)).thenReturn(Optional.of(transition3));
@@ -383,8 +383,8 @@ class PathFinderTest {
 
             StateTransition transition1 = mock(StateTransition.class);
             StateTransition transition2 = mock(StateTransition.class);
-            lenient().when(transition1.getScore()).thenReturn(5);
-            lenient().when(transition2.getScore()).thenReturn(8);
+            lenient().when(transition1.getPathCost()).thenReturn(5);
+            lenient().when(transition2.getPathCost()).thenReturn(8);
             when(stateTransitionService.getTransition(1L, 2L)).thenReturn(Optional.of(transition1));
             when(stateTransitionService.getTransition(2L, 3L)).thenReturn(Optional.of(transition2));
 
@@ -397,7 +397,7 @@ class PathFinderTest {
             Path path = paths.getPaths().get(0);
 
             // Expected score: states (10 + 20 + 15) + transitions (5 + 8) = 58
-            assertEquals(58, path.getScore());
+            assertEquals(58, path.getPathCost());
         }
 
         @Test
@@ -431,8 +431,8 @@ class PathFinderTest {
 
             StateTransition transition1 = mock(StateTransition.class);
             StateTransition transition2 = mock(StateTransition.class);
-            lenient().when(transition1.getScore()).thenReturn(3);
-            lenient().when(transition2.getScore()).thenReturn(3);
+            lenient().when(transition1.getPathCost()).thenReturn(3);
+            lenient().when(transition2.getPathCost()).thenReturn(3);
             when(stateTransitionService.getTransition(1L, 3L)).thenReturn(Optional.of(transition1));
             when(stateTransitionService.getTransition(2L, 3L)).thenReturn(Optional.of(transition2));
 
@@ -487,7 +487,7 @@ class PathFinderTest {
                     .thenReturn(parentStates);
 
             StateTransition selfTransition = mock(StateTransition.class);
-            when(selfTransition.getScore()).thenReturn(5);
+            when(selfTransition.getPathCost()).thenReturn(5);
             when(stateTransitionService.getTransition(1L, 1L))
                     .thenReturn(Optional.of(selfTransition));
 

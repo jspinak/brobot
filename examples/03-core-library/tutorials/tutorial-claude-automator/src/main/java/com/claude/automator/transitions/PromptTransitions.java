@@ -32,7 +32,7 @@ public class PromptTransitions {
     /** Navigate from Prompt to Working by submitting a command. */
     @OutgoingTransition(
             to = WorkingState.class,
-            priority = 1,
+            pathCost = 1,
             description = "Navigate from Prompt to Working")
     public boolean toWorking() {
         log.info("Navigating from Prompt to Working");

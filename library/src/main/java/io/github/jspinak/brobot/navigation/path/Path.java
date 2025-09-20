@@ -25,14 +25,14 @@ import lombok.Setter;
  * <ul>
  *   <li><b>State Sequence</b>: Ordered list of state IDs representing the navigation route
  *   <li><b>Transitions</b>: The state transition functions that move between consecutive states
- *   <li><b>Score</b>: Numeric value for path quality (lower scores indicate preferred paths)
+ *   <li><b>Path Cost</b>: Numeric value for path quality (lower costs indicate preferred paths)
  * </ul>
  *
- * <p>Path scoring:
+ * <p>Path costing:
  *
  * <ul>
- *   <li>Lower scores are preferred when multiple paths exist to the same target
- *   <li>Scores are calculated based on state weights and transition costs
+ *   <li>Lower costs are preferred when multiple paths exist to the same target
+ *   <li>Costs are calculated based on state weights and transition costs
  *   <li>Enables optimization of navigation efficiency and reliability
  * </ul>
  *
@@ -51,7 +51,7 @@ import lombok.Setter;
  *   <li>Storing discovered routes from PathFinder algorithms
  *   <li>Executing state transitions in sequence during automation
  *   <li>Recovering from failures by finding alternative paths
- *   <li>Optimizing navigation by selecting lowest-score paths
+ *   <li>Optimizing navigation by selecting lowest-cost paths
  * </ul>
  *
  * <p>In the model-based approach, Path objects transform abstract state graphs into concrete
@@ -72,7 +72,7 @@ public class Path {
     private List<Long> states = new ArrayList<>(); // all states in the path
     private List<StateTransition> transitions =
             new ArrayList<>(); // transitions between the states in the path
-    private int score; // lower scores are chosen first when selecting a path
+    private int pathCost; // lower costs are chosen first when selecting a path
 
     public boolean equals(Path path) {
         return this.states.equals(path.getStates());
@@ -113,18 +113,18 @@ public class Path {
     public Path getCopy() {
         Path p = new Path();
         p.setStates(new ArrayList<>(states));
-        p.setScore(score);
+        p.setPathCost(pathCost);
         return p;
     }
 
     public void print() {
-        System.out.format("  (%d) ", score);
+        System.out.format("  (%d) ", pathCost);
         states.forEach(s -> System.out.format("-> %s ", s));
         System.out.println();
     }
 
     public void print(StateService stateService) {
-        System.out.format("  (%d) ", score);
+        System.out.format("  (%d) ", pathCost);
         states.forEach(
                 s -> {
                     String stateName =

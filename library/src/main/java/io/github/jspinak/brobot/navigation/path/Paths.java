@@ -78,7 +78,7 @@ public class Paths {
     }
 
     public void sort() {
-        paths.sort(Comparator.comparing(Path::getScore));
+        paths.sort(Comparator.comparing(Path::getPathCost));
     }
 
     public boolean equals(Paths paths) {
@@ -98,9 +98,9 @@ public class Paths {
 
     public int getBestScore() {
         if (paths.isEmpty()) return 0;
-        int best = paths.get(0).getScore();
+        int best = paths.get(0).getPathCost();
         for (int i = 1; i < paths.size(); i++) {
-            int newScore = paths.get(i).getScore();
+            int newScore = paths.get(i).getPathCost();
             if (newScore > best) best = newScore;
         }
         return best;

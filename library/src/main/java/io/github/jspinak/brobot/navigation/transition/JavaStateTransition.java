@@ -27,7 +27,7 @@ import lombok.Setter;
  *   <li><b>Activation List</b>: States to activate after successful transition
  *   <li><b>Exit List</b>: States to deactivate after successful transition
  *   <li><b>Visibility Control</b>: Whether source state remains visible post-transition
- *   <li><b>Path Score</b>: Weight for path-finding algorithms (higher = less preferred)
+ *   <li><b>Path Cost</b>: Weight for path-finding algorithms (higher = less preferred)
  * </ul>
  *
  * <p>State reference handling:
@@ -95,12 +95,23 @@ public class JavaStateTransition implements StateTransition {
     ;
     private Set<Long> exit = new HashSet<>();
     ;
-    private int score = 0;
+    private int pathCost = 0;
     private int timesSuccessful = 0;
 
     @Override
     public Optional<TaskSequence> getTaskSequenceOptional() {
         return Optional.empty();
+    }
+
+    // Implement new interface methods
+    @Override
+    public int getPathCost() {
+        return pathCost;
+    }
+
+    @Override
+    public void setPathCost(int pathCost) {
+        this.pathCost = pathCost;
     }
 
     @Override
@@ -117,7 +128,7 @@ public class JavaStateTransition implements StateTransition {
      *   <li>Default function returns false (transition fails)
      *   <li>Default visibility is NONE (inherit from transition type)
      *   <li>Empty activation and exit sets by default
-     *   <li>Zero score (highest priority)
+     *   <li>Zero path cost (highest priority)
      * </ul>
      *
      * <p>Example usage:
@@ -127,7 +138,7 @@ public class JavaStateTransition implements StateTransition {
      *     .setFunction(() -> action.click("Next"))
      *     .addToActivate("PageTwo")
      *     .addToExit("PageOne")
-     *     .setScore(10)
+     *     .setPathCost(10)
      *     .build();
      * </pre>
      */
@@ -136,7 +147,7 @@ public class JavaStateTransition implements StateTransition {
         private StaysVisible staysVisibleAfterTransition = StaysVisible.NONE;
         private Set<String> activate = new HashSet<>();
         private Set<String> exit = new HashSet<>();
-        private int score = 0;
+        private int pathCost = 0;
 
         /**
          * Sets the transition logic function.
@@ -214,16 +225,16 @@ public class JavaStateTransition implements StateTransition {
         }
 
         /**
-         * Sets the path-finding score for this transition.
+         * Sets the path-finding cost for this transition.
          *
-         * <p>Higher scores make this transition less preferred when multiple paths exist. Score 0
-         * is highest priority.
+         * <p>Higher costs make this transition less preferred when multiple paths exist. Cost 0 is
+         * most preferred.
          *
-         * @param score Path-finding weight (0 = best)
+         * @param pathCost Path-finding weight (0 = best)
          * @return This builder for method chaining
          */
-        public Builder setScore(int score) {
-            this.score = score;
+        public Builder setPathCost(int pathCost) {
+            this.pathCost = pathCost;
             return this;
         }
 
@@ -241,7 +252,7 @@ public class JavaStateTransition implements StateTransition {
             javaStateTransition.staysVisibleAfterTransition = staysVisibleAfterTransition;
             javaStateTransition.activateNames = activate;
             javaStateTransition.exitNames = exit;
-            javaStateTransition.score = score;
+            javaStateTransition.pathCost = pathCost;
             return javaStateTransition;
         }
     }

@@ -200,6 +200,21 @@ public class StateNavigator {
         Instant startTime = Instant.now();
         activeStates = stateMemory.getActiveStates();
 
+        // Check if there are any active states for pathfinding
+        if (activeStates.isEmpty()) {
+            String errorMsg =
+                    "No initial states are active. Brobot cannot perform pathfinding without active"
+                            + " states.\n"
+                            + "Please set initial states using one of these methods:\n"
+                            + "  1. Use @State(initial = true) annotation on your state class\n"
+                            + "  2. Call InitialStates.addStateSet() to register initial states\n"
+                            + "  3. Use InitialStateVerifier.verify() to find and activate initial"
+                            + " states";
+            ConsoleReporter.println(MessageFormatter.fail + " " + errorMsg);
+            log.error(errorMsg);
+            return false;
+        }
+
         Optional<State> targetState = allStatesInProjectService.getState(stateToOpen);
         if (targetState.isEmpty()) {
             ConsoleReporter.println(MessageFormatter.fail + " Target state not found.");

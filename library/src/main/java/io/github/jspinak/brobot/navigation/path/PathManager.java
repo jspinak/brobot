@@ -104,7 +104,7 @@ public class PathManager {
             Optional<State> optState = allStatesInProjectService.getState(stateId);
             if (optState.isPresent()) score += optState.get().getPathScore();
         }
-        path.setScore(score);
+        path.setPathCost(score);
     }
 
     public void updateScores(Paths paths) {

@@ -80,9 +80,9 @@ class JavaStateTransitionTest extends BrobotTestBase {
         }
 
         @Test
-        @DisplayName("Should have zero initial score")
-        void testInitialScore() {
-            assertEquals(0, transition.getScore());
+        @DisplayName("Should have zero initial path cost")
+        void testInitialPathCost() {
+            assertEquals(0, transition.getPathCost());
         }
 
         @Test
@@ -288,15 +288,15 @@ class JavaStateTransitionTest extends BrobotTestBase {
         @ValueSource(ints = {0, 1, 10, 50, 100, 1000, Integer.MAX_VALUE})
         @DisplayName("Should handle various score values")
         void testScoreValues(int score) {
-            transition.setScore(score);
-            assertEquals(score, transition.getScore());
+            transition.setPathCost(score);
+            assertEquals(score, transition.getPathCost());
         }
 
         @Test
         @DisplayName("Should handle negative scores")
         void testNegativeScore() {
-            transition.setScore(-100);
-            assertEquals(-100, transition.getScore());
+            transition.setPathCost(-100);
+            assertEquals(-100, transition.getPathCost());
         }
 
         @Test
@@ -371,7 +371,7 @@ class JavaStateTransitionTest extends BrobotTestBase {
                             .addToActivate("A1", "A2", "A3")
                             .addToExit("E1", "E2")
                             .setStaysVisibleAfterTransition(StateTransition.StaysVisible.TRUE)
-                            .setScore(50)
+                            .setPathCost(50)
                             .build();
 
             assertNotNull(built);
@@ -379,7 +379,7 @@ class JavaStateTransitionTest extends BrobotTestBase {
             assertEquals(3, built.getActivateNames().size());
             assertEquals(2, built.getExitNames().size());
             assertEquals(StateTransition.StaysVisible.TRUE, built.getStaysVisibleAfterTransition());
-            assertEquals(50, built.getScore());
+            assertEquals(50, built.getPathCost());
         }
 
         @Test
@@ -443,7 +443,7 @@ class JavaStateTransitionTest extends BrobotTestBase {
         @Test
         @DisplayName("Should reuse builder for multiple transitions")
         void testBuilderReuse() {
-            JavaStateTransition.Builder builder = new JavaStateTransition.Builder().setScore(10);
+            JavaStateTransition.Builder builder = new JavaStateTransition.Builder().setPathCost(10);
 
             JavaStateTransition t1 = builder.addToActivate("S1").build();
 
@@ -463,11 +463,11 @@ class JavaStateTransitionTest extends BrobotTestBase {
 
             JavaStateTransition built =
                     new JavaStateTransition.Builder()
-                            .setScore(score)
+                            .setPathCost(score)
                             .setStaysVisibleAfterTransition(vis)
                             .build();
 
-            assertEquals(score, built.getScore());
+            assertEquals(score, built.getPathCost());
             assertEquals(vis, built.getStaysVisibleAfterTransition());
         }
     }
@@ -515,7 +515,7 @@ class JavaStateTransitionTest extends BrobotTestBase {
         @Test
         @DisplayName("Should maintain state after multiple operations")
         void testStateConsistency() {
-            transition.setScore(100);
+            transition.setPathCost(100);
             transition.setTimesSuccessful(5);
             transition.setTransitionFunction(successFunction);
             transition.setStaysVisibleAfterTransition(StateTransition.StaysVisible.TRUE);
@@ -525,7 +525,7 @@ class JavaStateTransitionTest extends BrobotTestBase {
             transition.setExit(new HashSet<>(Arrays.asList(10L)));
 
             // Verify all properties remain set
-            assertEquals(100, transition.getScore());
+            assertEquals(100, transition.getPathCost());
             assertEquals(5, transition.getTimesSuccessful());
             assertNotNull(transition.getTransitionFunction());
             assertEquals(

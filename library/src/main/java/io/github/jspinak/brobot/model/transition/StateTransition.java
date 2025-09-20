@@ -31,7 +31,7 @@ import io.github.jspinak.brobot.runner.dsl.model.TaskSequence;
  *   <li><b>Activation States</b>: Set of states that this transition activates (navigates to)
  *   <li><b>Exit States</b>: Set of states that are exited when this transition executes
  *   <li><b>Visibility Control</b>: Determines if the source state remains visible after transition
- *   <li><b>Score</b>: Path-finding weight (higher scores discourage using this transition)
+ *   <li><b>Path Cost</b>: Path-finding weight (higher costs discourage using this transition)
  *   <li><b>Success Tracking</b>: Count of successful executions for reliability metrics
  * </ul>
  *
@@ -46,7 +46,7 @@ import io.github.jspinak.brobot.runner.dsl.model.TaskSequence;
  * <p>Path-finding integration:
  *
  * <ul>
- *   <li>Score affects path selection - lower total path scores are preferred
+ *   <li>Path cost affects path selection - lower total path costs are preferred
  *   <li>Success count can inform reliability-based path selection
  *   <li>Multiple activation targets enable branching transitions
  * </ul>
@@ -98,9 +98,9 @@ public interface StateTransition {
 
     void setExit(Set<Long> exit);
 
-    int getScore(); // larger path scores discourage taking a path with this transition
+    int getPathCost(); // larger path costs discourage taking a path with this transition
 
-    void setScore(int score);
+    void setPathCost(int pathCost);
 
     int getTimesSuccessful();
 

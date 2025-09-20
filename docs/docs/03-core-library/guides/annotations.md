@@ -9,9 +9,11 @@ Brobot provides a powerful annotation system that simplifies state and transitio
 
 ## Overview
 
-The annotation system introduces two key annotations:
+The annotation system introduces key annotations:
 - **`@State`** - Marks a class as a Brobot state
-- **`@Transition`** - Marks a class as containing transition logic
+- **`@TransitionSet`** - Marks a class as containing all transitions for a specific state
+- **`@IncomingTransition`** - Marks a method that verifies arrival at the state
+- **`@OutgoingTransition`** - Marks a method that navigates FROM the state TO another state
 
 These annotations work with Spring's component scanning to automatically discover and register your states and transitions at application startup.
 
@@ -40,11 +42,22 @@ public class PromptState {
         .build();
 }
 
-@Transition(from = PromptState.class, to = WorkingState.class)
+@TransitionSet(state = PromptState.class)
 @RequiredArgsConstructor
 @Slf4j
-public class PromptToWorkingTransition {
-    // Transition logic
+public class PromptTransitions {
+    private final Action action;
+    private final PromptState promptState;
+
+    @IncomingTransition
+    public boolean verifyArrival() {
+        return action.find(promptState.getSubmitButton()).isSuccess();
+    }
+
+    @OutgoingTransition(to = WorkingState.class)
+    public boolean toWorking() {
+        return action.click(promptState.getSubmitButton()).isSuccess();
+    }
 }
 ```
 
@@ -95,105 +108,131 @@ public class DashboardState {
 }
 ```
 
-## @Transition Annotation
+## Transition Annotations
 
-The `@Transition` annotation marks a class as containing transition logic and includes Spring's `@Component`.
+Brobot uses a cohesive annotation pattern where each state's transitions are grouped in one class.
 
-### Basic Transition
+### @TransitionSet
+
+Marks a class as containing all transitions for a specific state:
 
 ```java
-@Transition(from = LoginState.class, to = DashboardState.class)
+@TransitionSet(state = LoginState.class)
 @RequiredArgsConstructor
 @Slf4j
-public class LoginToDashboardTransition {
-    
+public class LoginTransitions {
+
     private final Action action;
     private final LoginState loginState;
-    
-    public boolean execute() {
+
+    @IncomingTransition
+    public boolean verifyArrival() {
+        log.info("Verifying arrival at Login state");
+        return action.find(loginState.getUsernameField()).isSuccess();
+    }
+
+    @OutgoingTransition(to = DashboardState.class, pathCost = 0)
+    public boolean toDashboard() {
         log.info("Transitioning from Login to Dashboard");
         // Perform login actions
-        ClickOptions clickOptions = new ClickOptions.Builder().build();
-        ObjectCollection objects = new ObjectCollection.Builder()
-            .withImages(loginState.getLoginButton())
-            .build();
-        return action.perform(clickOptions, objects).isSuccess();
+        action.type(loginState.getUsernameField(), "user@example.com");
+        action.type(loginState.getPasswordField(), "password");
+        return action.click(loginState.getLoginButton()).isSuccess();
+    }
+
+    @OutgoingTransition(to = ForgotPasswordState.class, pathCost = 2)
+    public boolean toForgotPassword() {
+        return action.click(loginState.getForgotPasswordLink()).isSuccess();
     }
 }
 ```
 
-### Multiple Source or Target States
+### Multi-State Transitions
 
 ```java
-@Transition(
-    from = {ErrorState.class, TimeoutState.class},
-    to = HomeState.class
-)
+@TransitionSet(state = DashboardState.class)
 @RequiredArgsConstructor
 @Slf4j
-public class RecoveryTransition {
-    
-    public boolean execute() {
-        // Recovery logic to return to home
-        return true;
+public class DashboardTransitions {
+
+    private final Action action;
+    private final DashboardState dashboardState;
+
+    @IncomingTransition
+    public boolean verifyArrival() {
+        return action.find(dashboardState.getMainContent()).isSuccess();
+    }
+
+    // Complex transition with multiple state changes
+    @OutgoingTransition(
+        to = ReportsState.class,
+        activate = {SidebarState.class, FilterPanelState.class},
+        exit = {NotificationPanelState.class},
+        pathCost = 1
+    )
+    public boolean toReports() {
+        return action.click(dashboardState.getReportsButton()).isSuccess();
+    }
+
+    // Modal overlay - keep dashboard visible
+    @OutgoingTransition(
+        to = SettingsModalState.class,
+        staysVisible = true,  // Dashboard remains visible
+        pathCost = 2
+    )
+    public boolean openSettings() {
+        return action.click(dashboardState.getSettingsIcon()).isSuccess();
     }
 }
 ```
 
-### Conditional Transitions
+### @IncomingTransition
+
+Verifies successful arrival at the state:
 
 ```java
-@Transition(
-    from = WorkingState.class,
-    to = {SuccessState.class, ErrorState.class}
-)
-@RequiredArgsConstructor
-@Slf4j
-public class WorkingTransitions {
-    
-    public boolean execute() {
-        if (checkSuccess()) {
-            // The framework will navigate to SuccessState
-            return true;
-        } else {
-            // The framework will navigate to ErrorState
-            return false;
-        }
-    }
+@IncomingTransition(description = "Verify settings modal is open", required = true)
+public boolean verifyArrival() {
+    return action.find(settingsState.getCloseButton()).isSuccess() &&
+           action.find(settingsState.getSettingsTitle()).isSuccess();
 }
 ```
 
-### Custom Method Names
+### @OutgoingTransition Parameters
 
-By default, the framework looks for an `execute()` method. You can specify a different method:
+- **`to`** (required): Target state class
+- **`activate`**: Additional states to activate
+- **`exit`**: States to deactivate
+- **`staysVisible`**: Whether originating state remains visible (default: false)
+- **`pathCost`**: Path-finding cost - lower costs preferred (default: 0)
+- **`description`**: Documentation for the transition
+
+### Path Cost Strategy
 
 ```java
-@Transition(
-    from = SearchState.class,
-    to = ResultsState.class,
-    method = "performSearch"
-)
-@RequiredArgsConstructor
-@Slf4j
-public class SearchTransition {
-    
-    public boolean performSearch() {
-        // Search logic
-        return true;
+@TransitionSet(state = MainMenuState.class)
+public class MainMenuTransitions {
+
+    // Direct navigation - lowest cost
+    @OutgoingTransition(
+        to = SettingsState.class,
+        pathCost = 0  // Preferred path
+    )
+    public boolean directToSettings() {
+        return action.click(mainMenu.getSettingsButton()).isSuccess();
+    }
+
+    // Indirect navigation - higher cost
+    @OutgoingTransition(
+        to = SettingsState.class,
+        activate = {HelpPanelState.class},
+        pathCost = 5  // Less preferred, only if direct fails
+    )
+    public boolean toSettingsViaHelp() {
+        action.click(mainMenu.getHelpButton());
+        return action.click(helpPanel.getSettingsLink()).isSuccess();
     }
 }
-```
-
-### Transition Priority
-
-Control path-finding preferences with priority:
-
-```java
-@Transition(
-    from = MainMenuState.class,
-    to = SettingsState.class,
-    priority = 10  // Higher priority paths are preferred
-)
 ```
 
 ## Complete Example

@@ -35,7 +35,7 @@ public class WorkingTransitions {
      */
     @OutgoingTransition(
             to = PromptState.class,
-            priority = 1,
+            pathCost = 1,
             description = "Navigate from Working to Prompt")
     public boolean toPrompt() {
         try {
