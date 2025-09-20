@@ -29,58 +29,69 @@ State-aware scheduling addresses these challenges by:
 
 ## Implementation
 
-### StateAwareScheduler Component
+### How StateAwareScheduler Works
 
-The `StateAwareScheduler` wraps standard Java scheduling with state validation:
+The `StateAwareScheduler` automatically performs state validation before each task execution. When you schedule a task with state checking, the scheduler internally:
+
+1. Validates that all required states are active based on your configuration
+2. Optionally rebuilds states if they're missing (when `rebuildOnMismatch` is true)
+3. Executes your task only after successful state validation
+4. Handles errors based on your `skipIfStatesMissing` setting
+
+### Using StateAwareScheduler
+
+Here's how to use the `StateAwareScheduler` in your own service:
 
 ```java
 @Component
 @RequiredArgsConstructor
-public class StateAwareScheduler {
-    private final StateDetector stateDetector;
-    private final StateMemory stateMemory;
-    private final StateService stateService;
-    
-    public void scheduleWithStateCheck(
-            ScheduledExecutorService scheduler,
-            Runnable task,
-            StateCheckConfiguration config,
-            long initialDelay,
-            long period,
-            TimeUnit unit) {
-        
-        scheduler.scheduleAtFixedRate(() -> {
-            try {
-                performStateCheck(config);
-                task.run();
-            } catch (Exception e) {
-                log.error("Error in state-aware scheduled task", e);
-            }
-        }, initialDelay, period, unit);
+public class MyAutomationService {
+    private final StateAwareScheduler stateAwareScheduler;
+    private final ScheduledExecutorService scheduler =
+        Executors.newScheduledThreadPool(1);
+
+    public void startAutomation() {
+        // Configure what states must be active
+        StateAwareScheduler.StateCheckConfiguration config =
+            new StateAwareScheduler.StateCheckConfiguration.Builder()
+                .withRequiredStates(List.of("Dashboard", "LoggedIn"))
+                .withRebuildOnMismatch(true)
+                .build();
+
+        // Schedule your task with automatic state checking
+        ScheduledFuture<?> future = stateAwareScheduler.scheduleWithStateCheck(
+            scheduler,
+            this::myAutomationTask,  // Your task
+            config,                   // State requirements
+            0,                       // Initial delay
+            10,                      // Period
+            TimeUnit.SECONDS
+        );
     }
-    
-    private void performStateCheck(StateCheckConfiguration config) {
-        List<String> activeStateNames = stateMemory.getActiveStateNames();
-        
-        boolean allRequiredStatesActive = config.requiredStates.stream()
-                .allMatch(activeStateNames::contains);
-        
-        if (!allRequiredStatesActive && config.rebuildOnMismatch) {
-            stateDetector.rebuildActiveStates();
-        }
+
+    private void myAutomationTask() {
+        // This runs AFTER states are validated
+        // Dashboard and LoggedIn states are guaranteed to be checked
+        log.info("Running automation with verified states");
     }
 }
 ```
+
+The state validation happens automatically before your task runs. Depending on your `checkMode` configuration:
+- **CHECK_ALL**: Validates all required states every time
+- **CHECK_INACTIVE_ONLY**: Only validates states that are currently inactive (more efficient)
 
 ### Configuration Options
 
 Configure state checking behavior with the builder pattern:
 
 ```java
-StateCheckConfiguration config = new StateCheckConfiguration.Builder()
+StateAwareScheduler.StateCheckConfiguration config = new StateAwareScheduler.StateCheckConfiguration.Builder()
     .withRequiredStates(List.of("MainMenu", "Dashboard"))
     .withRebuildOnMismatch(true)
     .withSkipIfStatesMissing(false)
+    .withCheckMode(StateAwareScheduler.StateCheckConfiguration.CheckMode.CHECK_INACTIVE_ONLY)
+    .withMaxIterations(100)  // Optional: limit iterations
     .build();
 ```
 
@@ -91,6 +102,13 @@ StateCheckConfiguration config = new StateCheckConfiguration.Builder()
 | `requiredStates` | `List<String>` | Empty | States that must be active before task execution |
 | `rebuildOnMismatch` | boolean | true | Whether to rebuild states if requirements not met |
 | `skipIfStatesMissing` | boolean | false | Skip task execution if states cannot be validated |
+| `checkMode` | CheckMode | CHECK_INACTIVE_ONLY | CHECK_ALL checks all states, CHECK_INACTIVE_ONLY only checks inactive ones |
+| `maxIterations` | int | -1 (unlimited) | Maximum number of task executions before stopping |
+
+#### Check Modes
+
+- **CHECK_ALL**: Validates all required states every time, regardless of current active status
+- **CHECK_INACTIVE_ONLY**: Only validates states that are currently inactive (more efficient)
 
 ## Usage Examples
 
@@ -105,7 +123,7 @@ public class ApplicationMonitor {
     
     @PostConstruct
     public void startMonitoring() {
-        StateCheckConfiguration config = new StateCheckConfiguration.Builder()
+        StateAwareScheduler.StateCheckConfiguration config = new StateAwareScheduler.StateCheckConfiguration.Builder()
                 .withRequiredStates(List.of("Application"))
                 .withRebuildOnMismatch(true)
                 .build();
@@ -121,8 +139,9 @@ public class ApplicationMonitor {
     }
     
     private void checkApplicationHealth() {
-        // This runs only after state validation
-        // Application state is guaranteed to be checked
+        // This runs only after automatic state validation
+        // The scheduler has already verified "Application" state is active
+        // No need to manually check states here
     }
 }
 ```
@@ -135,13 +154,13 @@ public class DataSyncAutomation {
     
     public void setupPeriodicSync() {
         // Different configurations for different stages
-        StateCheckConfiguration loginConfig = new StateCheckConfiguration.Builder()
+        StateAwareScheduler.StateCheckConfiguration loginConfig = new StateAwareScheduler.StateCheckConfiguration.Builder()
                 .withRequiredStates(List.of("LoginScreen"))
                 .withRebuildOnMismatch(true)
                 .withSkipIfStatesMissing(true) // Skip if can't find login
                 .build();
-        
-        StateCheckConfiguration dataConfig = new StateCheckConfiguration.Builder()
+
+        StateAwareScheduler.StateCheckConfiguration dataConfig = new StateAwareScheduler.StateCheckConfiguration.Builder()
                 .withRequiredStates(List.of("DataDashboard", "SyncPanel"))
                 .withRebuildOnMismatch(false) // Don't rebuild, just skip
                 .withSkipIfStatesMissing(true)
@@ -164,7 +183,7 @@ public class DataSyncAutomation {
 public class ErrorRecoveryService {
     
     public void setupErrorMonitoring() {
-        StateCheckConfiguration config = new StateCheckConfiguration.Builder()
+        StateAwareScheduler.StateCheckConfiguration config = new StateAwareScheduler.StateCheckConfiguration.Builder()
                 .withRequiredStates(List.of("NormalOperation"))
                 .withRebuildOnMismatch(true)
                 .build();
@@ -202,7 +221,7 @@ public class EnhancedMonitoring {
     public void startStateAwareMonitoring() {
         // Create state validation hook
         Runnable stateCheck = stateAwareScheduler.createStateCheckHook(
-            new StateCheckConfiguration.Builder()
+            new StateAwareScheduler.StateCheckConfiguration.Builder()
                 .withRequiredStates(List.of("Application"))
                 .build()
         );
@@ -286,13 +305,13 @@ private boolean rebuildOnMismatch;
 
 ```java
 // High-frequency task with minimal state checking
-StateCheckConfiguration lightConfig = new StateCheckConfiguration.Builder()
+StateAwareScheduler.StateCheckConfiguration lightConfig = new StateAwareScheduler.StateCheckConfiguration.Builder()
     .withRequiredStates(List.of("MainApp")) // Single state check
     .withRebuildOnMismatch(false)          // No rebuild
     .build();
 
 // Low-frequency task with thorough checking
-StateCheckConfiguration thoroughConfig = new StateCheckConfiguration.Builder()
+StateAwareScheduler.StateCheckConfiguration thoroughConfig = new StateAwareScheduler.StateCheckConfiguration.Builder()
     .withRequiredStates(List.of("App", "Module", "Feature"))
     .withRebuildOnMismatch(true)
     .build();
