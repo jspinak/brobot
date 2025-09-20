@@ -148,6 +148,9 @@ public class InitializationOrchestrator {
     @Autowired(required = false)
     private InitialStateAutoConfiguration initialStateAutoConfiguration;
 
+    @Autowired(required = false)
+    private io.github.jspinak.brobot.startup.state.StateImageLoader stateImageLoader;
+
     // Initialization tracking
     @Getter private final Map<String, PhaseStatus> phaseStatuses = new ConcurrentHashMap<>();
     private final AtomicBoolean initializationComplete = new AtomicBoolean(false);
@@ -413,6 +416,17 @@ public class InitializationOrchestrator {
             if (annotationProcessor != null) {
                 annotationProcessor.processAnnotations();
                 phase.addCompletedStep("Annotations processed");
+            }
+
+            // Load state images after context is ready
+            if (stateImageLoader != null) {
+                log.info("Loading state images after context initialization");
+                boolean imagesLoaded = stateImageLoader.loadStateImages();
+                if (imagesLoaded) {
+                    phase.addCompletedStep("State images loaded successfully");
+                } else {
+                    phase.addFailedStep("State image loading", "Some images failed to load");
+                }
             }
 
             // Initialize state dependencies and search regions

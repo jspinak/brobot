@@ -97,6 +97,7 @@ public class Pattern {
     For this reason, I've created a Brobot Image object and use this object in Match and in Pattern.
      */
     private Image image;
+    private boolean needsDelayedLoading = false;
 
     public Pattern(String imgPath) {
         // Add this safety check at the beginning
@@ -108,34 +109,103 @@ public class Pattern {
 
         ExecutionEnvironment env = ExecutionEnvironment.getInstance();
 
-        // Try to load the real image
+        // In mock mode, never load real images
+        if (env.isMockMode()) {
+            log.debug("Mock mode - skipping image load for: {}", imgPath);
+            this.image = null;
+            return;
+        }
+
+        // ALWAYS defer image loading during Spring initialization
+        // This avoids unnecessary load attempts that will fail
+        if (isSpringContextInitializing()) {
+            log.debug("Deferring image load during Spring initialization: {}", imgPath);
+            this.needsDelayedLoading = true;
+            this.image = null;
+            return;
+        }
+
+        // Only try to load if we're sure the infrastructure is ready
+        loadImageNow(imgPath);
+    }
+
+    /**
+     * Actually load the image. This is called either during construction (if Spring is ready) or
+     * later during lazy loading.
+     */
+    private void loadImageNow(String imgPath) {
         BufferedImage bufferedImage = BufferedImageUtilities.getBuffImgFromFile(imgPath);
 
         if (bufferedImage != null) {
-            // Successfully loaded the image
             this.image = new Image(bufferedImage, name);
-        } else if (env.isMockMode()) {
-            // In mock mode, log warning but allow null image
-            // Tests should provide their own mock images through proper test setup
-            log.warn(
-                    "Image '{}' not found in mock mode. Pattern '{}' will have null image. Tests"
-                            + " should provide mock images through MockSceneBuilder or similar test"
-                            + " utilities.",
-                    imgPath,
-                    name);
-            this.image = null;
+            this.needsDelayedLoading = false;
+            log.debug("Successfully loaded image: {}", imgPath);
         } else {
-            // In real mode, fail if image cannot be loaded
+            // Only throw exception if we're past initialization and still can't load
             throw new IllegalStateException(
                     "Failed to load image: "
                             + imgPath
-                            + ". Make sure the image exists in the configured image path and has"
-                            + " .png extension.");
+                            + ". Make sure the image exists in the configured image path.");
         }
     }
 
     public Pattern(BufferedImage bimg) {
         image = new Image(bimg);
+    }
+
+    /**
+     * Check if we're currently in the Spring context initialization phase. This is a simple
+     * heuristic based on whether the SmartImageLoader is available.
+     */
+    private boolean isSpringContextInitializing() {
+        try {
+            // If SmartImageLoader instance is not available, we're likely in early initialization
+            // This is a simple way to detect if Spring beans are still being created
+            return !BufferedImageUtilities.isSmartImageLoaderAvailable();
+        } catch (Exception e) {
+            // If we can't determine, assume we're initializing
+            return true;
+        }
+    }
+
+    /**
+     * Retry loading the image if it was deferred during Spring initialization. This should be
+     * called after Spring context is fully initialized.
+     *
+     * @return true if image was loaded successfully or was already loaded
+     */
+    public boolean retryImageLoad() {
+        if (!needsDelayedLoading || image != null) {
+            return true; // Already loaded or doesn't need loading
+        }
+
+        try {
+            loadImageNow(getImgpath());
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to load deferred image: {}", getImgpath(), e);
+            return false;
+        }
+    }
+
+    /**
+     * Override the Lombok-generated getter to implement lazy loading. This ensures images are
+     * loaded on first use if they were deferred.
+     */
+    public Image getImage() {
+        ensureImageLoaded();
+        return image;
+    }
+
+    /**
+     * Ensure the image is loaded. This implements lazy loading for patterns that were created
+     * during Spring initialization.
+     */
+    private void ensureImageLoaded() {
+        if (needsDelayedLoading && image == null) {
+            // Try to load the image now (will log error if it fails)
+            retryImageLoad();
+        }
     }
 
     public Pattern(Image image) {
@@ -171,7 +241,8 @@ public class Pattern {
      */
     @JsonIgnore
     public Mat getMat() {
-        return image.getMatBGR();
+        ensureImageLoaded();
+        return image == null ? new Mat() : image.getMatBGR();
     }
 
     /**
@@ -193,7 +264,8 @@ public class Pattern {
      */
     @JsonIgnore
     public Mat getMatHSV() {
-        return image.getMatHSV();
+        ensureImageLoaded();
+        return image == null ? new Mat() : image.getMatHSV();
     }
 
     @JsonIgnore
@@ -205,11 +277,13 @@ public class Pattern {
     }
 
     public int w() {
+        ensureImageLoaded();
         if (image == null) return 0;
         return image.w();
     }
 
     public int h() {
+        ensureImageLoaded();
         if (image == null) return 0;
         return image.h();
     }
@@ -292,6 +366,7 @@ public class Pattern {
 
     @JsonIgnore
     public boolean isEmpty() {
+        ensureImageLoaded();
         return image == null || image.isEmpty();
     }
 
@@ -393,6 +468,7 @@ public class Pattern {
 
     @JsonIgnore
     public BufferedImage getBImage() {
+        ensureImageLoaded();
         if (image == null) {
             log.debug("Pattern '{}' has null image", name);
             return null;

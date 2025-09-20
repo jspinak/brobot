@@ -150,6 +150,16 @@ public class BufferedImageUtilities {
     private static final Set<String> loggedImages = new HashSet<>();
 
     /**
+     * Check if SmartImageLoader is available (Spring context is initialized). This is used to
+     * detect if we're in the Spring initialization phase.
+     *
+     * @return true if SmartImageLoader is available, false otherwise
+     */
+    public static boolean isSmartImageLoaderAvailable() {
+        return instance != null && instance.smartImageLoader != null;
+    }
+
+    /**
      * Creates a new SikuliX Pattern and retrieves the BufferedImage from this Pattern.
      *
      * @param path the filename of the image
