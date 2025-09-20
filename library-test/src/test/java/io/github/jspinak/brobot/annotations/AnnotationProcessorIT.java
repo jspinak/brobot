@@ -70,8 +70,8 @@ public class AnnotationProcessorIT extends BrobotTestBase {
 
     @TransitionSet(state = TestState2.class)
     public static class TestTransition1 {
-        @FromTransition(from = TestState1.class)
-        public boolean fromTestState1() {
+        @OutgoingTransition(to = TestState1.class)
+        public boolean toTestState1() {
             return true;
         }
 

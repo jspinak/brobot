@@ -98,7 +98,7 @@ public class ActionDefinitionStateTransitionJsonParserTestUpdated {
         // Verify basic properties
         assertEquals(
                 StateTransition.StaysVisible.TRUE, transition.getStaysVisibleAfterTransition());
-        assertEquals(5, transition.getScore());
+        assertEquals(5, transition.getPathCost());
         assertEquals(10, transition.getTimesSuccessful());
 
         // Verify activate and exit sets
@@ -275,7 +275,7 @@ public class ActionDefinitionStateTransitionJsonParserTestUpdated {
         transition.setStaysVisibleAfterTransition(StateTransition.StaysVisible.NONE);
         transition.setActivate(new HashSet<>(List.of(15L, 16L)));
         transition.setExit(new HashSet<>(List.of(14L)));
-        transition.setScore(8);
+        transition.setPathCost(8);
         transition.setTimesSuccessful(25);
 
         // Serialize
@@ -315,7 +315,7 @@ public class ActionDefinitionStateTransitionJsonParserTestUpdated {
         assertTrue(deserializedTransition.getActivate().containsAll(List.of(15L, 16L)));
         assertEquals(1, deserializedTransition.getExit().size());
         assertTrue(deserializedTransition.getExit().contains(14L));
-        assertEquals(8, deserializedTransition.getScore());
+        assertEquals(8, deserializedTransition.getPathCost());
         assertEquals(25, deserializedTransition.getTimesSuccessful());
     }
 

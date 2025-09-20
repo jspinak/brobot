@@ -324,7 +324,7 @@ class PathFinderEdgeCasesTest extends BrobotTestBase {
             assertFalse(result.isEmpty());
 
             Path path = result.getPaths().get(0);
-            assertEquals(0, path.getScore()); // Default score
+            assertEquals(0, path.getPathCost()); // Default score
         }
 
         @Test
@@ -349,7 +349,7 @@ class PathFinderEdgeCasesTest extends BrobotTestBase {
             assertFalse(result.isEmpty());
 
             Path path = result.getPaths().get(0);
-            assertEquals(-15, path.getScore()); // Sum of negative scores
+            assertEquals(-15, path.getPathCost()); // Sum of negative scores
         }
 
         @Test
@@ -374,7 +374,7 @@ class PathFinderEdgeCasesTest extends BrobotTestBase {
             assertFalse(result.isEmpty());
 
             Path path = result.getPaths().get(0);
-            assertTrue(path.getScore() > 0); // Should handle large scores
+            assertTrue(path.getPathCost() > 0); // Should handle large scores
         }
     }
 

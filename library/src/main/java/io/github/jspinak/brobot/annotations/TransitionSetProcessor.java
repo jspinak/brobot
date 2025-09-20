@@ -6,6 +6,10 @@ import java.util.function.BooleanSupplier;
 
 import org.springframework.stereotype.Component;
 
+import io.github.jspinak.brobot.model.state.special.CurrentState;
+import io.github.jspinak.brobot.model.state.special.ExpectedState;
+import io.github.jspinak.brobot.model.state.special.PreviousState;
+import io.github.jspinak.brobot.model.state.special.SpecialStateType;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.navigation.service.StateTransitionService;
 import io.github.jspinak.brobot.navigation.transition.JavaStateTransition;
@@ -129,47 +133,96 @@ public class TransitionSetProcessor {
             Object bean, Method method, String fromStateName, StateTransitions.Builder builder) {
         OutgoingTransition annotation = method.getAnnotation(OutgoingTransition.class);
         Class<?> toStateClass = annotation.to();
-        String toStateName = deriveStateName(toStateClass, "");
 
-        log.info(
-                "Processing OutgoingTransition: {} -> {} (method: {}, pathCost: {}, staysVisible:"
-                        + " {})",
-                fromStateName,
-                toStateName,
-                method.getName(),
-                annotation.pathCost(),
-                annotation.staysVisible());
+        // Check if this is a special marker class for dynamic transitions
+        boolean isSpecialTransition = isSpecialMarkerClass(toStateClass);
+        String toStateName;
+        Long specialStateId = null;
+
+        if (isSpecialTransition) {
+            // Handle special marker classes (PreviousState, CurrentState, etc.)
+            specialStateId = getSpecialStateId(toStateClass);
+            toStateName = "SPECIAL_" + toStateClass.getSimpleName(); // For logging
+
+            log.info(
+                    "Processing special OutgoingTransition: {} -> {} (specialId: {}, method: {},"
+                            + " pathCost: {}, staysVisible: {})",
+                    fromStateName,
+                    toStateClass.getSimpleName(),
+                    specialStateId,
+                    method.getName(),
+                    annotation.pathCost(),
+                    annotation.staysVisible());
+        } else {
+            // Normal state class
+            toStateName = deriveStateName(toStateClass, "");
+
+            log.info(
+                    "Processing OutgoingTransition: {} -> {} (method: {}, pathCost: {},"
+                            + " staysVisible: {})",
+                    fromStateName,
+                    toStateName,
+                    method.getName(),
+                    annotation.pathCost(),
+                    annotation.staysVisible());
+        }
 
         BooleanSupplier transitionFunction = createBooleanSupplier(bean, method);
 
         // Create a StateTransition with the function and metadata
-        // This transition goes FROM the current state TO the target state
         JavaStateTransition.Builder transitionBuilder =
                 new JavaStateTransition.Builder()
                         .setFunction(transitionFunction)
-                        .addToActivate(toStateName)
                         .setPathCost(annotation.pathCost())
                         .setStaysVisibleAfterTransition(annotation.staysVisible());
 
-        // Add additional states to activate
-        for (Class<?> activateClass : annotation.activate()) {
-            String activateStateName = deriveStateName(activateClass, "");
-            transitionBuilder.addToActivate(activateStateName);
+        // For special transitions, we'll handle the target differently
+        if (!isSpecialTransition) {
+            transitionBuilder.addToActivate(toStateName);
         }
 
-        // Add states to exit
+        // Add additional states to activate (these could also be special markers)
+        for (Class<?> activateClass : annotation.activate()) {
+            if (isSpecialMarkerClass(activateClass)) {
+                log.warn(
+                        "Special marker class {} in activate[] array - will be handled at runtime",
+                        activateClass.getSimpleName());
+            } else {
+                String activateStateName = deriveStateName(activateClass, "");
+                transitionBuilder.addToActivate(activateStateName);
+            }
+        }
+
+        // Add states to exit (these could also be special markers)
         for (Class<?> exitClass : annotation.exit()) {
-            String exitStateName = deriveStateName(exitClass, "");
-            transitionBuilder.addToExit(exitStateName);
+            if (isSpecialMarkerClass(exitClass)) {
+                log.warn(
+                        "Special marker class {} in exit[] array - will be handled at runtime",
+                        exitClass.getSimpleName());
+            } else {
+                String exitStateName = deriveStateName(exitClass, "");
+                transitionBuilder.addToExit(exitStateName);
+            }
         }
 
         JavaStateTransition transition = transitionBuilder.build();
+
+        // For special transitions, we need to handle them differently
+        if (isSpecialTransition) {
+            // Set the special target ID directly on the transition
+            transition.getActivate().clear();
+            transition.getActivate().add(specialStateId);
+        }
 
         // Add this outgoing transition to the current state's transitions
         builder.addTransition(transition);
 
         // Also register it with the state transition service
-        registerTransitionForState(fromStateName, toStateName, transition);
+        if (isSpecialTransition) {
+            registerSpecialTransitionForState(fromStateName, specialStateId, transition);
+        } else {
+            registerTransitionForState(fromStateName, toStateName, transition);
+        }
     }
 
     /** Create a BooleanSupplier that invokes the given method on the bean. */
@@ -220,6 +273,35 @@ public class TransitionSetProcessor {
         return className;
     }
 
+    /**
+     * Check if a class is a special marker class for dynamic transitions.
+     *
+     * @param stateClass The class to check
+     * @return true if this is a special marker class
+     */
+    private boolean isSpecialMarkerClass(Class<?> stateClass) {
+        return stateClass == PreviousState.class
+                || stateClass == CurrentState.class
+                || stateClass == ExpectedState.class;
+    }
+
+    /**
+     * Get the special state ID for a marker class.
+     *
+     * @param markerClass The marker class
+     * @return The special state ID, or null if not a marker class
+     */
+    private Long getSpecialStateId(Class<?> markerClass) {
+        if (markerClass == PreviousState.class) {
+            return SpecialStateType.PREVIOUS.getId();
+        } else if (markerClass == CurrentState.class) {
+            return SpecialStateType.CURRENT.getId();
+        } else if (markerClass == ExpectedState.class) {
+            return SpecialStateType.EXPECTED.getId();
+        }
+        return null;
+    }
+
     /** Register an IncomingTransition for a specific state. */
     private void registerIncomingTransitionForState(
             String stateName, StateTransitions.Builder builder) {
@@ -261,6 +343,65 @@ public class TransitionSetProcessor {
         // Add to joint table
         jointTable.addToJointTable(stateTransitions);
         log.info("Registered ToTransition for state: {} ({})", stateName, stateId);
+    }
+
+    /**
+     * Register a special transition (to PreviousState, CurrentState, etc.) for a specific state.
+     *
+     * @param fromStateName The name of the source state
+     * @param specialStateId The special state ID (e.g., -2 for PREVIOUS)
+     * @param transition The transition to register
+     */
+    private void registerSpecialTransitionForState(
+            String fromStateName, Long specialStateId, JavaStateTransition transition) {
+        // Get the state ID
+        var fromStateOpt = stateService.getState(fromStateName);
+
+        if (fromStateOpt.isEmpty()) {
+            log.error(
+                    "Cannot register special transition: source state not found: {}",
+                    fromStateName);
+            return;
+        }
+
+        Long fromStateId = fromStateOpt.get().getId();
+
+        // The activate set already contains the special state ID
+
+        // Get or create StateTransitions for the FROM state
+        StateTransitions stateTransitions;
+        var existingTransitions = transitionService.getTransitions(fromStateId);
+
+        if (existingTransitions.isPresent()) {
+            stateTransitions = existingTransitions.get();
+            stateTransitions.addTransition(transition);
+            log.info(
+                    "Added special transition to existing StateTransitions for state {} ({}) ->"
+                            + " special state {}",
+                    fromStateName,
+                    fromStateId,
+                    specialStateId);
+        } else {
+            StateTransitions.Builder builder = new StateTransitions.Builder(fromStateName);
+            builder.addTransition(transition);
+            stateTransitions = builder.build();
+            stateTransitions.setStateId(fromStateId);
+            transitionService.getStateTransitionsRepository().add(stateTransitions);
+            log.info(
+                    "Created new StateTransitions with special transition for state {} ({}) ->"
+                            + " special state {}",
+                    fromStateName,
+                    fromStateId,
+                    specialStateId);
+        }
+
+        // Add to joint table - special states won't have regular transitions pointing to them
+        jointTable.addToJointTable(stateTransitions);
+        log.info(
+                "Registered special transition for state: {} ({}) -> special state {}",
+                fromStateName,
+                fromStateId,
+                specialStateId);
     }
 
     /** Register a transition for a specific state. */

@@ -271,7 +271,7 @@ public class PathFinderTest extends BrobotTestBase {
 
             // First path should be the one with better score (lower is better)
             Path bestPath = paths.getPaths().get(0);
-            assertTrue(bestPath.getScore() <= paths.getPaths().get(1).getScore());
+            assertTrue(bestPath.getPathCost() <= paths.getPaths().get(1).getPathCost());
         }
     }
 

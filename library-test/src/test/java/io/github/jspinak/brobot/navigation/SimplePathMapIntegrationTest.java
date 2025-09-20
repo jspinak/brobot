@@ -99,7 +99,7 @@ class SimplePathMapIntegrationTest {
         assertEquals(end.getId(), path.get(2));
 
         // Check path score includes middle state score
-        assertTrue(path.getScore() >= 10);
+        assertTrue(path.getPathCost() >= 10);
     }
 
     @Test
@@ -165,7 +165,7 @@ class SimplePathMapIntegrationTest {
                 allPaths.stream().filter(p -> p.contains(pathA.getId())).findFirst().orElseThrow();
 
         // Path through B should have lower score
-        assertTrue(pathThroughB.getScore() < pathThroughA.getScore());
+        assertTrue(pathThroughB.getPathCost() < pathThroughA.getPathCost());
     }
 
     @Test

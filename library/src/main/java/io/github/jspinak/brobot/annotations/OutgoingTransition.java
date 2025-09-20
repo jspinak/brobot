@@ -7,8 +7,22 @@ import java.lang.annotation.*;
  * enclosing @TransitionSet class TO a specific target state.
  *
  * <p>This annotation represents the cleaner pattern where a state's transition class contains its
- * incoming transition (ToTransition) and all its outgoing transitions. This is more cohesive since
- * outgoing transitions use the current state's images.
+ * incoming transition (IncomingTransition) and all its outgoing transitions. This is more cohesive
+ * since outgoing transitions use the current state's images.
+ *
+ * <p><b>Special State Markers:</b> The 'to' parameter can accept special marker classes for dynamic
+ * transitions:
+ *
+ * <ul>
+ *   <li>{@code PreviousState.class} - Returns to the most recently hidden state (for overlays,
+ *       dialogs, menus)
+ *   <li>{@code CurrentState.class} - Self-transition that stays in or re-enters the current state
+ *   <li>{@code ExpectedState.class} - (Future) Runtime-determined target state
+ * </ul>
+ *
+ * <p><b>Hidden States:</b> When a state overlays another (e.g., a menu opening over a page), the
+ * covered state is automatically tracked as "hidden". Transitions to {@code PreviousState.class}
+ * will dynamically resolve to return to whatever state was hidden.
  *
  * <p>The annotated method should:
  *
@@ -22,11 +36,31 @@ import java.lang.annotation.*;
  * <p>Example usage:
  *
  * <pre>{@code
- * // Simple transition
+ * // Simple transition to a specific state
  * @OutgoingTransition(to = PricingState.class, pathCost = 1)
  * public boolean toPricing() {
  *     log.info("Navigating from Homepage to Pricing");
  *     return action.click(homepageState.getPricingLink()).isSuccess();
+ * }
+ *
+ * // Return to hidden state (dynamic transition)
+ * @OutgoingTransition(
+ *     to = PreviousState.class,  // Returns to whatever state was covered
+ *     pathCost = 0,
+ *     description = "Close modal and return to previous state"
+ * )
+ * public boolean closeModal() {
+ *     return action.click(modalState.getCloseButton()).isSuccess();
+ * }
+ *
+ * // Self-transition (stays in current state)
+ * @OutgoingTransition(
+ *     to = CurrentState.class,  // Stay in or re-enter current state
+ *     pathCost = 2,
+ *     description = "Load more results"
+ * )
+ * public boolean loadMore() {
+ *     return action.click(loadMoreButton).isSuccess();
  * }
  *
  * // Modal overlay - keep origin visible
@@ -63,7 +97,16 @@ public @interface OutgoingTransition {
      * The primary target state class for this transition. This transition will navigate FROM the
      * state defined in @TransitionSet TO this target state.
      *
-     * @return the target state class
+     * <p>Can be one of:
+     *
+     * <ul>
+     *   <li>A regular state class (e.g., {@code HomeState.class})
+     *   <li>{@code PreviousState.class} - Returns to the most recently hidden state
+     *   <li>{@code CurrentState.class} - Self-transition or re-enters current state
+     *   <li>{@code ExpectedState.class} - (Future) Runtime-determined state
+     * </ul>
+     *
+     * @return the target state class or special state marker
      */
     Class<?> to();
 

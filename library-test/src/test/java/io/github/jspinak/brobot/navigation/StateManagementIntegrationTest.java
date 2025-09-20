@@ -219,7 +219,7 @@ class StateManagementIntegrationTest extends BrobotIntegrationTestBase {
                 new JavaStateTransition.Builder()
                         .setFunction(() -> true) // Always succeeds in mock mode
                         .addToActivate(settingsState.getName())
-                        .setScore(1) // Lower score = higher priority
+                        .setPathCost(1) // Lower score = higher priority
                         .build();
         homeTransitions.addTransition(toSettings);
 
@@ -228,7 +228,7 @@ class StateManagementIntegrationTest extends BrobotIntegrationTestBase {
                 new JavaStateTransition.Builder()
                         .setFunction(() -> true)
                         .addToActivate(profileState.getName())
-                        .setScore(2)
+                        .setPathCost(2)
                         .build();
         homeTransitions.addTransition(toProfile);
 
@@ -244,7 +244,7 @@ class StateManagementIntegrationTest extends BrobotIntegrationTestBase {
                 new JavaStateTransition.Builder()
                         .setFunction(() -> true)
                         .addToActivate(homeState.getName())
-                        .setScore(1)
+                        .setPathCost(1)
                         .build();
         settingsTransitions.addTransition(toHome);
 
@@ -252,7 +252,7 @@ class StateManagementIntegrationTest extends BrobotIntegrationTestBase {
                 new JavaStateTransition.Builder()
                         .setFunction(() -> true)
                         .addToActivate(profileState.getName())
-                        .setScore(3)
+                        .setPathCost(3)
                         .build();
         settingsTransitions.addTransition(toProfileFromSettings);
 
@@ -305,7 +305,7 @@ class StateManagementIntegrationTest extends BrobotIntegrationTestBase {
                 new JavaStateTransition.Builder()
                         .setFunction(() -> true)
                         .addToActivate(settingsState.getName())
-                        .setScore(1)
+                        .setPathCost(1)
                         .build();
         homeTransitions.addTransition(toSettings);
         stateTransitionStore.add(homeTransitions);

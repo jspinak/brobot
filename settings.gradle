@@ -10,3 +10,7 @@ include 'library', 'library-features', 'persistence', 'runner', 'library-test', 
 // 'library-test' module re-enabled after migration
 // 'persistence' module added for optional persistence providers
 // 'pattern-capture-tool' module added for standalone capture application
+
+// Include example projects
+include 'examples:03-core-library:guides:dynamic-transitions:special-states-example'
+project(':examples:03-core-library:guides:dynamic-transitions:special-states-example').projectDir = file('examples/03-core-library/guides/dynamic-transitions/special-states-example')

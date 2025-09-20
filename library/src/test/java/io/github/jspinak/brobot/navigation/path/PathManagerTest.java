@@ -60,7 +60,7 @@ class PathManagerTest extends BrobotTestBase {
 
             pathManager.updateScore(path);
 
-            assertEquals(45, path.getScore()); // 10 + 20 + 15
+            assertEquals(45, path.getPathCost()); // 10 + 20 + 15
         }
 
         @Test
@@ -79,7 +79,7 @@ class PathManagerTest extends BrobotTestBase {
 
             pathManager.updateScore(path);
 
-            assertEquals(20, path.getScore());
+            assertEquals(20, path.getPathCost());
         }
 
         @Test
@@ -89,7 +89,7 @@ class PathManagerTest extends BrobotTestBase {
 
             pathManager.updateScore(path);
 
-            assertEquals(0, path.getScore());
+            assertEquals(0, path.getPathCost());
             verify(mockStateService, never()).getState(anyLong());
         }
 
@@ -109,7 +109,7 @@ class PathManagerTest extends BrobotTestBase {
 
             pathManager.updateScore(path);
 
-            assertEquals(20, path.getScore()); // -10 + 30
+            assertEquals(20, path.getPathCost()); // -10 + 30
         }
 
         @Test
@@ -132,7 +132,7 @@ class PathManagerTest extends BrobotTestBase {
             pathManager.updateScore(path);
 
             // Score should handle overflow gracefully
-            assertTrue(path.getScore() > 0);
+            assertTrue(path.getPathCost() > 0);
         }
     }
 
@@ -164,15 +164,15 @@ class PathManagerTest extends BrobotTestBase {
             pathManager.updateScores(paths);
 
             // Verify scores are updated
-            assertEquals(30, path1.getScore());
-            assertEquals(15, path2.getScore());
-            assertEquals(55, path3.getScore());
+            assertEquals(30, path1.getPathCost());
+            assertEquals(15, path2.getPathCost());
+            assertEquals(55, path3.getPathCost());
 
             // Verify paths are sorted by score (ascending)
             List<Path> sortedPaths = paths.getPaths();
-            assertEquals(15, sortedPaths.get(0).getScore()); // path2
-            assertEquals(30, sortedPaths.get(1).getScore()); // path1
-            assertEquals(55, sortedPaths.get(2).getScore()); // path3
+            assertEquals(15, sortedPaths.get(0).getPathCost()); // path2
+            assertEquals(30, sortedPaths.get(1).getPathCost()); // path1
+            assertEquals(55, sortedPaths.get(2).getPathCost()); // path3
         }
 
         @Test
@@ -206,9 +206,9 @@ class PathManagerTest extends BrobotTestBase {
             pathManager.updateScores(paths);
 
             // All should have same score
-            assertEquals(10, path1.getScore());
-            assertEquals(10, path2.getScore());
-            assertEquals(10, path3.getScore());
+            assertEquals(10, path1.getPathCost());
+            assertEquals(10, path2.getPathCost());
+            assertEquals(10, path3.getPathCost());
         }
     }
 
@@ -243,7 +243,7 @@ class PathManagerTest extends BrobotTestBase {
             assertNotNull(cleanedPaths);
             // Paths should be cleaned and scores updated
             for (Path path : cleanedPaths.getPaths()) {
-                assertTrue(path.getScore() >= 0);
+                assertTrue(path.getPathCost() >= 0);
             }
         }
 
@@ -288,7 +288,7 @@ class PathManagerTest extends BrobotTestBase {
             assertNotNull(cleanedPaths);
             // Cleaned paths should have updated scores
             for (Path path : cleanedPaths.getPaths()) {
-                assertNotNull(path.getScore());
+                assertNotNull(path.getPathCost());
             }
         }
 
@@ -344,7 +344,7 @@ class PathManagerTest extends BrobotTestBase {
             assertNotNull(recoveredPaths);
             // Verify scores are recalculated
             for (Path path : recoveredPaths.getPaths()) {
-                assertTrue(path.getScore() >= 0);
+                assertTrue(path.getPathCost() >= 0);
             }
         }
 
@@ -364,7 +364,7 @@ class PathManagerTest extends BrobotTestBase {
             pathManager.updateScores(paths);
 
             // Score should include state 2 twice
-            assertEquals(90, cyclicPath.getScore()); // 10 + 20 + 15 + 20 + 25
+            assertEquals(90, cyclicPath.getPathCost()); // 10 + 20 + 15 + 20 + 25
         }
 
         @Test
@@ -383,7 +383,7 @@ class PathManagerTest extends BrobotTestBase {
 
             pathManager.updateScores(paths);
 
-            assertEquals(100, longPath.getScore());
+            assertEquals(100, longPath.getPathCost());
             verify(mockStateService, times(100)).getState(anyLong());
         }
     }
