@@ -97,7 +97,7 @@ public class StateTransitionSimpleTest extends BrobotTestBase {
         // Create a transition from Prompt to Working
         JavaStateTransition transition = new JavaStateTransition();
         transition.setActivate(Set.of(workingId));
-        transition.setScore(100);
+        transition.setPathCost(100);
         transition.setTransitionFunction(() -> true);
 
         // Create StateTransitions container for Prompt

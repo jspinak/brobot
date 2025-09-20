@@ -446,7 +446,7 @@ class PathFinderTest {
             // First path should have lower score (better)
             Path firstPath = paths.getPaths().get(0);
             Path secondPath = paths.getPaths().get(1);
-            assertTrue(firstPath.getScore() <= secondPath.getScore());
+            assertTrue(firstPath.getPathCost() <= secondPath.getPathCost());
         }
     }
 

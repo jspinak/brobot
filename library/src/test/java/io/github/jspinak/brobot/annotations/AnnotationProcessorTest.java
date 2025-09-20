@@ -80,8 +80,8 @@ public class AnnotationProcessorTest extends BrobotTestBase {
     // Test transition class using TransitionSet
     @io.github.jspinak.brobot.annotations.TransitionSet(state = SimpleState.class)
     static class TestTransition {
-        @io.github.jspinak.brobot.annotations.FromTransition(from = TestState.class)
-        public boolean execute() {
+        @io.github.jspinak.brobot.annotations.OutgoingTransition(to = TestState.class)
+        public boolean toTestState() {
             return true;
         }
 
@@ -281,10 +281,10 @@ public class AnnotationProcessorTest extends BrobotTestBase {
         @Test
         @DisplayName("Should find transition method by name")
         void shouldFindTransitionMethodByName() throws NoSuchMethodException {
-            Method executeMethod = TestTransition.class.getMethod("execute");
-            assertNotNull(executeMethod);
-            assertEquals("execute", executeMethod.getName());
-            assertEquals(boolean.class, executeMethod.getReturnType());
+            Method transitionMethod = TestTransition.class.getMethod("toTestState");
+            assertNotNull(transitionMethod);
+            assertEquals("toTestState", transitionMethod.getName());
+            assertEquals(boolean.class, transitionMethod.getReturnType());
         }
     }
 
@@ -332,8 +332,8 @@ public class AnnotationProcessorTest extends BrobotTestBase {
             // Setup transition with invalid method name
             @TransitionSet(state = SimpleState.class)
             class InvalidTransition {
-                @FromTransition(from = TestState.class)
-                public boolean nonExistentMethod() {
+                @OutgoingTransition(to = TestState.class)
+                public boolean toTestState() {
                     return false;
                 }
             }

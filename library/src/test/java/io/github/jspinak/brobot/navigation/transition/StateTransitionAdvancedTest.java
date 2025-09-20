@@ -83,14 +83,14 @@ class StateTransitionAdvancedTest extends BrobotTestBase {
             // Arrange
             taskSequenceTransition.setActivate(Set.of(2L, 3L));
             taskSequenceTransition.setExit(Set.of(1L));
-            taskSequenceTransition.setScore(10);
+            taskSequenceTransition.setPathCost(10);
 
             // Act & Assert
             assertEquals(2, taskSequenceTransition.getActivate().size());
             assertTrue(taskSequenceTransition.getActivate().contains(2L));
             assertTrue(taskSequenceTransition.getActivate().contains(3L));
             assertEquals(1, taskSequenceTransition.getExit().size());
-            assertEquals(10, taskSequenceTransition.getScore());
+            assertEquals(10, taskSequenceTransition.getPathCost());
         }
 
         @Test
@@ -241,10 +241,10 @@ class StateTransitionAdvancedTest extends BrobotTestBase {
         @DisplayName("Should handle various score values")
         void testScoreValues(int score) {
             // Arrange & Act
-            taskSequenceTransition.setScore(score);
+            taskSequenceTransition.setPathCost(score);
 
             // Assert
-            assertEquals(score, taskSequenceTransition.getScore());
+            assertEquals(score, taskSequenceTransition.getPathCost());
         }
 
         @Test
@@ -252,14 +252,14 @@ class StateTransitionAdvancedTest extends BrobotTestBase {
         void testScoreComparison() {
             // Arrange
             TaskSequenceStateTransition lowScore = new TaskSequenceStateTransition();
-            lowScore.setScore(10);
+            lowScore.setPathCost(10);
 
             TaskSequenceStateTransition highScore = new TaskSequenceStateTransition();
-            highScore.setScore(100);
+            highScore.setPathCost(100);
 
             // Act
             List<StateTransition> transitions = Arrays.asList(highScore, lowScore);
-            transitions.sort(Comparator.comparingInt(StateTransition::getScore));
+            transitions.sort(Comparator.comparingInt(StateTransition::getPathCost));
 
             // Assert
             assertEquals(lowScore, transitions.get(0));
@@ -376,7 +376,7 @@ class StateTransitionAdvancedTest extends BrobotTestBase {
             // Act & Assert
             assertNull(incomplete.getActionDefinition());
             assertTrue(incomplete.getActivate().isEmpty());
-            assertEquals(0, incomplete.getScore());
+            assertEquals(0, incomplete.getPathCost());
         }
 
         @Test

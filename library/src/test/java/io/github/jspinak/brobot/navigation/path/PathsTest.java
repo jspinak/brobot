@@ -103,11 +103,11 @@ class PathsTest extends BrobotTestBase {
         void testSortByScore() {
             // Arrange
             Path path1 = new Path();
-            path1.setScore(30);
+            path1.setPathCost(30);
             Path path2 = new Path();
-            path2.setScore(10);
+            path2.setPathCost(10);
             Path path3 = new Path();
-            path3.setScore(20);
+            path3.setPathCost(20);
 
             Paths sortablePaths = new Paths(Arrays.asList(path1, path2, path3));
 
@@ -116,9 +116,9 @@ class PathsTest extends BrobotTestBase {
 
             // Assert
             List<Path> sorted = sortablePaths.getPaths();
-            assertEquals(10, sorted.get(0).getScore());
-            assertEquals(20, sorted.get(1).getScore());
-            assertEquals(30, sorted.get(2).getScore());
+            assertEquals(10, sorted.get(0).getPathCost());
+            assertEquals(20, sorted.get(1).getPathCost());
+            assertEquals(30, sorted.get(2).getPathCost());
         }
 
         @Test
@@ -134,7 +134,7 @@ class PathsTest extends BrobotTestBase {
         void testSortSinglePath() {
             // Arrange
             Path path = new Path();
-            path.setScore(15);
+            path.setPathCost(15);
             Paths singlePath = new Paths(List.of(path));
 
             // Act
@@ -142,7 +142,7 @@ class PathsTest extends BrobotTestBase {
 
             // Assert
             assertEquals(1, singlePath.getPaths().size());
-            assertEquals(15, singlePath.getPaths().get(0).getScore());
+            assertEquals(15, singlePath.getPaths().get(0).getPathCost());
         }
 
         @Test
@@ -150,11 +150,11 @@ class PathsTest extends BrobotTestBase {
         void testSortEqualScores() {
             // Arrange
             Path path1 = new Path();
-            path1.setScore(10);
+            path1.setPathCost(10);
             path1.getStates().add(1L); // Distinguish paths
 
             Path path2 = new Path();
-            path2.setScore(10);
+            path2.setPathCost(10);
             path2.getStates().add(2L);
 
             Paths equalScorePaths = new Paths(Arrays.asList(path1, path2));
@@ -164,8 +164,8 @@ class PathsTest extends BrobotTestBase {
 
             // Assert
             List<Path> sorted = equalScorePaths.getPaths();
-            assertEquals(10, sorted.get(0).getScore());
-            assertEquals(10, sorted.get(1).getScore());
+            assertEquals(10, sorted.get(0).getPathCost());
+            assertEquals(10, sorted.get(1).getPathCost());
             // Original order should be maintained (stable sort)
             assertEquals(1L, sorted.get(0).getStates().get(0));
             assertEquals(2L, sorted.get(1).getStates().get(0));
@@ -181,11 +181,11 @@ class PathsTest extends BrobotTestBase {
         void testGetBestScore() {
             // Arrange
             Path path1 = new Path();
-            path1.setScore(15);
+            path1.setPathCost(15);
             Path path2 = new Path();
-            path2.setScore(25);
+            path2.setPathCost(25);
             Path path3 = new Path();
-            path3.setScore(20);
+            path3.setPathCost(20);
 
             Paths scoredPaths = new Paths(Arrays.asList(path1, path2, path3));
 
@@ -211,11 +211,11 @@ class PathsTest extends BrobotTestBase {
         void testBestScoreWithNegatives() {
             // Arrange
             Path path1 = new Path();
-            path1.setScore(-10);
+            path1.setPathCost(-10);
             Path path2 = new Path();
-            path2.setScore(-5);
+            path2.setPathCost(-5);
             Path path3 = new Path();
-            path3.setScore(-20);
+            path3.setPathCost(-20);
 
             Paths negativePaths = new Paths(Arrays.asList(path1, path2, path3));
 
@@ -419,7 +419,7 @@ class PathsTest extends BrobotTestBase {
             List<Path> largePaths = new ArrayList<>();
             for (int i = 0; i < 1000; i++) {
                 Path path = new Path();
-                path.setScore(i);
+                path.setPathCost(i);
                 largePaths.add(path);
             }
 
@@ -432,8 +432,8 @@ class PathsTest extends BrobotTestBase {
             // Assert
             assertEquals(1000, largeCollection.getPaths().size());
             assertEquals(999, bestScore);
-            assertEquals(0, largeCollection.getPaths().get(0).getScore());
-            assertEquals(999, largeCollection.getPaths().get(999).getScore());
+            assertEquals(0, largeCollection.getPaths().get(0).getPathCost());
+            assertEquals(999, largeCollection.getPaths().get(999).getPathCost());
         }
 
         @Test
@@ -441,13 +441,13 @@ class PathsTest extends BrobotTestBase {
         void testMixedOperations() {
             // Arrange
             Path path1 = new Path();
-            path1.setScore(20);
+            path1.setPathCost(20);
             path1.getStates().add(1L); // Make non-empty
             Path path2 = new Path();
-            path2.setScore(10);
+            path2.setPathCost(10);
             path2.getStates().add(2L); // Make non-empty
             Path path3 = new Path();
-            path3.setScore(30);
+            path3.setPathCost(30);
             path3.getStates().add(3L); // Make non-empty
 
             when(mockPath1.isEmpty()).thenReturn(true); // Will be filtered
@@ -463,9 +463,9 @@ class PathsTest extends BrobotTestBase {
             List<Path> pathList = paths.getPaths();
             assertEquals(3, pathList.size());
             // First two should be sorted (10, 20), then path3 added after sort
-            assertEquals(10, pathList.get(0).getScore());
-            assertEquals(20, pathList.get(1).getScore());
-            assertEquals(30, pathList.get(2).getScore()); // Added after sort, remains at end
+            assertEquals(10, pathList.get(0).getPathCost());
+            assertEquals(20, pathList.get(1).getPathCost());
+            assertEquals(30, pathList.get(2).getPathCost()); // Added after sort, remains at end
         }
     }
 }

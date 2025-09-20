@@ -72,7 +72,7 @@ class TaskSequenceStateTransitionTest extends BrobotTestBase {
             assertNotNull(transition.getExit());
             assertTrue(transition.getActivate().isEmpty());
             assertTrue(transition.getExit().isEmpty());
-            assertEquals(0, transition.getScore());
+            assertEquals(0, transition.getPathCost());
             assertEquals(0, transition.getTimesSuccessful());
         }
     }
@@ -241,18 +241,18 @@ class TaskSequenceStateTransitionTest extends BrobotTestBase {
         @ValueSource(ints = {0, 1, 10, 50, 100, 500, 1000, Integer.MAX_VALUE})
         @DisplayName("Should handle various score values")
         void testScoreValues(int score) {
-            transition.setScore(score);
-            assertEquals(score, transition.getScore());
+            transition.setPathCost(score);
+            assertEquals(score, transition.getPathCost());
         }
 
         @Test
         @DisplayName("Should handle negative scores")
         void testNegativeScore() {
-            transition.setScore(-50);
-            assertEquals(-50, transition.getScore());
+            transition.setPathCost(-50);
+            assertEquals(-50, transition.getPathCost());
 
-            transition.setScore(Integer.MIN_VALUE);
-            assertEquals(Integer.MIN_VALUE, transition.getScore());
+            transition.setPathCost(Integer.MIN_VALUE);
+            assertEquals(Integer.MIN_VALUE, transition.getPathCost());
         }
 
         @Test
@@ -347,7 +347,7 @@ class TaskSequenceStateTransitionTest extends BrobotTestBase {
             transition.setStaysVisibleAfterTransition(StateTransition.StaysVisible.TRUE);
             transition.setActivate(new HashSet<>(Arrays.asList(1L, 2L)));
             transition.setExit(new HashSet<>(Arrays.asList(3L, 4L)));
-            transition.setScore(100);
+            transition.setPathCost(100);
             transition.setTimesSuccessful(5);
 
             // Verify all remain set
@@ -356,15 +356,15 @@ class TaskSequenceStateTransitionTest extends BrobotTestBase {
                     StateTransition.StaysVisible.TRUE, transition.getStaysVisibleAfterTransition());
             assertEquals(2, transition.getActivate().size());
             assertEquals(2, transition.getExit().size());
-            assertEquals(100, transition.getScore());
+            assertEquals(100, transition.getPathCost());
             assertEquals(5, transition.getTimesSuccessful());
 
             // Update some properties
-            transition.setScore(200);
+            transition.setPathCost(200);
             transition.setTimesSuccessful(10);
 
             // Verify updates and others unchanged
-            assertEquals(200, transition.getScore());
+            assertEquals(200, transition.getPathCost());
             assertEquals(10, transition.getTimesSuccessful());
             assertEquals(mockTaskSequence, transition.getActionDefinition());
             assertEquals(2, transition.getActivate().size());
@@ -397,11 +397,11 @@ class TaskSequenceStateTransitionTest extends BrobotTestBase {
         void testScoreComparison() {
             TaskSequenceStateTransition other = new TaskSequenceStateTransition();
 
-            transition.setScore(10);
-            other.setScore(20);
+            transition.setPathCost(10);
+            other.setPathCost(20);
 
             List<StateTransition> transitions = Arrays.asList(other, transition);
-            transitions.sort(Comparator.comparingInt(StateTransition::getScore));
+            transitions.sort(Comparator.comparingInt(StateTransition::getPathCost));
 
             assertEquals(transition, transitions.get(0));
             assertEquals(other, transitions.get(1));

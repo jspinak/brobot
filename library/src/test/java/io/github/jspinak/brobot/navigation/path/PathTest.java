@@ -49,7 +49,7 @@ class PathTest extends BrobotTestBase {
             assertNotNull(path.getTransitions());
             assertTrue(path.isEmpty());
             assertEquals(0, path.size());
-            assertEquals(0, path.getScore());
+            assertEquals(0, path.getPathCost());
         }
 
         @Test
@@ -105,13 +105,13 @@ class PathTest extends BrobotTestBase {
         @Test
         @DisplayName("Should get and set score")
         void testScore() {
-            assertEquals(0, path.getScore());
+            assertEquals(0, path.getPathCost());
 
-            path.setScore(50);
-            assertEquals(50, path.getScore());
+            path.setPathCost(50);
+            assertEquals(50, path.getPathCost());
 
-            path.setScore(-10);
-            assertEquals(-10, path.getScore());
+            path.setPathCost(-10);
+            assertEquals(-10, path.getPathCost());
         }
     }
 
@@ -219,23 +219,23 @@ class PathTest extends BrobotTestBase {
             path.add(100L);
             path.add(200L);
             path.add(300L);
-            path.setScore(50);
+            path.setPathCost(50);
             path.add(mockTransition1);
 
             Path copy = path.getCopy();
 
             // Check copy has same content
             assertEquals(path.getStates(), copy.getStates());
-            assertEquals(path.getScore(), copy.getScore());
+            assertEquals(path.getPathCost(), copy.getPathCost());
 
             // Check copy is independent
             copy.add(400L);
-            copy.setScore(100);
+            copy.setPathCost(100);
 
             assertEquals(3, path.size());
             assertEquals(4, copy.size());
-            assertEquals(50, path.getScore());
-            assertEquals(100, copy.getScore());
+            assertEquals(50, path.getPathCost());
+            assertEquals(100, copy.getPathCost());
 
             // Verify states list is a new instance
             assertNotSame(path.getStates(), copy.getStates());
@@ -247,7 +247,7 @@ class PathTest extends BrobotTestBase {
             Path copy = path.getCopy();
 
             assertTrue(copy.isEmpty());
-            assertEquals(0, copy.getScore());
+            assertEquals(0, copy.getPathCost());
             assertNotSame(path.getStates(), copy.getStates());
         }
     }
@@ -384,7 +384,7 @@ class PathTest extends BrobotTestBase {
         void testPrint() {
             path.add(100L);
             path.add(200L);
-            path.setScore(25);
+            path.setPathCost(25);
 
             // Capture System.out
             assertDoesNotThrow(() -> path.print());
@@ -432,18 +432,18 @@ class PathTest extends BrobotTestBase {
         @Test
         @DisplayName("Should handle negative scores")
         void testNegativeScore() {
-            path.setScore(-100);
-            assertEquals(-100, path.getScore());
+            path.setPathCost(-100);
+            assertEquals(-100, path.getPathCost());
 
             Path copy = path.getCopy();
-            assertEquals(-100, copy.getScore());
+            assertEquals(-100, copy.getPathCost());
         }
 
         @Test
         @DisplayName("Should handle MAX_VALUE score")
         void testMaxScore() {
-            path.setScore(Integer.MAX_VALUE);
-            assertEquals(Integer.MAX_VALUE, path.getScore());
+            path.setPathCost(Integer.MAX_VALUE);
+            assertEquals(Integer.MAX_VALUE, path.getPathCost());
         }
 
         @Test

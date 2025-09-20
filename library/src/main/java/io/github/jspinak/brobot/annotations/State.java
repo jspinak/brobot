@@ -12,6 +12,12 @@ import org.springframework.stereotype.Component;
  * <p>Classes annotated with @State should also include: - @Getter from Lombok for generating
  * getters - @Slf4j from Lombok for logging
  *
+ * <p><b>Hidden States:</b> When a state overlays another (e.g., a modal dialog opening over a
+ * page), the framework automatically tracks the covered state as "hidden". This enables dynamic
+ * transitions using {@code PreviousState.class} to return to whatever was covered. States don't
+ * need to explicitly define their hidden states - this is managed automatically by the framework
+ * based on state activation patterns.
+ *
  * <p>Usage:
  *
  * <pre>

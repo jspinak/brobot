@@ -346,7 +346,7 @@ class StateTransitionsEnhancedTest extends BrobotTestBase {
                             .setFunction(() -> true)
                             .addToActivate("State1", "State2", "State3")
                             .addToExit("State4", "State5")
-                            .setScore(100)
+                            .setPathCost(100)
                             .setStaysVisibleAfterTransition(StateTransition.StaysVisible.TRUE)
                             .build();
             transition.setTimesSuccessful(5);
@@ -356,7 +356,7 @@ class StateTransitionsEnhancedTest extends BrobotTestBase {
             assertNotNull(transition.getTransitionFunction());
             assertEquals(3, transition.getActivateNames().size());
             assertEquals(2, transition.getExitNames().size());
-            assertEquals(100, transition.getScore());
+            assertEquals(100, transition.getPathCost());
             assertEquals(5, transition.getTimesSuccessful());
             assertEquals(
                     StateTransition.StaysVisible.TRUE, transition.getStaysVisibleAfterTransition());
@@ -374,7 +374,7 @@ class StateTransitionsEnhancedTest extends BrobotTestBase {
             assertNotNull(transition.getTransitionFunction());
             assertTrue(transition.getActivateNames().isEmpty());
             assertTrue(transition.getExitNames().isEmpty());
-            assertEquals(0, transition.getScore());
+            assertEquals(0, transition.getPathCost());
             assertEquals(0, transition.getTimesSuccessful());
             assertEquals(
                     StateTransition.StaysVisible.NONE, transition.getStaysVisibleAfterTransition());

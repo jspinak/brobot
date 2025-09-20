@@ -157,7 +157,7 @@ class PathFinderAdvancedTest extends BrobotTestBase {
                 // Paths should be sorted by score
                 List<Path> pathList = paths.getPaths();
                 for (int i = 1; i < pathList.size(); i++) {
-                    assertTrue(pathList.get(i - 1).getScore() <= pathList.get(i).getScore());
+                    assertTrue(pathList.get(i - 1).getPathCost() <= pathList.get(i).getPathCost());
                 }
             }
         }
