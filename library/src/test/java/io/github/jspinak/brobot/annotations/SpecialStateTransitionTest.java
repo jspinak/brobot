@@ -41,7 +41,7 @@ class SpecialStateTransitionTest {
     @BeforeEach
     void setUp() {
         processor = new TransitionSetProcessor(jointTable, stateService, transitionService);
-        when(transitionService.getStateTransitionsRepository()).thenReturn(repository);
+        lenient().when(transitionService.getStateTransitionsRepository()).thenReturn(repository);
     }
 
     /** Test state with a transition to PreviousState marker class. */
@@ -138,6 +138,7 @@ class SpecialStateTransitionTest {
         // The processor should have processed both OutgoingTransitions
         // We can't easily verify the details, but we can check that processing succeeded
         verify(repository, times(1)).add(any(StateTransitions.class));
-        verify(jointTable, times(2)).addToJointTable(any(StateTransitions.class));
+        // Should only add to joint table once per state, not per transition
+        verify(jointTable, times(1)).addToJointTable(any(StateTransitions.class));
     }
 }
