@@ -374,7 +374,7 @@ class StateTransitionsEnhancedTest extends BrobotTestBase {
             assertNotNull(transition.getTransitionFunction());
             assertTrue(transition.getActivateNames().isEmpty());
             assertTrue(transition.getExitNames().isEmpty());
-            assertEquals(0, transition.getPathCost());
+            assertEquals(1, transition.getPathCost()); // Default cost is 1
             assertEquals(0, transition.getTimesSuccessful());
             assertEquals(
                     StateTransition.StaysVisible.NONE, transition.getStaysVisibleAfterTransition());

@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.model.analysis.color;
 
 import static io.github.jspinak.brobot.model.analysis.color.ColorCluster.ColorSchemaName.BGR;
 import static io.github.jspinak.brobot.model.analysis.color.ColorCluster.ColorSchemaName.HSV;
-import static io.github.jspinak.brobot.model.analysis.color.PixelProfiles.Analysis.*;
 import static org.bytedeco.opencv.global.opencv_core.CV_32FC1;
 import static org.bytedeco.opencv.global.opencv_core.CV_8UC3;
 import static org.junit.jupiter.api.Assertions.*;
@@ -88,8 +87,8 @@ public class PixelProfilesTest extends BrobotTestBase {
             assertTrue(pixelProfiles.getPixelAnalyses().isEmpty());
 
             // Check scene images are stored
-            assertEquals(matBGR, pixelProfiles.getAnalysis(SCENE, BGR));
-            assertEquals(matHSV, pixelProfiles.getAnalysis(SCENE, HSV));
+            assertEquals(matBGR, pixelProfiles.getAnalysis(PixelProfiles.Analysis.SCENE, BGR));
+            assertEquals(matHSV, pixelProfiles.getAnalysis(PixelProfiles.Analysis.SCENE, HSV));
         }
 
         @Test
@@ -221,29 +220,33 @@ public class PixelProfilesTest extends BrobotTestBase {
         @Test
         @DisplayName("Should add analysis data for BGR")
         void shouldAddAnalysisForBGR() {
-            pixelProfiles.setAnalyses(SCORE, BGR, scoreMat);
+            pixelProfiles.setAnalyses(PixelProfiles.Analysis.SCORE, BGR, scoreMat);
 
-            Mat retrieved = pixelProfiles.getAnalysis(SCORE, BGR);
+            Mat retrieved = pixelProfiles.getAnalysis(PixelProfiles.Analysis.SCORE, BGR);
             assertEquals(scoreMat, retrieved);
         }
 
         @Test
         @DisplayName("Should add analysis data for HSV")
         void shouldAddAnalysisForHSV() {
-            pixelProfiles.setAnalyses(SCORE, HSV, scoreMat);
+            pixelProfiles.setAnalyses(PixelProfiles.Analysis.SCORE, HSV, scoreMat);
 
-            Mat retrieved = pixelProfiles.getAnalysis(SCORE, HSV);
+            Mat retrieved = pixelProfiles.getAnalysis(PixelProfiles.Analysis.SCORE, HSV);
             assertEquals(scoreMat, retrieved);
         }
 
         @Test
         @DisplayName("Should store multiple analysis types")
         void shouldStoreMultipleAnalysisTypes() {
-            pixelProfiles.setAnalyses(SCORE, BGR, scoreMat);
-            pixelProfiles.setAnalyses(SCORE_DIST_BELOW_THRESHHOLD, BGR, thresholdMat);
+            pixelProfiles.setAnalyses(PixelProfiles.Analysis.SCORE, BGR, scoreMat);
+            pixelProfiles.setAnalyses(
+                    PixelProfiles.Analysis.SCORE_DIST_BELOW_THRESHHOLD, BGR, thresholdMat);
 
-            assertEquals(scoreMat, pixelProfiles.getAnalysis(SCORE, BGR));
-            assertEquals(thresholdMat, pixelProfiles.getAnalysis(SCORE_DIST_BELOW_THRESHHOLD, BGR));
+            assertEquals(scoreMat, pixelProfiles.getAnalysis(PixelProfiles.Analysis.SCORE, BGR));
+            assertEquals(
+                    thresholdMat,
+                    pixelProfiles.getAnalysis(
+                            PixelProfiles.Analysis.SCORE_DIST_BELOW_THRESHHOLD, BGR));
         }
 
         @Test
@@ -253,10 +256,10 @@ public class PixelProfilesTest extends BrobotTestBase {
             Mat newMat = new Mat(75, 75, CV_32FC1);
 
             try {
-                pixelProfiles.setAnalyses(SCORE, BGR, originalMat);
-                pixelProfiles.setAnalyses(SCORE, BGR, newMat);
+                pixelProfiles.setAnalyses(PixelProfiles.Analysis.SCORE, BGR, originalMat);
+                pixelProfiles.setAnalyses(PixelProfiles.Analysis.SCORE, BGR, newMat);
 
-                assertEquals(newMat, pixelProfiles.getAnalysis(SCORE, BGR));
+                assertEquals(newMat, pixelProfiles.getAnalysis(PixelProfiles.Analysis.SCORE, BGR));
             } finally {
                 originalMat.release();
                 newMat.release();
@@ -267,7 +270,8 @@ public class PixelProfilesTest extends BrobotTestBase {
         @EnumSource(PixelProfiles.Analysis.class)
         @DisplayName("Should handle all analysis types")
         void shouldHandleAllAnalysisTypes(PixelProfiles.Analysis analysisType) {
-            if (analysisType != SCENE) { // SCENE is already set in constructor
+            if (analysisType
+                    != PixelProfiles.Analysis.SCENE) { // SCENE is already set in constructor
                 Mat testMat = new Mat(10, 10, CV_32FC1);
                 try {
                     pixelProfiles.setAnalyses(analysisType, BGR, testMat);
@@ -281,7 +285,7 @@ public class PixelProfilesTest extends BrobotTestBase {
         @Test
         @DisplayName("Should return null for non-existent analysis")
         void shouldReturnNullForNonExistentAnalysis() {
-            Mat result = pixelProfiles.getAnalysis(SCORE, BGR);
+            Mat result = pixelProfiles.getAnalysis(PixelProfiles.Analysis.SCORE, BGR);
             assertNull(result);
         }
     }
@@ -294,13 +298,13 @@ public class PixelProfilesTest extends BrobotTestBase {
         @DisplayName("Should check if has scores")
         void shouldCheckIfHasScores() {
             // Initially no scores
-            assertNull(pixelProfiles.getAnalysis(SCORE, BGR));
-            assertNull(pixelProfiles.getAnalysis(SCORE, HSV));
+            assertNull(pixelProfiles.getAnalysis(PixelProfiles.Analysis.SCORE, BGR));
+            assertNull(pixelProfiles.getAnalysis(PixelProfiles.Analysis.SCORE, HSV));
 
             Mat scoreMat = new Mat(100, 100, CV_32FC1);
             try {
-                pixelProfiles.setAnalyses(SCORE, BGR, scoreMat);
-                assertNotNull(pixelProfiles.getAnalysis(SCORE, BGR));
+                pixelProfiles.setAnalyses(PixelProfiles.Analysis.SCORE, BGR, scoreMat);
+                assertNotNull(pixelProfiles.getAnalysis(PixelProfiles.Analysis.SCORE, BGR));
             } finally {
                 scoreMat.release();
             }
@@ -309,21 +313,21 @@ public class PixelProfilesTest extends BrobotTestBase {
         @Test
         @DisplayName("Should check scores for both color schemas")
         void shouldCheckScoresForBothColorSchemas() {
-            assertNull(pixelProfiles.getAnalysis(SCORE, BGR));
-            assertNull(pixelProfiles.getAnalysis(SCORE, HSV));
+            assertNull(pixelProfiles.getAnalysis(PixelProfiles.Analysis.SCORE, BGR));
+            assertNull(pixelProfiles.getAnalysis(PixelProfiles.Analysis.SCORE, HSV));
 
             Mat scoreBGR = new Mat(100, 100, CV_32FC1);
             Mat scoreHSV = new Mat(100, 100, CV_32FC1);
 
             try {
                 // Add only BGR score
-                pixelProfiles.setAnalyses(SCORE, BGR, scoreBGR);
-                assertNotNull(pixelProfiles.getAnalysis(SCORE, BGR));
+                pixelProfiles.setAnalyses(PixelProfiles.Analysis.SCORE, BGR, scoreBGR);
+                assertNotNull(pixelProfiles.getAnalysis(PixelProfiles.Analysis.SCORE, BGR));
 
                 // Clear and add only HSV score
-                pixelProfiles.getAnalyses().get(BGR).remove(SCORE);
-                pixelProfiles.setAnalyses(SCORE, HSV, scoreHSV);
-                assertNotNull(pixelProfiles.getAnalysis(SCORE, HSV));
+                pixelProfiles.getAnalyses().get(BGR).remove(PixelProfiles.Analysis.SCORE);
+                pixelProfiles.setAnalyses(PixelProfiles.Analysis.SCORE, HSV, scoreHSV);
+                assertNotNull(pixelProfiles.getAnalysis(PixelProfiles.Analysis.SCORE, HSV));
             } finally {
                 scoreBGR.release();
                 scoreHSV.release();
@@ -346,8 +350,8 @@ public class PixelProfilesTest extends BrobotTestBase {
         @Test
         @DisplayName("Should handle null Mat in analysis")
         void shouldHandleNullMatInAnalysis() {
-            pixelProfiles.setAnalyses(SCORE, BGR, null);
-            assertNull(pixelProfiles.getAnalysis(SCORE, BGR));
+            pixelProfiles.setAnalyses(PixelProfiles.Analysis.SCORE, BGR, null);
+            assertNull(pixelProfiles.getAnalysis(PixelProfiles.Analysis.SCORE, BGR));
         }
 
         @Test
@@ -356,13 +360,13 @@ public class PixelProfilesTest extends BrobotTestBase {
             // Add other analyses
             Mat scoreMat = new Mat(100, 100, CV_32FC1);
             try {
-                pixelProfiles.setAnalyses(SCORE, BGR, scoreMat);
+                pixelProfiles.setAnalyses(PixelProfiles.Analysis.SCORE, BGR, scoreMat);
                 pixelProfiles.add(mockPixelProfile1);
                 pixelProfiles.setStateImage(mockStateImage);
 
                 // Scene images should still be present
-                assertEquals(matBGR, pixelProfiles.getAnalysis(SCENE, BGR));
-                assertEquals(matHSV, pixelProfiles.getAnalysis(SCENE, HSV));
+                assertEquals(matBGR, pixelProfiles.getAnalysis(PixelProfiles.Analysis.SCENE, BGR));
+                assertEquals(matHSV, pixelProfiles.getAnalysis(PixelProfiles.Analysis.SCENE, HSV));
             } finally {
                 scoreMat.release();
             }

@@ -15,6 +15,7 @@ import io.github.jspinak.brobot.navigation.service.StateTransitionService;
 import io.github.jspinak.brobot.navigation.transition.JavaStateTransition;
 import io.github.jspinak.brobot.navigation.transition.StateTransitions;
 import io.github.jspinak.brobot.navigation.transition.StateTransitionsJointTable;
+import io.github.jspinak.brobot.navigation.transition.TaskSequenceStateTransition;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -83,10 +84,8 @@ public class TransitionSetProcessor {
                 processOutgoingTransition(bean, method, stateName, builder);
             }
 
-            // Register the IncomingTransition for this target state
-            if (incomingTransitionMethod != null) {
-                registerIncomingTransitionForState(stateName, builder);
-            }
+            // Build and register the complete StateTransitions object
+            registerStateTransitions(stateName, builder);
 
             log.info(
                     "Successfully registered {} OutgoingTransitions and {}"
@@ -198,23 +197,18 @@ public class TransitionSetProcessor {
 
         JavaStateTransition transition = transitionBuilder.build();
 
-        // Add this outgoing transition to the current state's transitions
-        builder.addTransition(transition);
-
-        // Register the transition with the state transition service
+        // Handle special state IDs - add them directly to the activate set
         if (!specialStateIds.isEmpty()) {
-            // If there are special states, register them separately
-            for (Long specialStateId : specialStateIds) {
-                registerSpecialTransitionForState(fromStateName, specialStateId, transition);
+            // Add special state IDs to the activate set
+            if (transition.getActivate() == null) {
+                transition.setActivate(new HashSet<>());
             }
+            transition.getActivate().addAll(specialStateIds);
         }
 
-        if (!regularStateNames.isEmpty()) {
-            // Register regular state transitions
-            for (String toStateName : regularStateNames) {
-                registerTransitionForState(fromStateName, toStateName, transition);
-            }
-        }
+        // Add this outgoing transition to the current state's transitions builder
+        // The actual registration will happen once when the StateTransitions is built
+        builder.addTransition(transition);
 
         log.info(logMessage.toString());
     }
@@ -296,165 +290,78 @@ public class TransitionSetProcessor {
         return null;
     }
 
-    /** Register an IncomingTransition for a specific state. */
-    private void registerIncomingTransitionForState(
-            String stateName, StateTransitions.Builder builder) {
+    /** Register the complete StateTransitions for a specific state. */
+    private void registerStateTransitions(String stateName, StateTransitions.Builder builder) {
         // Get the state ID
         var stateOpt = stateService.getState(stateName);
 
         if (stateOpt.isEmpty()) {
-            log.error("Cannot register ToTransition: state not found: {}", stateName);
+            log.error("Cannot register StateTransitions: state not found: {}", stateName);
             return;
         }
 
         Long stateId = stateOpt.get().getId();
 
+        // Build the StateTransitions object
+        StateTransitions newTransitions = builder.build();
+        newTransitions.setStateId(stateId);
+
+        // Now we need to convert state names in activate sets to IDs
+        for (var transition : newTransitions.getTransitions()) {
+            if (transition instanceof JavaStateTransition) {
+                JavaStateTransition javaTransition = (JavaStateTransition) transition;
+                Set<Long> activateIds = new HashSet<>();
+
+                // Convert any string state names that were added
+                if (javaTransition.getActivate() != null) {
+                    for (Object activate : javaTransition.getActivate()) {
+                        if (activate instanceof String) {
+                            var targetStateOpt = stateService.getState((String) activate);
+                            if (targetStateOpt.isPresent()) {
+                                activateIds.add(targetStateOpt.get().getId());
+                            }
+                        } else if (activate instanceof Long) {
+                            // Special state IDs are already Longs
+                            activateIds.add((Long) activate);
+                        }
+                    }
+                    javaTransition.setActivate(activateIds);
+                }
+            }
+        }
+
         // Get or create StateTransitions for this state
-        StateTransitions stateTransitions;
         var existingTransitions = transitionService.getTransitions(stateId);
 
         if (existingTransitions.isPresent()) {
-            // Update existing transitions with the ToTransition
-            stateTransitions = existingTransitions.get();
-            // Build the transitions from the builder to get the ToTransition
-            StateTransitions builtTransitions = builder.build();
-            stateTransitions.setTransitionFinish(builtTransitions.getTransitionFinish());
-            log.info(
-                    "Added ToTransition to existing StateTransitions for state {} ({})",
-                    stateName,
-                    stateId);
+            // Merge with existing transitions
+            StateTransitions stateTransitions = existingTransitions.get();
+
+            // Update with new transitions
+            if (newTransitions.getTransitionFinish() != null) {
+                stateTransitions.setTransitionFinish(newTransitions.getTransitionFinish());
+            }
+            for (var transition : newTransitions.getTransitions()) {
+                if (transition instanceof JavaStateTransition) {
+                    stateTransitions.addTransition((JavaStateTransition) transition);
+                } else if (transition instanceof TaskSequenceStateTransition) {
+                    stateTransitions.addTransition((TaskSequenceStateTransition) transition);
+                } else {
+                    // For other StateTransition types, add to the transitions list directly
+                    stateTransitions.getTransitions().add(transition);
+                }
+            }
+
+            log.info("Updated existing StateTransitions for state {} ({})", stateName, stateId);
         } else {
-            // Create new StateTransitions with the ToTransition
-            stateTransitions = builder.build();
-            stateTransitions.setStateId(stateId);
-            transitionService.getStateTransitionsRepository().add(stateTransitions);
-            log.info(
-                    "Created new StateTransitions with ToTransition for state {} ({})",
-                    stateName,
-                    stateId);
+            // Add new StateTransitions
+            transitionService.getStateTransitionsRepository().add(newTransitions);
+            log.info("Created new StateTransitions for state {} ({})", stateName, stateId);
         }
 
         // Add to joint table
-        jointTable.addToJointTable(stateTransitions);
-        log.info("Registered ToTransition for state: {} ({})", stateName, stateId);
-    }
-
-    /**
-     * Register a special transition (to PreviousState, CurrentState, etc.) for a specific state.
-     *
-     * @param fromStateName The name of the source state
-     * @param specialStateId The special state ID (e.g., -2 for PREVIOUS)
-     * @param transition The transition to register
-     */
-    private void registerSpecialTransitionForState(
-            String fromStateName, Long specialStateId, JavaStateTransition transition) {
-        // Get the state ID
-        var fromStateOpt = stateService.getState(fromStateName);
-
-        if (fromStateOpt.isEmpty()) {
-            log.error(
-                    "Cannot register special transition: source state not found: {}",
-                    fromStateName);
-            return;
-        }
-
-        Long fromStateId = fromStateOpt.get().getId();
-
-        // Add the special state ID to the activate set
-        if (transition.getActivate() == null) {
-            transition.setActivate(new HashSet<>());
-        }
-        transition.getActivate().add(specialStateId);
-
-        // Get or create StateTransitions for the FROM state
-        StateTransitions stateTransitions;
-        var existingTransitions = transitionService.getTransitions(fromStateId);
-
-        if (existingTransitions.isPresent()) {
-            stateTransitions = existingTransitions.get();
-            stateTransitions.addTransition(transition);
-            log.debug(
-                    "Added special transition to existing StateTransitions for state {} ({}) ->"
-                            + " special state {}",
-                    fromStateName,
-                    fromStateId,
-                    specialStateId);
-        } else {
-            StateTransitions.Builder builder = new StateTransitions.Builder(fromStateName);
-            builder.addTransition(transition);
-            stateTransitions = builder.build();
-            stateTransitions.setStateId(fromStateId);
-            transitionService.getStateTransitionsRepository().add(stateTransitions);
-            log.debug(
-                    "Created new StateTransitions with special transition for state {} ({}) ->"
-                            + " special state {}",
-                    fromStateName,
-                    fromStateId,
-                    specialStateId);
-        }
-
-        // Add to joint table - special states won't have regular transitions pointing to them
-        jointTable.addToJointTable(stateTransitions);
-        log.debug(
-                "Registered special transition for state: {} ({}) -> special state {}",
-                fromStateName,
-                fromStateId,
-                specialStateId);
-    }
-
-    /** Register a transition for a specific state. */
-    private void registerTransitionForState(
-            String fromStateName, String toStateName, JavaStateTransition transition) {
-        // Get the state IDs
-        var fromStateOpt = stateService.getState(fromStateName);
-        var toStateOpt = stateService.getState(toStateName);
-
-        if (fromStateOpt.isEmpty()) {
-            log.error("Cannot register transition: source state not found: {}", fromStateName);
-            return;
-        }
-
-        if (toStateOpt.isEmpty()) {
-            log.error("Cannot register transition: target state not found: {}", toStateName);
-            return;
-        }
-
-        Long fromStateId = fromStateOpt.get().getId();
-        Long toStateId = toStateOpt.get().getId();
-
-        // Add the target state ID to the activate set
-        if (transition.getActivate() == null) {
-            transition.setActivate(new HashSet<>());
-        }
-        transition.getActivate().add(toStateId);
-
-        // Get or create StateTransitions for the FROM state
-        StateTransitions stateTransitions;
-        var existingTransitions = transitionService.getTransitions(fromStateId);
-
-        if (existingTransitions.isPresent()) {
-            stateTransitions = existingTransitions.get();
-            stateTransitions.addTransition(transition);
-            log.debug(
-                    "Added transition to existing StateTransitions for state {} ({})",
-                    fromStateName,
-                    fromStateId);
-        } else {
-            // Create new StateTransitions for the FROM state
-            stateTransitions =
-                    new StateTransitions.Builder(fromStateName).addTransition(transition).build();
-            stateTransitions.setStateId(fromStateId);
-            transitionService.getStateTransitionsRepository().add(stateTransitions);
-            log.debug("Created new StateTransitions for state {} ({})", fromStateName, fromStateId);
-        }
-
-        // Add to joint table
-        jointTable.addToJointTable(stateTransitions);
-        log.debug(
-                "Registered transition: {} ({}) -> {} ({})",
-                fromStateName,
-                fromStateId,
-                toStateName,
-                toStateId);
+        var finalTransitions = existingTransitions.orElse(newTransitions);
+        jointTable.addToJointTable(finalTransitions);
+        log.info("Registered StateTransitions for state: {} ({})", stateName, stateId);
     }
 }
