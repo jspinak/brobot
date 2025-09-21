@@ -80,9 +80,9 @@ class JavaStateTransitionTest extends BrobotTestBase {
         }
 
         @Test
-        @DisplayName("Should have zero initial path cost")
+        @DisplayName("Should have default initial path cost of 1")
         void testInitialPathCost() {
-            assertEquals(0, transition.getPathCost());
+            assertEquals(1, transition.getPathCost());
         }
 
         @Test

@@ -376,7 +376,7 @@ class StateTransitionAdvancedTest extends BrobotTestBase {
             // Act & Assert
             assertNull(incomplete.getActionDefinition());
             assertTrue(incomplete.getActivate().isEmpty());
-            assertEquals(0, incomplete.getPathCost());
+            assertEquals(1, incomplete.getPathCost()); // Default cost is 1
         }
 
         @Test

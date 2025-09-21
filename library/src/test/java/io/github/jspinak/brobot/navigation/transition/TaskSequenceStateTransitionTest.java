@@ -72,7 +72,7 @@ class TaskSequenceStateTransitionTest extends BrobotTestBase {
             assertNotNull(transition.getExit());
             assertTrue(transition.getActivate().isEmpty());
             assertTrue(transition.getExit().isEmpty());
-            assertEquals(0, transition.getPathCost());
+            assertEquals(1, transition.getPathCost()); // Default cost is 1
             assertEquals(0, transition.getTimesSuccessful());
         }
     }
