@@ -43,10 +43,10 @@ public class TestPatternMatchingWithZoom {
 
         // Create Pattern and Scene objects as Brobot would
         Pattern pattern = new Pattern(patternImg);
-        pattern.setName("claude-prompt-test");
+        pattern.setNameWithoutExtension("claude-prompt-test");
 
         Pattern scenePattern = new Pattern(sceneImg);
-        scenePattern.setName("test-scene");
+        scenePattern.setNameWithoutExtension("test-scene");
         Scene scene = new Scene(scenePattern);
 
         System.out.println("Pattern: " + patternImg.getWidth() + "x" + patternImg.getHeight());
@@ -121,7 +121,7 @@ public class TestPatternMatchingWithZoom {
 
         // Load the pattern
         Pattern pattern = new Pattern("claude-prompt");
-        System.out.println("Pattern loaded: " + pattern.getName());
+        System.out.println("Pattern loaded: " + pattern.getNameWithoutExtension());
         System.out.println("Pattern dimensions: " + pattern.w() + "x" + pattern.h());
 
         // Capture current screen
@@ -132,7 +132,7 @@ public class TestPatternMatchingWithZoom {
 
         // Create scene from current screen
         Pattern scenePattern = new Pattern(currentScreen);
-        scenePattern.setName("current-screen");
+        scenePattern.setNameWithoutExtension("current-screen");
         Scene scene = new Scene(scenePattern);
 
         // Try to find the pattern

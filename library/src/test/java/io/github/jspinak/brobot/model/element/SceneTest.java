@@ -37,7 +37,7 @@ public class SceneTest extends BrobotTestBase {
         super.setupTest();
         testImage = new BufferedImage(1920, 1080, BufferedImage.TYPE_INT_RGB);
         testPattern = new Pattern(new Image(testImage, "TestScene"));
-        testPattern.setName("TestPattern");
+        testPattern.setNameWithoutExtension("TestPattern");
         objectMapper = new ObjectMapper();
     }
 
@@ -143,7 +143,7 @@ public class SceneTest extends BrobotTestBase {
         // Given - Create a scene without Image (which isn't serializable)
         Scene scene = new Scene();
         scene.setId(42L);
-        scene.getPattern().setName("TestPattern");
+        scene.getPattern().setNameWithoutExtension("TestPattern");
 
         // When - Serialize
         String json = objectMapper.writeValueAsString(scene);
@@ -159,7 +159,7 @@ public class SceneTest extends BrobotTestBase {
         // Then - Objects have same properties
         assertEquals(scene.getId(), deserialized.getId());
         assertNotNull(deserialized.getPattern());
-        assertEquals("TestPattern", deserialized.getPattern().getName());
+        assertEquals("TestPattern", deserialized.getPattern().getNameWithoutExtension());
     }
 
     @Test

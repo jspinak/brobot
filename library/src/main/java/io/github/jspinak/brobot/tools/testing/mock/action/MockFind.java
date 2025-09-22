@@ -81,7 +81,7 @@ public class MockFind {
                 new Match.Builder()
                         .setRegion(new Region(100, 100, 50, 50))
                         .setSimScore(0.95)
-                        .setName(pattern.getName() != null ? pattern.getName() : "MockMatch")
+                        .setName(pattern.getNameWithoutExtension() != null ? pattern.getNameWithoutExtension() : "MockMatch")
                         .build();
         List<Match> matches = new ArrayList<>();
         matches.add(defaultMatch);

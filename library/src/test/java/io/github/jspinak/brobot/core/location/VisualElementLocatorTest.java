@@ -111,7 +111,7 @@ public class VisualElementLocatorTest extends BrobotTestBase {
         // Arrange
         Region searchRegion = new Region(100, 100, 400, 300);
         when(screenCapture.captureRegion(searchRegion)).thenReturn(mockRegionImage);
-        when(mockPattern.getName()).thenReturn("TestPattern");
+        when(mockPattern.getNameWithoutExtension()).thenReturn("TestPattern");
 
         ElementLocator.LocateRequest request =
                 new ElementLocator.LocateRequest.Builder()
@@ -256,8 +256,8 @@ public class VisualElementLocatorTest extends BrobotTestBase {
 
         Pattern pattern1 = mock(Pattern.class);
         Pattern pattern2 = mock(Pattern.class);
-        when(pattern1.getName()).thenReturn("Pattern1");
-        when(pattern2.getName()).thenReturn("Pattern2");
+        when(pattern1.getNameWithoutExtension()).thenReturn("Pattern1");
+        when(pattern2.getNameWithoutExtension()).thenReturn("Pattern2");
 
         ElementLocator.LocateRequest request =
                 new ElementLocator.LocateRequest.Builder()

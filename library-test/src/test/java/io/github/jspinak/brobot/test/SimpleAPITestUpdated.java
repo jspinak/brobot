@@ -58,7 +58,7 @@ public class SimpleAPITestUpdated extends BrobotIntegrationTestBase {
                         .build();
 
         assertNotNull(pattern);
-        assertEquals("TestPattern", pattern.getName());
+        assertEquals("TestPattern", pattern.getNameWithoutExtension());
         assertNotNull(pattern.getBImage());
     }
 

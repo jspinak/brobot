@@ -35,7 +35,7 @@ public class SikuliXBrobotComparisonDiagnostic {
         // Get patterns from StateImage
         for (var pattern : stateImage.getPatterns()) {
             if (pattern.getImage() != null && pattern.getImage().getBufferedImage() != null) {
-                String patternName = pattern.getName();
+                String patternName = pattern.getNameWithoutExtension();
                 BufferedImage brobotImage = pattern.getImage().getBufferedImage();
 
                 log.info("\n═══════════════════════════════════════════════════════════════════");

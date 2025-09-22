@@ -34,14 +34,14 @@ public class SimpleDeclarativeRegionTest extends BrobotTestBase {
         // Create ImageA (reference image)
         // In mock mode, we can create patterns without actual image files
         Pattern patternA = new Pattern();
-        patternA.setName("pattern-a");
+        patternA.setNameWithoutExtension("pattern-a");
 
         StateImage imageA =
                 new StateImage.Builder().setName("ReferenceImage").addPattern(patternA).build();
 
         // Create ImageB with declarative dependency on ImageA
         Pattern patternB = new Pattern();
-        patternB.setName("pattern-b");
+        patternB.setNameWithoutExtension("pattern-b");
 
         StateImage imageB =
                 new StateImage.Builder()
@@ -80,7 +80,7 @@ public class SimpleDeclarativeRegionTest extends BrobotTestBase {
     void testFixedRegionClearingBehavior() {
         // Create ImageB with both fixed region and declarative region
         Pattern pattern = new Pattern();
-        pattern.setName("pattern");
+        pattern.setNameWithoutExtension("pattern");
 
         StateImage imageB =
                 new StateImage.Builder()

@@ -235,7 +235,7 @@ public class StateImageTest extends BrobotTestBase {
         @Test
         @DisplayName("Build with single pattern")
         public void testBuilderWithSinglePattern() {
-            when(mockPattern.getName()).thenReturn("button.png");
+            when(mockPattern.getNameWithoutExtension()).thenReturn("button.png");
 
             StateImage image = new StateImage.Builder().addPattern(mockPattern).build();
 
