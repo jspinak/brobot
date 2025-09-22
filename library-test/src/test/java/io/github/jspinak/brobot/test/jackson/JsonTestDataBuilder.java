@@ -70,9 +70,9 @@ public class JsonTestDataBuilder {
     /** Creates a valid Pattern object. */
     public static Pattern createValidPattern(String name) {
         Pattern pattern = new Pattern();
-        pattern.setName(name != null ? name : "test-pattern-" + UUID.randomUUID());
-        pattern.setImgpath("images/" + pattern.getName() + ".png");
-        pattern.setUrl("http://example.com/" + pattern.getName());
+        pattern.setNameWithoutExtension(name != null ? name : "test-pattern-" + UUID.randomUUID());
+        pattern.setImgpath("images/" + pattern.getNameWithoutExtension() + ".png");
+        pattern.setUrl("http://example.com/" + pattern.getNameWithoutExtension());
         pattern.setFixed(false);
         pattern.setDynamic(false);
         pattern.setIndex(0);
@@ -221,8 +221,8 @@ public class JsonTestDataBuilder {
 
         // Create a simple pattern for the scene
         Pattern pattern = new Pattern();
-        pattern.setName(name != null ? name : "scene-" + UUID.randomUUID());
-        pattern.setImgpath("scenes/" + pattern.getName() + ".png");
+        pattern.setNameWithoutExtension(name != null ? name : "scene-" + UUID.randomUUID());
+        pattern.setImgpath("scenes/" + pattern.getNameWithoutExtension() + ".png");
 
         // Note: Don't set actual image data for serialization tests
         // The Pattern's image field should remain null

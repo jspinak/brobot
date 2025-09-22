@@ -91,7 +91,7 @@ public class Image {
     public Image(Pattern pattern) {
         this.bufferedImage = pattern.getBImage();
         // Pattern.getName() might return null, fall back to getImgpath() if needed
-        String patternName = pattern.getName();
+        String patternName = pattern.getNameWithoutExtension();
         this.name = (patternName != null) ? patternName : pattern.getImgpath();
     }
 

@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.action.internal.find.scene;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -21,7 +20,7 @@ import io.github.jspinak.brobot.model.element.Image;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.match.Match;
-// Removed old logging import: 
+// Removed old logging import:
 /**
  * Performs image pattern matching and OCR text detection within captured scenes.
  *
@@ -254,7 +253,7 @@ public class ScenePatternMatcher {
                 Match nextMatch =
                         new Match.Builder()
                                 .setSikuliMatch(sikuliMatch)
-                                .setName(pattern.getName())
+                                .setName(pattern.getNameWithoutExtension())
                                 .build();
 
                 acceptedMatches++;
@@ -357,7 +356,7 @@ public class ScenePatternMatcher {
         // Handle failed matches
         if (matchList.isEmpty()) {
             // Save debug images if enabled and pattern name contains "prompt"
-            if (pattern.getName() != null && pattern.getName().toLowerCase().contains("prompt")) {
+            if (pattern.getNameWithoutExtension() != null && pattern.getNameWithoutExtension().toLowerCase().contains("prompt")) {
                 saveDebugImages(pattern, scene);
             }
         }
@@ -399,7 +398,7 @@ public class ScenePatternMatcher {
             return wordMatches;
         }
         List<org.sikuli.script.Match> sikuliMatches = OCR.readWords(scene.getPattern().getBImage());
-        String baseName = scene.getPattern().getName() == null ? "" : scene.getPattern().getName();
+        String baseName = scene.getPattern().getNameWithoutExtension() == null ? "" : scene.getPattern().getNameWithoutExtension();
         int i = 0;
         for (org.sikuli.script.Match match : sikuliMatches) {
             Match m =
@@ -429,7 +428,7 @@ public class ScenePatternMatcher {
 
             // Use DiagnosticLogger for image analysis
             if (diagnosticLogger != null) {
-                diagnosticLogger.logImageAnalysis(patternImg, sceneImg, pattern.getName());
+                diagnosticLogger.logImageAnalysis(patternImg, sceneImg, pattern.getNameWithoutExtension());
             } else {
                 if (patternImg != null) {
                     analyzeImageContent(patternImg, "Pattern");
@@ -443,7 +442,7 @@ public class ScenePatternMatcher {
             }
 
             // Save pattern image
-            String patternFile = debugDir + "/pattern_" + pattern.getName() + ".png";
+            String patternFile = debugDir + "/pattern_" + pattern.getNameWithoutExtension() + ".png";
             if (patternImg != null) {
                 ImageIO.write(patternImg, "png", new File(patternFile));
             }
@@ -482,7 +481,7 @@ public class ScenePatternMatcher {
             // Log similarity analysis using DiagnosticLogger
             if (diagnosticLogger != null) {
                 diagnosticLogger.logSimilarityAnalysis(
-                        pattern.getName(), testThresholds, foundThreshold, foundScore);
+                        pattern.getNameWithoutExtension(), testThresholds, foundThreshold, foundScore);
             } else {
                 if (foundThreshold != null && foundScore != null) {
                 } else {

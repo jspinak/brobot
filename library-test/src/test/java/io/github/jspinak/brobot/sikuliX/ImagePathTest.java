@@ -54,8 +54,8 @@ public class ImagePathTest {
                         .setFilename(Paths.get(screenshotsPath, "floranext0.png").toString())
                         .build();
 
-        assertEquals("bottomR", fromImages.getName());
-        assertEquals("floranext0", fromScreenshots.getName());
+        assertEquals("bottomR", fromImages.getNameWithoutExtension());
+        assertEquals("floranext0", fromScreenshots.getNameWithoutExtension());
 
         // Verify images were actually loaded
         assertNotNull(fromImages.getImage());
@@ -69,7 +69,7 @@ public class ImagePathTest {
         Pattern fromScreenshots =
                 new Pattern.Builder().setFilename(screenshotFile.getAbsolutePath()).build();
 
-        assertEquals("floranext0", fromScreenshots.getName());
+        assertEquals("floranext0", fromScreenshots.getNameWithoutExtension());
         assertNotNull(fromScreenshots.getImage());
     }
 }

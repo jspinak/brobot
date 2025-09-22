@@ -62,8 +62,8 @@ public class TestBrobotJsonModule extends BrobotJsonModule {
                 gen.writeArrayFieldStart("scenes");
                 for (Scene scene : value.getScenes()) {
                     gen.writeStartObject();
-                    if (scene.getPattern() != null && scene.getPattern().getName() != null) {
-                        gen.writeStringField("name", scene.getPattern().getName());
+                    if (scene.getPattern() != null && scene.getPattern().getNameWithoutExtension() != null) {
+                        gen.writeStringField("name", scene.getPattern().getNameWithoutExtension());
                     }
                     gen.writeEndObject();
                 }

@@ -79,8 +79,8 @@ public class ImageComparerTest extends BrobotTestBase {
         // Setup default mock behaviors with lenient() to avoid unnecessary stubbing errors
         lenient().when(pattern1.getBImage()).thenReturn(bufferedImage1);
         lenient().when(pattern2.getBImage()).thenReturn(bufferedImage2);
-        lenient().when(pattern1.getName()).thenReturn("Pattern1");
-        lenient().when(pattern2.getName()).thenReturn("Pattern2");
+        lenient().when(pattern1.getNameWithoutExtension()).thenReturn("Pattern1");
+        lenient().when(pattern2.getNameWithoutExtension()).thenReturn("Pattern2");
         lenient().when(pattern1.getImage()).thenReturn(image1);
         lenient().when(pattern2.getImage()).thenReturn(image2);
 
@@ -286,7 +286,7 @@ public class ImageComparerTest extends BrobotTestBase {
             Pattern targetPattern = mock(Pattern.class);
 
             when(targetPattern.getBImage()).thenReturn(bufferedImage1);
-            when(targetPattern.getName()).thenReturn("TargetPattern");
+            when(targetPattern.getNameWithoutExtension()).thenReturn("TargetPattern");
             Image targetPatternImage = mock(Image.class);
             when(targetPattern.getImage()).thenReturn(targetPatternImage);
             when(targetStateImage.getPatterns())
@@ -384,13 +384,13 @@ public class ImageComparerTest extends BrobotTestBase {
                 BufferedImage img2 = mock(BufferedImage.class);
 
                 lenient().when(p1.getBImage()).thenReturn(img1);
-                lenient().when(p1.getName()).thenReturn("P1-" + i);
+                lenient().when(p1.getNameWithoutExtension()).thenReturn("P1-" + i);
                 Image pImage1 = mock(Image.class);
                 Image pImage2 = mock(Image.class);
                 lenient().when(p1.getImage()).thenReturn(pImage1);
 
                 lenient().when(p2.getBImage()).thenReturn(img2);
-                lenient().when(p2.getName()).thenReturn("P2-" + i);
+                lenient().when(p2.getNameWithoutExtension()).thenReturn("P2-" + i);
                 lenient().when(p2.getImage()).thenReturn(pImage2);
 
                 patterns1.add(p1);

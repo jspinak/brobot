@@ -10,7 +10,7 @@ import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig.VerbosityLevel;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
-// Removed old logging import: 
+// Removed old logging import:
 /**
  * Provides concise logging for find operations with intelligent deduplication and summarization to
  * reduce repetitive log output.
@@ -85,7 +85,7 @@ public class ConciseFindLogger {
         VerbosityLevel level = getVerbosity();
         if (level == VerbosityLevel.QUIET) return;
 
-        String patternKey = pattern.getName();
+        String patternKey = pattern.getNameWithoutExtension();
         sessionPatterns.add(patternKey);
         totalSearchAttempts++;
 
@@ -101,7 +101,7 @@ public class ConciseFindLogger {
             msg.append(
                     String.format(
                             "[SEARCH] %s (%dx%d) sim=%.2f",
-                            pattern.getName(), pattern.w(), pattern.h(), similarity));
+                            pattern.getNameWithoutExtension(), pattern.w(), pattern.h(), similarity));
 
             // Add scene size only if not using a constrained region
             boolean hasConstrainedRegion = false;
@@ -146,7 +146,7 @@ public class ConciseFindLogger {
             return;
         }
 
-        PatternSearchInfo info = loggedPatterns.get(pattern.getName());
+        PatternSearchInfo info = loggedPatterns.get(pattern.getNameWithoutExtension());
 
         if (matchCount == 0) {
             if (foundAtLowerThreshold && info != null && !info.hasLoggedLowerThreshold) {
@@ -220,7 +220,7 @@ public class ConciseFindLogger {
         boolean hasLoggedLowerThreshold;
 
         PatternSearchInfo(Pattern pattern, Scene scene, double similarity) {
-            this.patternName = pattern.getName();
+            this.patternName = pattern.getNameWithoutExtension();
             this.patternWidth = pattern.w();
             this.patternHeight = pattern.h();
             this.sceneWidth = scene.getPattern().w();

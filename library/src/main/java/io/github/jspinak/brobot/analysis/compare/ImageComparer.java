@@ -127,7 +127,7 @@ public class ImageComparer {
         if (sortedPatterns.isEmpty()) return new EmptyMatch();
         Pattern biggestPattern = sortedPatterns.get(1);
         Pattern smallestPattern = sortedPatterns.get(0);
-        String name = smallestPattern.getName() + " found in " + biggestPattern.getName();
+        String name = smallestPattern.getNameWithoutExtension() + " found in " + biggestPattern.getNameWithoutExtension();
         Scene scene = new Scene(new Pattern(biggestPattern.getImage()));
         List<Match> matchList = mockOrLive.findAll(smallestPattern, scene);
         if (matchList.isEmpty()) {

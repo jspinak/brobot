@@ -81,7 +81,7 @@ public class SerializationTestExample extends BrobotTestBase {
         StateImage stateImage = new StateImage();
         stateImage.setName("TestImage");
         Pattern pattern = new Pattern();
-        pattern.setName("test-pattern");
+        pattern.setNameWithoutExtension("test-pattern");
         pattern.setImgpath("images/test.png");
         stateImage.getPatterns().add(pattern);
         collection.getStateImages().add(stateImage);
@@ -186,7 +186,7 @@ public class SerializationTestExample extends BrobotTestBase {
         // Add patterns without actual image data
         for (int i = 0; i < 3; i++) {
             Pattern pattern = new Pattern();
-            pattern.setName("pattern-" + i);
+            pattern.setNameWithoutExtension("pattern-" + i);
             pattern.setImgpath("images/pattern-" + i + ".png");
             pattern.setFixed(i == 0); // First pattern is fixed
             pattern.setDynamic(i == 2); // Last pattern is dynamic

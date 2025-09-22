@@ -86,7 +86,7 @@ public class Scene {
                 + "id="
                 + id
                 + ", pattern="
-                + (pattern != null ? pattern.getName() : "null")
+                + (pattern != null ? pattern.getNameWithoutExtension() : "null")
                 + '}';
     }
 }

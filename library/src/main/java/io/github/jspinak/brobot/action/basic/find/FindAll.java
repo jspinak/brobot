@@ -118,7 +118,7 @@ public class FindAll {
         for (Pattern pattern : stateImage.getPatterns()) {
             log.info(
                     "[FINDALL_DEBUG]   Processing pattern {} (index {})",
-                    pattern.getName(),
+                    pattern.getNameWithoutExtension(),
                     patternIndex);
             log.info(
                     "[FINDALL_DEBUG]     - Pattern has search regions: {}",
@@ -147,7 +147,7 @@ public class FindAll {
             log.info(
                     "[FINDALL_DEBUG]     - Found {} matches for pattern {}",
                     matchList.size(),
-                    pattern.getName());
+                    pattern.getNameWithoutExtension());
 
             addMatchObjects(
                     allMatchObjects,
@@ -199,7 +199,7 @@ public class FindAll {
         for (Pattern pattern : stateImage.getPatterns()) {
             log.info(
                     "[FINDALL_DEBUG]   Processing pattern {} (index {})",
-                    pattern.getName(),
+                    pattern.getNameWithoutExtension(),
                     patternIndex);
             log.info(
                     "[FINDALL_DEBUG]     - Pattern has search regions: {}",
@@ -218,7 +218,7 @@ public class FindAll {
             log.info(
                     "[FINDALL_DEBUG]     - Found {} matches for pattern {}",
                     matchList.size(),
-                    pattern.getName());
+                    pattern.getNameWithoutExtension());
 
             addMatchObjects(
                     allMatchObjects,
@@ -267,9 +267,9 @@ public class FindAll {
             Location offset) {
         int i = 0;
         String name =
-                pattern.getName() != null && !pattern.getName().isEmpty()
-                        ? pattern.getName()
-                        : scene.getPattern().getName();
+                pattern.getNameWithoutExtension() != null && !pattern.getNameWithoutExtension().isEmpty()
+                        ? pattern.getNameWithoutExtension()
+                        : scene.getPattern().getNameWithoutExtension();
         List<Region> regionsAllowedForMatch = selectRegions.getRegions(actionConfig, stateImage);
 
         // Compact debug logging - only log if there are matches or in verbose mode
@@ -384,9 +384,9 @@ public class FindAll {
             Location offset) {
         int i = 0;
         String name =
-                pattern.getName() != null && !pattern.getName().isEmpty()
-                        ? pattern.getName()
-                        : scene.getPattern().getName();
+                pattern.getNameWithoutExtension() != null && !pattern.getNameWithoutExtension().isEmpty()
+                        ? pattern.getNameWithoutExtension()
+                        : scene.getPattern().getNameWithoutExtension();
         List<Match> validMatches = new ArrayList<>();
         boolean isVerbose =
                 verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE;

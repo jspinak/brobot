@@ -338,7 +338,7 @@ class ObjectCollectionJsonParserTest {
 
         Pattern deserializedPattern = deserializedImage.getPatterns().getFirst();
         // The pattern name should be preserved
-        assertEquals("topLeft", deserializedPattern.getName());
+        assertEquals("topLeft", deserializedPattern.getNameWithoutExtension());
         // The imgpath might not be preserved during serialization/deserialization
         // but the pattern should still have the correct search regions
         assertEquals(2, deserializedPattern.getSearchRegions().getRegions().size());

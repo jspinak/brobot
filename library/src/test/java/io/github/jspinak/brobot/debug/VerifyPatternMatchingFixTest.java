@@ -68,7 +68,7 @@ public class VerifyPatternMatchingFixTest extends BrobotTestBase {
             // Create Brobot Pattern - this should now use direct file path loading
             System.out.println("\n1. CREATING BROBOT PATTERN");
             Pattern brobotPattern = new Pattern(patternPath);
-            System.out.println("   ✓ Pattern created: " + brobotPattern.getName());
+            System.out.println("   ✓ Pattern created: " + brobotPattern.getNameWithoutExtension());
             System.out.println("   ✓ Image path set: " + brobotPattern.getImgpath());
 
             // Get SikuliX pattern - should use direct file path internally

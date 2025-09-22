@@ -139,7 +139,7 @@ public class PatternMatchingDiagnostics {
         for (int i = 0; i < stateImage.getPatterns().size(); i++) {
             Pattern pattern = stateImage.getPatterns().get(i);
             log.info("");
-            log.info("Pattern[{}]: {}", i, pattern.getName());
+            log.info("Pattern[{}]: {}", i, pattern.getNameWithoutExtension());
             if (pattern.getImage() != null && pattern.getImage().getBufferedImage() != null) {
                 BufferedImage img = pattern.getImage().getBufferedImage();
                 log.info("  - Dimensions: {}x{} pixels", img.getWidth(), img.getHeight());
@@ -158,10 +158,10 @@ public class PatternMatchingDiagnostics {
 
     private PatternTestResult testPattern(Pattern pattern, int index, StateImage stateImage) {
         log.info("");
-        log.info("=== TESTING PATTERN[{}]: {} ===", index, pattern.getName());
+        log.info("=== TESTING PATTERN[{}]: {} ===", index, pattern.getNameWithoutExtension());
 
         PatternTestResult result = new PatternTestResult();
-        result.patternName = pattern.getName();
+        result.patternName = pattern.getNameWithoutExtension();
         result.patternIndex = index;
 
         if (pattern.getImage() == null || pattern.getImage().getBufferedImage() == null) {
