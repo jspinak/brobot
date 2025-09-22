@@ -95,7 +95,7 @@ import lombok.Data;
  * }</pre>
  *
  * @since 1.0
- * @see ActionResult
+ * @see io.github.jspinak.brobot.action.ActionResult
  * @see Region
  * @see Location
  * @see Pattern

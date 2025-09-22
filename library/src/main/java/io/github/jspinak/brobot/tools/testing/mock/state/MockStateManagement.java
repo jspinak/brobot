@@ -26,7 +26,7 @@ import io.github.jspinak.brobot.tools.testing.mock.MockStatus;
  *
  * <ul>
  *   <li>Simulating unavailable states (probability = 0)
- *   <li>Testing probabilistic state detection (0 < probability < 100)
+ *   <li>Testing probabilistic state detection (0 &lt; probability &lt; 100)
  *   <li>Ensuring states are always found (probability = 100)
  *   <li>Creating failure scenarios for error handling tests
  *   <li>Testing state transition logic under various conditions

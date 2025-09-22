@@ -24,17 +24,16 @@ import io.github.jspinak.brobot.model.state.StateRegion;
  * Provides a facade of commonly used action patterns for GUI automation using the modern
  * ActionConfig API.
  *
- * <p>This class is the ActionConfig-based replacement for {@link ActionFacade}, encapsulating
- * frequent action combinations into simple, reusable methods. It reduces code duplication and
- * improves readability across automation scripts by providing a higher-level abstraction over the
- * core {@link Action} API with type-safe configuration objects.
+ * <p>This class encapsulates frequent action combinations into simple, reusable methods.
+ * It reduces code duplication and improves readability across automation scripts by providing
+ * a higher-level abstraction over the core {@link Action} API with type-safe configuration objects.
  *
- * <p>Key improvements over ActionFacade:
+ * <p>Key features:
  *
  * <ul>
  *   <li>Type-safe configuration with specific Options classes
  *   <li>Better IDE support with auto-completion
- *   <li>Clearer API with method names that match intent
+ *   <li>Clear API with method names that match intent
  *   <li>Support for action chaining through fluent API
  * </ul>
  *
@@ -58,8 +57,7 @@ import io.github.jspinak.brobot.model.state.StateRegion;
  * }</pre>
  *
  * @see Action
- * @see ActionConfig
- * @see StateService
+ * @see io.github.jspinak.brobot.action.ActionConfig
  * @since 2.0
  */
 @Component

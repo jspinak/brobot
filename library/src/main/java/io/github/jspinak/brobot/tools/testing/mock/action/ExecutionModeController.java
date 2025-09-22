@@ -43,7 +43,7 @@ import lombok.extern.slf4j.Slf4j;
  * <p>ExecutionModeController acts as a facade that:
  *
  * <ol>
- *   <li>Checks the current execution mode via {@link ExecutionMode}
+ *   <li>Checks the current execution mode via {@link io.github.jspinak.brobot.config.environment.ExecutionMode}
  *   <li>Routes operations to appropriate mock or live implementations
  *   <li>Maintains consistent APIs across both execution modes
  *   <li>Handles mode-specific error conditions gracefully
@@ -79,7 +79,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  * <h2>Configuration:</h2>
  *
- * <p>The execution mode is determined by {@link ExecutionMode#isMock()} and can be configured
+ * <p>The execution mode is determined by {@link io.github.jspinak.brobot.config.environment.ExecutionMode#isMock()} and can be configured
  * through:
  *
  * <ul>
@@ -99,7 +99,7 @@ import lombok.extern.slf4j.Slf4j;
  *   <li><b>CI/CD:</b> Mock tests can run in headless environments
  * </ul>
  *
- * @see ExecutionMode
+ * @see io.github.jspinak.brobot.config.environment.ExecutionMode
  * @see MockFind
  * @see MockText
  * @see MockTime
