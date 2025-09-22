@@ -33,41 +33,14 @@ jobs:
       # Create a test environment setup specifically for GitHub Actions
       - name: Setup test environment
         run: |
-          # Create directories for runner module if they don't exist
-          mkdir -p runner/src/main/resources
-
-          # Backup original application.properties if it exists
-          if [ -f "runner/src/main/resources/application.properties" ]; then
-            cp runner/src/main/resources/application.properties runner/src/main/resources/application.properties.backup
-          fi
-
-          # Create application-ci.properties with direct values
-          cat > runner/src/main/resources/application-ci.properties << EOF
-          spring.application.name=brobot-runner
-          server.port=8080
-          spring.datasource.url=jdbc:h2:mem:testdb
-          spring.datasource.username=sa
-          spring.datasource.password=
-          spring.datasource.driver-class-name=org.h2.Driver
-          spring.jpa.hibernate.ddl-auto=create-drop
-          EOF
-
-          # Create .env file
-          cat > .env << EOF
-          SERVER_PORT=8080
-          DATABASE_URL=jdbc:h2:mem:testdb
-          DATABASE_USERNAME=sa
-          DATABASE_PASSWORD=
-          EOF
-
-          # Set up directories
+          # Set up directories for tests
           mkdir -p /home/runner/work/brobot/brobot/screenshots
           mkdir -p /home/runner/work/brobot/brobot/images
           mkdir -p /home/runner/work/brobot/brobot/history
 
-          # Copy image files to screenshots directory
-          find /home/runner/work/brobot/brobot -type f -name "*.png" -exec cp {} /home/runner/work/brobot/brobot/screenshots/ \;
-          find /home/runner/work/brobot/brobot -type f -name "*.jpg" -exec cp {} /home/runner/work/brobot/brobot/screenshots/ \;
+          # Copy image files to screenshots directory for mock tests
+          find /home/runner/work/brobot/brobot -type f -name "*.png" -exec cp {} /home/runner/work/brobot/brobot/screenshots/ \; 2>/dev/null || true
+          find /home/runner/work/brobot/brobot -type f -name "*.jpg" -exec cp {} /home/runner/work/brobot/brobot/screenshots/ \; 2>/dev/null || true
 
           # Ensure permissions are correct
           chmod -R 755 /home/runner/work/brobot/brobot/screenshots
@@ -79,7 +52,7 @@ jobs:
       # Build with non-modular approach
       - name: Build with Gradle (excluding library-features)
         run: |
-          ./gradlew :library:build :runner:build -x test \
+          ./gradlew :library:build -x test \
             -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
         env:
           SPRING_PROFILES_ACTIVE: "ci"
@@ -112,88 +85,4 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-  package-desktop:
-    runs-on: ubuntu-latest
-    needs: build-and-test
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: "21"
-          distribution: "temurin"
-          cache: "gradle"
-
-      - name: Make Gradle wrapper executable
-        run: chmod +x ./gradlew
-
-      # Disable module-info files in this job too
-      - name: Disable module-info files
-        run: |
-          find . -name "module-info.java" -type f -exec mv {} {}.disabled \;
-          echo "Module info files have been disabled"
-
-      - name: Install JPackage dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y fakeroot binutils rpm
-
-      # Build with non-modular approach
-      - name: Build minimal runner package
-        run: |
-          ./gradlew :library:build :runner:build -x test \
-            -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
-        env:
-          SPRING_PROFILES_ACTIVE: "ci"
-          _JAVA_OPTIONS: "-Djava.awt.headless=true"
-
-      # Update the runner build.gradle to use non-modular approach
-      - name: Modify runner configuration for non-modular build
-        run: |
-          # Back up original file
-          cp runner/build.gradle runner/build.gradle.backup
-
-          # Remove mainModule property
-          sed -i 's/mainModule = .*/\/\/ mainModule removed for non-modular build/' runner/build.gradle
-
-          # Remove module-related JVM args
-          sed -i '/--add-modules/d' runner/build.gradle
-          sed -i '/--add-reads/d' runner/build.gradle
-          sed -i '/--add-opens/d' runner/build.gradle
-
-          echo "Runner build.gradle modified for non-modular build"
-
-      # Use standard distribution tasks from application plugin
-      - name: Create distribution package
-        run: |
-          ./gradlew :runner:bootJar
-          ./gradlew :runner:distZip --info
-        env:
-          _JAVA_OPTIONS: "-Djava.awt.headless=true"
-
-      - name: Package application
-        if: success()
-        run: |
-          # Fall back to a simple packaging approach
-          mkdir -p runner/build/jpackage-app
-          cp runner/build/libs/*.jar runner/build/jpackage-app/
-          cp -r runner/src/main/resources runner/build/jpackage-app/resources || true
-          echo "java -jar runner-*.jar" > runner/build/jpackage-app/start.sh
-          chmod +x runner/build/jpackage-app/start.sh
-          cd runner/build
-          zip -r brobot-runner-package.zip jpackage-app
-
-          echo "Created simple application package"
-
-      - name: Upload packaged application
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: brobot-desktop-app
-          path: |
-            runner/build/distributions/*.zip
-            runner/build/brobot-runner-package.zip
-          if-no-files-found: warn
+  # Runner packaging job removed - runner module no longer in project
