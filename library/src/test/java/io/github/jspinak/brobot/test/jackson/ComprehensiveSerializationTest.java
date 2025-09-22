@@ -12,7 +12,6 @@ import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import io.github.jspinak.brobot.action.ActionConfig;
-import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.model.action.ActionRecord;
@@ -172,8 +171,7 @@ public class ComprehensiveSerializationTest extends BrobotTestBase {
         // so it won't be serialized. This test should test ActionConfig directly instead.
 
         // Create a PatternFindOptions (subtype of ActionConfig)
-        PatternFindOptions config = new PatternFindOptions.Builder()
-                .build();
+        PatternFindOptions config = new PatternFindOptions.Builder().build();
 
         // Serialize the ActionConfig directly
         String json = testObjectMapper.writeValueAsString(config);

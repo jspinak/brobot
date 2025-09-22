@@ -107,8 +107,8 @@ public class Location {
     }
 
     /**
-     * Creates a Location within a Region based on a SikuliX Location's coordinates.
-     * The position within the region is calculated as a percentage.
+     * Creates a Location within a Region based on a SikuliX Location's coordinates. The position
+     * within the region is calculated as a percentage.
      *
      * @param region the containing Region
      * @param sikuliLocation the absolute coordinates to convert to relative position
@@ -132,8 +132,8 @@ public class Location {
     }
 
     /**
-     * Sets the position within the region based on absolute coordinates.
-     * Converts the absolute coordinates to percentage positions within the region.
+     * Sets the position within the region based on absolute coordinates. Converts the absolute
+     * coordinates to percentage positions within the region.
      *
      * @param newX the absolute x-coordinate
      * @param newY the absolute y-coordinate
@@ -424,8 +424,8 @@ public class Location {
     }
 
     /**
-     * Gets the opposite location across the center of the region.
-     * For example, if this location is in the top-left, returns bottom-right.
+     * Gets the opposite location across the center of the region. For example, if this location is
+     * in the top-left, returns bottom-right.
      *
      * @return the opposite Location
      */
@@ -465,8 +465,8 @@ public class Location {
     }
 
     /**
-     * Sets this location's position based on an angle and distance from its region's center.
-     * Uses polar coordinates to position the location.
+     * Sets this location's position based on an angle and distance from its region's center. Uses
+     * polar coordinates to position the location.
      *
      * @param angle the angle in radians from the center
      * @param distance the distance in pixels from the center
@@ -489,9 +489,7 @@ public class Location {
         LocationUtils.add(this, loc);
     }
 
-    /**
-     * Prints this location's details to the console for debugging.
-     */
+    /** Prints this location's details to the console for debugging. */
     public void print() {
         LocationUtils.print(this);
     }
@@ -506,9 +504,7 @@ public class Location {
         return LocationUtils.toString(this);
     }
 
-    /**
-     * Builder class for constructing Location instances with a fluent API.
-     */
+    /** Builder class for constructing Location instances with a fluent API. */
     public static class Builder {
         private String name;
         private int x = -1;

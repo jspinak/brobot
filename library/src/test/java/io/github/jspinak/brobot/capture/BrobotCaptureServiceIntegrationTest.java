@@ -104,10 +104,10 @@ class BrobotCaptureServiceIntegrationTest extends BrobotTestBase {
         assertTrue(capture.getHeight() > 0);
 
         // Log the actual dimensions for debugging
-        System.out.println(String.format(
-                "Region capture: requested %dx%d, got %dx%d",
-                region.width, region.height,
-                capture.getWidth(), capture.getHeight()));
+        System.out.println(
+                String.format(
+                        "Region capture: requested %dx%d, got %dx%d",
+                        region.width, region.height, capture.getWidth(), capture.getHeight()));
     }
 
     @Test

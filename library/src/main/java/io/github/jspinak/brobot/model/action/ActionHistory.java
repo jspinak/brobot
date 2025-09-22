@@ -210,8 +210,6 @@ public class ActionHistory {
         return getRandomSnapshot(getSimilarSnapshots(actionConfig));
     }
 
-    // Removed deprecated getRandomSnapshot(ActionConfig) method
-
     /**
      * Gets similar snapshots for the specified ActionConfig.
      *
@@ -221,8 +219,6 @@ public class ActionHistory {
     public List<ActionRecord> getSimilarSnapshots(ActionConfig actionConfig) {
         return getSnapshotOfFindType(actionConfig, getFindOrVanishSnapshots(actionConfig));
     }
-
-    // Removed deprecated getSimilarSnapshots(ActionConfig) method
 
     private List<ActionRecord> getFindOrVanishSnapshots(ActionConfig actionConfig) {
         ActionType action = getActionTypeFromConfig(actionConfig);
@@ -235,8 +231,6 @@ public class ActionHistory {
                 .filter(snapshot -> getSnapshotActionType(snapshot) != ActionType.VANISH)
                 .collect(toList());
     }
-
-    // Removed deprecated getFindOrVanishSnapshots(ActionConfig) method
 
     private List<ActionRecord> getSnapshotOfFindType(
             ActionConfig actionConfig, List<ActionRecord> snapshots) {
@@ -270,8 +264,6 @@ public class ActionHistory {
         return sameTypeSnapshots;
     }
 
-    // Removed deprecated getSnapshotOfFindType(ActionConfig, List<ActionRecord>) method
-
     public Optional<ActionRecord> getRandomSnapshot(List<ActionRecord> snapshots) {
         if (snapshots.isEmpty()) return Optional.empty();
         return Optional.of(snapshots.get(new Random().nextInt(snapshots.size())));
@@ -288,8 +280,6 @@ public class ActionHistory {
         if (randomSnapshot.isEmpty()) return matchList;
         return randomSnapshot.get().getMatchList();
     }
-
-    // Removed deprecated getRandomMatchList(ActionConfig) method
 
     public String getRandomText() {
         // Use modern ActionConfig instead of deprecated ActionType

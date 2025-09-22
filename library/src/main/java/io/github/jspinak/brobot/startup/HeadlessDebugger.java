@@ -21,8 +21,8 @@ public class HeadlessDebugger
     }
 
     /**
-     * Initializes the headless debugger during Spring context initialization.
-     * Logs headless state and attempts to access GraphicsEnvironment internal fields.
+     * Initializes the headless debugger during Spring context initialization. Logs headless state
+     * and attempts to access GraphicsEnvironment internal fields.
      *
      * @param applicationContext the Spring application context being initialized
      */
@@ -46,8 +46,8 @@ public class HeadlessDebugger
     }
 
     /**
-     * Logs the current headless state from various sources.
-     * Captures both the system property and GraphicsEnvironment state.
+     * Logs the current headless state from various sources. Captures both the system property and
+     * GraphicsEnvironment state.
      *
      * @param location descriptive name of where this check is being performed
      */

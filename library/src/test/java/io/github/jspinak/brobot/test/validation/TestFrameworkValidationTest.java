@@ -1,27 +1,28 @@
 package io.github.jspinak.brobot.test.validation;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
 import io.github.jspinak.brobot.logging.LogCategory;
 import io.github.jspinak.brobot.logging.LogLevel;
+import io.github.jspinak.brobot.logging.events.ActionEvent;
+import io.github.jspinak.brobot.logging.events.TransitionEvent;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.test.builders.TestEventBuilders;
 import io.github.jspinak.brobot.test.mock.LogCapture;
 import io.github.jspinak.brobot.test.mock.MockLoggerFactory;
-import io.github.jspinak.brobot.logging.events.ActionEvent;
-import io.github.jspinak.brobot.logging.events.TransitionEvent;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Nested;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 /**
- * Validation tests for the test framework itself.
- * Ensures all test utilities and mocks work correctly.
+ * Validation tests for the test framework itself. Ensures all test utilities and mocks work
+ * correctly.
  *
- * Note: Disabled due to complex mock setup issues with LogBuilder.
- * These tests validate the test framework itself, not core library functionality.
+ * <p>Note: Disabled due to complex mock setup issues with LogBuilder. These tests validate the test
+ * framework itself, not core library functionality.
  */
 @Disabled("Mock setup issues with LogBuilder - test framework validation not critical")
 @DisplayName("Test Framework Validation")
@@ -38,10 +39,7 @@ public class TestFrameworkValidationTest extends BrobotTestBase {
             assertNotNull(mockLogBuilder, "Mock log builder should be initialized");
 
             // Verify fluent API works
-            mockLogger.builder(LogCategory.ACTIONS)
-                .level(LogLevel.INFO)
-                .message("test")
-                .log();
+            mockLogger.builder(LogCategory.ACTIONS).level(LogLevel.INFO).message("test").log();
 
             verify(mockLogBuilder).log();
         }
@@ -66,10 +64,11 @@ public class TestFrameworkValidationTest extends BrobotTestBase {
         @Test
         @DisplayName("Should verify logged with category and level")
         void testVerifyLogged() {
-            mockLogger.builder(LogCategory.ACTIONS)
-                .level(LogLevel.INFO)
-                .message("test action")
-                .log();
+            mockLogger
+                    .builder(LogCategory.ACTIONS)
+                    .level(LogLevel.INFO)
+                    .message("test action")
+                    .log();
 
             verifyLogged(LogCategory.ACTIONS, LogLevel.INFO);
         }
@@ -77,10 +76,11 @@ public class TestFrameworkValidationTest extends BrobotTestBase {
         @Test
         @DisplayName("Should verify action logged")
         void testVerifyActionLogged() {
-            mockLogger.builder(LogCategory.ACTIONS)
-                .level(LogLevel.INFO)
-                .action("CLICK", "button")
-                .log();
+            mockLogger
+                    .builder(LogCategory.ACTIONS)
+                    .level(LogLevel.INFO)
+                    .action("CLICK", "button")
+                    .log();
 
             verifyActionLogged("CLICK", "button");
         }
@@ -90,10 +90,7 @@ public class TestFrameworkValidationTest extends BrobotTestBase {
         void testVerifyErrorLogged() {
             RuntimeException error = new RuntimeException("test error");
 
-            mockLogger.builder(LogCategory.SYSTEM)
-                .level(LogLevel.ERROR)
-                .error(error)
-                .log();
+            mockLogger.builder(LogCategory.SYSTEM).level(LogLevel.ERROR).error(error).log();
 
             verifyErrorLogged(error);
         }
@@ -103,10 +100,7 @@ public class TestFrameworkValidationTest extends BrobotTestBase {
         void testVerifyMessageLogged() {
             String message = "Test message";
 
-            mockLogger.builder(LogCategory.LIFECYCLE)
-                .level(LogLevel.INFO)
-                .message(message)
-                .log();
+            mockLogger.builder(LogCategory.LIFECYCLE).level(LogLevel.INFO).message(message).log();
 
             verifyMessageLogged(message);
         }
@@ -115,9 +109,7 @@ public class TestFrameworkValidationTest extends BrobotTestBase {
         @DisplayName("Should reset logger mocks")
         void testResetLoggerMocks() {
             // Log something first
-            mockLogger.builder(LogCategory.ACTIONS)
-                .level(LogLevel.INFO)
-                .log();
+            mockLogger.builder(LogCategory.ACTIONS).level(LogLevel.INFO).log();
 
             verify(mockLogBuilder, times(1)).log();
 
@@ -125,11 +117,10 @@ public class TestFrameworkValidationTest extends BrobotTestBase {
             resetLoggerMocks();
 
             // Log again - this should work with the reconfigured mock
-            mockLogger.builder(LogCategory.ACTIONS)
-                .level(LogLevel.INFO)
-                .log();
+            mockLogger.builder(LogCategory.ACTIONS).level(LogLevel.INFO).log();
 
-            // Verify the mock was called after reset (should be 1 time, not counting pre-reset calls)
+            // Verify the mock was called after reset (should be 1 time, not counting pre-reset
+            // calls)
             verify(mockLogBuilder, times(1)).log();
         }
     }
@@ -161,12 +152,13 @@ public class TestFrameworkValidationTest extends BrobotTestBase {
             assertNotNull(logger);
 
             // Silent logger should work but do nothing
-            assertDoesNotThrow(() -> {
-                logger.builder(LogCategory.ACTIONS)
-                    .level(LogLevel.INFO)
-                    .message("silent")
-                    .log();
-            });
+            assertDoesNotThrow(
+                    () -> {
+                        logger.builder(LogCategory.ACTIONS)
+                                .level(LogLevel.INFO)
+                                .message("silent")
+                                .log();
+                    });
         }
 
         @Test
@@ -177,10 +169,7 @@ public class TestFrameworkValidationTest extends BrobotTestBase {
             assertNotNull(logger);
 
             // Log something
-            logger.builder(LogCategory.ACTIONS)
-                .level(LogLevel.INFO)
-                .message("captured")
-                .log();
+            logger.builder(LogCategory.ACTIONS).level(LogLevel.INFO).message("captured").log();
 
             // Verify it was captured
             assertEquals(1, capture.getLogCount());
@@ -200,20 +189,20 @@ public class TestFrameworkValidationTest extends BrobotTestBase {
 
             // Log multiple entries
             logger.builder(LogCategory.ACTIONS)
-                .level(LogLevel.INFO)
-                .message("action log")
-                .action("CLICK", "button")
-                .log();
+                    .level(LogLevel.INFO)
+                    .message("action log")
+                    .action("CLICK", "button")
+                    .log();
 
             logger.builder(LogCategory.TRANSITIONS)
-                .level(LogLevel.DEBUG)
-                .message("transition log")
-                .log();
+                    .level(LogLevel.DEBUG)
+                    .message("transition log")
+                    .log();
 
             logger.builder(LogCategory.SYSTEM)
-                .level(LogLevel.ERROR)
-                .error(new RuntimeException("error"))
-                .log();
+                    .level(LogLevel.ERROR)
+                    .error(new RuntimeException("error"))
+                    .log();
 
             // Verify captures
             assertEquals(3, capture.getLogCount());
@@ -235,15 +224,9 @@ public class TestFrameworkValidationTest extends BrobotTestBase {
             LogCapture capture = new LogCapture();
             var logger = capture.createCapturingLogger();
 
-            logger.builder(LogCategory.ACTIONS)
-                .level(LogLevel.INFO)
-                .message("first")
-                .log();
+            logger.builder(LogCategory.ACTIONS).level(LogLevel.INFO).message("first").log();
 
-            logger.builder(LogCategory.ACTIONS)
-                .level(LogLevel.INFO)
-                .message("last")
-                .log();
+            logger.builder(LogCategory.ACTIONS).level(LogLevel.INFO).message("last").log();
 
             var lastLog = capture.getLastLog();
             assertNotNull(lastLog);
@@ -256,10 +239,7 @@ public class TestFrameworkValidationTest extends BrobotTestBase {
             LogCapture capture = new LogCapture();
             var logger = capture.createCapturingLogger();
 
-            logger.builder(LogCategory.ACTIONS)
-                .level(LogLevel.INFO)
-                .message("test")
-                .log();
+            logger.builder(LogCategory.ACTIONS).level(LogLevel.INFO).message("test").log();
 
             assertEquals(1, capture.getLogCount());
 
@@ -349,18 +329,18 @@ public class TestFrameworkValidationTest extends BrobotTestBase {
 
             // Log the events
             logger.builder(LogCategory.ACTIONS)
-                .level(LogLevel.INFO)
-                .action(actionEvent.getActionType(), actionEvent.getTarget())
-                .correlationId(actionEvent.getCorrelationId())
-                .log();
+                    .level(LogLevel.INFO)
+                    .action(actionEvent.getActionType(), actionEvent.getTarget())
+                    .correlationId(actionEvent.getCorrelationId())
+                    .log();
 
             logger.builder(LogCategory.TRANSITIONS)
-                .level(LogLevel.INFO)
-                .message("Transition from %s to %s",
-                    transitionEvent.getFromState(),
-                    transitionEvent.getToState())
-                .correlationId(transitionEvent.getCorrelationId())
-                .log();
+                    .level(LogLevel.INFO)
+                    .message(
+                            "Transition from %s to %s",
+                            transitionEvent.getFromState(), transitionEvent.getToState())
+                    .correlationId(transitionEvent.getCorrelationId())
+                    .log();
 
             // Verify the logs
             assertEquals(2, capture.getLogCount());

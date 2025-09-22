@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.util.string;
 
 import org.springframework.stereotype.Component;
 
-// Removed old logging import: 
 /**
  * Calculates string similarity using the Levenshtein distance algorithm.
  *
@@ -210,6 +209,5 @@ public class StringSimilarity {
      * @param s the first string to compare
      * @param t the second string to compare
      */
-    public static void printSimilarity(String s, String t) {
-    }
+    public static void printSimilarity(String s, String t) {}
 }

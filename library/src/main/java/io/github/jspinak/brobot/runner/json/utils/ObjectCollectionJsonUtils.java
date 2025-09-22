@@ -115,7 +115,11 @@ public class ObjectCollectionJsonUtils {
         map.put(
                 "scenes",
                 collection.getScenes().stream()
-                        .map(scene -> Map.of("filename", scene.getPattern().getNameWithoutExtension()))
+                        .map(
+                                scene ->
+                                        Map.of(
+                                                "filename",
+                                                scene.getPattern().getNameWithoutExtension()))
                         .toList());
 
         return map;

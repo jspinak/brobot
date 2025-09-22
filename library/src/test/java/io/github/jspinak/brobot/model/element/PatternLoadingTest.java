@@ -297,9 +297,11 @@ public class PatternLoadingTest extends BrobotTestBase {
             ImageIO.write(testImage, "png", imageFile.toFile());
 
             try (MockedStatic<BufferedImageUtilities> utilsMock =
-                            mockStatic(BufferedImageUtilities.class)) {
+                    mockStatic(BufferedImageUtilities.class)) {
                 // Mock that SmartImageLoader is available so loading isn't deferred
-                utilsMock.when(BufferedImageUtilities::isSmartImageLoaderAvailable).thenReturn(true);
+                utilsMock
+                        .when(BufferedImageUtilities::isSmartImageLoaderAvailable)
+                        .thenReturn(true);
                 utilsMock
                         .when(() -> BufferedImageUtilities.getBuffImgFromFile("test-image.png"))
                         .thenReturn(testImage);

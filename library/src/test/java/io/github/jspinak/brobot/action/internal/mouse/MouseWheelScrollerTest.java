@@ -15,7 +15,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.MockitoAnnotations;
 
@@ -47,7 +46,7 @@ public class MouseWheelScrollerTest extends BrobotTestBase {
         mockBrobotProperties = mock(BrobotProperties.class);
         mockCore = mock(BrobotProperties.Core.class);
         when(mockBrobotProperties.getCore()).thenReturn(mockCore);
-        when(mockCore.isMock()).thenReturn(true);  // Default to mock mode
+        when(mockCore.isMock()).thenReturn(true); // Default to mock mode
 
         mouseWheelScroller = new MouseWheelScroller(mockBrobotProperties, null);
     }
@@ -94,7 +93,9 @@ public class MouseWheelScrollerTest extends BrobotTestBase {
 
             assertTrue(result);
             String output = outputStream.toString();
-            assertTrue(output.contains("Mock: scroll UP 3 times."), "Expected output to contain 'Mock: scroll UP 3 times.' but got: " + output);
+            assertTrue(
+                    output.contains("Mock: scroll UP 3 times."),
+                    "Expected output to contain 'Mock: scroll UP 3 times.' but got: " + output);
         }
 
         @Test
@@ -114,7 +115,9 @@ public class MouseWheelScrollerTest extends BrobotTestBase {
 
             assertTrue(result);
             String output = outputStream.toString();
-            assertTrue(output.contains("Mock: scroll DOWN 5 times."), "Expected output to contain 'Mock: scroll DOWN 5 times.' but got: " + output);
+            assertTrue(
+                    output.contains("Mock: scroll DOWN 5 times."),
+                    "Expected output to contain 'Mock: scroll DOWN 5 times.' but got: " + output);
         }
 
         @ParameterizedTest
@@ -135,7 +138,12 @@ public class MouseWheelScrollerTest extends BrobotTestBase {
 
             assertTrue(result);
             String output = outputStream.toString();
-            assertTrue(output.contains("Mock: scroll UP " + steps + " times."), "Expected output to contain 'Mock: scroll UP " + steps + " times.' but got: " + output);
+            assertTrue(
+                    output.contains("Mock: scroll UP " + steps + " times."),
+                    "Expected output to contain 'Mock: scroll UP "
+                            + steps
+                            + " times.' but got: "
+                            + output);
         }
 
         @ParameterizedTest
@@ -153,7 +161,12 @@ public class MouseWheelScrollerTest extends BrobotTestBase {
 
             assertTrue(result);
             String output = outputStream.toString();
-            assertTrue(output.contains("Mock: scroll " + direction), "Expected output to contain 'Mock: scroll " + direction + "' but got: " + output);
+            assertTrue(
+                    output.contains("Mock: scroll " + direction),
+                    "Expected output to contain 'Mock: scroll "
+                            + direction
+                            + "' but got: "
+                            + output);
         }
     }
 
@@ -188,7 +201,10 @@ public class MouseWheelScrollerTest extends BrobotTestBase {
                 boolean result = mouseWheelScroller.scroll(options);
 
                 assertTrue(result);
-                assertEquals(1, mockedRegion.constructed().size(), "Should create one Region in real mode");
+                assertEquals(
+                        1,
+                        mockedRegion.constructed().size(),
+                        "Should create one Region in real mode");
                 Region region = mockedRegion.constructed().get(0);
                 verify(region.sikuli()).wheel(-1, 2); // UP = -1
             }
@@ -215,7 +231,10 @@ public class MouseWheelScrollerTest extends BrobotTestBase {
                 boolean result = mouseWheelScroller.scroll(options);
 
                 assertTrue(result);
-                assertEquals(1, mockedRegion.constructed().size(), "Should create one Region in real mode");
+                assertEquals(
+                        1,
+                        mockedRegion.constructed().size(),
+                        "Should create one Region in real mode");
                 Region region = mockedRegion.constructed().get(0);
                 verify(region.sikuli()).wheel(1, 4); // DOWN = 1
             }
@@ -244,7 +263,10 @@ public class MouseWheelScrollerTest extends BrobotTestBase {
                 boolean result = mouseWheelScroller.scroll(options);
 
                 assertTrue(result);
-                assertEquals(1, mockedRegion.constructed().size(), "Should create one Region in real mode");
+                assertEquals(
+                        1,
+                        mockedRegion.constructed().size(),
+                        "Should create one Region in real mode");
                 Region region = mockedRegion.constructed().get(0);
                 verify(region.sikuli()).wheel(expectedSikuliDirection, steps);
             }

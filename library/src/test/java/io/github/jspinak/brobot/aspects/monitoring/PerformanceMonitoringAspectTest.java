@@ -19,7 +19,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -307,7 +306,8 @@ public class PerformanceMonitoringAspectTest extends BrobotTestBase {
         aspect.generatePerformanceReport();
 
         // Assert - Should detect degradation
-        verify(logBuilder, atLeastOnce()).action("PERFORMANCE_DEGRADATION", "TestClass.degradingMethod()");
+        verify(logBuilder, atLeastOnce())
+                .action("PERFORMANCE_DEGRADATION", "TestClass.degradingMethod()");
     }
 
     @Test

@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.model.element.Pattern;
-// Removed old logging import: 
+
 /**
  * OpenCV-based implementation of the PatternMatcher interface.
  *

@@ -57,6 +57,7 @@ import lombok.Data;
  * successful find operation. Multiple Match objects are aggregated in an ActionResult.
  *
  * <h3>Example Usage:</h3>
+ *
  * <pre>{@code
  * // Find and process matches
  * StateImage buttonImage = new StateImage.Builder()
@@ -138,9 +139,7 @@ public class Match {
     // the old MatchObject had `private double duration;`
     private int timesActedOn = 0;
 
-    /**
-     * Default constructor for Jackson JSON mapping.
-     */
+    /** Default constructor for Jackson JSON mapping. */
     public Match() {} // for mapping
 
     /**
@@ -242,16 +241,14 @@ public class Match {
         return getRegion().w() * getRegion().h();
     }
 
-    /**
-     * Increments the counter tracking how many times this match has been acted upon.
-     */
+    /** Increments the counter tracking how many times this match has been acted upon. */
     public void incrementTimesActedOn() {
         timesActedOn++;
     }
 
     /**
-     * Extracts and sets the match image from the associated scene using the match region.
-     * If no scene is set, this method does nothing.
+     * Extracts and sets the match image from the associated scene using the match region. If no
+     * scene is set, this method does nothing.
      */
     public void setImageWithScene() {
         if (scene == null) return;
@@ -337,8 +334,8 @@ public class Match {
     }
 
     /**
-     * Builder class for constructing Match instances with a fluent API.
-     * Supports creating matches from SikuliX matches, regions, images, and metadata.
+     * Builder class for constructing Match instances with a fluent API. Supports creating matches
+     * from SikuliX matches, regions, images, and metadata.
      */
     public static class Builder {
         private org.sikuli.script.Match sikuliMatch;
@@ -625,8 +622,8 @@ public class Match {
         }
 
         /**
-         * Internal method to set the appropriate image on the match.
-         * Priority: explicit image > bufferedImage > scene extraction.
+         * Internal method to set the appropriate image on the match. Priority: explicit image >
+         * bufferedImage > scene extraction.
          *
          * @param match the match to set the image on
          */

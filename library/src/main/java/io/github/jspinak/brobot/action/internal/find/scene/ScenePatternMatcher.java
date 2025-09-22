@@ -20,7 +20,7 @@ import io.github.jspinak.brobot.model.element.Image;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.match.Match;
-// Removed old logging import:
+
 /**
  * Performs image pattern matching and OCR text detection within captured scenes.
  *
@@ -152,17 +152,14 @@ public class ScenePatternMatcher {
 
         if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
             if (!searchRegions.isEmpty()) {
-                for (io.github.jspinak.brobot.model.element.Region region : searchRegions) {
-                }
+                for (io.github.jspinak.brobot.model.element.Region region : searchRegions) {}
             } else {
             }
         }
 
-        if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
-        }
+        if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {}
         f.findAll(sikuliPattern);
-        if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
-        }
+        if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {}
 
         // Process results
         List<Match> matchList = new ArrayList<>();
@@ -279,8 +276,7 @@ public class ScenePatternMatcher {
                 // Match was within search region but didn't meet similarity threshold
                 rejectedMatches++;
                 if (verbosityConfig != null
-                        && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
-                }
+                        && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {}
             }
             // else: Match was filtered out by region filter (already logged above)
 
@@ -323,13 +319,11 @@ public class ScenePatternMatcher {
                         Match m = topMatches.get(i);
                     }
 
-                    if (acceptedMatches > MAX_VERBOSE_MATCHES) {
-                    }
+                    if (acceptedMatches > MAX_VERBOSE_MATCHES) {}
                 }
             } else if (matchCount > 1 || rejectedMatches > 0) {
                 // Normal mode - simpler summary
-                if (acceptedMatches > 0) {
-                }
+                if (acceptedMatches > 0) {}
             }
         }
 
@@ -356,7 +350,8 @@ public class ScenePatternMatcher {
         // Handle failed matches
         if (matchList.isEmpty()) {
             // Save debug images if enabled and pattern name contains "prompt"
-            if (pattern.getNameWithoutExtension() != null && pattern.getNameWithoutExtension().toLowerCase().contains("prompt")) {
+            if (pattern.getNameWithoutExtension() != null
+                    && pattern.getNameWithoutExtension().toLowerCase().contains("prompt")) {
                 saveDebugImages(pattern, scene);
             }
         }
@@ -398,7 +393,10 @@ public class ScenePatternMatcher {
             return wordMatches;
         }
         List<org.sikuli.script.Match> sikuliMatches = OCR.readWords(scene.getPattern().getBImage());
-        String baseName = scene.getPattern().getNameWithoutExtension() == null ? "" : scene.getPattern().getNameWithoutExtension();
+        String baseName =
+                scene.getPattern().getNameWithoutExtension() == null
+                        ? ""
+                        : scene.getPattern().getNameWithoutExtension();
         int i = 0;
         for (org.sikuli.script.Match match : sikuliMatches) {
             Match m =
@@ -428,7 +426,8 @@ public class ScenePatternMatcher {
 
             // Use DiagnosticLogger for image analysis
             if (diagnosticLogger != null) {
-                diagnosticLogger.logImageAnalysis(patternImg, sceneImg, pattern.getNameWithoutExtension());
+                diagnosticLogger.logImageAnalysis(
+                        patternImg, sceneImg, pattern.getNameWithoutExtension());
             } else {
                 if (patternImg != null) {
                     analyzeImageContent(patternImg, "Pattern");
@@ -442,7 +441,8 @@ public class ScenePatternMatcher {
             }
 
             // Save pattern image
-            String patternFile = debugDir + "/pattern_" + pattern.getNameWithoutExtension() + ".png";
+            String patternFile =
+                    debugDir + "/pattern_" + pattern.getNameWithoutExtension() + ".png";
             if (patternImg != null) {
                 ImageIO.write(patternImg, "png", new File(patternFile));
             }
@@ -481,7 +481,10 @@ public class ScenePatternMatcher {
             // Log similarity analysis using DiagnosticLogger
             if (diagnosticLogger != null) {
                 diagnosticLogger.logSimilarityAnalysis(
-                        pattern.getNameWithoutExtension(), testThresholds, foundThreshold, foundScore);
+                        pattern.getNameWithoutExtension(),
+                        testThresholds,
+                        foundThreshold,
+                        foundScore);
             } else {
                 if (foundThreshold != null && foundScore != null) {
                 } else {

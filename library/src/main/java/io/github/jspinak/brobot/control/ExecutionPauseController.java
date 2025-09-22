@@ -70,7 +70,10 @@ public class ExecutionPauseController {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             if (logger != null) {
-                logger.log(LogCategory.EXECUTION, LogLevel.WARN, "Pause interrupted: " + e.getMessage());
+                logger.log(
+                        LogCategory.EXECUTION,
+                        LogLevel.WARN,
+                        "Pause interrupted: " + e.getMessage());
             }
         } finally {
             isPaused.set(false);
@@ -87,7 +90,8 @@ public class ExecutionPauseController {
         }
 
         if (logger != null) {
-            logger.log(LogCategory.EXECUTION, LogLevel.INFO, "Paused at breakpoint: " + pausePointId);
+            logger.log(
+                    LogCategory.EXECUTION, LogLevel.INFO, "Paused at breakpoint: " + pausePointId);
         }
         waitForResume();
 
@@ -109,7 +113,8 @@ public class ExecutionPauseController {
     public void removePausePoint(String pausePointId) {
         pausePoints.remove(pausePointId);
         if (logger != null) {
-            logger.log(LogCategory.EXECUTION, LogLevel.INFO, "Pause point removed: " + pausePointId);
+            logger.log(
+                    LogCategory.EXECUTION, LogLevel.INFO, "Pause point removed: " + pausePointId);
         }
     }
 
@@ -132,7 +137,10 @@ public class ExecutionPauseController {
     public void setPauseEnabled(boolean enabled) {
         pauseEnabled.set(enabled);
         if (logger != null) {
-            logger.log(LogCategory.EXECUTION, LogLevel.INFO, "Pause functionality " + (enabled ? "enabled" : "disabled"));
+            logger.log(
+                    LogCategory.EXECUTION,
+                    LogLevel.INFO,
+                    "Pause functionality " + (enabled ? "enabled" : "disabled"));
         }
 
         if (!enabled && isPaused.get()) {
@@ -144,7 +152,10 @@ public class ExecutionPauseController {
     public void setGlobalPause(boolean enabled) {
         globalPause.set(enabled);
         if (logger != null) {
-            logger.log(LogCategory.EXECUTION, LogLevel.INFO, "Global pause " + (enabled ? "enabled" : "disabled"));
+            logger.log(
+                    LogCategory.EXECUTION,
+                    LogLevel.INFO,
+                    "Global pause " + (enabled ? "enabled" : "disabled"));
         }
     }
 
@@ -168,7 +179,10 @@ public class ExecutionPauseController {
         if (executionController != null) {
             // Add methods to ExecutionController if needed
             if (logger != null) {
-                logger.log(LogCategory.EXECUTION, LogLevel.INFO, "ExecutionPauseController integrated with ExecutionController");
+                logger.log(
+                        LogCategory.EXECUTION,
+                        LogLevel.INFO,
+                        "ExecutionPauseController integrated with ExecutionController");
             }
         }
     }

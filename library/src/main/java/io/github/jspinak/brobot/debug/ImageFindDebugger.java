@@ -98,8 +98,8 @@ public class ImageFindDebugger {
     }
 
     /**
-     * Initializes a new debugging session with unique ID and directory structure.
-     * Creates directories for screenshots, patterns, comparisons, visual output, and logs.
+     * Initializes a new debugging session with unique ID and directory structure. Creates
+     * directories for screenshots, patterns, comparisons, visual output, and logs.
      */
     public void initializeSession() {
         if (config == null || !config.isEnabled()) return;
@@ -122,8 +122,8 @@ public class ImageFindDebugger {
     }
 
     /**
-     * Debugs a find operation with comprehensive output.
-     * Captures pattern info, search parameters, results, and optionally saves debug files.
+     * Debugs a find operation with comprehensive output. Captures pattern info, search parameters,
+     * results, and optionally saves debug files.
      *
      * @param objectCollection the collection of objects being searched for
      * @param options the find options with search parameters

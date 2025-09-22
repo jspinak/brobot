@@ -11,7 +11,6 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.logging.BrobotLogger;
 import io.github.jspinak.brobot.logging.LogCategory;
 import io.github.jspinak.brobot.logging.LogLevel;
-import io.github.jspinak.brobot.logging.events.ActionEvent;
 
 /**
  * Implements conditional logging based on action results. Allows for fine-grained control over when
@@ -95,7 +94,10 @@ public class ConditionalLoggingStrategy {
                 result -> !result.getMatchList().isEmpty(),
                 () -> {
                     if (logger != null) {
-                        logger.builder(LogCategory.SYSTEM).level(LogLevel.INFO).message(message).log();
+                        logger.builder(LogCategory.SYSTEM)
+                                .level(LogLevel.INFO)
+                                .message(message)
+                                .log();
                     }
                 },
                 LogLevel.INFO,
@@ -108,7 +110,10 @@ public class ConditionalLoggingStrategy {
                 result -> result.getMatchList().isEmpty(),
                 () -> {
                     if (logger != null) {
-                        logger.builder(LogCategory.SYSTEM).level(LogLevel.WARN).message(message).log();
+                        logger.builder(LogCategory.SYSTEM)
+                                .level(LogLevel.WARN)
+                                .message(message)
+                                .log();
                     }
                 },
                 LogLevel.WARN,
@@ -122,7 +127,10 @@ public class ConditionalLoggingStrategy {
                 result -> result.getMatchList().stream().anyMatch(m -> m.getScore() >= threshold),
                 () -> {
                     if (logger != null) {
-                        logger.builder(LogCategory.SYSTEM).level(LogLevel.INFO).message(message).log();
+                        logger.builder(LogCategory.SYSTEM)
+                                .level(LogLevel.INFO)
+                                .message(message)
+                                .log();
                     }
                 },
                 LogLevel.INFO,
@@ -138,7 +146,10 @@ public class ConditionalLoggingStrategy {
                                 && result.getDuration().toMillis() > milliseconds,
                 () -> {
                     if (logger != null) {
-                        logger.builder(LogCategory.SYSTEM).level(LogLevel.WARN).message(message).log();
+                        logger.builder(LogCategory.SYSTEM)
+                                .level(LogLevel.WARN)
+                                .message(message)
+                                .log();
                     }
                 },
                 LogLevel.WARN,

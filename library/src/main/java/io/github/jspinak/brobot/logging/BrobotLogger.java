@@ -1,22 +1,23 @@
 package io.github.jspinak.brobot.logging;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Map;
+
 import io.github.jspinak.brobot.logging.events.ActionEvent;
 import io.github.jspinak.brobot.logging.events.MatchEvent;
 import io.github.jspinak.brobot.logging.events.PerformanceEvent;
 import io.github.jspinak.brobot.logging.events.TransitionEvent;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Map;
-
 /**
  * Core logger interface for the Brobot framework.
  *
- * <p>Provides structured logging capabilities with support for different event types,
- * categories, and levels. The interface supports both high-level event logging and
- * flexible fluent API for building custom log entries.
+ * <p>Provides structured logging capabilities with support for different event types, categories,
+ * and levels. The interface supports both high-level event logging and flexible fluent API for
+ * building custom log entries.
  *
  * <p>Key features:
+ *
  * <ul>
  *   <li>Structured event logging for actions, transitions, matches, and performance
  *   <li>Category-based filtering and configuration
@@ -26,6 +27,7 @@ import java.util.Map;
  * </ul>
  *
  * <p>Example usage:
+ *
  * <pre>{@code
  * // Event-based logging
  * logger.logAction(ActionEvent.success("CLICK", "submitButton", Duration.ofMillis(25)));
@@ -111,8 +113,8 @@ public interface BrobotLogger {
     /**
      * Fluent API for building structured log entries.
      *
-     * <p>Provides a convenient way to build log entries with context, timing,
-     * and metadata. All methods return the builder for chaining.
+     * <p>Provides a convenient way to build log entries with context, timing, and metadata. All
+     * methods return the builder for chaining.
      */
     interface LogBuilder {
 
@@ -167,7 +169,10 @@ public interface BrobotLogger {
          * @param location Location of the action (if applicable)
          * @return this builder for chaining
          */
-        LogBuilder result(boolean success, double similarity, io.github.jspinak.brobot.model.element.Location location);
+        LogBuilder result(
+                boolean success,
+                double similarity,
+                io.github.jspinak.brobot.model.element.Location location);
 
         /**
          * Add timing information.
@@ -233,15 +238,11 @@ public interface BrobotLogger {
          */
         LogBuilder operationCount(long count);
 
-        /**
-         * Finalize and emit the log entry.
-         */
+        /** Finalize and emit the log entry. */
         void log();
     }
 
-    /**
-     * Convenience methods for common logging patterns.
-     */
+    /** Convenience methods for common logging patterns. */
 
     /**
      * Log an info message.

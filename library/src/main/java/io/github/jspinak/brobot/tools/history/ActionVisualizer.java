@@ -16,7 +16,7 @@ import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.tools.history.draw.DrawRect;
 import io.github.jspinak.brobot.tools.history.visual.Visualization;
-// Removed old logging import: 
+
 /**
  * Core drawing utilities for visualizing action results on screenshots.
  *

@@ -2,8 +2,6 @@ package io.github.jspinak.brobot.logging.modular;
 
 import java.time.Duration;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.springframework.stereotype.Component;
 
@@ -11,8 +9,8 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.model.match.Match;
 
 /**
- * Provides standard output for action results.
- * Shows important information without overwhelming detail.
+ * Provides standard output for action results. Shows important information without overwhelming
+ * detail.
  */
 @Component
 public class NormalFormatter implements ActionLogFormatter {
@@ -29,7 +27,10 @@ public class NormalFormatter implements ActionLogFormatter {
 
         // Timestamp (if available)
         if (actionResult.getStartTime() != null) {
-            formatted.append("[").append(actionResult.getStartTime().format(TIME_FORMATTER)).append("] ");
+            formatted
+                    .append("[")
+                    .append(actionResult.getStartTime().format(TIME_FORMATTER))
+                    .append("] ");
         }
 
         // Success/failure symbol
@@ -59,7 +60,8 @@ public class NormalFormatter implements ActionLogFormatter {
         }
 
         // Add failure reason if available and action failed
-        if (!actionResult.isSuccess() && actionResult.getOutputText() != null
+        if (!actionResult.isSuccess()
+                && actionResult.getOutputText() != null
                 && !actionResult.getOutputText().isEmpty()) {
             formatted.append("\n  → ").append(actionResult.getOutputText());
         }
@@ -104,11 +106,14 @@ public class NormalFormatter implements ActionLogFormatter {
     private boolean isSignificantAction(ActionResult actionResult) {
         // Check if it's a significant action type based on config
         if (actionResult.getActionConfig() != null) {
-            String className = actionResult.getActionConfig().getClass().getSimpleName().toLowerCase();
+            String className =
+                    actionResult.getActionConfig().getClass().getSimpleName().toLowerCase();
 
             // Significant actions include clicks, typing, dragging, etc.
-            if (className.contains("click") || className.contains("type") ||
-                className.contains("drag") || className.contains("scroll")) {
+            if (className.contains("click")
+                    || className.contains("type")
+                    || className.contains("drag")
+                    || className.contains("scroll")) {
                 return true;
             }
 

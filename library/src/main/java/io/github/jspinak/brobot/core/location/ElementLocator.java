@@ -31,8 +31,8 @@ import io.github.jspinak.brobot.model.state.StateImage;
 public interface ElementLocator {
 
     /**
-     * Request object for element location operations.
-     * Encapsulates all parameters needed for locating elements, providing a clean and extensible API.
+     * Request object for element location operations. Encapsulates all parameters needed for
+     * locating elements, providing a clean and extensible API.
      */
     class LocateRequest {
         private List<Pattern> patterns;
@@ -150,9 +150,7 @@ public interface ElementLocator {
             this.maxMatches = maxMatches;
         }
 
-        /**
-         * Builder for creating LocateRequest instances.
-         */
+        /** Builder for creating LocateRequest instances. */
         public static class Builder {
             private final LocateRequest request = new LocateRequest();
 
@@ -246,8 +244,8 @@ public interface ElementLocator {
     }
 
     /**
-     * Result of an element location operation.
-     * This lightweight class contains the found element without action-specific semantics.
+     * Result of an element location operation. This lightweight class contains the found element
+     * without action-specific semantics.
      */
     class Element {
         private int x;

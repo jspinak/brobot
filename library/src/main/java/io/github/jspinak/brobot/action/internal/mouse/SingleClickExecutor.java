@@ -1,7 +1,5 @@
 package io.github.jspinak.brobot.action.internal.mouse;
 
-import io.github.jspinak.brobot.util.location.LocationUtils;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -185,9 +183,8 @@ public class SingleClickExecutor {
             double pauseBeforeUp,
             double pauseAfterUp) {
         if (brobotProperties.getCore().isMock()) {
-            if (button != MouseButton.LEFT || numberOfClicks > 1) {
-                
-            }
+            if (button != MouseButton.LEFT || numberOfClicks > 1) {}
+
             return true;
         }
 

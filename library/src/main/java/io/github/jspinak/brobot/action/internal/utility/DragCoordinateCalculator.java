@@ -1,7 +1,5 @@
 package io.github.jspinak.brobot.action.internal.utility;
 
-import io.github.jspinak.brobot.util.location.LocationUtils;
-
 import org.sikuli.basics.Settings;
 import org.sikuli.script.FindFailed;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,7 +115,6 @@ public class DragCoordinateCalculator {
      * @implNote This method modifies global Sikuli settings. While these are set before each drag,
      *     be aware that they affect all Sikuli operations until changed.
      */
-    // Removed duplicate drag(ActionConfig) method - use the one below that properly
     // handles ActionConfig types
 
     /**

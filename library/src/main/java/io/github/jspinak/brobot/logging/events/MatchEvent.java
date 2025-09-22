@@ -1,27 +1,28 @@
 package io.github.jspinak.brobot.logging.events;
 
-import lombok.Builder;
-import lombok.Value;
-
-import io.github.jspinak.brobot.action.basic.find.FindStrategy;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.logging.LogLevel;
-import io.github.jspinak.brobot.model.element.Location;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+import io.github.jspinak.brobot.action.basic.find.FindStrategy;
+import io.github.jspinak.brobot.logging.LogLevel;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.match.Match;
+
+import lombok.Builder;
+import lombok.Value;
+
 /**
  * Event representing pattern matching operations in the Brobot framework.
  *
- * <p>Captures detailed information about find operations including the search
- * strategy used, matches found, timing, and search regions. This is essential
- * for debugging pattern matching issues and performance optimization.
+ * <p>Captures detailed information about find operations including the search strategy used,
+ * matches found, timing, and search regions. This is essential for debugging pattern matching
+ * issues and performance optimization.
  *
  * <p>Example usage:
+ *
  * <pre>{@code
  * MatchEvent event = MatchEvent.builder()
  *     .pattern("submitButton")
@@ -37,15 +38,13 @@ import java.util.Map;
 public class MatchEvent {
 
     /** Timestamp when the match operation was initiated */
-    @Builder.Default
-    Instant timestamp = Instant.now();
+    @Builder.Default Instant timestamp = Instant.now();
 
     /** Pattern description (e.g., image name, text content) */
     String pattern;
 
     /** List of matches found (empty if no matches) */
-    @Builder.Default
-    List<Match> matches = java.util.Collections.emptyList();
+    @Builder.Default List<Match> matches = java.util.Collections.emptyList();
 
     /** Time taken to complete the search */
     Duration searchTime;
@@ -69,8 +68,7 @@ public class MatchEvent {
     String errorMessage;
 
     /** Additional metadata about the search */
-    @Builder.Default
-    Map<String, Object> metadata = java.util.Collections.emptyMap();
+    @Builder.Default Map<String, Object> metadata = java.util.Collections.emptyMap();
 
     /** Correlation ID for tracking related actions */
     String correlationId;
@@ -93,7 +91,8 @@ public class MatchEvent {
      * @param strategy The strategy used
      * @return A new MatchEvent for a successful search
      */
-    public static MatchEvent success(String pattern, List<Match> matches, Duration searchTime, FindStrategy strategy) {
+    public static MatchEvent success(
+            String pattern, List<Match> matches, Duration searchTime, FindStrategy strategy) {
         return MatchEvent.builder()
                 .pattern(pattern)
                 .matches(matches)
@@ -112,7 +111,8 @@ public class MatchEvent {
      * @param errorMessage The error message
      * @return A new MatchEvent for a failed search
      */
-    public static MatchEvent failure(String pattern, Duration searchTime, FindStrategy strategy, String errorMessage) {
+    public static MatchEvent failure(
+            String pattern, Duration searchTime, FindStrategy strategy, String errorMessage) {
         return MatchEvent.builder()
                 .pattern(pattern)
                 .searchTime(searchTime)
@@ -148,10 +148,7 @@ public class MatchEvent {
      * @return The average similarity score, or 0.0 if no matches
      */
     public double getAverageScore() {
-        return matches.stream()
-                .mapToDouble(Match::getScore)
-                .average()
-                .orElse(0.0);
+        return matches.stream().mapToDouble(Match::getScore).average().orElse(0.0);
     }
 
     /**
@@ -164,15 +161,23 @@ public class MatchEvent {
             Match best = getBestMatch();
             double bestScore = best != null ? best.getScore() : 0.0;
 
-            return String.format("MATCH %s → %d matches [%dms] %s best:%.2f avg:%.2f",
-                    pattern, getMatchCount(), searchTime.toMillis(), strategy,
-                    bestScore, getAverageScore());
+            return String.format(
+                    "MATCH %s → %d matches [%dms] %s best:%.2f avg:%.2f",
+                    pattern,
+                    getMatchCount(),
+                    searchTime.toMillis(),
+                    strategy,
+                    bestScore,
+                    getAverageScore());
         } else if (success) {
-            return String.format("MATCH %s → 0 matches [%dms] %s",
-                    pattern, searchTime.toMillis(), strategy);
+            return String.format(
+                    "MATCH %s → 0 matches [%dms] %s", pattern, searchTime.toMillis(), strategy);
         } else {
-            return String.format("MATCH %s → FAILED [%dms] %s%s",
-                    pattern, searchTime.toMillis(), strategy,
+            return String.format(
+                    "MATCH %s → FAILED [%dms] %s%s",
+                    pattern,
+                    searchTime.toMillis(),
+                    strategy,
                     errorMessage != null ? " " + errorMessage : "");
         }
     }
@@ -198,8 +203,8 @@ public class MatchEvent {
     }
 
     /**
-     * Get the log level for this match event.
-     * Successful searches log at DEBUG level, failures at WARN level.
+     * Get the log level for this match event. Successful searches log at DEBUG level, failures at
+     * WARN level.
      *
      * @return The appropriate log level
      */
@@ -218,8 +223,9 @@ public class MatchEvent {
         } else if (success) {
             return String.format("No matches found for %s", pattern);
         } else {
-            return String.format("Search for %s failed%s", pattern,
-                    errorMessage != null ? ": " + errorMessage : "");
+            return String.format(
+                    "Search for %s failed%s",
+                    pattern, errorMessage != null ? ": " + errorMessage : "");
         }
     }
 

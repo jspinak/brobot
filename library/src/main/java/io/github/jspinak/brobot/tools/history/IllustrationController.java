@@ -1,7 +1,5 @@
 package io.github.jspinak.brobot.tools.history;
 
-import io.github.jspinak.brobot.tools.history.ActionVisualizer;
-
 import static io.github.jspinak.brobot.action.ActionType.*;
 
 import java.util.*;
@@ -384,15 +382,12 @@ public class IllustrationController {
      * @param config the ActionConfig to convert
      * @return equivalent ActionConfig
      */
-    // Removed convertToActionConfig - ActionConfig no longer exists
 
     /** Helper method to check if verbose logging is enabled. */
     private boolean isVerbose() {
         return loggingConfig != null
                 && loggingConfig.getVerbosity() == LoggingVerbosityConfig.VerbosityLevel.VERBOSE;
     }
-
-    // Removed duplicate getActionType - using the one above
 
     /** Helper method to extract find strategy from PatternFindOptions. */
     private PatternFindOptions.Strategy getFindStrategy(ActionConfig actionConfig) {

@@ -10,8 +10,6 @@ import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.navigation.service.StateTransitionService;
 import io.github.jspinak.brobot.navigation.transition.StateTransitions;
 import io.github.jspinak.brobot.navigation.transition.StateTransitionsJointTable;
-// Removed old logging imports that no longer exist:
-// // Removed old logging import: // // Removed old logging import: import io.github.jspinak.brobot.tools.logging.MessageFormatter;
 
 /**
  * Implements graph traversal algorithms to find navigation paths between States.
@@ -103,8 +101,7 @@ public class PathFinder {
         this.pathList = new ArrayList<>();
         recursePath(new Path(), targetState);
 
-        if (pathList.isEmpty()) {
-        }
+        if (pathList.isEmpty()) {}
         Paths paths = new Paths(pathList);
         paths.sort();
         paths.print(allStates);

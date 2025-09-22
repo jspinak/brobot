@@ -125,7 +125,6 @@ public class InitializationOrchestrator {
     @Autowired(required = false)
     private AnnotationProcessor annotationProcessor;
 
-
     @Autowired(required = false)
     private EventListenerConfiguration eventListenerConfiguration;
 

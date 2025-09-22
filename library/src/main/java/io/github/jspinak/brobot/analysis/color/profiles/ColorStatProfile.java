@@ -8,7 +8,7 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 
 import io.github.jspinak.brobot.model.analysis.color.ColorInfo;
 import io.github.jspinak.brobot.model.analysis.color.ColorSchema;
-// Removed old logging import: 
+
 import lombok.Getter;
 
 /**
@@ -82,7 +82,6 @@ public class ColorStatProfile {
      * analysis purposes.
      */
     public void print() {
-        for (ColorSchema.ColorValue colorValue : means.keySet()) {
-        }
+        for (ColorSchema.ColorValue colorValue : means.keySet()) {}
     }
 }

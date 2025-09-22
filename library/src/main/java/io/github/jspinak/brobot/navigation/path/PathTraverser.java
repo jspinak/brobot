@@ -9,8 +9,6 @@ import io.github.jspinak.brobot.navigation.service.StateTransitionService;
 import io.github.jspinak.brobot.navigation.transition.StateTransitions;
 import io.github.jspinak.brobot.navigation.transition.TransitionConditionPackager;
 import io.github.jspinak.brobot.navigation.transition.TransitionExecutor;
-// Removed old logging import: // Removed old logging import that no longer exists:
-// import io.github.jspinak.brobot.tools.logging.ansi.AnsiColor;
 
 import lombok.Getter;
 

@@ -12,7 +12,6 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.logging.BrobotLogger;
 import io.github.jspinak.brobot.logging.LogCategory;
 import io.github.jspinak.brobot.logging.LogLevel;
-import io.github.jspinak.brobot.logging.events.ActionEvent;
 
 /**
  * Specialized logging for action chains with step-by-step tracking. Provides detailed logging for

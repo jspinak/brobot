@@ -233,12 +233,12 @@ public class MatrixUtilities {
         int ch = Math.min(channels, mat.channels());
         for (int z = 0; z < ch; z++) {
             if (ch > 1)
-            for (int y = 0; y < Math.min(rows, mat.rows()); y++) {
-                double[] row = getDoubleRow(y, mat);
-                for (double d : row) System.out.printf("%-8.1f", d);
-                // getNonConsecutiveZeros(row).forEach((key, value) -> Report.format("%-2.12s ",
-                // value));
-            }
+                for (int y = 0; y < Math.min(rows, mat.rows()); y++) {
+                    double[] row = getDoubleRow(y, mat);
+                    for (double d : row) System.out.printf("%-8.1f", d);
+                    // getNonConsecutiveZeros(row).forEach((key, value) -> Report.format("%-2.12s ",
+                    // value));
+                }
         }
     }
 
@@ -256,11 +256,9 @@ public class MatrixUtilities {
         return converter1.convert(converter2.convert(mat));
     }
 
-    public static void printDimensions(org.opencv.core.Mat mat) {
-    }
+    public static void printDimensions(org.opencv.core.Mat mat) {}
 
-    public static void printDimensions(Mat mat) {
-    }
+    public static void printDimensions(Mat mat) {}
 
     public static void printDimensions(Mat mat, String title) {
         // Implementation removed with ConsoleReporter

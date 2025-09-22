@@ -18,7 +18,7 @@ import io.github.jspinak.brobot.action.internal.find.pixel.PixelScoreCalculator;
 import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.model.analysis.color.PixelProfile;
 import io.github.jspinak.brobot.model.analysis.color.PixelProfiles;
-// Removed old logging import: 
+
 /**
  * Aggregates pixel scores across multiple color profiles for comprehensive matching.
  *

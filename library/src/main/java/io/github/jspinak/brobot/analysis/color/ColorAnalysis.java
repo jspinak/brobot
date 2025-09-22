@@ -10,7 +10,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 
 import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.model.analysis.color.PixelProfile;
-// Removed old logging import: import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
 
 import lombok.Getter;
 

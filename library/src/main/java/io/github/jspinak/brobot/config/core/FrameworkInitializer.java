@@ -18,7 +18,7 @@ import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.navigation.service.StateTransitionService;
 import io.github.jspinak.brobot.navigation.transition.StateTransitions;
 import io.github.jspinak.brobot.statemanagement.StateIdResolver;
-// Removed old logging import: 
+
 /**
  * Initialization service for the Brobot model-based GUI automation framework.
  *
@@ -191,8 +191,7 @@ public class FrameworkInitializer {
      * @param state The state containing images to preprocess
      */
     private void preProcessImages(State state) {
-        if (!state.getStateImages().isEmpty()) {
-        }
+        if (!state.getStateImages().isEmpty()) {}
         for (StateImage stateImage : state.getStateImages()) {
             stateImage.setIndex(lastImageIndex);
             profileSetBuilder.setMatsAndColorProfiles(stateImage);
@@ -203,8 +202,7 @@ public class FrameworkInitializer {
                 setKMeansProfiles.setProfiles(stateImage);
             }
         }
-        if (!state.getStateImages().isEmpty()) {
-        }
+        if (!state.getStateImages().isEmpty()) {}
     }
 
     /**

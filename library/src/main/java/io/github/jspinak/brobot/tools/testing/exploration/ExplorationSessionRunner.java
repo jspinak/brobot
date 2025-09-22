@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.tools.testing.exploration;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -16,7 +15,6 @@ import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.navigation.transition.StateNavigator;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
-// Removed old logging import: import io.github.jspinak.brobot.tools.logging.ActionLogger;
 import io.github.jspinak.brobot.util.image.capture.ScreenshotCapture;
 
 /**
@@ -104,8 +102,6 @@ public class ExplorationSessionRunner {
     private final StateNavigator stateTransitionsManagement;
     private final StateMemory stateMemory;
     private final StateService allStatesInProjectService;
-    // Removed old logging dependency that no longer exists:
-    // private final ActionLogger actionLogger;
     private final ScreenshotCapture captureScreenshot;
     private final Action action;
 
@@ -113,15 +109,11 @@ public class ExplorationSessionRunner {
             StateNavigator stateTransitionsManagement,
             StateMemory stateMemory,
             StateService allStatesInProjectService,
-            // Removed missing parameter:
-            // ActionLogger actionLogger,
             ScreenshotCapture captureScreenshot,
             Action action) {
         this.stateTransitionsManagement = stateTransitionsManagement;
         this.stateMemory = stateMemory;
         this.allStatesInProjectService = allStatesInProjectService;
-        // Removed initialization of missing class:
-        // this.actionLogger = actionLogger;
         this.captureScreenshot = captureScreenshot;
         this.action = action;
     }
@@ -163,13 +155,10 @@ public class ExplorationSessionRunner {
         Instant startTime = Instant.now();
 
         try {
-            // actionLogger.startVideoRecording(sessionId);
 
             logger.info("Test started at {}", startTime);
-            // actionLogger.logObservation(sessionId, "TEST_START", "Test started", "INFO");
 
             // Log initial state
-            // actionLogger.logObservation(
             //         sessionId,
             //         "INITIAL_STATE",
             //         "Initial states: " + stateMemory.getActiveStates(),
@@ -187,7 +176,6 @@ public class ExplorationSessionRunner {
             long transitionDuration = Duration.between(transitionStart, Instant.now()).toMillis();
 
             // Log the transition
-            // actionLogger.logStateTransition(
             //         sessionId,
             //         null,
             //         allStatesInProjectService.findSetById(stateMemory.getActiveStates()),
@@ -199,12 +187,11 @@ public class ExplorationSessionRunner {
             if (!transitionSuccess) {
                 String screenshotPath =
                         captureScreenshot.captureScreenshot("transition_failed_" + sessionId);
-                // actionLogger.logError(
-                //         sessionId, "Failed to transition to state: " + destination, screenshotPath);
+                //         sessionId, "Failed to transition to state: " + destination,
+                // screenshotPath);
             }
 
             // Log final state
-            // actionLogger.logObservation(
             //         sessionId,
             //         "FINAL_STATE",
             //         "Final states: " + stateMemory.getActiveStates(),
@@ -213,16 +200,13 @@ public class ExplorationSessionRunner {
             // Log performance metrics
             Instant endTime = Instant.now();
             long totalDuration = Duration.between(startTime, endTime).toMillis();
-            // actionLogger.logPerformanceMetrics(sessionId, transitionDuration, 0, totalDuration);
 
         } catch (Exception e) {
             logger.error("Error during test execution", e);
             String screenshotPath = captureScreenshot.captureScreenshot("error_" + sessionId);
-            // actionLogger.logError(
             //         sessionId, "Error during test execution: " + e.getMessage(), screenshotPath);
         } finally {
             try {
-                // actionLogger.stopVideoRecording(sessionId);
             } catch (Exception e) {
                 logger.error("Error stopping video recording", e);
             }
@@ -230,7 +214,6 @@ public class ExplorationSessionRunner {
             Instant endTime = Instant.now();
             long totalDuration = Duration.between(startTime, endTime).toMillis();
             logger.info("Test ended at {}. Total duration: {} ms", endTime, totalDuration);
-            // actionLogger.logObservation(
             //         sessionId,
             //         "TEST_END",
             //         "Test ended. Total duration: " + totalDuration + " ms",
@@ -262,11 +245,9 @@ public class ExplorationSessionRunner {
     private void logAction(
             String sessionId, ActionConfig actionConfig, ObjectCollection... objectCollections) {
         ActionResult results = performAction(actionConfig, objectCollections);
-        // actionLogger.logAction(sessionId, results, objectCollections[0]);
         if (!results.isSuccess()) {
             String screenshotPath =
                     captureScreenshot.captureScreenshot("action_failed_" + sessionId);
-            // actionLogger.logError(
             //         sessionId,
             //         "Action failed: " + actionConfig.getClass().getSimpleName(),
             //         screenshotPath);

@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.core.services.SikuliScreenCapture;
-// Removed old logging import: 
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -120,8 +120,7 @@ public class DirectRobotCapture {
         }
 
         if (directCapture.getWidth() != sikuliCapture.getWidth()
-                || directCapture.getHeight() != sikuliCapture.getHeight()) {
-        }
+                || directCapture.getHeight() != sikuliCapture.getHeight()) {}
 
         // Sample pixel comparison
         int sampleX =
@@ -133,8 +132,7 @@ public class DirectRobotCapture {
         int directRGB = directCapture.getRGB(sampleX, sampleY);
         int sikuliRGB = sikuliCapture.getRGB(sampleX, sampleY);
 
-        if (directRGB != sikuliRGB) {
-        }
+        if (directRGB != sikuliRGB) {}
     }
 
     private String getImageType(int type) {

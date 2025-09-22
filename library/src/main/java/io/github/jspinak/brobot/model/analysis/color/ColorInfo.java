@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-// Removed old logging import: 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -100,8 +99,7 @@ public class ColorInfo implements Comparable<ColorInfo> {
      * <p>Side effects: Outputs to the Report logging system
      */
     public void print() {
-        if (colorValue != null && stats != null && !stats.isEmpty()) {
-        }
+        if (colorValue != null && stats != null && !stats.isEmpty()) {}
     }
 
     /**

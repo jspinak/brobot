@@ -266,7 +266,8 @@ public class SceneTest extends BrobotTestBase {
 
                             // Scene can be used to provide mock screenshots
                             assertNotNull(mockScene.getPattern());
-                            // In mock mode, images are not null when created directly from BufferedImage
+                            // In mock mode, images are not null when created directly from
+                            // BufferedImage
                             // (only null when loaded from missing files)
                             assertNotNull(mockScene.getPattern().getImage());
                         }),

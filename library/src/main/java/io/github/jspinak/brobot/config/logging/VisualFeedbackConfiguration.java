@@ -1,10 +1,8 @@
 package io.github.jspinak.brobot.config.logging;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-// Removed old logging import that no longer exists:
 // import io.github.jspinak.brobot.tools.logging.visual.VisualFeedbackConfig;
 
 /**
@@ -13,8 +11,6 @@ import org.springframework.context.annotation.Configuration;
  * <p>This configuration enables visual feedback features when the property
  * 'brobot.highlight.enabled' is set to true. It creates and configures the necessary beans for
  * highlighting found matches and search regions.
- *
- // * Note: VisualFeedbackConfig and HighlightManager classes have been removed // HighlightManager removed
  */
 @Configuration
 @ConditionalOnProperty(

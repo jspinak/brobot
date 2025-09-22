@@ -13,10 +13,8 @@ import org.bytedeco.opencv.opencv_core.*;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.model.element.Pattern;
-// Removed old logging import: 
-import lombok.extern.slf4j.Slf4j;
-import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
 
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Extensions of OpenCV operations to handle 3-channel (color) images.

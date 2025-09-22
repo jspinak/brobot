@@ -12,7 +12,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import io.github.jspinak.brobot.analysis.compare.ContourExtractor;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.tools.history.visual.Visualization;
-// Removed old logging import: 
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -172,6 +172,5 @@ public class SceneAnalyses {
     }
 
     /** Prints a summary of the collection to the report. */
-    public void print() {
-    }
+    public void print() {}
 }

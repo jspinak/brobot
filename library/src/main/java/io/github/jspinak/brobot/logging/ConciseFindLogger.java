@@ -10,7 +10,7 @@ import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig.VerbosityLevel;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
-// Removed old logging import:
+
 /**
  * Provides concise logging for find operations with intelligent deduplication and summarization to
  * reduce repetitive log output.
@@ -44,8 +44,7 @@ public class ConciseFindLogger {
             totalSearchAttempts = 0;
             sessionPatterns.clear();
 
-            if (isVerbose()) {
-            }
+            if (isVerbose()) {}
         }
     }
 
@@ -101,7 +100,10 @@ public class ConciseFindLogger {
             msg.append(
                     String.format(
                             "[SEARCH] %s (%dx%d) sim=%.2f",
-                            pattern.getNameWithoutExtension(), pattern.w(), pattern.h(), similarity));
+                            pattern.getNameWithoutExtension(),
+                            pattern.w(),
+                            pattern.h(),
+                            similarity));
 
             // Add scene size only if not using a constrained region
             boolean hasConstrainedRegion = false;
@@ -187,7 +189,6 @@ public class ConciseFindLogger {
         if (info != null) {
             info.hasLoggedAnalysis = true;
         }
-
     }
 
     // Helper methods

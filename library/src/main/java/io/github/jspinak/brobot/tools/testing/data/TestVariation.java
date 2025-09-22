@@ -114,7 +114,6 @@ public class TestVariation {
     /** Builder class for creating test variations with fluent interface. */
     public static class Builder {
         private final String name;
-        // Commented out due to Lombok builder compilation issues
         private final TestVariation.TestVariationBuilder variationBuilder;
 
         public Builder(String name) {

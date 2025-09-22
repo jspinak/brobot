@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Region;
-// Removed old logging import: 
+
 /**
  * Handles keyboard key release operations in both real and mock modes.
  *

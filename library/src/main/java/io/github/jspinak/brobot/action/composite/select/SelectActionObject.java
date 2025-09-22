@@ -188,8 +188,6 @@ public class SelectActionObject {
             return this;
         }
 
-        // Removed deprecated setSwipeActionConfig method
-
         /**
          * Sets the swipe configuration using ActionConfig (modern API).
          *
@@ -206,8 +204,6 @@ public class SelectActionObject {
             return this;
         }
 
-        // Removed deprecated setFindActionConfig method
-
         /**
          * Sets the find configuration using ActionConfig (modern API).
          *
@@ -218,8 +214,6 @@ public class SelectActionObject {
             this.findActionConfig = findActionConfig;
             return this;
         }
-
-        // Removed deprecated setClickActionConfig method
 
         /**
          * Sets the click configuration using ActionConfig (modern API).
@@ -237,8 +231,6 @@ public class SelectActionObject {
             this.confirmationObjectCollection = confirmationObjectCollection;
             return this;
         }
-
-        // Removed deprecated setConfirmActionConfig method
 
         /**
          * Sets the confirmation configuration using ActionConfig (modern API).

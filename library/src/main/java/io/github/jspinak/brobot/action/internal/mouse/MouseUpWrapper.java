@@ -1,13 +1,11 @@
 package io.github.jspinak.brobot.action.internal.mouse;
 
-import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
-
 import org.sikuli.script.Mouse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.config.core.BrobotProperties;
-// Removed old logging import: import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
+import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 
 /**
  * Provides mouse button release functionality with timing control and mock support.
@@ -68,7 +66,7 @@ public class MouseUpWrapper {
     public boolean press(double pauseBefore, double pauseAfter, ClickType.Type type) {
         if (brobotProperties.getCore().isMock()) {
             // this could be expanded if object clicks are given mock actions
-            
+
             return true;
         }
         timeWrapper.wait(pauseBefore);

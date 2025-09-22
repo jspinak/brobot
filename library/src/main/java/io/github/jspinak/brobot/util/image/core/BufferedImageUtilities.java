@@ -28,10 +28,9 @@ import io.github.jspinak.brobot.capture.UnifiedCaptureService;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.config.core.SmartImageLoader;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
-import io.github.jspinak.brobot.util.file.FilenameUtils;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.monitor.MonitorManager;
-// Removed old logging import: import io.github.jspinak.brobot.util.file.FilenameUtils;
+import io.github.jspinak.brobot.util.file.FilenameUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -179,8 +178,7 @@ public class BufferedImageUtilities {
                 SmartImageLoader.LoadResult result = instance.smartImageLoader.loadImage(path);
                 if (result.isSuccess()) {
                     BufferedImage img = instance.smartImageLoader.getFromCache(path);
-                    if (shouldLog) {
-                    }
+                    if (shouldLog) {}
                     return img;
                 }
             } catch (Exception e) {
@@ -208,8 +206,7 @@ public class BufferedImageUtilities {
                     return bi;
                 }
             } catch (Exception e) {
-                if (shouldLog) {
-                }
+                if (shouldLog) {}
             }
         }
 
@@ -246,8 +243,7 @@ public class BufferedImageUtilities {
 
         if ((r < 5 && g < 5 && b < 5)
                 && (topLeft & 0xFFFFFF) < 0x050505
-                && (bottomRight & 0xFFFFFF) < 0x050505) {
-        }
+                && (bottomRight & 0xFFFFFF) < 0x050505) {}
     }
 
     /** Get human-readable image type name */
@@ -399,8 +395,7 @@ public class BufferedImageUtilities {
                 }
 
                 if (blackPixels == sampleCount) {
-                    if (isRunningInWSL()) {
-                    }
+                    if (isRunningInWSL()) {}
                 }
             } else {
             }

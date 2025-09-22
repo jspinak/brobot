@@ -14,7 +14,7 @@ import io.github.jspinak.brobot.model.state.StateEnum;
 import io.github.jspinak.brobot.model.state.special.SpecialStateType;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.navigation.transition.StateTransitions;
-// Removed old logging import: 
+
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -190,7 +190,10 @@ public class StateMemory {
         if (isNullState(activeState)) return;
         // newLine parameter removed - using structured logging instead
         activeStates.add(activeState);
-        log.info("State became active: {} (ID: {})", stateService.getStateName(activeState), activeState);
+        log.info(
+                "State became active: {} (ID: {})",
+                stateService.getStateName(activeState),
+                activeState);
         stateService
                 .getState(activeState)
                 .ifPresent(
@@ -231,7 +234,10 @@ public class StateMemory {
     public void removeInactiveState(Long inactiveState) {
         if (!activeStates.contains(inactiveState)) return;
         activeStates.remove(inactiveState);
-        log.info("State became inactive: {} (ID: {})", stateService.getStateName(inactiveState), inactiveState);
+        log.info(
+                "State became inactive: {} (ID: {})",
+                stateService.getStateName(inactiveState),
+                inactiveState);
         // Note: mockFindStochasticModifier is not modified when removing states
         // It should retain its value for future mock runs
     }

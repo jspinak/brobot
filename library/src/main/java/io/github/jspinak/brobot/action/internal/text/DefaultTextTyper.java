@@ -9,7 +9,7 @@ import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateString;
-// Removed old logging import: 
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -53,8 +53,7 @@ public class DefaultTextTyper implements TextTyper {
         log.debug("Mock typing: '{}' with modifiers: '{}'", text, modifiers);
 
         // Log to console for visibility
-        if (modifiers != null && !modifiers.isEmpty()) {
-        }
+        if (modifiers != null && !modifiers.isEmpty()) {}
 
         // Simulate typing delay
         if (brobotProperties.getMock().getTimeClick() > 0) {

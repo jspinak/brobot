@@ -12,11 +12,10 @@ import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig.VerbosityLevel;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
-// Removed old logging import:
+
 /**
  * Diagnostic logger for pattern matching and image analysis. Provides verbosity-aware logging that
  * available at all verbosity levels.
- *
  *
  * <p>In VERBOSE mode: Adds detailed information through BrobotLogger
  *
@@ -277,8 +276,7 @@ public class DiagnosticLogger {
             highestLowScore = Math.max(highestLowScore, score);
 
             // In VERBOSE mode, show first few low-score matches as examples
-            if (level == VerbosityLevel.VERBOSE && lowScoreMatchCount <= 3) {
-            }
+            if (level == VerbosityLevel.VERBOSE && lowScoreMatchCount <= 3) {}
             return;
         }
 
@@ -293,8 +291,7 @@ public class DiagnosticLogger {
             showDetails = (matchNumber <= maxDetailedMatches && score >= lowScoreThreshold);
         }
 
-        if (showDetails) {
-        }
+        if (showDetails) {}
     }
 
     /** Reset match tracking for a new search */
@@ -307,8 +304,7 @@ public class DiagnosticLogger {
     /** Log summary of low-score matches if any were found */
     public void logLowScoreSummary() {
         if (lowScoreMatchCount > 0) {
-            if (lowScoreMatchCount > 3) {
-            }
+            if (lowScoreMatchCount > 3) {}
         }
     }
 

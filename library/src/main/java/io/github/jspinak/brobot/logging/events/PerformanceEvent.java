@@ -1,22 +1,22 @@
 package io.github.jspinak.brobot.logging.events;
 
-import lombok.Builder;
-import lombok.Value;
-
-import io.github.jspinak.brobot.logging.LogLevel;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 
+import io.github.jspinak.brobot.logging.LogLevel;
+
+import lombok.Builder;
+import lombok.Value;
+
 /**
  * Event representing performance metrics for Brobot operations.
  *
- * <p>Captures detailed timing and resource usage information for operations,
- * including memory usage and timing breakdowns. This is essential for
- * performance monitoring and optimization.
+ * <p>Captures detailed timing and resource usage information for operations, including memory usage
+ * and timing breakdowns. This is essential for performance monitoring and optimization.
  *
  * <p>Example usage:
+ *
  * <pre>{@code
  * PerformanceEvent event = PerformanceEvent.builder()
  *     .operation("findAndClick")
@@ -34,8 +34,7 @@ import java.util.Map;
 public class PerformanceEvent {
 
     /** Timestamp when the operation was initiated */
-    @Builder.Default
-    Instant timestamp = Instant.now();
+    @Builder.Default Instant timestamp = Instant.now();
 
     /** Name/description of the operation */
     String operation;
@@ -47,12 +46,10 @@ public class PerformanceEvent {
     long memoryUsed;
 
     /** Detailed timing breakdown of sub-operations */
-    @Builder.Default
-    Map<String, Duration> breakdown = java.util.Collections.emptyMap();
+    @Builder.Default Map<String, Duration> breakdown = java.util.Collections.emptyMap();
 
     /** Additional performance metadata */
-    @Builder.Default
-    Map<String, Object> metadata = java.util.Collections.emptyMap();
+    @Builder.Default Map<String, Object> metadata = java.util.Collections.emptyMap();
 
     /** Correlation ID for tracking related operations */
     String correlationId;
@@ -107,7 +104,8 @@ public class PerformanceEvent {
      * @param errorMessage The error message
      * @return A new PerformanceEvent for a failed operation
      */
-    public static PerformanceEvent failure(String operation, Duration duration, String errorMessage) {
+    public static PerformanceEvent failure(
+            String operation, Duration duration, String errorMessage) {
         return PerformanceEvent.builder()
                 .operation(operation)
                 .duration(duration)
@@ -167,10 +165,10 @@ public class PerformanceEvent {
 
         long totalMs = duration.toMillis();
         return breakdown.entrySet().stream()
-                .collect(java.util.stream.Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> (entry.getValue().toMillis() * 100.0) / totalMs
-                ));
+                .collect(
+                        java.util.stream.Collectors.toMap(
+                                Map.Entry::getKey,
+                                entry -> (entry.getValue().toMillis() * 100.0) / totalMs));
     }
 
     /**
@@ -203,12 +201,12 @@ public class PerformanceEvent {
             String memInfo = memoryUsed > 0 ? String.format(" mem:%.1fMB", getMemoryUsedMB()) : "";
             String countInfo = operationCount > 0 ? String.format(" ops:%d", operationCount) : "";
 
-            return String.format("PERF %s [%dms]%s%s",
-                    operation, duration.toMillis(), memInfo, countInfo);
+            return String.format(
+                    "PERF %s [%dms]%s%s", operation, duration.toMillis(), memInfo, countInfo);
         } else {
-            return String.format("PERF %s FAILED [%dms]%s",
-                    operation, duration.toMillis(),
-                    errorMessage != null ? " " + errorMessage : "");
+            return String.format(
+                    "PERF %s FAILED [%dms]%s",
+                    operation, duration.toMillis(), errorMessage != null ? " " + errorMessage : "");
         }
     }
 
@@ -224,17 +222,19 @@ public class PerformanceEvent {
 
         Map<String, Double> percentages = getBreakdownPercentages();
         return breakdown.entrySet().stream()
-                .map(entry -> String.format("%s:%dms(%.1f%%)",
-                        entry.getKey(),
-                        entry.getValue().toMillis(),
-                        percentages.getOrDefault(entry.getKey(), 0.0)))
+                .map(
+                        entry ->
+                                String.format(
+                                        "%s:%dms(%.1f%%)",
+                                        entry.getKey(),
+                                        entry.getValue().toMillis(),
+                                        percentages.getOrDefault(entry.getKey(), 0.0)))
                 .collect(java.util.stream.Collectors.joining(", "));
     }
 
     /**
-     * Get the log level for this performance event.
-     * Successful operations log at INFO level, failures at ERROR level,
-     * slow operations log at WARN level.
+     * Get the log level for this performance event. Successful operations log at INFO level,
+     * failures at ERROR level, slow operations log at WARN level.
      *
      * @return The appropriate log level
      */
@@ -262,9 +262,13 @@ public class PerformanceEvent {
             if (operationCount > 0) {
                 perfInfo += String.format(", %d operations", operationCount);
             }
-            return String.format("Operation %s completed in %dms%s", operation, duration.toMillis(), perfInfo);
+            return String.format(
+                    "Operation %s completed in %dms%s", operation, duration.toMillis(), perfInfo);
         } else {
-            return String.format("Operation %s failed after %dms%s", operation, duration.toMillis(),
+            return String.format(
+                    "Operation %s failed after %dms%s",
+                    operation,
+                    duration.toMillis(),
                     errorMessage != null ? ": " + errorMessage : "");
         }
     }

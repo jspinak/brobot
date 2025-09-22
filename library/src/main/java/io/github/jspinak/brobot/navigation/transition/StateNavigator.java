@@ -2,9 +2,9 @@ package io.github.jspinak.brobot.navigation.transition;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,10 +18,6 @@ import io.github.jspinak.brobot.navigation.path.PathTraverser;
 import io.github.jspinak.brobot.navigation.path.Paths;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
-// Removed old logging imports that no longer exist:
-// // Removed old logging import: import io.github.jspinak.brobot.tools.logging.ActionLogger;
-// // Removed old logging import: // // Removed old logging import: import io.github.jspinak.brobot.tools.logging.ExecutionSession;
-// // Removed old logging import: import io.github.jspinak.brobot.tools.logging.MessageFormatter;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -101,9 +97,6 @@ public class StateNavigator {
     private final StateMemory stateMemory;
     private final PathTraverser pathTraverser;
     private final PathManager pathManager;
-    // Removed old logging dependencies that no longer exist:
-    // private final ActionLogger actionLogger;
-    // private final ExecutionSession automationSession;
 
     @Autowired(required = false)
     private AutomationConfig automationConfig;
@@ -115,19 +108,12 @@ public class StateNavigator {
             StateService allStatesInProjectService,
             StateMemory stateMemory,
             PathTraverser pathTraverser,
-            PathManager pathManager
-            // Removed missing parameters:
-            // ActionLogger actionLogger,
-            // ExecutionSession automationSession
-    ) {
+            PathManager pathManager) {
         this.pathFinder = pathFinder;
         this.allStatesInProjectService = allStatesInProjectService;
         this.stateMemory = stateMemory;
         this.pathTraverser = pathTraverser;
         this.pathManager = pathManager;
-        // Removed initialization of missing classes:
-        // this.actionLogger = actionLogger;
-        // this.automationSession = automationSession;
     }
 
     /**
@@ -196,7 +182,6 @@ public class StateNavigator {
      * @return true if target state was successfully reached, false otherwise
      */
     public boolean openState(Long stateToOpen) {
-        String sessionId = "default"; // automationSession.getCurrentSessionId();
         Instant startTime = Instant.now();
         activeStates = stateMemory.getActiveStates();
 
@@ -224,7 +209,6 @@ public class StateNavigator {
                         + stateMemory.getActiveStateNamesAsString()
                         + " to "
                         + targetState.get().getName();
-        // actionLogger.logObservation(
         //         automationSession.getCurrentSessionId(),
         //         "Transition start:",
         //         transitionDescription,
@@ -232,12 +216,13 @@ public class StateNavigator {
 
         // we find the paths once, and then reuse these paths when needed
         Paths paths = pathFinder.getPathsToState(activeStates, stateToOpen);
+        String sessionId =
+                UUID.randomUUID().toString(); // Generate session ID for this navigation attempt
         boolean success = recursePaths(paths, stateToOpen, sessionId);
         Duration duration = Duration.between(startTime, Instant.now());
 
         // Log transition attempt end
         Set<State> activeStatesSet = allStatesInProjectService.findSetById(activeStates);
-        // actionLogger.logStateTransition(
         //         sessionId, // no duration for start log
         //         activeStatesSet,
         //         Collections.singleton(targetState.get()),

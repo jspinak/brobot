@@ -32,14 +32,12 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.aspects.annotations.CollectData;
 import io.github.jspinak.brobot.logging.BrobotLogger;
-import io.github.jspinak.brobot.logging.events.ActionEvent;
+import io.github.jspinak.brobot.logging.LogCategory;
+import io.github.jspinak.brobot.logging.LogLevel;
 import io.github.jspinak.brobot.model.state.StateObject;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import io.github.jspinak.brobot.logging.LogCategory;
-import io.github.jspinak.brobot.logging.LogLevel;
-
 
 /**
  * Aspect that automatically collects datasets for machine learning training.
@@ -456,7 +454,8 @@ public class DatasetCollectionAspect {
 
     /** Log data collection event */
     private void logDataCollection(DataSample sample) {
-        brobotLogger.builder(LogCategory.SYSTEM)
+        brobotLogger
+                .builder(LogCategory.SYSTEM)
                 .level(LogLevel.DEBUG)
                 .action("DATASET_COLLECTED", sample.getCategory())
                 .context("category", sample.getCategory())

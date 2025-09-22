@@ -83,9 +83,9 @@ public class StatePersistenceTest extends BrobotTestBase {
 
             stateMemory.addActiveState(1L);
             // mockFindStochasticModifier verification removed
-stateMemory.removeInactiveState(1L);
+            stateMemory.removeInactiveState(1L);
             // mockFindStochasticModifier verification removed
-}
+        }
 
         @Test
         @DisplayName("Should maintain state history order")

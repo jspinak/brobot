@@ -58,6 +58,7 @@ import lombok.Setter;
  * and cross-platform differences.
  *
  * <h3>Example Usage:</h3>
+ *
  * <pre>{@code
  * // Create StateImage with patterns
  * StateImage submitButton = new StateImage.Builder()
@@ -174,8 +175,8 @@ public class StateImage implements StateObject {
     @JsonIgnore private List<Match> lastMatchesFound = new ArrayList<>();
 
     /**
-     * Returns a unique string identifier for this StateImage.
-     * Combines object type, name, and pattern information.
+     * Returns a unique string identifier for this StateImage. Combines object type, name, and
+     * pattern information.
      *
      * @return concatenated string of type, name, and patterns
      */
@@ -193,8 +194,8 @@ public class StateImage implements StateObject {
     }
 
     /**
-     * Sets the target offset for all patterns in this StateImage.
-     * The offset adjusts the click/action point relative to the pattern match.
+     * Sets the target offset for all patterns in this StateImage. The offset adjusts the
+     * click/action point relative to the pattern match.
      *
      * @param offset the Location offset to apply to all patterns
      */
@@ -213,16 +214,16 @@ public class StateImage implements StateObject {
     }
 
     /**
-     * Increments the counter tracking how many times this StateImage has been acted upon.
-     * Useful for tracking usage frequency and interaction statistics.
+     * Increments the counter tracking how many times this StateImage has been acted upon. Useful
+     * for tracking usage frequency and interaction statistics.
      */
     public void addTimesActedOn() {
         this.timesActedOn++;
     }
 
     /**
-     * Returns the combined match history from all patterns in this StateImage.
-     * Merges individual pattern histories into a single ActionHistory.
+     * Returns the combined match history from all patterns in this StateImage. Merges individual
+     * pattern histories into a single ActionHistory.
      *
      * @return ActionHistory containing all pattern match records
      */
@@ -268,8 +269,8 @@ public class StateImage implements StateObject {
     }
 
     /**
-     * Returns a random snapshot from patterns that match the given action configuration.
-     * Useful for mock mode and testing scenarios.
+     * Returns a random snapshot from patterns that match the given action configuration. Useful for
+     * mock mode and testing scenarios.
      *
      * @param actionConfig configuration to filter similar snapshots
      * @return Optional containing a random ActionRecord, or empty if no snapshots match
@@ -341,8 +342,8 @@ public class StateImage implements StateObject {
     }
 
     /**
-     * Returns all defined fixed regions from patterns in this StateImage.
-     * Fixed regions are specific search areas that don't change.
+     * Returns all defined fixed regions from patterns in this StateImage. Fixed regions are
+     * specific search areas that don't change.
      *
      * @return list of defined fixed regions
      */
@@ -357,8 +358,8 @@ public class StateImage implements StateObject {
     }
 
     /**
-     * Returns the largest defined fixed region among all patterns,
-     * or a new empty Region if none exist.
+     * Returns the largest defined fixed region among all patterns, or a new empty Region if none
+     * exist.
      *
      * @return largest fixed region or new Region instance
      */
@@ -370,8 +371,8 @@ public class StateImage implements StateObject {
     }
 
     /**
-     * Converts this StateImage to an ObjectCollection containing only this image.
-     * Useful for Action methods that require ObjectCollection parameters.
+     * Converts this StateImage to an ObjectCollection containing only this image. Useful for Action
+     * methods that require ObjectCollection parameters.
      *
      * @return ObjectCollection containing this StateImage
      */
@@ -458,8 +459,8 @@ public class StateImage implements StateObject {
     }
 
     /**
-     * Returns a string representation of this StateImage.
-     * Includes name, id, owner state, search regions, and pattern sizes.
+     * Returns a string representation of this StateImage. Includes name, id, owner state, search
+     * regions, and pattern sizes.
      *
      * @return detailed string representation
      */
@@ -528,8 +529,8 @@ public class StateImage implements StateObject {
         }
 
         /**
-         * Sets the complete list of patterns for the StateImage.
-         * If no name has been set, uses the first pattern's name.
+         * Sets the complete list of patterns for the StateImage. If no name has been set, uses the
+         * first pattern's name.
          *
          * @param patterns list of Pattern objects
          * @return this builder for method chaining
@@ -541,8 +542,8 @@ public class StateImage implements StateObject {
         }
 
         /**
-         * Adds a single Pattern to the StateImage being built.
-         * If no name has been set, uses this pattern's name.
+         * Adds a single Pattern to the StateImage being built. If no name has been set, uses this
+         * pattern's name.
          *
          * @param pattern the Pattern to add
          * @return this builder for method chaining
@@ -554,8 +555,8 @@ public class StateImage implements StateObject {
         }
 
         /**
-         * Creates and adds a Pattern from an image filename.
-         * If no name has been set, uses this pattern's name.
+         * Creates and adds a Pattern from an image filename. If no name has been set, uses this
+         * pattern's name.
          *
          * @param filename the image filename to create a pattern from
          * @return this builder for method chaining
@@ -615,8 +616,8 @@ public class StateImage implements StateObject {
         }
 
         /**
-         * Sets a Position to be applied to all patterns in the StateImage.
-         * The Position determines the click/action point relative to the pattern.
+         * Sets a Position to be applied to all patterns in the StateImage. The Position determines
+         * the click/action point relative to the pattern.
          *
          * @param position the Position to apply
          * @return this builder for method chaining
@@ -639,8 +640,8 @@ public class StateImage implements StateObject {
         }
 
         /**
-         * Sets a Location offset to be applied to all patterns.
-         * The offset adjusts the click/action point in pixels.
+         * Sets a Location offset to be applied to all patterns. The offset adjusts the click/action
+         * point in pixels.
          *
          * @param offset the Location offset to apply
          * @return this builder for method chaining
@@ -663,8 +664,8 @@ public class StateImage implements StateObject {
         }
 
         /**
-         * Sets a search region to be applied to all patterns.
-         * Patterns will only be searched within this region.
+         * Sets a search region to be applied to all patterns. Patterns will only be searched within
+         * this region.
          *
          * @param searchRegion the Region to search within
          * @return this builder for method chaining
@@ -675,8 +676,8 @@ public class StateImage implements StateObject {
         }
 
         /**
-         * Sets the search region configuration relative to another object.
-         * Enables dynamic search regions based on other StateImages.
+         * Sets the search region configuration relative to another object. Enables dynamic search
+         * regions based on other StateImages.
          *
          * @param searchRegionOnObject the cross-object search configuration
          * @return this builder for method chaining
@@ -687,8 +688,8 @@ public class StateImage implements StateObject {
         }
 
         /**
-         * Sets whether all patterns should use fixed search regions.
-         * Fixed regions don't adapt based on screen content.
+         * Sets whether all patterns should use fixed search regions. Fixed regions don't adapt
+         * based on screen content.
          *
          * @param fixed true to use fixed regions, false for adaptive
          * @return this builder for method chaining
@@ -750,8 +751,8 @@ public class StateImage implements StateObject {
         }
 
         /**
-         * Returns a string representation of this builder's current state.
-         * Shows the StateImage name and pattern names.
+         * Returns a string representation of this builder's current state. Shows the StateImage
+         * name and pattern names.
          *
          * @return string representation of the builder
          */
@@ -761,26 +762,29 @@ public class StateImage implements StateObject {
             stringBuilder.append("StateImage\n");
             stringBuilder.append("images\n");
             stringBuilder.append(this.name).append("\n");
-            patterns.forEach(pattern -> stringBuilder.append(pattern.getNameWithoutExtension()).append(" "));
+            patterns.forEach(
+                    pattern -> stringBuilder.append(pattern.getNameWithoutExtension()).append(" "));
             return stringBuilder.toString();
         }
 
         /**
-         * Sets the StateImage name from a pattern if no name has been set.
-         * Used internally to auto-populate names from pattern filenames.
+         * Sets the StateImage name from a pattern if no name has been set. Used internally to
+         * auto-populate names from pattern filenames.
          *
          * @param pattern the Pattern to potentially get the name from
          */
         private void setNameFromPatternIfEmpty(Pattern pattern) {
             // This condition now safely handles cases where 'name' is null or empty.
-            if ((name == null || name.isEmpty()) && pattern != null && pattern.getNameWithoutExtension() != null) {
+            if ((name == null || name.isEmpty())
+                    && pattern != null
+                    && pattern.getNameWithoutExtension() != null) {
                 name = pattern.getNameWithoutExtension();
             }
         }
 
         /**
-         * Builds the StateImage with all configured properties.
-         * Applies all pattern-level settings that were configured for all patterns.
+         * Builds the StateImage with all configured properties. Applies all pattern-level settings
+         * that were configured for all patterns.
          *
          * @return the constructed StateImage instance
          */
@@ -816,8 +820,8 @@ public class StateImage implements StateObject {
         }
 
         /**
-         * Creates a generic StateImage with default values.
-         * Used for testing or placeholder purposes.
+         * Creates a generic StateImage with default values. Used for testing or placeholder
+         * purposes.
          *
          * @return a generic StateImage instance
          */

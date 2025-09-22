@@ -7,7 +7,7 @@ import io.github.jspinak.brobot.model.element.Positions;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateLocation;
-// Removed old logging import: 
+
 /**
  * Comprehensive utility methods for Location manipulation and calculations in Brobot.
  *
@@ -237,8 +237,7 @@ public class LocationUtils {
     }
 
     /** Print location */
-    public static void print(Location location) {
-    }
+    public static void print(Location location) {}
 
     /** Get string representation of location */
     public static String toString(Location location) {

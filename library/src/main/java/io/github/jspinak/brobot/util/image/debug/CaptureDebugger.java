@@ -16,7 +16,7 @@ import org.sikuli.script.Screen;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.model.element.Region;
-// Removed old logging import: 
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -76,7 +76,6 @@ public class CaptureDebugger {
 
         // 4. System information
         printSystemInfo();
-
     }
 
     private BufferedImage captureWithNewScreen(Region region, String filename) {
@@ -162,7 +161,6 @@ public class CaptureDebugger {
                 }
             }
         }
-
     }
 
     private void testPatternMatch(BufferedImage scene, Pattern pattern, String method) {
@@ -191,7 +189,6 @@ public class CaptureDebugger {
 
     private void analyzeImage(BufferedImage img, String label) {
         if (img == null) return;
-
 
         // Analyze content
         int blackCount = 0, whiteCount = 0;
@@ -236,8 +233,7 @@ public class CaptureDebugger {
             }
         }
 
-        if (edgeVariance > checks / 2) {
-        }
+        if (edgeVariance > checks / 2) {}
     }
 
     private void printSystemInfo() {

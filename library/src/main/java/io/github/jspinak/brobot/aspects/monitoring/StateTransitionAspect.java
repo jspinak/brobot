@@ -26,14 +26,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.logging.BrobotLogger;
-import io.github.jspinak.brobot.logging.events.ActionEvent;
+import io.github.jspinak.brobot.logging.LogCategory;
+import io.github.jspinak.brobot.logging.LogLevel;
 import io.github.jspinak.brobot.model.state.State;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import io.github.jspinak.brobot.logging.LogCategory;
-import io.github.jspinak.brobot.logging.LogLevel;
-
 
 /**
  * Aspect that tracks and analyzes state transitions in the Brobot framework.
@@ -282,7 +280,8 @@ public class StateTransitionAspect {
     private void logTransition(TransitionEvent event) {
         LogLevel level = event.isSuccess() ? LogLevel.DEBUG : LogLevel.WARN;
 
-        brobotLogger.builder(LogCategory.TRANSITIONS)
+        brobotLogger
+                .builder(LogCategory.TRANSITIONS)
                 .level(level)
                 .action("STATE_TRANSITION", "transition")
                 .context("success", event.isSuccess())

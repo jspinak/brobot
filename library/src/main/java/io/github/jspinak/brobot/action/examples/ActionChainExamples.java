@@ -57,7 +57,6 @@ public class ActionChainExamples {
             String password,
             StateImage loginButton) {
 
-        // Old way (with MultipleActionsObject):
         // MultipleActionsObject mao = new MultipleActionsObject();
         // mao.add(new ActionParameters(clickOptions, usernameField.asObjectCollection()));
         // mao.add(new ActionParameters(typeOptions, new
@@ -98,7 +97,6 @@ public class ActionChainExamples {
      */
     public ActionResult clickAndVerify(StateImage buttonToClick, StateImage expectedResult) {
 
-        // Old way (with ActionResultCombo):
         // ActionResultCombo combo = new ActionResultCombo();
         // combo.setActionConfig(clickOptions);
         // combo.setResultOptions(findOptions);

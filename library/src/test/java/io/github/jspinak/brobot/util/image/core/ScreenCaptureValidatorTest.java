@@ -17,8 +17,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import io.github.jspinak.brobot.logging.BrobotLogger;
-import io.github.jspinak.brobot.logging.LogCategory;
 import io.github.jspinak.brobot.logging.LogBuilder;
+import io.github.jspinak.brobot.logging.LogCategory;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**

@@ -180,8 +180,16 @@ public class WSLResolutionTest extends BrobotTestBase {
         // The color test would only work if the red square was within the cropped bounds
 
         System.out.println("Red square location: (960, 540) with size 100x100");
-        System.out.println("Cropped region: (" + physicalX + ", " + physicalY +
-                          ") with size (" + physicalW + ", " + physicalH + ")");
+        System.out.println(
+                "Cropped region: ("
+                        + physicalX
+                        + ", "
+                        + physicalY
+                        + ") with size ("
+                        + physicalW
+                        + ", "
+                        + physicalH
+                        + ")");
         System.out.println("Red square is outside the cropped region (expected behavior)");
     }
 
@@ -208,7 +216,8 @@ public class WSLResolutionTest extends BrobotTestBase {
                 Dimension screenSize = toolkit.getScreenSize();
 
                 // WSL typically reports a default resolution if no X server
-                System.out.println("WSL Screen Size: " + screenSize.width + "x" + screenSize.height);
+                System.out.println(
+                        "WSL Screen Size: " + screenSize.width + "x" + screenSize.height);
             } else {
                 System.out.println("Running in headless mode - screen size not available");
             }

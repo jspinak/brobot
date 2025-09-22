@@ -364,8 +364,6 @@ public class ActionLifecycleManagement {
             return;
         }
         actionLifecycle.setPrinted(true);
-        // Removed direct console output - this is now handled by the logging framework
         // which respects verbosity settings and structured logging
-        // Legacy direct console printing interferes with QUIET mode and structured logs
     }
 }

@@ -100,9 +100,8 @@ public class Pattern {
     private boolean needsDelayedLoading = false;
 
     /**
-     * Creates a Pattern from an image file path.
-     * In mock mode, image loading is skipped. During Spring initialization,
-     * image loading is deferred until the context is ready.
+     * Creates a Pattern from an image file path. In mock mode, image loading is skipped. During
+     * Spring initialization, image loading is deferred until the context is ready.
      *
      * @param imgPath the path to the image file
      */
@@ -149,7 +148,10 @@ public class Pattern {
             log.debug("Successfully loaded image: {}", imgPath);
         } else {
             // Log error but don't throw exception - let automation continue with null image
-            log.error("Failed to load image: {}. Pattern will have null image and find operations will fail.", imgPath);
+            log.error(
+                    "Failed to load image: {}. Pattern will have null image and find operations"
+                            + " will fail.",
+                    imgPath);
             this.image = null;
             this.needsDelayedLoading = false; // Don't retry, we've already logged the error
         }
@@ -232,8 +234,7 @@ public class Pattern {
     }
 
     /**
-     * Creates a Pattern from a Match object.
-     * The pattern is marked as fixed at the match location.
+     * Creates a Pattern from a Match object. The pattern is marked as fixed at the match location.
      *
      * @param match the Match to create a pattern from
      */
@@ -300,7 +301,8 @@ public class Pattern {
     private void setNameFromFilenameIfEmpty(String filename) {
         if (filename == null) return;
         if (nameWithoutExtension == null || nameWithoutExtension.isEmpty()) {
-            setNameWithoutExtension(FilenameExtractor.getFilenameWithoutExtensionAndDirectory(filename));
+            setNameWithoutExtension(
+                    FilenameExtractor.getFilenameWithoutExtensionAndDirectory(filename));
         }
     }
 
@@ -372,9 +374,7 @@ public class Pattern {
         searchRegions.addSearchRegions(region);
     }
 
-    /**
-     * Resets the fixed search region, allowing the pattern to be found anywhere.
-     */
+    /** Resets the fixed search region, allowing the pattern to be found anywhere. */
     public void resetFixedSearchRegion() {
         searchRegions.resetFixedRegion();
     }
@@ -511,7 +511,8 @@ public class Pattern {
         // Ensure we have a valid image
         if (image == null || image.isEmpty()) {
             throw new IllegalStateException(
-                    "Cannot create SikuliX Pattern: No valid image for pattern: " + nameWithoutExtension);
+                    "Cannot create SikuliX Pattern: No valid image for pattern: "
+                            + nameWithoutExtension);
         }
 
         // Get the BufferedImage - this is what SikuliX uses internally anyway
@@ -520,7 +521,9 @@ public class Pattern {
         // Only log pattern creation in debug/verbose mode
         if (log.isDebugEnabled()
                 && nameWithoutExtension != null
-                && (nameWithoutExtension.contains("prompt") || nameWithoutExtension.contains("claude") || nameWithoutExtension.contains("debug"))) {
+                && (nameWithoutExtension.contains("prompt")
+                        || nameWithoutExtension.contains("claude")
+                        || nameWithoutExtension.contains("debug"))) {
             log.debug(
                     "[PATTERN] Creating SikuliX pattern '{}' {}x{} type={}",
                     nameWithoutExtension,
@@ -587,9 +590,7 @@ public class Pattern {
                 + '}';
     }
 
-    /**
-     * Builder class for constructing Pattern instances with a fluent API.
-     */
+    /** Builder class for constructing Pattern instances with a fluent API. */
     @Slf4j
     public static class Builder {
         private String name = "";
@@ -614,8 +615,8 @@ public class Pattern {
         Therefore, this method should not set the filename in addition to the name.
          */
         /**
-         * Sets the name for this pattern.
-         * The name is independent of the filename and can be set without changing the image source.
+         * Sets the name for this pattern. The name is independent of the filename and can be set
+         * without changing the image source.
          *
          * @param name the pattern name
          * @return this builder for method chaining
@@ -662,8 +663,8 @@ public class Pattern {
         }
 
         /**
-         * Sets the filename and loads the image from file.
-         * If name is not set, extracts it from the filename.
+         * Sets the filename and loads the image from file. If name is not set, extracts it from the
+         * filename.
          *
          * @param filename the image file path
          * @return this builder for method chaining
@@ -721,8 +722,8 @@ public class Pattern {
         }
 
         /**
-         * Sets whether to generate K-means color profiles for this pattern.
-         * This is an expensive operation and should only be enabled when needed.
+         * Sets whether to generate K-means color profiles for this pattern. This is an expensive
+         * operation and should only be enabled when needed.
          *
          * @param setKmeansColorProfiles true to enable K-means profiling
          * @return this builder for method chaining
@@ -761,8 +762,8 @@ public class Pattern {
         }
 
         /**
-         * Sets the unique identifier for this pattern.
-         * Used for classification matrices and pattern indexing.
+         * Sets the unique identifier for this pattern. Used for classification matrices and pattern
+         * indexing.
          *
          * @param index the unique index
          * @return this builder for method chaining
@@ -773,8 +774,8 @@ public class Pattern {
         }
 
         /**
-         * Sets whether this pattern has dynamic content.
-         * Dynamic images cannot be found using standard pattern matching.
+         * Sets whether this pattern has dynamic content. Dynamic images cannot be found using
+         * standard pattern matching.
          *
          * @param isDynamic true if the pattern content changes
          * @return this builder for method chaining

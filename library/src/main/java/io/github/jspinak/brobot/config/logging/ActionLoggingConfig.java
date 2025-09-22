@@ -1,12 +1,9 @@
 package io.github.jspinak.brobot.config.logging;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
-// Removed old logging imports that no longer exist:
 // import io.github.jspinak.brobot.tools.logging.console.ConsoleActionConfig;
 // import io.github.jspinak.brobot.tools.logging.gui.GuiAccessConfig;
 // import io.github.jspinak.brobot.tools.logging.gui.GuiAccessMonitor;
@@ -45,26 +42,12 @@ public class ActionLoggingConfig {
     // Spring
     // The @ConditionalOnProperty should be moved to the ConsoleActionReporter class itself
 
-   //  // HighlightManager is now created automatically as a @Component with lazy Action injection // HighlightManager removed
     // to avoid circular dependency issues
 
     // GuiAccessMonitor is already annotated with @Component, so it's automatically created by
     // Spring
 
-    // Removed the enhanced action logger configuration as it was causing bean conflicts
-    // The base ActionLoggerImpl is sufficient for now
-
     /** Creates a startup bean that performs initial GUI access check if configured. */
-    // Commented out - GuiAccessMonitor class no longer exists
-    // @Bean
-    // @ConditionalOnProperty(
-    //         prefix = "brobot.gui-access",
-    //         name = "check-on-startup",
-    //         havingValue = "true",
-    //         matchIfMissing = true)
-    // public GuiAccessStartupChecker guiAccessStartupChecker(GuiAccessMonitor monitor) {
-    //     return new GuiAccessStartupChecker(monitor);
-    // }
 
     /** Inner class for startup GUI check. */
     public static class GuiAccessStartupChecker {
