@@ -447,7 +447,7 @@ public class Pattern {
      * Checks if an image with alpha channel actually has transparent pixels.
      *
      * @param img The image to check
-     * @return true if the image has pixels with alpha < 255, false otherwise
+     * @return true if the image has pixels with alpha &lt; 255, false otherwise
      */
     private boolean hasTransparency(BufferedImage img) {
         if (!img.getColorModel().hasAlpha()) {

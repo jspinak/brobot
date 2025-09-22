@@ -166,7 +166,7 @@ public abstract class BaseFindOptions extends ActionConfig {
          * Sets the match adjustment options for post-processing found matches. This allows for
          * resizing match regions or targeting specific points within matches.
          *
-         * @param matchAdjustmentBuilder A builder for MatchAdjustmentOptions.
+         * @param matchAdjustmentOptions The match adjustment options.
          * @return this Builder instance for chaining.
          */
         public B setMatchAdjustment(MatchAdjustmentOptions matchAdjustmentOptions) {
