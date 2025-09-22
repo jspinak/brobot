@@ -22,7 +22,7 @@ public class StateRegionTest {
                         .setName("testRegion")
                         .setSearchRegion(new Region(10, 20, 30, 40))
                         .setOwnerStateName("testState")
-                        .setProbabilityExists(80)
+                        .setMockFindStochasticModifier(80)
                         .setTimesActedOn(3)
                         .build();
     }

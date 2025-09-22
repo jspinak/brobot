@@ -3,8 +3,7 @@ package io.github.jspinak.brobot.model.element;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 import lombok.Getter;
 
 /**
@@ -91,13 +90,10 @@ public class Grid {
     private List<Region> gridRegions = new ArrayList<>();
 
     public void print() {
-        ConsoleReporter.println("region = " + region);
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
                 Region reg = gridRegions.get(cols * r + c);
-                ConsoleReporter.format("%d.%d_%d.%d ", reg.x(), reg.y(), reg.w(), reg.h());
             }
-            ConsoleReporter.println();
         }
     }
 

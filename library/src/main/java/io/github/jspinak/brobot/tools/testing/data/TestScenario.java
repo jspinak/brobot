@@ -144,7 +144,7 @@ public class TestScenario {
     public static class Builder {
         private final String name;
         private final TestDataBuilder parent;
-        private final TestScenario.TestScenarioBuilder scenarioBuilder;
+        private final TestScenarioBuilder scenarioBuilder;
 
         public Builder(String name, TestDataBuilder parent) {
             this.name = name;

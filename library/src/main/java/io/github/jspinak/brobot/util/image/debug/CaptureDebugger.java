@@ -16,8 +16,7 @@ import org.sikuli.script.Screen;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -42,13 +41,8 @@ public class CaptureDebugger {
     /** Comprehensive debug capture that tests all methods and saves results. */
     public void debugCapture(Region region, String patternPath) {
         String timestamp = dateFormat.format(new Date());
-        ConsoleReporter.println("\n" + "=".repeat(80));
-        ConsoleReporter.println("CAPTURE DEBUG SESSION: " + timestamp);
-        ConsoleReporter.println("=".repeat(80));
 
         // 1. Test different Screen creation methods
-        ConsoleReporter.println("\n1. TESTING SCREEN CREATION METHODS:");
-        ConsoleReporter.println("-".repeat(40));
 
         BufferedImage capture1 = captureWithNewScreen(region, timestamp + "_new-screen");
         BufferedImage capture2 = captureWithDefaultScreen(region, timestamp + "_default-screen");
@@ -56,8 +50,6 @@ public class CaptureDebugger {
         BufferedImage capture4 = captureWithScreenshot(timestamp + "_screenshot");
 
         // 2. Compare captures
-        ConsoleReporter.println("\n2. COMPARING CAPTURES:");
-        ConsoleReporter.println("-".repeat(40));
 
         compareImages(capture1, capture2, "New Screen vs Default Screen");
         compareImages(capture1, capture3, "New Screen vs SikuliX Region");
@@ -65,9 +57,6 @@ public class CaptureDebugger {
 
         // 3. Test pattern matching with each capture
         if (patternPath != null && new File(patternPath).exists()) {
-            ConsoleReporter.println("\n3. PATTERN MATCHING TESTS:");
-            ConsoleReporter.println("-".repeat(40));
-            ConsoleReporter.println("Pattern: " + patternPath);
 
             try {
                 Pattern pattern = new Pattern(patternPath);
@@ -82,119 +71,76 @@ public class CaptureDebugger {
                 analyzeImage(patternImg, "PATTERN");
 
             } catch (Exception e) {
-                ConsoleReporter.println("ERROR loading pattern: " + e.getMessage());
             }
         }
 
         // 4. System information
-        ConsoleReporter.println("\n4. SYSTEM INFORMATION:");
-        ConsoleReporter.println("-".repeat(40));
         printSystemInfo();
 
-        ConsoleReporter.println("\n" + "=".repeat(80));
-        ConsoleReporter.println("Debug images saved to: " + new File(DEBUG_DIR).getAbsolutePath());
-        ConsoleReporter.println("=".repeat(80) + "\n");
     }
 
     private BufferedImage captureWithNewScreen(Region region, String filename) {
         try {
-            ConsoleReporter.println("\nMethod: new Screen()");
             Screen screen = new Screen();
-            ConsoleReporter.println("  Screen ID: " + screen.getID());
-            ConsoleReporter.println("  Screen bounds: " + screen.getBounds());
 
             BufferedImage captured = screen.capture(region.sikuli()).getImage();
-            ConsoleReporter.println(
-                    "  Captured: " + captured.getWidth() + "x" + captured.getHeight());
-
             saveImage(captured, filename);
             analyzeImage(captured, "NEW SCREEN");
             return captured;
 
         } catch (Exception e) {
-            ConsoleReporter.println("  ERROR: " + e.getMessage());
             return null;
         }
     }
 
     private BufferedImage captureWithDefaultScreen(Region region, String filename) {
         try {
-            ConsoleReporter.println("\nMethod: Screen.getPrimaryScreen() or Screen(0)");
             Screen screen = new Screen(0);
-            ConsoleReporter.println("  Screen ID: " + screen.getID());
-            ConsoleReporter.println("  Screen bounds: " + screen.getBounds());
 
             BufferedImage captured = screen.capture(region.sikuli()).getImage();
-            ConsoleReporter.println(
-                    "  Captured: " + captured.getWidth() + "x" + captured.getHeight());
-
             saveImage(captured, filename);
             analyzeImage(captured, "DEFAULT SCREEN");
             return captured;
 
         } catch (Exception e) {
-            ConsoleReporter.println("  ERROR: " + e.getMessage());
             return null;
         }
     }
 
     private BufferedImage captureWithRobot(Region region, String filename) {
         try {
-            ConsoleReporter.println("\nMethod: SikuliX Screen with region");
             Screen screen = new Screen();
 
             org.sikuli.script.Region sikuliRegion =
                     new org.sikuli.script.Region(region.x(), region.y(), region.w(), region.h());
             BufferedImage captured = screen.capture(sikuliRegion).getImage();
-            ConsoleReporter.println(
-                    "  Captured: " + captured.getWidth() + "x" + captured.getHeight());
-
             saveImage(captured, filename);
             analyzeImage(captured, "SIKULI_REGION");
             return captured;
 
         } catch (Exception e) {
-            ConsoleReporter.println("  ERROR: " + e.getMessage());
             return null;
         }
     }
 
     private BufferedImage captureWithScreenshot(String filename) {
         try {
-            ConsoleReporter.println("\nMethod: Full Screenshot");
             Screen screen = new Screen();
             BufferedImage captured = screen.capture().getImage();
-            ConsoleReporter.println(
-                    "  Captured: " + captured.getWidth() + "x" + captured.getHeight());
-
             saveImage(captured, filename);
             return captured;
 
         } catch (Exception e) {
-            ConsoleReporter.println("  ERROR: " + e.getMessage());
             return null;
         }
     }
 
     private void compareImages(BufferedImage img1, BufferedImage img2, String comparison) {
         if (img1 == null || img2 == null) {
-            ConsoleReporter.println("\n" + comparison + ": Cannot compare (null image)");
             return;
         }
 
-        ConsoleReporter.println("\n" + comparison + ":");
-        ConsoleReporter.println(
-                "  Size: "
-                        + img1.getWidth()
-                        + "x"
-                        + img1.getHeight()
-                        + " vs "
-                        + img2.getWidth()
-                        + "x"
-                        + img2.getHeight());
-
         if (img1.getWidth() != img2.getWidth() || img1.getHeight() != img2.getHeight()) {
-            ConsoleReporter.println("  WARNING: Different sizes!");
             return;
         }
 
@@ -212,21 +158,15 @@ public class CaptureDebugger {
                 if (rgb1 != rgb2) {
                     differences++;
                     if (differences <= 3) { // Show first 3 differences
-                        ConsoleReporter.println(
-                                String.format(
-                                        "  Pixel diff at (%d,%d): #%06X vs #%06X",
-                                        x, y, rgb1 & 0xFFFFFF, rgb2 & 0xFFFFFF));
                     }
                 }
             }
         }
 
-        ConsoleReporter.println("  Pixel differences: " + differences + "/" + samples);
     }
 
     private void testPatternMatch(BufferedImage scene, Pattern pattern, String method) {
         if (scene == null) {
-            ConsoleReporter.println("\n" + method + " match: Cannot test (null scene)");
             return;
         }
 
@@ -243,30 +183,15 @@ public class CaptureDebugger {
                     bestScore = match.getScore();
                 }
             }
-
-            ConsoleReporter.println(
-                    "\n"
-                            + method
-                            + " match: "
-                            + count
-                            + " matches, best score: "
-                            + String.format("%.3f", bestScore));
-
             finder.destroy();
 
         } catch (Exception e) {
-            ConsoleReporter.println("\n" + method + " match: ERROR - " + e.getMessage());
         }
     }
 
     private void analyzeImage(BufferedImage img, String label) {
         if (img == null) return;
 
-        ConsoleReporter.println("\nImage Analysis - " + label + ":");
-        ConsoleReporter.println("  Dimensions: " + img.getWidth() + "x" + img.getHeight());
-        ConsoleReporter.println("  Type: " + getImageType(img.getType()));
-        ConsoleReporter.println("  Color Model: " + img.getColorModel().getClass().getSimpleName());
-        ConsoleReporter.println("  Has Alpha: " + img.getColorModel().hasAlpha());
 
         // Analyze content
         int blackCount = 0, whiteCount = 0;
@@ -289,18 +214,6 @@ public class CaptureDebugger {
             if (r < 10 && g < 10 && b < 10) blackCount++;
             if (r > 245 && g > 245 && b > 245) whiteCount++;
         }
-
-        ConsoleReporter.println(
-                String.format(
-                        "  Content: %.1f%% black, %.1f%% white",
-                        (blackCount * 100.0) / sampleSize, (whiteCount * 100.0) / sampleSize));
-        ConsoleReporter.println(
-                String.format(
-                        "  Avg RGB: (%d, %d, %d)",
-                        (int) (totalR / sampleSize),
-                        (int) (totalG / sampleSize),
-                        (int) (totalB / sampleSize)));
-
         // Check edges for scaling artifacts
         checkEdges(img);
     }
@@ -324,65 +237,33 @@ public class CaptureDebugger {
         }
 
         if (edgeVariance > checks / 2) {
-            ConsoleReporter.println("  WARNING: High edge variance - possible scaling artifacts!");
         }
     }
 
     private void printSystemInfo() {
         // Display information
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+
+        // Check if we're in a headless environment
+        if (ge.isHeadlessInstance()) {
+            System.out.println("Running in headless mode - screen information not available");
+            return;
+        }
+
         GraphicsDevice gd = ge.getDefaultScreenDevice();
         DisplayMode dm = gd.getDisplayMode();
-
-        ConsoleReporter.println(
-                "Display Mode: "
-                        + dm.getWidth()
-                        + "x"
-                        + dm.getHeight()
-                        + " @ "
-                        + dm.getRefreshRate()
-                        + "Hz, "
-                        + dm.getBitDepth()
-                        + "-bit");
-
         // Toolkit screen size
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        ConsoleReporter.println(
-                "Toolkit Screen Size: " + screenSize.width + "x" + screenSize.height);
-
         // Screen resolution (DPI)
         int dpi = Toolkit.getDefaultToolkit().getScreenResolution();
-        ConsoleReporter.println("Screen DPI: " + dpi);
 
         // Graphics configuration
         GraphicsConfiguration gc = gd.getDefaultConfiguration();
         AffineTransform transform = gc.getDefaultTransform();
-        ConsoleReporter.println(
-                "Graphics Transform: scaleX="
-                        + transform.getScaleX()
-                        + ", scaleY="
-                        + transform.getScaleY());
-
         // Java properties
-        ConsoleReporter.println("\nJava Properties:");
-        ConsoleReporter.println("  java.awt.headless: " + System.getProperty("java.awt.headless"));
-        ConsoleReporter.println(
-                "  sun.java2d.dpiaware: " + System.getProperty("sun.java2d.dpiaware"));
-        ConsoleReporter.println(
-                "  sun.java2d.uiScale: " + System.getProperty("sun.java2d.uiScale"));
-        ConsoleReporter.println(
-                "  sun.java2d.win.uiScale: " + System.getProperty("sun.java2d.win.uiScale"));
-
         // SikuliX Settings
-        ConsoleReporter.println("\nSikuliX Settings:");
-        ConsoleReporter.println("  MinSimilarity: " + org.sikuli.basics.Settings.MinSimilarity);
-        ConsoleReporter.println("  AutoWaitTimeout: " + org.sikuli.basics.Settings.AutoWaitTimeout);
 
         // OS info
-        ConsoleReporter.println("\nOS Information:");
-        ConsoleReporter.println(
-                "  OS: " + System.getProperty("os.name") + " " + System.getProperty("os.version"));
-        ConsoleReporter.println("  Architecture: " + System.getProperty("os.arch"));
     }
 
     private void saveImage(BufferedImage img, String filename) {
@@ -391,9 +272,7 @@ public class CaptureDebugger {
         try {
             File file = new File(DEBUG_DIR, filename + ".png");
             ImageIO.write(img, "png", file);
-            ConsoleReporter.println("  Saved: " + file.getName());
         } catch (IOException e) {
-            ConsoleReporter.println("  Failed to save: " + e.getMessage());
         }
     }
 

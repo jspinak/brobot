@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.action.internal.utility;
 
+import io.github.jspinak.brobot.util.location.LocationUtils;
+
 import org.sikuli.basics.Settings;
 import org.sikuli.script.FindFailed;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +13,6 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.tools.history.IllustrationController;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.tools.testing.mock.action.MockDrag;
 import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 
@@ -81,7 +82,6 @@ public class DragCoordinateCalculator {
         try {
             new Region().sikuli().dragDrop(from.sikuli(), to.sikuli());
         } catch (FindFailed findFailed) {
-            ConsoleReporter.print(ConsoleReporter.OutputLevel.HIGH, "|drag failed| ");
             return false;
         }
         return true;
@@ -133,13 +133,6 @@ public class DragCoordinateCalculator {
      *     drag operation failed.
      */
     public boolean drag(Location from, Location to, DragOptions dragOptions) {
-        ConsoleReporter.format(
-                ConsoleReporter.OutputLevel.HIGH,
-                "drag %d.%d to %d.%d ",
-                from.getCalculatedX(),
-                from.getCalculatedY(),
-                to.getCalculatedX(),
-                to.getCalculatedY());
         if (brobotProperties.getCore().isMock()) return mock.drag();
 
         // Extract timing from MousePressOptions and DragOptions
@@ -172,9 +165,6 @@ public class DragCoordinateCalculator {
         if (actionConfig instanceof DragOptions) {
             return drag(from, to, (DragOptions) actionConfig);
         } else {
-            ConsoleReporter.println(
-                    "Unsupported ActionConfig type for drag: "
-                            + actionConfig.getClass().getSimpleName());
             return false;
         }
     }

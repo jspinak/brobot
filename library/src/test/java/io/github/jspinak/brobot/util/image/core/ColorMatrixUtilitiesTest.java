@@ -20,6 +20,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
+
 
 /**
  * Comprehensive test suite for ColorMatrixUtilities. Tests 3-channel image operations and color

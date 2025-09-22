@@ -8,8 +8,10 @@ import org.sikuli.script.ScreenImage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.logging.unified.BrobotLogger;
-import io.github.jspinak.brobot.logging.unified.LogEvent;
+import io.github.jspinak.brobot.logging.BrobotLogger;
+import io.github.jspinak.brobot.logging.LogCategory;
+import io.github.jspinak.brobot.logging.LogLevel;
+import io.github.jspinak.brobot.logging.events.ActionEvent;
 
 /**
  * Validates screen capture functionality in different environments. Detects headless mode,
@@ -97,8 +99,8 @@ public class ScreenCaptureValidator {
 
         } catch (Exception e) {
             if (logger != null) {
-                logger.log()
-                        .level(LogEvent.Level.ERROR)
+                logger.builder(LogCategory.SYSTEM)
+                        .level(LogLevel.ERROR)
                         .message("Error during screen capture validation")
                         .error(e)
                         .log();
@@ -130,13 +132,13 @@ public class ScreenCaptureValidator {
 
         if (isHeadless) {
             if (logger != null) {
-                logger.log()
-                        .level(LogEvent.Level.INFO)
+                logger.builder(LogCategory.SYSTEM)
+                        .level(LogLevel.INFO)
                         .message("Headless mode detected")
-                        .metadata("headlessProperty", isHeadlessProperty)
-                        .metadata("graphicsHeadless", isGraphicsHeadless)
-                        .metadata("isWSL", isWSL)
-                        .metadata("isSSH", isSSH)
+                        .context("headlessProperty", isHeadlessProperty)
+                        .context("graphicsHeadless", isGraphicsHeadless)
+                        .context("isWSL", isWSL)
+                        .context("isSSH", isSSH)
                         .log();
             }
         }
@@ -179,8 +181,8 @@ public class ScreenCaptureValidator {
         } catch (Exception e) {
             // Log error and return null
             if (logger != null) {
-                logger.log()
-                        .level(LogEvent.Level.ERROR)
+                logger.builder(LogCategory.SYSTEM)
+                        .level(LogLevel.ERROR)
                         .message("Failed to capture screen using SikuliX")
                         .error(e)
                         .log();
@@ -253,14 +255,14 @@ public class ScreenCaptureValidator {
 
         if (result.isValid()) {
             if (logger != null) {
-                logger.log().level(LogEvent.Level.INFO).message("Screen capture test PASSED").log();
+                logger.builder(LogCategory.SYSTEM).level(LogLevel.INFO).message("Screen capture test PASSED").log();
             }
         } else {
             if (logger != null) {
-                logger.log()
-                        .level(LogEvent.Level.WARNING)
+                logger.builder(LogCategory.SYSTEM)
+                        .level(LogLevel.WARN)
                         .message("Screen capture test FAILED: " + result.getMessage())
-                        .metadata("diagnosticInfo", getDiagnosticInfo())
+                        .context("diagnosticInfo", getDiagnosticInfo())
                         .log();
             }
         }

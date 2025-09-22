@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
 
 import lombok.Getter;
@@ -109,7 +108,6 @@ public class PixelProfile {
      * <p>Side effects: Outputs to the Report logging system
      */
     public void print() {
-        ConsoleReporter.println("PixelProfile");
         MatrixUtilities.printDimensions(
                 getAnalyses(Analysis.DIST_TO_TARGET, BGR), "distanceToTargetColorBGR: ");
         MatrixUtilities.printDimensions(

@@ -24,8 +24,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import io.github.jspinak.brobot.logging.unified.BrobotLogger;
-import io.github.jspinak.brobot.logging.unified.LogBuilder;
+import io.github.jspinak.brobot.logging.BrobotLogger;
+import io.github.jspinak.brobot.logging.LogCategory;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.test.annotations.Flaky;
 import io.github.jspinak.brobot.test.annotations.Flaky.FlakyCause;
@@ -38,7 +38,7 @@ public class PerformanceMonitoringAspectTest extends BrobotTestBase {
 
     @Mock private BrobotLogger brobotLogger;
 
-    @Mock private LogBuilder logBuilder;
+    @Mock private BrobotLogger.LogBuilder logBuilder;
 
     @Mock private ProceedingJoinPoint joinPoint;
 
@@ -53,14 +53,15 @@ public class PerformanceMonitoringAspectTest extends BrobotTestBase {
         ReflectionTestUtils.setField(aspect, "reportIntervalSeconds", 300);
         ReflectionTestUtils.setField(aspect, "trackMemoryUsage", true);
 
+        // Setup brobotLogger to return logBuilder
+        lenient().when(brobotLogger.builder(any(LogCategory.class))).thenReturn(logBuilder);
+
         // Setup log builder chain - use lenient() to avoid UnnecessaryStubbingException
-        lenient().when(brobotLogger.log()).thenReturn(logBuilder);
-        lenient().when(logBuilder.type(any())).thenReturn(logBuilder);
         lenient().when(logBuilder.level(any())).thenReturn(logBuilder);
-        lenient().when(logBuilder.action(anyString())).thenReturn(logBuilder);
-        lenient().when(logBuilder.duration(anyLong())).thenReturn(logBuilder);
-        lenient().when(logBuilder.metadata(anyString(), any())).thenReturn(logBuilder);
-        lenient().when(logBuilder.observation(anyString())).thenReturn(logBuilder);
+        lenient().when(logBuilder.action(anyString(), anyString())).thenReturn(logBuilder);
+        lenient().when(logBuilder.duration(any(Duration.class))).thenReturn(logBuilder);
+        lenient().when(logBuilder.context(anyString(), any())).thenReturn(logBuilder);
+        lenient().when(logBuilder.message(anyString())).thenReturn(logBuilder);
 
         // Mock the void log() method
         lenient().doNothing().when(logBuilder).log();
@@ -146,9 +147,9 @@ public class PerformanceMonitoringAspectTest extends BrobotTestBase {
         aspect.monitorPerformance(joinPoint);
 
         // Assert - Verify slow operation was logged
-        verify(logBuilder).action("SLOW_OPERATION");
-        verify(logBuilder).metadata("threshold", 100L);
-        verify(logBuilder).metadata("argCount", 2);
+        verify(logBuilder).action("SLOW_OPERATION", "TestClass.slowMethod()");
+        verify(logBuilder).context("threshold", 100L);
+        verify(logBuilder).context("argCount", 2);
         verify(logBuilder, atLeastOnce()).log();
     }
 
@@ -270,9 +271,7 @@ public class PerformanceMonitoringAspectTest extends BrobotTestBase {
         aspect.generatePerformanceReport();
 
         // Assert - Verify report was logged
-        ArgumentCaptor<String> actionCaptor = ArgumentCaptor.forClass(String.class);
-        verify(logBuilder, atLeastOnce()).action(actionCaptor.capture());
-        assertTrue(actionCaptor.getAllValues().contains("PERFORMANCE_REPORT"));
+        verify(logBuilder, atLeastOnce()).action(eq("PERFORMANCE_REPORT"), anyString());
     }
 
     @Test
@@ -308,7 +307,7 @@ public class PerformanceMonitoringAspectTest extends BrobotTestBase {
         aspect.generatePerformanceReport();
 
         // Assert - Should detect degradation
-        verify(logBuilder, atLeastOnce()).action("PERFORMANCE_DEGRADATION");
+        verify(logBuilder, atLeastOnce()).action("PERFORMANCE_DEGRADATION", "TestClass.degradingMethod()");
     }
 
     @Test

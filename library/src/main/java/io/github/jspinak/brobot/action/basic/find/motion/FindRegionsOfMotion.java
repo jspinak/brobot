@@ -17,8 +17,7 @@ import io.github.jspinak.brobot.analysis.motion.FindDynamicPixels;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalyses;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-import io.github.jspinak.brobot.util.image.visualization.MatrixVisualizer;
+// Removed old logging import: import io.github.jspinak.brobot.util.image.visualization.MatrixVisualizer;
 
 /**
  * Identifies regions containing motion across multiple scene captures. This class analyzes a
@@ -53,7 +52,7 @@ public class FindRegionsOfMotion {
     private final SearchRegionResolver selectRegions;
     private final FindDynamicPixels findDynamicPixels;
     private final MatchCollectionUtilities matchOps;
-    private final MatrixVisualizer matVisualize;
+    // private final MatrixVisualizer matVisualize;
 
     /**
      * Constructs a FindRegionsOfMotion instance with required dependencies.
@@ -69,12 +68,12 @@ public class FindRegionsOfMotion {
             SearchRegionResolver selectRegions,
             FindDynamicPixels findDynamicPixels,
             MatchCollectionUtilities matchOps,
-            MatrixVisualizer matVisualize) {
+            Object matVisualize) { // MatrixVisualizer temporarily replaced with Object
         this.getSceneAnalysisCollection = getSceneAnalysisCollection;
         this.selectRegions = selectRegions;
         this.findDynamicPixels = findDynamicPixels;
         this.matchOps = matchOps;
-        this.matVisualize = matVisualize;
+        // this.matVisualize = matVisualize;
     }
 
     /**
@@ -110,7 +109,6 @@ public class FindRegionsOfMotion {
         SceneAnalyses sceneAnalysisCollection =
                 getSceneAnalysisCollection.get(objectCollections, scenes, pause, actionConfig);
         if (sceneAnalysisCollection.getSceneAnalyses().size() < 2) {
-            ConsoleReporter.println("Not enough scenes to detect motion");
             return;
         }
         // System.out.println("FindRegionsOfMotion: # scenes = " +
@@ -175,7 +173,7 @@ public class FindRegionsOfMotion {
         if (searchRegions.isEmpty())
             searchRegions.add(new Region(0, 0, scenes.get(0).cols(), scenes.get(0).rows()));
         Mat dynamicPixels = findDynamicPixels.getDynamicPixelMask(scenesVector);
-        matVisualize.writeMatToHistory(dynamicPixels, "dynamicPixels");
+        // matVisualize.writeMatToHistory(dynamicPixels, "dynamicPixels"); // Visualization removed
         sceneAnalysisCollection.setResults(dynamicPixels); // .clone()
         // System.out.println("FindRegionsOfMotion: minArea = " + actionConfig.getMinArea() + "
         // maxArea = " + actionConfig.getMaxArea() + " searchRegions: " + searchRegions);

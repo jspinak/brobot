@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.core.services;
 
+import io.github.jspinak.brobot.util.location.LocationUtils;
+
 import java.awt.*;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.InputEvent;
@@ -11,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.coordinates.CoordinateScaler;
 
 /**
@@ -65,17 +66,8 @@ public class SikuliMouseController implements MouseController {
             Location result = location.hover();
             boolean success = result != null;
 
-            if (success) {
-                ConsoleReporter.println("[SikuliMouseController] Moved to: " + x + ", " + y);
-            } else {
-                ConsoleReporter.println(
-                        "[SikuliMouseController] Failed to move to: " + x + ", " + y);
-            }
-
             return success;
         } catch (Exception e) {
-            ConsoleReporter.println(
-                    "[SikuliMouseController] Error moving mouse: " + e.getMessage());
             return false;
         }
     }
@@ -113,17 +105,8 @@ public class SikuliMouseController implements MouseController {
                 success = true;
             }
 
-            if (success) {
-                ConsoleReporter.println(
-                        "[SikuliMouseController] Clicked " + button + " at: " + x + ", " + y);
-            } else {
-                ConsoleReporter.println(
-                        "[SikuliMouseController] Failed to click at: " + x + ", " + y);
-            }
-
             return success;
         } catch (Exception e) {
-            ConsoleReporter.println("[SikuliMouseController] Error clicking: " + e.getMessage());
             return false;
         }
     }
@@ -145,7 +128,7 @@ public class SikuliMouseController implements MouseController {
                     io.github.jspinak.brobot.model.element.Location brobotLoc =
                             new io.github.jspinak.brobot.model.element.Location(x, y);
                     location = coordinateScaler.scaleLocationToLogical(brobotLoc);
-                } else {
+                } {
                     location = new Location(x, y);
                 }
                 location.doubleClick();
@@ -160,8 +143,6 @@ public class SikuliMouseController implements MouseController {
                 return click(x, y, button);
             }
         } catch (Exception e) {
-            ConsoleReporter.println(
-                    "[SikuliMouseController] Error double-clicking: " + e.getMessage());
             return false;
         }
     }
@@ -171,11 +152,8 @@ public class SikuliMouseController implements MouseController {
         try {
             int sikuliButton = convertButton(button);
             Mouse.down(sikuliButton);
-            ConsoleReporter.println("[SikuliMouseController] Mouse " + button + " down");
             return true;
         } catch (Exception e) {
-            ConsoleReporter.println(
-                    "[SikuliMouseController] Error pressing mouse button: " + e.getMessage());
             return false;
         }
     }
@@ -185,11 +163,8 @@ public class SikuliMouseController implements MouseController {
         try {
             int sikuliButton = convertButton(button);
             Mouse.up(sikuliButton);
-            ConsoleReporter.println("[SikuliMouseController] Mouse " + button + " up");
             return true;
         } catch (Exception e) {
-            ConsoleReporter.println(
-                    "[SikuliMouseController] Error releasing mouse button: " + e.getMessage());
             return false;
         }
     }
@@ -229,26 +204,13 @@ public class SikuliMouseController implements MouseController {
 
             // Note: dragDrop automatically releases the button
             boolean success = result > 0;
-
-            if (success) {
-                ConsoleReporter.println(
-                        "[SikuliMouseController] Dragged from "
-                                + startX
-                                + ","
-                                + startY
-                                + " to "
-                                + endX
-                                + ","
-                                + endY);
-            } else {
-                ConsoleReporter.println("[SikuliMouseController] Drag failed");
+            if (!success) {
                 // Try to release button if drag failed
                 mouseUp(button);
             }
 
             return success;
         } catch (Exception e) {
-            ConsoleReporter.println("[SikuliMouseController] Error dragging: " + e.getMessage());
             // Try to release button on error
             mouseUp(button);
             return false;
@@ -290,10 +252,8 @@ public class SikuliMouseController implements MouseController {
 
             region.wheel(direction, steps);
 
-            ConsoleReporter.println("[SikuliMouseController] Scrolled " + wheelAmt + " units");
             return true;
         } catch (Exception e) {
-            ConsoleReporter.println("[SikuliMouseController] Error scrolling: " + e.getMessage());
             return false;
         }
     }
@@ -309,8 +269,6 @@ public class SikuliMouseController implements MouseController {
             // The caller can scale if needed
             return new int[] {currentLoc.x, currentLoc.y};
         } catch (Exception e) {
-            ConsoleReporter.println(
-                    "[SikuliMouseController] Error getting mouse position: " + e.getMessage());
             return null;
         }
     }

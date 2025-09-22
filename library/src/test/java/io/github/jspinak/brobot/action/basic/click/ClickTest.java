@@ -449,7 +449,7 @@ public class ClickTest extends BrobotTestBase {
                     new StateLocation.Builder()
                             .setLocation(new Location(100, 100))
                             .setOwnerStateName(stateName)
-                            .setProbabilityExists(85)
+                            .setMockFindStochasticModifier(85)
                             .build();
             collection.getStateLocations().add(stateLocation);
 

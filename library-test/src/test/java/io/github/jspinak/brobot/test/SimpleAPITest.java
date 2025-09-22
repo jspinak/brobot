@@ -69,7 +69,7 @@ public class SimpleAPITest {
                             .build();
 
             assertNotNull(pattern);
-            assertEquals("TestPattern", pattern.getName());
+            assertEquals("TestPattern", pattern.getImgpath());
             System.out.println("testPatternWithNameCreation PASSED");
         } catch (Exception e) {
             System.err.println("testPatternWithNameCreation FAILED: " + e.getMessage());

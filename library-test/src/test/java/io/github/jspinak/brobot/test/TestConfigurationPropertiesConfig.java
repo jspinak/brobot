@@ -8,8 +8,9 @@ import org.springframework.context.annotation.Primary;
 import io.github.jspinak.brobot.config.core.BrobotConfiguration;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.startup.orchestration.StartupConfiguration;
-import io.github.jspinak.brobot.tools.logging.console.ConsoleActionConfig;
-import io.github.jspinak.brobot.tools.logging.visual.VisualFeedbackConfig;
+
+// ConsoleActionConfig removed
+// VisualFeedbackConfig removed
 
 /**
  * Explicitly configures @ConfigurationProperties beans for tests. This prevents Spring Boot from

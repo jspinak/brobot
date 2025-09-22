@@ -14,10 +14,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.aspects.annotations.Recoverable;
-import io.github.jspinak.brobot.logging.unified.BrobotLogger;
-import io.github.jspinak.brobot.logging.unified.LogEvent;
+import io.github.jspinak.brobot.logging.BrobotLogger;
+import io.github.jspinak.brobot.logging.events.ActionEvent;
 
 import lombok.extern.slf4j.Slf4j;
+import io.github.jspinak.brobot.logging.LogCategory;
+import io.github.jspinak.brobot.logging.LogLevel;
+
 
 /**
  * Aspect that provides automatic error recovery with configurable retry policies.
@@ -243,43 +246,37 @@ public class ErrorRecoveryAspect {
 
     /** Log retry attempt */
     private void logRetryAttempt(String method, int attempt, long delay) {
-        brobotLogger
-                .log()
-                .type(LogEvent.Type.ACTION)
-                .level(LogEvent.Level.WARNING)
-                .action("RETRY_ATTEMPT")
-                .metadata("method", method)
-                .metadata("attempt", attempt)
-                .metadata("nextDelay", delay)
-                .observation("Retrying after failure")
+        brobotLogger.builder(LogCategory.SYSTEM)
+                .level(LogLevel.WARN)
+                .action("RETRY_ATTEMPT", method)
+                .context("method", method)
+                .context("attempt", attempt)
+                .context("nextDelay", delay)
+                .message("Retrying after failure")
                 .log();
     }
 
     /** Log retry success */
     private void logRetrySuccess(String method, int attemptsTaken) {
-        brobotLogger
-                .log()
-                .type(LogEvent.Type.ACTION)
-                .level(LogEvent.Level.INFO)
-                .action("RETRY_SUCCESS")
-                .metadata("method", method)
-                .metadata("attemptsTaken", attemptsTaken)
-                .observation("Operation succeeded after retry")
+        brobotLogger.builder(LogCategory.SYSTEM)
+                .level(LogLevel.INFO)
+                .action("RETRY_SUCCESS", method)
+                .context("method", method)
+                .context("attemptsTaken", attemptsTaken)
+                .message("Operation succeeded after retry")
                 .log();
     }
 
     /** Log retry exhaustion */
     private void logRetryExhaustion(String method, int maxRetries, Throwable lastException) {
-        brobotLogger
-                .log()
-                .type(LogEvent.Type.ERROR)
-                .level(LogEvent.Level.ERROR)
-                .action("RETRY_EXHAUSTED")
-                .metadata("method", method)
-                .metadata("maxRetries", maxRetries)
-                .metadata("lastException", lastException.getClass().getSimpleName())
+        brobotLogger.builder(LogCategory.SYSTEM)
+                .level(LogLevel.ERROR)
+                .action("RETRY_EXHAUSTED", method)
+                .context("method", method)
+                .context("maxRetries", maxRetries)
+                .context("lastException", lastException.getClass().getSimpleName())
                 .error(lastException)
-                .observation("All retry attempts failed")
+                .message("All retry attempts failed")
                 .log();
     }
 

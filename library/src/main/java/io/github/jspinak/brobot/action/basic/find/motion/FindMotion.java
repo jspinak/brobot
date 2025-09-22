@@ -20,8 +20,7 @@ import io.github.jspinak.brobot.analysis.motion.MovingObjectSelector;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalyses;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 /**
  * Detects and tracks motion across multiple scene captures. This class implements motion detection
  * by analyzing changes between three consecutive screenshots to identify moving objects and
@@ -123,7 +122,6 @@ public class FindMotion {
         SceneAnalyses sceneAnalysisCollection =
                 getSceneAnalysisCollection.get(objectCollections, 3, 0.1, actionConfig);
         if (sceneAnalysisCollection.getSceneAnalyses().size() < 3) {
-            ConsoleReporter.println("Not enough scenes to detect motion");
             return;
         }
         matches.setSceneAnalysisCollection(sceneAnalysisCollection);

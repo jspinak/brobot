@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
+import java.time.Duration;
 
 import jakarta.annotation.PostConstruct;
 
@@ -18,10 +19,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.logging.unified.BrobotLogger;
-import io.github.jspinak.brobot.logging.unified.LogEvent;
+import io.github.jspinak.brobot.logging.BrobotLogger;
+import io.github.jspinak.brobot.logging.events.ActionEvent;
 
 import lombok.extern.slf4j.Slf4j;
+import io.github.jspinak.brobot.logging.LogCategory;
+import io.github.jspinak.brobot.logging.LogLevel;
+
 
 /**
  * Aspect that provides comprehensive performance monitoring for Brobot operations.
@@ -207,16 +211,14 @@ public class PerformanceMonitoringAspect {
 
     /** Log slow operation with details */
     private void logSlowOperation(String method, long executionTime, Object[] args) {
-        brobotLogger
-                .log()
-                .type(LogEvent.Type.PERFORMANCE)
-                .level(LogEvent.Level.WARNING)
-                .action("SLOW_OPERATION")
-                .duration(executionTime)
-                .metadata("method", method)
-                .metadata("threshold", alertThresholdMillis)
-                .metadata("argCount", args != null ? args.length : 0)
-                .observation("Operation exceeded performance threshold")
+        brobotLogger.builder(LogCategory.PERFORMANCE)
+                .level(LogLevel.WARN)
+                .action("SLOW_OPERATION", method)
+                .duration(Duration.ofMillis(executionTime))
+                .context("method", method)
+                .context("threshold", alertThresholdMillis)
+                .context("argCount", args != null ? args.length : 0)
+                .message("Operation exceeded performance threshold")
                 .log();
     }
 
@@ -241,20 +243,18 @@ public class PerformanceMonitoringAspect {
         // Log detailed stats for slowest methods
         slowestMethods.forEach(
                 stats -> {
-                    brobotLogger
-                            .log()
-                            .type(LogEvent.Type.PERFORMANCE)
-                            .level(LogEvent.Level.INFO)
-                            .action("PERFORMANCE_REPORT")
-                            .metadata("method", stats.getMethodName())
-                            .metadata("calls", stats.getTotalCalls())
-                            .metadata("avgTime", stats.getAverageTime())
-                            .metadata("minTime", stats.getMinTime())
-                            .metadata("maxTime", stats.getMaxTime())
-                            .metadata("p95Time", stats.getPercentile(95))
-                            .metadata(
+                    brobotLogger.builder(LogCategory.PERFORMANCE)
+                            .level(LogLevel.INFO)
+                            .action("PERFORMANCE_REPORT", stats.getMethodName())
+                            .context("method", stats.getMethodName())
+                            .context("calls", stats.getTotalCalls())
+                            .context("avgTime", stats.getAverageTime())
+                            .context("minTime", stats.getMinTime())
+                            .context("maxTime", stats.getMaxTime())
+                            .context("p95Time", stats.getPercentile(95))
+                            .context(
                                     "successRate", String.format("%.2f%%", stats.getSuccessRate()))
-                            .observation("Performance statistics")
+                            .message("Performance statistics")
                             .log();
                 });
 
@@ -285,20 +285,18 @@ public class PerformanceMonitoringAspect {
 
                     // Check for significant degradation (>20% slower)
                     if (recentAvg > previousAvg * 1.2) {
-                        brobotLogger
-                                .log()
-                                .type(LogEvent.Type.PERFORMANCE)
-                                .level(LogEvent.Level.WARNING)
-                                .action("PERFORMANCE_DEGRADATION")
-                                .metadata("method", method)
-                                .metadata("recentAvg", (long) recentAvg)
-                                .metadata("previousAvg", (long) previousAvg)
-                                .metadata(
+                        brobotLogger.builder(LogCategory.PERFORMANCE)
+                                .level(LogLevel.WARN)
+                                .action("PERFORMANCE_DEGRADATION", method)
+                                .context("method", method)
+                                .context("recentAvg", (long) recentAvg)
+                                .context("previousAvg", (long) previousAvg)
+                                .context(
                                         "degradation",
                                         String.format(
                                                 "%.1f%%",
                                                 (recentAvg - previousAvg) / previousAvg * 100))
-                                .observation("Performance degradation detected")
+                                .message("Performance degradation detected")
                                 .log();
                     }
                 });

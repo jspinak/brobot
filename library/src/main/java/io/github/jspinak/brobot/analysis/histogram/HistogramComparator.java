@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.analysis.histogram;
 
-import static org.bytedeco.opencv.global.opencv_core.hconcat;
+import static org.bytedeco.opencv.global.opencv_core.*;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_DIST_L2;
 import static org.bytedeco.opencv.global.opencv_imgproc.EMD;
 
@@ -118,8 +118,12 @@ public class HistogramComparator {
      * @return a Mat containing sequential indices
      */
     private Mat setIndexedColumn(int totalBins) {
-        int[] a = IntStream.range(0, totalBins).toArray();
-        return new Mat(a);
+        // Create a column vector (totalBins x 1) with CV_32F type
+        Mat indexedColumn = new Mat(totalBins, 1, CV_32F);
+        for (int i = 0; i < totalBins; i++) {
+            indexedColumn.ptr(i, 0).putFloat((float) i);
+        }
+        return indexedColumn;
     }
 
     /**
@@ -131,10 +135,16 @@ public class HistogramComparator {
      * @return a new Mat with the indexed column concatenated to the histogram
      */
     private Mat addIndexedColumn(Mat mat, Mat indexedColumn) {
-        indexedColumn.convertTo(indexedColumn, mat.type());
-        MatVector mv = new MatVector(indexedColumn, mat);
+        // Create a copy to avoid modifying the original indexedColumn
+        Mat convertedColumn = new Mat();
+        indexedColumn.convertTo(convertedColumn, mat.type());
+
+        // Concatenate the indexed column with the histogram
+        MatVector mv = new MatVector(convertedColumn, mat);
         Mat result = new Mat();
         hconcat(mv, result);
+
+        convertedColumn.release();  // Clean up the temporary matrix
         return result;
     }
 

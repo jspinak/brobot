@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.tools.history;
 
+import io.github.jspinak.brobot.tools.history.ActionVisualizer;
+
 import static io.github.jspinak.brobot.action.ActionType.*;
 
 import java.util.*;
@@ -21,7 +23,6 @@ import io.github.jspinak.brobot.action.composite.drag.DragOptions;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
 
 import lombok.Getter;
@@ -177,14 +178,12 @@ public class IllustrationController {
         // Get action type from config
         ActionType action = getActionType(actionConfig);
         if (!actionPermissions.containsKey(action)) {
-            ConsoleReporter.println(action + " not available to illustrate in BrobotProperties.");
             if (isVerbose()) {
                 log.debug("  Result: NO - action {} not available to illustrate", action);
             }
             return false;
         }
         if (!actionPermissions.get(action)) {
-            ConsoleReporter.println(action + " not set to illustrate in BrobotProperties.");
             if (isVerbose()) {
                 log.debug("  Result: NO - action {} not permitted in settings", action);
                 log.debug(

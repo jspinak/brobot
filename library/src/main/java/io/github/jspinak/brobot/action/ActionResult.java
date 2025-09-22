@@ -22,7 +22,8 @@ import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.element.Text;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.tools.logging.MessageFormatter;
+// Removed old logging import that no longer exists:
+// // Removed old logging import: import io.github.jspinak.brobot.tools.logging.MessageFormatter;
 
 import lombok.Data;
 
@@ -34,11 +35,10 @@ import lombok.Data;
  * approach simplifies the API and provides consistent access to action outcomes regardless of the
  * action type.
  *
- * <p>Version 2.0 introduces a component-based architecture where responsibilities are delegated to
- * specialized classes while maintaining backward compatibility.
+ * <p>Uses a component-based architecture where responsibilities are delegated to
+ * specialized classes for better organization and maintainability.
  *
  * @since 1.0
- * @version 2.0
  * @see Match
  * @see Action
  * @see ActionConfig
@@ -62,7 +62,6 @@ public class ActionResult {
     /** Formatted text output for reporting and logging. */
     private String outputText = "";
 
-    // Component-based architecture (Version 2.0)
     private final MatchCollection matchCollection = new MatchCollection();
     private final TimingData timingData = new TimingData();
     private final TextExtractionResult textResult = new TextExtractionResult();
@@ -71,11 +70,6 @@ public class ActionResult {
     private final MovementTracker movementTracker = new MovementTracker();
     private final ActionAnalysis actionAnalysis = new ActionAnalysis();
     private final ExecutionHistory executionHistory = new ExecutionHistory();
-
-    // Fields maintained for test compatibility
-    @JsonIgnore private ActionMetrics actionMetrics;
-    @JsonIgnore private ActionExecutionContext executionContext;
-    @JsonIgnore private static volatile EnvironmentSnapshot environmentSnapshot;
 
     /** Creates an empty ActionResult with default values. */
     public ActionResult() {}
@@ -90,7 +84,7 @@ public class ActionResult {
     }
 
     // =====================================================
-    // Match Management Methods (delegated to MatchCollection)
+    // Match Management Methods
     // =====================================================
 
     /**
@@ -413,7 +407,7 @@ public class ActionResult {
     }
 
     // =====================================================
-    // Text Management Methods (delegated to TextExtractionResult)
+    // Text Management Methods
     // =====================================================
 
     /**
@@ -462,7 +456,7 @@ public class ActionResult {
     }
 
     // =====================================================
-    // State Management Methods (delegated to StateTracker)
+    // State Management Methods
     // =====================================================
 
     /**
@@ -487,7 +481,7 @@ public class ActionResult {
     }
 
     // =====================================================
-    // Timing Methods (delegated to TimingData)
+    // Timing Methods
     // =====================================================
 
     /**
@@ -546,7 +540,7 @@ public class ActionResult {
     }
 
     // =====================================================
-    // Region Management Methods (delegated to RegionManager)
+    // Region Management Methods
     // =====================================================
 
     /**
@@ -589,7 +583,7 @@ public class ActionResult {
     }
 
     // =====================================================
-    // Movement Management Methods (delegated to MovementTracker)
+    // Movement Management Methods
     // =====================================================
 
     /**
@@ -633,7 +627,7 @@ public class ActionResult {
     }
 
     // =====================================================
-    // Analysis Methods (delegated to ActionAnalysis)
+    // Analysis Methods
     // =====================================================
 
     /**
@@ -685,7 +679,7 @@ public class ActionResult {
     }
 
     // =====================================================
-    // Execution History Methods (delegated to ExecutionHistory)
+    // Execution History Methods
     // =====================================================
 
     /**
@@ -788,7 +782,8 @@ public class ActionResult {
      * @return Unicode symbol indicating success (✓) or failure (✗)
      */
     public String getSuccessSymbol() {
-        return success ? MessageFormatter.check : MessageFormatter.fail;
+        // Replaced MessageFormatter constants with direct Unicode symbols
+        return success ? "✓" : "✗";
     }
 
     /**
@@ -890,103 +885,11 @@ public class ActionResult {
         }
     }
 
-    // ===============================
-    // Enhanced Logging Data Structures (maintained for test compatibility)
-    // ===============================
 
-    @Data
-    public static class ActionExecutionContext {
-        private String actionType;
-        private List<StateImage> targetImages = new ArrayList<>();
-        private List<String> targetStrings = new ArrayList<>();
-        private List<Region> targetRegions = new ArrayList<>();
-        private String primaryTargetName;
-        private boolean success;
-        private Duration executionDuration = Duration.ZERO;
-        private Instant startTime;
-        private Instant endTime;
-        private List<Match> resultMatches = new ArrayList<>();
-        private Throwable executionError;
-        private String executingThread;
-        private String actionId;
-    }
 
-    @Data
-    public static class ActionMetrics {
-        private long executionTimeMs;
-        private int matchCount;
-        private double bestMatchConfidence = 0.0;
-        private String threadName;
-        private String actionId;
-        private int retryCount = 0;
-        private long retryTimeMs = 0;
-    }
 
-    @Data
-    public static class EnvironmentSnapshot {
-        private List<MonitorInfo> monitors = new ArrayList<>();
-        private String osName;
-        private String javaVersion;
-        private boolean headlessMode;
-        private Instant captureTime;
-
-        public static EnvironmentSnapshot getInstance() {
-            if (environmentSnapshot == null) {
-                synchronized (EnvironmentSnapshot.class) {
-                    if (environmentSnapshot == null) {
-                        environmentSnapshot = captureEnvironment();
-                    }
-                }
-            }
-            return environmentSnapshot;
-        }
-
-        private static EnvironmentSnapshot captureEnvironment() {
-            EnvironmentSnapshot snapshot = new EnvironmentSnapshot();
-            snapshot.setOsName(System.getProperty("os.name", "unknown"));
-            snapshot.setJavaVersion(System.getProperty("java.version", "unknown"));
-            snapshot.setHeadlessMode("true".equals(System.getProperty("java.awt.headless")));
-            snapshot.setCaptureTime(Instant.now());
-            snapshot.setMonitors(new ArrayList<>());
-            return snapshot;
-        }
-    }
-
-    @Data
-    public static class MonitorInfo {
-        private int monitorId;
-        private int width;
-        private int height;
-        private int x;
-        private int y;
-        private boolean primary;
-    }
-
-    public ActionExecutionContext getExecutionContext() {
-        return executionContext;
-    }
-
-    public void setExecutionContext(ActionExecutionContext executionContext) {
-        this.executionContext = executionContext;
-    }
-
-    public ActionMetrics getActionMetrics() {
-        return actionMetrics;
-    }
-
-    public void setActionMetrics(ActionMetrics actionMetrics) {
-        this.actionMetrics = actionMetrics;
-    }
-
-    public EnvironmentSnapshot getEnvironmentSnapshot() {
-        return EnvironmentSnapshot.getInstance();
-    }
 
     public String getLogTargetName() {
-        if (executionContext != null && executionContext.getPrimaryTargetName() != null) {
-            return executionContext.getPrimaryTargetName();
-        }
-
         if (!getMatchList().isEmpty()) {
             Match firstMatch = getMatchList().get(0);
             if (firstMatch.getStateObjectData() != null) {
@@ -1002,13 +905,10 @@ public class ActionResult {
     }
 
     public long getExecutionTimeMs() {
-        if (actionMetrics != null) {
-            return actionMetrics.getExecutionTimeMs();
-        }
         return timingData.getExecutionTimeMs();
     }
 
     public boolean isLoggable() {
-        return executionContext != null && executionContext.getEndTime() != null;
+        return getEndTime() != null;
     }
 }

@@ -48,7 +48,7 @@ import lombok.Setter;
  * <ul>
  *   <li><b>probabilityStaysVisibleAfterClicked</b>: Likelihood (0-100) the location remains
  *       actionable after being clicked
- *   <li><b>probabilityExists</b>: Likelihood (0-100) of finding actionable content at this location
+ *   <li><b>mockFindStochasticModifier</b>: Likelihood (0-100) of finding actionable content at this location
  *       when the state is active
  * </ul>
  *
@@ -84,7 +84,7 @@ public class StateLocation implements StateObject {
     private String ownerStateName = "null";
     private Long ownerStateId = null;
     private int probabilityStaysVisibleAfterClicked = 100;
-    private int probabilityExists = 100; // probability something can be acted on at this location
+    private int mockFindStochasticModifier = 100; // modifier for find probability in mock mode
     private int timesActedOn = 0;
     private Position position;
     private Anchors anchors; // just one, but defined with Anchors b/c it's a StateObject
@@ -130,8 +130,8 @@ public class StateLocation implements StateObject {
         private String ownerStateName = "null";
         private Long ownerStateId = 0L;
         private int probabilityStaysVisibleAfterClicked = 100;
-        private int probabilityExists =
-                100; // probability something can be acted on at this location
+        private int mockFindStochasticModifier =
+                100; // modifier for find probability in mock mode
         private int timesActedOn = 0;
         private Position position = new Position(.5, .5);
         private Anchors anchors = new Anchors();
@@ -164,8 +164,8 @@ public class StateLocation implements StateObject {
             return this;
         }
 
-        public Builder setProbabilityExists(int probabilityExists) {
-            this.probabilityExists = probabilityExists;
+        public Builder setMockFindStochasticModifier(int mockFindStochasticModifier) {
+            this.mockFindStochasticModifier = mockFindStochasticModifier;
             return this;
         }
 
@@ -216,7 +216,7 @@ public class StateLocation implements StateObject {
             stateLocation.ownerStateName = ownerStateName;
             stateLocation.ownerStateId = ownerStateId;
             stateLocation.probabilityStaysVisibleAfterClicked = probabilityStaysVisibleAfterClicked;
-            stateLocation.probabilityExists = probabilityExists;
+            stateLocation.mockFindStochasticModifier = mockFindStochasticModifier;
             stateLocation.timesActedOn = timesActedOn;
             stateLocation.position = position;
             stateLocation.anchors = anchors;

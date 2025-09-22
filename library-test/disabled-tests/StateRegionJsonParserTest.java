@@ -93,7 +93,7 @@ public class StateRegionJsonParserTest {
                 .setOwnerStateName("PropertiesState")
                 .setSearchRegion(new Region(30, 40, 300, 400))
                 .setStaysVisibleAfterClicked(500)
-                .setProbabilityExists(75)
+                .setMockFindStochasticModifier(75)
                 .setPosition(new Position(0.25, 0.75))
                 .setMockText("Mock region text")
                 .build();

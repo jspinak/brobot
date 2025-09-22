@@ -16,7 +16,7 @@ import io.github.jspinak.brobot.test.BrobotTestBase;
 @ExtendWith(MockitoExtension.class)
 public class VisualFeedbackConfigTest extends BrobotTestBase {
 
-    private VisualFeedbackConfig config;
+    // VisualFeedbackConfig removed
     private final ApplicationContextRunner contextRunner =
             new ApplicationContextRunner().withUserConfiguration(TestConfiguration.class);
 

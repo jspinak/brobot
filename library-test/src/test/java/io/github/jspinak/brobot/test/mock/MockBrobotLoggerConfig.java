@@ -5,12 +5,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
 import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
-import io.github.jspinak.brobot.logging.unified.*;
-import io.github.jspinak.brobot.logging.unified.console.ConsoleFormatter;
+import io.github.jspinak.brobot.logging.BrobotLogger;
 import io.github.jspinak.brobot.test.logging.TestLoggerFactory;
-import io.github.jspinak.brobot.tools.logging.ActionLogger;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporterInitializer;
-import io.github.jspinak.brobot.tools.logging.spi.LogSink;
 
 /**
  * Test configuration that provides a functional BrobotLogger for tests.
@@ -30,46 +26,16 @@ public class MockBrobotLoggerConfig {
      */
     @Bean
     public TestLoggerFactory.LoggingSystem testLoggingSystem(
-            ActionLogger actionLogger, LoggingVerbosityConfig verbosityConfig) {
+            LoggingVerbosityConfig verbosityConfig) {
         TestLoggerFactory factory = new TestLoggerFactory();
-        this.loggingSystem = factory.createTestLoggingSystem(actionLogger, verbosityConfig);
+        // Pass null for actionLogger since it's been removed
+        this.loggingSystem = factory.createTestLoggingSystem(null, verbosityConfig);
         return loggingSystem;
-    }
-
-    @Bean
-    @Primary
-    public LoggingContext loggingContext(TestLoggerFactory.LoggingSystem system) {
-        return system.getContext();
-    }
-
-    @Bean
-    @Primary
-    public LogSink logSink(TestLoggerFactory.LoggingSystem system) {
-        return system.getLogSink();
-    }
-
-    @Bean
-    @Primary
-    public ConsoleFormatter consoleFormatter(TestLoggerFactory.LoggingSystem system) {
-        return system.getFormatter();
-    }
-
-    @Bean
-    @Primary
-    public MessageRouter messageRouter(TestLoggerFactory.LoggingSystem system) {
-        return system.getRouter();
     }
 
     @Bean
     @Primary
     public BrobotLogger brobotLogger(TestLoggerFactory.LoggingSystem system) {
         return system.getLogger();
-    }
-
-    @Bean
-    @Primary
-    public ConsoleReporterInitializer consoleReporterInitializer(
-            TestLoggerFactory.LoggingSystem system) {
-        return system.getReporterInit();
     }
 }

@@ -15,8 +15,7 @@ import org.springframework.stereotype.Component;
 import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.statemanagement.StateDetector;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -172,13 +171,6 @@ public class StateAwareScheduler {
         if (maxIterations > 0) {
             if (verbosityConfig != null
                     && (verbosityConfig.isNormalMode() || verbosityConfig.isVerboseMode())) {
-                ConsoleReporter.println(
-                        "[SCHEDULER] Starting scheduled task with "
-                                + maxIterations
-                                + " iteration limit, period: "
-                                + period
-                                + " "
-                                + unit.toString().toLowerCase());
             }
         }
 
@@ -190,10 +182,6 @@ public class StateAwareScheduler {
                             int currentIteration = iterationCount.incrementAndGet();
                             if (currentIteration > maxIterations) {
                                 // Always log when stopping due to max iterations
-                                ConsoleReporter.println(
-                                        "[SCHEDULER] Reached maximum iterations ("
-                                                + maxIterations
-                                                + "), stopping scheduled task");
                                 log.info(
                                         "Reached maximum iterations ({}) for scheduled task,"
                                                 + " stopping",
@@ -205,21 +193,11 @@ public class StateAwareScheduler {
                             if (verbosityConfig != null) {
                                 if (verbosityConfig.isVerboseMode()) {
                                     // VERBOSE: Log every iteration
-                                    ConsoleReporter.println(
-                                            "[SCHEDULER] Executing iteration "
-                                                    + currentIteration
-                                                    + "/"
-                                                    + maxIterations);
                                 } else if (verbosityConfig.isNormalMode()
                                         && (currentIteration == 1
                                                 || currentIteration % 5 == 0
                                                 || currentIteration == maxIterations)) {
                                     // NORMAL: Log first, every 5th, and last iteration
-                                    ConsoleReporter.println(
-                                            "[SCHEDULER] Iteration "
-                                                    + currentIteration
-                                                    + "/"
-                                                    + maxIterations);
                                 }
                                 // QUIET: No iteration logging
                             } else {
@@ -282,13 +260,6 @@ public class StateAwareScheduler {
         if (maxIterations > 0) {
             if (verbosityConfig != null
                     && (verbosityConfig.isNormalMode() || verbosityConfig.isVerboseMode())) {
-                ConsoleReporter.println(
-                        "[SCHEDULER] Starting scheduled task with "
-                                + maxIterations
-                                + " iteration limit, delay: "
-                                + delay
-                                + " "
-                                + unit.toString().toLowerCase());
             }
         }
 
@@ -300,10 +271,6 @@ public class StateAwareScheduler {
                             int currentIteration = iterationCount.incrementAndGet();
                             if (currentIteration > maxIterations) {
                                 // Always log when stopping due to max iterations
-                                ConsoleReporter.println(
-                                        "[SCHEDULER] Reached maximum iterations ("
-                                                + maxIterations
-                                                + "), stopping scheduled task");
                                 log.info(
                                         "Reached maximum iterations ({}) for scheduled task,"
                                                 + " stopping",
@@ -315,21 +282,11 @@ public class StateAwareScheduler {
                             if (verbosityConfig != null) {
                                 if (verbosityConfig.isVerboseMode()) {
                                     // VERBOSE: Log every iteration
-                                    ConsoleReporter.println(
-                                            "[SCHEDULER] Executing iteration "
-                                                    + currentIteration
-                                                    + "/"
-                                                    + maxIterations);
                                 } else if (verbosityConfig.isNormalMode()
                                         && (currentIteration == 1
                                                 || currentIteration % 5 == 0
                                                 || currentIteration == maxIterations)) {
                                     // NORMAL: Log first, every 5th, and last iteration
-                                    ConsoleReporter.println(
-                                            "[SCHEDULER] Iteration "
-                                                    + currentIteration
-                                                    + "/"
-                                                    + maxIterations);
                                 }
                                 // QUIET: No iteration logging
                             } else {

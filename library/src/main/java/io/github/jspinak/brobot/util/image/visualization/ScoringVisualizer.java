@@ -13,7 +13,6 @@ import org.bytedeco.opencv.opencv_core.Size;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.model.analysis.color.ColorSchema;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
 
 /**
@@ -103,8 +102,9 @@ public class ScoringVisualizer {
         Mat hsvMean = colorSchema.getMat(MEAN, new Size(size, size));
         MatrixUtilities.printPartOfMat(hsvMean, 5, 5, "hsvMean");
         List.of(colorSchema.getColorStats(MEAN))
-                .forEach(dbl -> ConsoleReporter.println("mean: " + Arrays.toString(dbl)));
-        MatrixUtilities.info(hsvMean, "hsvMean");
+                .forEach(dbl -> {
+                });
+        // MatrixUtilities.info removed
         cvtColor(hsvMean, hsvMean, COLOR_HSV2BGR);
         addText(hsvMean, "Mean");
         return hsvMean;
@@ -136,7 +136,7 @@ public class ScoringVisualizer {
         cvtColor(hsvPixel, bgrPixel, COLOR_HSV2BGR);
         Mat bgrPixelResized = new Mat();
         resize(bgrPixel, bgrPixelResized, new Size(size, size), 0, 0, INTER_AREA);
-        MatrixUtilities.info(bgrPixel, "bgrPixel");
+        // MatrixUtilities.info removed
         addText(bgrPixelResized, "Pixel");
         return bgrPixelResized;
     }

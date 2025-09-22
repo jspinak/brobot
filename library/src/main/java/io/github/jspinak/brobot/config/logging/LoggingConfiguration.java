@@ -4,8 +4,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import io.github.jspinak.brobot.tools.logging.spi.LogSink;
-import io.github.jspinak.brobot.tools.logging.spi.NoOpLogSink;
+// Removed old logging imports that no longer exist:
+// import io.github.jspinak.brobot.tools.logging.spi.LogSink;
+// import io.github.jspinak.brobot.tools.logging.spi.NoOpLogSink;
 
 /**
  * Spring configuration for the Brobot logging subsystem.
@@ -84,11 +85,12 @@ public class LoggingConfiguration {
      * @see NoOpLogSink
      * @see ConditionalOnMissingBean
      */
-    @Bean
-    @ConditionalOnMissingBean(LogSink.class)
-    public LogSink defaultLogSink() {
-        // This bean will only be created if no other LogSink bean
-        // (like the runner's DatabaseLogSink) is present in the context.
-        return new NoOpLogSink();
-    }
+    // Commented out - LogSink classes no longer exist
+    // @Bean
+    // @ConditionalOnMissingBean(LogSink.class)
+    // public LogSink defaultLogSink() {
+    //     // This bean will only be created if no other LogSink bean
+    //     // (like the runner's DatabaseLogSink) is present in the context.
+    //     return new NoOpLogSink();
+    // }
 }

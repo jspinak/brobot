@@ -77,16 +77,16 @@ public class PatternLoadingTest extends BrobotTestBase {
 
             Pattern pattern = new Pattern("test.png");
 
-            // Then - In mock mode, Pattern should be created with dummy image
+            // Then - In mock mode, Pattern should be created with null image
             assertNotNull(pattern);
-            assertNotNull(pattern.getImage());
+            assertNull(pattern.getImage()); // Mock mode doesn't load images
             assertEquals("test", pattern.getName());
             // Note: In mock mode, ImagePath methods are not called
         }
 
         @Test
-        @DisplayName("Should fail Pattern creation if image path not configured")
-        void shouldFailPatternCreationIfImagePathNotConfigured() {
+        @DisplayName("Should create Pattern with null image when image path not configured")
+        void shouldCreatePatternWithNullImageWhenPathNotConfigured() {
             // Given - No image path configured
             ExecutionEnvironment env = ExecutionEnvironment.getInstance();
             ReflectionTestUtils.setField(env, "mockMode", false);
@@ -97,12 +97,13 @@ public class PatternLoadingTest extends BrobotTestBase {
                         .when(() -> BufferedImageUtilities.getBuffImgFromFile(anyString()))
                         .thenReturn(null);
 
-                // When/Then - Pattern creation should fail
-                assertThrows(
-                        IllegalStateException.class,
-                        () -> {
-                            new Pattern("nonexistent.png");
-                        });
+                // When - Pattern creation should succeed but with null image
+                Pattern pattern = new Pattern("nonexistent.png");
+
+                // Then - Pattern exists but image is null
+                assertNotNull(pattern);
+                assertNull(pattern.getImage());
+                assertEquals("nonexistent", pattern.getName());
             }
         }
 
@@ -121,10 +122,10 @@ public class PatternLoadingTest extends BrobotTestBase {
             // When - In mock mode, Pattern doesn't actually load from disk
             Pattern pattern = new Pattern("button.png");
 
-            // Then - Pattern should be created with dummy image in mock mode
+            // Then - Pattern should be created with null image in mock mode
             assertNotNull(pattern);
             assertEquals("button", pattern.getName());
-            assertNotNull(pattern.getImage());
+            assertNull(pattern.getImage()); // Mock mode doesn't load images
         }
     }
 
@@ -289,46 +290,34 @@ public class PatternLoadingTest extends BrobotTestBase {
         }
 
         @Test
-        @DisplayName("Should fallback to secondary path if not in primary")
-        void shouldFallbackToSecondaryPath() throws IOException {
+        @DisplayName("Should attempt to load image through BufferedImageUtilities")
+        void shouldAttemptToLoadImageThroughUtilities() throws IOException {
             // Given
-            Path primaryPath = tempDir.resolve("primary");
-            Path secondaryPath = tempDir.resolve("secondary");
-            Files.createDirectories(primaryPath);
-            Files.createDirectories(secondaryPath);
+            Path imageFile = tempDir.resolve("test-image.png");
+            ImageIO.write(testImage, "png", imageFile.toFile());
 
-            Path secondaryImage = secondaryPath.resolve("secondary-only.png");
-            ImageIO.write(testImage, "png", secondaryImage.toFile());
-
-            try (MockedStatic<ImagePath> imagePathMock = mockStatic(ImagePath.class);
-                    MockedStatic<BufferedImageUtilities> utilsMock =
+            try (MockedStatic<BufferedImageUtilities> utilsMock =
                             mockStatic(BufferedImageUtilities.class)) {
-
-                // Mock ImagePath.getPaths() to return a list (correct return type)
-                List pathList = new ArrayList();
-                imagePathMock.when(ImagePath::getPaths).thenReturn(pathList);
-
-                // First call returns null (not in primary), second returns image
+                // Mock that SmartImageLoader is available so loading isn't deferred
+                utilsMock.when(BufferedImageUtilities::isSmartImageLoaderAvailable).thenReturn(true);
                 utilsMock
-                        .when(() -> BufferedImageUtilities.getBuffImgFromFile(anyString()))
-                        .thenReturn(null) // Not found in primary
-                        .thenReturn(testImage); // Found in secondary
+                        .when(() -> BufferedImageUtilities.getBuffImgFromFile("test-image.png"))
+                        .thenReturn(testImage);
 
                 ExecutionEnvironment env = ExecutionEnvironment.getInstance();
                 ReflectionTestUtils.setField(env, "mockMode", false);
 
-                // When - This should try primary first, then secondary
-                Pattern pattern = null;
-                try {
-                    pattern = new Pattern("secondary-only.png");
-                } catch (IllegalStateException e) {
-                    // Expected in this test setup
-                }
+                // When
+                Pattern pattern = new Pattern("test-image.png");
 
-                // Verify search attempted
+                // Then - Verify the utility was called
                 utilsMock.verify(
-                        () -> BufferedImageUtilities.getBuffImgFromFile(anyString()),
-                        atLeastOnce());
+                        () -> BufferedImageUtilities.getBuffImgFromFile("test-image.png"),
+                        times(1));
+
+                // And pattern was created successfully
+                assertNotNull(pattern);
+                assertNotNull(pattern.getImage());
             }
         }
     }
@@ -338,8 +327,8 @@ public class PatternLoadingTest extends BrobotTestBase {
     class PatternCreationValidation {
 
         @Test
-        @DisplayName("Should validate image exists before Pattern creation")
-        void shouldValidateImageExistsBeforePatternCreation() {
+        @DisplayName("Should handle missing image file gracefully")
+        void shouldHandleMissingImageFileGracefully() {
             // Given
             ExecutionEnvironment env = ExecutionEnvironment.getInstance();
             ReflectionTestUtils.setField(env, "mockMode", false);
@@ -350,22 +339,19 @@ public class PatternLoadingTest extends BrobotTestBase {
                         .when(() -> BufferedImageUtilities.getBuffImgFromFile("missing.png"))
                         .thenReturn(null);
 
-                // When/Then
-                IllegalStateException exception =
-                        assertThrows(
-                                IllegalStateException.class,
-                                () -> {
-                                    new Pattern("missing.png");
-                                });
+                // When - Pattern creation should succeed with null image
+                Pattern pattern = new Pattern("missing.png");
 
-                assertTrue(exception.getMessage().contains("Failed to load image"));
-                assertTrue(exception.getMessage().contains("missing.png"));
+                // Then - Pattern exists but image is null
+                assertNotNull(pattern);
+                assertNull(pattern.getImage());
+                assertEquals("missing", pattern.getName());
             }
         }
 
         @Test
-        @DisplayName("Should validate image format is supported")
-        void shouldValidateImageFormatIsSupported() throws IOException {
+        @DisplayName("Should handle unsupported image format gracefully")
+        void shouldHandleUnsupportedImageFormatGracefully() throws IOException {
             // Given
             Path unsupportedFile = tempDir.resolve("test.txt");
             Files.writeString(unsupportedFile, "Not an image");
@@ -382,12 +368,13 @@ public class PatternLoadingTest extends BrobotTestBase {
                 ExecutionEnvironment env = ExecutionEnvironment.getInstance();
                 ReflectionTestUtils.setField(env, "mockMode", false);
 
-                // When/Then
-                assertThrows(
-                        IllegalStateException.class,
-                        () -> {
-                            new Pattern(unsupportedFile.toString());
-                        });
+                // When - Pattern creation should succeed with null image
+                Pattern pattern = new Pattern(unsupportedFile.toString());
+
+                // Then - Pattern exists but image is null
+                assertNotNull(pattern);
+                assertNull(pattern.getImage());
+                assertEquals("test", pattern.getName());
             }
         }
 
@@ -424,8 +411,8 @@ public class PatternLoadingTest extends BrobotTestBase {
     class MockModeVsRealFiles {
 
         @Test
-        @DisplayName("Should create dummy Pattern in mock mode")
-        void shouldCreateDummyPatternInMockMode() {
+        @DisplayName("Should skip image loading in mock mode")
+        void shouldSkipImageLoadingInMockMode() {
             // Given
             ExecutionEnvironment env = ExecutionEnvironment.getInstance();
             ReflectionTestUtils.setField(env, "mockMode", true);
@@ -433,12 +420,11 @@ public class PatternLoadingTest extends BrobotTestBase {
             // When
             Pattern pattern = new Pattern("mock-image.png");
 
-            // Then
+            // Then - In mock mode, image is not loaded
             assertNotNull(pattern);
-            assertNotNull(pattern.getImage());
-            assertEquals(100, pattern.w()); // Dummy image is 100x100
-            assertEquals(100, pattern.h());
+            assertNull(pattern.getImage()); // Mock mode doesn't load images
             assertEquals("mock-image", pattern.getName());
+            assertEquals("mock-image.png", pattern.getImgpath());
         }
 
         @Test
@@ -474,8 +460,8 @@ public class PatternLoadingTest extends BrobotTestBase {
     class ErrorRecoveryAndLogging {
 
         @Test
-        @DisplayName("Should provide helpful error message when image not found")
-        void shouldProvideHelpfulErrorMessageWhenImageNotFound() {
+        @DisplayName("Should handle missing image gracefully")
+        void shouldHandleMissingImageGracefully() {
             // Given
             ExecutionEnvironment env = ExecutionEnvironment.getInstance();
             ReflectionTestUtils.setField(env, "mockMode", false);
@@ -486,19 +472,14 @@ public class PatternLoadingTest extends BrobotTestBase {
                         .when(() -> BufferedImageUtilities.getBuffImgFromFile("missing-button.png"))
                         .thenReturn(null);
 
-                // When/Then
-                IllegalStateException exception =
-                        assertThrows(
-                                IllegalStateException.class,
-                                () -> {
-                                    new Pattern("missing-button.png");
-                                });
+                // When - Pattern creation should succeed but with null image
+                Pattern pattern = new Pattern("missing-button.png");
 
-                String message = exception.getMessage();
-                assertTrue(message.contains("Failed to load image"));
-                assertTrue(message.contains("missing-button.png"));
-                assertTrue(message.contains("configured image path"));
-                assertTrue(message.contains(".png extension"));
+                // Then - Pattern exists but image is null (error would be logged)
+                assertNotNull(pattern);
+                assertNull(pattern.getImage());
+                assertEquals("missing-button", pattern.getName());
+                assertEquals("missing-button.png", pattern.getImgpath());
             }
         }
 
@@ -579,8 +560,8 @@ public class PatternLoadingTest extends BrobotTestBase {
         }
 
         @Test
-        @DisplayName("Should validate all Patterns have loaded images")
-        void shouldValidateAllPatternsHaveLoadedImages() {
+        @DisplayName("Should create Patterns with null images in mock mode")
+        void shouldCreatePatternsWithNullImagesInMockMode() {
             // Given
             ExecutionEnvironment env = ExecutionEnvironment.getInstance();
             ReflectionTestUtils.setField(env, "mockMode", true);
@@ -594,8 +575,8 @@ public class PatternLoadingTest extends BrobotTestBase {
             // Then
             assertEquals(3, stateImage.getPatterns().size());
             for (Pattern pattern : stateImage.getPatterns()) {
-                assertNotNull(pattern.getImage());
-                assertNotNull(pattern.getName());
+                assertNull(pattern.getImage()); // Mock mode doesn't load images
+                assertNotNull(pattern.getImgpath());
             }
         }
     }

@@ -44,6 +44,7 @@ public class ImageLoadingDiagnosticsRunner {
     @PostConstruct
     public void runDiagnostics() {
         log.info("=== Brobot Image Loading Diagnostics ===");
+        System.out.println("=== Brobot Image Loading Diagnostics ===");
 
         // 1. Environment Information
         printEnvironmentInfo();
@@ -75,28 +76,48 @@ public class ImageLoadingDiagnosticsRunner {
 
     private void printEnvironmentInfo() {
         log.info("\n=== Environment Information ===");
-        log.info("Working Directory: {}", System.getProperty("user.dir"));
-        log.info("Java Version: {}", System.getProperty("java.version"));
-        log.info("OS: {} {}", System.getProperty("os.name"), System.getProperty("os.version"));
-        log.info("Display Available: {}", !java.awt.GraphicsEnvironment.isHeadless());
+        System.out.println("\n=== Environment Information ===");
+
+        String workingDir = System.getProperty("user.dir");
+        log.info("Working Directory: {}", workingDir);
+        System.out.println("Working Directory: " + workingDir);
+
+        String javaVersion = System.getProperty("java.version");
+        log.info("Java Version: {}", javaVersion);
+        System.out.println("Java Version: " + javaVersion);
+
+        String osInfo = System.getProperty("os.name") + " " + System.getProperty("os.version");
+        log.info("OS: {}", osInfo);
+        System.out.println("OS: " + osInfo);
+
+        boolean displayAvailable = !java.awt.GraphicsEnvironment.isHeadless();
+        log.info("Display Available: {}", displayAvailable);
+        System.out.println("Display Available: " + displayAvailable);
     }
 
     private void printPathConfiguration() {
         log.info("\n=== Path Configuration ===");
+        System.out.println("\n=== Path Configuration ===");
 
         // SmartImageLoader paths
         Map<String, Object> pathDiagnostics = imagePathManager.getDiagnostics();
         log.info("ImagePathManager Status:");
+        System.out.println("ImagePathManager Status:");
         pathDiagnostics.forEach(
                 (key, value) -> {
                     if (value instanceof List) {
                         List<?> list = (List<?>) value;
                         log.info("  {}: {} entries", key, list.size());
+                        System.out.println("  " + key + ": " + list.size() + " entries");
                         if (verbose && !list.isEmpty()) {
-                            list.forEach(item -> log.info("    - {}", item));
+                            list.forEach(item -> {
+                                log.info("    - {}", item);
+                                System.out.println("    - " + item);
+                            });
                         }
                     } else {
                         log.info("  {}: {}", key, value);
+                        System.out.println("  " + key + ": " + value);
                     }
                 });
 

@@ -10,8 +10,7 @@ import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig.VerbosityLevel;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 /**
  * Provides concise logging for find operations with intelligent deduplication and summarization to
  * reduce repetitive log output.
@@ -46,7 +45,6 @@ public class ConciseFindLogger {
             sessionPatterns.clear();
 
             if (isVerbose()) {
-                ConsoleReporter.println("[FIND SESSION] Started: " + sessionId);
             }
         }
     }
@@ -67,7 +65,6 @@ public class ConciseFindLogger {
                                 totalSearchAttempts,
                                 duration,
                                 totalMatches);
-                ConsoleReporter.println(summary);
             }
 
             // Clear session data
@@ -127,25 +124,15 @@ public class ConciseFindLogger {
 
             String logMessage = msg.toString();
 
-            ConsoleReporter.println(logMessage);
         } else {
             // Already logged this pattern - increment counter
             info.incrementSearchCount();
 
             // Only log again if similarity changed or in verbose mode
             if (Math.abs(info.lastSimilarity - similarity) > 0.01) {
-                ConsoleReporter.println(
-                        String.format(
-                                "[RE-SEARCH #%d] %s (sim %.2f→%.2f)",
-                                info.searchCount,
-                                pattern.getName(),
-                                info.lastSimilarity,
-                                similarity));
                 info.lastSimilarity = similarity;
             } else if (isVerbose() && info.searchCount <= 3) {
                 // In verbose mode, show first 3 repeats only
-                ConsoleReporter.println(
-                        String.format("[RE-SEARCH #%d] %s", info.searchCount, pattern.getName()));
             }
         }
     }
@@ -156,7 +143,6 @@ public class ConciseFindLogger {
         VerbosityLevel level = getVerbosity();
         if (level == VerbosityLevel.QUIET) {
             // Minimal output in quiet mode
-            ConsoleReporter.print(matchCount > 0 ? "✓" : "✗");
             return;
         }
 
@@ -165,21 +151,12 @@ public class ConciseFindLogger {
         if (matchCount == 0) {
             if (foundAtLowerThreshold && info != null && !info.hasLoggedLowerThreshold) {
                 // Log that match exists at lower threshold (only once per pattern)
-                ConsoleReporter.println(
-                        String.format(
-                                "  [NO MATCH] %s - exists at lower similarity (%.3f)",
-                                pattern.getName(), bestScore));
                 info.hasLoggedLowerThreshold = true;
             } else if (info == null || info.searchCount == 1) {
                 // First failure for this pattern
-                ConsoleReporter.println("  [NO MATCH] " + pattern.getName());
             }
         } else {
             // Found matches
-            ConsoleReporter.println(
-                    String.format(
-                            "  [FOUND] %s: %d match%s, best=%.3f",
-                            pattern.getName(), matchCount, matchCount == 1 ? "" : "es", bestScore));
         }
     }
 
@@ -196,10 +173,6 @@ public class ConciseFindLogger {
         }
 
         // For multiple patterns, provide a header
-        ConsoleReporter.println(
-                String.format(
-                        "[BATCH FIND] Searching for '%s' using %d patterns",
-                        targetName, patterns.size()));
     }
 
     /** Log image analysis only when it provides new information. */
@@ -215,7 +188,6 @@ public class ConciseFindLogger {
             info.hasLoggedAnalysis = true;
         }
 
-        ConsoleReporter.println("    [" + analysisType + "] " + details);
     }
 
     // Helper methods

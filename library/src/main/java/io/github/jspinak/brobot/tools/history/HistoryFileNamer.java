@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.tools.history;
 
+import io.github.jspinak.brobot.util.location.LocationUtils;
+
 import static io.github.jspinak.brobot.action.ActionType.FIND;
 
 import java.util.ArrayList;
@@ -17,7 +19,6 @@ import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalysis;
 import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.file.FilenameAllocator;
 
 /**
@@ -167,7 +168,6 @@ public class HistoryFileNamer {
                         + "_"
                         + names
                         + String.join("_", additionalDescription);
-        ConsoleReporter.println("Filename: " + prefix + suffix);
         return filenameRepo.reserveFreePath(prefix, suffix);
     }
 

@@ -24,8 +24,7 @@ import io.github.jspinak.brobot.navigation.service.StateTransitionService;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
 import io.github.jspinak.brobot.statemanagement.StateVisibilityManager;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-import io.github.jspinak.brobot.tools.logging.MessageFormatter;
+// Removed old logging import: // Removed old logging import: import io.github.jspinak.brobot.tools.logging.MessageFormatter;
 
 @DisplayName("TransitionExecutor Tests")
 public class TransitionExecutorTest extends BrobotTestBase {
@@ -82,7 +81,6 @@ public class TransitionExecutorTest extends BrobotTestBase {
             // Setup successful transition scenario
             setupSuccessfulTransition(fromState, toState);
 
-            try (MockedStatic<ConsoleReporter> consoleMock = mockStatic(ConsoleReporter.class)) {
                 // Execute
                 boolean result = executor.go(fromState, toState);
 
@@ -90,11 +88,6 @@ public class TransitionExecutorTest extends BrobotTestBase {
                 assertTrue(result);
                 consoleMock.verify(
                         () ->
-                                ConsoleReporter.format(
-                                        MessageFormatter.check
-                                                + " Transition %s->%s successful. \n",
-                                        fromState,
-                                        toState));
             }
         }
 
@@ -109,7 +102,6 @@ public class TransitionExecutorTest extends BrobotTestBase {
             when(stateMemory.isActive(fromState)).thenReturn(false);
             when(stateMemory.getActiveStates()).thenReturn(new HashSet<>());
 
-            try (MockedStatic<ConsoleReporter> consoleMock = mockStatic(ConsoleReporter.class)) {
                 // Execute
                 boolean result = executor.go(fromState, toState);
 
@@ -117,11 +109,6 @@ public class TransitionExecutorTest extends BrobotTestBase {
                 assertFalse(result);
                 consoleMock.verify(
                         () ->
-                                ConsoleReporter.format(
-                                        MessageFormatter.fail
-                                                + " Transition %s->%s not successful. \n",
-                                        fromState,
-                                        toState));
             }
         }
     }

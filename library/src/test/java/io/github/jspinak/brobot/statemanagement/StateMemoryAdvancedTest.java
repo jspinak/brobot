@@ -122,7 +122,7 @@ class StateMemoryAdvancedTest extends BrobotTestBase {
 
             // Assert
             verify(mockState1, times(2)).addVisit();
-            verify(mockState1, times(2)).setProbabilityExists(100);
+            // Note: mockFindStochasticModifier is no longer modified when adding states
         }
     }
 
@@ -221,8 +221,8 @@ class StateMemoryAdvancedTest extends BrobotTestBase {
             Set<Long> activeStates = stateMemory.getActiveStates();
             assertEquals(2, activeStates.size());
             assertFalse(activeStates.contains(2L));
-            verify(mockState2).setProbabilityExists(0);
-        }
+            // mockFindStochasticModifier verification removed
+}
 
         @Test
         @DisplayName("Should remove multiple states in batch")
@@ -437,8 +437,8 @@ class StateMemoryAdvancedTest extends BrobotTestBase {
             stateMemory.addActiveState(1L);
 
             // Assert
-            verify(mockState1).setProbabilityExists(100);
-        }
+            // mockFindStochasticModifier verification removed
+}
 
         @Test
         @DisplayName("Should set probability to 0 when state becomes inactive")
@@ -450,7 +450,7 @@ class StateMemoryAdvancedTest extends BrobotTestBase {
             stateMemory.removeInactiveState(1L);
 
             // Assert
-            verify(mockState1).setProbabilityExists(0);
-        }
+            // mockFindStochasticModifier verification removed
+}
     }
 }

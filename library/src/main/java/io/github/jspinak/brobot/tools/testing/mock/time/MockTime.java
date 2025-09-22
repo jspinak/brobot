@@ -6,8 +6,7 @@ import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-import io.github.jspinak.brobot.tools.testing.mock.MockStatus;
+// Removed old logging import: import io.github.jspinak.brobot.tools.testing.mock.MockStatus;
 
 /**
  * Provides simulated time control for mock testing environments in Brobot.
@@ -110,8 +109,6 @@ public class MockTime {
 
     public void wait(double seconds) {
         if (seconds <= 0) return;
-        if (ConsoleReporter.minReportingLevel(ConsoleReporter.OutputLevel.HIGH))
-            System.out.format("%s-%.1f ", "wait", seconds);
         long nanoTimeout = (long) (seconds * Math.pow(10, 9));
         now = now.plusNanos(nanoTimeout);
     }

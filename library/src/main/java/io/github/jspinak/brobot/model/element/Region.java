@@ -41,6 +41,47 @@ import lombok.Setter;
  * approach, including grid operations, region arithmetic, and integration with other Brobot data
  * types like Match and Location.
  *
+ * <h3>Example Usage:</h3>
+ * <pre>{@code
+ * // Create regions
+ * Region fullScreen = new Region();  // Full screen
+ * Region area = new Region(100, 100, 200, 150);  // x, y, width, height
+ * Region fromMatch = match.getRegion();  // From a match
+ *
+ * // Use builder for fluent creation
+ * Region searchArea = Region.builder()
+ *     .withPosition(Positions.Name.TOPRIGHT)
+ *     .withSize(300, 200)
+ *     .build();
+ *
+ * // Perform actions on regions
+ * action.click(area);  // Click center
+ * action.highlight(area);  // Highlight for debugging
+ *
+ * // Restrict search to region
+ * PatternFindOptions options = new PatternFindOptions.Builder()
+ *     .setSearchRegions(new SearchRegions(area))
+ *     .build();
+ * ActionResult result = action.perform(options, targetImage.asObjectCollection());
+ *
+ * // Region operations
+ * Region expanded = area.grow(10);  // Expand by 10 pixels
+ * Region shrunken = area.shrink(5);  // Shrink by 5 pixels
+ * Region moved = area.move(50, 0);  // Move 50 pixels right
+ *
+ * // Check containment
+ * Location point = new Location(150, 150);
+ * if (area.contains(point)) {
+ *     System.out.println("Point is inside region");
+ * }
+ *
+ * // Grid operations
+ * List<Region> grid = area.getGrid(2, 2);  // 2x2 grid
+ * for (Region cell : grid) {
+ *     action.highlight(cell);  // Highlight each cell
+ * }
+ * }</pre>
+ *
  * @since 1.0
  * @see Location
  * @see Match
@@ -199,55 +240,128 @@ public class Region implements Comparable<Region> {
         }
     }
 
+    /**
+     * Returns the x-coordinate of the region's top-left corner.
+     *
+     * @return the x-coordinate
+     */
     public int x() {
         return x;
     }
 
+    /**
+     * Returns the y-coordinate of the region's top-left corner.
+     *
+     * @return the y-coordinate
+     */
     public int y() {
         return y;
     }
 
+    /**
+     * Returns the width of the region.
+     *
+     * @return the width in pixels
+     */
     public int w() {
         return w;
     }
 
+    /**
+     * Returns the height of the region.
+     *
+     * @return the height in pixels
+     */
     public int h() {
         return h;
     }
 
+    /**
+     * Returns the x-coordinate of the region's bottom-right corner.
+     *
+     * @return the x-coordinate of the right edge (x + width)
+     */
     public int x2() {
         return RegionUtils.x2(this);
     }
 
+    /**
+     * Returns the y-coordinate of the region's bottom-right corner.
+     *
+     * @return the y-coordinate of the bottom edge (y + height)
+     */
     public int y2() {
         return RegionUtils.y2(this);
     }
 
+    /**
+     * Adjusts the width of the region to set the right edge at the specified x-coordinate.
+     *
+     * @param x2 the new x-coordinate for the right edge
+     */
     public void adjustX2(int x2) {
         RegionUtils.adjustX2(this, x2);
     }
 
+    /**
+     * Adjusts the height of the region to set the bottom edge at the specified y-coordinate.
+     *
+     * @param y2 the new y-coordinate for the bottom edge
+     */
     public void adjustY2(int y2) {
         RegionUtils.adjustY2(this, y2);
     }
 
+    /**
+     * Adjusts the x-coordinate of the region while maintaining its width.
+     *
+     * @param newX the new x-coordinate for the top-left corner
+     */
     public void adjustX(int newX) {
         RegionUtils.adjustX(this, newX);
     }
 
+    /**
+     * Adjusts the y-coordinate of the region while maintaining its height.
+     *
+     * @param newY the new y-coordinate for the top-left corner
+     */
     public void adjustY(int newY) {
         RegionUtils.adjustY(this, newY);
     }
 
+    /**
+     * Compares this region to another region for ordering.
+     * Regions are compared first by y-coordinate, then by x-coordinate.
+     *
+     * @param comparesTo the region to compare with
+     * @return negative if this region comes before, positive if after, zero if equal
+     */
     @Override
     public int compareTo(Region comparesTo) {
         return RegionUtils.compareRegions(this, comparesTo);
     }
 
+    /**
+     * Adjusts the region's position and dimensions.
+     *
+     * @param xAdjust amount to subtract from x-coordinate
+     * @param yAdjust amount to subtract from y-coordinate
+     * @param wAdjust new width
+     * @param hAdjust new height
+     */
     public void adjust(int xAdjust, int yAdjust, int wAdjust, int hAdjust) {
         setXYWH(x - xAdjust, y - yAdjust, wAdjust, hAdjust);
     }
 
+    /**
+     * Sets all region coordinates and dimensions at once.
+     *
+     * @param x the x-coordinate of the top-left corner
+     * @param y the y-coordinate of the top-left corner
+     * @param w the width
+     * @param h the height
+     */
     public void setXYWH(int x, int y, int w, int h) {
         this.x = x;
         this.y = y;
@@ -305,32 +419,74 @@ public class Region implements Comparable<Region> {
         return RegionUtils.isDefined(this);
     }
 
-    // Instance Methods
+    /**
+     * Checks if this region overlaps with another region.
+     *
+     * @param r the region to check for overlap
+     * @return true if the regions overlap, false otherwise
+     */
     public boolean overlaps(Region r) {
         return RegionUtils.overlaps(this, r);
     }
 
+    /**
+     * Checks if this region completely contains another region.
+     *
+     * @param r the region to check containment for
+     * @return true if this region contains the entire other region
+     */
     public boolean contains(Region r) {
         return RegionUtils.contains(this, r);
     }
 
+    /**
+     * Checks if this region contains an OpenCV Rect.
+     *
+     * @param rect the OpenCV rectangle to check
+     * @return true if this region contains the entire rectangle
+     */
     public boolean contains(Rect rect) {
         return RegionUtils.contains(this, new Region(rect));
     }
 
+    /**
+     * Checks if this region contains a specific location.
+     *
+     * @param l the location to check
+     * @return true if the location is within this region's boundaries
+     */
     public boolean contains(Location l) {
         return RegionUtils.containsX(this, l) && RegionUtils.containsY(this, l);
     }
 
+    /**
+     * Calculates the area of this region.
+     *
+     * @return the area in pixels (width * height)
+     */
     public int size() {
         return RegionUtils.size(this);
     }
 
+    /**
+     * Gets the grid cell number for a given location within this region.
+     * The region is divided into a grid based on configured rows and columns.
+     *
+     * @param location the location to find the grid cell for
+     * @return Optional containing the grid cell number, or empty if location is outside region
+     */
     @JsonIgnore
     public Optional<Integer> getGridNumber(Location location) {
         return RegionUtils.getGridNumber(this, location);
     }
 
+    /**
+     * Returns a sub-region corresponding to a specific grid cell.
+     * The region is divided into a grid based on configured rows and columns.
+     *
+     * @param gridNumber the grid cell number (0-based)
+     * @return the Region representing the specified grid cell, or this region if gridNumber is -1
+     */
     @JsonIgnore
     public Region getGridRegion(int gridNumber) {
         if (gridNumber == -1) return this;
@@ -354,45 +510,97 @@ public class Region implements Comparable<Region> {
                         RegionUtils.toRow(this, gridNumber), RegionUtils.toCol(this, gridNumber)));
     }
 
+    /**
+     * Gets the grid cell region that contains the specified location.
+     *
+     * @param location the location to find the containing grid cell for
+     * @return Optional containing the grid cell Region, or empty if location is outside region
+     */
     @JsonIgnore
     public Optional<Region> getGridRegion(Location location) {
         Optional<Integer> gridNumber = getGridNumber(location);
         return gridNumber.map(this::getGridRegion);
     }
 
+    /**
+     * Returns a string representation of this region.
+     *
+     * @return string in format "R[x.y.w.h]"
+     */
     @Override
     public String toString() {
         return "R[" + x + "." + y + "." + w + "." + h + "]";
     }
 
+    /**
+     * Checks if this region overlaps with an OpenCV Rect.
+     *
+     * @param rect the OpenCV rectangle to check for overlap
+     * @return true if there is any overlap between this region and the rectangle
+     */
     public boolean overlaps(Rect rect) {
         return RegionUtils.overlaps(this, rect);
     }
 
+    /**
+     * Checks if this region completely contains a match.
+     *
+     * @param m the match to check containment for
+     * @return true if this region contains the entire match region
+     */
     public boolean contains(Match m) {
         return contains(new Region(m));
     }
 
+    /**
+     * Checks if this region contains a SikuliX match.
+     *
+     * @param m the SikuliX match to check
+     * @return true if this region contains the entire match region
+     */
     @JsonIgnore
     public boolean contains(org.sikuli.script.Match m) {
         return contains(new Region(m));
     }
 
+    /**
+     * Checks if this region contains a SikuliX location.
+     *
+     * @param l the SikuliX location to check
+     * @return true if the location is within this region's boundaries
+     */
     @JsonIgnore
     public boolean contains(org.sikuli.script.Location l) {
         return new Rectangle(x, y, w, h).contains(l.x, l.y);
     }
 
+    /**
+     * Checks if a SikuliX location's x-coordinate is within this region's horizontal bounds.
+     *
+     * @param l the SikuliX location to check
+     * @return true if the location's x-coordinate is within the region's width
+     */
     @JsonIgnore
     public boolean containsX(org.sikuli.script.Location l) {
         return l.getX() >= x() && l.getX() <= x() + w();
     }
 
+    /**
+     * Checks if a SikuliX location's y-coordinate is within this region's vertical bounds.
+     *
+     * @param l the SikuliX location to check
+     * @return true if the location's y-coordinate is within the region's height
+     */
     @JsonIgnore
     public boolean containsY(org.sikuli.script.Location l) {
         return l.getY() >= y() && l.getY() <= y() + h();
     }
 
+    /**
+     * Converts this region to a Match object.
+     *
+     * @return a new Match with this region's boundaries
+     */
     @JsonIgnore
     public Match toMatch() {
         return new Match(this);

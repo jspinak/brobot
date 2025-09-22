@@ -10,7 +10,7 @@ public class JsonTestFixtures {
             """
         {
             "actionConfig": {
-                "@class": "io.github.jspinak.brobot.action.basic.find.PatternFindOptions",
+                "@type": "PatternFindOptions",
                 "similarity": 0.8
             },
             "matchList": [],
@@ -79,7 +79,7 @@ public class JsonTestFixtures {
             "ownerStateId": 1,
             "timesActedOn": 0,
             "staysVisible": true,
-            "probabilityExists": 100,
+            "mockFindStochasticModifier": 100,
             "patterns": [
                 {
                     "name": "pattern-1",
@@ -102,7 +102,7 @@ public class JsonTestFixtures {
             "ownerStateId": 1,
             "timesActedOn": 0,
             "staysVisible": true,
-            "probabilityExists": 100,
+            "mockFindStochasticModifier": 100,
             "searchRegion": {
                 "x": 0,
                 "y": 0,
@@ -121,7 +121,7 @@ public class JsonTestFixtures {
             "ownerStateId": 1,
             "timesActedOn": 0,
             "staysVisible": true,
-            "probabilityExists": 100,
+            "mockFindStochasticModifier": 100,
             "location": {
                 "x": 400,
                 "y": 300
@@ -143,7 +143,7 @@ public class JsonTestFixtures {
             "ownerStateId": 1,
             "timesActedOn": 0,
             "staysVisible": true,
-            "probabilityExists": 100,
+            "mockFindStochasticModifier": 100,
             "string": "Test String Value"
         }
         """;

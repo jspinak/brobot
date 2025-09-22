@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  * <h2>Dependency Flow:</h2>
  *
  * <pre>
- * Action → ActionExecution → Highlight → HighlightManager → HighlightWrapper
+ // * Action → ActionExecution → Highlight → HighlightManager → HighlightWrapper // HighlightManager removed
  *                                                                    ↓
  *                                                      MockHighlight / Live Sikuli
  * </pre>

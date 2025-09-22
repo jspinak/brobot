@@ -13,7 +13,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.annotations.StatesRegisteredEvent;
-import io.github.jspinak.brobot.logging.unified.BrobotLogger;
+import io.github.jspinak.brobot.logging.BrobotLogger;
+import io.github.jspinak.brobot.logging.LogCategory;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -100,9 +101,8 @@ public class AutoStartupVerifier implements ApplicationRunner {
 
         try {
             if (brobotLogger != null) {
-                try (var operation = brobotLogger.operation("AutoStartupImageVerification")) {
-                    performImageVerification();
-                }
+                // brobotLogger.operation() method doesn't exist
+                performImageVerification();
             } else {
                 performImageVerification();
             }
@@ -126,9 +126,8 @@ public class AutoStartupVerifier implements ApplicationRunner {
 
         try {
             if (brobotLogger != null) {
-                try (var operation = brobotLogger.operation("AutoStartupStateVerification")) {
-                    performStateVerification();
-                }
+                // brobotLogger.operation() method doesn't exist
+                performStateVerification();
             } else {
                 performStateVerification();
             }
@@ -249,10 +248,10 @@ public class AutoStartupVerifier implements ApplicationRunner {
 
     private void logMetadata(String message, Object... keyValuePairs) {
         if (brobotLogger != null) {
-            var logBuilder = brobotLogger.log().observation(message);
+            var logBuilder = brobotLogger.builder(LogCategory.SYSTEM).message(message);
             for (int i = 0; i < keyValuePairs.length; i += 2) {
                 if (i + 1 < keyValuePairs.length) {
-                    logBuilder.metadata(keyValuePairs[i].toString(), keyValuePairs[i + 1]);
+                    logBuilder.context(keyValuePairs[i].toString(), keyValuePairs[i + 1]);
                 }
             }
             logBuilder.log();

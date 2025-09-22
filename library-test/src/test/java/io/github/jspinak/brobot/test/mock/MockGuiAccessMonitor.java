@@ -5,9 +5,10 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.config.environment.HeadlessDetector;
-import io.github.jspinak.brobot.logging.unified.BrobotLogger;
-import io.github.jspinak.brobot.tools.logging.gui.GuiAccessConfig;
-import io.github.jspinak.brobot.tools.logging.gui.GuiAccessMonitor;
+import io.github.jspinak.brobot.logging.BrobotLogger;
+
+// GuiAccessConfig removed
+// GuiAccessMonitor removed
 
 /**
  * Mock GUI access monitor for headless test environment. Always reports GUI as accessible to allow

@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+// Removed old logging import: import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
 @Component
 public class WriteXmlDomActions {
@@ -78,7 +78,7 @@ public class WriteXmlDomActions {
         if (doc == null) return;
         // write dom document to a file
         String path = FileSystems.getDefault().getPath(".") + "\\" + filename;
-        ConsoleReporter.println("Writing XML to file: " + path);
+        System.out.println("Writing XML to file: " + path);
         try (FileOutputStream output = new FileOutputStream(path)) {
             writeXml(doc, output);
         } catch (IOException e) {

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
@@ -20,6 +21,7 @@ import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.state.StateLocation;
 import io.github.jspinak.brobot.model.state.StateObject;
+import io.github.jspinak.brobot.model.state.StateObjectMetadata;
 import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.model.state.StateStore;
 import io.github.jspinak.brobot.util.region.RegionUtils;
@@ -72,7 +74,7 @@ public class DynamicRegionResolver {
         }
 
         SearchRegionOnObject config = stateImage.getSearchRegionOnObject();
-        if (config == null) return;
+        if (config == null || actionResult == null) return;
 
         log.info(
                 "IMPORTANT: Attempting to resolve search regions for '{}' based on '{}' from '{}'",
@@ -80,16 +82,15 @@ public class DynamicRegionResolver {
                 config.getTargetObjectName(),
                 config.getTargetStateName());
 
-        // Get all resolved regions (handles FIND.ALL scenarios)
-        List<Region> resolvedRegions = resolveRegionsFromMatches(config);
+        // Get all resolved regions from the ActionResult matches
+        List<Region> resolvedRegions = resolveRegionsFromActionResult(config, actionResult);
 
         if (!resolvedRegions.isEmpty()) {
-            // Set all resolved regions as search regions for the StateImage
-            Region[] regionArray = resolvedRegions.toArray(new Region[0]);
-            stateImage.setSearchRegions(regionArray);
+            // Set the first resolved region as a fixed search region for the StateImage
+            stateImage.setFixedSearchRegion(resolvedRegions.get(0));
 
             log.info(
-                    "✓ Resolved {} search regions for '{}' from '{}' lastMatchesFound",
+                    "✓ Resolved {} search regions for '{}' from '{}' matches",
                     resolvedRegions.size(),
                     stateImage.getName(),
                     config.getTargetObjectName());
@@ -98,8 +99,7 @@ public class DynamicRegionResolver {
             log.debug("  First region: {}", resolvedRegions.get(0));
         } else {
             log.warn(
-                    "Could not resolve search regions for '{}' - target '{}' has no"
-                            + " lastMatchesFound",
+                    "Could not resolve search regions for '{}' - target '{}' has no matches",
                     stateImage.getName(),
                     config.getTargetObjectName());
         }
@@ -107,11 +107,11 @@ public class DynamicRegionResolver {
 
     private void updateStateLocationSearchRegion(
             StateLocation stateLocation, ActionResult actionResult) {
-        if (stateLocation.getSearchRegionOnObject() == null) return;
+        if (stateLocation.getSearchRegionOnObject() == null || actionResult == null) return;
 
         // StateLocation uses its location as the center of a search region
         SearchRegionOnObject config = stateLocation.getSearchRegionOnObject();
-        List<Region> resolvedRegions = resolveRegionsFromMatches(config);
+        List<Region> resolvedRegions = resolveRegionsFromActionResult(config, actionResult);
 
         if (!resolvedRegions.isEmpty()) {
             // Update the location based on the center of the first region
@@ -151,8 +151,68 @@ public class DynamicRegionResolver {
     }
 
     /**
+     * Resolves search regions from the ActionResult matches based on the SearchRegionOnObject configuration.
+     * Filters matches by the target state and object names specified in the config.
+     */
+    private List<Region> resolveRegionsFromActionResult(SearchRegionOnObject config, ActionResult actionResult) {
+        if (actionResult == null || actionResult.getMatchList() == null) {
+            return new ArrayList<>();
+        }
+
+        String targetStateName = config.getTargetStateName();
+        String targetObjectName = config.getTargetObjectName();
+
+        // Filter matches by the target state and object names
+        List<Match> sourceMatches = actionResult.getMatchList().stream()
+                .filter(match -> {
+                    StateObjectMetadata metadata = match.getStateObjectData();
+                    return metadata != null
+                            && targetStateName.equals(metadata.getOwnerStateName())
+                            && targetObjectName.equals(metadata.getStateObjectName());
+                })
+                .collect(Collectors.toList());
+
+        if (sourceMatches.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<Region> resolvedRegions = new ArrayList<>();
+        MatchAdjustmentOptions adjustments = config.getAdjustments();
+
+        // Create a region for each match with adjustments
+        for (Match match : sourceMatches) {
+            Region baseRegion = match.getRegion();
+
+            int x = baseRegion.getX();
+            int y = baseRegion.getY();
+            int w = baseRegion.getW();
+            int h = baseRegion.getH();
+
+            if (adjustments != null) {
+                x += adjustments.getAddX();
+                y += adjustments.getAddY();
+                w += adjustments.getAddW();
+                h += adjustments.getAddH();
+
+                // Apply absolute adjustments if set
+                if (adjustments.getAbsoluteW() > 0) {
+                    w = adjustments.getAbsoluteW();
+                }
+                if (adjustments.getAbsoluteH() > 0) {
+                    h = adjustments.getAbsoluteH();
+                }
+            }
+
+            resolvedRegions.add(new Region(x, y, w, h));
+        }
+
+        return resolvedRegions;
+    }
+
+    /**
      * Resolves search regions from matches based on the SearchRegionOnObject configuration. Creates
      * regions around all matches (for FIND.ALL scenarios).
+     * @deprecated Use resolveRegionsFromActionResult instead
      */
     private List<Region> resolveRegionsFromMatches(SearchRegionOnObject config) {
         // Find all source matches

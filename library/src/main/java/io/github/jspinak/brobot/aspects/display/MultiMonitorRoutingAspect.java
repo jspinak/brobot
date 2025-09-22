@@ -17,12 +17,15 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.logging.unified.BrobotLogger;
-import io.github.jspinak.brobot.logging.unified.LogEvent;
+import io.github.jspinak.brobot.logging.BrobotLogger;
+import io.github.jspinak.brobot.logging.events.ActionEvent;
 import io.github.jspinak.brobot.monitor.MonitorManager;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import io.github.jspinak.brobot.logging.LogCategory;
+import io.github.jspinak.brobot.logging.LogLevel;
+
 
 /**
  * Aspect that provides intelligent routing of actions to specific monitors in multi-monitor setups.
@@ -241,14 +244,13 @@ public class MultiMonitorRoutingAspect {
     /** Log routing decision */
     private void logRoutingDecision(String method, int monitor, RegionInfo regionInfo) {
         brobotLogger
-                .log()
-                .type(LogEvent.Type.ACTION)
-                .level(LogEvent.Level.DEBUG)
-                .action("MONITOR_ROUTING")
-                .metadata("method", method)
-                .metadata("targetMonitor", monitor)
-                .metadata("hasRegion", regionInfo.hasRegion)
-                .observation("Routed operation to monitor")
+                .builder(LogCategory.ACTIONS)
+                .level(LogLevel.DEBUG)
+                .action("MONITOR_ROUTING", method)
+                .context("method", method)
+                .context("targetMonitor", monitor)
+                .context("hasRegion", regionInfo.hasRegion)
+                .message("Routed operation to monitor")
                 .log();
     }
 

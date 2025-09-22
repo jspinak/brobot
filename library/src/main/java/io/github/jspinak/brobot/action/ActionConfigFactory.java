@@ -20,7 +20,11 @@ import io.github.jspinak.brobot.action.basic.type.KeyUpOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.action.basic.vanish.VanishOptions;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
-import io.github.jspinak.brobot.tools.logging.model.LogEventType;
+// Removed old logging import that no longer exists:
+// import io.github.jspinak.brobot.tools.logging.model.LogEventType;
+import io.github.jspinak.brobot.logging.LogCategory;
+import io.github.jspinak.brobot.logging.LogLevel;
+
 
 /**
  * Factory for creating ActionConfig instances based on action type.
@@ -267,9 +271,10 @@ public class ActionConfigFactory {
         if (overrides.containsKey("illustrate")) {
             builder.setIllustrate((ActionConfig.Illustrate) overrides.get("illustrate"));
         }
-        if (overrides.containsKey("logType")) {
-            builder.setLogType((LogEventType) overrides.get("logType"));
-        }
+        // LogEventType removed - commenting out logType override
+        // if (overrides.containsKey("logType")) {
+        //     builder.setLogType((LogEventType) overrides.get("logType"));
+        // }
         if (overrides.containsKey("successCriteria")) {
             @SuppressWarnings("unchecked")
             var criteria =

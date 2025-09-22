@@ -27,8 +27,7 @@ import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.state.StateString;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 /**
  * Entry point for executing GUI automation actions in the Brobot model-based framework.
  *
@@ -57,11 +56,42 @@ import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
  * what to do rather than how to do it. The model-based approach ensures actions are executed in the
  * context of the current State, making them more reliable and robust.
  *
+ * <h3>Example Usage:</h3>
+ * <pre>{@code
+ * // Simple click at location
+ * action.click(new Location(100, 200));
+ *
+ * // Find and click an image
+ * StateImage submitButton = new StateImage.Builder()
+ *     .addPatterns("submit-button")
+ *     .build();
+ * action.click(submitButton);
+ *
+ * // Type text at current location
+ * action.type("Hello World");
+ *
+ * // Find pattern with custom options
+ * PatternFindOptions findOptions = new PatternFindOptions.Builder()
+ *     .setSimilarity(0.85)
+ *     .build();
+ * ActionResult result = action.perform(findOptions, submitButton.asObjectCollection());
+ *
+ * // Using conditional chains (recommended approach)
+ * ConditionalActionChain
+ *     .find(new PatternFindOptions.Builder().build())
+ *     .ifFoundClick()
+ *     .ifNotFoundLog("Button not found")
+ *     .perform(action, new ObjectCollection.Builder()
+ *         .withImages(submitButton)
+ *         .build());
+ * }</pre>
+ *
  * @since 1.0
  * @see ActionConfig
  * @see ActionInterface
  * @see BasicActionRegistry
  * @see ActionResult
+ * @see ConditionalActionChain
  * @author Joshua Spinak
  */
 @Component
@@ -155,8 +185,6 @@ public class Action {
         // Single action execution
         Optional<ActionInterface> action = actionService.getAction(actionConfig);
         if (action.isEmpty()) {
-            ConsoleReporter.println(
-                    "Not a valid Action for " + actionConfig.getClass().getSimpleName());
             return new ActionResult();
         }
         return actionExecution.perform(

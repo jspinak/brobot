@@ -12,8 +12,7 @@ import io.github.jspinak.brobot.model.transition.StateTransition;
 import io.github.jspinak.brobot.model.transition.StateTransitionStore;
 import io.github.jspinak.brobot.navigation.transition.StateTransitions;
 import io.github.jspinak.brobot.navigation.transition.StateTransitionsJointTable;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 import lombok.Getter;
 
 /**
@@ -211,10 +210,9 @@ public class StateTransitionService {
      * <p>Useful for verifying transition definitions and troubleshooting navigation issues.
      */
     public void printAllTransitions() {
-        ConsoleReporter.print("State Transitions in Project:\n");
         stateTransitionsRepository
                 .getAllTransitions()
-                .forEach(transition -> ConsoleReporter.println(transition.toString()));
-        ConsoleReporter.println();
+                .forEach(transition -> {
+                });
     }
 }

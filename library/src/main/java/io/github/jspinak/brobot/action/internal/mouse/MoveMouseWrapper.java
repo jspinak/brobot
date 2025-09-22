@@ -1,12 +1,13 @@
 package io.github.jspinak.brobot.action.internal.mouse;
 
+import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.internal.utility.DragCoordinateCalculator;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Location;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.coordinates.CoordinateScaler;
 
 import lombok.extern.slf4j.Slf4j;
@@ -88,7 +89,6 @@ public class MoveMouseWrapper {
 
             // Log both original and scaled coordinates for debugging
             log.debug("Mouse move: original={}, scaled={}", location, sikuliLocation);
-            ConsoleReporter.print("move mouse to " + sikuliLocation + " ");
 
             // return new Region().mouseMove(location.getSikuliLocation()) != 0; // this can
             // cause the script to freeze for unknown reasons
@@ -134,17 +134,9 @@ public class MoveMouseWrapper {
      */
     public boolean move(Location location) {
         if (brobotProperties.getCore().isMock()) {
-            ConsoleReporter.format(
-                    ConsoleReporter.OutputLevel.HIGH,
-                    "%s: %d.%d| ",
-                    "mouseMove to",
-                    location.getCalculatedX(),
-                    location.getCalculatedY());
             return true;
         }
         boolean success = sikuliMove(location);
-        if (!success) ConsoleReporter.print("move failed. ");
-        // else ConsoleReporter.print("move succeeded. ");
         return success;
     }
 }

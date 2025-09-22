@@ -6,8 +6,7 @@ import org.springframework.stereotype.Component;
 import io.github.jspinak.brobot.core.location.ElementLocator;
 import io.github.jspinak.brobot.core.services.MouseController;
 import io.github.jspinak.brobot.model.element.Location;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 /**
  * Executes click operations on elements WITHOUT depending on Find.
  *
@@ -138,12 +137,10 @@ public class ClickExecutor {
         int x = location.getCalculatedX();
         int y = location.getCalculatedY();
 
-        ConsoleReporter.println("[ClickExecutor] Clicking at: " + x + ", " + y);
 
         // Move to location first if configured
         if (options.isMoveBeforeClick()) {
             if (!mouseController.moveTo(x, y)) {
-                ConsoleReporter.println("[ClickExecutor] Failed to move to click location");
                 return false;
             }
         }
@@ -160,7 +157,6 @@ public class ClickExecutor {
                 // Regular click
                 success = mouseController.click(x, y, options.getButton());
                 if (!success) {
-                    ConsoleReporter.println("[ClickExecutor] Click " + (i + 1) + " failed");
                     break;
                 }
 
@@ -177,8 +173,6 @@ public class ClickExecutor {
         }
 
         if (success) {
-            ConsoleReporter.println(
-                    "[ClickExecutor] Successfully clicked " + options.getClickCount() + " time(s)");
         }
 
         return success;

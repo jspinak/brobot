@@ -204,3 +204,21 @@ library-test/disabled-classes.txt
 **/test_save.json
 examples/TRANSITION_MIGRATION_GUIDE.md
 library/scripts
+
+# Temporary Python analysis and fix scripts (root directory)
+/*.py
+remaining_failures.txt
+test_analysis_results.json
+test-results-*.json
+
+# Temporary test fix scripts
+fix_*.py
+analyze_*.py
+cleanup_*.py
+disable_*.py
+identify_*.py
+remove_*.py
+rename_*.py
+run_*.py
+update_*.py
+verify_*.py

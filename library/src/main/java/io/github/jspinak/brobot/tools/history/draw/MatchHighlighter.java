@@ -8,7 +8,8 @@ import org.springframework.stereotype.Component;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
-import io.github.jspinak.brobot.logging.unified.BrobotLogger;
+import io.github.jspinak.brobot.logging.BrobotLogger;
+import io.github.jspinak.brobot.logging.LogCategory;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateObjectMetadata;
 
@@ -65,14 +66,14 @@ public class MatchHighlighter {
         if (brobotProperties.getCore().isMock()
                 && brobotProperties.getScreenshot().getTestScreenshots().isEmpty()) {
             brobotLogger
-                    .log()
-                    .observation(
+                    .builder(LogCategory.ACTIONS)
+                    .message(
                             "Highlight ON: "
                                     + formatMatch(match)
                                     + " with color: "
                                     + highlightColor)
-                    .metadata("action", "HIGHLIGHT_ON")
-                    .metadata("color", highlightColor)
+                    .context("action", "HIGHLIGHT_ON")
+                    .context("color", highlightColor)
                     .log();
         } else {
             // Temporarily disable SikuliX logs
@@ -94,8 +95,8 @@ public class MatchHighlighter {
                                 : "Unknown";
 
                 brobotLogger
-                        .log()
-                        .observation(
+                        .builder(LogCategory.ACTIONS)
+                        .message(
                                 String.format(
                                         "Highlighting region for %s.%s (%d,%d,%dx%d)",
                                         stateName,
@@ -104,11 +105,11 @@ public class MatchHighlighter {
                                         match.getRegion().y(),
                                         match.getRegion().w(),
                                         match.getRegion().h()))
-                        .metadata("action", "HIGHLIGHT_ON")
-                        .metadata("state", stateName)
-                        .metadata("object", objectName)
-                        .metadata("region", formatMatch(match))
-                        .metadata("color", highlightColor)
+                        .context("action", "HIGHLIGHT_ON")
+                        .context("state", stateName)
+                        .context("object", objectName)
+                        .context("region", formatMatch(match))
+                        .context("color", highlightColor)
                         .log();
             } finally {
                 Settings.ActionLogs = previousActionLogs;
@@ -169,11 +170,11 @@ public class MatchHighlighter {
         if (brobotProperties.getCore().isMock()
                 && brobotProperties.getScreenshot().getTestScreenshots().isEmpty()) {
             brobotLogger
-                    .log()
-                    .observation("Highlight: " + formatMatch(match))
-                    .metadata("action", "HIGHLIGHT")
-                    .metadata("duration", highlightSeconds)
-                    .metadata("color", highlightColor)
+                    .builder(LogCategory.ACTIONS)
+                    .message("Highlight: " + formatMatch(match))
+                    .context("action", "HIGHLIGHT")
+                    .context("duration", highlightSeconds)
+                    .context("color", highlightColor)
                     .log();
             return true;
         }
@@ -188,7 +189,6 @@ public class MatchHighlighter {
             if (match.w() == 0) highlightReg.w = 10;
             if (match.h() == 0) highlightReg.h = 10;
 
-            // Log through Brobot instead of ConsoleReporter
             String stateName =
                     match.getStateObjectData() != null
                                     && match.getStateObjectData().getOwnerStateName() != null
@@ -201,8 +201,8 @@ public class MatchHighlighter {
                             : "Unknown";
 
             brobotLogger
-                    .log()
-                    .observation(
+                    .builder(LogCategory.ACTIONS)
+                    .message(
                             String.format(
                                     "Highlighting region for %s.%s (%d,%d,%dx%d)",
                                     stateName,
@@ -211,12 +211,12 @@ public class MatchHighlighter {
                                     match.getRegion().y(),
                                     match.getRegion().w(),
                                     match.getRegion().h()))
-                    .metadata("action", "HIGHLIGHT")
-                    .metadata("state", stateName)
-                    .metadata("object", objectName)
-                    .metadata("region", formatMatch(match))
-                    .metadata("duration", highlightSeconds)
-                    .metadata("color", highlightColor)
+                    .context("action", "HIGHLIGHT")
+                    .context("state", stateName)
+                    .context("object", objectName)
+                    .context("region", formatMatch(match))
+                    .context("duration", highlightSeconds)
+                    .context("color", highlightColor)
                     .log();
 
             highlightReg.highlight(highlightSeconds, highlightColor);

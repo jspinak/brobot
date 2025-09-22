@@ -13,7 +13,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import io.github.jspinak.brobot.action.internal.find.pixel.PixelScoreCalculator;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
 
 import lombok.Getter;
@@ -151,8 +150,6 @@ public class PixelProfiles {
      * <p>Side effects: Outputs to the Report logging system
      */
     public void print() {
-        ConsoleReporter.println("\nPixelProfiles");
-        ConsoleReporter.println("Size of collection: " + pixelAnalyses.size());
         pixelAnalyses.forEach(PixelProfile::print);
         MatrixUtilities.printDimensions(getAnalysis(Analysis.SCENE, BGR), "Scene BGR");
         MatrixUtilities.printDimensions(getAnalysis(Analysis.SCORE, BGR), "Score BGR");

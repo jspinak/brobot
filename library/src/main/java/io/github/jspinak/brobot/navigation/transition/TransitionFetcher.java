@@ -154,8 +154,7 @@ public class TransitionFetcher {
      * @return true if all components present and valid
      */
     private boolean isComplete() {
-        // The 'to' state might not have any transitions (it could be a terminal state)
-        // We only need the toState to be valid, not necessarily toTransitions or toTransition
+        // Check that all required 'from' components are present
         boolean fromComplete =
                 !Objects.equals(transitionToEnum, "null")
                         && fromTransitions != null
@@ -163,7 +162,10 @@ public class TransitionFetcher {
                         && fromState != null
                         && fromTransitionFunction != null;
 
-        boolean toComplete = toState != null;
+        // Check that required 'to' components are present
+        // If toTransitions exists, we need a valid transitionFinish to verify arrival
+        boolean toComplete = toState != null &&
+                (toTransitions == null || toTransition != null);
 
         if (!fromComplete || !toComplete) {
             System.out.println("=== TRANSITION DEBUG: isComplete() check failed:");

@@ -23,7 +23,8 @@ import org.w3c.dom.Element;
 
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Location;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+
+// Removed old logging import: import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
 @Component
 public class WriteXmlDomScenes {
@@ -95,7 +96,7 @@ public class WriteXmlDomScenes {
         if (doc == null) return;
         // write dom document to a file
         String path = FileSystems.getDefault().getPath(".") + "\\" + filename;
-        ConsoleReporter.println("Writing XML to file: " + path);
+        System.out.println("Writing XML to file: " + path);
         try (FileOutputStream output = new FileOutputStream(path)) {
             writeXml(doc, output);
         } catch (IOException e) {

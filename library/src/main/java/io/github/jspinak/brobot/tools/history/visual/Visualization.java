@@ -11,8 +11,7 @@ import io.github.jspinak.brobot.tools.history.ActionVisualizer;
 import io.github.jspinak.brobot.tools.history.IllustrationController;
 import io.github.jspinak.brobot.tools.history.RuntimeStateVisualizer;
 import io.github.jspinak.brobot.tools.history.StateLayoutVisualizer;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -145,7 +144,6 @@ public class Visualization {
             case CLASSES_LEGEND:
                 return classesWithMatchesAndLegend;
             default:
-                ConsoleReporter.println("No such type of Mat: " + type);
                 return null;
         }
     }
@@ -157,7 +155,6 @@ public class Visualization {
             case CLASSES_LEGEND:
                 return filenameClasses;
             default:
-                ConsoleReporter.println("No such type of filename: " + type);
                 return null;
         }
     }
@@ -166,7 +163,6 @@ public class Visualization {
         Mat mat = getMat(type);
         String filename = getFilename(type);
         if (mat == null || filename == null) {
-            ConsoleReporter.println("Didn't write illustration. Mat or filename is null.");
             return;
         }
         imwrite(filename, mat);

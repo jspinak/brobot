@@ -29,8 +29,9 @@ import io.github.jspinak.brobot.model.state.StateObject;
 import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
 import io.github.jspinak.brobot.statemanagement.StateMemoryUpdater;
-import io.github.jspinak.brobot.tools.logging.visual.HighlightManager;
-import io.github.jspinak.brobot.tools.logging.visual.VisualFeedbackConfig;
+// Removed old visual logging imports that no longer exist:// 
+// import io.github.jspinak.brobot.tools.logging.visual.HighlightManager; // HighlightManager removed
+// import io.github.jspinak.brobot.tools.logging.visual.VisualFeedbackConfig;
 import io.github.jspinak.brobot.util.string.TextSelector;
 
 import lombok.extern.slf4j.Slf4j;
@@ -73,8 +74,9 @@ public class FindPipeline {
     private final StateMemory stateMemory;
     private final TextSelector textSelector;
     private final DynamicRegionResolver dynamicRegionResolver;
-    private final HighlightManager highlightManager;
-    private final VisualFeedbackConfig visualFeedbackConfig;
+    // Removed old visual logging dependencies that no longer exist:
+  //  //  // private final HighlightManager highlightManager; // HighlightManager removed // highlightManager removed
+    // private final VisualFeedbackConfig visualFeedbackConfig;
     private final ModernFindStrategyRegistry findStrategyRegistry;
     private final ActionSuccessCriteria actionSuccessCriteria;
     private final ConciseFindLogger conciseFindLogger;
@@ -94,8 +96,9 @@ public class FindPipeline {
             StateMemory stateMemory,
             TextSelector textSelector,
             DynamicRegionResolver dynamicRegionResolver,
-            HighlightManager highlightManager,
-            VisualFeedbackConfig visualFeedbackConfig,
+            // Removed missing parameters:
+          //  //  // HighlightManager highlightManager, // HighlightManager removed // highlightManager removed
+            // VisualFeedbackConfig visualFeedbackConfig,
             ModernFindStrategyRegistry findStrategyRegistry,
             ActionSuccessCriteria actionSuccessCriteria,
             StateMemoryUpdater stateMemoryUpdater,
@@ -109,8 +112,9 @@ public class FindPipeline {
         this.stateMemory = stateMemory;
         this.textSelector = textSelector;
         this.dynamicRegionResolver = dynamicRegionResolver;
-        this.highlightManager = highlightManager;
-        this.visualFeedbackConfig = visualFeedbackConfig;
+        // Removed initialization of missing classes:
+       //  // this.highlightManager = highlightManager; // highlightManager removed
+        // this.visualFeedbackConfig = visualFeedbackConfig;
         this.findStrategyRegistry = findStrategyRegistry;
         this.actionSuccessCriteria = actionSuccessCriteria;
         this.stateMemoryUpdater = stateMemoryUpdater;
@@ -266,10 +270,10 @@ public class FindPipeline {
         }
         updateCrossStateSearchRegions(matches, objectCollections);
 
-        // Highlight search regions if enabled
-        if (shouldHighlightSearchRegions()) {
-            highlightSearchRegions(objectCollections);
-        }
+        // Highlight search regions if enabled - DISABLED: visual logging classes removed
+        // if (shouldHighlightSearchRegions()) {
+        //     highlightSearchRegions(objectCollections);
+        // }
 
         // Convert non-image objects and delegate to find strategies
         ActionResult nonImageMatches =
@@ -308,10 +312,10 @@ public class FindPipeline {
             log.debug("FindPipeline: No matches found, skipping dependent search region update");
         }
 
-        // Highlight found matches if enabled
-        if (shouldHighlightFinds() && !matches.isEmpty()) {
-            highlightManager.highlightMatches(matches.getMatchList());
-        }
+        // Highlight found matches if enabled - DISABLED: visual logging classes removed
+        // if (shouldHighlightFinds() && !matches.isEmpty()) {
+       //  //     highlightManager.highlightMatches(matches.getMatchList()); // highlightManager removed
+        // }
 
         // Set success criteria based on the action configuration
         // This ensures success is evaluated before the ActionLifecycleAspect logs the result
@@ -327,20 +331,24 @@ public class FindPipeline {
 
     /** Checks if search regions should be highlighted based on configuration. */
     private boolean shouldHighlightSearchRegions() {
-        return highlightEnabled
-                && highlightManager != null
-                && visualFeedbackConfig != null
-                && visualFeedbackConfig.isEnabled()
-                && visualFeedbackConfig.isAutoHighlightSearchRegions();
+        // Visual feedback functionality disabled - missing classes
+        return false;
+        // return highlightEnabled
+       //  //         && highlightManager != null // highlightManager removed
+        //         && visualFeedbackConfig != null
+        //         && visualFeedbackConfig.isEnabled()
+        //         && visualFeedbackConfig.isAutoHighlightSearchRegions();
     }
 
     /** Checks if found matches should be highlighted based on configuration. */
     private boolean shouldHighlightFinds() {
-        return highlightEnabled
-                && highlightManager != null
-                && visualFeedbackConfig != null
-                && visualFeedbackConfig.isEnabled()
-                && visualFeedbackConfig.isAutoHighlightFinds();
+        // Visual feedback functionality disabled - missing classes
+        return false;
+        // return highlightEnabled
+       //  //         && highlightManager != null // highlightManager removed
+        //         && visualFeedbackConfig != null
+        //         && visualFeedbackConfig.isEnabled()
+        //         && visualFeedbackConfig.isAutoHighlightFinds();
     }
 
     /**
@@ -349,44 +357,8 @@ public class FindPipeline {
      * @param collections The object collections containing search regions to highlight
      */
     private void highlightSearchRegions(ObjectCollection... collections) {
-        if (highlightManager == null) return;
-
-        List<HighlightManager.RegionWithContext> regionsWithContext = new ArrayList<>();
-
-        for (ObjectCollection collection : collections) {
-            // Extract regions from StateRegions
-            for (StateRegion stateRegion : collection.getStateRegions()) {
-                if (stateRegion.getSearchRegion() != null) {
-                    regionsWithContext.add(
-                            new HighlightManager.RegionWithContext(
-                                    stateRegion.getSearchRegion(),
-                                    stateRegion.getOwnerStateName(),
-                                    stateRegion.getName()));
-                }
-            }
-
-            // Extract search regions from StateImages
-            for (StateImage stateImage : collection.getStateImages()) {
-                for (var pattern : stateImage.getPatterns()) {
-                    if (pattern.getSearchRegions() != null
-                            && !pattern.getSearchRegions().getAllRegions().isEmpty()) {
-                        for (Region region : pattern.getSearchRegions().getAllRegions()) {
-                            regionsWithContext.add(
-                                    new HighlightManager.RegionWithContext(
-                                            region,
-                                            stateImage.getOwnerStateName(),
-                                            stateImage.getName()));
-                        }
-                    }
-                }
-            }
-        }
-
-        // If no specific search regions found, don't highlight anything
-        // (avoid highlighting the entire screen as a fallback)
-        if (!regionsWithContext.isEmpty()) {
-            highlightManager.highlightSearchRegionsWithContext(regionsWithContext);
-        }
+       //  // HighlightManager removed - visual highlighting temporarily disabled // HighlightManager removed
+        // This functionality will be restored when the visualization system is refactored
     }
 
     /**

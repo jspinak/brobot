@@ -5,8 +5,7 @@ import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 /**
  * Handles keyboard key press-and-hold operations for modifier key combinations.
  *
@@ -88,10 +87,8 @@ public class KeyDownWrapper {
      */
     public void press(String key, String modifiers) {
         if (brobotProperties.getCore().isMock()) {
-            ConsoleReporter.format("hold %s %s| ", modifiers, key);
             return;
         }
-        ConsoleReporter.print(key + " ");
         new Region().sikuli().keyDown(key + modifiers);
     }
 }

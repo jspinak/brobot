@@ -18,8 +18,7 @@ import io.github.jspinak.brobot.action.internal.find.pixel.PixelScoreCalculator;
 import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.model.analysis.color.PixelProfile;
 import io.github.jspinak.brobot.model.analysis.color.PixelProfiles;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 /**
  * Aggregates pixel scores across multiple color profiles for comprehensive matching.
  *
@@ -74,7 +73,6 @@ public class GetPixelAnalysisCollectionScores {
     public Mat setScores(
             PixelProfiles pixelAnalysisCollection, ColorCluster.ColorSchemaName colorSchemaName) {
         if (pixelAnalysisCollection.getPixelAnalyses().isEmpty()) {
-            ConsoleReporter.println("No pixel analyses to set scores for.");
             return new Mat();
         }
         List<PixelProfile> pixelAnalyses = pixelAnalysisCollection.getPixelAnalyses();

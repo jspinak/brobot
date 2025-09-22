@@ -12,8 +12,8 @@ import io.github.jspinak.brobot.navigation.transition.StateNavigator;
 import io.github.jspinak.brobot.statemanagement.AdjacentStates;
 import io.github.jspinak.brobot.statemanagement.InitialStates;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
-import io.github.jspinak.brobot.tools.logging.ActionLogger;
-import io.github.jspinak.brobot.tools.logging.ExecutionSession;
+// Removed old logging import: import io.github.jspinak.brobot.tools.logging.ActionLogger;
+// Removed old logging import: import io.github.jspinak.brobot.tools.logging.ExecutionSession;
 
 /**
  * Orchestrates comprehensive state exploration for automated testing of the application.
@@ -107,8 +107,10 @@ public class StateTraversalService {
     private final StateNavigator stateTransitionsManagement;
     private final InitialStates initialStates;
     private final StateMemory stateMemory;
-    private final ActionLogger actionLogger;
-    private final ExecutionSession automationSession;
+    // Removed old logging dependency that no longer exists:
+    // private final ActionLogger actionLogger;
+    // Removed old logging dependency that no longer exists:
+    // private final ExecutionSession automationSession;
     private final StateImageValidator visitAllStateImages;
 
     private final List<StateVisit> stateVisits = new ArrayList<>();
@@ -123,8 +125,9 @@ public class StateTraversalService {
             StateMemory stateMemory,
             StateNavigator stateTransitionsManagement,
             InitialStates initialStates,
-            ActionLogger actionLogger,
-            ExecutionSession automationSession,
+            // Removed missing parameters:
+            // ActionLogger actionLogger,
+            // ExecutionSession automationSession,
             StateImageValidator visitAllStateImages) {
         this.adjacentStates = adjacentStates;
         this.allStatesInProjectService = allStatesInProjectService;
@@ -132,8 +135,8 @@ public class StateTraversalService {
         this.stateTransitionsManagement = stateTransitionsManagement;
         this.initialStates = initialStates;
         this.stateMemory = stateMemory;
-        this.actionLogger = actionLogger;
-        this.automationSession = automationSession;
+        // this.actionLogger = actionLogger;
+        // this.automationSession = automationSession;
         this.visitAllStateImages = visitAllStateImages;
     }
 
@@ -234,11 +237,11 @@ public class StateTraversalService {
                                     });
                         });
 
-        actionLogger.logObservation(
-                automationSession.getCurrentSessionId(),
-                "Initial states:",
-                stateMemory.getActiveStateNamesAsString(),
-                "info");
+        // actionLogger.logObservation(
+        //         automationSession.getCurrentSessionId(),
+        //         "Initial states:",
+        //         stateMemory.getActiveStateNamesAsString(),
+        //         "info");
         visitedStates = new HashSet<>(stateMemory.getActiveStates());
         visitedStates.forEach(
                 initialState -> {
@@ -260,12 +263,13 @@ public class StateTraversalService {
             System.out.println("visited states = " + visitedStates);
             StringBuilder unvisitedStatesString = new StringBuilder();
             unvisitedStateSet.forEach(unvisitedStatesString::append);
-            if (failedAttempt > 0)
-                actionLogger.logObservation(
-                        automationSession.getCurrentSessionId(),
-                        "unvisited: failed attempts = " + failedAttempt,
-                        unvisitedStatesString.toString(),
-                        "info");
+            if (failedAttempt > 0) {
+                // actionLogger.logObservation(
+                //         automationSession.getCurrentSessionId(),
+                //         "unvisited: failed attempts = " + failedAttempt,
+                //         unvisitedStatesString.toString(),
+                //         "info");
+            }
 
             Optional<State> state = allStatesInProjectService.getState(closestStateId);
             boolean success = stateTransitionsManagement.openState(closestStateId);
@@ -379,11 +383,11 @@ public class StateTraversalService {
 
         logger.info("State Traversal Summary:");
         logger.info(summary.toString());
-        actionLogger.logObservation(
-                automationSession.getCurrentSessionId(),
-                "State Traversal Summary:",
-                summary.toString(),
-                "info");
+        // actionLogger.logObservation(
+        //         automationSession.getCurrentSessionId(),
+        //         "State Traversal Summary:",
+        //         summary.toString(),
+        //         "info");
     }
 
     /**

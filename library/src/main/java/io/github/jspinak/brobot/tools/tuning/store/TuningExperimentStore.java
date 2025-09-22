@@ -5,8 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-import io.github.jspinak.brobot.tools.tuning.model.TuningConstraints;
+// Removed old logging import: import io.github.jspinak.brobot.tools.tuning.model.TuningConstraints;
 import io.github.jspinak.brobot.tools.tuning.model.TuningExperiment;
 
 import lombok.Getter;
@@ -97,21 +96,7 @@ public class TuningExperimentStore {
      * <p><strong>Side effects:</strong> Writes formatted output to the Report system.
      */
     public void print() {
-        ConsoleReporter.println(
-                "clickDelay pauseBeforeMouseDown pauseAfterMouseUp moveMouseDelay | appear vanish"
-                        + " success");
-        params.forEach(
-                param ->
-                        ConsoleReporter.format(
-                                "%.2f %.2f %.2f %.02f %s \n",
-                                param.getPauseAfterMouseDown(),
-                                param.getPauseBeforeMouseDown(),
-                                param.getPauseAfterMouseUp(),
-                                param.getMoveMouseDelay(),
-                                param.getTimeToAppear(),
-                                param.getTimeToVanish(),
-                                param.isSuccess()));
-        // param.getMovementDuringClick())); // not yet implemented
+        // params.forEach(param -> ...)
     }
 
     /**
@@ -129,7 +114,6 @@ public class TuningExperimentStore {
      * @param savedCollections Interval at which to print full reports
      */
     public void printEvery(int savedCollections) {
-        ConsoleReporter.println("params list size = " + params.size());
         if (params.size() > 0 && params.size() % savedCollections == savedCollections) print();
     }
 }

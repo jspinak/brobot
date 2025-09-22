@@ -14,9 +14,9 @@ import io.github.jspinak.brobot.model.state.StateEnum;
 import io.github.jspinak.brobot.model.state.special.SpecialStateType;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.navigation.transition.StateTransitions;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Maintains the runtime memory of active States in the Brobot framework.
@@ -58,6 +58,7 @@ import lombok.Getter;
  * @see StateDetector
  * @see StateService
  */
+@Slf4j
 @Component
 @Getter
 public class StateMemory {
@@ -156,14 +157,20 @@ public class StateMemory {
     /**
      * Adds a state to the active state list.
      *
-     * <p>Public convenience method that delegates to the private implementation without forcing a
-     * newline in the report output.
+     * <p>Marks a state as currently active in the GUI. Performs several operations:
+     *
+     * <ul>
+     *   <li>Checks for duplicate additions (idempotent)
+     *   <li>Filters out NULL states
+     *   <li>Logs the state activation
+     *   <li>Increments state visit counter for metrics
+     * </ul>
+     *
+     * <p>Note: mockFindStochasticModifier is NOT modified here as it's only relevant for mock mode
+     * and should be controlled by the mock framework, not by state activation.
      *
      * @param activeState ID of the state to mark as active
      */
-    public void addActiveState(Long activeState) {
-        addActiveState(activeState, false);
-    }
 
     /**
      * Checks if a state ID represents the NULL state.
@@ -178,44 +185,17 @@ public class StateMemory {
         return state.equals(SpecialStateType.NULL.getId());
     }
 
-    /**
-     * Adds a state to the active state list with reporting options.
-     *
-     * <p>Marks a state as currently active in the GUI. Performs several operations:
-     *
-     * <ul>
-     *   <li>Checks for duplicate additions (idempotent)
-     *   <li>Filters out NULL states
-     *   <li>Reports the addition to logs
-     *   <li>Sets state probability to 100%
-     *   <li>Increments state visit counter
-     * </ul>
-     *
-     * <p>Side effects:
-     *
-     * <ul>
-     *   <li>Modifies active state set
-     *   <li>Updates state probability to 100
-     *   <li>Increments state visit count
-     *   <li>Prints to Report
-     * </ul>
-     *
-     * @param activeState ID of the state to mark as active
-     * @param newLine Whether to print a newline after the report message
-     */
-    public void addActiveState(Long activeState, boolean newLine) {
+    public void addActiveState(Long activeState) {
         if (activeStates.contains(activeState)) return;
         if (isNullState(activeState)) return;
-        ConsoleReporter.print(
-                "+ add state " + stateService.getStateName(activeState) + " to active states ");
-        if (newLine) ConsoleReporter.println();
+        // newLine parameter removed - using structured logging instead
         activeStates.add(activeState);
+        log.info("State became active: {} (ID: {})", stateService.getStateName(activeState), activeState);
         stateService
                 .getState(activeState)
                 .ifPresent(
                         state -> {
-                            state.setProbabilityExists(100);
-                            state.addVisit();
+                            state.addVisit(); // Track visit count for metrics
                         });
     }
 
@@ -250,9 +230,10 @@ public class StateMemory {
      */
     public void removeInactiveState(Long inactiveState) {
         if (!activeStates.contains(inactiveState)) return;
-        ConsoleReporter.println("- remove " + inactiveState + " from active states");
         activeStates.remove(inactiveState);
-        stateService.getState(inactiveState).ifPresent(state -> state.setProbabilityExists(0));
+        log.info("State became inactive: {} (ID: {})", stateService.getStateName(inactiveState), inactiveState);
+        // Note: mockFindStochasticModifier is not modified when removing states
+        // It should retain its value for future mock runs
     }
 
     /**
@@ -269,8 +250,6 @@ public class StateMemory {
         if (inactiveStateId != null) {
             removeInactiveState(inactiveStateId);
         } else {
-            ConsoleReporter.println(
-                    "- remove " + inactiveStateName + " from active states (not found)");
         }
     }
 

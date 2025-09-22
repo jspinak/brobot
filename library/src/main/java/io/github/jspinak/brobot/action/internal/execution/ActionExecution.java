@@ -15,17 +15,21 @@ import io.github.jspinak.brobot.action.internal.utility.ActionSuccessCriteria;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.control.ExecutionController;
 import io.github.jspinak.brobot.control.ExecutionStoppedException;
-import io.github.jspinak.brobot.logging.unified.BrobotLogger;
+import io.github.jspinak.brobot.logging.BrobotLogger;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
 import io.github.jspinak.brobot.tools.history.IllustrationController;
-import io.github.jspinak.brobot.tools.logging.ActionLogger;
-import io.github.jspinak.brobot.tools.logging.ExecutionSession;
-import io.github.jspinak.brobot.tools.logging.model.LogData;
+// Removed old logging imports that no longer exist:
+// // Removed old logging import: import io.github.jspinak.brobot.tools.logging.ActionLogger;
+// // Removed old logging import: import io.github.jspinak.brobot.tools.logging.ExecutionSession;
+// import io.github.jspinak.brobot.tools.logging.model.LogData;
 import io.github.jspinak.brobot.tools.ml.dataset.DatasetManager;
 import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 import io.github.jspinak.brobot.util.image.capture.ScreenshotCapture;
 
 import lombok.extern.slf4j.Slf4j;
+import io.github.jspinak.brobot.logging.LogCategory;
+import io.github.jspinak.brobot.logging.LogLevel;
+
 
 /**
  * Central orchestrator for executing GUI automation actions with full lifecycle management.
@@ -78,9 +82,10 @@ public class ActionExecution {
     private final DatasetManager datasetManager;
     private final ActionSuccessCriteria success;
     private final ActionResultFactory matchesInitializer;
-    private final ActionLogger actionLogger;
+    // Removed old logging dependencies:
+    // private final ActionLogger actionLogger;
     private final ScreenshotCapture captureScreenshot;
-    private final ExecutionSession automationSession;
+    // private final ExecutionSession automationSession;
     private final ExecutionController executionController;
     private final BrobotLogger brobotLogger;
     private final StateMemory stateMemory;
@@ -100,9 +105,7 @@ public class ActionExecution {
      * @param datasetManager Collects training data when machine learning mode is enabled
      * @param success Evaluates and sets success criteria for completed actions
      * @param matchesInitializer Creates and configures ActionResult instances
-     * @param actionLogger Records action execution details for analysis and debugging
      * @param captureScreenshot Captures raw screenshots for error documentation
-     * @param automationSession Manages session context and identifiers
      * @param executionController Controls execution flow with pause/resume/stop functionality
      * @param brobotLogger Logger for framework-level events
      * @param stateMemory State management and history
@@ -116,9 +119,7 @@ public class ActionExecution {
             DatasetManager datasetManager,
             ActionSuccessCriteria success,
             ActionResultFactory matchesInitializer,
-            ActionLogger actionLogger,
             ScreenshotCapture captureScreenshot,
-            ExecutionSession automationSession,
             @Autowired(required = false) ExecutionController executionController,
             BrobotLogger brobotLogger,
             StateMemory stateMemory) {
@@ -130,9 +131,7 @@ public class ActionExecution {
         this.datasetManager = datasetManager;
         this.success = success;
         this.matchesInitializer = matchesInitializer;
-        this.actionLogger = actionLogger;
         this.captureScreenshot = captureScreenshot;
-        this.automationSession = automationSession;
         this.executionController = executionController;
         this.brobotLogger = brobotLogger;
         this.stateMemory = stateMemory;
@@ -225,7 +224,7 @@ public class ActionExecution {
      * if (brobotProperties.getDataset().isEnabled()) datasetManager.addSetOfData(matches);
      * // Removed direct console output - logging is handled by
      * ActionLifecycleAspect which respects QUIET mode
-     * // ConsoleReporter.println(actionConfig.getAction() + " " +
+     * //  + " " +
      * matches.getOutputText() + " " + matches.getSuccessSymbol());
      * if (objectCollections.length > 0) {
      * LogData logData = actionLogger.logAction(sessionId, matches,
@@ -253,20 +252,7 @@ public class ActionExecution {
      *
      * <p>This method formats and outputs a concise representation of the action being executed,
      * including the action type and target state images. Output is only generated when the
-     * reporting level is set to {@link ConsoleReporter.OutputLevel#LOW} or higher.
-     *
-     * <p>The output format is: {@code |ACTION_TYPE stateName.imageName, stateName.imageName|}
-     *
-     * <p>Example output: {@code |CLICK MainMenu.fileButton, MainMenu.editButton|}
-     *
-     * @param actionConfig Contains the action type to be printed
-     * @param objectCollections Contains state images to be included in the output. Only the first
-     *     collection is processed if multiple are provided.
-     */
-    // Removed ActionConfig-based printAction method
-    /*
-     * private void printAction(ActionConfig actionConfig, ObjectCollection...
-     * objectCollections) {
+     * reporting level is set to {@link  {
      * // Disabled direct console output - logging is handled by
      * ActionLifecycleAspect which respects QUIET mode
      * // Legacy direct console printing interferes with structured logging and
@@ -295,7 +281,7 @@ public class ActionExecution {
             String actionDescription,
             ActionConfig actionConfig,
             ObjectCollection... objectCollections) {
-        String sessionId = automationSession.getCurrentSessionId();
+        // String sessionId = automationSession.getCurrentSessionId(); // Removed - session management no longer available
         printActionConfig(actionConfig, objectCollections);
         ActionResult matches =
                 matchesInitializer.init(actionConfig, actionDescription, objectCollections);
@@ -344,11 +330,12 @@ public class ActionExecution {
         if (brobotProperties.getDataset().isBuild()) datasetManager.addSetOfData(matches);
         // Removed direct console output - logging is handled by ActionLifecycleAspect
         // which respects QUIET mode
-        // ConsoleReporter.println(actionConfig.getClass().getSimpleName() + " " +
+        // .getSimpleName() + " " +
         // matches.getOutputText() + " " + matches.getSuccessSymbol());
-        if (objectCollections.length > 0) {
-            LogData logData = actionLogger.logAction(sessionId, matches, objectCollections[0]);
-        }
+        // Legacy logging removed - use new BrobotLogger instead
+        // if (objectCollections.length > 0) {
+        //     LogData logData = actionLogger.logAction(sessionId, matches, objectCollections[0]);
+        // }
 
         // Automatically update state memory when patterns are found
         // This ensures states are activated when their patterns are detected
@@ -395,23 +382,7 @@ public class ActionExecution {
      */
     private void handleBeforeActionLogging(
             ActionConfig actionConfig, ObjectCollection... objectCollections) {
-        if (actionConfig.getLoggingOptions() == null
-                || !actionConfig.getLoggingOptions().isLogBeforeAction()
-                || actionConfig.getLoggingOptions().getBeforeActionMessage() == null) {
-            return;
-        }
-
-        String message =
-                formatLogMessage(
-                        actionConfig.getLoggingOptions().getBeforeActionMessage(),
-                        null,
-                        objectCollections);
-        logMessage(
-                message,
-                actionConfig.getLoggingOptions().getBeforeActionLevel(),
-                actionConfig,
-                null,
-                objectCollections);
+        // LoggingOptions removed - logging now handled through BrobotLogger
     }
 
     /**
@@ -425,23 +396,7 @@ public class ActionExecution {
             ActionConfig actionConfig,
             ActionResult actionResult,
             ObjectCollection... objectCollections) {
-        if (actionConfig.getLoggingOptions() == null
-                || !actionConfig.getLoggingOptions().isLogAfterAction()
-                || actionConfig.getLoggingOptions().getAfterActionMessage() == null) {
-            return;
-        }
-
-        String message =
-                formatLogMessage(
-                        actionConfig.getLoggingOptions().getAfterActionMessage(),
-                        actionResult,
-                        objectCollections);
-        logMessage(
-                message,
-                actionConfig.getLoggingOptions().getAfterActionLevel(),
-                actionConfig,
-                actionResult,
-                objectCollections);
+        // LoggingOptions removed - logging now handled through BrobotLogger
     }
 
     /**
@@ -458,39 +413,7 @@ public class ActionExecution {
             ActionConfig actionConfig,
             ActionResult actionResult,
             ObjectCollection... objectCollections) {
-        if (actionConfig.getLoggingOptions() == null) {
-            return; // No logging configured
-        }
-
-        ActionConfig.LoggingOptions loggingOptions = actionConfig.getLoggingOptions();
-
-        if (actionResult.isSuccess()
-                && loggingOptions.isLogOnSuccess()
-                && loggingOptions.getSuccessMessage() != null) {
-            // Log success message
-            String message =
-                    formatLogMessage(
-                            loggingOptions.getSuccessMessage(), actionResult, objectCollections);
-            logMessage(
-                    message,
-                    loggingOptions.getSuccessLevel(),
-                    actionConfig,
-                    actionResult,
-                    objectCollections);
-        } else if (!actionResult.isSuccess()
-                && loggingOptions.isLogOnFailure()
-                && loggingOptions.getFailureMessage() != null) {
-            // Log failure message
-            String message =
-                    formatLogMessage(
-                            loggingOptions.getFailureMessage(), actionResult, objectCollections);
-            logMessage(
-                    message,
-                    loggingOptions.getFailureLevel(),
-                    actionConfig,
-                    actionResult,
-                    objectCollections);
-        }
+        // LoggingOptions removed - automatic logging now handled through BrobotLogger
     }
 
     /**
@@ -534,52 +457,7 @@ public class ActionExecution {
         return "action";
     }
 
-    /** Logs a message through the unified logging system. */
-    private void logMessage(
-            String message,
-            io.github.jspinak.brobot.tools.logging.model.LogEventType logType,
-            ActionConfig actionConfig,
-            ActionResult actionResult,
-            ObjectCollection... objectCollections) {
-        // Determine the primary target for logging
-        String targetName = "unknown";
-        if (objectCollections.length > 0 && !objectCollections[0].getStateImages().isEmpty()) {
-            targetName = objectCollections[0].getStateImages().get(0).getName();
-        }
+    // Removed obsolete logMessage method - functionality moved to handleAutomaticLogging
 
-        // Build log entry
-        var logBuilder =
-                brobotLogger
-                        .log()
-                        .type(mapLogEventType(logType))
-                        .action(actionConfig.getClass().getSimpleName().replace("Options", ""))
-                        .target(targetName)
-                        .observation(message);
-
-        // Add result-specific data if available
-        if (actionResult != null) {
-            logBuilder.success(actionResult.isSuccess());
-            if (actionResult.getDuration() != null) {
-                logBuilder.duration(actionResult.getDuration().toMillis());
-            }
-            logBuilder.metadata("matchCount", actionResult.getMatchList().size());
-        }
-
-        logBuilder.log();
-    }
-
-    /** Maps LogEventType to unified LogEvent.Type */
-    private io.github.jspinak.brobot.logging.unified.LogEvent.Type mapLogEventType(
-            io.github.jspinak.brobot.tools.logging.model.LogEventType logEventType) {
-        switch (logEventType) {
-            case ACTION:
-                return io.github.jspinak.brobot.logging.unified.LogEvent.Type.ACTION;
-            case ERROR:
-                return io.github.jspinak.brobot.logging.unified.LogEvent.Type.ERROR;
-            case TRANSITION:
-                return io.github.jspinak.brobot.logging.unified.LogEvent.Type.TRANSITION;
-            default:
-                return io.github.jspinak.brobot.logging.unified.LogEvent.Type.OBSERVATION;
-        }
-    }
+    // Removed obsolete mapping method - LogEventType and unified LogEvent.Type no longer exist
 }

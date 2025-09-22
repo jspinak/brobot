@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.aspects.core;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -16,10 +17,13 @@ import org.springframework.stereotype.Component;
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.exception.ActionFailedException;
-import io.github.jspinak.brobot.logging.unified.BrobotLogger;
-import io.github.jspinak.brobot.logging.unified.LogEvent;
+import io.github.jspinak.brobot.logging.BrobotLogger;
+import io.github.jspinak.brobot.logging.events.ActionEvent;
 
 import lombok.extern.slf4j.Slf4j;
+import io.github.jspinak.brobot.logging.LogCategory;
+import io.github.jspinak.brobot.logging.LogLevel;
+
 
 /**
  * Aspect that intercepts all Sikuli method calls to provide: - Centralized error handling and
@@ -125,14 +129,12 @@ public class SikuliInterceptionAspect {
         Object[] args = joinPoint.getArgs();
 
         // Log mock operation
-        brobotLogger
-                .log()
-                .type(LogEvent.Type.ACTION)
-                .level(LogEvent.Level.DEBUG)
-                .action("MOCK_" + methodName.toUpperCase())
-                .metadata("method", methodName)
-                .metadata("args", Arrays.toString(args))
-                .metadata("mock", true)
+        brobotLogger.builder(LogCategory.SYSTEM)
+                .level(LogLevel.DEBUG)
+                .action("MOCK_" + methodName.toUpperCase(), methodName)
+                .context("method", methodName)
+                .context("args", Arrays.toString(args))
+                .context("mock", true)
                 .log();
 
         // Return appropriate mock result
@@ -144,14 +146,12 @@ public class SikuliInterceptionAspect {
         String methodName = joinPoint.getSignature().getName();
         Object[] args = joinPoint.getArgs();
 
-        brobotLogger
-                .log()
-                .type(LogEvent.Type.ACTION)
-                .level(LogEvent.Level.DEBUG)
-                .action("SIKULI_" + methodName.toUpperCase())
-                .metadata("method", methodName)
-                .metadata("args", sanitizeArgs(args))
-                .metadata("thread", Thread.currentThread().getName())
+        brobotLogger.builder(LogCategory.SYSTEM)
+                .level(LogLevel.DEBUG)
+                .action("SIKULI_" + methodName.toUpperCase(), methodName)
+                .context("method", methodName)
+                .context("args", sanitizeArgs(args))
+                .context("thread", Thread.currentThread().getName())
                 .log();
     }
 
@@ -159,15 +159,13 @@ public class SikuliInterceptionAspect {
     private void logOperationSuccess(JoinPoint joinPoint, Object result, long duration) {
         String methodName = joinPoint.getSignature().getName();
 
-        brobotLogger
-                .log()
-                .type(LogEvent.Type.ACTION)
-                .level(LogEvent.Level.DEBUG)
-                .action("SIKULI_" + methodName.toUpperCase() + "_SUCCESS")
-                .success(true)
-                .duration(duration)
-                .metadata("method", methodName)
-                .metadata("resultType", result != null ? result.getClass().getSimpleName() : "null")
+        brobotLogger.builder(LogCategory.SYSTEM)
+                .level(LogLevel.DEBUG)
+                .action("SIKULI_" + methodName.toUpperCase() + "_SUCCESS", methodName)
+                .context("success", true)
+                .duration(Duration.ofMillis(duration))
+                .context("method", methodName)
+                .context("resultType", result != null ? result.getClass().getSimpleName() : "null")
                 .log();
     }
 
@@ -188,19 +186,17 @@ public class SikuliInterceptionAspect {
         // }
 
         // Log the failure with details
-        brobotLogger
-                .log()
-                .type(LogEvent.Type.ERROR)
-                .level(LogEvent.Level.ERROR)
-                .action("SIKULI_" + methodName.toUpperCase() + "_FAILED")
-                .success(false)
-                .duration(duration)
+        brobotLogger.builder(LogCategory.SYSTEM)
+                .level(LogLevel.ERROR)
+                .action("SIKULI_" + methodName.toUpperCase() + "_FAILED", methodName)
+                .context("success", false)
+                .duration(Duration.ofMillis(duration))
                 .error(e)
-                .metadata("method", methodName)
-                .metadata("args", sanitizeArgs(args))
-                .metadata("errorType", "FindFailed")
-                .metadata("screenshot", screenshotPath)
-                .metadata("searchImage", extractImagePath(args))
+                .context("method", methodName)
+                .context("args", sanitizeArgs(args))
+                .context("errorType", "FindFailed")
+                .context("screenshot", screenshotPath)
+                .context("searchImage", extractImagePath(args))
                 .log();
     }
 
@@ -209,17 +205,15 @@ public class SikuliInterceptionAspect {
         String methodName = joinPoint.getSignature().getName();
         Object[] args = joinPoint.getArgs();
 
-        brobotLogger
-                .log()
-                .type(LogEvent.Type.ERROR)
-                .level(LogEvent.Level.ERROR)
-                .action("SIKULI_" + methodName.toUpperCase() + "_ERROR")
-                .success(false)
-                .duration(duration)
+        brobotLogger.builder(LogCategory.SYSTEM)
+                .level(LogLevel.ERROR)
+                .action("SIKULI_" + methodName.toUpperCase() + "_ERROR", methodName)
+                .context("success", false)
+                .duration(Duration.ofMillis(duration))
                 .error(e)
-                .metadata("method", methodName)
-                .metadata("args", sanitizeArgs(args))
-                .metadata("errorType", e.getClass().getSimpleName())
+                .context("method", methodName)
+                .context("args", sanitizeArgs(args))
+                .context("errorType", e.getClass().getSimpleName())
                 .log();
     }
 

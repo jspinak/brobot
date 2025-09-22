@@ -18,18 +18,22 @@ import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.logging.unified.BrobotLogger;
-import io.github.jspinak.brobot.logging.unified.LogEvent;
+import io.github.jspinak.brobot.logging.BrobotLogger;
+import io.github.jspinak.brobot.logging.events.ActionEvent;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.monitor.MonitorManager;
-import io.github.jspinak.brobot.tools.logging.visual.HighlightManager;
-import io.github.jspinak.brobot.tools.logging.visual.VisualFeedbackConfig;
+// Removed old visual logging imports that no longer exist:// 
+// import io.github.jspinak.brobot.tools.logging.visual.HighlightManager; // HighlightManager removed
+// import io.github.jspinak.brobot.tools.logging.visual.VisualFeedbackConfig;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import io.github.jspinak.brobot.logging.LogCategory;
+import io.github.jspinak.brobot.logging.LogLevel;
+
 
 /**
  * Aspect that provides automatic visual feedback during automation execution.
@@ -52,20 +56,24 @@ import lombok.extern.slf4j.Slf4j;
 public class VisualFeedbackAspect {
 
     private final BrobotLogger brobotLogger;
-    private final HighlightManager highlightManager;
-    private final VisualFeedbackConfig visualConfig;
+    // Removed old visual logging dependencies that no longer exist:
+  //  //  // private final HighlightManager highlightManager; // HighlightManager removed // highlightManager removed
+    // private final VisualFeedbackConfig visualConfig;
     private final MonitorManager monitorManager;
 
     @Autowired
     public VisualFeedbackAspect(
             BrobotLogger brobotLogger,
-            MonitorManager monitorManager,
-            @Autowired(required = false) HighlightManager highlightManager,
-            @Autowired(required = false) VisualFeedbackConfig visualConfig) {
+            MonitorManager monitorManager
+            // Removed missing parameters:
+          //  //  // @Autowired(required = false) HighlightManager highlightManager, // HighlightManager removed // highlightManager removed
+            // @Autowired(required = false) VisualFeedbackConfig visualConfig
+    ) {
         this.brobotLogger = brobotLogger;
         this.monitorManager = monitorManager;
-        this.highlightManager = highlightManager;
-        this.visualConfig = visualConfig;
+        // Removed initialization of missing classes:
+       //  // this.highlightManager = highlightManager; // highlightManager removed
+        // this.visualConfig = visualConfig;
     }
 
     @Value("${brobot.aspects.visual-feedback.highlight-duration:2}")
@@ -91,9 +99,9 @@ public class VisualFeedbackAspect {
     @PostConstruct
     public void init() {
         log.info("Visual Feedback Aspect initialized");
-        if (highlightManager == null) {
-            log.warn("HighlightManager not available - visual feedback will be limited");
-        }
+        // if (highlightManager == null) { // highlightManager removed
+        //     log.warn("HighlightManager not available - visual feedback will be limited"); // HighlightManager removed
+        // }
     }
 
     /** Pointcut for find operations */
@@ -125,17 +133,17 @@ public class VisualFeedbackAspect {
         ObjectCollection targets = extractTargets(joinPoint.getArgs());
 
         // Only log if aspect is actually enabled and will do something
-        if (visualConfig != null && visualConfig.isEnabled()) {
-            log.debug(
-                    "Visual feedback for {} operation, targets: {}",
-                    operationType,
-                    targets != null ? "found" : "null");
-        }
+        // if (visualConfig != null && visualConfig.isEnabled()) {
+        //     log.debug(
+        //             "Visual feedback for {} operation, targets: {}",
+        //             operationType,
+        //             targets != null ? "found" : "null");
+        // }
 
         // Highlight search regions before operation
-        if (targets != null && highlightManager != null) {
-            highlightSearchRegions(targets, operationType);
-        }
+        // if (targets != null && highlightManager != null) { // highlightManager removed
+        //     highlightSearchRegions(targets, operationType);
+        // }
 
         try {
             // Execute the operation
@@ -216,43 +224,44 @@ public class VisualFeedbackAspect {
 
     /** Highlight search regions before operation */
     private void highlightSearchRegions(ObjectCollection targets, String operationType) {
-        if (targets == null || highlightManager == null) return;
+        if (targets == null) return;
 
         // Only log if highlighting is actually enabled
-        if (visualConfig != null
-                && visualConfig.isEnabled()
-                && visualConfig.isAutoHighlightSearchRegions()) {
-            log.debug(
-                    "Extracting search regions for highlighting. StateImages: {}, StateRegions: {}",
-                    targets.getStateImages().size(),
-                    targets.getStateRegions().size());
-        }
+        // if (visualConfig != null
+        //         && visualConfig.isEnabled()
+        //         && visualConfig.isAutoHighlightSearchRegions()) {
+        //     log.debug(
+        //             "Extracting search regions for highlighting. StateImages: {}, StateRegions: {}",
+        //             targets.getStateImages().size(),
+        //             targets.getStateRegions().size());
+        // }
 
         // Extract regions with context from the ObjectCollection
-        List<HighlightManager.RegionWithContext> regionsWithContext = new ArrayList<>();
+        // List<HighlightManager.RegionWithContext> regionsWithContext = new ArrayList<>(); // HighlightManager removed
+        List<Object> regionsWithContext = new ArrayList<>(); // Placeholder for removed HighlightManager.RegionWithContext
 
         // Get regions from StateRegions
         for (StateRegion stateRegion : targets.getStateRegions()) {
             if (stateRegion.getSearchRegion() != null) {
-                regionsWithContext.add(
-                        new HighlightManager.RegionWithContext(
-                                stateRegion.getSearchRegion(),
-                                stateRegion.getOwnerStateName(),
-                                stateRegion.getName()));
+                // regionsWithContext.add(
+                //         new HighlightManager.RegionWithContext( // HighlightManager removed
+                //                 stateRegion.getSearchRegion(),
+                //                 stateRegion.getOwnerStateName(),
+                //                 stateRegion.getName()));
             }
         }
 
         // Get search regions from StateImages
         for (StateImage stateImage : targets.getStateImages()) {
             // Only log detailed info if highlighting is actually happening
-            if (visualConfig != null
-                    && visualConfig.isEnabled()
-                    && visualConfig.isAutoHighlightSearchRegions()) {
-                log.debug(
-                        "StateImage: {}, patterns: {}",
-                        stateImage.getName(),
-                        stateImage.getPatterns().size());
-            }
+            // if (visualConfig != null
+            //         && visualConfig.isEnabled()
+            //         && visualConfig.isAutoHighlightSearchRegions()) {
+            //     log.debug(
+            //             "StateImage: {}, patterns: {}",
+            //             stateImage.getName(),
+            //             stateImage.getPatterns().size());
+            // }
             boolean foundRegions = false;
 
             // StateImages don't have direct search regions, they use patterns
@@ -265,16 +274,16 @@ public class VisualFeedbackAspect {
                     if (!configuredRegions.isEmpty()) {
                         for (Region region : configuredRegions) {
                             if (region.isDefined()) {
-                                regionsWithContext.add(
-                                        new HighlightManager.RegionWithContext(
-                                                region,
-                                                stateImage.getOwnerStateName(),
-                                                stateImage.getName()));
+                                // regionsWithContext.add(
+                                //         new HighlightManager.RegionWithContext( // HighlightManager removed
+                                //                 region,
+                                //                 stateImage.getOwnerStateName(),
+                                //                 stateImage.getName()));
                                 foundRegions = true;
                                 // Only log if actually highlighting
-                                if (visualConfig != null && visualConfig.isEnabled()) {
-                                    log.debug("Added region from pattern: {}", region);
-                                }
+                                // if (visualConfig != null && visualConfig.isEnabled()) {
+                                //     log.debug("Added region from pattern: {}", region);
+                                // }
                             }
                         }
                     }
@@ -284,11 +293,11 @@ public class VisualFeedbackAspect {
             // If no regions found for this StateImage and we're processing it, use full screen
             if (!foundRegions && stateImage.getPatterns().size() > 0) {
                 Region screenRegion = getScreenRegion();
-                regionsWithContext.add(
-                        new HighlightManager.RegionWithContext(
-                                screenRegion,
-                                stateImage.getOwnerStateName(),
-                                stateImage.getName()));
+                // regionsWithContext.add(
+                //         new HighlightManager.RegionWithContext( // HighlightManager removed
+                //                 screenRegion,
+                //                 stateImage.getOwnerStateName(),
+                //                 stateImage.getName()));
                 log.debug(
                         "No search regions defined for StateImage {}, using full screen",
                         stateImage.getName());
@@ -296,21 +305,21 @@ public class VisualFeedbackAspect {
         }
 
         // Check if highlighting is actually enabled before logging
-        if (visualConfig != null
-                && visualConfig.isEnabled()
-                && visualConfig.isAutoHighlightSearchRegions()) {
-            log.debug("Total search regions to highlight: {}", regionsWithContext.size());
-        } else if (!regionsWithContext.isEmpty()) {
-            log.debug(
-                    "Search region highlighting skipped: enabled={}, autoHighlight={}, regions={}",
-                    visualConfig != null ? visualConfig.isEnabled() : false,
-                    visualConfig != null ? visualConfig.isAutoHighlightSearchRegions() : false,
-                    regionsWithContext.size());
-        }
+        // if (visualConfig != null
+        //         && visualConfig.isEnabled()
+        //         && visualConfig.isAutoHighlightSearchRegions()) {
+        //     log.debug("Total search regions to highlight: {}", regionsWithContext.size());
+        // } else if (!regionsWithContext.isEmpty()) {
+        //     log.debug(
+        //             "Search region highlighting skipped: enabled={}, autoHighlight={}, regions={}",
+        //             visualConfig != null ? visualConfig.isEnabled() : false,
+        //             visualConfig != null ? visualConfig.isAutoHighlightSearchRegions() : false,
+        //             regionsWithContext.size());
+        // }
 
-        // Use HighlightManager to highlight the regions with context
+       //  // Use HighlightManager to highlight the regions with context // HighlightManager removed
         if (!regionsWithContext.isEmpty()) {
-            highlightManager.highlightSearchRegionsWithContext(regionsWithContext);
+           //  highlightManager.highlightSearchRegionsWithContext(regionsWithContext); // highlightManager removed
         }
 
         logVisualFeedback("SEARCH_HIGHLIGHT", operationType, regionsWithContext.size());
@@ -318,7 +327,7 @@ public class VisualFeedbackAspect {
 
     /** Provide feedback for operation results */
     private void provideResultFeedback(ActionResult result, String operationType) {
-        if (!result.isSuccess() || highlightManager == null) {
+        if (!result.isSuccess()) {
             return;
         }
 
@@ -327,8 +336,8 @@ public class VisualFeedbackAspect {
             return;
         }
 
-        // Use HighlightManager to highlight the matches
-        highlightManager.highlightMatches(matches);
+       //  // Use HighlightManager to highlight the matches // HighlightManager removed
+       //  highlightManager.highlightMatches(matches); // highlightManager removed
 
         // Update action flow
         if (showActionFlow && !matches.isEmpty()) {
@@ -343,7 +352,7 @@ public class VisualFeedbackAspect {
     /** Provide error feedback */
     private void provideErrorFeedback(
             ObjectCollection targets, String operationType, Throwable error) {
-        if (highlightManager == null || targets == null) return;
+        if (targets == null) return;
 
         // Get the first search region to highlight as error
         Region errorRegion = null;
@@ -373,8 +382,8 @@ public class VisualFeedbackAspect {
             errorRegion = new Region(0, 0, 1920, 1080);
         }
 
-        // Use HighlightManager to highlight the error
-        highlightManager.highlightError(errorRegion);
+       //  // Use HighlightManager to highlight the error // HighlightManager removed
+       //  highlightManager.highlightError(errorRegion); // highlightManager removed
 
         logVisualFeedback("ERROR_HIGHLIGHT", operationType, 1);
     }
@@ -420,14 +429,13 @@ public class VisualFeedbackAspect {
     /** Log visual feedback event */
     private void logVisualFeedback(String feedbackType, String operationType, int targetCount) {
         brobotLogger
-                .log()
-                .type(LogEvent.Type.OBSERVATION)
-                .level(LogEvent.Level.DEBUG)
-                .action("VISUAL_FEEDBACK")
-                .metadata("feedbackType", feedbackType)
-                .metadata("operationType", operationType)
-                .metadata("targetCount", targetCount)
-                .observation("Visual feedback provided")
+                .builder(LogCategory.ACTIONS)
+                .level(LogLevel.DEBUG)
+                .action("VISUAL_FEEDBACK", operationType)
+                .context("feedbackType", feedbackType)
+                .context("operationType", operationType)
+                .context("targetCount", targetCount)
+                .message("Visual feedback provided")
                 .log();
     }
 

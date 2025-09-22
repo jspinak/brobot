@@ -16,8 +16,7 @@ import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.tools.history.draw.DrawRect;
 import io.github.jspinak.brobot.tools.history.visual.Visualization;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 /**
  * Core drawing utilities for visualizing action results on screenshots.
  *
@@ -139,11 +138,6 @@ public class ActionVisualizer {
      */
     public void drawClick(Visualization illustrations, ActionResult matches) {
         for (Match match : matches.getMatchList()) {
-            ConsoleReporter.println(
-                    "Drawing click on "
-                            + match.getTarget().getCalculatedX()
-                            + ", "
-                            + match.getTarget().getCalculatedY());
             drawPoint(illustrations.getMatchesOnScene(), match, new Scalar(255, 150, 255, 0));
         }
     }

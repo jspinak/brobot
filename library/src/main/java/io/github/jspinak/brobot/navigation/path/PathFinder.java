@@ -10,8 +10,8 @@ import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.navigation.service.StateTransitionService;
 import io.github.jspinak.brobot.navigation.transition.StateTransitions;
 import io.github.jspinak.brobot.navigation.transition.StateTransitionsJointTable;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-import io.github.jspinak.brobot.tools.logging.MessageFormatter;
+// Removed old logging imports that no longer exist:
+// // Removed old logging import: // // Removed old logging import: import io.github.jspinak.brobot.tools.logging.MessageFormatter;
 
 /**
  * Implements graph traversal algorithms to find navigation paths between States.
@@ -81,7 +81,6 @@ public class PathFinder {
     public synchronized Paths getPathsToState(Set<Long> startStates, Long targetState) {
         // Handle null target state
         if (targetState == null) {
-            ConsoleReporter.println(MessageFormatter.fail + "Target state is null");
             return new Paths(new ArrayList<>());
         }
 
@@ -90,7 +89,6 @@ public class PathFinder {
             String errorMsg =
                     "Cannot find path: No active start states. "
                             + "Please ensure initial states are set before attempting navigation.";
-            ConsoleReporter.println(MessageFormatter.fail + " " + errorMsg);
             return new Paths(new ArrayList<>());
         }
 
@@ -99,15 +97,14 @@ public class PathFinder {
                 startStates.stream()
                         .map(allStates::getStateName)
                         .reduce("", (s, s2) -> s + ", " + s2);
-        ConsoleReporter.println("Find path: " + startStatesString + " -> " + targetStateName);
 
         // Use instance fields - method is synchronized for thread safety
         this.startStates = startStates;
         this.pathList = new ArrayList<>();
         recursePath(new Path(), targetState);
 
-        if (pathList.isEmpty())
-            ConsoleReporter.println(MessageFormatter.fail + "Path to state not found.");
+        if (pathList.isEmpty()) {
+        }
         Paths paths = new Paths(pathList);
         paths.sort();
         paths.print(allStates);

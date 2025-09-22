@@ -8,6 +8,8 @@ import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import io.github.jspinak.brobot.json.serializers.*;
+import io.github.jspinak.brobot.model.element.Image;
+import io.github.jspinak.brobot.runner.json.mixins.BrobotImageMixin;
 
 /**
  * Custom Jackson module for Brobot that registers all custom serializers and deserializers.
@@ -37,6 +39,9 @@ public class BrobotJacksonModule extends SimpleModule {
         // Register OpenCV Mat serializers
         addSerializer(Mat.class, new MatSerializer());
         addDeserializer(Mat.class, new MatDeserializer());
+
+        // Register mixins
+        setMixInAnnotation(Image.class, BrobotImageMixin.class);
     }
 
     @Override

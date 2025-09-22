@@ -52,7 +52,7 @@ import lombok.Data;
  *
  * <ul>
  *   <li><b>staysVisibleAfterClicked</b>: Probability (0-100) the region remains after interaction
- *   <li><b>probabilityExists</b>: Likelihood (0-100) of finding actionable content
+ *   <li><b>mockFindStochasticModifier</b>: Likelihood (0-100) of finding actionable content
  *   <li><b>position</b>: Target point within region for clicks (0-1 scale)
  * </ul>
  *
@@ -87,7 +87,7 @@ public class StateRegion implements StateObject {
     private String ownerStateName = "null";
     private Long ownerStateId = 0L;
     private int staysVisibleAfterClicked = 100;
-    private int probabilityExists = 100; // probability something can be acted on in this region
+    private int mockFindStochasticModifier = 100; // modifier for find probability in mock mode
     private int timesActedOn = 0;
     private Position position = new Position(.5, .5); // click position within region
     private Anchors anchors = new Anchors();
@@ -98,6 +98,12 @@ public class StateRegion implements StateObject {
     private List<CrossStateAnchor> crossStateAnchors = new ArrayList<>();
     private DefineAs defineStrategy = DefineAs.OUTSIDE_ANCHORS;
 
+    /**
+     * Returns a unique string identifier for this StateRegion.
+     * Combines object type, name, and region coordinates.
+     *
+     * @return concatenated string of type, name, and coordinates
+     */
     public String getIdAsString() {
         return objectType.name()
                 + name
@@ -107,34 +113,76 @@ public class StateRegion implements StateObject {
                 + searchRegion.h();
     }
 
+    /**
+     * Returns the x-coordinate of this StateRegion.
+     *
+     * @return x-coordinate in pixels
+     */
     public int x() {
         return searchRegion.x();
     }
 
+    /**
+     * Returns the y-coordinate of this StateRegion.
+     *
+     * @return y-coordinate in pixels
+     */
     public int y() {
         return searchRegion.y();
     }
 
+    /**
+     * Returns the width of this StateRegion.
+     *
+     * @return width in pixels
+     */
     public int w() {
         return searchRegion.w();
     }
 
+    /**
+     * Returns the height of this StateRegion.
+     *
+     * @return height in pixels
+     */
     public int h() {
         return searchRegion.h();
     }
 
+    /**
+     * Checks if this StateRegion has defined coordinates.
+     * A region is defined if it has non-zero width and height.
+     *
+     * @return true if the region is defined, false otherwise
+     */
     public boolean defined() {
         return getSearchRegion().isDefined();
     }
 
+    /**
+     * Increments the counter tracking how many times this region has been acted upon.
+     * Useful for tracking usage frequency and interaction statistics.
+     */
     public void addTimesActedOn() {
         timesActedOn++;
     }
 
+    /**
+     * Adds an action record snapshot to this region's match history.
+     * Used for tracking historical interactions and supporting mock mode.
+     *
+     * @param matchSnapshot the ActionRecord to add to history
+     */
     public void addSnapshot(ActionRecord matchSnapshot) {
         matchHistory.addSnapshot(matchSnapshot);
     }
 
+    /**
+     * Converts this StateRegion to an ObjectCollection containing only this region.
+     * Useful for Action methods that require ObjectCollection parameters.
+     *
+     * @return ObjectCollection containing this StateRegion
+     */
     public ObjectCollection asObjectCollection() {
         return new ObjectCollection.Builder().withRegions(this).build();
     }
@@ -145,7 +193,7 @@ public class StateRegion implements StateObject {
         private String ownerStateName = "null";
         private Long ownerStateId = 0L;
         private int staysVisibleAfterClicked = 100;
-        private int probabilityExists = 100;
+        private int mockFindStochasticModifier = 100;
         private int timesActedOn = 0;
         private Position position = new Position(.5, .5);
         private Anchors anchors = new Anchors();
@@ -154,92 +202,207 @@ public class StateRegion implements StateObject {
         private List<CrossStateAnchor> crossStateAnchors = new ArrayList<>();
         private DefineAs defineStrategy = DefineAs.OUTSIDE_ANCHORS;
 
+        /**
+         * Sets the name for the StateRegion being built.
+         *
+         * @param name the name to assign
+         * @return this builder for method chaining
+         */
         public Builder setName(String name) {
             this.name = name;
             return this;
         }
 
+        /**
+         * Sets the search region for this StateRegion.
+         *
+         * @param searchRegion the Region to use
+         * @return this builder for method chaining
+         */
         public Builder setSearchRegion(Region searchRegion) {
             this.searchRegion = searchRegion;
             return this;
         }
 
+        /**
+         * Sets the search region using coordinates.
+         *
+         * @param x x-coordinate in pixels
+         * @param y y-coordinate in pixels
+         * @param w width in pixels
+         * @param h height in pixels
+         * @return this builder for method chaining
+         */
         public Builder setSearchRegion(int x, int y, int w, int h) {
             this.searchRegion = new Region(x, y, w, h);
             return this;
         }
 
+        /**
+         * Sets the name of the State that owns this StateRegion.
+         *
+         * @param stateName the owner state's name
+         * @return this builder for method chaining
+         */
         public Builder setOwnerStateName(String stateName) {
             this.ownerStateName = stateName;
             return this;
         }
 
+        /**
+         * Sets the probability that this region remains visible after being clicked.
+         *
+         * @param staysVisibleAfterClicked probability (0-100) of staying visible
+         * @return this builder for method chaining
+         */
         public Builder setStaysVisibleAfterClicked(int staysVisibleAfterClicked) {
             this.staysVisibleAfterClicked = staysVisibleAfterClicked;
             return this;
         }
 
-        public Builder setProbabilityExists(int probabilityExists) {
-            this.probabilityExists = probabilityExists;
+        /**
+         * Sets the probability that actionable content exists in this region.
+         *
+         * @param mockFindStochasticModifier probability (0-100) of content existence
+         * @return this builder for method chaining
+         */
+        public Builder setMockFindStochasticModifier(int mockFindStochasticModifier) {
+            this.mockFindStochasticModifier = mockFindStochasticModifier;
             return this;
         }
 
+        /**
+         * Sets the initial count of times this region has been acted upon.
+         *
+         * @param timesActedOn the initial interaction count
+         * @return this builder for method chaining
+         */
         public Builder setTimesActedOn(int timesActedOn) {
             this.timesActedOn = timesActedOn;
             return this;
         }
 
+        /**
+         * Sets the target position within the region for clicks.
+         * Position is relative (0.0-1.0) where 0.5,0.5 is center.
+         *
+         * @param position the Position for clicks
+         * @return this builder for method chaining
+         */
         public Builder setPosition(Position position) {
             this.position = position;
             return this;
         }
 
+        /**
+         * Adds an anchor relating a border of a defined region to a position in this region.
+         *
+         * @param definedRegionBorder the border position of the anchor region
+         * @param positionInThisRegion the position in this region to anchor to
+         * @return this builder for method chaining
+         */
         public Builder addAnchor(
                 Positions.Name definedRegionBorder, Positions.Name positionInThisRegion) {
             this.anchors.add(new Anchor(definedRegionBorder, new Position(positionInThisRegion)));
             return this;
         }
 
+        /**
+         * Adds an anchor with a specific position.
+         *
+         * @param definedRegionBorder the border position of the anchor region
+         * @param location the specific position to anchor to
+         * @return this builder for method chaining
+         */
         public Builder addAnchor(Positions.Name definedRegionBorder, Position location) {
             this.anchors.add(new Anchor(definedRegionBorder, location));
             return this;
         }
 
+        /**
+         * Sets the complete Anchors collection for this region.
+         *
+         * @param anchors the Anchors object containing all anchors
+         * @return this builder for method chaining
+         */
         public Builder setAnchors(Anchors anchors) {
             this.anchors = anchors;
             return this;
         }
 
+        /**
+         * Adds an action record snapshot to the match history.
+         *
+         * @param matchSnapshot the ActionRecord to add
+         * @return this builder for method chaining
+         */
         public Builder addSnapshot(ActionRecord matchSnapshot) {
             this.matchHistory.addSnapshot(matchSnapshot);
             return this;
         }
 
+        /**
+         * Sets the mock text for this region.
+         * Used in testing and mock mode to simulate text content.
+         *
+         * @param mockText the text to use in mock scenarios
+         * @return this builder for method chaining
+         */
         public Builder setMockText(String mockText) {
             this.mockText = mockText;
             return this;
         }
 
+        /**
+         * Sets the complete match history for this region.
+         * Contains historical interaction data for learning and mocking.
+         *
+         * @param matchHistory the ActionHistory to use
+         * @return this builder for method chaining
+         */
         public Builder setMatchHistory(ActionHistory matchHistory) {
             this.matchHistory = matchHistory;
             return this;
         }
 
+        /**
+         * Adds a cross-state anchor for positioning relative to elements in other states.
+         *
+         * @param anchor the CrossStateAnchor to add
+         * @return this builder for method chaining
+         */
         public Builder addCrossStateAnchor(CrossStateAnchor anchor) {
             this.crossStateAnchors.add(anchor);
             return this;
         }
 
+        /**
+         * Sets the complete list of cross-state anchors.
+         *
+         * @param anchors list of CrossStateAnchor objects
+         * @return this builder for method chaining
+         */
         public Builder setCrossStateAnchors(List<CrossStateAnchor> anchors) {
             this.crossStateAnchors = anchors;
             return this;
         }
 
+        /**
+         * Sets the strategy for defining this region relative to anchors.
+         *
+         * @param strategy the DefineAs strategy to use
+         * @return this builder for method chaining
+         */
         public Builder setDefineStrategy(DefineAs strategy) {
             this.defineStrategy = strategy;
             return this;
         }
 
+        /**
+         * Builds the StateRegion with all configured properties.
+         *
+         * @return the constructed StateRegion instance
+         */
         public StateRegion build() {
             StateRegion stateRegion = new StateRegion();
             stateRegion.name = name;
@@ -247,7 +410,7 @@ public class StateRegion implements StateObject {
             stateRegion.ownerStateName = ownerStateName;
             stateRegion.ownerStateId = ownerStateId;
             stateRegion.staysVisibleAfterClicked = staysVisibleAfterClicked;
-            stateRegion.probabilityExists = probabilityExists;
+            stateRegion.mockFindStochasticModifier = mockFindStochasticModifier;
             stateRegion.timesActedOn = timesActedOn;
             stateRegion.position = position;
             stateRegion.anchors = anchors;

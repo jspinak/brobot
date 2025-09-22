@@ -12,7 +12,7 @@ import com.github.kwhat.jnativehook.*;
 import com.github.kwhat.jnativehook.keyboard.*;
 import com.github.kwhat.jnativehook.mouse.*;
 
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+// Removed old logging import: import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
 @Component
 public class CaptureUserInputs
@@ -35,7 +35,7 @@ public class CaptureUserInputs
             logger.setUseParentHandlers(false);
             GlobalScreen.registerNativeHook();
         } catch (NativeHookException e) {
-            ConsoleReporter.format("Error registering native hook: %s", e.getMessage());
+            System.out.printf("Error registering native hook: %s%n", e.getMessage());
         }
     }
 
@@ -48,7 +48,7 @@ public class CaptureUserInputs
             try {
                 GlobalScreen.unregisterNativeHook();
             } catch (NativeHookException e) {
-                ConsoleReporter.formatln("Error unregistering native hook: %s", e.getMessage());
+                System.out.printf("Error unregistering native hook: %s%n", e.getMessage());
             }
         }
     }

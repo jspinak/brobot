@@ -15,7 +15,8 @@ import org.xml.sax.SAXException;
 
 import io.github.jspinak.brobot.libraryfeatures.captureAndReplay.capture.SceneAndObjectsForXML;
 import io.github.jspinak.brobot.libraryfeatures.captureAndReplay.capture.SceneObjectCollectionForXML;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+
+// Removed old logging import: import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
 @Component
 public class ReadXmlScenes {
@@ -24,7 +25,7 @@ public class ReadXmlScenes {
         DocumentBuilderFactory dbf =
                 DocumentBuilderFactory.newInstance(); // Instantiate the Factory
         String path = "capture\\scenes.xml";
-        ConsoleReporter.println(Path.of(path).toAbsolutePath().toString());
+        System.out.println(Path.of(path).toAbsolutePath().toString());
         DocumentBuilder db;
         try {
             db = dbf.newDocumentBuilder();

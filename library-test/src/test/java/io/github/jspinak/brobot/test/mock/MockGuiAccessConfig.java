@@ -4,7 +4,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
-import io.github.jspinak.brobot.tools.logging.gui.GuiAccessConfig;
+// GuiAccessConfig removed
 
 /**
  * Test configuration for GUI access in headless test environment. Overrides the default GUI access

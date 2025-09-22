@@ -28,8 +28,8 @@ import org.springframework.test.context.TestPropertySource;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.config.core.BrobotPropertyVerifier;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
-import io.github.jspinak.brobot.logging.unified.BrobotLogger;
-import io.github.jspinak.brobot.logging.unified.LogBuilder;
+import io.github.jspinak.brobot.logging.BrobotLogger;
+import io.github.jspinak.brobot.logging.LogBuilder;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
@@ -79,7 +79,7 @@ public class BrobotPropertyVerifierTest extends BrobotTestBase {
         lenient().when(mockProperties.getIllustration()).thenReturn(mockIllustrationProps);
         lenient().when(mockLogger.log()).thenReturn(mockLogBuilder);
         lenient().when(mockLogBuilder.observation(anyString())).thenReturn(mockLogBuilder);
-        lenient().when(mockLogBuilder.metadata(anyString(), any())).thenReturn(mockLogBuilder);
+        lenient().when(mockLogBuilder.context(anyString(), any())).thenReturn(mockLogBuilder);
 
         // Reset static flag for each test
         resetPropertiesVerifiedFlag();
@@ -138,9 +138,9 @@ public class BrobotPropertyVerifierTest extends BrobotTestBase {
 
         // Then
         verify(mockLogBuilder).observation("WARNING: Illustrations Disabled");
-        verify(mockLogBuilder).metadata("reason", "saveHistory is false");
+        verify(mockLogBuilder).context("reason", "saveHistory is false");
         verify(mockLogBuilder)
-                .metadata(
+                .context(
                         "solution",
                         "Set brobot.screenshot.save-history=true in application.properties");
     }
@@ -195,7 +195,7 @@ public class BrobotPropertyVerifierTest extends BrobotTestBase {
 
             // Then
             verify(mockLogBuilder).observation("WARNING: Headless Mode Active");
-            verify(mockLogBuilder).metadata("headless", true);
+            verify(mockLogBuilder).context("headless", true);
         }
     }
 
@@ -267,7 +267,7 @@ public class BrobotPropertyVerifierTest extends BrobotTestBase {
         verifier.verifyProperties();
 
         // Then
-        verify(mockLogBuilder).metadata(eq("illustrationEnabled"), eq(expectedEnabled));
+        verify(mockLogBuilder).context(eq("illustrationEnabled"), eq(expectedEnabled));
     }
 
     @Test
@@ -330,14 +330,14 @@ public class BrobotPropertyVerifierTest extends BrobotTestBase {
         verifier.verifyProperties();
 
         // Then - Verify illustration properties are logged
-        verify(mockLogBuilder, atLeastOnce()).metadata("drawFind", true);
-        verify(mockLogBuilder, atLeastOnce()).metadata("drawClick", false);
-        verify(mockLogBuilder, atLeastOnce()).metadata("drawDrag", true);
-        verify(mockLogBuilder, atLeastOnce()).metadata("drawMove", false);
-        verify(mockLogBuilder, atLeastOnce()).metadata("drawHighlight", true);
-        verify(mockLogBuilder, atLeastOnce()).metadata("drawRepeatedActions", false);
-        verify(mockLogBuilder, atLeastOnce()).metadata("drawClassify", true);
-        verify(mockLogBuilder, atLeastOnce()).metadata("drawDefine", false);
+        verify(mockLogBuilder, atLeastOnce()).context("drawFind", true);
+        verify(mockLogBuilder, atLeastOnce()).context("drawClick", false);
+        verify(mockLogBuilder, atLeastOnce()).context("drawDrag", true);
+        verify(mockLogBuilder, atLeastOnce()).context("drawMove", false);
+        verify(mockLogBuilder, atLeastOnce()).context("drawHighlight", true);
+        verify(mockLogBuilder, atLeastOnce()).context("drawRepeatedActions", false);
+        verify(mockLogBuilder, atLeastOnce()).context("drawClassify", true);
+        verify(mockLogBuilder, atLeastOnce()).context("drawDefine", false);
     }
 
     @Test
@@ -360,7 +360,7 @@ public class BrobotPropertyVerifierTest extends BrobotTestBase {
         // Then
         verify(mockLogBuilder).observation("Framework Settings (Illustration Related)");
         // Framework settings are logged in a separate log call
-        verify(mockLogBuilder, atLeastOnce()).metadata(eq("drawFind"), any());
+        verify(mockLogBuilder, atLeastOnce()).context(eq("drawFind"), any());
     }
 
     @Test
@@ -384,10 +384,10 @@ public class BrobotPropertyVerifierTest extends BrobotTestBase {
             verifier.verifyProperties();
 
             // Then
-            verify(mockLogBuilder).metadata("mockMode", true);
-            verify(mockLogBuilder).metadata("hasDisplay", false);
-            verify(mockLogBuilder).metadata("canCaptureScreen", false);
-            verify(mockLogBuilder).metadata(eq("osName"), anyString());
+            verify(mockLogBuilder).context("mockMode", true);
+            verify(mockLogBuilder).context("hasDisplay", false);
+            verify(mockLogBuilder).context("canCaptureScreen", false);
+            verify(mockLogBuilder).context(eq("osName"), anyString());
         }
     }
 

@@ -10,8 +10,7 @@ import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 import lombok.Getter;
 import lombok.Setter;
 
@@ -107,15 +106,10 @@ public class MonitoringService {
     public void startContinuousTask(
             Runnable task, BooleanSupplier continueCondition, long delaySeconds) {
         if (isRunning) {
-            ConsoleReporter.println(
-                    "ContinuousAutomation is already running. Stop it first before starting a new"
-                            + " task.");
             return;
         }
 
         if (executorService.isShutdown()) {
-            ConsoleReporter.println(
-                    "ContinuousAutomation executor has been shutdown. Cannot start new tasks.");
             return;
         }
 
@@ -137,12 +131,7 @@ public class MonitoringService {
 
                             } catch (Exception e) {
                                 consecutiveFailures++;
-                                ConsoleReporter.println(
-                                        "Error in continuous automation task: " + e.getMessage());
                                 if (consecutiveFailures >= maxConsecutiveFailures) {
-                                    ConsoleReporter.println(
-                                            "Maximum consecutive failures reached. Stopping"
-                                                    + " continuous automation.");
                                     stop();
                                 }
                             }
@@ -189,7 +178,6 @@ public class MonitoringService {
             scheduledTask.cancel(false);
         }
         isRunning = false;
-        ConsoleReporter.println("ContinuousAutomation stopped.");
     }
 
     /** Shuts down the executor service. Should be called when the application is closing. */

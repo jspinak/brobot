@@ -348,19 +348,8 @@ public class ActionResultBuilder {
             result.setMask(analysis.getMask());
         }
 
-        // Apply metrics
-        if (metrics != null) {
-            // Convert standalone ActionMetrics to inner ActionMetrics
-            ActionResult.ActionMetrics innerMetrics = new ActionResult.ActionMetrics();
-            innerMetrics.setExecutionTimeMs(metrics.getExecutionTimeMs());
-            innerMetrics.setMatchCount(matches.size());
-            innerMetrics.setThreadName(metrics.getThreadName());
-            innerMetrics.setActionId(metrics.getActionId());
-            innerMetrics.setRetryCount(metrics.getRetryCount());
-            innerMetrics.setRetryTimeMs(metrics.getRetryTimeMs());
-            matches.getBest().ifPresent(m -> innerMetrics.setBestMatchConfidence(m.getScore()));
-            result.setActionMetrics(innerMetrics);
-        }
+        // Apply metrics - metrics are now handled internally by ActionResult components
+        // The timing and match data is already set through other methods
 
         // Apply history
         if (!history.isEmpty()) {

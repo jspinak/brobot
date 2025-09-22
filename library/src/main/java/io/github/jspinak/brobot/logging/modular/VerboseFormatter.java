@@ -1,29 +1,24 @@
 package io.github.jspinak.brobot.logging.modular;
 
+import java.time.Duration;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.match.Match;
 
 /**
- * Formatter for VERBOSE verbosity level.
- *
- * <p>Produces detailed output with full metadata, environment info, and timing details. Multi-line
- * format with comprehensive information for debugging and analysis.
+ * Provides comprehensive, detailed output for action results.
+ * Includes all available information about the action execution.
  */
 @Component
 public class VerboseFormatter implements ActionLogFormatter {
 
-    private static final DateTimeFormatter TIMESTAMP_FORMATTER =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
-
-    // Cache environment information that doesn't change during execution
-    private static String cachedOsName = null;
-    private static String cachedJavaVersion = null;
-    private static Boolean cachedHeadlessMode = null;
-    private static boolean environmentCached = false;
+    private static final DateTimeFormatter TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
 
     @Override
     public String format(ActionResult actionResult) {
@@ -31,275 +26,163 @@ public class VerboseFormatter implements ActionLogFormatter {
             return null;
         }
 
-        ActionResult.ActionExecutionContext context = actionResult.getExecutionContext();
-        if (context == null) {
-            return null;
-        }
-
         StringBuilder formatted = new StringBuilder();
 
-        // Header with timestamp and action ID
-        formatted.append("=== ACTION EXECUTION ===\n");
-        if (context.getStartTime() != null) {
-            formatted
-                    .append("Started:    ")
-                    .append(
-                            context.getStartTime()
-                                    .atZone(java.time.ZoneId.systemDefault())
-                                    .format(TIMESTAMP_FORMATTER))
-                    .append("\n");
-        }
-        if (context.getEndTime() != null) {
-            formatted
-                    .append("Completed:  ")
-                    .append(
-                            context.getEndTime()
-                                    .atZone(java.time.ZoneId.systemDefault())
-                                    .format(TIMESTAMP_FORMATTER))
-                    .append("\n");
-        }
-        formatted
-                .append("Action ID:  ")
-                .append(context.getActionId() != null ? context.getActionId() : "N/A")
-                .append("\n");
-        formatted
-                .append("Thread:     ")
-                .append(
-                        context.getExecutingThread() != null
-                                ? context.getExecutingThread()
-                                : Thread.currentThread().getName())
-                .append("\n");
+        // Build header line with timestamp, status, and action type
+        formatted.append(buildHeaderLine(actionResult));
 
-        // Action details
-        formatted.append("\n--- ACTION DETAILS ---\n");
-        formatted
-                .append("Type:       ")
-                .append(context.getActionType() != null ? context.getActionType() : "Unknown")
-                .append("\n");
-        formatted
-                .append("Status:     ")
-                .append(context.isSuccess() ? "SUCCESS [OK]" : "FAILED [X]")
-                .append("\n");
-
-        if (context.getExecutionDuration() != null && !context.getExecutionDuration().isZero()) {
-            formatted
-                    .append("Duration:   ")
-                    .append(context.getExecutionDuration().toMillis())
-                    .append("ms\n");
-        }
-
-        // Target information
-        if (hasTargets(context)) {
-            formatted.append("\n--- TARGETS ---\n");
-
-            if (!context.getTargetImages().isEmpty()) {
-                formatted
-                        .append("Images (")
-                        .append(context.getTargetImages().size())
-                        .append("):\n");
-                for (int i = 0; i < context.getTargetImages().size(); i++) {
-                    StateImage img = context.getTargetImages().get(i);
-                    formatted.append("  [").append(i + 1).append("] ");
-                    if (img.getOwnerStateName() != null && !img.getOwnerStateName().isEmpty()) {
-                        formatted.append(img.getOwnerStateName()).append(".");
-                    }
-                    formatted
-                            .append(img.getName() != null ? img.getName() : "Unnamed")
-                            .append("\n");
-                }
-            }
-
-            if (!context.getTargetStrings().isEmpty()) {
-                formatted
-                        .append("Strings (")
-                        .append(context.getTargetStrings().size())
-                        .append("):\n");
-                for (int i = 0; i < context.getTargetStrings().size(); i++) {
-                    formatted
-                            .append("  [")
-                            .append(i + 1)
-                            .append("] \"")
-                            .append(context.getTargetStrings().get(i))
-                            .append("\"\n");
-                }
-            }
-
-            if (!context.getTargetRegions().isEmpty()) {
-                formatted
-                        .append("Regions (")
-                        .append(context.getTargetRegions().size())
-                        .append("):\n");
-                for (int i = 0; i < context.getTargetRegions().size(); i++) {
-                    formatted
-                            .append("  [")
-                            .append(i + 1)
-                            .append("] ")
-                            .append(context.getTargetRegions().get(i).toString())
-                            .append("\n");
-                }
-            }
-
-            if (context.getPrimaryTargetName() != null
-                    && !context.getPrimaryTargetName().isEmpty()) {
-                formatted
-                        .append("Primary:    ")
-                        .append(context.getPrimaryTargetName())
-                        .append("\n");
-            }
-        }
-
-        // Results
-        if (!context.getResultMatches().isEmpty()) {
-            formatted.append("\n--- RESULTS ---\n");
-            formatted.append("Matches:    ").append(context.getResultMatches().size()).append("\n");
-            for (int i = 0; i < Math.min(context.getResultMatches().size(), 5); i++) {
-                var match = context.getResultMatches().get(i);
-                formatted
-                        .append("  [")
-                        .append(i + 1)
-                        .append("] Score: ")
-                        .append(String.format("%.3f", match.getScore()))
-                        .append(" Region: ")
-                        .append(match.getRegion().toString())
-                        .append("\n");
-            }
-            if (context.getResultMatches().size() > 5) {
-                formatted
-                        .append("  ... and ")
-                        .append(context.getResultMatches().size() - 5)
-                        .append(" more matches\n");
-            }
-        } else if (context.getEndTime() != null) {
-            formatted.append("\n--- RESULTS ---\n");
-            formatted.append("Matches:    0 (No matches found)\n");
-        }
-
-        // Error information
-        if (context.getExecutionError() != null) {
-            formatted.append("\n--- ERROR ---\n");
-            formatted
-                    .append("Exception:  ")
-                    .append(context.getExecutionError().getClass().getSimpleName())
-                    .append("\n");
-            formatted
-                    .append("Message:    ")
-                    .append(
-                            context.getExecutionError().getMessage() != null
-                                    ? context.getExecutionError().getMessage()
-                                    : "No message")
-                    .append("\n");
-            if (context.getExecutionError().getStackTrace().length > 0) {
-                formatted
-                        .append("Location:   ")
-                        .append(context.getExecutionError().getStackTrace()[0].toString())
-                        .append("\n");
-            }
-        }
-
-        // Environment information - cache static values and only log once
-        ActionResult.EnvironmentSnapshot env = actionResult.getEnvironmentSnapshot();
-        if (env != null) {
-            // Cache static environment values on first run
-            if (!environmentCached && env.getOsName() != null) {
-                cachedOsName = env.getOsName();
-                cachedJavaVersion = env.getJavaVersion();
-                cachedHeadlessMode = env.isHeadlessMode();
-                environmentCached = true;
-
-                // Log full environment info on first run
-                formatted.append("\n--- ENVIRONMENT (Initial) ---\n");
-                formatted
-                        .append("OS:         ")
-                        .append(cachedOsName != null ? cachedOsName : "Unknown")
-                        .append("\n");
-                formatted
-                        .append("Java:       ")
-                        .append(cachedJavaVersion != null ? cachedJavaVersion : "Unknown")
-                        .append("\n");
-                formatted
-                        .append("Headless:   ")
-                        .append(cachedHeadlessMode != null ? cachedHeadlessMode : false)
-                        .append("\n");
-                if (env.getMonitors() != null && !env.getMonitors().isEmpty()) {
-                    formatted.append("Monitors:   ").append(env.getMonitors().size()).append("\n");
-                }
-            } else if (!environmentCached) {
-                // Only include environment section if not yet cached
-                formatted.append("\n--- ENVIRONMENT ---\n");
-                formatted
-                        .append("OS:         ")
-                        .append(env.getOsName() != null ? env.getOsName() : "Unknown")
-                        .append("\n");
-                formatted
-                        .append("Java:       ")
-                        .append(env.getJavaVersion() != null ? env.getJavaVersion() : "Unknown")
-                        .append("\n");
-                formatted.append("Headless:   ").append(env.isHeadlessMode()).append("\n");
-            }
-            // Always include capture time if available (this changes)
-            if (env.getCaptureTime() != null && !environmentCached) {
-                if (!formatted.toString().contains("--- ENVIRONMENT")) {
-                    formatted.append("\n--- CAPTURE ---\n");
-                }
-                formatted
-                        .append("Captured:   ")
-                        .append(
-                                env.getCaptureTime()
-                                        .atZone(java.time.ZoneId.systemDefault())
-                                        .format(TIMESTAMP_FORMATTER))
-                        .append("\n");
-            }
-        }
-
-        // Performance metrics
-        ActionResult.ActionMetrics metrics = actionResult.getActionMetrics();
-        if (metrics != null) {
-            formatted.append("\n--- METRICS ---\n");
-            formatted
-                    .append("Execution Time:   ")
-                    .append(metrics.getExecutionTimeMs())
-                    .append("ms\n");
-            formatted.append("Match Count:      ").append(metrics.getMatchCount()).append("\n");
-            formatted
-                    .append("Best Match Score: ")
-                    .append(String.format("%.3f", metrics.getBestMatchConfidence()))
-                    .append("\n");
-            if (metrics.getThreadName() != null) {
-                formatted.append("Thread:           ").append(metrics.getThreadName()).append("\n");
-            }
-            if (metrics.getActionId() != null) {
-                formatted.append("Action ID:        ").append(metrics.getActionId()).append("\n");
-            }
-        }
-
-        formatted.append("========================\n");
+        // Add detailed information sections
+        formatted.append(buildTargetSection(actionResult));
+        formatted.append(buildResultSection(actionResult));
+        formatted.append(buildTimingSection(actionResult));
+        formatted.append(buildMatchSection(actionResult));
 
         return formatted.toString();
     }
 
-    @Override
-    public boolean shouldLog(ActionResult actionResult) {
-        if (actionResult == null) {
-            return false;
+    private String buildHeaderLine(ActionResult actionResult) {
+        StringBuilder header = new StringBuilder();
+
+        // Timestamp
+        if (actionResult.getStartTime() != null) {
+            header.append("[").append(actionResult.getStartTime().format(TIME_FORMATTER)).append("] ");
         }
 
-        ActionResult.ActionExecutionContext context = actionResult.getExecutionContext();
+        // Status symbol and text
+        if (actionResult.isSuccess()) {
+            header.append("✓ SUCCESS: ");
+        } else {
+            header.append("✗ FAILED: ");
+        }
 
-        // Verbose mode logs everything - start events, completion, failures
-        return context != null && (context.getStartTime() != null || context.getEndTime() != null);
+        // Action type
+        String actionType = extractActionType(actionResult);
+        header.append(actionType);
+
+        header.append("\n");
+        return header.toString();
+    }
+
+    private String buildTargetSection(ActionResult actionResult) {
+        StringBuilder section = new StringBuilder();
+
+        // Get target info from matches
+        String targetName = actionResult.getLogTargetName();
+        if (targetName != null && !targetName.equals("unknown")) {
+            section.append("  Target: ").append(targetName).append("\n");
+        }
+
+        // Add match count if available
+        if (!actionResult.getMatchList().isEmpty()) {
+            section.append("  Matches Found: ").append(actionResult.size()).append("\n");
+        }
+
+        return section.toString();
+    }
+
+    private String buildResultSection(ActionResult actionResult) {
+        StringBuilder section = new StringBuilder();
+
+        // Output text if available
+        if (actionResult.getOutputText() != null && !actionResult.getOutputText().isEmpty()) {
+            section.append("  Output: ").append(actionResult.getOutputText()).append("\n");
+        }
+
+        // Text result if available
+        if (actionResult.getText() != null && !actionResult.getText().isEmpty()) {
+            String text = String.join(", ", actionResult.getText().getAll());
+            if (text.length() > 100) {
+                text = text.substring(0, 97) + "...";
+            }
+            section.append("  Extracted Text: \"").append(text).append("\"\n");
+        }
+
+        return section.toString();
+    }
+
+    private String buildTimingSection(ActionResult actionResult) {
+        StringBuilder section = new StringBuilder();
+
+        if (actionResult.getDuration() != null) {
+            Duration duration = actionResult.getDuration();
+            section.append("  Duration: ").append(formatDuration(duration)).append("\n");
+
+            // Add performance indicator for slow actions
+            if (duration.toMillis() > 1000) {
+                section.append("  ⚠ Slow Action (>1s)\n");
+            }
+        }
+
+        // Start and end times
+        if (actionResult.getStartTime() != null) {
+            section.append("  Started: ").append(actionResult.getStartTime().format(TIME_FORMATTER)).append("\n");
+        }
+        if (actionResult.getEndTime() != null) {
+            section.append("  Ended: ").append(actionResult.getEndTime().format(TIME_FORMATTER)).append("\n");
+        }
+
+        return section.toString();
+    }
+
+    private String buildMatchSection(ActionResult actionResult) {
+        if (actionResult.getMatchList().isEmpty()) {
+            return "";
+        }
+
+        StringBuilder section = new StringBuilder();
+        section.append("  Match Details:\n");
+
+        int count = 0;
+        for (Match match : actionResult.getMatchList()) {
+            count++;
+            if (count > 5) {
+                section.append("    ... and ").append(actionResult.size() - 5).append(" more\n");
+                break;
+            }
+
+            section.append("    [").append(count).append("] ");
+            section.append("Score: ").append(String.format("%.2f", match.getScore()));
+            section.append(" @ (").append(match.x()).append(",").append(match.y()).append(")");
+            section.append(" Size: ").append(match.w()).append("x").append(match.h());
+
+            if (match.getName() != null && !match.getName().isEmpty()) {
+                section.append(" - ").append(match.getName());
+            }
+            section.append("\n");
+        }
+
+        return section.toString();
     }
 
     @Override
-    public VerbosityLevel getVerbosityLevel() {
+    public boolean shouldLog(ActionResult actionResult) {
+        // Log all actions in verbose mode
+        return actionResult != null;
+    }
+
+    @Override
+    public ActionLogFormatter.VerbosityLevel getVerbosityLevel() {
         return VerbosityLevel.VERBOSE;
     }
 
-    /** Check if the context has any target information */
-    private boolean hasTargets(ActionResult.ActionExecutionContext context) {
-        return !context.getTargetImages().isEmpty()
-                || !context.getTargetStrings().isEmpty()
-                || !context.getTargetRegions().isEmpty()
-                || (context.getPrimaryTargetName() != null
-                        && !context.getPrimaryTargetName().isEmpty());
+    private String extractActionType(ActionResult actionResult) {
+        if (actionResult.getActionConfig() != null) {
+            String className = actionResult.getActionConfig().getClass().getSimpleName();
+            return className.replace("Options", "").replace("Config", "").toUpperCase();
+        }
+        return "ACTION";
+    }
+
+    private String formatDuration(Duration duration) {
+        long millis = duration.toMillis();
+        if (millis < 1000) {
+            return millis + "ms";
+        } else if (millis < 60000) {
+            return String.format("%.2fs", millis / 1000.0);
+        } else {
+            long minutes = millis / 60000;
+            long seconds = (millis % 60000) / 1000;
+            return String.format("%dm %ds", minutes, seconds);
+        }
     }
 }

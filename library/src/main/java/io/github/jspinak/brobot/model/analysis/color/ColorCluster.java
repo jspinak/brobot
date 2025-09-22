@@ -7,8 +7,7 @@ import java.util.Optional;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
 
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 import lombok.Getter;
 import lombok.Setter;
 
@@ -136,7 +135,6 @@ public class ColorCluster {
      */
     public Mat getMat(ColorSchemaName colorSchemaName, ColorInfo.ColorStat colorStat, Size size) {
         if (!colorSchemas.containsKey(colorSchemaName)) {
-            ConsoleReporter.println("ColorProfile does not have a Schema " + colorSchemaName);
             return new Mat();
         }
         return colorSchemas.get(colorSchemaName).getMat(colorStat, size);

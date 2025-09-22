@@ -56,6 +56,44 @@ import lombok.Data;
  * <p>Unlike MatchSnapshot which can represent failed matches, a Match object always represents a
  * successful find operation. Multiple Match objects are aggregated in an ActionResult.
  *
+ * <h3>Example Usage:</h3>
+ * <pre>{@code
+ * // Find and process matches
+ * StateImage buttonImage = new StateImage.Builder()
+ *     .addPatterns("button.png")
+ *     .build();
+ * ActionResult result = action.find(buttonImage);
+ *
+ * // Process each match
+ * for (Match match : result.getMatchList()) {
+ *     // Get match properties
+ *     double score = match.getScore();  // Similarity score (0.0-1.0)
+ *     Region region = match.getRegion();  // Bounding box
+ *     Location center = match.getLocation();  // Center point
+ *
+ *     // Click at different positions
+ *     action.click(match);  // Click at match center
+ *     action.click(match.getTopLeft());  // Click top-left corner
+ *     action.click(match.getBottomRight());  // Click bottom-right
+ *
+ *     // Highlight for debugging
+ *     action.highlight(match);
+ *
+ *     // Check match quality
+ *     if (match.getScore() > 0.95) {
+ *         System.out.println("High confidence match at: " + match.getLocation());
+ *     }
+ * }
+ *
+ * // Get best match
+ * Optional<Match> best = result.getBestMatch();
+ * if (best.isPresent()) {
+ *     Match bestMatch = best.get();
+ *     System.out.println("Best match score: " + bestMatch.getScore());
+ *     action.click(bestMatch);
+ * }
+ * }</pre>
+ *
  * @since 1.0
  * @see ActionResult
  * @see Region
@@ -100,60 +138,121 @@ public class Match {
     // the old MatchObject had `private double duration;`
     private int timesActedOn = 0;
 
+    /**
+     * Default constructor for Jackson JSON mapping.
+     */
     public Match() {} // for mapping
 
+    /**
+     * Creates a Match with the specified region as its location.
+     *
+     * @param region the region where this match was found
+     */
     public Match(Region region) {
         this.target = new Location(region);
     }
 
+    /**
+     * Returns the x-coordinate of the match region's top-left corner.
+     *
+     * @return the x-coordinate, or 0 if no region is set
+     */
     public int x() {
         Region region = getRegion();
         return region != null ? region.x() : 0;
     }
 
+    /**
+     * Returns the y-coordinate of the match region's top-left corner.
+     *
+     * @return the y-coordinate, or 0 if no region is set
+     */
     public int y() {
         Region region = getRegion();
         return region != null ? region.y() : 0;
     }
 
+    /**
+     * Returns the width of the match region.
+     *
+     * @return the width in pixels, or 0 if no region is set
+     */
     public int w() {
         Region region = getRegion();
         return region != null ? region.w() : 0;
     }
 
+    /**
+     * Returns the height of the match region.
+     *
+     * @return the height in pixels, or 0 if no region is set
+     */
     public int h() {
         Region region = getRegion();
         return region != null ? region.h() : 0;
     }
 
+    /**
+     * Returns the region where this match was found on the screen.
+     *
+     * @return the match region, or null if no target location is set
+     */
     public Region getRegion() {
         if (target == null) return null;
         return target.getRegion();
     }
 
+    /**
+     * Sets the region for this match, creating a target location if necessary.
+     *
+     * @param region the new region for this match
+     */
     public void setRegion(Region region) {
         if (target == null) {
             target = new Location(region);
         } else target.setRegion(region);
     }
 
+    /**
+     * Returns the OpenCV Mat representation of the match image in BGR format.
+     *
+     * @return the Mat object, or null if no image is set
+     */
     @com.fasterxml.jackson.annotation.JsonIgnore
     public Mat getMat() {
         return image != null ? image.getMatBGR() : null;
     }
 
+    /**
+     * Compares this match with another match by their similarity scores.
+     *
+     * @param m the match to compare with
+     * @return positive if this match has higher score, negative if lower, zero if equal
+     */
     public double compareByScore(Match m) {
         return score - m.getScore();
     }
 
+    /**
+     * Returns the area of the match region in pixels.
+     *
+     * @return the width * height of the match region
+     */
     public int size() { // TODO: check. this used to refer to the size of the Pattern
         return getRegion().w() * getRegion().h();
     }
 
+    /**
+     * Increments the counter tracking how many times this match has been acted upon.
+     */
     public void incrementTimesActedOn() {
         timesActedOn++;
     }
 
+    /**
+     * Extracts and sets the match image from the associated scene using the match region.
+     * If no scene is set, this method does nothing.
+     */
     public void setImageWithScene() {
         if (scene == null) return;
         BufferedImage bImg =
@@ -162,6 +261,11 @@ public class Match {
         else image.setBufferedImage(bImg);
     }
 
+    /**
+     * Returns the name of the State that owns the StateObject that produced this match.
+     *
+     * @return the owner state name from the state object metadata
+     */
     public String getOwnerStateName() {
         return stateObjectData.getOwnerStateName();
     }
@@ -223,10 +327,19 @@ public class Match {
         return stringBuilder.toString();
     }
 
+    /**
+     * Converts this Brobot Match to a SikuliX Match for compatibility with SikuliX operations.
+     *
+     * @return a SikuliX Match object with the same region and score
+     */
     public org.sikuli.script.Match sikuli() {
         return new org.sikuli.script.Match(getRegion().sikuli(), score);
     }
 
+    /**
+     * Builder class for constructing Match instances with a fluent API.
+     * Supports creating matches from SikuliX matches, regions, images, and metadata.
+     */
     public static class Builder {
         private org.sikuli.script.Match sikuliMatch;
         private Location target = new Location();
@@ -245,11 +358,23 @@ public class Match {
         private Scene scene;
         private double simScore = -1;
 
+        /**
+         * Sets the SikuliX match to convert to a Brobot Match.
+         *
+         * @param sikuliMatch the SikuliX match to convert
+         * @return this builder for method chaining
+         */
         public Builder setSikuliMatch(org.sikuli.script.Match sikuliMatch) {
             this.sikuliMatch = sikuliMatch;
             return this;
         }
 
+        /**
+         * Copies properties from an existing Match to this builder.
+         *
+         * @param match the match to copy properties from
+         * @return this builder for method chaining
+         */
         public Builder setMatch(Match match) {
             if (match.image != null) image = match.image;
             if (match.searchImage != null) this.searchImage = match.getSearchImage();
@@ -264,112 +389,247 @@ public class Match {
             return this;
         }
 
+        /**
+         * Sets the region where the match was found.
+         *
+         * @param region the match region
+         * @return this builder for method chaining
+         */
         public Builder setRegion(Region region) {
             this.region = region;
             return this;
         }
 
+        /**
+         * Sets the position within the region for action targeting.
+         *
+         * @param position the target position (e.g., CENTER, TOP_LEFT)
+         * @return this builder for method chaining
+         */
         public Builder setPosition(Position position) {
             this.position = position;
             return this;
         }
 
+        /**
+         * Sets the horizontal offset from the target position.
+         *
+         * @param offsetX the x-axis offset in pixels
+         * @return this builder for method chaining
+         */
         public Builder setOffsetX(int offsetX) {
             this.offsetX = offsetX;
             return this;
         }
 
+        /**
+         * Sets the vertical offset from the target position.
+         *
+         * @param offsetY the y-axis offset in pixels
+         * @return this builder for method chaining
+         */
         public Builder setOffsetY(int offsetY) {
             this.offsetY = offsetY;
             return this;
         }
 
+        /**
+         * Sets both horizontal and vertical offsets from a Location.
+         *
+         * @param offset the location containing x and y offsets
+         * @return this builder for method chaining
+         */
         public Builder setOffset(Location offset) {
             this.offsetX = offset.getCalculatedX();
             this.offsetY = offset.getCalculatedY();
             return this;
         }
 
+        /**
+         * Sets the image captured from the screen at the match location.
+         *
+         * @param image the screen capture at the match location
+         * @return this builder for method chaining
+         */
         public Builder setImage(Image image) {
             this.image = image;
             return this;
         }
 
+        /**
+         * Sets the region from an OpenCV Rect.
+         *
+         * @param rect the OpenCV rectangle defining the match area
+         * @return this builder for method chaining
+         */
         public Builder setRegion(Rect rect) {
             this.region = new Region(rect);
             return this;
         }
 
+        /**
+         * Sets the region using explicit coordinates and dimensions.
+         *
+         * @param x the x-coordinate of the top-left corner
+         * @param y the y-coordinate of the top-left corner
+         * @param w the width in pixels
+         * @param h the height in pixels
+         * @return this builder for method chaining
+         */
         public Builder setRegion(int x, int y, int w, int h) {
             this.region = new Region(x, y, w, h);
             return this;
         }
 
+        /**
+         * Sets the descriptive name for this match.
+         *
+         * @param name the match name
+         * @return this builder for method chaining
+         */
         public Builder setName(String name) {
             this.name = name;
             return this;
         }
 
+        /**
+         * Sets the text content found at the match location (for OCR matches).
+         *
+         * @param text the OCR text
+         * @return this builder for method chaining
+         */
         public Builder setText(String text) {
             this.text = text;
             return this;
         }
 
+        /**
+         * Sets the BufferedImage captured from the match location.
+         *
+         * @param bufferedImage the captured image
+         * @return this builder for method chaining
+         */
         public Builder setBufferedImage(BufferedImage bufferedImage) {
             this.bufferedImage = bufferedImage;
             return this;
         }
 
+        /**
+         * Sets the BufferedImage by converting from an OpenCV Mat.
+         *
+         * @param mat the OpenCV Mat to convert
+         * @return this builder for method chaining
+         */
         public Builder setBufferedImage(Mat mat) {
             this.bufferedImage = BufferedImageUtilities.fromMat(mat);
             return this;
         }
 
+        /**
+         * Sets the pattern image that was searched for to find this match.
+         *
+         * @param bufferedImage the search pattern image
+         * @return this builder for method chaining
+         */
         public Builder setSearchImage(BufferedImage bufferedImage) {
             this.searchImage = new Image(bufferedImage);
             return this;
         }
 
+        /**
+         * Sets the search pattern image from an OpenCV Mat.
+         *
+         * @param mat the OpenCV Mat of the search pattern
+         * @return this builder for method chaining
+         */
         public Builder setSearchImage(Mat mat) {
             this.searchImage = new Image(mat);
             return this;
         }
 
+        /**
+         * Sets the search pattern image.
+         *
+         * @param image the search pattern
+         * @return this builder for method chaining
+         */
         public Builder setSearchImage(Image image) {
             this.searchImage = image;
             return this;
         }
 
+        /**
+         * Sets the anchor points used for relative positioning.
+         *
+         * @param anchors the anchor configuration
+         * @return this builder for method chaining
+         */
         public Builder setAnchors(Anchors anchors) {
             this.anchors = anchors;
             return this;
         }
 
+        /**
+         * Sets metadata from the StateObject that produced this match.
+         *
+         * @param stateObject the source state object
+         * @return this builder for method chaining
+         */
         public Builder setStateObjectData(StateObject stateObject) {
             this.stateObjectData = new StateObjectMetadata(stateObject);
             return this;
         }
 
+        /**
+         * Sets the state object metadata directly.
+         *
+         * @param stateObjectData the metadata to set
+         * @return this builder for method chaining
+         */
         public Builder setStateObjectData(StateObjectMetadata stateObjectData) {
             this.stateObjectData = stateObjectData;
             return this;
         }
 
+        /**
+         * Sets the histogram for the match image (used for color analysis).
+         *
+         * @param histogram the OpenCV histogram
+         * @return this builder for method chaining
+         */
         public Builder setHistogram(Mat histogram) {
             this.histogram = histogram;
             return this;
         }
 
+        /**
+         * Sets the scene containing the full screen capture where this match was found.
+         *
+         * @param scene the scene object
+         * @return this builder for method chaining
+         */
         public Builder setScene(Scene scene) {
             this.scene = scene;
             return this;
         }
 
+        /**
+         * Sets the similarity score for this match.
+         *
+         * @param simScore the similarity score (0.0 to 1.0)
+         * @return this builder for method chaining
+         */
         public Builder setSimScore(double simScore) {
             this.simScore = simScore;
             return this;
         }
 
+        /**
+         * Internal method to set the appropriate image on the match.
+         * Priority: explicit image > bufferedImage > scene extraction.
+         *
+         * @param match the match to set the image on
+         */
         private void setMatchImage(Match match) {
             if (image != null) {
                 match.setImage(image);
@@ -383,6 +643,11 @@ public class Match {
             if (match.scene != null) match.setImageWithScene();
         }
 
+        /**
+         * Builds and returns a new Match instance with the configured properties.
+         *
+         * @return a new Match instance
+         */
         public Match build() {
             Match match = new Match(new Region());
             if (sikuliMatch != null) {

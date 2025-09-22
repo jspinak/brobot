@@ -103,7 +103,7 @@ public class StateLocationJsonParserTest {
                 .setOwnerStateName("PropertiesState")
                 .setLocation(location)
                 .setProbabilityStaysVisibleAfterClicked(100)
-                .setProbabilityExists(85)
+                .setMockFindStochasticModifier(85)
                 .setPosition(Positions.Name.BOTTOMRIGHT)
                 .build();
 

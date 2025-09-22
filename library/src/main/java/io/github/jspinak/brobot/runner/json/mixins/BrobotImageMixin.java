@@ -31,7 +31,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  * @see org.bytedeco.opencv.opencv_core.Mat
  * @see com.fasterxml.jackson.databind.ObjectMapper#addMixIn(Class, Class)
  */
-@JsonIgnoreProperties({"matBGR", "matHSV", "sikuli"})
+@JsonIgnoreProperties({"matBGR", "matHSV", "sikuli", "empty"})
 public abstract class BrobotImageMixin {
     // Override the @JsonIgnore on the getBufferedImage method to allow serialization
     // when using BrobotObjectMapper with custom serializers

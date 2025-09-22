@@ -5,7 +5,6 @@ import static org.bytedeco.opencv.global.opencv_imgproc.*;
 
 import java.awt.image.BufferedImage;
 import java.util.*;
-import java.util.Arrays;
 
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.indexer.*;
@@ -15,8 +14,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
 
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-import io.github.jspinak.brobot.util.image.recognition.ImageLoader;
 import io.github.jspinak.brobot.util.image.visualization.MatBuilder;
 
 /**
@@ -137,15 +134,12 @@ public class MatrixUtilities {
 
     public static void putInt(Mat mat, int row, int col, short... values) {
         if (mat.channels() != 1) {
-            ConsoleReporter.println("MatrixUtilities.putInt: Mat has more than 1 channel");
             return;
         }
         if (mat.rows() <= row || mat.cols() <= col) {
-            ConsoleReporter.println("MatrixUtilities.putInt: Mat is too small");
             return;
         }
         if (values.length > mat.cols() - col) {
-            ConsoleReporter.println("MatrixUtilities.putInt: Mat is too small");
             return;
         }
         UByteRawIndexer indexer =
@@ -206,7 +200,7 @@ public class MatrixUtilities {
         for (int i = 0; i < array.length; i++) {
             if (array[i] != 0 || i == array.length - 1) {
                 noConsecutiveZeros.put(i, String.valueOf(array[i]));
-            } else {
+            } else if (i < array.length - 1) {
                 if (array[i + 1] != 0) {
                     noConsecutiveZeros.put(i, " 0 "); // a single 0
                 } else {
@@ -233,24 +227,17 @@ public class MatrixUtilities {
     public static void printPartOfMat(Mat mat, int rows, int cols, int channels, String title) {
         String boldTextStart = "\u001B[1m"; // ANSI escape code for bold text
         String resetFormatting = "\u001B[0m"; // ANSI escape code to reset text formatting
-        ConsoleReporter.print(boldTextStart + title + resetFormatting);
         if (mat == null || mat.isNull() || mat.empty()) {
-            ConsoleReporter.println("Mat is empty or null.");
             return;
         }
-        ConsoleReporter.formatln(
-                " rows.cols.channels = %d.%d.%d of %d.%d.%d",
-                rows, cols, channels, mat.rows(), mat.cols(), mat.channels());
         int ch = Math.min(channels, mat.channels());
         for (int z = 0; z < ch; z++) {
-            if (ch > 1) ConsoleReporter.formatln("channel %d", z);
+            if (ch > 1)
             for (int y = 0; y < Math.min(rows, mat.rows()); y++) {
-                ConsoleReporter.format("[%d] ", y);
                 double[] row = getDoubleRow(y, mat);
                 for (double d : row) System.out.printf("%-8.1f", d);
                 // getNonConsecutiveZeros(row).forEach((key, value) -> Report.format("%-2.12s ",
                 // value));
-                ConsoleReporter.println();
             }
         }
     }
@@ -270,38 +257,20 @@ public class MatrixUtilities {
     }
 
     public static void printDimensions(org.opencv.core.Mat mat) {
-        ConsoleReporter.format(
-                "rows.cols.channels = %d.%d.%d\n", mat.rows(), mat.cols(), mat.channels());
     }
 
     public static void printDimensions(Mat mat) {
-        ConsoleReporter.format(
-                "rows.cols.channels = %d.%d.%d\n", mat.rows(), mat.cols(), mat.channels());
     }
 
     public static void printDimensions(Mat mat, String title) {
-        if (mat == null) ConsoleReporter.println(title + "Mat is not defined.");
-        else
-            ConsoleReporter.format(
-                    "%s rows.cols.channels = %d.%d.%d\n",
-                    title, mat.rows(), mat.cols(), mat.channels());
+        // Implementation removed with ConsoleReporter
     }
 
     public static void info(Mat mat, String... strings) {
-        double[] minmax = getMinMaxOfFirstChannel(mat);
-        Arrays.stream(strings).forEach(str -> ConsoleReporter.print(str + " "));
-        ConsoleReporter.format(
-                "rows.cols.channels type = %d.%d.%d %d ",
-                mat.rows(), mat.cols(), mat.channels(), mat.type());
-        if (minmax.length > 1)
-            ConsoleReporter.format("min = %,.1f max = %,.1f\n", minmax[0], minmax[1]);
-        else if (mat.total() == 0) ConsoleReporter.formatln(" Mat is empty.");
-        else ConsoleReporter.println();
+        // Implementation removed with ConsoleReporter
     }
 
     public static void info(MatVector matVector, String... strings) {
-        Arrays.stream(strings).forEach(str -> ConsoleReporter.print(str + " "));
-        ConsoleReporter.println();
         for (int i = 0; i < matVector.size(); i++) {
             info(matVector.get(i), "mat" + i);
         }
@@ -320,7 +289,6 @@ public class MatrixUtilities {
         Mat mask = new Mat();
         minMaxLoc(singleChannelMat, min, max, minLoc, maxLoc, mask);
         if (min.isNull() || max.isNull()) {
-            ConsoleReporter.println("no min max");
             return new double[] {};
         }
         double[] minmax = new double[] {min.get(), max.get()};

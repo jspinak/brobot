@@ -266,6 +266,8 @@ public class SceneTest extends BrobotTestBase {
 
                             // Scene can be used to provide mock screenshots
                             assertNotNull(mockScene.getPattern());
+                            // In mock mode, images are not null when created directly from BufferedImage
+                            // (only null when loaded from missing files)
                             assertNotNull(mockScene.getPattern().getImage());
                         }),
                 dynamicTest(
@@ -371,6 +373,7 @@ public class SceneTest extends BrobotTestBase {
 
         // Then - Check that regions were added
         assertFalse(scene.getPattern().getRegions().isEmpty());
+        // Pattern created from BufferedImage directly will have non-null image
         assertNotNull(scene.getPattern().getImage());
         // The exact number of regions may vary based on how SearchRegions handles them
         assertTrue(scene.getPattern().getRegions().size() >= 1);

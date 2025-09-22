@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 import lombok.Getter;
 
 /**
@@ -119,8 +118,5 @@ public class OverlappingGrids {
     public void print() {
         Region g = grid.getRegion();
         Region i = innerGrid.getRegion();
-        ConsoleReporter.formatln("cell w.h = %d.%d", grid.getCellWidth(), grid.getCellHeight());
-        ConsoleReporter.formatln("main grid x.y.w.h = %d.%d.%d.%d", g.x(), g.y(), g.w(), g.h());
-        ConsoleReporter.formatln("inner grid x.y.w.h = %d.%d.%d.%d", i.x(), i.y(), i.w(), i.h());
     }
 }

@@ -13,7 +13,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+// Removed old logging import: import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
 @Component
 public class GetXmlActions {
@@ -29,8 +29,7 @@ public class GetXmlActions {
 
     public ReplayCollection getActionsBetweenTimes(double startTime, double endTime) {
         ReplayCollection replayCollection = getAllActions();
-        ConsoleReporter.println(
-                "ReplayCollection size: " + replayCollection.getReplayObjects().size());
+        System.out.println("ReplayCollection size: " + replayCollection.getReplayObjects().size());
         return replayCollectionOrganizer.getActionsBetweenTimes(
                 replayCollection, startTime * 1000, endTime * 1000);
     }
@@ -44,7 +43,7 @@ public class GetXmlActions {
         DocumentBuilderFactory dbf =
                 DocumentBuilderFactory.newInstance(); // Instantiate the Factory
         String path = "capture\\input-history.xml";
-        ConsoleReporter.println(Path.of(path).toAbsolutePath().toString());
+        System.out.println(Path.of(path).toAbsolutePath().toString());
         DocumentBuilder db;
         try {
             db = dbf.newDocumentBuilder();

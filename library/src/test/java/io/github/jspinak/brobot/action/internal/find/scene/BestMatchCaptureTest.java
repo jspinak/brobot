@@ -100,7 +100,7 @@ public class BestMatchCaptureTest extends BrobotTestBase {
             bestMatchCapture.setCaptureEnabled(true);
 
             // Setup pattern
-            lenient().when(pattern.getName()).thenReturn("test-pattern");
+            lenient().when(pattern.getImgpath()).thenReturn("test-pattern");
             lenient().when(pattern.getBImage()).thenReturn(patternImage);
             when(pattern.w()).thenReturn(50);
             when(pattern.h()).thenReturn(50);
@@ -155,7 +155,7 @@ public class BestMatchCaptureTest extends BrobotTestBase {
         void shouldFindBestMatchInScene() {
             // Arrange
             bestMatchCapture.setCaptureEnabled(true);
-            lenient().when(pattern.getName()).thenReturn("best-match-pattern");
+            lenient().when(pattern.getImgpath()).thenReturn("best-match-pattern");
             when(pattern.w()).thenReturn(50);
             when(pattern.h()).thenReturn(50);
             lenient().when(pattern.getBImage()).thenReturn(patternImage);
@@ -186,7 +186,7 @@ public class BestMatchCaptureTest extends BrobotTestBase {
             lenient().when(pattern.getBImage()).thenReturn(patternImage);
             when(pattern.w()).thenReturn(200); // Larger than scene
             lenient().when(pattern.h()).thenReturn(200);
-            lenient().when(pattern.getName()).thenReturn("test-pattern");
+            lenient().when(pattern.getImgpath()).thenReturn("test-pattern");
             Pattern scenePattern = mock(Pattern.class);
             when(scene.getPattern()).thenReturn(scenePattern);
             when(scenePattern.w()).thenReturn(100);
@@ -240,7 +240,7 @@ public class BestMatchCaptureTest extends BrobotTestBase {
 
             // Arrange
             bestMatchCapture.setCaptureEnabled(true);
-            lenient().when(pattern.getName()).thenReturn("test-capture");
+            lenient().when(pattern.getImgpath()).thenReturn("test-capture");
             lenient().when(pattern.getBImage()).thenReturn(patternImage);
             when(pattern.w()).thenReturn(50);
             when(pattern.h()).thenReturn(50);
@@ -274,7 +274,7 @@ public class BestMatchCaptureTest extends BrobotTestBase {
 
             // Arrange
             bestMatchCapture.setCaptureEnabled(true);
-            lenient().when(pattern.getName()).thenReturn("test");
+            lenient().when(pattern.getImgpath()).thenReturn("test");
             lenient().when(pattern.getBImage()).thenReturn(patternImage);
             when(pattern.w()).thenReturn(50);
             when(pattern.h()).thenReturn(50);
@@ -305,7 +305,7 @@ public class BestMatchCaptureTest extends BrobotTestBase {
 
             // Arrange
             bestMatchCapture.setCaptureEnabled(true);
-            lenient().when(pattern.getName()).thenReturn("capture");
+            lenient().when(pattern.getImgpath()).thenReturn("capture");
             lenient().when(pattern.getBImage()).thenReturn(patternImage);
             when(pattern.w()).thenReturn(10);
             when(pattern.h()).thenReturn(10);
@@ -341,7 +341,7 @@ public class BestMatchCaptureTest extends BrobotTestBase {
 
             // Arrange
             bestMatchCapture.setCaptureEnabled(true);
-            lenient().when(pattern.getName()).thenReturn("test-pattern");
+            lenient().when(pattern.getImgpath()).thenReturn("test-pattern");
             lenient().when(pattern.getBImage()).thenReturn(patternImage);
             when(pattern.w()).thenReturn(50);
             when(pattern.h()).thenReturn(50);
@@ -397,7 +397,7 @@ public class BestMatchCaptureTest extends BrobotTestBase {
             BufferedImage patternImg = new BufferedImage(200, 150, BufferedImage.TYPE_INT_RGB);
             BufferedImage sceneImg = new BufferedImage(1000, 800, BufferedImage.TYPE_INT_RGB);
 
-            lenient().when(pattern.getName()).thenReturn("test-pattern");
+            lenient().when(pattern.getImgpath()).thenReturn("test-pattern");
             lenient().when(pattern.getBImage()).thenReturn(patternImg);
             when(pattern.w()).thenReturn(200);
             when(pattern.h()).thenReturn(150);
@@ -433,7 +433,7 @@ public class BestMatchCaptureTest extends BrobotTestBase {
             BufferedImage patternImg = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
             BufferedImage sceneImg = new BufferedImage(500, 400, BufferedImage.TYPE_INT_RGB);
 
-            lenient().when(pattern.getName()).thenReturn("test-pattern");
+            lenient().when(pattern.getImgpath()).thenReturn("test-pattern");
             lenient().when(pattern.getBImage()).thenReturn(patternImg);
             when(pattern.w()).thenReturn(100);
             when(pattern.h()).thenReturn(100);
@@ -529,7 +529,7 @@ public class BestMatchCaptureTest extends BrobotTestBase {
 
             // Use mocks that might cause IO issues
             lenient()
-                    .when(pattern.getName())
+                    .when(pattern.getImgpath())
                     .thenReturn("test\0invalid"); // Invalid filename characters
 
             // Act
@@ -555,7 +555,7 @@ public class BestMatchCaptureTest extends BrobotTestBase {
             BufferedImage smallPattern = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
             BufferedImage smallScene = new BufferedImage(20, 20, BufferedImage.TYPE_INT_RGB);
 
-            lenient().when(pattern.getName()).thenReturn("test-pattern");
+            lenient().when(pattern.getImgpath()).thenReturn("test-pattern");
             lenient().when(pattern.getBImage()).thenReturn(smallPattern);
             when(pattern.w()).thenReturn(10);
             when(pattern.h()).thenReturn(10);

@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.aspects.core;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,6 +27,7 @@ import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.logging.modular.ActionLoggingService;
 import io.github.jspinak.brobot.model.state.StateImage;
 
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -49,24 +52,27 @@ import lombok.extern.slf4j.Slf4j;
 public class ActionLifecycleAspect {
 
     private final ActionLoggingService actionLoggingService;
-
-    // Pause configuration
     private final int preActionPause;
     private final int postActionPause;
     private final boolean logEvents;
     private final boolean captureBeforeScreenshot;
     private final boolean captureAfterScreenshot;
 
+    // Thread-local storage for current action context
+    private static final ThreadLocal<ActionContext> currentActionContext = new ThreadLocal<>();
+
+    // Track action execution history per thread
+    private final Map<String, List<ActionContext>> threadActionHistory =
+            Collections.synchronizedMap(new HashMap<>());
+
     @Autowired
     public ActionLifecycleAspect(
             ActionLoggingService actionLoggingService,
-            @Value("${brobot.action.pre-pause:0}") int preActionPause,
-            @Value("${brobot.action.post-pause:0}") int postActionPause,
-            @Value("${brobot.aspects.action-lifecycle.log-events:true}") boolean logEvents,
-            @Value("${brobot.aspects.action-lifecycle.capture-before-screenshot:false}")
-                    boolean captureBeforeScreenshot,
-            @Value("${brobot.aspects.action-lifecycle.capture-after-screenshot:true}")
-                    boolean captureAfterScreenshot) {
+            @Value("${brobot.actions.pause.before:0}") int preActionPause,
+            @Value("${brobot.actions.pause.after:0}") int postActionPause,
+            @Value("${brobot.logging.actions.enabled:true}") boolean logEvents,
+            @Value("${brobot.actions.screenshots.before:false}") boolean captureBeforeScreenshot,
+            @Value("${brobot.actions.screenshots.after:false}") boolean captureAfterScreenshot) {
         this.actionLoggingService = actionLoggingService;
         this.preActionPause = preActionPause;
         this.postActionPause = postActionPause;
@@ -75,460 +81,241 @@ public class ActionLifecycleAspect {
         this.captureAfterScreenshot = captureAfterScreenshot;
     }
 
-    // Thread-local storage for action context
-    private final ThreadLocal<ActionContext> actionContext = new ThreadLocal<>();
+    @Pointcut("execution(* io.github.jspinak.brobot.action.ActionInterface.perform(..))")
+    public void actionExecution() {}
 
-    /** Pointcut for all ActionInterface perform methods */
-    @Pointcut("execution(* io.github.jspinak.brobot.action.ActionInterface+.perform(..))")
-    public void actionPerform() {}
-
-    /** Main interception for action lifecycle management */
-    @Around("actionPerform()")
+    @Around("actionExecution()")
     public Object manageActionLifecycle(ProceedingJoinPoint joinPoint) throws Throwable {
         // Extract action information
         ActionInterface action = (ActionInterface) joinPoint.getTarget();
         Object[] args = joinPoint.getArgs();
 
-        // Debug: Log aspect invocation
-        log.debug(
-                "ActionLifecycleAspect invoked for: {} with {} args",
-                action.getClass().getSimpleName(),
-                args.length);
-
-        // Standard signature: perform(ActionResult, ObjectCollection...)
-        ActionResult actionResult =
-                args.length > 0 && args[0] instanceof ActionResult ? (ActionResult) args[0] : null;
-
-        // Extract ObjectCollections from varargs
+        // Expect: perform(ActionResult result, ObjectCollection objects)
+        ActionResult actionResult = null;
         ObjectCollection objectCollection = null;
-        List<ObjectCollection> allCollections = new ArrayList<>();
 
-        // Collect all ObjectCollections from varargs (starting at index 1)
-        for (int i = 1; i < args.length; i++) {
-            if (args[i] instanceof ObjectCollection) {
-                allCollections.add((ObjectCollection) args[i]);
-            } else if (args[i] instanceof ObjectCollection[]) {
-                // Handle case where varargs are passed as array
-                ObjectCollection[] array = (ObjectCollection[]) args[i];
-                Collections.addAll(allCollections, array);
+        // Handle different argument patterns
+        if (args.length == 2) {
+            if (args[0] instanceof ActionResult) {
+                actionResult = (ActionResult) args[0];
             }
+            if (args[1] instanceof ObjectCollection) {
+                objectCollection = (ObjectCollection) args[1];
+            }
+        } else if (args.length == 1 && args[0] instanceof ObjectCollection[]) {
+            // Handle array of ObjectCollections
+            ObjectCollection[] collections = (ObjectCollection[]) args[0];
+            if (collections.length > 0) {
+                objectCollection = collections[0];
+            }
+            actionResult = new ActionResult();
         }
 
-        // Use first collection as primary, or create empty if none
-        if (!allCollections.isEmpty()) {
-            objectCollection = allCollections.get(0);
-        } else {
-            objectCollection = new ObjectCollection.Builder().build();
-        }
-
-        // Extract action options from ActionResult
-        Object actionConfig = actionResult != null ? actionResult.getActionConfig() : null;
-        if (actionConfig == null && actionResult != null) {
-            // Try legacy ActionConfig
-            actionConfig = actionResult.getActionConfig();
+        if (actionResult == null) {
+            // Create default result if not provided
+            actionResult = new ActionResult();
         }
 
         // Create action context
-        ActionContext context = createActionContext(action, actionConfig, objectCollection);
-        actionContext.set(context);
+        ActionContext context = createActionContext(action, actionResult, objectCollection);
 
-        // Set start time immediately
-        context.setStartTime(Instant.now());
+        // Pre-action tasks
+        performPreActionTasks(context, actionResult);
 
-        // Initialize ActionResult execution context if available
-        if (actionResult != null) {
-            populateExecutionContext(actionResult, context, objectCollection);
-        }
+        Object result = null;
+        Exception executionError = null;
+        long startTime = System.currentTimeMillis();
 
         try {
-            // Pre-execution phase
-            performPreExecution(context);
+            // Set current context for nested access
+            currentActionContext.set(context);
 
-            // Execute the action with timing
-            long startTime = System.currentTimeMillis();
-            Object result = joinPoint.proceed();
-            long duration = System.currentTimeMillis() - startTime;
+            // Execute the actual action
+            result = joinPoint.proceed();
 
-            // Update context with results
-            context.setResult(result);
-            context.setDuration(duration);
-
-            // The action modifies the ActionResult in-place
-            if (actionResult != null) {
-                context.setSuccess(actionResult.isSuccess());
-                // Update duration in the ActionResult if not already set with a meaningful value
-                if (actionResult.getDuration() == null
-                        || actionResult.getDuration().toMillis() <= 0) {
-                    actionResult.setDuration(java.time.Duration.ofMillis(duration));
-                }
-                // Update execution context with final results
-                updateExecutionContextWithResults(actionResult, context, duration);
-            } else {
-                context.setSuccess(isSuccessfulResult(result));
+            // Mark success if result is ActionResult
+            if (result instanceof ActionResult) {
+                ActionResult actionResultFromExecution = (ActionResult) result;
+                actionResultFromExecution.setSuccess(true);
             }
-
-            // Post-execution phase
-            performPostExecution(context);
-
-            // Log the completed action using modular logging
-            if (actionResult != null) {
-                actionLoggingService.logAction(actionResult);
-            }
-
-            return result;
 
         } catch (Exception e) {
-            // Handle execution failure
-            handleExecutionFailure(context, e);
-
-            // Update ActionResult with failure information and log it
-            if (actionResult != null) {
-                updateExecutionContextWithError(actionResult, context, e);
-                actionLoggingService.logAction(actionResult);
-            }
-
+            executionError = e;
+            actionResult.setSuccess(false);
+            log.error("Action execution failed", e);
             throw e;
-
         } finally {
-            // Cleanup
-            actionContext.remove();
-        }
-    }
+            // Calculate duration
+            long duration = System.currentTimeMillis() - startTime;
 
-    /** Perform pre-execution tasks */
-    private void performPreExecution(ActionContext context) {
-        // Apply pre-action pause
-        applyPause(preActionPause);
+            // Post-action tasks
+            performPostActionTasks(context, actionResult, duration, executionError);
 
-        // Action start logging handled by modular logging service
+            // Clear current context
+            currentActionContext.remove();
 
-        // Capture before screenshot if enabled
-        if (captureBeforeScreenshot) {
-            captureScreenshot(context, "before");
+            // Store in history
+            storeActionInHistory(context);
         }
 
-        // Start time already set in main method before populateExecutionContext
+        return result != null ? result : actionResult;
     }
 
-    /** Perform post-execution tasks */
-    private void performPostExecution(ActionContext context) {
-        // Apply post-action pause
-        applyPause(postActionPause);
-
-        // Action completion logging handled by modular logging service
-
-        // Capture after screenshot if enabled
-        if (captureAfterScreenshot && context.isSuccess()) {
-            captureScreenshot(context, "after");
-        }
-
-        // Dataset collection would go here if DatasetManager was available
-
-        // Update performance metrics
-        updatePerformanceMetrics(context);
-    }
-
-    /** Handle execution failure */
-    private void handleExecutionFailure(ActionContext context, Exception e) {
-        context.setSuccess(false);
-        context.setError(e);
-        context.setDuration(System.currentTimeMillis() - context.getStartTime().toEpochMilli());
-
-        // Failure logging handled by modular logging service
-
-        // Capture error screenshot
-        if (captureAfterScreenshot) {
-            captureScreenshot(context, "error");
-        }
-    }
-
-    /** Create action context from method arguments */
     private ActionContext createActionContext(
-            ActionInterface action, Object actionConfig, ObjectCollection objectCollection) {
+            ActionInterface action, ActionResult actionResult, ObjectCollection objectCollection) {
         ActionContext context = new ActionContext();
         context.setActionId(UUID.randomUUID().toString());
-
-        // Extract action type from ActionConfig if available
-        String actionType = extractActionType(actionConfig, action);
-        context.setActionType(actionType);
-
-        context.setActionConfig(actionConfig);
-        context.setObjectCollection(objectCollection);
+        context.setActionType(extractActionType(action, actionResult));
+        context.setStartTime(Instant.now());
         context.setThreadName(Thread.currentThread().getName());
+        context.setObjectCollection(objectCollection);
         return context;
     }
 
-    /** Extract action type from ActionConfig or fallback to action class */
-    private String extractActionType(Object actionConfig, ActionInterface action) {
-        // Check if it's an ActionConfig (base class for all action options)
-        if (actionConfig instanceof ActionConfig) {
-            ActionConfig config = (ActionConfig) actionConfig;
-
-            // Try to extract a meaningful action name from the config class
-            String configClassName = config.getClass().getSimpleName();
-
-            // Handle special cases
-            if (configClassName.equals("PatternFindOptions")) {
-                return "FIND";
-            }
-
-            // Convert XxxOptions to XXX (e.g., ClickOptions -> CLICK)
-            if (configClassName.endsWith("Options")) {
-                String actionName = configClassName.substring(0, configClassName.length() - 7);
-                return actionName.toUpperCase();
-            }
+    private String extractActionType(ActionInterface action, ActionResult actionResult) {
+        // Try to get from ActionConfig if available
+        if (actionResult != null && actionResult.getActionConfig() != null) {
+            ActionConfig config = actionResult.getActionConfig();
+            return config.getClass().getSimpleName().replace("Options", "").toUpperCase();
         }
-
-        // Check if it's the legacy ActionConfig
-        if (actionConfig != null
-                && actionConfig
-                        .getClass()
-                        .getName()
-                        .equals("io.github.jspinak.brobot.action.ActionConfig")) {
-            try {
-                // Use reflection to get the action enum value
-                Object actionEnum =
-                        actionConfig.getClass().getMethod("getAction").invoke(actionConfig);
-                if (actionEnum != null) {
-                    return actionEnum.toString();
-                }
-            } catch (Exception e) {
-                log.debug("Could not extract action from ActionConfig: {}", e.getMessage());
-            }
-        }
-
-        // Fallback to action interface implementation class name
+        // Fall back to action class name
         return action.getClass().getSimpleName().toUpperCase();
     }
 
-    /** Check if the result indicates success */
-    private boolean isSuccessfulResult(Object result) {
-        if (result instanceof ActionResult) {
-            return ((ActionResult) result).isSuccess();
-        }
-        // For other return types, assume success if not null
-        return result != null;
-    }
+    private void performPreActionTasks(ActionContext context, ActionResult actionResult) {
+        // Set start time on ActionResult
+        actionResult.setStartTime(
+                LocalDateTime.ofInstant(context.getStartTime(), ZoneId.systemDefault()));
 
-    /** Apply pause if configured */
-    private void applyPause(int pauseMillis) {
-        if (pauseMillis > 0) {
+        // Apply pre-action pause
+        if (preActionPause > 0) {
             try {
-                Thread.sleep(pauseMillis);
+                Thread.sleep(preActionPause);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                log.warn("Action pause interrupted", e);
             }
+        }
+
+        // Capture before screenshot if configured
+        if (captureBeforeScreenshot) {
+            // Screenshot capture would be done here
+            log.debug("Would capture before screenshot for action {}", context.getActionId());
+        }
+
+        // Log action start if enabled
+        if (logEvents) {
+            log.debug(
+                    "Starting action {} of type {} on thread {}",
+                    context.getActionId(),
+                    context.getActionType(),
+                    context.getThreadName());
         }
     }
 
-    /** Capture screenshot */
-    private void captureScreenshot(ActionContext context, String phase) {
-        // TODO: Implement screenshot capture when ScreenCapture is available
-        log.debug("Screenshot capture for {} phase - to be implemented", phase);
+    private void performPostActionTasks(
+            ActionContext context,
+            ActionResult actionResult,
+            long duration,
+            Exception executionError) {
+
+        // Set end time and duration on ActionResult
+        actionResult.setEndTime(LocalDateTime.now());
+        actionResult.setDuration(java.time.Duration.ofMillis(duration));
+
+        // Update success status
+        context.setSuccess(actionResult.isSuccess());
+        context.setEndTime(Instant.now());
+        context.setDuration(java.time.Duration.ofMillis(duration));
+
+        // Apply post-action pause
+        if (postActionPause > 0) {
+            try {
+                Thread.sleep(postActionPause);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        // Capture after screenshot if configured
+        if (captureAfterScreenshot) {
+            // Screenshot capture would be done here
+            log.debug("Would capture after screenshot for action {}", context.getActionId());
+        }
+
+        // Log action completion
+        if (logEvents) {
+            if (executionError != null) {
+                log.error(
+                        "Action {} failed after {}ms: {}",
+                        context.getActionId(),
+                        duration,
+                        executionError.getMessage());
+            } else {
+                log.debug(
+                        "Action {} completed successfully in {}ms",
+                        context.getActionId(),
+                        duration);
+            }
+        }
+
+        // Use logging service to log the action
+        if (actionLoggingService != null) {
+            actionLoggingService.logAction(actionResult);
+        }
     }
 
-    // Dataset collection removed - DatasetManager not available
+    private void storeActionInHistory(ActionContext context) {
+        String threadName = context.getThreadName();
+        threadActionHistory
+                .computeIfAbsent(threadName, k -> Collections.synchronizedList(new ArrayList<>()))
+                .add(context);
 
-    /** Update performance metrics */
-    private void updatePerformanceMetrics(ActionContext context) {
-        // Performance metrics are handled by PerformanceMonitoringAspect
-        // This is just a placeholder for any action-specific metrics
+        // Limit history size to prevent memory leaks
+        List<ActionContext> history = threadActionHistory.get(threadName);
+        if (history.size() > 100) {
+            history.remove(0);
+        }
     }
 
-    /** Get current action context (for use by other aspects) */
+    /**
+     * Get the current action context for the executing thread.
+     *
+     * @return Optional containing the current action context if one exists
+     */
     public Optional<ActionContext> getCurrentActionContext() {
-        return Optional.ofNullable(actionContext.get());
+        return Optional.ofNullable(currentActionContext.get());
     }
 
-    /** Populate ActionResult execution context with initial data */
-    private void populateExecutionContext(
-            ActionResult actionResult, ActionContext context, ObjectCollection objectCollection) {
-        // Initialize execution context if not present
-        ActionResult.ActionExecutionContext execContext = actionResult.getExecutionContext();
-        if (execContext == null) {
-            execContext = new ActionResult.ActionExecutionContext();
-            actionResult.setExecutionContext(execContext);
-        }
-
-        // Set basic action information
-        execContext.setActionType(context.getActionType());
-        execContext.setActionId(context.getActionId());
-        execContext.setExecutingThread(context.getThreadName());
-        execContext.setStartTime(context.getStartTime());
-
-        // Extract target information from ObjectCollection
-        if (objectCollection != null) {
-            execContext.setTargetImages(objectCollection.getStateImages());
-            execContext.setTargetStrings(
-                    objectCollection.getStateStrings().stream()
-                            .map(ss -> ss.getString())
-                            .collect(java.util.stream.Collectors.toList()));
-            execContext.setTargetRegions(
-                    objectCollection.getStateRegions().stream()
-                            .map(sr -> sr.getSearchRegion())
-                            .collect(java.util.stream.Collectors.toList()));
-
-            // Set primary target name
-            if (!objectCollection.getStateImages().isEmpty()) {
-                StateImage primaryImage = objectCollection.getStateImages().get(0);
-                String primaryTargetName = "";
-                if (primaryImage.getOwnerStateName() != null
-                        && !primaryImage.getOwnerStateName().isEmpty()) {
-                    primaryTargetName = primaryImage.getOwnerStateName() + ".";
-                }
-                if (primaryImage.getName() != null && !primaryImage.getName().isEmpty()) {
-                    primaryTargetName += primaryImage.getName();
-                }
-                execContext.setPrimaryTargetName(primaryTargetName);
-            }
-        }
-
-        // Initialize metrics if not present
-        if (actionResult.getActionMetrics() == null) {
-            actionResult.setActionMetrics(new ActionResult.ActionMetrics());
-        }
-
-        // Initialize environment snapshot if not present
-        if (actionResult.getEnvironmentSnapshot() == null) {
-            ActionResult.EnvironmentSnapshot envSnapshot = new ActionResult.EnvironmentSnapshot();
-            envSnapshot.setOsName(System.getProperty("os.name"));
-            // Monitor count and other env info would be populated by other components
-            // ActionResult doesn't have setEnvironmentSnapshot yet, will be added later
-        }
+    /**
+     * Get action history for a specific thread.
+     *
+     * @param threadName the name of the thread
+     * @return List of action contexts for the thread
+     */
+    public List<ActionContext> getThreadActionHistory(String threadName) {
+        return threadActionHistory.getOrDefault(
+                threadName, Collections.emptyList());
     }
 
-    /** Update execution context with final results */
-    private void updateExecutionContextWithResults(
-            ActionResult actionResult, ActionContext context, long duration) {
-        ActionResult.ActionExecutionContext execContext = actionResult.getExecutionContext();
-        if (execContext != null) {
-            execContext.setEndTime(java.time.Instant.now());
-            execContext.setSuccess(actionResult.isSuccess());
-            execContext.setExecutionDuration(java.time.Duration.ofMillis(duration));
-
-            // Copy matches from ActionResult
-            if (actionResult.getMatchList() != null) {
-                execContext.setResultMatches(actionResult.getMatchList());
-            }
-        }
+    /**
+     * Clear all action history.
+     */
+    public void clearHistory() {
+        threadActionHistory.clear();
     }
 
-    /** Update execution context with error information */
-    private void updateExecutionContextWithError(
-            ActionResult actionResult, ActionContext context, Exception error) {
-        ActionResult.ActionExecutionContext execContext = actionResult.getExecutionContext();
-        if (execContext != null) {
-            execContext.setEndTime(java.time.Instant.now());
-            execContext.setSuccess(false);
-            execContext.setExecutionError(error);
-            execContext.setExecutionDuration(
-                    java.time.Duration.ofMillis(
-                            System.currentTimeMillis() - context.getStartTime().toEpochMilli()));
-        }
-    }
-
-    /** Inner class to hold action execution context */
+    /**
+     * Internal class to track action execution context.
+     */
+    @Data
     public static class ActionContext {
         private String actionId;
-        private String actionType; // Using String since ActionInterface doesn't expose Type
-        private Object actionConfig;
-        private ObjectCollection objectCollection;
-        private String threadName;
+        private String actionType;
         private Instant startTime;
-        private Object result;
-        private long duration;
+        private Instant endTime;
+        private java.time.Duration duration;
+        private String threadName;
+        private ObjectCollection objectCollection;
         private boolean success;
-        private Exception error;
-        private Map<String, Object> metadata = new HashMap<>();
-
-        // Getters and setters
-        public String getActionId() {
-            return actionId;
-        }
-
-        public void setActionId(String actionId) {
-            this.actionId = actionId;
-        }
-
-        public String getActionType() {
-            return actionType;
-        }
-
-        public void setActionType(String actionType) {
-            this.actionType = actionType;
-        }
-
-        public Object getActionConfig() {
-            return actionConfig;
-        }
-
-        public void setActionConfig(Object actionConfig) {
-            this.actionConfig = actionConfig;
-        }
-
-        public ObjectCollection getObjectCollection() {
-            return objectCollection;
-        }
-
-        public void setObjectCollection(ObjectCollection objectCollection) {
-            this.objectCollection = objectCollection;
-        }
-
-        public String getThreadName() {
-            return threadName;
-        }
-
-        public void setThreadName(String threadName) {
-            this.threadName = threadName;
-        }
-
-        public Instant getStartTime() {
-            return startTime;
-        }
-
-        public void setStartTime(Instant startTime) {
-            this.startTime = startTime;
-        }
-
-        public Object getResult() {
-            return result;
-        }
-
-        public void setResult(Object result) {
-            this.result = result;
-        }
-
-        public long getDuration() {
-            return duration;
-        }
-
-        public void setDuration(long duration) {
-            this.duration = duration;
-        }
-
-        public boolean isSuccess() {
-            return success;
-        }
-
-        public void setSuccess(boolean success) {
-            this.success = success;
-        }
-
-        public Exception getError() {
-            return error;
-        }
-
-        public void setError(Exception error) {
-            this.error = error;
-        }
-
-        public Map<String, Object> getMetadata() {
-            return metadata;
-        }
-
-        public void addMetadata(String key, Object value) {
-            metadata.put(key, value);
-        }
     }
 }

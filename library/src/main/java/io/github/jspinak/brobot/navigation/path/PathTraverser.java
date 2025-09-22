@@ -9,8 +9,8 @@ import io.github.jspinak.brobot.navigation.service.StateTransitionService;
 import io.github.jspinak.brobot.navigation.transition.StateTransitions;
 import io.github.jspinak.brobot.navigation.transition.TransitionConditionPackager;
 import io.github.jspinak.brobot.navigation.transition.TransitionExecutor;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-import io.github.jspinak.brobot.tools.logging.ansi.AnsiColor;
+// Removed old logging import: // Removed old logging import that no longer exists:
+// import io.github.jspinak.brobot.tools.logging.ansi.AnsiColor;
 
 import lombok.Getter;
 
@@ -129,10 +129,6 @@ public class PathTraverser {
         Optional<StateTransitions> optToStateTransitions =
                 stateTransitionsInProjectService.getTransitions(stateToOpen);
         if (optToStateTransitions.isEmpty()) {
-            ConsoleReporter.print(
-                    ConsoleReporter.OutputLevel.HIGH,
-                    "'to state' " + stateToOpen + " not a valid transition",
-                    AnsiColor.RED);
             return false;
         }
         return transitionBooleanSupplierPackager.getAsBoolean(
