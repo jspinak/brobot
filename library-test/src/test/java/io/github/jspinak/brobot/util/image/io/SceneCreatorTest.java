@@ -81,7 +81,7 @@ public class SceneCreatorTest extends BrobotTestBase {
                             .map(
                                     scene ->
                                             scene.getPattern() != null
-                                                    ? scene.getPattern().getName()
+                                                    ? scene.getPattern().getNameWithoutExtension()
                                                     : "")
                             .collect(Collectors.toList());
 
@@ -110,7 +110,10 @@ public class SceneCreatorTest extends BrobotTestBase {
             assertEquals(1, scenes.size());
             assertTrue(
                     scenes.get(0).getPattern() != null
-                            && scenes.get(0).getPattern().getName().contains("single"));
+                            && scenes.get(0)
+                                    .getPattern()
+                                    .getNameWithoutExtension()
+                                    .contains("single"));
         }
     }
 
@@ -133,7 +136,10 @@ public class SceneCreatorTest extends BrobotTestBase {
             assertEquals(1, scenes.size());
             assertTrue(
                     scenes.get(0).getPattern() != null
-                            && scenes.get(0).getPattern().getName().contains("image"));
+                            && scenes.get(0)
+                                    .getPattern()
+                                    .getNameWithoutExtension()
+                                    .contains("image"));
         }
 
         @Test
@@ -152,7 +158,10 @@ public class SceneCreatorTest extends BrobotTestBase {
             assertEquals(1, scenes.size()); // Only PNG processed
             assertTrue(
                     scenes.get(0).getPattern() != null
-                            && scenes.get(0).getPattern().getName().contains("screenshot"));
+                            && scenes.get(0)
+                                    .getPattern()
+                                    .getNameWithoutExtension()
+                                    .contains("screenshot"));
         }
 
         @Test
@@ -180,7 +189,10 @@ public class SceneCreatorTest extends BrobotTestBase {
             assertEquals(1, scenes.size());
             assertTrue(
                     scenes.get(0).getPattern() != null
-                            && scenes.get(0).getPattern().getName().contains("file"));
+                            && scenes.get(0)
+                                    .getPattern()
+                                    .getNameWithoutExtension()
+                                    .contains("file"));
         }
     }
 
@@ -199,7 +211,9 @@ public class SceneCreatorTest extends BrobotTestBase {
             assertEquals(1, scenes.size());
 
             String path =
-                    scenes.get(0).getPattern() != null ? scenes.get(0).getPattern().getName() : "";
+                    scenes.get(0).getPattern() != null
+                            ? scenes.get(0).getPattern().getNameWithoutExtension()
+                            : "";
             // The path should contain the filename without extension
             assertTrue(path.contains("test"));
             assertFalse(path.endsWith(".png")); // Extension removed
@@ -216,7 +230,9 @@ public class SceneCreatorTest extends BrobotTestBase {
             assertEquals(1, scenes.size());
 
             String path =
-                    scenes.get(0).getPattern() != null ? scenes.get(0).getPattern().getName() : "";
+                    scenes.get(0).getPattern() != null
+                            ? scenes.get(0).getPattern().getNameWithoutExtension()
+                            : "";
             assertFalse(path.contains(".png"));
             assertTrue(path.endsWith("screenshot"));
         }
@@ -241,7 +257,10 @@ public class SceneCreatorTest extends BrobotTestBase {
             // becomes "with.dots.in"
             assertTrue(
                     scenes.get(0).getPattern() != null
-                            && scenes.get(0).getPattern().getName().contains(expectedNamePart));
+                            && scenes.get(0)
+                                    .getPattern()
+                                    .getNameWithoutExtension()
+                                    .contains(expectedNamePart));
         }
     }
 
@@ -260,7 +279,10 @@ public class SceneCreatorTest extends BrobotTestBase {
             assertEquals(1, scenes.size());
             assertTrue(
                     scenes.get(0).getPattern() != null
-                            && scenes.get(0).getPattern().getName().contains("screen shot"));
+                            && scenes.get(0)
+                                    .getPattern()
+                                    .getNameWithoutExtension()
+                                    .contains("screen shot"));
         }
 
         @Test
@@ -274,7 +296,10 @@ public class SceneCreatorTest extends BrobotTestBase {
             assertEquals(1, scenes.size());
             assertTrue(
                     scenes.get(0).getPattern() != null
-                            && scenes.get(0).getPattern().getName().contains("screen-shot_001"));
+                            && scenes.get(0)
+                                    .getPattern()
+                                    .getNameWithoutExtension()
+                                    .contains("screen-shot_001"));
         }
 
         @Test
@@ -288,7 +313,10 @@ public class SceneCreatorTest extends BrobotTestBase {
             assertEquals(1, scenes.size());
             assertTrue(
                     scenes.get(0).getPattern() != null
-                            && scenes.get(0).getPattern().getName().contains("截图_测试"));
+                            && scenes.get(0)
+                                    .getPattern()
+                                    .getNameWithoutExtension()
+                                    .contains("截图_测试"));
         }
 
         @Test
@@ -304,7 +332,7 @@ public class SceneCreatorTest extends BrobotTestBase {
                     scenes.get(0).getPattern() != null
                             && scenes.get(0)
                                     .getPattern()
-                                    .getName()
+                                    .getNameWithoutExtension()
                                     .contains("screenshot_2024-01-15_143022"));
         }
     }
@@ -390,7 +418,7 @@ public class SceneCreatorTest extends BrobotTestBase {
                                         s ->
                                                 s.getPattern() != null
                                                         && s.getPattern()
-                                                                .getName()
+                                                                .getNameWithoutExtension()
                                                                 .contains("screenshot_" + num)));
             }
         }
@@ -432,7 +460,7 @@ public class SceneCreatorTest extends BrobotTestBase {
                             .map(
                                     scene ->
                                             scene.getPattern() != null
-                                                    ? scene.getPattern().getName()
+                                                    ? scene.getPattern().getNameWithoutExtension()
                                                     : "")
                             .collect(Collectors.toList());
             assertEquals(4, paths.stream().distinct().count());
@@ -506,7 +534,7 @@ public class SceneCreatorTest extends BrobotTestBase {
                                     s ->
                                             s.getPattern() != null
                                                     && s.getPattern()
-                                                            .getName()
+                                                            .getNameWithoutExtension()
                                                             .contains("login_page_initial")));
             assertTrue(
                     scenes.stream()
@@ -514,7 +542,7 @@ public class SceneCreatorTest extends BrobotTestBase {
                                     s ->
                                             s.getPattern() != null
                                                     && s.getPattern()
-                                                            .getName()
+                                                            .getNameWithoutExtension()
                                                             .contains("dashboard_loaded")));
         }
 
@@ -549,7 +577,7 @@ public class SceneCreatorTest extends BrobotTestBase {
                                         s ->
                                                 s.getPattern() != null
                                                         && s.getPattern()
-                                                                .getName()
+                                                                .getNameWithoutExtension()
                                                                 .contains(state)));
             }
         }
@@ -575,7 +603,7 @@ public class SceneCreatorTest extends BrobotTestBase {
                                     s ->
                                             s.getPattern() != null
                                                     && s.getPattern()
-                                                            .getName()
+                                                            .getNameWithoutExtension()
                                                             .contains("202401")));
         }
     }

@@ -12,7 +12,7 @@ import io.github.jspinak.brobot.core.services.ScreenCaptureService;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;
-// Removed old logging import: 
+// Removed old logging import:
 /**
  * Visual implementation of the ElementLocator interface.
  *
@@ -230,7 +230,7 @@ public class VisualElementLocator implements ElementLocator {
             element.setWidth(result.getWidth());
             element.setHeight(result.getHeight());
             element.setConfidence(result.getConfidence());
-            element.setName(pattern.getName());
+            element.setName(pattern.getNameWithoutExtension());
             element.setSourcePattern(pattern);
 
             // Find source StateImage if available

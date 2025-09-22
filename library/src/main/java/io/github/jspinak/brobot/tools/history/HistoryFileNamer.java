@@ -1,7 +1,5 @@
 package io.github.jspinak.brobot.tools.history;
 
-import io.github.jspinak.brobot.util.location.LocationUtils;
-
 import static io.github.jspinak.brobot.action.ActionType.FIND;
 
 import java.util.ArrayList;
@@ -158,7 +156,7 @@ public class HistoryFileNamer {
             String... additionalDescription) {
         String prefix = brobotProperties.getScreenshot().getHistoryPath();
         ActionType actionType = getActionTypeFromConfig(actionConfig);
-        String sceneName = sceneAnalysis.getScene().getPattern().getName();
+        String sceneName = sceneAnalysis.getScene().getPattern().getNameWithoutExtension();
         String imageNames = sceneAnalysis.getImageNames();
         String names = String.join("_", imageNames);
         String suffix =

@@ -25,7 +25,7 @@ public class TestRegionDebug {
         System.out.println("Number of patterns: " + claudePrompt.getPatterns().size());
 
         for (Pattern p : claudePrompt.getPatterns()) {
-            System.out.println("Pattern: " + p.getName());
+            System.out.println("Pattern: " + p.getNameWithoutExtension());
             System.out.println("Is fixed: " + p.isFixed());
             System.out.println("Search regions: " + p.getSearchRegions());
             System.out.println("getRegions(fixed): " + p.getRegions());

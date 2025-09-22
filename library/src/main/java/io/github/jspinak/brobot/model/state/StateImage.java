@@ -761,7 +761,7 @@ public class StateImage implements StateObject {
             stringBuilder.append("StateImage\n");
             stringBuilder.append("images\n");
             stringBuilder.append(this.name).append("\n");
-            patterns.forEach(pattern -> stringBuilder.append(pattern.getName()).append(" "));
+            patterns.forEach(pattern -> stringBuilder.append(pattern.getNameWithoutExtension()).append(" "));
             return stringBuilder.toString();
         }
 
@@ -773,8 +773,8 @@ public class StateImage implements StateObject {
          */
         private void setNameFromPatternIfEmpty(Pattern pattern) {
             // This condition now safely handles cases where 'name' is null or empty.
-            if ((name == null || name.isEmpty()) && pattern != null && pattern.getName() != null) {
-                name = pattern.getName();
+            if ((name == null || name.isEmpty()) && pattern != null && pattern.getNameWithoutExtension() != null) {
+                name = pattern.getNameWithoutExtension();
             }
         }
 

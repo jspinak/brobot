@@ -90,7 +90,7 @@ public class RecordingActionWrapper {
             persistence.captureCurrentExecution(result, pattern, config);
 
             // Track record count for auto-save
-            String patternKey = pattern.getName();
+            String patternKey = pattern.getNameWithoutExtension();
             int count = recordCounts.merge(patternKey, 1, Integer::sum);
 
             if (autoSaveEnabled && count % autoSaveInterval == 0) {
@@ -114,7 +114,7 @@ public class RecordingActionWrapper {
             if (!stateImage.getPatterns().isEmpty()) {
                 Pattern pattern = stateImage.getPatterns().get(0);
                 persistence.captureCurrentExecution(result, pattern, config);
-                updateRecordCount(pattern.getName());
+                updateRecordCount(pattern.getNameWithoutExtension());
             }
         }
     }
@@ -160,10 +160,10 @@ public class RecordingActionWrapper {
             if (pattern.getMatchHistory() != null
                     && !pattern.getMatchHistory().getSnapshots().isEmpty()) {
                 try {
-                    String filename = String.format("%s_%s", sessionName, pattern.getName());
+                    String filename = String.format("%s_%s", sessionName, pattern.getNameWithoutExtension());
                     persistence.saveSessionHistory(pattern, filename);
                 } catch (IOException e) {
-                    log.error("Failed to save history for pattern: {}", pattern.getName(), e);
+                    log.error("Failed to save history for pattern: {}", pattern.getNameWithoutExtension(), e);
                 }
             }
         }
@@ -221,7 +221,7 @@ public class RecordingActionWrapper {
             PatternFindOptions findOptions =
                     new PatternFindOptions.Builder().setPauseBeforeBegin(timeout).build();
             persistence.captureCurrentExecution(result, pattern, findOptions);
-            updateRecordCount(pattern.getName());
+            updateRecordCount(pattern.getNameWithoutExtension());
         }
 
         return result;

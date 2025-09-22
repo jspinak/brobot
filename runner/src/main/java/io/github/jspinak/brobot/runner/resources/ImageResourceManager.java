@@ -173,7 +173,7 @@ public class ImageResourceManager implements AutoCloseable {
             if (pattern.isEmpty()) continue;
 
             BufferedImage bImg = pattern.getBImage();
-            String name = pattern.getName();
+            String name = pattern.getNameWithoutExtension();
 
             if (bImg != null && name != null && !name.isEmpty()) {
                 cacheImage(name, bImg);

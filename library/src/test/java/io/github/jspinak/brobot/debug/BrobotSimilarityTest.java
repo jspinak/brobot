@@ -45,7 +45,7 @@ public class BrobotSimilarityTest extends BrobotTestBase {
 
             // Create Brobot Pattern
             Pattern brobotPattern = new Pattern(buffImg);
-            brobotPattern.setName("claude-prompt-1");
+            brobotPattern.setNameWithoutExtension("claude-prompt-1");
 
             // Get the SikuliX pattern from Brobot
             org.sikuli.script.Pattern sikuliPattern = brobotPattern.sikuli();
