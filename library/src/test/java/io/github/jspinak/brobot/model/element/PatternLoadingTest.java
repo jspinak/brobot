@@ -80,7 +80,7 @@ public class PatternLoadingTest extends BrobotTestBase {
             // Then - In mock mode, Pattern should be created with null image
             assertNotNull(pattern);
             assertNull(pattern.getImage()); // Mock mode doesn't load images
-            assertEquals("test", pattern.getName());
+            assertEquals("test", pattern.getNameWithoutExtension());
             // Note: In mock mode, ImagePath methods are not called
         }
 
@@ -103,7 +103,7 @@ public class PatternLoadingTest extends BrobotTestBase {
                 // Then - Pattern exists but image is null
                 assertNotNull(pattern);
                 assertNull(pattern.getImage());
-                assertEquals("nonexistent", pattern.getName());
+                assertEquals("nonexistent", pattern.getNameWithoutExtension());
             }
         }
 
@@ -124,7 +124,7 @@ public class PatternLoadingTest extends BrobotTestBase {
 
             // Then - Pattern should be created with null image in mock mode
             assertNotNull(pattern);
-            assertEquals("button", pattern.getName());
+            assertEquals("button", pattern.getNameWithoutExtension());
             assertNull(pattern.getImage()); // Mock mode doesn't load images
         }
     }
@@ -155,7 +155,7 @@ public class PatternLoadingTest extends BrobotTestBase {
                 // Then
                 assertNotNull(pattern);
                 assertNotNull(pattern.getImage());
-                assertEquals("absolute", pattern.getName());
+                assertEquals("absolute", pattern.getNameWithoutExtension());
             }
         }
 
@@ -186,7 +186,7 @@ public class PatternLoadingTest extends BrobotTestBase {
                 // Then
                 assertNotNull(pattern);
                 assertNotNull(pattern.getImage());
-                assertEquals("relative", pattern.getName());
+                assertEquals("relative", pattern.getNameWithoutExtension());
             }
         }
 
@@ -345,7 +345,7 @@ public class PatternLoadingTest extends BrobotTestBase {
                 // Then - Pattern exists but image is null
                 assertNotNull(pattern);
                 assertNull(pattern.getImage());
-                assertEquals("missing", pattern.getName());
+                assertEquals("missing", pattern.getNameWithoutExtension());
             }
         }
 
@@ -374,7 +374,7 @@ public class PatternLoadingTest extends BrobotTestBase {
                 // Then - Pattern exists but image is null
                 assertNotNull(pattern);
                 assertNull(pattern.getImage());
-                assertEquals("test", pattern.getName());
+                assertEquals("test", pattern.getNameWithoutExtension());
             }
         }
 
@@ -389,7 +389,7 @@ public class PatternLoadingTest extends BrobotTestBase {
             Pattern pattern = new Pattern("button_submit.png");
 
             // Then
-            assertEquals("button_submit", pattern.getName());
+            assertEquals("button_submit", pattern.getNameWithoutExtension());
         }
 
         @Test
@@ -423,7 +423,7 @@ public class PatternLoadingTest extends BrobotTestBase {
             // Then - In mock mode, image is not loaded
             assertNotNull(pattern);
             assertNull(pattern.getImage()); // Mock mode doesn't load images
-            assertEquals("mock-image", pattern.getName());
+            assertEquals("mock-image", pattern.getNameWithoutExtension());
             assertEquals("mock-image.png", pattern.getImgpath());
         }
 
@@ -478,7 +478,7 @@ public class PatternLoadingTest extends BrobotTestBase {
                 // Then - Pattern exists but image is null (error would be logged)
                 assertNotNull(pattern);
                 assertNull(pattern.getImage());
-                assertEquals("missing-button", pattern.getName());
+                assertEquals("missing-button", pattern.getNameWithoutExtension());
                 assertEquals("missing-button.png", pattern.getImgpath());
             }
         }
@@ -533,7 +533,7 @@ public class PatternLoadingTest extends BrobotTestBase {
 
                 // Then
                 assertNotNull(pattern);
-                assertEquals("button_v1.2", pattern.getName());
+                assertEquals("button_v1.2", pattern.getNameWithoutExtension());
             }
         }
     }
@@ -556,7 +556,7 @@ public class PatternLoadingTest extends BrobotTestBase {
             // Then
             assertFalse(stateImage.getPatterns().isEmpty());
             Pattern pattern = stateImage.getPatterns().get(0);
-            assertEquals("state-pattern", pattern.getName());
+            assertEquals("state-pattern", pattern.getNameWithoutExtension());
         }
 
         @Test

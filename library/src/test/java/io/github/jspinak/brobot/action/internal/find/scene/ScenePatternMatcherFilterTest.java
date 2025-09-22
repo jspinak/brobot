@@ -1,7 +1,6 @@
 package io.github.jspinak.brobot.action.internal.find.scene;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 import java.awt.image.BufferedImage;
 import java.util.List;
@@ -31,7 +30,7 @@ public class ScenePatternMatcherFilterTest extends BrobotTestBase {
         // Create test pattern and scene with dummy images
         BufferedImage dummyImage = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
         pattern = new Pattern();
-        pattern.setName("test-pattern");
+        pattern.setNameWithoutExtension("test-pattern");
         pattern.setImage(new io.github.jspinak.brobot.model.element.Image(dummyImage));
 
         Pattern scenePattern = new Pattern();

@@ -106,7 +106,7 @@ public class ImageTest extends BrobotTestBase {
         // Given
         Pattern nullPattern = mock(Pattern.class);
         when(nullPattern.getBImage()).thenReturn(null);
-        when(nullPattern.getName()).thenReturn(null);
+        when(nullPattern.getNameWithoutExtension()).thenReturn(null);
 
         // When
         Image image = new Image(nullPattern);

@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.match.Match;
-// Removed old logging import: 
+// Removed old logging import:
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -83,7 +83,7 @@ public class BestMatchCapture {
         } catch (Exception e) {
             log.error(
                     "Error capturing best match for pattern '{}': {}",
-                    pattern.getName(),
+                    pattern.getNameWithoutExtension(),
                     e.getMessage(),
                     e);
         }
@@ -149,7 +149,7 @@ public class BestMatchCapture {
 
             // Create filename with pattern name, similarity, and timestamp
             String safePatternName =
-                    pattern.getName().replaceAll("[^a-zA-Z0-9.-]", "_").replaceAll("_{2,}", "_");
+                    pattern.getNameWithoutExtension().replaceAll("[^a-zA-Z0-9.-]", "_").replaceAll("_{2,}", "_");
 
             String similarityStr = String.format("%.3f", bestMatch.score).replace(".", "");
 
@@ -185,7 +185,7 @@ public class BestMatchCapture {
             log.debug(
                     "Best match captured - Pattern: {}, Location: ({}, {}), Size: {}x{},"
                             + " Similarity: {}",
-                    pattern.getName(),
+                    pattern.getNameWithoutExtension(),
                     x,
                     y,
                     w,
@@ -195,7 +195,7 @@ public class BestMatchCapture {
         } catch (IOException e) {
             log.error(
                     "Failed to save best match image for pattern '{}': {}",
-                    pattern.getName(),
+                    pattern.getNameWithoutExtension(),
                     e.getMessage(),
                     e);
         }

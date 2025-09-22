@@ -10,11 +10,9 @@ import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig.VerbosityLevel;
-import io.github.jspinak.brobot.logging.BrobotLogger;
-import io.github.jspinak.brobot.logging.events.ActionEvent;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
-// Removed old logging import: 
+// Removed old logging import:
 /**
  * Diagnostic logger for pattern matching and image analysis. Provides verbosity-aware logging that
  * available at all verbosity levels.
@@ -63,7 +61,7 @@ public class DiagnosticLogger {
         // Add detailed logging for VERBOSE mode
         if (level == VerbosityLevel.VERBOSE && brobotLogger != null) {
             Map<String, Object> metadata = new HashMap<>();
-            metadata.put("patternName", pattern.getName());
+            metadata.put("patternName", pattern.getNameWithoutExtension());
             metadata.put("patternSize", pattern.w() + "x" + pattern.h());
             metadata.put("sceneSize", scene.getPattern().w() + "x" + scene.getPattern().h());
             metadata.put("similarity", similarity);
@@ -73,7 +71,7 @@ public class DiagnosticLogger {
             brobotLogger
                     .builder(LogCategory.MATCHING)
                     .level(LogLevel.DEBUG)
-                    .action("PATTERN_SEARCH", pattern.getName())
+                    .action("PATTERN_SEARCH", pattern.getNameWithoutExtension())
                     .context(metadata)
                     .log();
         }
@@ -99,7 +97,7 @@ public class DiagnosticLogger {
         // Additional verbose logging
         if (level == VerbosityLevel.VERBOSE && brobotLogger != null) {
             Map<String, Object> metadata = new HashMap<>();
-            metadata.put("patternName", pattern.getName());
+            metadata.put("patternName", pattern.getNameWithoutExtension());
             metadata.put("matchCount", matchCount);
             metadata.put("bestScore", bestScore);
             metadata.put("success", matchCount > 0);
@@ -107,7 +105,7 @@ public class DiagnosticLogger {
             brobotLogger
                     .builder(LogCategory.MATCHING)
                     .level(matchCount > 0 ? LogLevel.DEBUG : LogLevel.WARN)
-                    .action("PATTERN_RESULT", pattern.getName())
+                    .action("PATTERN_RESULT", pattern.getNameWithoutExtension())
                     .context("success", matchCount > 0)
                     .context(metadata)
                     .log();

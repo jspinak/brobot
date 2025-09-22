@@ -174,7 +174,7 @@ class ImageJsonParserTest extends BrobotTestBase {
         // Create a Pattern with a BufferedImage
         BufferedImage buffImg = new BufferedImage(50, 50, BufferedImage.TYPE_INT_RGB);
         Pattern pattern = new Pattern(buffImg);
-        pattern.setName("PatternName");
+        pattern.setNameWithoutExtension("PatternName");
 
         // Create Image from Pattern
         Image image = new Image(pattern);

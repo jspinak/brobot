@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.model.element;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-import static org.mockito.Mockito.*;
 
 import java.awt.image.BufferedImage;
 import java.util.List;
@@ -97,7 +96,7 @@ public class PatternTest extends BrobotTestBase {
 
         // Then
         assertSame(testImage, pattern.getImage());
-        assertEquals("TestImage", pattern.getName());
+        assertEquals("TestImage", pattern.getNameWithoutExtension());
     }
 
     @Test
@@ -110,7 +109,7 @@ public class PatternTest extends BrobotTestBase {
         assertTrue(pattern.isFixed());
         assertNotNull(pattern.getSearchRegions());
         assertEquals(testImage, pattern.getImage());
-        assertEquals("TestMatch", pattern.getName());
+        assertEquals("TestMatch", pattern.getNameWithoutExtension());
 
         // Verify the search region was set
         Region fixedRegion = pattern.getRegion();
@@ -130,7 +129,7 @@ public class PatternTest extends BrobotTestBase {
 
         // Then
         assertTrue(pattern.isFixed());
-        assertEquals("NoImageMatch", pattern.getName());
+        assertEquals("NoImageMatch", pattern.getNameWithoutExtension());
         assertNull(pattern.getImage());
     }
 
@@ -290,7 +289,7 @@ public class PatternTest extends BrobotTestBase {
     void testInNullState() {
         // Given
         Pattern pattern = new Pattern(testImage);
-        pattern.setName("TestPattern");
+        pattern.setNameWithoutExtension("TestPattern");
 
         // When
         StateImage stateImage = pattern.inNullState();
@@ -350,8 +349,8 @@ public class PatternTest extends BrobotTestBase {
                         "Should set and get name",
                         () -> {
                             Pattern pattern = new Pattern();
-                            pattern.setName("PatternName");
-                            assertEquals("PatternName", pattern.getName());
+                            pattern.setNameWithoutExtension("PatternName");
+                            assertEquals("PatternName", pattern.getNameWithoutExtension());
                         }),
                 dynamicTest(
                         "Should set and get dynamic flag",
@@ -447,13 +446,13 @@ public class PatternTest extends BrobotTestBase {
     void testEqualsAndHashCode() {
         // Given
         Pattern pattern1 = new Pattern(testImage);
-        pattern1.setName("Pattern1");
+        pattern1.setNameWithoutExtension("Pattern1");
 
         Pattern pattern2 = new Pattern(testImage);
-        pattern2.setName("Pattern1");
+        pattern2.setNameWithoutExtension("Pattern1");
 
         Pattern pattern3 = new Pattern(testImage);
-        pattern3.setName("Pattern2");
+        pattern3.setNameWithoutExtension("Pattern2");
 
         // Then - Same object
         assertEquals(pattern1, pattern1);
@@ -478,7 +477,7 @@ public class PatternTest extends BrobotTestBase {
         Pattern pattern = new Pattern(testImage);
 
         // When - Configure the pattern
-        pattern.setName("ComplexPattern");
+        pattern.setNameWithoutExtension("ComplexPattern");
         pattern.setFixed(true);
         pattern.setDynamic(false);
         pattern.setIndex(5);
@@ -489,7 +488,7 @@ public class PatternTest extends BrobotTestBase {
         pattern.getAnchors().add(new Anchor(Positions.Name.TOPLEFT, new Position(0, 0)));
 
         // Then
-        assertEquals("ComplexPattern", pattern.getName());
+        assertEquals("ComplexPattern", pattern.getNameWithoutExtension());
         assertTrue(pattern.isFixed());
         assertFalse(pattern.isDynamic());
         assertEquals(5, pattern.getIndex());

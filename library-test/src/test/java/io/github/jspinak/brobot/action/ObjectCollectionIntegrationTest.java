@@ -54,7 +54,7 @@ public class ObjectCollectionIntegrationTest {
     private Pattern createTestPattern(String name) {
         BufferedImage dummyImage = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
         Pattern pattern = new Pattern(dummyImage);
-        pattern.setName(name);
+        pattern.setNameWithoutExtension(name);
         return pattern;
     }
 

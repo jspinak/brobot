@@ -3,11 +3,9 @@ package io.github.jspinak.brobot.model.analysis.color;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
+import io.github.jspinak.brobot.analysis.color.kmeans.KmeansProfile;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
-
-// Removed old logging import: 
 import lombok.Getter;
 import lombok.Setter;
 

@@ -64,7 +64,7 @@ public class Pattern {
     private String url; // originally type URL, which requires conversion for use with JPA
     private String imgpath;
 
-    private String name;
+    private String nameWithoutExtension;
     /*
     An image that should always appear in the same location has fixed==true.
     */
@@ -144,7 +144,7 @@ public class Pattern {
         BufferedImage bufferedImage = BufferedImageUtilities.getBuffImgFromFile(imgPath);
 
         if (bufferedImage != null) {
-            this.image = new Image(bufferedImage, name);
+            this.image = new Image(bufferedImage, nameWithoutExtension);
             this.needsDelayedLoading = false;
             log.debug("Successfully loaded image: {}", imgPath);
         } else {
@@ -227,7 +227,7 @@ public class Pattern {
     public Pattern(Image image) {
         this.image = image;
         if (image != null) {
-            setName(image.getName());
+            setNameWithoutExtension(image.getName());
         }
     }
 
@@ -247,7 +247,7 @@ public class Pattern {
             image = imageToUse;
         }
         // Always set name from match
-        name = match.getName();
+        nameWithoutExtension = match.getName();
     }
 
     /**
@@ -299,8 +299,8 @@ public class Pattern {
     @JsonIgnore
     private void setNameFromFilenameIfEmpty(String filename) {
         if (filename == null) return;
-        if (name == null || name.isEmpty()) {
-            setName(FilenameExtractor.getFilenameWithoutExtensionAndDirectory(filename));
+        if (nameWithoutExtension == null || nameWithoutExtension.isEmpty()) {
+            setNameWithoutExtension(FilenameExtractor.getFilenameWithoutExtensionAndDirectory(filename));
         }
     }
 
@@ -423,7 +423,7 @@ public class Pattern {
     public StateImage inNullState() {
         return new StateImage.Builder()
                 .addPattern(this)
-                .setName(name)
+                .setName(nameWithoutExtension)
                 .setOwnerStateName("null")
                 .build();
     }
@@ -511,7 +511,7 @@ public class Pattern {
         // Ensure we have a valid image
         if (image == null || image.isEmpty()) {
             throw new IllegalStateException(
-                    "Cannot create SikuliX Pattern: No valid image for pattern: " + name);
+                    "Cannot create SikuliX Pattern: No valid image for pattern: " + nameWithoutExtension);
         }
 
         // Get the BufferedImage - this is what SikuliX uses internally anyway
@@ -519,11 +519,11 @@ public class Pattern {
 
         // Only log pattern creation in debug/verbose mode
         if (log.isDebugEnabled()
-                && name != null
-                && (name.contains("prompt") || name.contains("claude") || name.contains("debug"))) {
+                && nameWithoutExtension != null
+                && (nameWithoutExtension.contains("prompt") || nameWithoutExtension.contains("claude") || nameWithoutExtension.contains("debug"))) {
             log.debug(
                     "[PATTERN] Creating SikuliX pattern '{}' {}x{} type={}",
-                    name,
+                    nameWithoutExtension,
                     buffImg.getWidth(),
                     buffImg.getHeight(),
                     getImageTypeString(buffImg.getType()));
@@ -544,7 +544,7 @@ public class Pattern {
     public BufferedImage getBImage() {
         ensureImageLoaded();
         if (image == null) {
-            log.debug("Pattern '{}' has null image", name);
+            log.debug("Pattern '{}' has null image", nameWithoutExtension);
             return null;
         }
         return image.getBufferedImage();
@@ -559,7 +559,7 @@ public class Pattern {
     public String toString() {
         return "Pattern{"
                 + "name='"
-                + name
+                + nameWithoutExtension
                 + '\''
                 + ", imgpath='"
                 + imgpath
@@ -900,7 +900,7 @@ public class Pattern {
          */
         public Pattern build() {
             Pattern pattern = new Pattern(); // Start with a truly empty pattern
-            if (name != null) pattern.setName(name);
+            if (name != null) pattern.setNameWithoutExtension(name);
 
             createImageFromSources(pattern);
 
