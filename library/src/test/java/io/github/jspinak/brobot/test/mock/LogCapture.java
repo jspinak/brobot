@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.test.mock;
 
-import io.github.jspinak.brobot.logging.BrobotLogger;
-import io.github.jspinak.brobot.logging.LogCategory;
-import io.github.jspinak.brobot.logging.LogLevel;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -11,13 +11,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import io.github.jspinak.brobot.logging.BrobotLogger;
+import io.github.jspinak.brobot.logging.LogCategory;
+import io.github.jspinak.brobot.logging.LogLevel;
 
 /**
- * Utility class for capturing log entries during tests.
- * Provides methods to verify logged messages and their properties.
+ * Utility class for capturing log entries during tests. Provides methods to verify logged messages
+ * and their properties.
  */
 public class LogCapture {
 
@@ -31,10 +31,12 @@ public class LogCapture {
     public BrobotLogger createCapturingLogger() {
         BrobotLogger logger = mock(BrobotLogger.class);
 
-        when(logger.builder(any(LogCategory.class))).thenAnswer(invocation -> {
-            LogCategory category = invocation.getArgument(0);
-            return new CapturingLogBuilder(category, this);
-        });
+        when(logger.builder(any(LogCategory.class)))
+                .thenAnswer(
+                        invocation -> {
+                            LogCategory category = invocation.getArgument(0);
+                            return new CapturingLogBuilder(category, this);
+                        });
 
         return logger;
     }
@@ -65,8 +67,8 @@ public class LogCapture {
      */
     public List<LogEntry> getLogsByCategory(LogCategory category) {
         return capturedLogs.stream()
-            .filter(log -> log.getCategory() == category)
-            .collect(Collectors.toList());
+                .filter(log -> log.getCategory() == category)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -77,13 +79,11 @@ public class LogCapture {
      */
     public List<LogEntry> getLogsByLevel(LogLevel level) {
         return capturedLogs.stream()
-            .filter(log -> log.getLevel() == level)
-            .collect(Collectors.toList());
+                .filter(log -> log.getLevel() == level)
+                .collect(Collectors.toList());
     }
 
-    /**
-     * Clears all captured logs.
-     */
+    /** Clears all captured logs. */
     public void clear() {
         capturedLogs.clear();
     }
@@ -96,8 +96,10 @@ public class LogCapture {
      */
     public boolean assertLoggedWithMessage(String expectedMessage) {
         return capturedLogs.stream()
-            .anyMatch(log -> log.getMessage() != null &&
-                           log.getMessage().contains(expectedMessage));
+                .anyMatch(
+                        log ->
+                                log.getMessage() != null
+                                        && log.getMessage().contains(expectedMessage));
     }
 
     /**
@@ -108,8 +110,7 @@ public class LogCapture {
      */
     public boolean assertErrorLogged(Class<? extends Throwable> errorClass) {
         return capturedLogs.stream()
-            .anyMatch(log -> log.getError() != null &&
-                           errorClass.isInstance(log.getError()));
+                .anyMatch(log -> log.getError() != null && errorClass.isInstance(log.getError()));
     }
 
     /**
@@ -121,8 +122,11 @@ public class LogCapture {
      */
     public boolean assertActionLogged(String actionType, String target) {
         return capturedLogs.stream()
-            .anyMatch(log -> actionType.equals(log.getActionType()) &&
-                           (target == null || target.equals(log.getActionTarget())));
+                .anyMatch(
+                        log ->
+                                actionType.equals(log.getActionType())
+                                        && (target == null
+                                                || target.equals(log.getActionTarget())));
     }
 
     /**
@@ -140,13 +144,10 @@ public class LogCapture {
      * @return The last log entry, or null if none captured
      */
     public LogEntry getLastLog() {
-        return capturedLogs.isEmpty() ? null :
-               capturedLogs.get(capturedLogs.size() - 1);
+        return capturedLogs.isEmpty() ? null : capturedLogs.get(capturedLogs.size() - 1);
     }
 
-    /**
-     * Represents a captured log entry with all its properties.
-     */
+    /** Represents a captured log entry with all its properties. */
     public static class LogEntry {
         private final LogCategory category;
         private LogLevel level;
@@ -166,32 +167,80 @@ public class LogCapture {
         }
 
         // Getters
-        public LogCategory getCategory() { return category; }
-        public LogLevel getLevel() { return level; }
-        public String getMessage() { return message; }
-        public Object[] getMessageArgs() { return messageArgs; }
-        public String getActionType() { return actionType; }
-        public String getActionTarget() { return actionTarget; }
-        public Throwable getError() { return error; }
-        public Duration getDuration() { return duration; }
-        public String getCorrelationId() { return correlationId; }
-        public String getState() { return state; }
-        public LocalDateTime getTimestamp() { return timestamp; }
+        public LogCategory getCategory() {
+            return category;
+        }
+
+        public LogLevel getLevel() {
+            return level;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public Object[] getMessageArgs() {
+            return messageArgs;
+        }
+
+        public String getActionType() {
+            return actionType;
+        }
+
+        public String getActionTarget() {
+            return actionTarget;
+        }
+
+        public Throwable getError() {
+            return error;
+        }
+
+        public Duration getDuration() {
+            return duration;
+        }
+
+        public String getCorrelationId() {
+            return correlationId;
+        }
+
+        public String getState() {
+            return state;
+        }
+
+        public LocalDateTime getTimestamp() {
+            return timestamp;
+        }
 
         // Package-private setters for CapturingLogBuilder
-        void setLevel(LogLevel level) { this.level = level; }
+        void setLevel(LogLevel level) {
+            this.level = level;
+        }
+
         void setMessage(String message, Object... args) {
             this.message = message;
             this.messageArgs = args;
         }
+
         void setAction(String type, String target) {
             this.actionType = type;
             this.actionTarget = target;
         }
-        void setError(Throwable error) { this.error = error; }
-        void setDuration(Duration duration) { this.duration = duration; }
-        void setCorrelationId(String correlationId) { this.correlationId = correlationId; }
-        void setState(String state) { this.state = state; }
+
+        void setError(Throwable error) {
+            this.error = error;
+        }
+
+        void setDuration(Duration duration) {
+            this.duration = duration;
+        }
+
+        void setCorrelationId(String correlationId) {
+            this.correlationId = correlationId;
+        }
+
+        void setState(String state) {
+            this.state = state;
+        }
 
         /**
          * Gets the formatted message with arguments applied.
@@ -210,8 +259,7 @@ public class LogCapture {
 
         @Override
         public String toString() {
-            return String.format("[%s][%s] %s",
-                category, level, getFormattedMessage());
+            return String.format("[%s][%s] %s", category, level, getFormattedMessage());
         }
     }
 }

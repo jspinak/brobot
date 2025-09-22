@@ -99,8 +99,8 @@ public class StateRegion implements StateObject {
     private DefineAs defineStrategy = DefineAs.OUTSIDE_ANCHORS;
 
     /**
-     * Returns a unique string identifier for this StateRegion.
-     * Combines object type, name, and region coordinates.
+     * Returns a unique string identifier for this StateRegion. Combines object type, name, and
+     * region coordinates.
      *
      * @return concatenated string of type, name, and coordinates
      */
@@ -150,8 +150,8 @@ public class StateRegion implements StateObject {
     }
 
     /**
-     * Checks if this StateRegion has defined coordinates.
-     * A region is defined if it has non-zero width and height.
+     * Checks if this StateRegion has defined coordinates. A region is defined if it has non-zero
+     * width and height.
      *
      * @return true if the region is defined, false otherwise
      */
@@ -160,16 +160,16 @@ public class StateRegion implements StateObject {
     }
 
     /**
-     * Increments the counter tracking how many times this region has been acted upon.
-     * Useful for tracking usage frequency and interaction statistics.
+     * Increments the counter tracking how many times this region has been acted upon. Useful for
+     * tracking usage frequency and interaction statistics.
      */
     public void addTimesActedOn() {
         timesActedOn++;
     }
 
     /**
-     * Adds an action record snapshot to this region's match history.
-     * Used for tracking historical interactions and supporting mock mode.
+     * Adds an action record snapshot to this region's match history. Used for tracking historical
+     * interactions and supporting mock mode.
      *
      * @param matchSnapshot the ActionRecord to add to history
      */
@@ -178,8 +178,8 @@ public class StateRegion implements StateObject {
     }
 
     /**
-     * Converts this StateRegion to an ObjectCollection containing only this region.
-     * Useful for Action methods that require ObjectCollection parameters.
+     * Converts this StateRegion to an ObjectCollection containing only this region. Useful for
+     * Action methods that require ObjectCollection parameters.
      *
      * @return ObjectCollection containing this StateRegion
      */
@@ -283,8 +283,8 @@ public class StateRegion implements StateObject {
         }
 
         /**
-         * Sets the target position within the region for clicks.
-         * Position is relative (0.0-1.0) where 0.5,0.5 is center.
+         * Sets the target position within the region for clicks. Position is relative (0.0-1.0)
+         * where 0.5,0.5 is center.
          *
          * @param position the Position for clicks
          * @return this builder for method chaining
@@ -342,8 +342,8 @@ public class StateRegion implements StateObject {
         }
 
         /**
-         * Sets the mock text for this region.
-         * Used in testing and mock mode to simulate text content.
+         * Sets the mock text for this region. Used in testing and mock mode to simulate text
+         * content.
          *
          * @param mockText the text to use in mock scenarios
          * @return this builder for method chaining
@@ -354,8 +354,8 @@ public class StateRegion implements StateObject {
         }
 
         /**
-         * Sets the complete match history for this region.
-         * Contains historical interaction data for learning and mocking.
+         * Sets the complete match history for this region. Contains historical interaction data for
+         * learning and mocking.
          *
          * @param matchHistory the ActionHistory to use
          * @return this builder for method chaining

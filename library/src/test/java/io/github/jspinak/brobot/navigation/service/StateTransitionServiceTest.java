@@ -15,7 +15,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 
 import io.github.jspinak.brobot.model.state.special.SpecialStateType;
@@ -24,7 +23,8 @@ import io.github.jspinak.brobot.model.transition.StateTransitionStore;
 import io.github.jspinak.brobot.navigation.transition.StateTransitions;
 import io.github.jspinak.brobot.navigation.transition.StateTransitionsJointTable;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-// Removed old logging import: 
+
+// Removed old logging import:
 /**
  * Test suite for StateTransitionService.
  *

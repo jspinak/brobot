@@ -18,14 +18,12 @@ import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.logging.BrobotLogger;
-import io.github.jspinak.brobot.logging.events.ActionEvent;
+import io.github.jspinak.brobot.logging.LogCategory;
+import io.github.jspinak.brobot.logging.LogLevel;
 import io.github.jspinak.brobot.monitor.MonitorManager;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import io.github.jspinak.brobot.logging.LogCategory;
-import io.github.jspinak.brobot.logging.LogLevel;
-
 
 /**
  * Aspect that provides intelligent routing of actions to specific monitors in multi-monitor setups.

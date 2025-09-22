@@ -1,21 +1,17 @@
 package io.github.jspinak.brobot.logging.modular;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionResult;
 
 /**
- * Provides minimal, clean output for action results.
- * Only logs completed actions with basic information.
+ * Provides minimal, clean output for action results. Only logs completed actions with basic
+ * information.
  */
 @Component
 public class QuietFormatter implements ActionLogFormatter {
-
-    // Removed the first format method that has no @Override annotation
 
     @Override
     public String format(ActionResult actionResult) {
@@ -32,9 +28,13 @@ public class QuietFormatter implements ActionLogFormatter {
         // Action type from config if available
         String actionType = "Action";
         if (actionResult.getActionConfig() != null) {
-            actionType = actionResult.getActionConfig().getClass().getSimpleName()
-                    .replace("Options", "")
-                    .replace("Config", "");
+            actionType =
+                    actionResult
+                            .getActionConfig()
+                            .getClass()
+                            .getSimpleName()
+                            .replace("Options", "")
+                            .replace("Config", "");
             actionType = cleanActionType(actionType);
         }
         formatted.append(actionType);

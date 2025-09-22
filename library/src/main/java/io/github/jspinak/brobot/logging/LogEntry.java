@@ -1,21 +1,21 @@
 package io.github.jspinak.brobot.logging;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+
 import lombok.Builder;
 import lombok.Data;
-
-import java.time.Instant;
-import java.time.Duration;
-import java.util.Map;
-import java.util.HashMap;
 
 /**
  * The actual log entry data structure that gets passed to formatters.
  *
- * <p>This immutable data structure contains all the information needed
- * to format and output a log entry. It serves as the bridge between
- * the high-level logging API and the various formatters.
+ * <p>This immutable data structure contains all the information needed to format and output a log
+ * entry. It serves as the bridge between the high-level logging API and the various formatters.
  *
  * <p>Features:
+ *
  * <ul>
  *   <li>Immutable design for thread safety
  *   <li>Rich metadata support with type safety
@@ -25,6 +25,7 @@ import java.util.HashMap;
  * </ul>
  *
  * <p>Example usage:
+ *
  * <pre>{@code
  * LogEntry entry = LogEntry.builder()
  *     .timestamp(Instant.now())
@@ -80,8 +81,7 @@ public class LogEntry {
     private final String targetState;
 
     // Custom metadata
-    @Builder.Default
-    private final Map<String, Object> metadata = new HashMap<>();
+    @Builder.Default private final Map<String, Object> metadata = new HashMap<>();
 
     /**
      * Create a simple log entry with just the essential fields.
@@ -113,8 +113,14 @@ public class LogEntry {
      * @param duration How long the action took
      * @return A new LogEntry instance
      */
-    public static LogEntry forAction(LogCategory category, LogLevel level, String message,
-                                   String actionType, String actionTarget, Boolean success, Duration duration) {
+    public static LogEntry forAction(
+            LogCategory category,
+            LogLevel level,
+            String message,
+            String actionType,
+            String actionTarget,
+            Boolean success,
+            Duration duration) {
         return LogEntry.builder()
                 .timestamp(Instant.now())
                 .category(category)
@@ -157,7 +163,8 @@ public class LogEntry {
      * @param operationCount Number of operations performed
      * @return A new LogEntry instance
      */
-    public static LogEntry forPerformance(String message, Duration duration, Long memoryUsage, Long operationCount) {
+    public static LogEntry forPerformance(
+            String message, Duration duration, Long memoryUsage, Long operationCount) {
         return LogEntry.builder()
                 .timestamp(Instant.now())
                 .category(LogCategory.PERFORMANCE)
@@ -328,9 +335,7 @@ public class LogEntry {
     public LogEntry withAdditionalMetadata(Map<String, Object> additionalMetadata) {
         Map<String, Object> newMetadata = new HashMap<>(this.metadata);
         newMetadata.putAll(additionalMetadata);
-        return this.toBuilder()
-                .metadata(newMetadata)
-                .build();
+        return this.toBuilder().metadata(newMetadata).build();
     }
 
     /**
@@ -340,9 +345,7 @@ public class LogEntry {
      * @return A new LogEntry with the updated level
      */
     public LogEntry withLevel(LogLevel newLevel) {
-        return this.toBuilder()
-                .level(newLevel)
-                .build();
+        return this.toBuilder().level(newLevel).build();
     }
 
     /**
@@ -353,9 +356,6 @@ public class LogEntry {
      * @return A new LogEntry with correlation information
      */
     public LogEntry withCorrelation(String correlationId, String sessionId) {
-        return this.toBuilder()
-                .correlationId(correlationId)
-                .sessionId(sessionId)
-                .build();
+        return this.toBuilder().correlationId(correlationId).sessionId(sessionId).build();
     }
 }

@@ -128,10 +128,10 @@ public class State {
     private LocalDateTime lastAccessed;
 
     /**
-     * The base modifier for find operations in mock mode. This value modifies the probability
-     * of finding state elements during mock test runs. A value less than 100 will introduce
-     * realistic failures into mock tests, simulating environmental uncertainties like network
-     * issues, rendering problems, or unexpected UI overlays.
+     * The base modifier for find operations in mock mode. This value modifies the probability of
+     * finding state elements during mock test runs. A value less than 100 will introduce realistic
+     * failures into mock tests, simulating environmental uncertainties like network issues,
+     * rendering problems, or unexpected UI overlays.
      */
     private int baseMockFindStochasticModifier = 100;
 

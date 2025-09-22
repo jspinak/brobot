@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.statemanagement.StateDetector;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
-// Removed old logging import: 
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -170,8 +170,7 @@ public class StateAwareScheduler {
         // Log scheduling start
         if (maxIterations > 0) {
             if (verbosityConfig != null
-                    && (verbosityConfig.isNormalMode() || verbosityConfig.isVerboseMode())) {
-            }
+                    && (verbosityConfig.isNormalMode() || verbosityConfig.isVerboseMode())) {}
         }
 
         return scheduler.scheduleAtFixedRate(
@@ -259,8 +258,7 @@ public class StateAwareScheduler {
         // Log scheduling start
         if (maxIterations > 0) {
             if (verbosityConfig != null
-                    && (verbosityConfig.isNormalMode() || verbosityConfig.isVerboseMode())) {
-            }
+                    && (verbosityConfig.isNormalMode() || verbosityConfig.isVerboseMode())) {}
         }
 
         return scheduler.scheduleWithFixedDelay(

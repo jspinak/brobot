@@ -1,21 +1,21 @@
 package io.github.jspinak.brobot.logging;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import lombok.Data;
 
-import java.util.EnumMap;
-import java.util.Map;
-
 /**
  * Configuration for the Brobot logging system.
  *
- * <p>Provides hierarchical configuration where category-specific levels
- * override global settings. Supports multiple output formats and
- * performance optimizations.
+ * <p>Provides hierarchical configuration where category-specific levels override global settings.
+ * Supports multiple output formats and performance optimizations.
  *
  * <p>Configuration can be set via application.properties:
+ *
  * <pre>
  * brobot.logging.global-level=INFO
  * brobot.logging.categories.actions=DEBUG

@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
-// Removed old logging import that no longer exists:
+
 // import io.github.jspinak.brobot.tools.logging.gui.GuiAccessConfig;
 
 /**

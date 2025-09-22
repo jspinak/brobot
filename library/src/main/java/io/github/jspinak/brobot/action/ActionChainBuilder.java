@@ -3,11 +3,7 @@ package io.github.jspinak.brobot.action;
 import java.util.ArrayList;
 import java.util.List;
 
-// Removed old logging import that no longer exists:
 // import io.github.jspinak.brobot.tools.logging.model.LogEventType;
-import io.github.jspinak.brobot.logging.LogCategory;
-import io.github.jspinak.brobot.logging.LogLevel;
-
 
 /**
  * Fluent builder for creating action chains in a readable, declarative style.
@@ -35,7 +31,7 @@ public class ActionChainBuilder {
     private double pauseBeforeBegin = 0.0;
     private double pauseAfterEnd = 0.0;
     private ActionConfig.Illustrate illustrate = ActionConfig.Illustrate.USE_GLOBAL;
-    // Removed LogEventType field - class no longer exists
+
     // private LogEventType logType = LogEventType.ACTION;
 
     private ActionChainBuilder(ActionConfig initialAction) {
@@ -152,11 +148,6 @@ public class ActionChainBuilder {
      * @param logType The log event type
      * @return This builder for fluent chaining
      */
-    // Removed logEventType method - LogEventType class no longer exists
-    // public ActionChainBuilder logEventType(LogEventType logType) {
-    //     this.logType = logType;
-    //     return this;
-    // }
 
     /**
      * Configures the chain to use NESTED chaining strategy. This is a convenience method equivalent
@@ -201,7 +192,6 @@ public class ActionChainBuilder {
                 .setPauseBeforeBegin(pauseBeforeBegin)
                 .setPauseAfterEnd(pauseAfterEnd)
                 .setIllustrate(illustrate);
-                // .setLogType(logType); // logType is not available
 
         return builder.build();
     }

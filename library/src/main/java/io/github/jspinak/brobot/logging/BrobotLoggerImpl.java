@@ -1,32 +1,33 @@
 package io.github.jspinak.brobot.logging;
 
-import io.github.jspinak.brobot.logging.correlation.CorrelationContext;
-import io.github.jspinak.brobot.logging.events.ActionEvent;
-import io.github.jspinak.brobot.logging.events.MatchEvent;
-import io.github.jspinak.brobot.logging.events.PerformanceEvent;
-import io.github.jspinak.brobot.logging.events.TransitionEvent;
-import io.github.jspinak.brobot.logging.formatter.LogFormatter;
-import io.github.jspinak.brobot.logging.formatter.SimpleLogFormatter;
-import io.github.jspinak.brobot.logging.formatter.StructuredLogFormatter;
-import io.github.jspinak.brobot.logging.formatter.JsonLogFormatter;
-
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import io.github.jspinak.brobot.logging.correlation.CorrelationContext;
+import io.github.jspinak.brobot.logging.events.ActionEvent;
+import io.github.jspinak.brobot.logging.events.MatchEvent;
+import io.github.jspinak.brobot.logging.events.PerformanceEvent;
+import io.github.jspinak.brobot.logging.events.TransitionEvent;
+import io.github.jspinak.brobot.logging.formatter.JsonLogFormatter;
+import io.github.jspinak.brobot.logging.formatter.LogFormatter;
+import io.github.jspinak.brobot.logging.formatter.SimpleLogFormatter;
+import io.github.jspinak.brobot.logging.formatter.StructuredLogFormatter;
+
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Main implementation of the BrobotLogger interface.
  *
- * <p>Handles log filtering based on levels, delegates to formatters,
- * and integrates with SLF4J for actual output. Provides the complete
- * logging infrastructure for the Brobot framework.
+ * <p>Handles log filtering based on levels, delegates to formatters, and integrates with SLF4J for
+ * actual output. Provides the complete logging infrastructure for the Brobot framework.
  *
  * <p>Features:
+ *
  * <ul>
  *   <li>Category and level-based filtering
  *   <li>Multiple output formatters
@@ -36,9 +37,8 @@ import java.util.concurrent.ConcurrentHashMap;
  *   <li>Thread-safe operation
  * </ul>
  *
- * <p>The logger automatically enriches log entries with correlation
- * information from the current thread context and applies filtering
- * based on the configured logging levels.
+ * <p>The logger automatically enriches log entries with correlation information from the current
+ * thread context and applies filtering based on the configured logging levels.
  */
 @Slf4j
 @Component
@@ -50,9 +50,12 @@ public class BrobotLoggerImpl implements BrobotLogger {
     private final LogFormatter defaultFormatter;
 
     @Autowired
-    public BrobotLoggerImpl(LoggingConfiguration config, CorrelationContext correlationContext,
-                          SimpleLogFormatter simpleFormatter, StructuredLogFormatter structuredFormatter,
-                          JsonLogFormatter jsonFormatter) {
+    public BrobotLoggerImpl(
+            LoggingConfiguration config,
+            CorrelationContext correlationContext,
+            SimpleLogFormatter simpleFormatter,
+            StructuredLogFormatter structuredFormatter,
+            JsonLogFormatter jsonFormatter) {
         this.config = config;
         this.correlationContext = correlationContext;
         this.formatters = new ConcurrentHashMap<>();
@@ -65,8 +68,10 @@ public class BrobotLoggerImpl implements BrobotLogger {
         // Set default formatter based on configuration
         this.defaultFormatter = getFormatterForOutputFormat(config.getOutput().getFormat());
 
-        log.debug("BrobotLogger initialized with {} formatters, default format: {}",
-                formatters.size(), config.getOutput().getFormat());
+        log.debug(
+                "BrobotLogger initialized with {} formatters, default format: {}",
+                formatters.size(),
+                config.getOutput().getFormat());
     }
 
     @Override
@@ -75,21 +80,22 @@ public class BrobotLoggerImpl implements BrobotLogger {
             return;
         }
 
-        LogEntry entry = LogEntry.builder()
-                .timestamp(Instant.now())
-                .category(LogCategory.ACTIONS)
-                .level(event.getLevel())
-                .message(event.getMessage())
-                .threadName(Thread.currentThread().getName())
-                .actionType(event.getActionType())
-                .actionTarget(event.getTarget())
-                .success(event.isSuccess())
-                .similarity(event.getSimilarity())
-                .location(event.getLocation())
-                .duration(event.getDuration())
-                .error(event.getError())
-                .metadata(event.getMetadata())
-                .build();
+        LogEntry entry =
+                LogEntry.builder()
+                        .timestamp(Instant.now())
+                        .category(LogCategory.ACTIONS)
+                        .level(event.getLevel())
+                        .message(event.getMessage())
+                        .threadName(Thread.currentThread().getName())
+                        .actionType(event.getActionType())
+                        .actionTarget(event.getTarget())
+                        .success(event.isSuccess())
+                        .similarity(event.getSimilarity())
+                        .location(event.getLocation())
+                        .duration(event.getDuration())
+                        .error(event.getError())
+                        .metadata(event.getMetadata())
+                        .build();
 
         logEntryWithCorrelation(entry);
     }
@@ -100,19 +106,20 @@ public class BrobotLoggerImpl implements BrobotLogger {
             return;
         }
 
-        LogEntry entry = LogEntry.builder()
-                .timestamp(Instant.now())
-                .category(LogCategory.TRANSITIONS)
-                .level(event.getLevel())
-                .message(event.getMessage())
-                .threadName(Thread.currentThread().getName())
-                .currentState(event.getFromState())
-                .targetState(event.getToState())
-                .success(event.isSuccess())
-                .duration(event.getDuration())
-                .error(event.getError())
-                .metadata(event.getMetadata())
-                .build();
+        LogEntry entry =
+                LogEntry.builder()
+                        .timestamp(Instant.now())
+                        .category(LogCategory.TRANSITIONS)
+                        .level(event.getLevel())
+                        .message(event.getMessage())
+                        .threadName(Thread.currentThread().getName())
+                        .currentState(event.getFromState())
+                        .targetState(event.getToState())
+                        .success(event.isSuccess())
+                        .duration(event.getDuration())
+                        .error(event.getError())
+                        .metadata(event.getMetadata())
+                        .build();
 
         logEntryWithCorrelation(entry);
     }
@@ -123,20 +130,21 @@ public class BrobotLoggerImpl implements BrobotLogger {
             return;
         }
 
-        LogEntry entry = LogEntry.builder()
-                .timestamp(Instant.now())
-                .category(LogCategory.MATCHING)
-                .level(event.getLevel())
-                .message(event.getMessage())
-                .threadName(Thread.currentThread().getName())
-                .actionTarget(event.getPattern())
-                .success(event.isFound())
-                .similarity(event.getSimilarity())
-                .location(event.getLocation())
-                .duration(event.getDuration())
-                .operationCount((long) event.getMatchCount())
-                .metadata(event.getMetadata())
-                .build();
+        LogEntry entry =
+                LogEntry.builder()
+                        .timestamp(Instant.now())
+                        .category(LogCategory.MATCHING)
+                        .level(event.getLevel())
+                        .message(event.getMessage())
+                        .threadName(Thread.currentThread().getName())
+                        .actionTarget(event.getPattern())
+                        .success(event.isFound())
+                        .similarity(event.getSimilarity())
+                        .location(event.getLocation())
+                        .duration(event.getDuration())
+                        .operationCount((long) event.getMatchCount())
+                        .metadata(event.getMetadata())
+                        .build();
 
         logEntryWithCorrelation(entry);
     }
@@ -147,35 +155,38 @@ public class BrobotLoggerImpl implements BrobotLogger {
             return;
         }
 
-        LogEntry entry = LogEntry.builder()
-                .timestamp(Instant.now())
-                .category(LogCategory.PERFORMANCE)
-                .level(event.getLevel())
-                .message(event.getMessage())
-                .threadName(Thread.currentThread().getName())
-                .duration(event.getDuration())
-                .memoryUsage(event.getMemoryUsage())
-                .operationCount(event.getOperationCount())
-                .metadata(event.getMetadata())
-                .build();
+        LogEntry entry =
+                LogEntry.builder()
+                        .timestamp(Instant.now())
+                        .category(LogCategory.PERFORMANCE)
+                        .level(event.getLevel())
+                        .message(event.getMessage())
+                        .threadName(Thread.currentThread().getName())
+                        .duration(event.getDuration())
+                        .memoryUsage(event.getMemoryUsage())
+                        .operationCount(event.getOperationCount())
+                        .metadata(event.getMetadata())
+                        .build();
 
         logEntryWithCorrelation(entry);
     }
 
     @Override
-    public void log(LogCategory category, LogLevel level, String message, Map<String, Object> context) {
+    public void log(
+            LogCategory category, LogLevel level, String message, Map<String, Object> context) {
         if (!isLoggingEnabled(category, level)) {
             return;
         }
 
-        LogEntry entry = LogEntry.builder()
-                .timestamp(Instant.now())
-                .category(category)
-                .level(level)
-                .message(message)
-                .threadName(Thread.currentThread().getName())
-                .metadata(context != null ? context : java.util.Collections.emptyMap())
-                .build();
+        LogEntry entry =
+                LogEntry.builder()
+                        .timestamp(Instant.now())
+                        .category(category)
+                        .level(level)
+                        .message(message)
+                        .threadName(Thread.currentThread().getName())
+                        .metadata(context != null ? context : java.util.Collections.emptyMap())
+                        .build();
 
         logEntryWithCorrelation(entry);
     }
@@ -199,11 +210,12 @@ public class BrobotLoggerImpl implements BrobotLogger {
         try {
             // Enrich with correlation context
             CorrelationContext.Context context = correlationContext.getCurrentContext();
-            LogEntry enrichedEntry = entry.toBuilder()
-                    .correlationId(context.getCorrelationId())
-                    .sessionId(context.getSessionId())
-                    .operationName(context.getCurrentOperation())
-                    .build();
+            LogEntry enrichedEntry =
+                    entry.toBuilder()
+                            .correlationId(context.getCorrelationId())
+                            .sessionId(context.getSessionId())
+                            .operationName(context.getCurrentOperation())
+                            .build();
 
             // Add context metadata
             if (!context.getMetadata().isEmpty()) {
@@ -229,7 +241,8 @@ public class BrobotLoggerImpl implements BrobotLogger {
      */
     private void outputToSlf4j(LogCategory category, LogLevel level, String message) {
         // Use category-specific logger for better log organization
-        org.slf4j.Logger categoryLogger = org.slf4j.LoggerFactory.getLogger("brobot." + category.toString().toLowerCase());
+        org.slf4j.Logger categoryLogger =
+                org.slf4j.LoggerFactory.getLogger("brobot." + category.toString().toLowerCase());
 
         switch (level) {
             case ERROR:
@@ -273,9 +286,7 @@ public class BrobotLoggerImpl implements BrobotLogger {
         }
     }
 
-    /**
-     * Implementation of the fluent LogBuilder interface.
-     */
+    /** Implementation of the fluent LogBuilder interface. */
     private static class LogBuilderImpl implements LogBuilder {
         private final LogCategory category;
         private final BrobotLoggerImpl logger;
@@ -332,7 +343,10 @@ public class BrobotLoggerImpl implements BrobotLogger {
         }
 
         @Override
-        public LogBuilder result(boolean success, double similarity, io.github.jspinak.brobot.model.element.Location location) {
+        public LogBuilder result(
+                boolean success,
+                double similarity,
+                io.github.jspinak.brobot.model.element.Location location) {
             this.success = success;
             this.similarity = similarity;
             this.location = location;
@@ -400,25 +414,26 @@ public class BrobotLoggerImpl implements BrobotLogger {
                 return;
             }
 
-            LogEntry entry = LogEntry.builder()
-                    .timestamp(Instant.now())
-                    .category(category)
-                    .level(level)
-                    .message(message)
-                    .threadName(Thread.currentThread().getName())
-                    .actionType(actionType)
-                    .actionTarget(actionTarget)
-                    .success(success)
-                    .similarity(similarity)
-                    .location(location)
-                    .duration(duration)
-                    .currentState(currentState)
-                    .error(error)
-                    .errorMessage(errorMessage)
-                    .memoryUsage(memoryBytes)
-                    .operationCount(operationCount)
-                    .metadata(context)
-                    .build();
+            LogEntry entry =
+                    LogEntry.builder()
+                            .timestamp(Instant.now())
+                            .category(category)
+                            .level(level)
+                            .message(message)
+                            .threadName(Thread.currentThread().getName())
+                            .actionType(actionType)
+                            .actionTarget(actionTarget)
+                            .success(success)
+                            .similarity(similarity)
+                            .location(location)
+                            .duration(duration)
+                            .currentState(currentState)
+                            .error(error)
+                            .errorMessage(errorMessage)
+                            .memoryUsage(memoryBytes)
+                            .operationCount(operationCount)
+                            .metadata(context)
+                            .build();
 
             // Override correlation ID if explicitly set
             if (correlationId != null) {

@@ -12,7 +12,7 @@ import io.github.jspinak.brobot.core.services.ScreenCaptureService;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;
-// Removed old logging import:
+
 /**
  * Visual implementation of the ElementLocator interface.
  *

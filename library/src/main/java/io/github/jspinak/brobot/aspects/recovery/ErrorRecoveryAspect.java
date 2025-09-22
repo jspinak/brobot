@@ -15,12 +15,10 @@ import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.aspects.annotations.Recoverable;
 import io.github.jspinak.brobot.logging.BrobotLogger;
-import io.github.jspinak.brobot.logging.events.ActionEvent;
-
-import lombok.extern.slf4j.Slf4j;
 import io.github.jspinak.brobot.logging.LogCategory;
 import io.github.jspinak.brobot.logging.LogLevel;
 
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Aspect that provides automatic error recovery with configurable retry policies.
@@ -246,7 +244,8 @@ public class ErrorRecoveryAspect {
 
     /** Log retry attempt */
     private void logRetryAttempt(String method, int attempt, long delay) {
-        brobotLogger.builder(LogCategory.SYSTEM)
+        brobotLogger
+                .builder(LogCategory.SYSTEM)
                 .level(LogLevel.WARN)
                 .action("RETRY_ATTEMPT", method)
                 .context("method", method)
@@ -258,7 +257,8 @@ public class ErrorRecoveryAspect {
 
     /** Log retry success */
     private void logRetrySuccess(String method, int attemptsTaken) {
-        brobotLogger.builder(LogCategory.SYSTEM)
+        brobotLogger
+                .builder(LogCategory.SYSTEM)
                 .level(LogLevel.INFO)
                 .action("RETRY_SUCCESS", method)
                 .context("method", method)
@@ -269,7 +269,8 @@ public class ErrorRecoveryAspect {
 
     /** Log retry exhaustion */
     private void logRetryExhaustion(String method, int maxRetries, Throwable lastException) {
-        brobotLogger.builder(LogCategory.SYSTEM)
+        brobotLogger
+                .builder(LogCategory.SYSTEM)
                 .level(LogLevel.ERROR)
                 .action("RETRY_EXHAUSTED", method)
                 .context("method", method)

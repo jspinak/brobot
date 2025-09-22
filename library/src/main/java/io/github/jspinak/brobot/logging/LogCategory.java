@@ -3,11 +3,11 @@ package io.github.jspinak.brobot.logging;
 /**
  * Categories for Brobot logging events.
  *
- * <p>Each category can be configured independently or controlled by global setting.
- * This allows fine-grained control over what types of events are logged and at
- * what level.
+ * <p>Each category can be configured independently or controlled by global setting. This allows
+ * fine-grained control over what types of events are logged and at what level.
  *
  * <p>Categories follow the main functional areas of the Brobot framework:
+ *
  * <ul>
  *   <li>ACTIONS - User actions (click, type, find)
  *   <li>TRANSITIONS - State transitions and navigation

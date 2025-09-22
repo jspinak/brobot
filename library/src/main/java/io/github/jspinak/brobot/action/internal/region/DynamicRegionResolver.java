@@ -151,10 +151,11 @@ public class DynamicRegionResolver {
     }
 
     /**
-     * Resolves search regions from the ActionResult matches based on the SearchRegionOnObject configuration.
-     * Filters matches by the target state and object names specified in the config.
+     * Resolves search regions from the ActionResult matches based on the SearchRegionOnObject
+     * configuration. Filters matches by the target state and object names specified in the config.
      */
-    private List<Region> resolveRegionsFromActionResult(SearchRegionOnObject config, ActionResult actionResult) {
+    private List<Region> resolveRegionsFromActionResult(
+            SearchRegionOnObject config, ActionResult actionResult) {
         if (actionResult == null || actionResult.getMatchList() == null) {
             return new ArrayList<>();
         }
@@ -163,14 +164,17 @@ public class DynamicRegionResolver {
         String targetObjectName = config.getTargetObjectName();
 
         // Filter matches by the target state and object names
-        List<Match> sourceMatches = actionResult.getMatchList().stream()
-                .filter(match -> {
-                    StateObjectMetadata metadata = match.getStateObjectData();
-                    return metadata != null
-                            && targetStateName.equals(metadata.getOwnerStateName())
-                            && targetObjectName.equals(metadata.getStateObjectName());
-                })
-                .collect(Collectors.toList());
+        List<Match> sourceMatches =
+                actionResult.getMatchList().stream()
+                        .filter(
+                                match -> {
+                                    StateObjectMetadata metadata = match.getStateObjectData();
+                                    return metadata != null
+                                            && targetStateName.equals(metadata.getOwnerStateName())
+                                            && targetObjectName.equals(
+                                                    metadata.getStateObjectName());
+                                })
+                        .collect(Collectors.toList());
 
         if (sourceMatches.isEmpty()) {
             return new ArrayList<>();
@@ -212,6 +216,7 @@ public class DynamicRegionResolver {
     /**
      * Resolves search regions from matches based on the SearchRegionOnObject configuration. Creates
      * regions around all matches (for FIND.ALL scenarios).
+     *
      * @deprecated Use resolveRegionsFromActionResult instead
      */
     private List<Region> resolveRegionsFromMatches(SearchRegionOnObject config) {

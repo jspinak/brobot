@@ -45,7 +45,8 @@ public class BrobotPropertyVerifier {
         propertiesVerified = true;
 
         // Log screenshot and illustration settings
-        brobotLogger.builder(LogCategory.SYSTEM)
+        brobotLogger
+                .builder(LogCategory.SYSTEM)
                 .message("Brobot Property Verification")
                 .context("saveHistory", brobotProperties.getScreenshot().isSaveHistory())
                 .context("historyPath", brobotProperties.getScreenshot().getHistoryPath())
@@ -54,7 +55,8 @@ public class BrobotPropertyVerifier {
 
         // Log execution environment - use singleton instance
         ExecutionEnvironment env = ExecutionEnvironment.getInstance();
-        brobotLogger.builder(LogCategory.SYSTEM)
+        brobotLogger
+                .builder(LogCategory.SYSTEM)
                 .message("Execution Environment")
                 .context("mockMode", env.isMockMode())
                 .context("hasDisplay", env.hasDisplay())
@@ -65,7 +67,8 @@ public class BrobotPropertyVerifier {
                 .log();
 
         // Log illustration settings detail
-        brobotLogger.builder(LogCategory.SYSTEM)
+        brobotLogger
+                .builder(LogCategory.SYSTEM)
                 .message("Illustration Settings")
                 .context("drawFind", brobotProperties.getIllustration().isDrawFind())
                 .context("drawClick", brobotProperties.getIllustration().isDrawClick())
@@ -84,7 +87,8 @@ public class BrobotPropertyVerifier {
         // Provide diagnostic summary
         if (!brobotProperties.getScreenshot().isSaveHistory()) {
             log.warn("Illustrations are DISABLED: saveHistory is false");
-            brobotLogger.builder(LogCategory.SYSTEM)
+            brobotLogger
+                    .builder(LogCategory.SYSTEM)
                     .level(LogLevel.WARN)
                     .message("WARNING: Illustrations Disabled")
                     .context("reason", "saveHistory is false")
@@ -94,12 +98,16 @@ public class BrobotPropertyVerifier {
                     .log();
         } else if (env.isMockMode()) {
             log.info("Illustrations may be limited in mock mode");
-            brobotLogger.builder(LogCategory.SYSTEM).message("Note: Running in mock mode - illustrations use mock data").log();
+            brobotLogger
+                    .builder(LogCategory.SYSTEM)
+                    .message("Note: Running in mock mode - illustrations use mock data")
+                    .log();
         } else if (java.awt.GraphicsEnvironment.isHeadless()) {
             log.warn(
                     "Running in HEADLESS mode - illustrations will be created but may have limited"
                             + " content");
-            brobotLogger.builder(LogCategory.SYSTEM)
+            brobotLogger
+                    .builder(LogCategory.SYSTEM)
                     .level(LogLevel.WARN)
                     .message("WARNING: Headless Mode Active")
                     .context("headless", true)
@@ -107,7 +115,10 @@ public class BrobotPropertyVerifier {
                     .log();
         } else {
             log.info("Illustrations are ENABLED");
-            brobotLogger.builder(LogCategory.SYSTEM).message("Illustrations are enabled and configured").log();
+            brobotLogger
+                    .builder(LogCategory.SYSTEM)
+                    .message("Illustrations are enabled and configured")
+                    .log();
         }
     }
 

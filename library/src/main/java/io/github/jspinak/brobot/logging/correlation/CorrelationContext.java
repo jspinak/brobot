@@ -1,23 +1,24 @@
 package io.github.jspinak.brobot.logging.correlation;
 
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-
 import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.stereotype.Component;
+
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Manages correlation IDs and session context for log entries.
  *
- * <p>Provides ThreadLocal storage for correlation data, enabling tracking
- * of requests and operations across the entire execution context. Each
- * thread maintains its own correlation context that can be updated and
- * accessed throughout the execution lifecycle.
+ * <p>Provides ThreadLocal storage for correlation data, enabling tracking of requests and
+ * operations across the entire execution context. Each thread maintains its own correlation context
+ * that can be updated and accessed throughout the execution lifecycle.
  *
  * <p>Features:
+ *
  * <ul>
  *   <li>Automatic correlation ID generation
  *   <li>Session and operation tracking
@@ -27,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * </ul>
  *
  * <p>Example usage:
+ *
  * <pre>{@code
  * // Start a new session
  * correlationContext.startSession("user-action");
@@ -47,9 +49,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class CorrelationContext {
 
-    /**
-     * Context data structure for a single thread's execution.
-     */
+    /** Context data structure for a single thread's execution. */
     @Data
     public static class Context {
         private String correlationId;
@@ -91,8 +91,7 @@ public class CorrelationContext {
     private final ThreadLocal<Context> threadContext = new ThreadLocal<>();
 
     /**
-     * Get the current thread's correlation context.
-     * Creates a new context if none exists.
+     * Get the current thread's correlation context. Creates a new context if none exists.
      *
      * @return The current context
      */
@@ -134,8 +133,8 @@ public class CorrelationContext {
     }
 
     /**
-     * Start a new session with the given name.
-     * This resets the session context but preserves the correlation ID.
+     * Start a new session with the given name. This resets the session context but preserves the
+     * correlation ID.
      *
      * @param sessionName The name of the session
      */
@@ -150,8 +149,7 @@ public class CorrelationContext {
     }
 
     /**
-     * Start a new operation within the current session.
-     * Operations can be nested.
+     * Start a new operation within the current session. Operations can be nested.
      *
      * @param operationName The name of the operation
      */
@@ -165,8 +163,8 @@ public class CorrelationContext {
     }
 
     /**
-     * End the current operation.
-     * Decreases operation depth and clears operation context if depth reaches 0.
+     * End the current operation. Decreases operation depth and clears operation context if depth
+     * reaches 0.
      */
     public void endOperation() {
         Context context = getCurrentContext();
@@ -183,10 +181,7 @@ public class CorrelationContext {
         }
     }
 
-    /**
-     * End the current session.
-     * Clears all session context.
-     */
+    /** End the current session. Clears all session context. */
     public void endSession() {
         Context context = getCurrentContext();
         String sessionId = context.getSessionId();
@@ -256,9 +251,7 @@ public class CorrelationContext {
         return removed;
     }
 
-    /**
-     * Clear all metadata from the current context.
-     */
+    /** Clear all metadata from the current context. */
     public void clearContext() {
         int size = getCurrentContext().getMetadata().size();
         getCurrentContext().getMetadata().clear();
@@ -266,8 +259,8 @@ public class CorrelationContext {
     }
 
     /**
-     * Set a specific correlation ID for the current thread.
-     * Useful for inheriting correlation from external sources.
+     * Set a specific correlation ID for the current thread. Useful for inheriting correlation from
+     * external sources.
      *
      * @param correlationId The correlation ID to set
      */
@@ -279,8 +272,8 @@ public class CorrelationContext {
     }
 
     /**
-     * Inherit context from another thread's context.
-     * Creates a new session with the same correlation ID.
+     * Inherit context from another thread's context. Creates a new session with the same
+     * correlation ID.
      *
      * @param parentContext The context to inherit from
      */
@@ -290,10 +283,7 @@ public class CorrelationContext {
         log.trace("Inherited context with correlation ID: {}", newContext.getCorrelationId());
     }
 
-    /**
-     * Clear the current thread's context completely.
-     * The next access will create a new context.
-     */
+    /** Clear the current thread's context completely. The next access will create a new context. */
     public void clearCurrentContext() {
         Context context = threadContext.get();
         if (context != null) {

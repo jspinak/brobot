@@ -18,12 +18,10 @@ import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.exception.ActionFailedException;
 import io.github.jspinak.brobot.logging.BrobotLogger;
-import io.github.jspinak.brobot.logging.events.ActionEvent;
-
-import lombok.extern.slf4j.Slf4j;
 import io.github.jspinak.brobot.logging.LogCategory;
 import io.github.jspinak.brobot.logging.LogLevel;
 
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Aspect that intercepts all Sikuli method calls to provide: - Centralized error handling and
@@ -129,7 +127,8 @@ public class SikuliInterceptionAspect {
         Object[] args = joinPoint.getArgs();
 
         // Log mock operation
-        brobotLogger.builder(LogCategory.SYSTEM)
+        brobotLogger
+                .builder(LogCategory.SYSTEM)
                 .level(LogLevel.DEBUG)
                 .action("MOCK_" + methodName.toUpperCase(), methodName)
                 .context("method", methodName)
@@ -146,7 +145,8 @@ public class SikuliInterceptionAspect {
         String methodName = joinPoint.getSignature().getName();
         Object[] args = joinPoint.getArgs();
 
-        brobotLogger.builder(LogCategory.SYSTEM)
+        brobotLogger
+                .builder(LogCategory.SYSTEM)
                 .level(LogLevel.DEBUG)
                 .action("SIKULI_" + methodName.toUpperCase(), methodName)
                 .context("method", methodName)
@@ -159,7 +159,8 @@ public class SikuliInterceptionAspect {
     private void logOperationSuccess(JoinPoint joinPoint, Object result, long duration) {
         String methodName = joinPoint.getSignature().getName();
 
-        brobotLogger.builder(LogCategory.SYSTEM)
+        brobotLogger
+                .builder(LogCategory.SYSTEM)
                 .level(LogLevel.DEBUG)
                 .action("SIKULI_" + methodName.toUpperCase() + "_SUCCESS", methodName)
                 .context("success", true)
@@ -186,7 +187,8 @@ public class SikuliInterceptionAspect {
         // }
 
         // Log the failure with details
-        brobotLogger.builder(LogCategory.SYSTEM)
+        brobotLogger
+                .builder(LogCategory.SYSTEM)
                 .level(LogLevel.ERROR)
                 .action("SIKULI_" + methodName.toUpperCase() + "_FAILED", methodName)
                 .context("success", false)
@@ -205,7 +207,8 @@ public class SikuliInterceptionAspect {
         String methodName = joinPoint.getSignature().getName();
         Object[] args = joinPoint.getArgs();
 
-        brobotLogger.builder(LogCategory.SYSTEM)
+        brobotLogger
+                .builder(LogCategory.SYSTEM)
                 .level(LogLevel.ERROR)
                 .action("SIKULI_" + methodName.toUpperCase() + "_ERROR", methodName)
                 .context("success", false)

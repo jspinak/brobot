@@ -1,19 +1,20 @@
 package io.github.jspinak.brobot.logging.formatter;
 
-import io.github.jspinak.brobot.logging.LogEntry;
-import org.springframework.stereotype.Component;
-
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
+
+import org.springframework.stereotype.Component;
+
+import io.github.jspinak.brobot.logging.LogEntry;
 
 /**
  * Structured log formatter with consistent field placement.
  *
- * <p>Produces structured, parseable log output with consistent field
- * positioning and comprehensive metadata inclusion. Suitable for
- * log aggregation systems and detailed analysis.
+ * <p>Produces structured, parseable log output with consistent field positioning and comprehensive
+ * metadata inclusion. Suitable for log aggregation systems and detailed analysis.
  *
  * <p>Format pattern:
+ *
  * <pre>
  * timestamp=2023-12-01T14:23:45.123Z category=ACTIONS level=INFO thread=main
  * correlation=abc123 session=xyz789 message="Clicked submit button"
@@ -22,6 +23,7 @@ import java.util.Map;
  * </pre>
  *
  * <p>Examples:
+ *
  * <pre>
  * timestamp=2023-12-01T14:23:45.123Z category=ACTIONS level=INFO
  * correlation=abc123 message="Clicked submit button" action.type=CLICK
@@ -37,6 +39,7 @@ import java.util.Map;
  * </pre>
  *
  * <p>Features:
+ *
  * <ul>
  *   <li>ISO 8601 timestamp format
  *   <li>Key-value pairs for easy parsing
@@ -56,7 +59,10 @@ public class StructuredLogFormatter implements LogFormatter {
         StringBuilder sb = new StringBuilder();
 
         // Core fields
-        appendField(sb, "timestamp", entry.getTimestamp().atZone(java.time.ZoneOffset.UTC).format(ISO_FORMATTER));
+        appendField(
+                sb,
+                "timestamp",
+                entry.getTimestamp().atZone(java.time.ZoneOffset.UTC).format(ISO_FORMATTER));
         appendField(sb, "category", entry.getCategory());
         appendField(sb, "level", entry.getLevel());
 
@@ -108,7 +114,12 @@ public class StructuredLogFormatter implements LogFormatter {
             appendField(sb, "timing.duration", entry.getFormattedDuration());
         }
         if (entry.getOperationStartTime() != null) {
-            appendField(sb, "timing.startTime", entry.getOperationStartTime().atZone(java.time.ZoneOffset.UTC).format(ISO_FORMATTER));
+            appendField(
+                    sb,
+                    "timing.startTime",
+                    entry.getOperationStartTime()
+                            .atZone(java.time.ZoneOffset.UTC)
+                            .format(ISO_FORMATTER));
         }
         if (entry.getOperationDepth() != null) {
             appendField(sb, "timing.depth", entry.getOperationDepth());
@@ -207,8 +218,14 @@ public class StructuredLogFormatter implements LogFormatter {
         }
 
         // If the value contains spaces, quotes, or special characters, quote it
-        if (value.contains(" ") || value.contains("\"") || value.contains("=") || value.contains("\n") || value.contains("\t")) {
-            return "\"" + value.replace("\"", "\\\"").replace("\n", "\\n").replace("\t", "\\t") + "\"";
+        if (value.contains(" ")
+                || value.contains("\"")
+                || value.contains("=")
+                || value.contains("\n")
+                || value.contains("\t")) {
+            return "\""
+                    + value.replace("\"", "\\\"").replace("\n", "\\n").replace("\t", "\\t")
+                    + "\"";
         }
 
         return value;

@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Primary;
 
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.EventPublishingActionLogger;
-// Removed old logging import: import io.github.jspinak.brobot.tools.logging.ActionLogger;
 import io.github.jspinak.brobot.tools.logging.SessionLifecycleLogger;
 
 /** Configuration class for setting up the event system integration with logging. */

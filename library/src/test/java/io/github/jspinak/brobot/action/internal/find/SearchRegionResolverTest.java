@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 
 import io.github.jspinak.brobot.action.ActionConfig;
@@ -26,7 +25,8 @@ import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.element.SearchRegions;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-// Removed old logging import: 
+
+// Removed old logging import:
 @DisplayName("SearchRegionResolver Tests")
 public class SearchRegionResolverTest extends BrobotTestBase {
 

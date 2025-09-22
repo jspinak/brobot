@@ -48,8 +48,8 @@ import lombok.Setter;
  * <ul>
  *   <li><b>probabilityStaysVisibleAfterClicked</b>: Likelihood (0-100) the location remains
  *       actionable after being clicked
- *   <li><b>mockFindStochasticModifier</b>: Likelihood (0-100) of finding actionable content at this location
- *       when the state is active
+ *   <li><b>mockFindStochasticModifier</b>: Likelihood (0-100) of finding actionable content at this
+ *       location when the state is active
  * </ul>
  *
  * <p>Positioning options:
@@ -130,8 +130,7 @@ public class StateLocation implements StateObject {
         private String ownerStateName = "null";
         private Long ownerStateId = 0L;
         private int probabilityStaysVisibleAfterClicked = 100;
-        private int mockFindStochasticModifier =
-                100; // modifier for find probability in mock mode
+        private int mockFindStochasticModifier = 100; // modifier for find probability in mock mode
         private int timesActedOn = 0;
         private Position position = new Position(.5, .5);
         private Anchors anchors = new Anchors();

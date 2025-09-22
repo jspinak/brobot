@@ -11,7 +11,7 @@ import io.github.jspinak.brobot.tools.history.ActionVisualizer;
 import io.github.jspinak.brobot.tools.history.IllustrationController;
 import io.github.jspinak.brobot.tools.history.RuntimeStateVisualizer;
 import io.github.jspinak.brobot.tools.history.StateLayoutVisualizer;
-// Removed old logging import: 
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;

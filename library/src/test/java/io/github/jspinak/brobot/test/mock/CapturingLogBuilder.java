@@ -1,14 +1,14 @@
 package io.github.jspinak.brobot.test.mock;
 
+import java.time.Duration;
+
 import io.github.jspinak.brobot.logging.BrobotLogger;
 import io.github.jspinak.brobot.logging.LogCategory;
 import io.github.jspinak.brobot.logging.LogLevel;
 
-import java.time.Duration;
-
 /**
- * A LogBuilder implementation that captures log entries for testing.
- * Records all builder method calls and creates a LogEntry when log() is called.
+ * A LogBuilder implementation that captures log entries for testing. Records all builder method
+ * calls and creates a LogEntry when log() is called.
  */
 public class CapturingLogBuilder implements BrobotLogger.LogBuilder {
 
@@ -60,7 +60,10 @@ public class CapturingLogBuilder implements BrobotLogger.LogBuilder {
     }
 
     @Override
-    public BrobotLogger.LogBuilder result(boolean success, double similarity, io.github.jspinak.brobot.model.element.Location location) {
+    public BrobotLogger.LogBuilder result(
+            boolean success,
+            double similarity,
+            io.github.jspinak.brobot.model.element.Location location) {
         // Store result information
         return this;
     }

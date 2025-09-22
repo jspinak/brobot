@@ -12,7 +12,7 @@ import org.bytedeco.opencv.opencv_core.Size;
 
 import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.model.analysis.color.ColorSchema;
-// Removed old logging import: 
+
 import lombok.Getter;
 import lombok.Setter;
 

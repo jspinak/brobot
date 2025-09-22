@@ -110,10 +110,11 @@ public class ImageLoadingDiagnosticsRunner {
                         log.info("  {}: {} entries", key, list.size());
                         System.out.println("  " + key + ": " + list.size() + " entries");
                         if (verbose && !list.isEmpty()) {
-                            list.forEach(item -> {
-                                log.info("    - {}", item);
-                                System.out.println("    - " + item);
-                            });
+                            list.forEach(
+                                    item -> {
+                                        log.info("    - {}", item);
+                                        System.out.println("    - " + item);
+                                    });
                         }
                     } else {
                         log.info("  {}: {}", key, value);

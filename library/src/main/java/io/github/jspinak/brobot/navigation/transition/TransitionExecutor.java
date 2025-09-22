@@ -14,8 +14,6 @@ import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.navigation.service.StateTransitionService;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
 import io.github.jspinak.brobot.statemanagement.StateVisibilityManager;
-// Removed old logging imports that no longer exist:
-// // Removed old logging import: // // Removed old logging import: import io.github.jspinak.brobot.tools.logging.MessageFormatter;
 
 import lombok.extern.slf4j.Slf4j;
 

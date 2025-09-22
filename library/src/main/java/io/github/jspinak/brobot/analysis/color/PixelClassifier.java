@@ -1,7 +1,5 @@
 package io.github.jspinak.brobot.analysis.color;
 
-import io.github.jspinak.brobot.util.string.StringSimilarity;
-
 import static io.github.jspinak.brobot.model.analysis.color.ColorCluster.ColorSchemaName.BGR;
 import static io.github.jspinak.brobot.model.analysis.color.ColorCluster.ColorSchemaName.HSV;
 import static io.github.jspinak.brobot.model.analysis.color.ColorInfo.ColorStat.MEAN;

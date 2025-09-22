@@ -1,7 +1,5 @@
 package io.github.jspinak.brobot.action.internal.find.pixel;
 
-import io.github.jspinak.brobot.util.image.visualization.ScoringVisualizer;
-
 import static io.github.jspinak.brobot.model.analysis.color.PixelProfile.Analysis.SCORES;
 import static org.bytedeco.opencv.global.opencv_core.*;
 
@@ -15,7 +13,6 @@ import io.github.jspinak.brobot.action.basic.find.BaseFindOptions;
 import io.github.jspinak.brobot.analysis.color.DistanceMatrixCalculator;
 import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.model.analysis.color.PixelProfile;
-// Removed old logging import: import io.github.jspinak.brobot.util.image.visualization.MatrixVisualizer;
 
 // Remove incorrect atanh import - will use custom implementation
 
@@ -67,7 +64,8 @@ public class PixelScoreCalculator {
     private double maxTanh = Math.tanh(maxMinScoreForTanh);
     private double invMaxTanh = 1 - maxTanh;
 
-    public PixelScoreCalculator(Object matVisualize) { // MatrixVisualizer temporarily replaced with Object
+    public PixelScoreCalculator(
+            Object matVisualize) { // MatrixVisualizer temporarily replaced with Object
         // this.matVisualize = matVisualize;
     }
 

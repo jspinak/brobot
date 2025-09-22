@@ -7,12 +7,12 @@ import java.util.Map;
 /**
  * Standalone implementation of the fluent builder API for log entries.
  *
- * <p>This class provides a concrete implementation of the LogBuilder interface
- * that can be used independently or as part of the BrobotLogger system.
- * It supports all the fluent API methods for building complex log entries
- * with rich context and metadata.
+ * <p>This class provides a concrete implementation of the LogBuilder interface that can be used
+ * independently or as part of the BrobotLogger system. It supports all the fluent API methods for
+ * building complex log entries with rich context and metadata.
  *
  * <p>Example usage:
+ *
  * <pre>{@code
  * // Create and configure a log builder
  * LogBuilder builder = new LogBuilder(LogCategory.ACTIONS, logger)
@@ -28,9 +28,9 @@ import java.util.Map;
  * builder.log();
  * }</pre>
  *
- * <p>The builder accumulates all the context and metadata, then creates
- * a complete LogEntry when log() is called. This allows for incremental
- * building of complex log entries with all necessary context.
+ * <p>The builder accumulates all the context and metadata, then creates a complete LogEntry when
+ * log() is called. This allows for incremental building of complex log entries with all necessary
+ * context.
  */
 public class LogBuilder implements BrobotLogger.LogBuilder {
 
@@ -95,7 +95,10 @@ public class LogBuilder implements BrobotLogger.LogBuilder {
     }
 
     @Override
-    public BrobotLogger.LogBuilder result(boolean success, double similarity, io.github.jspinak.brobot.model.element.Location location) {
+    public BrobotLogger.LogBuilder result(
+            boolean success,
+            double similarity,
+            io.github.jspinak.brobot.model.element.Location location) {
         this.success = success;
         this.similarity = similarity;
         this.location = location;
@@ -249,7 +252,8 @@ public class LogBuilder implements BrobotLogger.LogBuilder {
                 }
                 return sb.toString();
             } else if (error != null || errorMessage != null) {
-                return "Error occurred: " + (errorMessage != null ? errorMessage : error.getMessage());
+                return "Error occurred: "
+                        + (errorMessage != null ? errorMessage : error.getMessage());
             } else {
                 return "Log entry";
             }

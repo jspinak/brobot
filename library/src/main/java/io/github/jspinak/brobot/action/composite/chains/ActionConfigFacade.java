@@ -24,9 +24,9 @@ import io.github.jspinak.brobot.model.state.StateRegion;
  * Provides a facade of commonly used action patterns for GUI automation using the modern
  * ActionConfig API.
  *
- * <p>This class encapsulates frequent action combinations into simple, reusable methods.
- * It reduces code duplication and improves readability across automation scripts by providing
- * a higher-level abstraction over the core {@link Action} API with type-safe configuration objects.
+ * <p>This class encapsulates frequent action combinations into simple, reusable methods. It reduces
+ * code duplication and improves readability across automation scripts by providing a higher-level
+ * abstraction over the core {@link Action} API with type-safe configuration objects.
  *
  * <p>Key features:
  *

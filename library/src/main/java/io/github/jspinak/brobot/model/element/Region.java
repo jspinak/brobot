@@ -42,6 +42,7 @@ import lombok.Setter;
  * types like Match and Location.
  *
  * <h3>Example Usage:</h3>
+ *
  * <pre>{@code
  * // Create regions
  * Region fullScreen = new Region();  // Full screen
@@ -331,8 +332,8 @@ public class Region implements Comparable<Region> {
     }
 
     /**
-     * Compares this region to another region for ordering.
-     * Regions are compared first by y-coordinate, then by x-coordinate.
+     * Compares this region to another region for ordering. Regions are compared first by
+     * y-coordinate, then by x-coordinate.
      *
      * @param comparesTo the region to compare with
      * @return negative if this region comes before, positive if after, zero if equal
@@ -469,8 +470,8 @@ public class Region implements Comparable<Region> {
     }
 
     /**
-     * Gets the grid cell number for a given location within this region.
-     * The region is divided into a grid based on configured rows and columns.
+     * Gets the grid cell number for a given location within this region. The region is divided into
+     * a grid based on configured rows and columns.
      *
      * @param location the location to find the grid cell for
      * @return Optional containing the grid cell number, or empty if location is outside region
@@ -481,8 +482,8 @@ public class Region implements Comparable<Region> {
     }
 
     /**
-     * Returns a sub-region corresponding to a specific grid cell.
-     * The region is divided into a grid based on configured rows and columns.
+     * Returns a sub-region corresponding to a specific grid cell. The region is divided into a grid
+     * based on configured rows and columns.
      *
      * @param gridNumber the grid cell number (0-based)
      * @return the Region representing the specified grid cell, or this region if gridNumber is -1

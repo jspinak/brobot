@@ -1,20 +1,23 @@
 package io.github.jspinak.brobot.logging.formatter;
 
-import io.github.jspinak.brobot.logging.LogEntry;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.time.format.DateTimeFormatter;
+
 import org.springframework.stereotype.Component;
 
-import java.time.format.DateTimeFormatter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import io.github.jspinak.brobot.logging.LogEntry;
 
 /**
  * JSON log formatter for machine processing.
  *
- * <p>Produces structured JSON output suitable for log aggregation
- * systems, SIEM tools, and automated log analysis. The JSON format
- * preserves all data types and allows for easy querying and filtering.
+ * <p>Produces structured JSON output suitable for log aggregation systems, SIEM tools, and
+ * automated log analysis. The JSON format preserves all data types and allows for easy querying and
+ * filtering.
  *
  * <p>Output structure:
+ *
  * <pre>{@code
  * {
  *   "@timestamp": "2023-12-01T14:23:45.123Z",
@@ -52,6 +55,7 @@ import java.time.format.DateTimeFormatter;
  * }</pre>
  *
  * <p>Features:
+ *
  * <ul>
  *   <li>ELK Stack compatible format
  *   <li>ISO 8601 timestamps with @timestamp field
@@ -78,7 +82,9 @@ public class JsonLogFormatter implements LogFormatter {
             ObjectNode root = objectMapper.createObjectNode();
 
             // ELK Stack standard fields
-            root.put("@timestamp", entry.getTimestamp().atZone(java.time.ZoneOffset.UTC).format(ISO_FORMATTER));
+            root.put(
+                    "@timestamp",
+                    entry.getTimestamp().atZone(java.time.ZoneOffset.UTC).format(ISO_FORMATTER));
             root.put("@version", "1");
 
             // Core fields
@@ -94,7 +100,9 @@ public class JsonLogFormatter implements LogFormatter {
             }
 
             // Correlation context
-            if (entry.hasCorrelation() || entry.getSessionId() != null || entry.getOperationName() != null) {
+            if (entry.hasCorrelation()
+                    || entry.getSessionId() != null
+                    || entry.getOperationName() != null) {
                 ObjectNode correlation = root.putObject("correlation");
                 if (entry.hasCorrelation()) {
                     correlation.put("id", entry.getCorrelationId());
@@ -108,7 +116,9 @@ public class JsonLogFormatter implements LogFormatter {
             }
 
             // Action context
-            if (entry.getActionType() != null || entry.getActionTarget() != null || entry.getSuccess() != null) {
+            if (entry.getActionType() != null
+                    || entry.getActionTarget() != null
+                    || entry.getSuccess() != null) {
                 ObjectNode action = root.putObject("action");
                 if (entry.getActionType() != null) {
                     action.put("type", entry.getActionType());
@@ -135,14 +145,20 @@ public class JsonLogFormatter implements LogFormatter {
             }
 
             // Timing information
-            if (entry.hasTiming() || entry.getOperationStartTime() != null || entry.getOperationDepth() != null) {
+            if (entry.hasTiming()
+                    || entry.getOperationStartTime() != null
+                    || entry.getOperationDepth() != null) {
                 ObjectNode timing = root.putObject("timing");
                 if (entry.hasTiming()) {
                     timing.put("duration", entry.getDurationMs());
                     timing.put("durationFormatted", entry.getFormattedDuration());
                 }
                 if (entry.getOperationStartTime() != null) {
-                    timing.put("startTime", entry.getOperationStartTime().atZone(java.time.ZoneOffset.UTC).format(ISO_FORMATTER));
+                    timing.put(
+                            "startTime",
+                            entry.getOperationStartTime()
+                                    .atZone(java.time.ZoneOffset.UTC)
+                                    .format(ISO_FORMATTER));
                 }
                 if (entry.getOperationDepth() != null) {
                     timing.put("depth", entry.getOperationDepth());
@@ -184,7 +200,8 @@ public class JsonLogFormatter implements LogFormatter {
                     error.put("simpleType", entry.getError().getClass().getSimpleName());
 
                     // Include stack trace for detailed analysis
-                    if (entry.getError().getStackTrace() != null && entry.getError().getStackTrace().length > 0) {
+                    if (entry.getError().getStackTrace() != null
+                            && entry.getError().getStackTrace().length > 0) {
                         StringBuilder stackTrace = new StringBuilder();
                         for (StackTraceElement element : entry.getError().getStackTrace()) {
                             stackTrace.append(element.toString()).append("\n");
@@ -197,7 +214,8 @@ public class JsonLogFormatter implements LogFormatter {
             // Custom metadata
             if (!entry.getMetadata().isEmpty()) {
                 ObjectNode metadata = root.putObject("metadata");
-                for (java.util.Map.Entry<String, Object> metaEntry : entry.getMetadata().entrySet()) {
+                for (java.util.Map.Entry<String, Object> metaEntry :
+                        entry.getMetadata().entrySet()) {
                     addJsonValue(metadata, metaEntry.getKey(), metaEntry.getValue());
                 }
             }
@@ -213,7 +231,9 @@ public class JsonLogFormatter implements LogFormatter {
 
         } catch (Exception e) {
             // Fallback to simple format if JSON serialization fails
-            return String.format("{\"@timestamp\":\"%s\",\"level\":\"ERROR\",\"message\":\"JSON formatting failed: %s\",\"originalMessage\":\"%s\"}",
+            return String.format(
+                    "{\"@timestamp\":\"%s\",\"level\":\"ERROR\",\"message\":\"JSON formatting"
+                            + " failed: %s\",\"originalMessage\":\"%s\"}",
                     entry.getTimestamp().atZone(java.time.ZoneOffset.UTC).format(ISO_FORMATTER),
                     e.getMessage(),
                     entry.getMessage() != null ? entry.getMessage().replace("\"", "\\\"") : "null");

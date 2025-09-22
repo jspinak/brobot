@@ -17,7 +17,6 @@ import io.github.jspinak.brobot.analysis.motion.FindDynamicPixels;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalyses;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
-// Removed old logging import: import io.github.jspinak.brobot.util.image.visualization.MatrixVisualizer;
 
 /**
  * Identifies regions containing motion across multiple scene captures. This class analyzes a
@@ -52,6 +51,7 @@ public class FindRegionsOfMotion {
     private final SearchRegionResolver selectRegions;
     private final FindDynamicPixels findDynamicPixels;
     private final MatchCollectionUtilities matchOps;
+
     // private final MatrixVisualizer matVisualize;
 
     /**

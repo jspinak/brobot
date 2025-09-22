@@ -11,7 +11,7 @@ import io.github.jspinak.brobot.action.basic.find.BaseFindOptions;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;
-// Removed old logging import: 
+
 /**
  * Selects appropriate search regions for find operations based on a priority hierarchy.
  *

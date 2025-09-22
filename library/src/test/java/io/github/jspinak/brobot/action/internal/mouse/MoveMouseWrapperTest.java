@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,9 +16,8 @@ import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.util.coordinates.CoordinateScaler;
 
 /**
- * Unit tests for MoveMouseWrapper.
- * Tests focus on mock mode behavior since MoveMouseWrapper's main responsibility
- * is to return true in mock mode and delegate to sikuliMove in real mode.
+ * Unit tests for MoveMouseWrapper. Tests focus on mock mode behavior since MoveMouseWrapper's main
+ * responsibility is to return true in mock mode and delegate to sikuliMove in real mode.
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("MoveMouseWrapper Tests")
@@ -67,9 +66,11 @@ public class MoveMouseWrapperTest extends BrobotTestBase {
         Location negativeLocation = new Location(-10, -20);
 
         // All moves should succeed in mock mode
-        assertTrue(moveMouseWrapper.move(explicitLocation), "Should succeed for explicit coordinates");
+        assertTrue(
+                moveMouseWrapper.move(explicitLocation), "Should succeed for explicit coordinates");
         assertTrue(moveMouseWrapper.move(zeroLocation), "Should succeed for zero coordinates");
-        assertTrue(moveMouseWrapper.move(negativeLocation), "Should succeed for negative coordinates");
+        assertTrue(
+                moveMouseWrapper.move(negativeLocation), "Should succeed for negative coordinates");
 
         // No interaction with coordinate scaler in mock mode
         verifyNoInteractions(coordinateScaler);

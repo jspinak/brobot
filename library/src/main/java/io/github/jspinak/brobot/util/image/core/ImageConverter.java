@@ -5,8 +5,6 @@ import java.util.Optional;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.sikuli.script.Image;
-import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
-
 
 /**
  * Static utility methods for image format conversions and operations.

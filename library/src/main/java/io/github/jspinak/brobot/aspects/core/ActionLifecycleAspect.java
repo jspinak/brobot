@@ -25,7 +25,6 @@ import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.logging.modular.ActionLoggingService;
-import io.github.jspinak.brobot.model.state.StateImage;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -293,20 +292,15 @@ public class ActionLifecycleAspect {
      * @return List of action contexts for the thread
      */
     public List<ActionContext> getThreadActionHistory(String threadName) {
-        return threadActionHistory.getOrDefault(
-                threadName, Collections.emptyList());
+        return threadActionHistory.getOrDefault(threadName, Collections.emptyList());
     }
 
-    /**
-     * Clear all action history.
-     */
+    /** Clear all action history. */
     public void clearHistory() {
         threadActionHistory.clear();
     }
 
-    /**
-     * Internal class to track action execution context.
-     */
+    /** Internal class to track action execution context. */
     @Data
     public static class ActionContext {
         private String actionId;

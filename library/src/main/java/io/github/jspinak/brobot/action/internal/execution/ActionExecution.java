@@ -18,18 +18,11 @@ import io.github.jspinak.brobot.control.ExecutionStoppedException;
 import io.github.jspinak.brobot.logging.BrobotLogger;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
 import io.github.jspinak.brobot.tools.history.IllustrationController;
-// Removed old logging imports that no longer exist:
-// // Removed old logging import: import io.github.jspinak.brobot.tools.logging.ActionLogger;
-// // Removed old logging import: import io.github.jspinak.brobot.tools.logging.ExecutionSession;
-// import io.github.jspinak.brobot.tools.logging.model.LogData;
 import io.github.jspinak.brobot.tools.ml.dataset.DatasetManager;
 import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 import io.github.jspinak.brobot.util.image.capture.ScreenshotCapture;
 
 import lombok.extern.slf4j.Slf4j;
-import io.github.jspinak.brobot.logging.LogCategory;
-import io.github.jspinak.brobot.logging.LogLevel;
-
 
 /**
  * Central orchestrator for executing GUI automation actions with full lifecycle management.
@@ -82,10 +75,7 @@ public class ActionExecution {
     private final DatasetManager datasetManager;
     private final ActionSuccessCriteria success;
     private final ActionResultFactory matchesInitializer;
-    // Removed old logging dependencies:
-    // private final ActionLogger actionLogger;
     private final ScreenshotCapture captureScreenshot;
-    // private final ExecutionSession automationSession;
     private final ExecutionController executionController;
     private final BrobotLogger brobotLogger;
     private final StateMemory stateMemory;
@@ -181,7 +171,6 @@ public class ActionExecution {
      * @see ActionLifecycleManagement
      * @see DatasetManager#addSetOfData
      */
-    // Removed ActionConfig-based perform method - use ActionConfig version instead
     // The ActionConfig version is available below
     /*
      * public ActionResult perform(ActionInterface actionMethod, String
@@ -222,7 +211,6 @@ public class ActionExecution {
      * Duration duration = actionLifecycleManagement.getCurrentDuration(matches);
      * matches.setDuration(duration);
      * if (brobotProperties.getDataset().isEnabled()) datasetManager.addSetOfData(matches);
-     * // Removed direct console output - logging is handled by
      * ActionLifecycleAspect which respects QUIET mode
      * //  + " " +
      * matches.getOutputText() + " " + matches.getSuccessSymbol());
@@ -253,9 +241,7 @@ public class ActionExecution {
      * <p>This method formats and outputs a concise representation of the action being executed,
      * including the action type and target state images. Output is only generated when the
      * reporting level is set to {@link  {
-     * // Disabled direct console output - logging is handled by
      * ActionLifecycleAspect which respects QUIET mode
-     * // Legacy direct console printing interferes with structured logging and
      * QUIET mode
      * }
      */
@@ -281,7 +267,6 @@ public class ActionExecution {
             String actionDescription,
             ActionConfig actionConfig,
             ObjectCollection... objectCollections) {
-        // String sessionId = automationSession.getCurrentSessionId(); // Removed - session management no longer available
         printActionConfig(actionConfig, objectCollections);
         ActionResult matches =
                 matchesInitializer.init(actionConfig, actionDescription, objectCollections);
@@ -328,11 +313,7 @@ public class ActionExecution {
         Duration duration = actionLifecycleManagement.getCurrentDuration(matches);
         matches.setDuration(duration);
         if (brobotProperties.getDataset().isBuild()) datasetManager.addSetOfData(matches);
-        // Removed direct console output - logging is handled by ActionLifecycleAspect
-        // which respects QUIET mode
-        // .getSimpleName() + " " +
         // matches.getOutputText() + " " + matches.getSuccessSymbol());
-        // Legacy logging removed - use new BrobotLogger instead
         // if (objectCollections.length > 0) {
         //     LogData logData = actionLogger.logAction(sessionId, matches, objectCollections[0]);
         // }
@@ -348,12 +329,7 @@ public class ActionExecution {
 
     /** Prints action details for ActionConfig-based actions. */
     private void printActionConfig(
-            ActionConfig actionConfig, ObjectCollection... objectCollections) {
-        // Disabled direct console output - logging is handled by ActionLifecycleAspect
-        // which respects QUIET mode
-        // Legacy direct console printing interferes with structured logging and QUIET
-        // mode
-    }
+            ActionConfig actionConfig, ObjectCollection... objectCollections) {}
 
     /**
      * Safely checks for pause points when an ExecutionController is available.
@@ -381,9 +357,7 @@ public class ActionExecution {
      * @param objectCollections The object collections involved in the action
      */
     private void handleBeforeActionLogging(
-            ActionConfig actionConfig, ObjectCollection... objectCollections) {
-        // LoggingOptions removed - logging now handled through BrobotLogger
-    }
+            ActionConfig actionConfig, ObjectCollection... objectCollections) {}
 
     /**
      * Handles logging after action execution completes.
@@ -395,9 +369,7 @@ public class ActionExecution {
     private void handleAfterActionLogging(
             ActionConfig actionConfig,
             ActionResult actionResult,
-            ObjectCollection... objectCollections) {
-        // LoggingOptions removed - logging now handled through BrobotLogger
-    }
+            ObjectCollection... objectCollections) {}
 
     /**
      * Handles automatic logging based on ActionConfig logging options.
@@ -412,9 +384,7 @@ public class ActionExecution {
     private void handleAutomaticLogging(
             ActionConfig actionConfig,
             ActionResult actionResult,
-            ObjectCollection... objectCollections) {
-        // LoggingOptions removed - automatic logging now handled through BrobotLogger
-    }
+            ObjectCollection... objectCollections) {}
 
     /**
      * Formats a log message with placeholders replaced by actual values. Supports placeholders like
@@ -456,8 +426,4 @@ public class ActionExecution {
         // class name
         return "action";
     }
-
-    // Removed obsolete logMessage method - functionality moved to handleAutomaticLogging
-
-    // Removed obsolete mapping method - LogEventType and unified LogEvent.Type no longer exist
 }

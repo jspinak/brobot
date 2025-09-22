@@ -160,10 +160,14 @@ public class RecordingActionWrapper {
             if (pattern.getMatchHistory() != null
                     && !pattern.getMatchHistory().getSnapshots().isEmpty()) {
                 try {
-                    String filename = String.format("%s_%s", sessionName, pattern.getNameWithoutExtension());
+                    String filename =
+                            String.format("%s_%s", sessionName, pattern.getNameWithoutExtension());
                     persistence.saveSessionHistory(pattern, filename);
                 } catch (IOException e) {
-                    log.error("Failed to save history for pattern: {}", pattern.getNameWithoutExtension(), e);
+                    log.error(
+                            "Failed to save history for pattern: {}",
+                            pattern.getNameWithoutExtension(),
+                            e);
                 }
             }
         }

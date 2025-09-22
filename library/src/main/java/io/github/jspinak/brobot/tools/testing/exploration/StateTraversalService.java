@@ -12,8 +12,6 @@ import io.github.jspinak.brobot.navigation.transition.StateNavigator;
 import io.github.jspinak.brobot.statemanagement.AdjacentStates;
 import io.github.jspinak.brobot.statemanagement.InitialStates;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
-// Removed old logging import: import io.github.jspinak.brobot.tools.logging.ActionLogger;
-// Removed old logging import: import io.github.jspinak.brobot.tools.logging.ExecutionSession;
 
 /**
  * Orchestrates comprehensive state exploration for automated testing of the application.
@@ -107,10 +105,6 @@ public class StateTraversalService {
     private final StateNavigator stateTransitionsManagement;
     private final InitialStates initialStates;
     private final StateMemory stateMemory;
-    // Removed old logging dependency that no longer exists:
-    // private final ActionLogger actionLogger;
-    // Removed old logging dependency that no longer exists:
-    // private final ExecutionSession automationSession;
     private final StateImageValidator visitAllStateImages;
 
     private final List<StateVisit> stateVisits = new ArrayList<>();
@@ -125,9 +119,6 @@ public class StateTraversalService {
             StateMemory stateMemory,
             StateNavigator stateTransitionsManagement,
             InitialStates initialStates,
-            // Removed missing parameters:
-            // ActionLogger actionLogger,
-            // ExecutionSession automationSession,
             StateImageValidator visitAllStateImages) {
         this.adjacentStates = adjacentStates;
         this.allStatesInProjectService = allStatesInProjectService;
@@ -237,7 +228,6 @@ public class StateTraversalService {
                                     });
                         });
 
-        // actionLogger.logObservation(
         //         automationSession.getCurrentSessionId(),
         //         "Initial states:",
         //         stateMemory.getActiveStateNamesAsString(),
@@ -264,7 +254,6 @@ public class StateTraversalService {
             StringBuilder unvisitedStatesString = new StringBuilder();
             unvisitedStateSet.forEach(unvisitedStatesString::append);
             if (failedAttempt > 0) {
-                // actionLogger.logObservation(
                 //         automationSession.getCurrentSessionId(),
                 //         "unvisited: failed attempts = " + failedAttempt,
                 //         unvisitedStatesString.toString(),
@@ -383,7 +372,6 @@ public class StateTraversalService {
 
         logger.info("State Traversal Summary:");
         logger.info(summary.toString());
-        // actionLogger.logObservation(
         //         automationSession.getCurrentSessionId(),
         //         "State Traversal Summary:",
         //         summary.toString(),

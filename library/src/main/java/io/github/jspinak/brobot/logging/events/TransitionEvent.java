@@ -1,23 +1,23 @@
 package io.github.jspinak.brobot.logging.events;
 
-import lombok.Builder;
-import lombok.Value;
-
-import io.github.jspinak.brobot.logging.LogLevel;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+import io.github.jspinak.brobot.logging.LogLevel;
+
+import lombok.Builder;
+import lombok.Value;
+
 /**
  * Event representing a state transition in the Brobot framework.
  *
- * <p>Captures information about state changes, including the path taken,
- * success status, and timing information. This is useful for tracking
- * navigation flows and debugging state management issues.
+ * <p>Captures information about state changes, including the path taken, success status, and timing
+ * information. This is useful for tracking navigation flows and debugging state management issues.
  *
  * <p>Example usage:
+ *
  * <pre>{@code
  * TransitionEvent event = TransitionEvent.builder()
  *     .fromState("loginPage")
@@ -51,8 +51,7 @@ public class TransitionEvent {
     }
 
     /** Timestamp when the transition was initiated */
-    @Builder.Default
-    Instant timestamp = Instant.now();
+    @Builder.Default Instant timestamp = Instant.now();
 
     /** Source state name */
     String fromState;
@@ -70,15 +69,13 @@ public class TransitionEvent {
     TransitionMethod method;
 
     /** Sequence of states traversed (for complex transitions) */
-    @Builder.Default
-    List<String> path = java.util.Collections.emptyList();
+    @Builder.Default List<String> path = java.util.Collections.emptyList();
 
     /** Error message if transition failed */
     String errorMessage;
 
     /** Additional metadata about the transition */
-    @Builder.Default
-    Map<String, Object> metadata = java.util.Collections.emptyMap();
+    @Builder.Default Map<String, Object> metadata = java.util.Collections.emptyMap();
 
     /** Correlation ID for tracking related actions */
     String correlationId;
@@ -98,7 +95,8 @@ public class TransitionEvent {
      * @param method The method used
      * @return A new TransitionEvent for a successful transition
      */
-    public static TransitionEvent success(String fromState, String toState, Duration duration, TransitionMethod method) {
+    public static TransitionEvent success(
+            String fromState, String toState, Duration duration, TransitionMethod method) {
         return TransitionEvent.builder()
                 .fromState(fromState)
                 .toState(toState)
@@ -118,8 +116,12 @@ public class TransitionEvent {
      * @param errorMessage The error message
      * @return A new TransitionEvent for a failed transition
      */
-    public static TransitionEvent failure(String fromState, String toState, Duration duration,
-                                        TransitionMethod method, String errorMessage) {
+    public static TransitionEvent failure(
+            String fromState,
+            String toState,
+            Duration duration,
+            TransitionMethod method,
+            String errorMessage) {
         return TransitionEvent.builder()
                 .fromState(fromState)
                 .toState(toState)
@@ -139,11 +141,17 @@ public class TransitionEvent {
         String pathStr = path.isEmpty() ? "" : " via " + String.join(" → ", path);
 
         if (success) {
-            return String.format("TRANSITION %s → %s [%dms] %s%s",
+            return String.format(
+                    "TRANSITION %s → %s [%dms] %s%s",
                     fromState, toState, duration.toMillis(), method, pathStr);
         } else {
-            return String.format("TRANSITION %s → %s FAILED [%dms] %s%s%s",
-                    fromState, toState, duration.toMillis(), method, pathStr,
+            return String.format(
+                    "TRANSITION %s → %s FAILED [%dms] %s%s%s",
+                    fromState,
+                    toState,
+                    duration.toMillis(),
+                    method,
+                    pathStr,
                     errorMessage != null ? " " + errorMessage : "");
         }
     }
@@ -167,8 +175,8 @@ public class TransitionEvent {
     }
 
     /**
-     * Get the log level for this transition event.
-     * Successful transitions log at INFO level, failures at ERROR level.
+     * Get the log level for this transition event. Successful transitions log at INFO level,
+     * failures at ERROR level.
      *
      * @return The appropriate log level
      */
@@ -185,8 +193,9 @@ public class TransitionEvent {
         if (success) {
             return String.format("Transitioned from %s to %s", fromState, toState);
         } else {
-            return String.format("Failed to transition from %s to %s%s", fromState, toState,
-                    errorMessage != null ? ": " + errorMessage : "");
+            return String.format(
+                    "Failed to transition from %s to %s%s",
+                    fromState, toState, errorMessage != null ? ": " + errorMessage : "");
         }
     }
 

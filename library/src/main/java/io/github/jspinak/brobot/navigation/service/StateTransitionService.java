@@ -12,7 +12,7 @@ import io.github.jspinak.brobot.model.transition.StateTransition;
 import io.github.jspinak.brobot.model.transition.StateTransitionStore;
 import io.github.jspinak.brobot.navigation.transition.StateTransitions;
 import io.github.jspinak.brobot.navigation.transition.StateTransitionsJointTable;
-// Removed old logging import: 
+
 import lombok.Getter;
 
 /**
@@ -210,9 +210,6 @@ public class StateTransitionService {
      * <p>Useful for verifying transition definitions and troubleshooting navigation issues.
      */
     public void printAllTransitions() {
-        stateTransitionsRepository
-                .getAllTransitions()
-                .forEach(transition -> {
-                });
+        stateTransitionsRepository.getAllTransitions().forEach(transition -> {});
     }
 }

@@ -22,16 +22,11 @@ import io.github.jspinak.brobot.action.internal.utility.ActionSuccessCriteria;
 import io.github.jspinak.brobot.analysis.color.profiles.ProfileSetBuilder;
 import io.github.jspinak.brobot.analysis.match.MatchFusion;
 import io.github.jspinak.brobot.logging.ConciseFindLogger;
-import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.state.StateObject;
-import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
 import io.github.jspinak.brobot.statemanagement.StateMemoryUpdater;
-// Removed old visual logging imports that no longer exist:// 
-// import io.github.jspinak.brobot.tools.logging.visual.HighlightManager; // HighlightManager removed
-// import io.github.jspinak.brobot.tools.logging.visual.VisualFeedbackConfig;
 import io.github.jspinak.brobot.util.string.TextSelector;
 
 import lombok.extern.slf4j.Slf4j;
@@ -74,9 +69,6 @@ public class FindPipeline {
     private final StateMemory stateMemory;
     private final TextSelector textSelector;
     private final DynamicRegionResolver dynamicRegionResolver;
-    // Removed old visual logging dependencies that no longer exist:
-  //  //  // private final HighlightManager highlightManager; // HighlightManager removed // highlightManager removed
-    // private final VisualFeedbackConfig visualFeedbackConfig;
     private final ModernFindStrategyRegistry findStrategyRegistry;
     private final ActionSuccessCriteria actionSuccessCriteria;
     private final ConciseFindLogger conciseFindLogger;
@@ -96,9 +88,6 @@ public class FindPipeline {
             StateMemory stateMemory,
             TextSelector textSelector,
             DynamicRegionResolver dynamicRegionResolver,
-            // Removed missing parameters:
-          //  //  // HighlightManager highlightManager, // HighlightManager removed // highlightManager removed
-            // VisualFeedbackConfig visualFeedbackConfig,
             ModernFindStrategyRegistry findStrategyRegistry,
             ActionSuccessCriteria actionSuccessCriteria,
             StateMemoryUpdater stateMemoryUpdater,
@@ -112,8 +101,6 @@ public class FindPipeline {
         this.stateMemory = stateMemory;
         this.textSelector = textSelector;
         this.dynamicRegionResolver = dynamicRegionResolver;
-        // Removed initialization of missing classes:
-       //  // this.highlightManager = highlightManager; // highlightManager removed
         // this.visualFeedbackConfig = visualFeedbackConfig;
         this.findStrategyRegistry = findStrategyRegistry;
         this.actionSuccessCriteria = actionSuccessCriteria;
@@ -314,7 +301,6 @@ public class FindPipeline {
 
         // Highlight found matches if enabled - DISABLED: visual logging classes removed
         // if (shouldHighlightFinds() && !matches.isEmpty()) {
-       //  //     highlightManager.highlightMatches(matches.getMatchList()); // highlightManager removed
         // }
 
         // Set success criteria based on the action configuration
@@ -331,10 +317,8 @@ public class FindPipeline {
 
     /** Checks if search regions should be highlighted based on configuration. */
     private boolean shouldHighlightSearchRegions() {
-        // Visual feedback functionality disabled - missing classes
         return false;
         // return highlightEnabled
-       //  //         && highlightManager != null // highlightManager removed
         //         && visualFeedbackConfig != null
         //         && visualFeedbackConfig.isEnabled()
         //         && visualFeedbackConfig.isAutoHighlightSearchRegions();
@@ -342,10 +326,8 @@ public class FindPipeline {
 
     /** Checks if found matches should be highlighted based on configuration. */
     private boolean shouldHighlightFinds() {
-        // Visual feedback functionality disabled - missing classes
         return false;
         // return highlightEnabled
-       //  //         && highlightManager != null // highlightManager removed
         //         && visualFeedbackConfig != null
         //         && visualFeedbackConfig.isEnabled()
         //         && visualFeedbackConfig.isAutoHighlightFinds();
@@ -356,10 +338,7 @@ public class FindPipeline {
      *
      * @param collections The object collections containing search regions to highlight
      */
-    private void highlightSearchRegions(ObjectCollection... collections) {
-       //  // HighlightManager removed - visual highlighting temporarily disabled // HighlightManager removed
-        // This functionality will be restored when the visualization system is refactored
-    }
+    private void highlightSearchRegions(ObjectCollection... collections) {}
 
     /**
      * Saves matches to their corresponding StateImages' lastMatchesFound field. This is the single

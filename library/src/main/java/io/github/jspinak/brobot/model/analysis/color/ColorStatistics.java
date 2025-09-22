@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.bytedeco.opencv.opencv_core.Scalar;
 
-// Removed old logging import: 
 import lombok.Getter;
 
 /**
@@ -94,7 +93,6 @@ public class ColorStatistics {
      * <p>Side effects: Outputs to the Report logging system
      */
     public void print() {
-        for (ColorSchema.ColorValue colorValue : means.keySet()) {
-        }
+        for (ColorSchema.ColorValue colorValue : means.keySet()) {}
     }
 }

@@ -127,9 +127,9 @@ public class ProfileMatrixBuilder {
      * appropriate visualization type for different automation scenarios.
      *
      * @param img The state image to visualize
-     * @param actionConfig Options specifying the visualization type: - kmeans &lt; 0: Use default from
-     *     BrobotProperties - kmeans = 0: Show mean color profile only - kmeans &gt; 0: Show K-means
-     *     clusters
+     * @param actionConfig Options specifying the visualization type: - kmeans &lt; 0: Use default
+     *     from BrobotProperties - kmeans = 0: Show mean color profile only - kmeans &gt; 0: Show
+     *     K-means clusters
      * @return A Mat containing the appropriate color profile visualization
      */
     public Mat getProfilesMat(StateImage img, ActionConfig actionConfig) {

@@ -198,14 +198,6 @@ public class MockActionHistoryFactory {
      * @param configurator function to configure the builder
      * @return ActionHistory with custom configuration
      */
-    // Commented out due to Lombok builder compilation issues
-    // public static ActionHistory withConfig(
-    //         java.util.function.Function<
-    //                         MockActionHistoryBuilder.Builder, MockActionHistoryBuilder.Builder>
-    //                 configurator) {
-    //     MockActionHistoryBuilder.Builder builder = MockActionHistoryBuilder.builder();
-    //     return configurator.apply(builder).build().build();
-    // }
 
     /**
      * Creates ActionHistory for a lower-left screen element. Commonly used for status bars,

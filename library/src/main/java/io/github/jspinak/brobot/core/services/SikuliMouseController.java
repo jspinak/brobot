@@ -1,7 +1,5 @@
 package io.github.jspinak.brobot.core.services;
 
-import io.github.jspinak.brobot.util.location.LocationUtils;
-
 import java.awt.*;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.InputEvent;
@@ -128,7 +126,8 @@ public class SikuliMouseController implements MouseController {
                     io.github.jspinak.brobot.model.element.Location brobotLoc =
                             new io.github.jspinak.brobot.model.element.Location(x, y);
                     location = coordinateScaler.scaleLocationToLogical(brobotLoc);
-                } {
+                }
+                {
                     location = new Location(x, y);
                 }
                 location.doubleClick();

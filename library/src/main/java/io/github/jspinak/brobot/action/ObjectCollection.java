@@ -17,7 +17,7 @@ import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.state.StateLocation;
 import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.model.state.StateString;
-// Removed old logging import: 
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -73,9 +73,7 @@ public class ObjectCollection {
 
     private List<Scene> scenes = new ArrayList<>();
 
-    /**
-     * Default constructor for Jackson JSON mapping.
-     */
+    /** Default constructor for Jackson JSON mapping. */
     public ObjectCollection() {} // public for mapping
 
     /**
@@ -180,8 +178,8 @@ public class ObjectCollection {
     }
 
     /**
-     * Gets the name of the first object in the collection.
-     * Searches in order: StateImages, StateLocations, StateRegions, StateStrings.
+     * Gets the name of the first object in the collection. Searches in order: StateImages,
+     * StateLocations, StateRegions, StateStrings.
      *
      * @return the name of the first object, or empty string if no objects or names
      */
@@ -264,8 +262,8 @@ public class ObjectCollection {
     }
 
     /**
-     * Checks if this collection equals another ObjectCollection.
-     * Collections are equal if they contain the same objects in all categories.
+     * Checks if this collection equals another ObjectCollection. Collections are equal if they
+     * contain the same objects in all categories.
      *
      * @param objectCollection the ObjectCollection to compare with
      * @return true if the collections contain the same objects
@@ -358,9 +356,7 @@ public class ObjectCollection {
                 + '}';
     }
 
-    /**
-     * Builder class for constructing ObjectCollection instances with a fluent API.
-     */
+    /** Builder class for constructing ObjectCollection instances with a fluent API. */
     public static class Builder {
         // private int lastId = 0; // currently id is given only to images
         private List<StateLocation> stateLocations = new ArrayList<>();
@@ -546,8 +542,8 @@ public class ObjectCollection {
         }
 
         /**
-         * Divides StateRegions into grid subregions and adds them to the collection.
-         * Note: Subregions are created as NullState regions.
+         * Divides StateRegions into grid subregions and adds them to the collection. Note:
+         * Subregions are created as NullState regions.
          *
          * @param rows the number of rows in the grid
          * @param columns the number of columns in the grid

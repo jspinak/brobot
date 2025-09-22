@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-// Removed old logging import: import io.github.jspinak.brobot.tools.testing.mock.MockStatus;
 
 /**
  * Provides simulated time control for mock testing environments in Brobot.
@@ -113,7 +112,6 @@ public class MockTime {
         now = now.plusNanos(nanoTimeout);
     }
 
-    // Removed deprecated wait methods for ActionType and ActionConfig.Find
     // Use wait(ActionType) and wait(PatternFindOptions.Strategy) instead
 
     /**

@@ -1,7 +1,6 @@
 package io.github.jspinak.brobot.action;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,8 +21,6 @@ import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.element.Text;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
-// Removed old logging import that no longer exists:
-// // Removed old logging import: import io.github.jspinak.brobot.tools.logging.MessageFormatter;
 
 import lombok.Data;
 
@@ -35,8 +32,8 @@ import lombok.Data;
  * approach simplifies the API and provides consistent access to action outcomes regardless of the
  * action type.
  *
- * <p>Uses a component-based architecture where responsibilities are delegated to
- * specialized classes for better organization and maintainability.
+ * <p>Uses a component-based architecture where responsibilities are delegated to specialized
+ * classes for better organization and maintainability.
  *
  * @since 1.0
  * @see Match
@@ -884,10 +881,6 @@ public class ActionResult {
                     -1);
         }
     }
-
-
-
-
 
     public String getLogTargetName() {
         if (!getMatchList().isEmpty()) {

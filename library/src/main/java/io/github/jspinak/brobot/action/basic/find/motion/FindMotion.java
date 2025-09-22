@@ -20,7 +20,7 @@ import io.github.jspinak.brobot.analysis.motion.MovingObjectSelector;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalyses;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
-// Removed old logging import: 
+
 /**
  * Detects and tracks motion across multiple scene captures. This class implements motion detection
  * by analyzing changes between three consecutive screenshots to identify moving objects and

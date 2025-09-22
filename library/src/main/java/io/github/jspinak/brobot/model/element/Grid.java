@@ -3,7 +3,6 @@ package io.github.jspinak.brobot.model.element;
 import java.util.ArrayList;
 import java.util.List;
 
-// Removed old logging import: 
 import lombok.Getter;
 
 /**

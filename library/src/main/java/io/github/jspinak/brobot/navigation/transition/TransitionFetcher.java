@@ -164,8 +164,7 @@ public class TransitionFetcher {
 
         // Check that required 'to' components are present
         // If toTransitions exists, we need a valid transitionFinish to verify arrival
-        boolean toComplete = toState != null &&
-                (toTransitions == null || toTransition != null);
+        boolean toComplete = toState != null && (toTransitions == null || toTransition != null);
 
         if (!fromComplete || !toComplete) {
             System.out.println("=== TRANSITION DEBUG: isComplete() check failed:");

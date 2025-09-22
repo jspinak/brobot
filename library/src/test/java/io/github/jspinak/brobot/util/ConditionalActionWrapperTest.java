@@ -14,8 +14,8 @@ import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 
 import io.github.jspinak.brobot.action.*;
-import io.github.jspinak.brobot.action.ConditionalActionChain;
 import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ConditionalActionChain;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;

@@ -27,7 +27,7 @@ import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.state.StateString;
-// Removed old logging import: 
+
 /**
  * Entry point for executing GUI automation actions in the Brobot model-based framework.
  *
@@ -57,6 +57,7 @@ import io.github.jspinak.brobot.model.state.StateString;
  * context of the current State, making them more reliable and robust.
  *
  * <h3>Example Usage:</h3>
+ *
  * <pre>{@code
  * // Simple click at location
  * action.click(new Location(100, 200));

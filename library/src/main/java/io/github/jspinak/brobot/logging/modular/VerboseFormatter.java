@@ -2,8 +2,6 @@ package io.github.jspinak.brobot.logging.modular;
 
 import java.time.Duration;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.springframework.stereotype.Component;
 
@@ -11,8 +9,8 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.model.match.Match;
 
 /**
- * Provides comprehensive, detailed output for action results.
- * Includes all available information about the action execution.
+ * Provides comprehensive, detailed output for action results. Includes all available information
+ * about the action execution.
  */
 @Component
 public class VerboseFormatter implements ActionLogFormatter {
@@ -45,7 +43,9 @@ public class VerboseFormatter implements ActionLogFormatter {
 
         // Timestamp
         if (actionResult.getStartTime() != null) {
-            header.append("[").append(actionResult.getStartTime().format(TIME_FORMATTER)).append("] ");
+            header.append("[")
+                    .append(actionResult.getStartTime().format(TIME_FORMATTER))
+                    .append("] ");
         }
 
         // Status symbol and text
@@ -115,10 +115,14 @@ public class VerboseFormatter implements ActionLogFormatter {
 
         // Start and end times
         if (actionResult.getStartTime() != null) {
-            section.append("  Started: ").append(actionResult.getStartTime().format(TIME_FORMATTER)).append("\n");
+            section.append("  Started: ")
+                    .append(actionResult.getStartTime().format(TIME_FORMATTER))
+                    .append("\n");
         }
         if (actionResult.getEndTime() != null) {
-            section.append("  Ended: ").append(actionResult.getEndTime().format(TIME_FORMATTER)).append("\n");
+            section.append("  Ended: ")
+                    .append(actionResult.getEndTime().format(TIME_FORMATTER))
+                    .append("\n");
         }
 
         return section.toString();

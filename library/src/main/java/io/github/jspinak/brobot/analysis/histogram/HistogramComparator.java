@@ -7,7 +7,6 @@ import static org.bytedeco.opencv.global.opencv_imgproc.EMD;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
@@ -144,7 +143,7 @@ public class HistogramComparator {
         Mat result = new Mat();
         hconcat(mv, result);
 
-        convertedColumn.release();  // Clean up the temporary matrix
+        convertedColumn.release(); // Clean up the temporary matrix
         return result;
     }
 

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import io.github.jspinak.brobot.core.location.ElementLocator;
 import io.github.jspinak.brobot.core.services.MouseController;
 import io.github.jspinak.brobot.model.element.Location;
-// Removed old logging import: 
+
 /**
  * Executes click operations on elements WITHOUT depending on Find.
  *
@@ -137,7 +137,6 @@ public class ClickExecutor {
         int x = location.getCalculatedX();
         int y = location.getCalculatedY();
 
-
         // Move to location first if configured
         if (options.isMoveBeforeClick()) {
             if (!mouseController.moveTo(x, y)) {
@@ -172,8 +171,7 @@ public class ClickExecutor {
             }
         }
 
-        if (success) {
-        }
+        if (success) {}
 
         return success;
     }

@@ -267,7 +267,8 @@ public class FindAll {
             Location offset) {
         int i = 0;
         String name =
-                pattern.getNameWithoutExtension() != null && !pattern.getNameWithoutExtension().isEmpty()
+                pattern.getNameWithoutExtension() != null
+                                && !pattern.getNameWithoutExtension().isEmpty()
                         ? pattern.getNameWithoutExtension()
                         : scene.getPattern().getNameWithoutExtension();
         List<Region> regionsAllowedForMatch = selectRegions.getRegions(actionConfig, stateImage);
@@ -384,7 +385,8 @@ public class FindAll {
             Location offset) {
         int i = 0;
         String name =
-                pattern.getNameWithoutExtension() != null && !pattern.getNameWithoutExtension().isEmpty()
+                pattern.getNameWithoutExtension() != null
+                                && !pattern.getNameWithoutExtension().isEmpty()
                         ? pattern.getNameWithoutExtension()
                         : scene.getPattern().getNameWithoutExtension();
         List<Match> validMatches = new ArrayList<>();

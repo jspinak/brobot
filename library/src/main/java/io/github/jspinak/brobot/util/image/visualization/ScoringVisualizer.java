@@ -3,7 +3,6 @@ package io.github.jspinak.brobot.util.image.visualization;
 import static io.github.jspinak.brobot.model.analysis.color.ColorInfo.ColorStat.MEAN;
 import static org.bytedeco.opencv.global.opencv_imgproc.*;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -101,9 +100,7 @@ public class ScoringVisualizer {
     public Mat getMeanBGR(ColorSchema colorSchema) {
         Mat hsvMean = colorSchema.getMat(MEAN, new Size(size, size));
         MatrixUtilities.printPartOfMat(hsvMean, 5, 5, "hsvMean");
-        List.of(colorSchema.getColorStats(MEAN))
-                .forEach(dbl -> {
-                });
+        List.of(colorSchema.getColorStats(MEAN)).forEach(dbl -> {});
         // MatrixUtilities.info removed
         cvtColor(hsvMean, hsvMean, COLOR_HSV2BGR);
         addText(hsvMean, "Mean");

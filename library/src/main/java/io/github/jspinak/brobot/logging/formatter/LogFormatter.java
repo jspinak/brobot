@@ -5,11 +5,12 @@ import io.github.jspinak.brobot.logging.LogEntry;
 /**
  * Interface for formatting log entries into string output.
  *
- * <p>Log formatters convert LogEntry objects into formatted strings
- * suitable for various output destinations (console, file, network).
- * Different formatters provide different levels of detail and structure.
+ * <p>Log formatters convert LogEntry objects into formatted strings suitable for various output
+ * destinations (console, file, network). Different formatters provide different levels of detail
+ * and structure.
  *
  * <p>Implementations should be:
+ *
  * <ul>
  *   <li>Thread-safe for concurrent use
  *   <li>Fast and efficient for high-volume logging
@@ -18,6 +19,7 @@ import io.github.jspinak.brobot.logging.LogEntry;
  * </ul>
  *
  * <p>Available formatters:
+ *
  * <ul>
  *   <li>{@link SimpleLogFormatter} - Simple human-readable format
  *   <li>{@link StructuredLogFormatter} - Structured format with metadata
@@ -25,6 +27,7 @@ import io.github.jspinak.brobot.logging.LogEntry;
  * </ul>
  *
  * <p>Example usage:
+ *
  * <pre>{@code
  * LogFormatter formatter = new SimpleLogFormatter();
  * String output = formatter.format(logEntry);
@@ -51,9 +54,8 @@ public interface LogFormatter {
     }
 
     /**
-     * Check if this formatter supports the given log entry.
-     * Most formatters support all entries, but specialized formatters
-     * might only handle specific types.
+     * Check if this formatter supports the given log entry. Most formatters support all entries,
+     * but specialized formatters might only handle specific types.
      *
      * @param entry The log entry to check
      * @return true if this formatter can format the entry
@@ -63,8 +65,7 @@ public interface LogFormatter {
     }
 
     /**
-     * Get the expected output format type.
-     * Used for routing to appropriate output destinations.
+     * Get the expected output format type. Used for routing to appropriate output destinations.
      *
      * @return The format type
      */
@@ -72,9 +73,7 @@ public interface LogFormatter {
         return FormatType.TEXT;
     }
 
-    /**
-     * Output format types for different use cases.
-     */
+    /** Output format types for different use cases. */
     enum FormatType {
         /** Plain text format for human reading */
         TEXT,

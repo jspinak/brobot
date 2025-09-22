@@ -1,5 +1,10 @@
 package io.github.jspinak.brobot.test;
 
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import java.time.Duration;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
@@ -14,11 +19,6 @@ import io.github.jspinak.brobot.logging.LogCategory;
 import io.github.jspinak.brobot.logging.LogLevel;
 import io.github.jspinak.brobot.test.jackson.BrobotJacksonMixins;
 import io.github.jspinak.brobot.test.jackson.BrobotJacksonTestConfig;
-
-import java.time.Duration;
-
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Base test class for all Brobot tests. Provides common setup and configuration for consistent test
@@ -42,14 +42,14 @@ public abstract class BrobotTestBase {
     protected ObjectMapper testObjectMapper;
 
     /**
-     * Mock BrobotLogger for testing logging functionality.
-     * Pre-configured with fluent API mock responses.
+     * Mock BrobotLogger for testing logging functionality. Pre-configured with fluent API mock
+     * responses.
      */
     protected BrobotLogger mockLogger;
 
     /**
-     * Mock LogBuilder for building log entries in tests.
-     * Pre-configured to support fluent API chaining.
+     * Mock LogBuilder for building log entries in tests. Pre-configured to support fluent API
+     * chaining.
      */
     protected LogBuilder mockLogBuilder;
 
@@ -175,8 +175,8 @@ public abstract class BrobotTestBase {
     }
 
     /**
-     * Creates a mock LogBuilder with fluent API support.
-     * All builder methods return the builder itself to support method chaining.
+     * Creates a mock LogBuilder with fluent API support. All builder methods return the builder
+     * itself to support method chaining.
      *
      * @return A fully configured mock LogBuilder
      */
@@ -242,8 +242,8 @@ public abstract class BrobotTestBase {
     }
 
     /**
-     * Reset the mock logger and builder for fresh verification.
-     * Useful when testing multiple logging scenarios in a single test.
+     * Reset the mock logger and builder for fresh verification. Useful when testing multiple
+     * logging scenarios in a single test.
      */
     protected void resetLoggerMocks() {
         Mockito.reset(mockLogger, mockLogBuilder);

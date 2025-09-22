@@ -108,7 +108,7 @@ public class StateMemoryTest extends BrobotTestBase {
 
             assertFalse(stateMemory.getActiveStates().contains(1L));
             assertTrue(stateMemory.getActiveStates().contains(2L));
-            }
+        }
 
         @Test
         @DisplayName("Should remove inactive state by name")
@@ -118,7 +118,7 @@ public class StateMemoryTest extends BrobotTestBase {
             stateMemory.removeInactiveState("State1");
 
             assertFalse(stateMemory.getActiveStates().contains(1L));
-            }
+        }
 
         @Test
         @DisplayName("Should remove multiple inactive states")

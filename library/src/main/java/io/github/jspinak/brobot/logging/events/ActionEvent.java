@@ -1,24 +1,25 @@
 package io.github.jspinak.brobot.logging.events;
 
-import lombok.Builder;
-import lombok.Value;
-
-import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.model.element.Location;
-import io.github.jspinak.brobot.logging.LogLevel;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 
+import io.github.jspinak.brobot.action.ActionInterface;
+import io.github.jspinak.brobot.logging.LogLevel;
+import io.github.jspinak.brobot.model.element.Location;
+
+import lombok.Builder;
+import lombok.Value;
+
 /**
  * Event representing the execution of a Brobot action.
  *
- * <p>Captures all relevant information about an action execution including
- * timing, success status, location, and metadata. This event is used by
- * the logging system to provide detailed action tracking.
+ * <p>Captures all relevant information about an action execution including timing, success status,
+ * location, and metadata. This event is used by the logging system to provide detailed action
+ * tracking.
  *
  * <p>Example usage:
+ *
  * <pre>{@code
  * ActionEvent event = ActionEvent.builder()
  *     .actionType("CLICK")
@@ -35,8 +36,7 @@ import java.util.Map;
 public class ActionEvent {
 
     /** Timestamp when the action was executed */
-    @Builder.Default
-    Instant timestamp = Instant.now();
+    @Builder.Default Instant timestamp = Instant.now();
 
     /** Type of action executed (e.g., CLICK, TYPE, FIND) */
     String actionType;
@@ -63,8 +63,7 @@ public class ActionEvent {
     Throwable error;
 
     /** Additional metadata about the action */
-    @Builder.Default
-    Map<String, Object> metadata = java.util.Collections.emptyMap();
+    @Builder.Default Map<String, Object> metadata = java.util.Collections.emptyMap();
 
     /** The action class that was executed */
     Class<? extends ActionInterface> actionClass;
@@ -104,7 +103,8 @@ public class ActionEvent {
      * @param errorMessage The error message
      * @return A new ActionEvent for a failed action
      */
-    public static ActionEvent failure(String actionType, String target, Duration duration, String errorMessage) {
+    public static ActionEvent failure(
+            String actionType, String target, Duration duration, String errorMessage) {
         return ActionEvent.builder()
                 .actionType(actionType)
                 .target(target)
@@ -121,20 +121,28 @@ public class ActionEvent {
      */
     public String getDescription() {
         if (success) {
-            return String.format("%s %s → SUCCESS [%dms]%s%s",
-                    actionType, target, duration.toMillis(),
-                    location != null ? String.format(" loc:(%d,%d)", location.getX(), location.getY()) : "",
+            return String.format(
+                    "%s %s → SUCCESS [%dms]%s%s",
+                    actionType,
+                    target,
+                    duration.toMillis(),
+                    location != null
+                            ? String.format(" loc:(%d,%d)", location.getX(), location.getY())
+                            : "",
                     similarity > 0 ? String.format(" sim:%.2f", similarity) : "");
         } else {
-            return String.format("%s %s → FAILED [%dms]%s",
-                    actionType, target, duration.toMillis(),
+            return String.format(
+                    "%s %s → FAILED [%dms]%s",
+                    actionType,
+                    target,
+                    duration.toMillis(),
                     errorMessage != null ? " " + errorMessage : "");
         }
     }
 
     /**
-     * Get the log level for this action event.
-     * Successful actions log at INFO level, failures at WARN level.
+     * Get the log level for this action event. Successful actions log at INFO level, failures at
+     * WARN level.
      *
      * @return The appropriate log level
      */
@@ -151,8 +159,9 @@ public class ActionEvent {
         if (success) {
             return String.format("Action %s on %s completed successfully", actionType, target);
         } else {
-            return String.format("Action %s on %s failed%s", actionType, target,
-                    errorMessage != null ? ": " + errorMessage : "");
+            return String.format(
+                    "Action %s on %s failed%s",
+                    actionType, target, errorMessage != null ? ": " + errorMessage : "");
         }
     }
 

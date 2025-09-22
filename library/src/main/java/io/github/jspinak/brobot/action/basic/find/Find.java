@@ -1,5 +1,8 @@
 package io.github.jspinak.brobot.action.basic.find;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionInterface;
@@ -9,12 +12,9 @@ import io.github.jspinak.brobot.logging.BrobotLogger;
 import io.github.jspinak.brobot.logging.LogCategory;
 import io.github.jspinak.brobot.logging.LogLevel;
 import io.github.jspinak.brobot.logging.events.ActionEvent;
+import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.model.element.Location;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -113,9 +113,13 @@ public class Find implements ActionInterface {
 
         // Validate configuration
         if (!(matches.getActionConfig() instanceof BaseFindOptions)) {
-            brobotLogger.error(LogCategory.ACTIONS,
-                String.format("Find requires BaseFindOptions configuration, got: %s",
-                    matches.getActionConfig() != null ? matches.getActionConfig().getClass() : "null"));
+            brobotLogger.error(
+                    LogCategory.ACTIONS,
+                    String.format(
+                            "Find requires BaseFindOptions configuration, got: %s",
+                            matches.getActionConfig() != null
+                                    ? matches.getActionConfig().getClass()
+                                    : "null"));
             throw new IllegalArgumentException("Find requires BaseFindOptions configuration");
         }
 
@@ -135,8 +139,10 @@ public class Find implements ActionInterface {
 
         // Log action start at appropriate level
         if (brobotLogger.isLoggingEnabled(LogCategory.ACTIONS, LogLevel.DEBUG)) {
-            brobotLogger.log(LogCategory.ACTIONS, LogLevel.DEBUG,
-                String.format("FIND %s (strategy: %s)", target, findOptions.getFindStrategy()));
+            brobotLogger.log(
+                    LogCategory.ACTIONS,
+                    LogLevel.DEBUG,
+                    String.format("FIND %s (strategy: %s)", target, findOptions.getFindStrategy()));
         }
 
         // Delegate entire orchestration to the pipeline
@@ -149,15 +155,17 @@ public class Find implements ActionInterface {
         // Match count and confidence are now tracked internally by ActionResult components
 
         // Create and log action event
-        ActionEvent.ActionEventBuilder eventBuilder = ActionEvent.builder()
-            .actionType("FIND")
-            .target(target)
-            .success(matches.isSuccess())
-            .duration(matches.getDuration());
+        ActionEvent.ActionEventBuilder eventBuilder =
+                ActionEvent.builder()
+                        .actionType("FIND")
+                        .target(target)
+                        .success(matches.isSuccess())
+                        .duration(matches.getDuration());
 
         if (matches.isSuccess() && !matches.getMatchList().isEmpty()) {
             Match firstMatch = matches.getMatchList().get(0);
-            eventBuilder.location(new Location(firstMatch.getTarget().getX(), firstMatch.getTarget().getY()));
+            eventBuilder.location(
+                    new Location(firstMatch.getTarget().getX(), firstMatch.getTarget().getY()));
             eventBuilder.similarity(firstMatch.getScore());
             Map<String, Object> metadata = new HashMap<>();
             metadata.put("matches_found", matches.getMatchList().size());
@@ -168,9 +176,7 @@ public class Find implements ActionInterface {
         brobotLogger.logAction(event);
     }
 
-    /**
-     * Extracts target description from object collections for logging.
-     */
+    /** Extracts target description from object collections for logging. */
     private String extractTarget(ObjectCollection... collections) {
         if (collections == null || collections.length == 0) {
             return "unknown";

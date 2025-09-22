@@ -1,19 +1,20 @@
 package io.github.jspinak.brobot.test.mock;
 
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import java.time.Duration;
+
+import org.springframework.stereotype.Component;
+
 import io.github.jspinak.brobot.logging.BrobotLogger;
 import io.github.jspinak.brobot.logging.LogBuilder;
 import io.github.jspinak.brobot.logging.LogCategory;
 import io.github.jspinak.brobot.logging.LogLevel;
-import org.springframework.stereotype.Component;
-
-import java.time.Duration;
-
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 
 /**
- * Factory for creating mock logger instances for testing.
- * Provides various types of mock loggers for different test scenarios.
+ * Factory for creating mock logger instances for testing. Provides various types of mock loggers
+ * for different test scenarios.
  */
 @Component
 public class MockLoggerFactory {
@@ -31,8 +32,8 @@ public class MockLoggerFactory {
     }
 
     /**
-     * Creates a mock LogBuilder with fluent API support.
-     * All builder methods return the builder itself to support method chaining.
+     * Creates a mock LogBuilder with fluent API support. All builder methods return the builder
+     * itself to support method chaining.
      *
      * @return A fully configured mock LogBuilder
      */
@@ -54,8 +55,8 @@ public class MockLoggerFactory {
     }
 
     /**
-     * Creates a silent logger that doesn't log anything.
-     * Useful for performance tests where logging overhead should be minimized.
+     * Creates a silent logger that doesn't log anything. Useful for performance tests where logging
+     * overhead should be minimized.
      *
      * @return A silent mock BrobotLogger
      */
@@ -89,8 +90,8 @@ public class MockLoggerFactory {
     }
 
     /**
-     * Creates a capturing logger that records all log entries for verification.
-     * Used with LogCapture utility for integration tests.
+     * Creates a capturing logger that records all log entries for verification. Used with
+     * LogCapture utility for integration tests.
      *
      * @param logCapture The LogCapture instance to record entries to
      * @return A capturing mock BrobotLogger
@@ -98,17 +99,19 @@ public class MockLoggerFactory {
     public BrobotLogger createCapturingLogger(LogCapture logCapture) {
         BrobotLogger logger = mock(BrobotLogger.class);
 
-        when(logger.builder(any(LogCategory.class))).thenAnswer(invocation -> {
-            LogCategory category = invocation.getArgument(0);
-            return new CapturingLogBuilder(category, logCapture);
-        });
+        when(logger.builder(any(LogCategory.class)))
+                .thenAnswer(
+                        invocation -> {
+                            LogCategory category = invocation.getArgument(0);
+                            return new CapturingLogBuilder(category, logCapture);
+                        });
 
         return logger;
     }
 
     /**
-     * Creates a strict logger that verifies correct usage patterns.
-     * Throws exceptions if methods are called in incorrect order.
+     * Creates a strict logger that verifies correct usage patterns. Throws exceptions if methods
+     * are called in incorrect order.
      *
      * @return A strict mock BrobotLogger
      */
@@ -127,8 +130,10 @@ public class MockLoggerFactory {
      * @return A strict mock LogBuilder
      */
     private LogBuilder createStrictLogBuilder() {
-        LogBuilder builder = mock(LogBuilder.class, withSettings()
-            .strictness(org.mockito.quality.Strictness.STRICT_STUBS));
+        LogBuilder builder =
+                mock(
+                        LogBuilder.class,
+                        withSettings().strictness(org.mockito.quality.Strictness.STRICT_STUBS));
 
         // Enforce that level must be set first
         when(builder.level(any(LogLevel.class))).thenReturn(builder);
@@ -143,17 +148,19 @@ public class MockLoggerFactory {
         when(builder.state(anyString())).thenReturn(builder);
 
         // Verify log() is called last
-        doAnswer(invocation -> {
-            verify(builder, atLeastOnce()).level(any(LogLevel.class));
-            return null;
-        }).when(builder).log();
+        doAnswer(
+                        invocation -> {
+                            verify(builder, atLeastOnce()).level(any(LogLevel.class));
+                            return null;
+                        })
+                .when(builder)
+                .log();
 
         return builder;
     }
 
     /**
-     * Creates a spy logger that wraps a real logger instance.
-     * Useful for partial mocking scenarios.
+     * Creates a spy logger that wraps a real logger instance. Useful for partial mocking scenarios.
      *
      * @param realLogger The real logger instance to spy on
      * @return A spy BrobotLogger

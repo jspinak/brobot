@@ -1,11 +1,11 @@
 package io.github.jspinak.brobot.aspects.monitoring;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
-import java.time.Duration;
 
 import jakarta.annotation.PostConstruct;
 
@@ -20,12 +20,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.logging.BrobotLogger;
-import io.github.jspinak.brobot.logging.events.ActionEvent;
-
-import lombok.extern.slf4j.Slf4j;
 import io.github.jspinak.brobot.logging.LogCategory;
 import io.github.jspinak.brobot.logging.LogLevel;
 
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Aspect that provides comprehensive performance monitoring for Brobot operations.
@@ -211,7 +209,8 @@ public class PerformanceMonitoringAspect {
 
     /** Log slow operation with details */
     private void logSlowOperation(String method, long executionTime, Object[] args) {
-        brobotLogger.builder(LogCategory.PERFORMANCE)
+        brobotLogger
+                .builder(LogCategory.PERFORMANCE)
                 .level(LogLevel.WARN)
                 .action("SLOW_OPERATION", method)
                 .duration(Duration.ofMillis(executionTime))
@@ -243,7 +242,8 @@ public class PerformanceMonitoringAspect {
         // Log detailed stats for slowest methods
         slowestMethods.forEach(
                 stats -> {
-                    brobotLogger.builder(LogCategory.PERFORMANCE)
+                    brobotLogger
+                            .builder(LogCategory.PERFORMANCE)
                             .level(LogLevel.INFO)
                             .action("PERFORMANCE_REPORT", stats.getMethodName())
                             .context("method", stats.getMethodName())
@@ -252,8 +252,7 @@ public class PerformanceMonitoringAspect {
                             .context("minTime", stats.getMinTime())
                             .context("maxTime", stats.getMaxTime())
                             .context("p95Time", stats.getPercentile(95))
-                            .context(
-                                    "successRate", String.format("%.2f%%", stats.getSuccessRate()))
+                            .context("successRate", String.format("%.2f%%", stats.getSuccessRate()))
                             .message("Performance statistics")
                             .log();
                 });
@@ -285,7 +284,8 @@ public class PerformanceMonitoringAspect {
 
                     // Check for significant degradation (>20% slower)
                     if (recentAvg > previousAvg * 1.2) {
-                        brobotLogger.builder(LogCategory.PERFORMANCE)
+                        brobotLogger
+                                .builder(LogCategory.PERFORMANCE)
                                 .level(LogLevel.WARN)
                                 .action("PERFORMANCE_DEGRADATION", method)
                                 .context("method", method)

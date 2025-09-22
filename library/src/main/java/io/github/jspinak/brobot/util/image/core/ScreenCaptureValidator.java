@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import io.github.jspinak.brobot.logging.BrobotLogger;
 import io.github.jspinak.brobot.logging.LogCategory;
 import io.github.jspinak.brobot.logging.LogLevel;
-import io.github.jspinak.brobot.logging.events.ActionEvent;
 
 /**
  * Validates screen capture functionality in different environments. Detects headless mode,
@@ -255,7 +254,10 @@ public class ScreenCaptureValidator {
 
         if (result.isValid()) {
             if (logger != null) {
-                logger.builder(LogCategory.SYSTEM).level(LogLevel.INFO).message("Screen capture test PASSED").log();
+                logger.builder(LogCategory.SYSTEM)
+                        .level(LogLevel.INFO)
+                        .message("Screen capture test PASSED")
+                        .log();
             }
         } else {
             if (logger != null) {

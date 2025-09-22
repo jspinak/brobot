@@ -338,8 +338,8 @@ public class PerformanceValidator {
     }
 
     /**
-     * Configuration for performance validation.
-     * Provides fluent API for customizing validation thresholds and parameters.
+     * Configuration for performance validation. Provides fluent API for customizing validation
+     * thresholds and parameters.
      */
     public static class ValidationConfig {
         public double minSuccessRate = DefaultThresholds.MIN_SUCCESS_RATE;
@@ -426,8 +426,8 @@ public class PerformanceValidator {
     }
 
     /**
-     * Result of performance validation containing metrics and findings.
-     * Includes errors, warnings, anomalies, and performance metrics.
+     * Result of performance validation containing metrics and findings. Includes errors, warnings,
+     * anomalies, and performance metrics.
      */
     public static class ValidationResult {
         private boolean valid = true;

@@ -165,10 +165,6 @@ public class IllustrationConfig {
      *
      * @return new config builder with current settings
      */
-    // Commented out due to Lombok builder naming issues
-    // public IllustrationConfigBuilder modify() {
-    //     return this.toBuilder();
-    // }
 
     /** Configuration for batching illustrations to improve performance. */
     @Data

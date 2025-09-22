@@ -129,7 +129,6 @@ public class FindColor {
         matchOps.limitNumberOfMatches(matches, colorOptions);
     }
 
-    // Removed findWithActionConfig and convertToActionConfig methods
     // These are no longer needed with ActionConfig removed
 
 }
