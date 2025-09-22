@@ -2,6 +2,8 @@
 
 This document provides a comprehensive reference for all Brobot configuration properties that can be set in `application.properties` or `application.yml`.
 
+> **Looking for usage examples?** See the [BrobotProperties Usage Guide](brobot-properties-usage.md) for how to use these properties in your code.
+
 ## Table of Contents
 - [Image Find Debugging](#image-find-debugging)
 - [Headless Detection](#headless-detection)

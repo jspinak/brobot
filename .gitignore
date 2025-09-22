@@ -222,3 +222,11 @@ rename_*.py
 run_*.py
 update_*.py
 verify_*.py
+
+# Runner module (kept locally but not in remote repo)
+/runner/
+runner-backup/
+
+# No-code automation docs (deprecated - moved to backups-archive)
+docs/versioned_docs/version-1.0.7/02-no-code-automation/
+backups-archive/
