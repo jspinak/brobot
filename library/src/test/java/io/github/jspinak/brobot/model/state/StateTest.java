@@ -69,8 +69,8 @@ public class StateTest extends BrobotTestBase {
             assertTrue(newState.getStateImages().isEmpty());
             assertEquals("", newState.getName());
             assertFalse(newState.isBlocking());
-            assertEquals(100, newState.getBaseProbabilityExists());
-            assertEquals(0, newState.getProbabilityExists());
+            assertEquals(100, newState.getBaseMockFindStochasticModifier());
+            assertEquals(0, newState.getMockFindStochasticModifier());
             assertEquals(1, newState.getPathCost());
         }
 
@@ -86,8 +86,8 @@ public class StateTest extends BrobotTestBase {
             state.setBlocking(true);
             state.setPathCost(5);
             state.setLastAccessed(now);
-            state.setBaseProbabilityExists(80);
-            state.setProbabilityExists(75);
+            state.setBaseMockFindStochasticModifier(80);
+            state.setMockFindStochasticModifier(75);
             state.setTimesVisited(10);
 
             assertEquals(id, state.getId());
@@ -95,8 +95,8 @@ public class StateTest extends BrobotTestBase {
             assertTrue(state.isBlocking());
             assertEquals(5, state.getPathCost());
             assertEquals(now, state.getLastAccessed());
-            assertEquals(80, state.getBaseProbabilityExists());
-            assertEquals(75, state.getProbabilityExists());
+            assertEquals(80, state.getBaseMockFindStochasticModifier());
+            assertEquals(75, state.getMockFindStochasticModifier());
             assertEquals(10, state.getTimesVisited());
         }
     }
@@ -326,34 +326,34 @@ public class StateTest extends BrobotTestBase {
         @Test
         @DisplayName("Base probability defaults to 100")
         public void testDefaultBaseProbability() {
-            assertEquals(100, state.getBaseProbabilityExists());
+            assertEquals(100, state.getBaseMockFindStochasticModifier());
         }
 
         @Test
         @DisplayName("Probability exists defaults to 0")
         public void testDefaultProbabilityExists() {
-            assertEquals(0, state.getProbabilityExists());
+            assertEquals(0, state.getMockFindStochasticModifier());
         }
 
         @Test
         @DisplayName("Set probability to base probability")
         public void testSetProbabilityToBase() {
-            state.setBaseProbabilityExists(85);
-            state.setProbabilityExists(0);
+            state.setBaseMockFindStochasticModifier(85);
+            state.setMockFindStochasticModifier(0);
 
             state.setProbabilityToBaseProbability();
 
-            assertEquals(85, state.getProbabilityExists());
+            assertEquals(85, state.getMockFindStochasticModifier());
         }
 
         @ParameterizedTest
         @ValueSource(ints = {0, 25, 50, 75, 100})
         @DisplayName("Set various probability values")
         public void testVariousProbabilities(int probability) {
-            state.setBaseProbabilityExists(probability);
+            state.setBaseMockFindStochasticModifier(probability);
             state.setProbabilityToBaseProbability();
 
-            assertEquals(probability, state.getProbabilityExists());
+            assertEquals(probability, state.getMockFindStochasticModifier());
         }
     }
 
@@ -506,7 +506,7 @@ public class StateTest extends BrobotTestBase {
             state.setName("LoginState");
             state.setBlocking(true);
             state.setPathCost(2);
-            state.setBaseProbabilityExists(90);
+            state.setBaseMockFindStochasticModifier(90);
             state.setProbabilityToBaseProbability();
 
             // Add state text
@@ -535,7 +535,7 @@ public class StateTest extends BrobotTestBase {
             assertEquals("LoginState", state.getName());
             assertTrue(state.isBlocking());
             assertEquals(2, state.getPathCost());
-            assertEquals(90, state.getProbabilityExists());
+            assertEquals(90, state.getMockFindStochasticModifier());
             assertEquals(3, state.getStateText().size());
             assertEquals(1, state.getStateImages().size());
             assertEquals(1, state.getStateRegions().size());

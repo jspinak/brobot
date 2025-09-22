@@ -72,7 +72,7 @@ public class StateRegionTest extends BrobotTestBase {
         @DisplayName("Default probabilities are 100")
         public void testDefaultProbabilities() {
             assertEquals(100, stateRegion.getStaysVisibleAfterClicked());
-            assertEquals(100, stateRegion.getProbabilityExists());
+            assertEquals(100, stateRegion.getMockFindStochasticModifier());
         }
 
         @Test
@@ -192,9 +192,9 @@ public class StateRegionTest extends BrobotTestBase {
         @Test
         @DisplayName("Set probability exists")
         public void testSetProbabilityExists() {
-            stateRegion.setProbabilityExists(80);
+            stateRegion.setMockFindStochasticModifier(80);
 
-            assertEquals(80, stateRegion.getProbabilityExists());
+            assertEquals(80, stateRegion.getMockFindStochasticModifier());
         }
 
         @Test
@@ -210,10 +210,10 @@ public class StateRegionTest extends BrobotTestBase {
         @DisplayName("Various probability values")
         public void testVariousProbabilities(int probability) {
             stateRegion.setStaysVisibleAfterClicked(probability);
-            stateRegion.setProbabilityExists(probability);
+            stateRegion.setMockFindStochasticModifier(probability);
 
             assertEquals(probability, stateRegion.getStaysVisibleAfterClicked());
-            assertEquals(probability, stateRegion.getProbabilityExists());
+            assertEquals(probability, stateRegion.getMockFindStochasticModifier());
         }
 
         @Test
@@ -456,7 +456,7 @@ public class StateRegionTest extends BrobotTestBase {
             stateRegion.setSearchRegion(new Region(200, 300, 400, 50));
             stateRegion.setOwnerStateName("LoginForm");
             stateRegion.setStaysVisibleAfterClicked(100); // Field stays visible
-            stateRegion.setProbabilityExists(95);
+            stateRegion.setMockFindStochasticModifier(95);
             stateRegion.setMockText("user@example.com");
             stateRegion.setPosition(new Position(0.5, 0.5)); // Click in center
 
@@ -475,7 +475,7 @@ public class StateRegionTest extends BrobotTestBase {
             stateRegion.setSearchRegion(new Region(50, 100, 800, 600));
             stateRegion.setOwnerStateName("MainView");
             stateRegion.setStaysVisibleAfterClicked(100);
-            stateRegion.setProbabilityExists(100);
+            stateRegion.setMockFindStochasticModifier(100);
 
             // Add anchors for dynamic positioning
             Anchors anchors = new Anchors();
@@ -496,11 +496,11 @@ public class StateRegionTest extends BrobotTestBase {
             stateRegion.setSearchRegion(new Region(400, 500, 200, 60));
             stateRegion.setOwnerStateName("FormState");
             stateRegion.setStaysVisibleAfterClicked(0); // Disappears after click
-            stateRegion.setProbabilityExists(90);
+            stateRegion.setMockFindStochasticModifier(90);
             stateRegion.setPosition(new Position(0.5, 0.5));
 
             assertEquals(0, stateRegion.getStaysVisibleAfterClicked());
-            assertEquals(90, stateRegion.getProbabilityExists());
+            assertEquals(90, stateRegion.getMockFindStochasticModifier());
         }
 
         @Test
@@ -534,10 +534,10 @@ public class StateRegionTest extends BrobotTestBase {
         public void testNegativeProbabilities() {
             // No validation, so negative values are accepted
             stateRegion.setStaysVisibleAfterClicked(-10);
-            stateRegion.setProbabilityExists(-20);
+            stateRegion.setMockFindStochasticModifier(-20);
 
             assertEquals(-10, stateRegion.getStaysVisibleAfterClicked());
-            assertEquals(-20, stateRegion.getProbabilityExists());
+            assertEquals(-20, stateRegion.getMockFindStochasticModifier());
         }
 
         @Test

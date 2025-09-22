@@ -98,7 +98,7 @@ public class ComprehensiveSerializationTest extends BrobotTestBase {
 
         Pattern pattern = testObjectMapper.readValue(JsonTestFixtures.VALID_PATTERN, Pattern.class);
         assertNotNull(pattern);
-        assertEquals("test-pattern", pattern.getName());
+        assertEquals("test-pattern", pattern.getImgpath());
     }
 
     @Test
@@ -249,7 +249,7 @@ public class ComprehensiveSerializationTest extends BrobotTestBase {
                         "false");
 
         Pattern pattern = testObjectMapper.readValue(customPattern, Pattern.class);
-        assertEquals("my-custom-pattern", pattern.getName());
+        assertEquals("my-custom-pattern", pattern.getImgpath());
         assertEquals("custom/path.png", pattern.getImgpath());
         assertTrue(pattern.isFixed());
         assertFalse(pattern.isDynamic());

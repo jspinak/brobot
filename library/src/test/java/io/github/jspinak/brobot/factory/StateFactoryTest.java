@@ -58,14 +58,14 @@ public class StateFactoryTest extends BrobotTestBase {
         void shouldCreateStateWithInitializer() {
             Consumer<State.Builder> initializer =
                     builder -> {
-                        builder.setBaseProbabilityExists(80);
+                        builder.setBaseMockFindStochasticModifier(80);
                     };
 
             State state = stateFactory.createState(TestStateEnum.TEST_STATE_2, initializer);
 
             assertNotNull(state);
             assertEquals(TestStateEnum.TEST_STATE_2.toString(), state.getName());
-            assertEquals(80, state.getBaseProbabilityExists());
+            assertEquals(80, state.getBaseMockFindStochasticModifier());
         }
 
         @Test
@@ -86,7 +86,7 @@ public class StateFactoryTest extends BrobotTestBase {
             Consumer<State.Builder> initializer =
                     builder -> {
                         builder.withImages(image1, image2)
-                                .setBaseProbabilityExists(90)
+                                .setBaseMockFindStochasticModifier(90)
                                 .setBlocking(true);
                     };
 
@@ -94,7 +94,7 @@ public class StateFactoryTest extends BrobotTestBase {
 
             assertNotNull(state);
             assertEquals(2, state.getStateImages().size());
-            assertEquals(90, state.getBaseProbabilityExists());
+            assertEquals(90, state.getBaseMockFindStochasticModifier());
             assertTrue(state.isBlocking());
         }
     }

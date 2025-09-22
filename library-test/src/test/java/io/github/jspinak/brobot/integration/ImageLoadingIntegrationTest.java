@@ -492,7 +492,7 @@ public class ImageLoadingIntegrationTest extends BrobotTestBase {
             for (Pattern pattern : stateImage.getPatterns()) {
                 assertNotNull(
                         pattern.getImage(),
-                        "Pattern " + pattern.getName() + " should have loaded image");
+                        "Pattern " + pattern.getImgpath() + " should have loaded image");
             }
         }
     }

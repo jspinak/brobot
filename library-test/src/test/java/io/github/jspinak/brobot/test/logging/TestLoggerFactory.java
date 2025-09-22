@@ -1,14 +1,11 @@
 package io.github.jspinak.brobot.test.logging;
 
+import org.mockito.Mockito;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
-import io.github.jspinak.brobot.logging.unified.*;
-import io.github.jspinak.brobot.logging.unified.console.ConsoleFormatter;
-import io.github.jspinak.brobot.tools.logging.ActionLogger;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporterInitializer;
-import io.github.jspinak.brobot.tools.logging.spi.LogSink;
-import io.github.jspinak.brobot.tools.logging.spi.NoOpLogSink;
+import io.github.jspinak.brobot.logging.BrobotLogger;
+import io.github.jspinak.brobot.logging.LogBuilder;
 
 /**
  * Factory for creating logger components in tests. This factory ensures proper initialization order
@@ -24,24 +21,20 @@ public class TestLoggerFactory {
      * in the correct order.
      */
     public LoggingSystem createTestLoggingSystem(
-            ActionLogger actionLogger, LoggingVerbosityConfig verbosityConfig) {
+            Object actionLogger, LoggingVerbosityConfig verbosityConfig) {
 
-        // Step 1: Create base components
-        LoggingContext context = new LoggingContext();
-        LogSink logSink = new NoOpLogSink();
-        ConsoleFormatter formatter = new ConsoleFormatter(verbosityConfig);
+        // Create a mock BrobotLogger that returns a working LogBuilder
+        BrobotLogger logger = Mockito.mock(BrobotLogger.class);
+        LogBuilder logBuilder = Mockito.mock(LogBuilder.class);
 
-        // Step 2: Create message router with its dependencies
-        MessageRouter router = new MessageRouter(actionLogger, verbosityConfig, formatter);
+        // Setup the mock to return the LogBuilder for chaining
+        Mockito.when(logger.builder()).thenReturn(logBuilder);
+        Mockito.when(logBuilder.prefix(Mockito.anyString())).thenReturn(logBuilder);
+        Mockito.when(logBuilder.message(Mockito.anyString())).thenReturn(logBuilder);
+        Mockito.when(logBuilder.data(Mockito.anyString(), Mockito.any())).thenReturn(logBuilder);
+        Mockito.when(logBuilder.error(Mockito.any(Throwable.class))).thenReturn(logBuilder);
 
-        // Step 3: Create the main logger
-        BrobotLogger logger = new BrobotLogger(context, router);
-
-        // Step 4: Initialize console reporter
-        ConsoleReporterInitializer reporterInit =
-                new ConsoleReporterInitializer(logger, verbosityConfig);
-
-        return new LoggingSystem(context, logSink, formatter, router, logger, reporterInit);
+        return new LoggingSystem(logger);
     }
 
     /**
@@ -49,50 +42,35 @@ public class TestLoggerFactory {
      * all components.
      */
     public static class LoggingSystem {
-        private final LoggingContext context;
-        private final LogSink logSink;
-        private final ConsoleFormatter formatter;
-        private final MessageRouter router;
         private final BrobotLogger logger;
-        private final ConsoleReporterInitializer reporterInit;
 
-        public LoggingSystem(
-                LoggingContext context,
-                LogSink logSink,
-                ConsoleFormatter formatter,
-                MessageRouter router,
-                BrobotLogger logger,
-                ConsoleReporterInitializer reporterInit) {
-            this.context = context;
-            this.logSink = logSink;
-            this.formatter = formatter;
-            this.router = router;
+        public LoggingSystem(BrobotLogger logger) {
             this.logger = logger;
-            this.reporterInit = reporterInit;
-        }
-
-        public LoggingContext getContext() {
-            return context;
-        }
-
-        public LogSink getLogSink() {
-            return logSink;
-        }
-
-        public ConsoleFormatter getFormatter() {
-            return formatter;
-        }
-
-        public MessageRouter getRouter() {
-            return router;
         }
 
         public BrobotLogger getLogger() {
             return logger;
         }
 
-        public ConsoleReporterInitializer getReporterInit() {
-            return reporterInit;
+        // Return null for removed components - they're no longer needed
+        public Object getContext() {
+            return null;
+        }
+
+        public Object getLogSink() {
+            return null;
+        }
+
+        public Object getFormatter() {
+            return null;
+        }
+
+        public Object getRouter() {
+            return null;
+        }
+
+        public Object getReporterInit() {
+            return null;
         }
     }
 }

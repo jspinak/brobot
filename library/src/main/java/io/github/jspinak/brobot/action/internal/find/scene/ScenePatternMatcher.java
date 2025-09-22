@@ -21,8 +21,7 @@ import io.github.jspinak.brobot.model.element.Image;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 /**
  * Performs image pattern matching and OCR text detection within captured scenes.
  *
@@ -122,28 +121,10 @@ public class ScenePatternMatcher {
             List<io.github.jspinak.brobot.model.element.Region> regions = pattern.getRegions();
             String regionInfo =
                     regions.size() == 1 ? regions.get(0).toString() : regions.size() + " regions";
-            ConsoleReporter.println(
-                    "[REGION] '"
-                            + pattern.getName()
-                            + "': "
-                            + (pattern.isFixed() ? "fixed @ " : "search in ")
-                            + regionInfo);
         }
 
         // Check size constraints first
         if (pattern.w() > scene.getPattern().w() || pattern.h() > scene.getPattern().h()) {
-            ConsoleReporter.println(
-                    "[SKIP] Pattern '"
-                            + pattern.getName()
-                            + "' ("
-                            + pattern.w()
-                            + "x"
-                            + pattern.h()
-                            + ") larger than scene ("
-                            + scene.getPattern().w()
-                            + "x"
-                            + scene.getPattern().h()
-                            + ")");
             return new ArrayList<>();
         }
 
@@ -161,20 +142,6 @@ public class ScenePatternMatcher {
         if (conciseFindLogger == null && diagnosticLogger != null) {
             diagnosticLogger.logPatternSearch(pattern, scene, sikuliPattern.getSimilar());
         } else if (conciseFindLogger == null) {
-            // Fallback to ConsoleReporter
-            ConsoleReporter.println(
-                    "[SEARCH] Pattern: '"
-                            + pattern.getName()
-                            + "' ("
-                            + pattern.w()
-                            + "x"
-                            + pattern.h()
-                            + ") | Similarity: "
-                            + sikuliPattern.getSimilar()
-                            + " | Scene: "
-                            + scene.getPattern().w()
-                            + "x"
-                            + scene.getPattern().h());
         }
 
         // Get search regions for filtering (NOT for cropping)
@@ -186,24 +153,16 @@ public class ScenePatternMatcher {
 
         if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
             if (!searchRegions.isEmpty()) {
-                ConsoleReporter.println(
-                        "[SEARCH] Full image search with "
-                                + searchRegions.size()
-                                + " region filter(s)");
                 for (io.github.jspinak.brobot.model.element.Region region : searchRegions) {
-                    ConsoleReporter.println("[FILTER REGION] " + region.toString());
                 }
             } else {
-                ConsoleReporter.println("[SEARCH] Full image search with no region filtering");
             }
         }
 
         if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
-            ConsoleReporter.println("[FINDER] Similarity: " + sikuliPattern.getSimilar());
         }
         f.findAll(sikuliPattern);
         if (verbosityConfig != null && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
-            ConsoleReporter.println("[FINDER] Search complete");
         }
 
         // Process results
@@ -322,15 +281,6 @@ public class ScenePatternMatcher {
                 rejectedMatches++;
                 if (verbosityConfig != null
                         && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
-                    ConsoleReporter.println(
-                            "[MATCH] Rejected at ("
-                                    + sikuliMatch.x
-                                    + ", "
-                                    + sikuliMatch.y
-                                    + ") score="
-                                    + String.format("%.3f", sikuliMatch.getScore())
-                                    + " < "
-                                    + String.format("%.3f", minSimilarity));
                 }
             }
             // else: Match was filtered out by region filter (already logged above)
@@ -343,17 +293,6 @@ public class ScenePatternMatcher {
                     diagnosticLogger.logFoundMatch(
                             matchCount, sikuliMatch.getScore(), sikuliMatch.x, sikuliMatch.y);
                 } else if (matchCount <= 3 && sikuliMatch.getScore() >= 0.50) {
-                    // Fallback to ConsoleReporter for first 3 high-score matches only
-                    ConsoleReporter.println(
-                            "  [FOUND #"
-                                    + matchCount
-                                    + "] Score: "
-                                    + String.format("%.3f", sikuliMatch.getScore())
-                                    + " at ("
-                                    + sikuliMatch.x
-                                    + ", "
-                                    + sikuliMatch.y
-                                    + ")");
                 }
             }
             // ConciseFindLogger will log results summary later
@@ -366,20 +305,11 @@ public class ScenePatternMatcher {
             // Log all filtered out matches in one message
             if (!filteredOutMatches.isEmpty()) {
                 String filteredList = String.join(", ", filteredOutMatches);
-                ConsoleReporter.println(
-                        "[OBSERVE] [FILTER] "
-                                + filteredOutMatches.size()
-                                + " matches filtered out (not fully contained in search regions): "
-                                + filteredList);
             }
 
             // Log all accepted matches in one message if needed
             if (!acceptedRegionMatches.isEmpty() && acceptedRegionMatches.size() > 3) {
                 // Only log if there are many accepted matches to avoid clutter
-                ConsoleReporter.println(
-                        "[OBSERVE] [FILTER] "
-                                + acceptedRegionMatches.size()
-                                + " matches accepted within search regions");
             }
         }
 
@@ -389,45 +319,17 @@ public class ScenePatternMatcher {
             if (verbosityConfig != null
                     && verbosityConfig.getVerbosity() == VerbosityLevel.VERBOSE) {
                 if (acceptedMatches > 0) {
-                    ConsoleReporter.println(
-                            "  [MATCH SUMMARY] "
-                                    + acceptedMatches
-                                    + " matches found"
-                                    + (rejectedMatches > 0
-                                            ? ", " + rejectedMatches + " rejected"
-                                            : "")
-                                    + " (threshold="
-                                    + String.format("%.3f", minSimilarity)
-                                    + ")");
-
                     // Show only top 3 matches
-                    ConsoleReporter.println("  [TOP MATCHES]");
                     for (int i = 0; i < Math.min(topMatches.size(), MAX_VERBOSE_MATCHES); i++) {
                         Match m = topMatches.get(i);
-                        ConsoleReporter.println(
-                                String.format(
-                                        "    #%d: Score %.3f at %s",
-                                        i + 1, m.getScore(), m.getRegion()));
                     }
 
                     if (acceptedMatches > MAX_VERBOSE_MATCHES) {
-                        ConsoleReporter.println(
-                                "    ... and "
-                                        + (acceptedMatches - MAX_VERBOSE_MATCHES)
-                                        + " more matches");
                     }
                 }
             } else if (matchCount > 1 || rejectedMatches > 0) {
                 // Normal mode - simpler summary
                 if (acceptedMatches > 0) {
-                    ConsoleReporter.println(
-                            "  [MATCHES] "
-                                    + acceptedMatches
-                                    + " accepted, "
-                                    + rejectedMatches
-                                    + " rejected (threshold="
-                                    + String.format("%.2f", minSimilarity)
-                                    + ")");
                 }
             }
         }
@@ -447,17 +349,8 @@ public class ScenePatternMatcher {
         } else if (diagnosticLogger != null) {
             diagnosticLogger.logPatternResult(pattern, matchList.size(), bestScore);
         } else {
-            // Fallback to ConsoleReporter
             if (matchList.isEmpty()) {
-                ConsoleReporter.println("  [RESULT] NO MATCHES for '" + pattern.getName() + "'");
             } else {
-                ConsoleReporter.println(
-                        "  [RESULT] "
-                                + matchList.size()
-                                + " matches for '"
-                                + pattern.getName()
-                                + "' | Best: "
-                                + String.format("%.3f", bestScore));
             }
         }
 
@@ -538,36 +431,14 @@ public class ScenePatternMatcher {
             if (diagnosticLogger != null) {
                 diagnosticLogger.logImageAnalysis(patternImg, sceneImg, pattern.getName());
             } else {
-                // Fallback to ConsoleReporter
-                ConsoleReporter.println("    [IMAGE ANALYSIS]");
                 if (patternImg != null) {
-                    ConsoleReporter.println(
-                            "      Pattern: "
-                                    + patternImg.getWidth()
-                                    + "x"
-                                    + patternImg.getHeight()
-                                    + " type="
-                                    + getImageType(patternImg.getType())
-                                    + " bytes="
-                                    + estimateImageSize(patternImg));
                     analyzeImageContent(patternImg, "Pattern");
                 } else {
-                    ConsoleReporter.println("      Pattern image is NULL!");
                 }
 
                 if (sceneImg != null) {
-                    ConsoleReporter.println(
-                            "      Scene: "
-                                    + sceneImg.getWidth()
-                                    + "x"
-                                    + sceneImg.getHeight()
-                                    + " type="
-                                    + getImageType(sceneImg.getType())
-                                    + " bytes="
-                                    + estimateImageSize(sceneImg));
                     analyzeImageContent(sceneImg, "Scene");
                 } else {
-                    ConsoleReporter.println("      Scene image is NULL!");
                 }
             }
 
@@ -575,7 +446,6 @@ public class ScenePatternMatcher {
             String patternFile = debugDir + "/pattern_" + pattern.getName() + ".png";
             if (patternImg != null) {
                 ImageIO.write(patternImg, "png", new File(patternFile));
-                ConsoleReporter.println("    [DEBUG] Saved pattern image to: " + patternFile);
             }
 
             // Save scene image (only first time for each pattern set)
@@ -583,7 +453,6 @@ public class ScenePatternMatcher {
             File sceneFileObj = new File(sceneFile);
             if (!sceneFileObj.exists() && sceneImg != null) {
                 ImageIO.write(sceneImg, "png", sceneFileObj);
-                ConsoleReporter.println("    [DEBUG] Saved scene image to: " + sceneFile);
             }
 
             // Progressive similarity testing
@@ -591,15 +460,6 @@ public class ScenePatternMatcher {
             double[] testThresholds = {0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3};
             Double foundThreshold = null;
             Double foundScore = null;
-
-            ConsoleReporter.println(
-                    "    [SIMILARITY DEBUG] Testing pattern '" + pattern.getName() + "'");
-            ConsoleReporter.println(
-                    "    [SIMILARITY DEBUG] Original MinSimilarity: " + originalSimilarity);
-            ConsoleReporter.println(
-                    "    [SIMILARITY DEBUG] Pattern type before conversion: Type"
-                            + patternImg.getType());
-            ConsoleReporter.println("    [SIMILARITY DEBUG] Scene type: Type" + sceneImg.getType());
 
             for (double threshold : testThresholds) {
                 org.sikuli.basics.Settings.MinSimilarity = threshold;
@@ -624,21 +484,12 @@ public class ScenePatternMatcher {
                 diagnosticLogger.logSimilarityAnalysis(
                         pattern.getName(), testThresholds, foundThreshold, foundScore);
             } else {
-                // Fallback to ConsoleReporter
-                ConsoleReporter.println("    [SIMILARITY ANALYSIS]");
                 if (foundThreshold != null && foundScore != null) {
-                    ConsoleReporter.println(
-                            "      Threshold "
-                                    + String.format("%.1f", foundThreshold)
-                                    + ": FOUND with score "
-                                    + String.format("%.3f", foundScore));
                 } else {
-                    ConsoleReporter.println("      No match found at any threshold tested");
                 }
             }
 
         } catch (Exception e) {
-            ConsoleReporter.println("    [DEBUG] Error in analysis: " + e.getMessage());
         }
     }
 
@@ -675,29 +526,8 @@ public class ScenePatternMatcher {
         int avgR = (int) (totalR / sampleSize);
         int avgG = (int) (totalG / sampleSize);
         int avgB = (int) (totalB / sampleSize);
-
-        ConsoleReporter.println(
-                "      "
-                        + label
-                        + " content: "
-                        + String.format("%.1f%%", blackPercent)
-                        + " black, "
-                        + String.format("%.1f%%", whitePercent)
-                        + " white, "
-                        + "avg RGB=("
-                        + avgR
-                        + ","
-                        + avgG
-                        + ","
-                        + avgB
-                        + ")");
-
         if (blackPercent > 90) {
-            ConsoleReporter.println(
-                    "      WARNING: " + label + " is mostly BLACK - possible capture failure!");
         } else if (whitePercent > 90) {
-            ConsoleReporter.println(
-                    "      WARNING: " + label + " is mostly WHITE - possible capture issue!");
         }
     }
 

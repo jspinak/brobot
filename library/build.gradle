@@ -426,20 +426,23 @@ task coverageReport {
 
 javadoc {
     dependsOn compileJava
-    
+
     if(JavaVersion.current().isJava9Compatible()) {
         options.addBooleanOption('html5', true)
     }
     exclude '**/module-info.java.disabled'
+    exclude '**/module-info.java.v1.1.0'
+    exclude '**/*.md'
     options.addStringOption('Xdoclint:none', '-quiet')
     options.windowTitle = "Brobot 1.1.0 API" // This sets the browser tab title
     options.docTitle = "Brobot 1.1.0 API" // This sets the main header on the page
-    
+
     // Include compiled classes in classpath for Lombok-generated code
     classpath = configurations.compileClasspath + sourceSets.main.output
-    
-    // Disable javadoc temporarily due to Lombok builder issues
-    enabled = false
+
+    // JavaDoc configuration that works with Lombok
+    // We include the compiled output so JavaDoc can see Lombok-generated methods
+    // Removed invalid -sourcepath option for modern Javadoc
 }
 
 // -- Publishing Configuration --

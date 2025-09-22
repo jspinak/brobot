@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.test;
 
-import org.mockito.Mockito;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -8,8 +7,9 @@ import org.springframework.context.annotation.Primary;
 import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig.NormalModeConfig;
 import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig.VerboseModeConfig;
-import io.github.jspinak.brobot.tools.logging.gui.GuiAccessConfig;
-import io.github.jspinak.brobot.tools.logging.gui.GuiAccessMonitor;
+
+// GuiAccessConfig removed
+// GuiAccessMonitor removed
 
 /** Test configuration to provide mock logging beans for Spring tests. */
 @TestConfiguration
@@ -41,15 +41,6 @@ public class TestLoggingConfig {
     // BrobotLogger is now provided by MockBrobotLoggerConfig with a real implementation
     // instead of a mock to avoid NullPointerException issues
 
-    @Bean
-    @Primary
-    public GuiAccessMonitor testGuiAccessMonitor() {
-        GuiAccessMonitor monitor = Mockito.mock(GuiAccessMonitor.class);
-        GuiAccessConfig config = new GuiAccessConfig();
-        config.setContinueOnError(true);
-        config.setCheckOnStartup(false);
-        Mockito.when(monitor.getConfig()).thenReturn(config);
-        Mockito.when(monitor.checkGuiAccess()).thenReturn(false);
-        return monitor;
-    }
+    // GuiAccessMonitor has been removed from the library
+    // This bean is no longer needed
 }

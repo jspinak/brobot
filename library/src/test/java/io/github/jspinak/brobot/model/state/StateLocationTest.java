@@ -113,15 +113,15 @@ public class StateLocationTest extends BrobotTestBase {
         @Test
         @DisplayName("Default probability exists is 100")
         public void testDefaultProbabilityExists() {
-            assertEquals(100, stateLocation.getProbabilityExists());
+            assertEquals(100, stateLocation.getMockFindStochasticModifier());
         }
 
         @Test
         @DisplayName("Set probability exists")
         public void testSetProbabilityExists() {
-            stateLocation.setProbabilityExists(80);
+            stateLocation.setMockFindStochasticModifier(80);
 
-            assertEquals(80, stateLocation.getProbabilityExists());
+            assertEquals(80, stateLocation.getMockFindStochasticModifier());
         }
 
         @ParameterizedTest
@@ -129,10 +129,10 @@ public class StateLocationTest extends BrobotTestBase {
         @DisplayName("Various probability values")
         public void testVariousProbabilities(int probability) {
             stateLocation.setProbabilityStaysVisibleAfterClicked(probability);
-            stateLocation.setProbabilityExists(probability);
+            stateLocation.setMockFindStochasticModifier(probability);
 
             assertEquals(probability, stateLocation.getProbabilityStaysVisibleAfterClicked());
-            assertEquals(probability, stateLocation.getProbabilityExists());
+            assertEquals(probability, stateLocation.getMockFindStochasticModifier());
         }
 
         @Test
@@ -140,10 +140,10 @@ public class StateLocationTest extends BrobotTestBase {
         public void testProbabilitiesOutsideRange() {
             // Test that values outside range are accepted (no validation)
             stateLocation.setProbabilityStaysVisibleAfterClicked(-10);
-            stateLocation.setProbabilityExists(150);
+            stateLocation.setMockFindStochasticModifier(150);
 
             assertEquals(-10, stateLocation.getProbabilityStaysVisibleAfterClicked());
-            assertEquals(150, stateLocation.getProbabilityExists());
+            assertEquals(150, stateLocation.getMockFindStochasticModifier());
         }
     }
 
@@ -358,7 +358,7 @@ public class StateLocationTest extends BrobotTestBase {
             stateLocation.setOwnerStateName("LoginState");
             stateLocation.setProbabilityStaysVisibleAfterClicked(
                     0); // Button disappears after click
-            stateLocation.setProbabilityExists(95); // Usually present
+            stateLocation.setMockFindStochasticModifier(95); // Usually present
 
             assertEquals("LoginButton", stateLocation.getName());
             assertEquals(500, stateLocation.getLocation().getX());
@@ -375,10 +375,10 @@ public class StateLocationTest extends BrobotTestBase {
             stateLocation.setLocation(menuLocation);
             stateLocation.setOwnerStateName("MainMenuState");
             stateLocation.setProbabilityStaysVisibleAfterClicked(100); // Menu stays open
-            stateLocation.setProbabilityExists(100); // Always present in this state
+            stateLocation.setMockFindStochasticModifier(100); // Always present in this state
 
             assertEquals(100, stateLocation.getProbabilityStaysVisibleAfterClicked());
-            assertEquals(100, stateLocation.getProbabilityExists());
+            assertEquals(100, stateLocation.getMockFindStochasticModifier());
         }
 
         @Test
@@ -512,10 +512,10 @@ public class StateLocationTest extends BrobotTestBase {
         @DisplayName("Zero probabilities")
         public void testZeroProbabilities() {
             stateLocation.setProbabilityStaysVisibleAfterClicked(0);
-            stateLocation.setProbabilityExists(0);
+            stateLocation.setMockFindStochasticModifier(0);
 
             assertEquals(0, stateLocation.getProbabilityStaysVisibleAfterClicked());
-            assertEquals(0, stateLocation.getProbabilityExists());
+            assertEquals(0, stateLocation.getMockFindStochasticModifier());
         }
     }
 }

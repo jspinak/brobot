@@ -252,7 +252,7 @@ public class InitialStateVerifier {
                             .getState(stateId)
                             .ifPresent(
                                     state -> {
-                                        stateMemory.addActiveState(stateId, true);
+                                        stateMemory.addActiveState(stateId);
                                         state.setProbabilityToBaseProbability();
                                         log.info(
                                                 "Mock: Activated state '{}' (ID: {})",

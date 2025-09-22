@@ -441,9 +441,9 @@
           "description": "How long the region stays visible after being clicked",
           "default": 100
         },
-        "probabilityExists": {
+        "mockFindStochasticModifier": {
           "type": "integer",
-          "description": "Probability that something can be acted on in this region",
+          "description": "Modifier for the probability of finding elements in mock mode",
           "default": 100,
           "minimum": 0,
           "maximum": 100
@@ -484,9 +484,9 @@
           "description": "How long the location stays visible after being clicked",
           "default": 100
         },
-        "probabilityExists": {
+        "mockFindStochasticModifier": {
           "type": "integer",
-          "description": "Probability that something can be acted on at this location",
+          "description": "Modifier for the probability of finding elements in mock mode",
           "default": 100,
           "minimum": 0,
           "maximum": 100

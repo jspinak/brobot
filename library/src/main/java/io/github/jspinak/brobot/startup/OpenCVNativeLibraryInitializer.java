@@ -89,7 +89,11 @@ public class OpenCVNativeLibraryInitializer
         initializeOpenCV();
     }
 
-    /** Initializes OpenCV native libraries. This method is idempotent and thread-safe. */
+    /**
+     * Initializes OpenCV native libraries.
+     * This method is idempotent and thread-safe, using an AtomicBoolean to ensure
+     * libraries are only loaded once.
+     */
     private static void initializeOpenCV() {
         if (initialized.compareAndSet(false, true)) {
             try {
@@ -165,7 +169,10 @@ public class OpenCVNativeLibraryInitializer
         return initialized.get();
     }
 
-    /** Forces re-initialization of OpenCV libraries. This is mainly for testing purposes. */
+    /**
+     * Forces re-initialization of OpenCV libraries.
+     * This is mainly for testing purposes and should not be used in production.
+     */
     public static void forceReinitialize() {
         initialized.set(false);
         initializeOpenCV();

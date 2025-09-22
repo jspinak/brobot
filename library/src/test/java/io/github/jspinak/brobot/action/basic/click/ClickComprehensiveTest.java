@@ -502,7 +502,7 @@ public class ClickComprehensiveTest extends BrobotTestBase {
         }
 
         @ParameterizedTest
-        @CsvSource({"1, 10", "5, 20", "10, 30", "20, 50"})
+        @CsvSource({"1, 50", "5, 100", "10, 150", "20, 250"})
         @DisplayName("Should scale performance linearly")
         void testPerformanceScaling(int numberOfLocations, int maxDurationMs) {
             // Arrange

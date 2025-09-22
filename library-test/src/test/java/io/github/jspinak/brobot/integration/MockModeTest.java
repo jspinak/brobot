@@ -46,9 +46,9 @@ public class MockModeTest extends BrobotTestBase {
 
         // Check each pattern has ActionHistory
         // for (Pattern pattern : claudePrompt.getPatterns()) {
-        //     System.out.println("Pattern: " + pattern.getName());
+        //     System.out.println("Pattern: " + pattern.getImgpath());
         //     assertNotNull(pattern.getMatchHistory(),
-        //             "Pattern " + pattern.getName() + " should have ActionHistory");
+        //             "Pattern " + pattern.getImgpath() + " should have ActionHistory");
 
         //     if (pattern.getMatchHistory() != null) {
         //         assertFalse(pattern.getMatchHistory().getSnapshots().isEmpty(),

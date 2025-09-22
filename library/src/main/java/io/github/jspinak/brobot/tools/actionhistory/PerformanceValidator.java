@@ -337,7 +337,10 @@ public class PerformanceValidator {
         return result;
     }
 
-    /** Validation configuration. */
+    /**
+     * Configuration for performance validation.
+     * Provides fluent API for customizing validation thresholds and parameters.
+     */
     public static class ValidationConfig {
         public double minSuccessRate = DefaultThresholds.MIN_SUCCESS_RATE;
         public long maxAverageDurationMs = DefaultThresholds.MAX_AVERAGE_DURATION_MS;
@@ -346,42 +349,86 @@ public class PerformanceValidator {
         public int minSamples = DefaultThresholds.MIN_SAMPLES;
         public int maxConsecutiveFailures = 3;
 
+        /**
+         * Creates a validation config with default thresholds.
+         *
+         * @return new ValidationConfig with default values
+         */
         public static ValidationConfig getDefault() {
             return new ValidationConfig();
         }
 
+        /**
+         * Sets the minimum acceptable success rate percentage.
+         *
+         * @param rate minimum success rate (0-100)
+         * @return this config for method chaining
+         */
         public ValidationConfig withMinSuccessRate(double rate) {
             this.minSuccessRate = rate;
             return this;
         }
 
+        /**
+         * Sets the maximum acceptable average duration in milliseconds.
+         *
+         * @param ms maximum average duration in milliseconds
+         * @return this config for method chaining
+         */
         public ValidationConfig withMaxAverageDuration(long ms) {
             this.maxAverageDurationMs = ms;
             return this;
         }
 
+        /**
+         * Sets the maximum acceptable single operation duration.
+         *
+         * @param ms maximum duration in milliseconds
+         * @return this config for method chaining
+         */
         public ValidationConfig withMaxDuration(long ms) {
             this.maxDurationMs = ms;
             return this;
         }
 
+        /**
+         * Sets the minimum number of samples required for reliable validation.
+         *
+         * @param samples minimum sample count
+         * @return this config for method chaining
+         */
         public ValidationConfig withMinSamples(int samples) {
             this.minSamples = samples;
             return this;
         }
 
+        /**
+         * Sets the maximum allowed consecutive failures.
+         *
+         * @param failures maximum consecutive failure count
+         * @return this config for method chaining
+         */
         public ValidationConfig withMaxConsecutiveFailures(int failures) {
             this.maxConsecutiveFailures = failures;
             return this;
         }
 
+        /**
+         * Sets the maximum acceptable duration variance (coefficient of variation).
+         *
+         * @param variance maximum variance (0.0-1.0)
+         * @return this config for method chaining
+         */
         public ValidationConfig withMaxDurationVariance(double variance) {
             this.maxDurationVariance = variance;
             return this;
         }
     }
 
-    /** Validation result containing all findings. */
+    /**
+     * Result of performance validation containing metrics and findings.
+     * Includes errors, warnings, anomalies, and performance metrics.
+     */
     public static class ValidationResult {
         private boolean valid = true;
         private List<String> errors = new ArrayList<>();
@@ -396,88 +443,193 @@ public class PerformanceValidator {
         private double durationVariance;
         private int anomalyCount;
 
+        /**
+         * Adds an error to the validation result and marks it as invalid.
+         *
+         * @param error error message to add
+         */
         public void addError(String error) {
             errors.add(error);
             valid = false;
         }
 
+        /**
+         * Adds a warning message to the validation result.
+         *
+         * @param warning warning message to add
+         */
         public void addWarning(String warning) {
             warnings.add(warning);
         }
 
+        /**
+         * Adds an informational message to the validation result.
+         *
+         * @param information info message to add
+         */
         public void addInfo(String information) {
             info.add(information);
         }
 
+        /**
+         * Records a detected performance anomaly.
+         *
+         * @param anomaly anomaly description to add
+         */
         public void addAnomaly(String anomaly) {
             anomalies.add(anomaly);
         }
 
         // Getters and setters
+        /**
+         * Checks if the validation passed all checks.
+         *
+         * @return true if valid with no errors, false otherwise
+         */
         public boolean isValid() {
             return valid && errors.isEmpty();
         }
 
+        /**
+         * Returns all validation errors.
+         *
+         * @return list of error messages
+         */
         public List<String> getErrors() {
             return errors;
         }
 
+        /**
+         * Returns all validation warnings.
+         *
+         * @return list of warning messages
+         */
         public List<String> getWarnings() {
             return warnings;
         }
 
+        /**
+         * Returns all informational messages.
+         *
+         * @return list of info messages
+         */
         public List<String> getInfo() {
             return info;
         }
 
+        /**
+         * Returns all detected anomalies.
+         *
+         * @return list of anomaly descriptions
+         */
         public List<String> getAnomalies() {
             return anomalies;
         }
 
+        /**
+         * Returns the calculated success rate percentage.
+         *
+         * @return success rate (0-100)
+         */
         public double getSuccessRate() {
             return successRate;
         }
 
+        /**
+         * Sets the calculated success rate.
+         *
+         * @param rate success rate percentage (0-100)
+         */
         public void setSuccessRate(double rate) {
             this.successRate = rate;
         }
 
+        /**
+         * Returns the average duration of all operations.
+         *
+         * @return average duration in milliseconds
+         */
         public double getAverageDuration() {
             return averageDuration;
         }
 
+        /**
+         * Sets the average duration metric.
+         *
+         * @param duration average duration in milliseconds
+         */
         public void setAverageDuration(double duration) {
             this.averageDuration = duration;
         }
 
+        /**
+         * Returns the maximum duration observed.
+         *
+         * @return maximum duration in milliseconds
+         */
         public double getMaxDuration() {
             return maxDuration;
         }
 
+        /**
+         * Sets the maximum duration metric.
+         *
+         * @param duration maximum duration in milliseconds
+         */
         public void setMaxDuration(double duration) {
             this.maxDuration = duration;
         }
 
+        /**
+         * Returns the minimum duration observed.
+         *
+         * @return minimum duration in milliseconds
+         */
         public double getMinDuration() {
             return minDuration;
         }
 
+        /**
+         * Sets the minimum duration metric.
+         *
+         * @param duration minimum duration in milliseconds
+         */
         public void setMinDuration(double duration) {
             this.minDuration = duration;
         }
 
+        /**
+         * Returns the coefficient of variation for duration.
+         *
+         * @return duration variance (0.0-1.0)
+         */
         public double getDurationVariance() {
             return durationVariance;
         }
 
+        /**
+         * Sets the duration variance metric.
+         *
+         * @param variance coefficient of variation (0.0-1.0)
+         */
         public void setDurationVariance(double variance) {
             this.durationVariance = variance;
         }
 
+        /**
+         * Returns the number of anomalies detected.
+         *
+         * @return anomaly count
+         */
         public int getAnomalyCount() {
             return anomalyCount;
         }
 
+        /**
+         * Sets the anomaly count.
+         *
+         * @param count number of anomalies
+         */
         public void setAnomalyCount(int count) {
             this.anomalyCount = count;
         }

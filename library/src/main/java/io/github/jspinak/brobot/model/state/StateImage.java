@@ -57,6 +57,61 @@ import lombok.Setter;
  * it adaptable to various GUI automation challenges including dynamic content, theme variations,
  * and cross-platform differences.
  *
+ * <h3>Example Usage:</h3>
+ * <pre>{@code
+ * // Create StateImage with patterns
+ * StateImage submitButton = new StateImage.Builder()
+ *     .setName("submitButton")
+ *     .addPatterns("submit.png", "submit-hover.png")  // Multiple variations
+ *     .build();
+ *
+ * // Find and click
+ * action.click(submitButton);
+ *
+ * // Find with custom options
+ * PatternFindOptions options = new PatternFindOptions.Builder()
+ *     .setSimilarity(0.85)
+ *     .setStrategy(PatternFindOptions.Strategy.BEST)
+ *     .build();
+ * ActionResult result = action.perform(options, submitButton.asObjectCollection());
+ *
+ * // Using conditional chains (recommended)
+ * ConditionalActionChain
+ *     .find(new PatternFindOptions.Builder().build())
+ *     .ifFoundClick()
+ *     .ifNotFoundLog("Submit button not found")
+ *     .perform(action, submitButton.asObjectCollection());
+ *
+ * // Configure search regions
+ * StateImage logo = new StateImage.Builder()
+ *     .addPattern("logo.png")
+ *     .setSearchRegionForAllPatterns(new Region(0, 0, 400, 200))  // Top area only
+ *     .build();
+ *
+ * // Set click position offset
+ * StateImage checkbox = new StateImage.Builder()
+ *     .addPattern("checkbox.png")
+ *     .setOffsetForAllPatterns(-20, 0)  // Click 20 pixels to the left
+ *     .build();
+ *
+ * // Process multiple patterns
+ * StateImage multiPattern = new StateImage.Builder()
+ *     .addPatterns("option1.png", "option2.png", "option3.png")
+ *     .build();
+ *
+ * ActionResult matches = action.find(multiPattern);
+ * for (Match match : matches.getMatchList()) {
+ *     System.out.println("Found pattern at: " + match.getLocation());
+ *     action.highlight(match);
+ * }
+ *
+ * // Use as part of ObjectCollection
+ * ObjectCollection objects = new ObjectCollection.Builder()
+ *     .withImages(submitButton, checkbox)
+ *     .withStrings("Form submitted")
+ *     .build();
+ * }</pre>
+ *
  * @since 1.0
  * @see Pattern
  * @see State
@@ -118,6 +173,12 @@ public class StateImage implements StateObject {
     // This is the single source of truth for where this StateImage was last found
     @JsonIgnore private List<Match> lastMatchesFound = new ArrayList<>();
 
+    /**
+     * Returns a unique string identifier for this StateImage.
+     * Combines object type, name, and pattern information.
+     *
+     * @return concatenated string of type, name, and patterns
+     */
     public String getIdAsString() {
         return objectType.name() + name + patterns.toString();
     }
@@ -131,6 +192,12 @@ public class StateImage implements StateObject {
         patterns.forEach(pattern -> pattern.setTargetPosition(position));
     }
 
+    /**
+     * Sets the target offset for all patterns in this StateImage.
+     * The offset adjusts the click/action point relative to the pattern match.
+     *
+     * @param offset the Location offset to apply to all patterns
+     */
     public void setOffsetForAllPatterns(Location offset) {
         patterns.forEach(pattern -> pattern.setTargetOffset(offset));
     }
@@ -145,10 +212,20 @@ public class StateImage implements StateObject {
         patterns.forEach(pattern -> pattern.getAnchors().setAnchorList(List.of(anchors)));
     }
 
+    /**
+     * Increments the counter tracking how many times this StateImage has been acted upon.
+     * Useful for tracking usage frequency and interaction statistics.
+     */
     public void addTimesActedOn() {
         this.timesActedOn++;
     }
 
+    /**
+     * Returns the combined match history from all patterns in this StateImage.
+     * Merges individual pattern histories into a single ActionHistory.
+     *
+     * @return ActionHistory containing all pattern match records
+     */
     public ActionHistory getMatchHistory() {
         ActionHistory matchHistory = new ActionHistory();
         patterns.forEach(p -> matchHistory.merge(p.getMatchHistory()));
@@ -190,6 +267,13 @@ public class StateImage implements StateObject {
         return matchSnapshots;
     }
 
+    /**
+     * Returns a random snapshot from patterns that match the given action configuration.
+     * Useful for mock mode and testing scenarios.
+     *
+     * @param actionConfig configuration to filter similar snapshots
+     * @return Optional containing a random ActionRecord, or empty if no snapshots match
+     */
     public Optional<ActionRecord> getRandomSnapshot(ActionConfig actionConfig) {
         List<ActionRecord> snapshots = new ArrayList<>();
         patterns.forEach(
@@ -200,6 +284,11 @@ public class StateImage implements StateObject {
         return Optional.of(snapshots.get(new Random().nextInt(snapshots.size())));
     }
 
+    /**
+     * Checks if this StateImage contains any patterns.
+     *
+     * @return true if no patterns are present, false otherwise
+     */
     public boolean isEmpty() {
         return patterns.isEmpty();
     }
@@ -251,6 +340,12 @@ public class StateImage implements StateObject {
         return regions;
     }
 
+    /**
+     * Returns all defined fixed regions from patterns in this StateImage.
+     * Fixed regions are specific search areas that don't change.
+     *
+     * @return list of defined fixed regions
+     */
     @JsonIgnore
     public List<Region> getDefinedFixedRegions() {
         List<Region> definedFixed = new ArrayList<>();
@@ -261,6 +356,12 @@ public class StateImage implements StateObject {
         return definedFixed;
     }
 
+    /**
+     * Returns the largest defined fixed region among all patterns,
+     * or a new empty Region if none exist.
+     *
+     * @return largest fixed region or new Region instance
+     */
     @JsonIgnore
     public Region getLargestDefinedFixedRegionOrNewRegion() {
         return getDefinedFixedRegions().stream()
@@ -268,22 +369,43 @@ public class StateImage implements StateObject {
                 .orElse(new Region());
     }
 
+    /**
+     * Converts this StateImage to an ObjectCollection containing only this image.
+     * Useful for Action methods that require ObjectCollection parameters.
+     *
+     * @return ObjectCollection containing this StateImage
+     */
     public ObjectCollection asObjectCollection() {
         return new ObjectCollection.Builder().withImages(this).build();
     }
 
+    /**
+     * Calculates the average width of all patterns in this StateImage.
+     *
+     * @return average width in pixels, or 0 if no patterns exist
+     */
     public double getAverageWidth() {
         double sum = 0;
         for (Pattern p : patterns) sum += p.w();
         return sum / patterns.size();
     }
 
+    /**
+     * Calculates the average height of all patterns in this StateImage.
+     *
+     * @return average height in pixels, or 0 if no patterns exist
+     */
     public double getAverageHeight() {
         double sum = 0;
         for (Pattern p : patterns) sum += p.h();
         return sum / patterns.size();
     }
 
+    /**
+     * Finds the maximum width among all patterns in this StateImage.
+     *
+     * @return maximum width in pixels, or 0 if no patterns exist
+     */
     public int getMaxWidth() {
         if (isEmpty()) return 0;
         int max = patterns.get(0).w();
@@ -293,6 +415,11 @@ public class StateImage implements StateObject {
         return max;
     }
 
+    /**
+     * Finds the maximum height among all patterns in this StateImage.
+     *
+     * @return maximum height in pixels, or 0 if no patterns exist
+     */
     public int getMaxHeight() {
         if (isEmpty()) return 0;
         int max = patterns.get(0).h();
@@ -302,6 +429,11 @@ public class StateImage implements StateObject {
         return max;
     }
 
+    /**
+     * Finds the minimum size (area) among all patterns in this StateImage.
+     *
+     * @return minimum size in pixels (width * height), or 0 if no patterns exist
+     */
     public int getMinSize() {
         if (patterns.isEmpty()) return 0;
         int minSize = patterns.get(0).size();
@@ -311,6 +443,11 @@ public class StateImage implements StateObject {
         return minSize;
     }
 
+    /**
+     * Finds the maximum size (area) among all patterns in this StateImage.
+     *
+     * @return maximum size in pixels (width * height), or 0 if no patterns exist
+     */
     public int getMaxSize() {
         if (patterns.isEmpty()) return 0;
         int maxSize = patterns.get(0).size();
@@ -320,6 +457,12 @@ public class StateImage implements StateObject {
         return maxSize;
     }
 
+    /**
+     * Returns a string representation of this StateImage.
+     * Includes name, id, owner state, search regions, and pattern sizes.
+     *
+     * @return detailed string representation
+     */
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
@@ -340,10 +483,20 @@ public class StateImage implements StateObject {
         return stringBuilder.toString();
     }
 
+    /**
+     * Adds patterns from image files specified by their filenames.
+     *
+     * @param filenames variable number of image filenames to create patterns from
+     */
     public void addPatterns(String... filenames) {
         for (String name : filenames) patterns.add(new Pattern(name));
     }
 
+    /**
+     * Adds existing Pattern objects to this StateImage.
+     *
+     * @param patterns variable number of Pattern objects to add
+     */
     public void addPatterns(Pattern... patterns) {
         Collections.addAll(this.patterns, patterns);
     }
@@ -363,23 +516,50 @@ public class StateImage implements StateObject {
         private ActionHistory actionHistoryForAllPatterns;
         private String highlightColor;
 
+        /**
+         * Sets the name for the StateImage being built.
+         *
+         * @param name the name to assign
+         * @return this builder for method chaining
+         */
         public Builder setName(String name) {
             this.name = name;
             return this;
         }
 
+        /**
+         * Sets the complete list of patterns for the StateImage.
+         * If no name has been set, uses the first pattern's name.
+         *
+         * @param patterns list of Pattern objects
+         * @return this builder for method chaining
+         */
         public Builder setPatterns(List<Pattern> patterns) {
             this.patterns = patterns;
             if (!patterns.isEmpty()) setNameFromPatternIfEmpty(patterns.get(0));
             return this;
         }
 
+        /**
+         * Adds a single Pattern to the StateImage being built.
+         * If no name has been set, uses this pattern's name.
+         *
+         * @param pattern the Pattern to add
+         * @return this builder for method chaining
+         */
         public Builder addPattern(Pattern pattern) {
             this.patterns.add(pattern);
             setNameFromPatternIfEmpty(pattern);
             return this;
         }
 
+        /**
+         * Creates and adds a Pattern from an image filename.
+         * If no name has been set, uses this pattern's name.
+         *
+         * @param filename the image filename to create a pattern from
+         * @return this builder for method chaining
+         */
         public Builder addPattern(String filename) {
             Pattern pattern = new Pattern(filename);
             this.patterns.add(pattern);
@@ -387,6 +567,12 @@ public class StateImage implements StateObject {
             return this;
         }
 
+        /**
+         * Creates and adds multiple Patterns from image filenames.
+         *
+         * @param imageNames variable number of image filenames
+         * @return this builder for method chaining
+         */
         public Builder addPatterns(String... imageNames) {
             for (String imageName : imageNames) {
                 addPattern(imageName);
@@ -394,52 +580,119 @@ public class StateImage implements StateObject {
             return this;
         }
 
+        /**
+         * Sets the k-means color profiles for advanced color-based matching.
+         *
+         * @param kmeansProfilesAllSchemas the k-means profiles to use
+         * @return this builder for method chaining
+         */
         public Builder setKmeansProfilesAllSchemas(
                 KmeansProfilesAllSchemas kmeansProfilesAllSchemas) {
             this.kmeansProfilesAllSchemas = kmeansProfilesAllSchemas;
             return this;
         }
 
+        /**
+         * Sets the unique index identifier for classification purposes.
+         *
+         * @param index the unique index value
+         * @return this builder for method chaining
+         */
         public Builder setIndex(int index) {
             this.index = index;
             return this;
         }
 
+        /**
+         * Sets the name of the State that owns this StateImage.
+         *
+         * @param ownerStateName the owner state's name
+         * @return this builder for method chaining
+         */
         public Builder setOwnerStateName(String ownerStateName) {
             this.ownerStateName = ownerStateName;
             return this;
         }
 
+        /**
+         * Sets a Position to be applied to all patterns in the StateImage.
+         * The Position determines the click/action point relative to the pattern.
+         *
+         * @param position the Position to apply
+         * @return this builder for method chaining
+         */
         public Builder setPositionForAllPatterns(Position position) {
             this.positionForAllPatterns = position;
             return this;
         }
 
+        /**
+         * Sets a Position for all patterns using percentage coordinates.
+         *
+         * @param percentOfWidth percentage of pattern width (0-100)
+         * @param percentOfHeight percentage of pattern height (0-100)
+         * @return this builder for method chaining
+         */
         public Builder setPositionForAllPatterns(int percentOfWidth, int percentOfHeight) {
             this.positionForAllPatterns = new Position(percentOfWidth, percentOfHeight);
             return this;
         }
 
+        /**
+         * Sets a Location offset to be applied to all patterns.
+         * The offset adjusts the click/action point in pixels.
+         *
+         * @param offset the Location offset to apply
+         * @return this builder for method chaining
+         */
         public Builder setOffsetForAllPatterns(Location offset) {
             this.offsetForAllPatterns = offset;
             return this;
         }
 
+        /**
+         * Sets a pixel offset for all patterns using x,y coordinates.
+         *
+         * @param xOffset horizontal offset in pixels
+         * @param yOffset vertical offset in pixels
+         * @return this builder for method chaining
+         */
         public Builder setOffsetForAllPatterns(int xOffset, int yOffset) {
             this.offsetForAllPatterns = new Location(xOffset, yOffset);
             return this;
         }
 
+        /**
+         * Sets a search region to be applied to all patterns.
+         * Patterns will only be searched within this region.
+         *
+         * @param searchRegion the Region to search within
+         * @return this builder for method chaining
+         */
         public Builder setSearchRegionForAllPatterns(Region searchRegion) {
             this.searchRegionForAllPatterns = searchRegion;
             return this;
         }
 
+        /**
+         * Sets the search region configuration relative to another object.
+         * Enables dynamic search regions based on other StateImages.
+         *
+         * @param searchRegionOnObject the cross-object search configuration
+         * @return this builder for method chaining
+         */
         public Builder setSearchRegionOnObject(SearchRegionOnObject searchRegionOnObject) {
             this.searchRegionOnObject = searchRegionOnObject;
             return this;
         }
 
+        /**
+         * Sets whether all patterns should use fixed search regions.
+         * Fixed regions don't adapt based on screen content.
+         *
+         * @param fixed true to use fixed regions, false for adaptive
+         * @return this builder for method chaining
+         */
         public Builder setFixedForAllPatterns(boolean fixed) {
             this.fixedForAllPatterns = fixed;
             return this;
@@ -496,6 +749,12 @@ public class StateImage implements StateObject {
             return this;
         }
 
+        /**
+         * Returns a string representation of this builder's current state.
+         * Shows the StateImage name and pattern names.
+         *
+         * @return string representation of the builder
+         */
         @Override
         public String toString() {
             StringBuilder stringBuilder = new StringBuilder();
@@ -506,6 +765,12 @@ public class StateImage implements StateObject {
             return stringBuilder.toString();
         }
 
+        /**
+         * Sets the StateImage name from a pattern if no name has been set.
+         * Used internally to auto-populate names from pattern filenames.
+         *
+         * @param pattern the Pattern to potentially get the name from
+         */
         private void setNameFromPatternIfEmpty(Pattern pattern) {
             // This condition now safely handles cases where 'name' is null or empty.
             if ((name == null || name.isEmpty()) && pattern != null && pattern.getName() != null) {
@@ -513,6 +778,12 @@ public class StateImage implements StateObject {
             }
         }
 
+        /**
+         * Builds the StateImage with all configured properties.
+         * Applies all pattern-level settings that were configured for all patterns.
+         *
+         * @return the constructed StateImage instance
+         */
         public StateImage build() {
             StateImage stateImage = new StateImage();
             stateImage.name = name;
@@ -544,6 +815,12 @@ public class StateImage implements StateObject {
             return stateImage;
         }
 
+        /**
+         * Creates a generic StateImage with default values.
+         * Used for testing or placeholder purposes.
+         *
+         * @return a generic StateImage instance
+         */
         public StateImage generic() {
             StateImage stateImage = new StateImage();
             stateImage.name = "generic";

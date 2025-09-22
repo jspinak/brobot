@@ -44,6 +44,10 @@ import io.github.jspinak.brobot.test.annotations.Flaky.FlakyCause;
         named = "CI",
         matches = "true",
         disabledReason = "Test incompatible with CI environment")
+@DisabledIfEnvironmentVariable(
+        named = "WSL_DISTRO_NAME",
+        matches = ".+",
+        disabledReason = "Test timing unreliable in WSL environment")
 public class MonitoringServiceTest extends ConcurrentTestBase {
 
     @Mock private StateMemory mockStateMemory;

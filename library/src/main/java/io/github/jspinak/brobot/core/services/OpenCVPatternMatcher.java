@@ -9,8 +9,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.model.element.Pattern;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 /**
  * OpenCV-based implementation of the PatternMatcher interface.
  *
@@ -43,13 +42,11 @@ public class OpenCVPatternMatcher implements PatternMatcher {
 
         // Check if pattern has valid image data
         if (pattern.getImage() == null || pattern.getImage().isEmpty()) {
-            ConsoleReporter.println("[OpenCVPatternMatcher] Pattern has no valid image data");
             return new ArrayList<>();
         }
 
         // Check size constraints
         if (pattern.w() > screen.getWidth() || pattern.h() > screen.getHeight()) {
-            ConsoleReporter.println("[OpenCVPatternMatcher] Pattern larger than screen");
             return new ArrayList<>();
         }
 
@@ -112,7 +109,6 @@ public class OpenCVPatternMatcher implements PatternMatcher {
                 || regionY < 0
                 || regionX + regionWidth > screen.getWidth()
                 || regionY + regionHeight > screen.getHeight()) {
-            ConsoleReporter.println("[OpenCVPatternMatcher] Invalid region bounds");
             return new ArrayList<>();
         }
 

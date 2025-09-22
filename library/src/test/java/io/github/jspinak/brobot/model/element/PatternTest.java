@@ -60,7 +60,7 @@ public class PatternTest extends BrobotTestBase {
         // Then
         assertNull(pattern.getUrl());
         assertNull(pattern.getImgpath());
-        assertNull(pattern.getName());
+        assertNull(pattern.getImgpath());
         assertFalse(pattern.isFixed());
         assertNotNull(pattern.getSearchRegions());
         assertFalse(pattern.isSetKmeansColorProfiles());
@@ -130,7 +130,7 @@ public class PatternTest extends BrobotTestBase {
 
         // Then
         assertTrue(pattern.isFixed());
-        assertEquals("NoImageMatch", pattern.getImgpath());
+        assertEquals("NoImageMatch", pattern.getName());
         assertNull(pattern.getImage());
     }
 

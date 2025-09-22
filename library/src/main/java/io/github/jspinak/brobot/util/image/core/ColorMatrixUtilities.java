@@ -13,9 +13,10 @@ import org.bytedeco.opencv.opencv_core.*;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.model.element.Pattern;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 import lombok.extern.slf4j.Slf4j;
+import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
+
 
 /**
  * Extensions of OpenCV operations to handle 3-channel (color) images.
@@ -668,7 +669,6 @@ public class ColorMatrixUtilities {
         }
         // the mask will have 255 for the indices to keep and 0 for the others
         Mat onlyIndicesToKeep = new Mat(indices.size(), indices.type());
-        ConsoleReporter.println();
         bitwise_and(indices, mask, onlyIndicesToKeep);
         return onlyIndicesToKeep;
     }

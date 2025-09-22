@@ -10,18 +10,15 @@ import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig.VerbosityLevel;
-import io.github.jspinak.brobot.logging.unified.BrobotLogger;
-import io.github.jspinak.brobot.logging.unified.LogEvent;
+import io.github.jspinak.brobot.logging.BrobotLogger;
+import io.github.jspinak.brobot.logging.events.ActionEvent;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 /**
  * Diagnostic logger for pattern matching and image analysis. Provides verbosity-aware logging that
- * integrates with both ConsoleReporter and BrobotLogger to ensure diagnostic information is
  * available at all verbosity levels.
  *
- * <p>In NORMAL mode: Uses ConsoleReporter for concise output
  *
  * <p>In VERBOSE mode: Adds detailed information through BrobotLogger
  *
@@ -63,20 +60,6 @@ public class DiagnosticLogger {
         }
 
         // Always log concise version for NORMAL and VERBOSE
-        ConsoleReporter.println(
-                "[SEARCH] Pattern: '"
-                        + pattern.getName()
-                        + "' ("
-                        + pattern.w()
-                        + "x"
-                        + pattern.h()
-                        + ") | Similarity: "
-                        + String.format("%.2f", similarity)
-                        + " | Scene: "
-                        + scene.getPattern().w()
-                        + "x"
-                        + scene.getPattern().h());
-
         // Add detailed logging for VERBOSE mode
         if (level == VerbosityLevel.VERBOSE && brobotLogger != null) {
             Map<String, Object> metadata = new HashMap<>();
@@ -88,11 +71,10 @@ public class DiagnosticLogger {
             metadata.put("patternDynamic", pattern.isDynamic());
 
             brobotLogger
-                    .log()
-                    .type(LogEvent.Type.ACTION)
-                    .level(LogEvent.Level.DEBUG)
-                    .action("PATTERN_SEARCH")
-                    .metadata(metadata)
+                    .builder(LogCategory.MATCHING)
+                    .level(LogLevel.DEBUG)
+                    .action("PATTERN_SEARCH", pattern.getName())
+                    .context(metadata)
                     .log();
         }
     }
@@ -104,24 +86,14 @@ public class DiagnosticLogger {
         if (level == VerbosityLevel.QUIET) {
             // Minimal output in quiet mode
             if (matchCount == 0) {
-                ConsoleReporter.print("✗");
             } else {
-                ConsoleReporter.print("✓");
             }
             return;
         }
 
         // Normal/Verbose output
         if (matchCount == 0) {
-            ConsoleReporter.println("  [RESULT] NO MATCHES for '" + pattern.getName() + "'");
         } else {
-            ConsoleReporter.println(
-                    "  [RESULT] "
-                            + matchCount
-                            + " matches for '"
-                            + pattern.getName()
-                            + "' | Best score: "
-                            + String.format("%.3f", bestScore));
         }
 
         // Additional verbose logging
@@ -133,12 +105,11 @@ public class DiagnosticLogger {
             metadata.put("success", matchCount > 0);
 
             brobotLogger
-                    .log()
-                    .type(LogEvent.Type.ACTION)
-                    .level(matchCount > 0 ? LogEvent.Level.DEBUG : LogEvent.Level.WARNING)
-                    .action("PATTERN_RESULT")
-                    .success(matchCount > 0)
-                    .metadata(metadata)
+                    .builder(LogCategory.MATCHING)
+                    .level(matchCount > 0 ? LogLevel.DEBUG : LogLevel.WARN)
+                    .action("PATTERN_RESULT", pattern.getName())
+                    .context("success", matchCount > 0)
+                    .context(metadata)
                     .log();
         }
     }
@@ -161,16 +132,6 @@ public class DiagnosticLogger {
                             : getImageType(patternImg.getType())
                                     + " vs "
                                     + getImageType(sceneImg.getType());
-
-            ConsoleReporter.println(
-                    String.format(
-                            "    [IMG] Pattern %dx%d, Scene %dx%d, Types: %s",
-                            patternImg.getWidth(),
-                            patternImg.getHeight(),
-                            sceneImg.getWidth(),
-                            sceneImg.getHeight(),
-                            typeComparison));
-
             // Only analyze content if there might be an issue
             analyzeImageContentIfProblematic(patternImg, sceneImg);
         }
@@ -193,11 +154,10 @@ public class DiagnosticLogger {
             }
 
             brobotLogger
-                    .log()
-                    .type(LogEvent.Type.ACTION)
-                    .level(LogEvent.Level.WARNING)
-                    .action("IMAGE_ANALYSIS")
-                    .metadata(metadata)
+                    .builder(LogCategory.MATCHING)
+                    .level(LogLevel.WARN)
+                    .action("IMAGE_ANALYSIS", "scene")
+                    .context(metadata)
                     .log();
         }
     }
@@ -217,7 +177,6 @@ public class DiagnosticLogger {
             if (patternIsWhite) warning += "Pattern is WHITE ";
             if (sceneIsBlack) warning += "Scene is BLACK ";
             if (sceneIsWhite) warning += "Scene is WHITE ";
-            ConsoleReporter.println(warning.trim());
         }
     }
 
@@ -257,11 +216,7 @@ public class DiagnosticLogger {
         }
 
         if (foundThreshold != null && foundScore != null) {
-            ConsoleReporter.println(
-                    String.format(
-                            "    [SIM] Found at %.1f with score %.3f", foundThreshold, foundScore));
         } else {
-            ConsoleReporter.println("    [SIM] No match at tested thresholds");
         }
 
         // Still log to BrobotLogger
@@ -274,11 +229,10 @@ public class DiagnosticLogger {
             metadata.put("matchFound", foundThreshold != null);
 
             brobotLogger
-                    .log()
-                    .type(LogEvent.Type.ACTION)
-                    .level(LogEvent.Level.INFO)
-                    .action("SIMILARITY_ANALYSIS")
-                    .metadata(metadata)
+                    .builder(LogCategory.MATCHING)
+                    .level(LogLevel.INFO)
+                    .action("SIMILARITY_ANALYSIS", "pattern")
+                    .context(metadata)
                     .log();
         }
     }
@@ -293,11 +247,7 @@ public class DiagnosticLogger {
         }
 
         if (cached) {
-            ConsoleReporter.println(
-                    "  [Pattern.sikuli()] Using CACHED SikuliX Pattern for: " + patternName);
         } else {
-            ConsoleReporter.println(
-                    "  [Pattern.sikuli()] Creating NEW SikuliX Pattern for: " + patternName);
         }
 
         if (brobotLogger != null) {
@@ -306,11 +256,10 @@ public class DiagnosticLogger {
             metadata.put("cached", cached);
 
             brobotLogger
-                    .log()
-                    .type(LogEvent.Type.ACTION)
-                    .level(LogEvent.Level.DEBUG)
-                    .action("PATTERN_SIKULI")
-                    .metadata(metadata)
+                    .builder(LogCategory.MATCHING)
+                    .level(LogLevel.DEBUG)
+                    .action("PATTERN_SIKULI", patternName)
+                    .context(metadata)
                     .log();
         }
     }
@@ -331,10 +280,6 @@ public class DiagnosticLogger {
 
             // In VERBOSE mode, show first few low-score matches as examples
             if (level == VerbosityLevel.VERBOSE && lowScoreMatchCount <= 3) {
-                ConsoleReporter.println(
-                        String.format(
-                                "  [LOW-SCORE #%d] Score: %.3f at (%d, %d)",
-                                matchNumber, score, x, y));
             }
             return;
         }
@@ -351,9 +296,6 @@ public class DiagnosticLogger {
         }
 
         if (showDetails) {
-            ConsoleReporter.println(
-                    String.format(
-                            "  [FOUND #%d] Score: %.3f at (%d, %d)", matchNumber, score, x, y));
         }
     }
 
@@ -368,14 +310,6 @@ public class DiagnosticLogger {
     public void logLowScoreSummary() {
         if (lowScoreMatchCount > 0) {
             if (lowScoreMatchCount > 3) {
-                ConsoleReporter.println(
-                        String.format(
-                                "  [LOW-SCORE SUMMARY] %d matches below %.2f threshold (range:"
-                                        + " %.3f-%.3f)",
-                                lowScoreMatchCount,
-                                lowScoreThreshold,
-                                lowestScore,
-                                highestLowScore));
             }
         }
     }
@@ -419,14 +353,9 @@ public class DiagnosticLogger {
                 String.format(
                         "      %s content: %.1f%% black, %.1f%% white, avg RGB=(%d,%d,%d)",
                         label, blackPercent, whitePercent, avgR, avgG, avgB);
-        ConsoleReporter.println(analysis);
 
         if (blackPercent > 90) {
-            ConsoleReporter.println(
-                    "      WARNING: " + label + " is mostly BLACK - possible capture failure!");
         } else if (whitePercent > 90) {
-            ConsoleReporter.println(
-                    "      WARNING: " + label + " is mostly WHITE - possible capture issue!");
         }
     }
 

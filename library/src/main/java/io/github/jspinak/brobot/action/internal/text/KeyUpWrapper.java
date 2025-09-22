@@ -5,8 +5,7 @@ import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 /**
  * Handles keyboard key release operations in both real and mock modes.
  *
@@ -74,7 +73,6 @@ public class KeyUpWrapper {
      * </ul>
      */
     public void release() {
-        ConsoleReporter.format("release all keys| ");
         if (brobotProperties.getCore().isMock()) return;
         new Region().sikuli().keyUp();
     }
@@ -96,7 +94,6 @@ public class KeyUpWrapper {
      * @param key String representation of the key to release (e.g., "a", "CTRL")
      */
     public void release(String key) {
-        ConsoleReporter.format("release %s| ", key);
         if (brobotProperties.getCore().isMock()) return;
         new Region().sikuli().keyUp(key);
     }
@@ -128,7 +125,6 @@ public class KeyUpWrapper {
      */
     public void release(int key) {
         if (brobotProperties.getCore().isMock()) {
-            ConsoleReporter.format("release %d| ", key);
             return;
         }
         new Region().sikuli().keyUp(key);

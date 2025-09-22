@@ -99,6 +99,13 @@ public class Pattern {
     private Image image;
     private boolean needsDelayedLoading = false;
 
+    /**
+     * Creates a Pattern from an image file path.
+     * In mock mode, image loading is skipped. During Spring initialization,
+     * image loading is deferred until the context is ready.
+     *
+     * @param imgPath the path to the image file
+     */
     public Pattern(String imgPath) {
         // Add this safety check at the beginning
         if (imgPath == null || imgPath.isEmpty()) {
@@ -141,14 +148,18 @@ public class Pattern {
             this.needsDelayedLoading = false;
             log.debug("Successfully loaded image: {}", imgPath);
         } else {
-            // Only throw exception if we're past initialization and still can't load
-            throw new IllegalStateException(
-                    "Failed to load image: "
-                            + imgPath
-                            + ". Make sure the image exists in the configured image path.");
+            // Log error but don't throw exception - let automation continue with null image
+            log.error("Failed to load image: {}. Pattern will have null image and find operations will fail.", imgPath);
+            this.image = null;
+            this.needsDelayedLoading = false; // Don't retry, we've already logged the error
         }
     }
 
+    /**
+     * Creates a Pattern from a BufferedImage.
+     *
+     * @param bimg the BufferedImage to use as the pattern
+     */
     public Pattern(BufferedImage bimg) {
         image = new Image(bimg);
     }
@@ -208,6 +219,11 @@ public class Pattern {
         }
     }
 
+    /**
+     * Creates a Pattern from a Brobot Image object.
+     *
+     * @param image the Image object containing the pattern
+     */
     public Pattern(Image image) {
         this.image = image;
         if (image != null) {
@@ -215,6 +231,12 @@ public class Pattern {
         }
     }
 
+    /**
+     * Creates a Pattern from a Match object.
+     * The pattern is marked as fixed at the match location.
+     *
+     * @param match the Match to create a pattern from
+     */
     public Pattern(Match match) {
         Image imageToUse = null;
         if (match.getImage() != null) imageToUse = match.getImage();
@@ -223,10 +245,16 @@ public class Pattern {
         searchRegions.setFixedRegion(match.getRegion());
         if (imageToUse != null) {
             image = imageToUse;
-            name = match.getName();
-        } else imgpath = match.getName();
+        }
+        // Always set name from match
+        name = match.getName();
     }
 
+    /**
+     * Creates a Pattern from an OpenCV Mat.
+     *
+     * @param mat the OpenCV Mat containing the image data
+     */
     public Pattern(Mat mat) {
         image = new Image(mat);
     }
@@ -276,12 +304,22 @@ public class Pattern {
         }
     }
 
+    /**
+     * Returns the width of the pattern image.
+     *
+     * @return the width in pixels, or 0 if no image is loaded
+     */
     public int w() {
         ensureImageLoaded();
         if (image == null) return 0;
         return image.w();
     }
 
+    /**
+     * Returns the height of the pattern image.
+     *
+     * @return the height in pixels, or 0 if no image is loaded
+     */
     public int h() {
         ensureImageLoaded();
         if (image == null) return 0;
@@ -325,10 +363,18 @@ public class Pattern {
         return regions;
     }
 
+    /**
+     * Adds a search region where this pattern should be looked for.
+     *
+     * @param region the region to add to the search areas
+     */
     public void addSearchRegion(Region region) {
         searchRegions.addSearchRegions(region);
     }
 
+    /**
+     * Resets the fixed search region, allowing the pattern to be found anywhere.
+     */
     public void resetFixedSearchRegion() {
         searchRegions.resetFixedRegion();
     }
@@ -338,19 +384,42 @@ public class Pattern {
         searchRegions.setRegions(List.of(regions));
     }
 
+    /**
+     * Calculates the area of the pattern image.
+     *
+     * @return the area in pixels (width * height)
+     */
     public int size() {
         return w() * h();
     }
 
+    /**
+     * Adds a match snapshot to the pattern's history for analysis and mocking.
+     *
+     * @param matchSnapshot the ActionRecord to add to history
+     */
     public void addMatchSnapshot(ActionRecord matchSnapshot) {
         matchHistory.addSnapshot(matchSnapshot);
     }
 
+    /**
+     * Adds a match with the specified coordinates to the pattern's history.
+     *
+     * @param x the x-coordinate of the match
+     * @param y the y-coordinate of the match
+     * @param w the width of the match
+     * @param h the height of the match
+     */
     public void addMatchSnapshot(int x, int y, int w, int h) {
         ActionRecord matchSnapshot = new ActionRecord(x, y, w, h);
         addMatchSnapshot(matchSnapshot);
     }
 
+    /**
+     * Creates a StateImage from this pattern, owned by the NULL state.
+     *
+     * @return a StateImage containing this pattern in the NULL state
+     */
     public StateImage inNullState() {
         return new StateImage.Builder()
                 .addPattern(this)
@@ -466,6 +535,11 @@ public class Pattern {
         return cachedSikuliPattern;
     }
 
+    /**
+     * Returns the BufferedImage representation of this pattern.
+     *
+     * @return the BufferedImage, or null if no image is loaded
+     */
     @JsonIgnore
     public BufferedImage getBImage() {
         ensureImageLoaded();
@@ -476,6 +550,11 @@ public class Pattern {
         return image.getBufferedImage();
     }
 
+    /**
+     * Returns a detailed string representation of this pattern.
+     *
+     * @return string containing pattern name, dimensions, search regions, and other properties
+     */
     @Override
     public String toString() {
         return "Pattern{"
@@ -508,6 +587,9 @@ public class Pattern {
                 + '}';
     }
 
+    /**
+     * Builder class for constructing Pattern instances with a fluent API.
+     */
     @Slf4j
     public static class Builder {
         private String name = "";
@@ -531,6 +613,13 @@ public class Pattern {
         Sometimes there is no filename, as when building the state structure and saving images to a database.
         Therefore, this method should not set the filename in addition to the name.
          */
+        /**
+         * Sets the name for this pattern.
+         * The name is independent of the filename and can be set without changing the image source.
+         *
+         * @param name the pattern name
+         * @return this builder for method chaining
+         */
         public Builder setName(String name) {
             this.name = name;
             // if (this.filename.isEmpty()) this.filename = name;
@@ -539,21 +628,46 @@ public class Pattern {
             return this;
         }
 
+        /**
+         * Sets the image from an OpenCV Mat.
+         *
+         * @param mat the OpenCV Mat to convert to BufferedImage
+         * @return this builder for method chaining
+         */
         public Builder setMat(Mat mat) {
             this.bufferedImage = BufferedImageUtilities.fromMat(mat);
             return this;
         }
 
+        /**
+         * Sets the Image object for this pattern.
+         *
+         * @param image the Image object
+         * @return this builder for method chaining
+         */
         public Builder setImage(Image image) {
             this.image = image;
             return this;
         }
 
+        /**
+         * Sets the BufferedImage for this pattern.
+         *
+         * @param bufferedImage the BufferedImage to use
+         * @return this builder for method chaining
+         */
         public Builder setBufferedImage(BufferedImage bufferedImage) {
             this.bufferedImage = bufferedImage;
             return this;
         }
 
+        /**
+         * Sets the filename and loads the image from file.
+         * If name is not set, extracts it from the filename.
+         *
+         * @param filename the image file path
+         * @return this builder for method chaining
+         */
         public Builder setFilename(String filename) {
             this.filename = filename;
             if (name.isEmpty())
@@ -562,26 +676,57 @@ public class Pattern {
             return this;
         }
 
+        /**
+         * Sets whether this pattern has a fixed location on screen.
+         *
+         * @param isFixed true if the pattern always appears in the same location
+         * @return this builder for method chaining
+         */
         public Builder setFixed(boolean isFixed) {
             this.fixed = isFixed;
             return this;
         }
 
+        /**
+         * Sets the fixed region where this pattern is always found.
+         *
+         * @param fixedRegion the fixed location region
+         * @return this builder for method chaining
+         */
         public Builder setFixedRegion(Region fixedRegion) {
             this.searchRegions.setFixedRegion(fixedRegion);
             return this;
         }
 
+        /**
+         * Sets the search regions configuration for this pattern.
+         *
+         * @param searchRegions the SearchRegions object
+         * @return this builder for method chaining
+         */
         public Builder setSearchRegions(SearchRegions searchRegions) {
             this.searchRegions = searchRegions;
             return this;
         }
 
+        /**
+         * Adds a search region where this pattern should be looked for.
+         *
+         * @param searchRegion the region to add
+         * @return this builder for method chaining
+         */
         public Builder addSearchRegion(Region searchRegion) {
             this.searchRegions.addSearchRegions(searchRegion);
             return this;
         }
 
+        /**
+         * Sets whether to generate K-means color profiles for this pattern.
+         * This is an expensive operation and should only be enabled when needed.
+         *
+         * @param setKmeansColorProfiles true to enable K-means profiling
+         * @return this builder for method chaining
+         */
         public Builder setSetKmeansColorProfiles(boolean setKmeansColorProfiles) {
             this.setKmeansColorProfiles = setKmeansColorProfiles;
             return this;
@@ -593,26 +738,58 @@ public class Pattern {
         //    return this;
         // }
 
+        /**
+         * Sets the match history for this pattern.
+         *
+         * @param matchHistory the ActionHistory object
+         * @return this builder for method chaining
+         */
         public Builder setMatchHistory(ActionHistory matchHistory) {
             this.matchHistory = matchHistory;
             return this;
         }
 
+        /**
+         * Adds a match snapshot to the pattern's history.
+         *
+         * @param matchSnapshot the ActionRecord to add
+         * @return this builder for method chaining
+         */
         public Builder addMatchSnapshot(ActionRecord matchSnapshot) {
             this.matchHistory.addSnapshot(matchSnapshot);
             return this;
         }
 
+        /**
+         * Sets the unique identifier for this pattern.
+         * Used for classification matrices and pattern indexing.
+         *
+         * @param index the unique index
+         * @return this builder for method chaining
+         */
         public Builder setIndex(int index) {
             this.index = index;
             return this;
         }
 
+        /**
+         * Sets whether this pattern has dynamic content.
+         * Dynamic images cannot be found using standard pattern matching.
+         *
+         * @param isDynamic true if the pattern content changes
+         * @return this builder for method chaining
+         */
         public Builder setDynamic(boolean isDynamic) {
             this.dynamic = isDynamic;
             return this;
         }
 
+        /**
+         * Sets the target position within the pattern for interactions.
+         *
+         * @param targetPosition the Position object
+         * @return this builder for method chaining
+         */
         public Builder setTargetPosition(Position targetPosition) {
             this.targetPosition = targetPosition;
             return this;
@@ -631,6 +808,12 @@ public class Pattern {
             return this;
         }
 
+        /**
+         * Sets the target offset from the calculated position.
+         *
+         * @param location the offset Location
+         * @return this builder for method chaining
+         */
         public Builder setTargetOffset(Location location) {
             this.targetOffset = location;
             return this;
@@ -648,16 +831,35 @@ public class Pattern {
             return this;
         }
 
+        /**
+         * Sets the anchors for defining relative positions.
+         *
+         * @param anchors the Anchors object
+         * @return this builder for method chaining
+         */
         public Builder setAnchors(Anchors anchors) {
             this.anchors = anchors;
             return this;
         }
 
+        /**
+         * Adds an anchor for defining relative positions.
+         *
+         * @param anchor the Anchor to add
+         * @return this builder for method chaining
+         */
         public Builder addAnchor(Anchor anchor) {
             this.anchors.add(anchor);
             return this;
         }
 
+        /**
+         * Adds an anchor using named positions.
+         *
+         * @param inRegionToDefine the position in the region being defined
+         * @param inMatch the position in the matched pattern
+         * @return this builder for method chaining
+         */
         public Builder addAnchor(Positions.Name inRegionToDefine, Positions.Name inMatch) {
             this.anchors.add(new Anchor(inRegionToDefine, new Position(inMatch)));
             return this;
@@ -691,6 +893,11 @@ public class Pattern {
             }
         }
 
+        /**
+         * Builds and returns a new Pattern with the configured properties.
+         *
+         * @return a new Pattern instance
+         */
         public Pattern build() {
             Pattern pattern = new Pattern(); // Start with a truly empty pattern
             if (name != null) pattern.setName(name);

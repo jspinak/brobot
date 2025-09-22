@@ -30,7 +30,6 @@ import io.github.jspinak.brobot.config.mock.MockConfiguration;
 import io.github.jspinak.brobot.startup.state.InitialStateAutoConfiguration;
 import io.github.jspinak.brobot.statemanagement.InitialStates;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporterInitializer;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -126,8 +125,6 @@ public class InitializationOrchestrator {
     @Autowired(required = false)
     private AnnotationProcessor annotationProcessor;
 
-    @Autowired(required = false)
-    private ConsoleReporterInitializer consoleReporterInitializer;
 
     @Autowired(required = false)
     private EventListenerConfiguration eventListenerConfiguration;
@@ -346,11 +343,8 @@ public class InitializationOrchestrator {
         log.info("════════════════════════════════════════════════════════════════════");
 
         try {
-            // Initialize console reporter
-            if (consoleReporterInitializer != null) {
-                // ConsoleReporterInitializer uses @PostConstruct
-                phase.addCompletedStep("Console reporter initialized");
-            }
+            // Console reporter initialization removed - class no longer exists
+            phase.addCompletedStep("Console reporter initialization skipped");
 
             // Configure and verify event listeners
             if (eventListenerConfiguration != null) {
@@ -650,7 +644,7 @@ public class InitializationOrchestrator {
                 .append(stateInitializationOrchestrator != null ? "✅ Available" : "❌ Not Available")
                 .append("\n");
         report.append("  • Console Reporter: ")
-                .append(consoleReporterInitializer != null ? "✅ Available" : "❌ Not Available")
+                .append("❌ Not Available (class removed)")
                 .append("\n");
 
         // Warnings and Recommendations
@@ -741,8 +735,8 @@ public class InitializationOrchestrator {
 
         // Add current configuration
         Map<String, Object> config = new HashMap<>();
-        config.put("mockMode", brobotProperties.getCore().isMock());
         if (brobotProperties != null && brobotProperties.getCore() != null) {
+            config.put("mockMode", brobotProperties.getCore().isMock());
             config.put("imagePath", brobotProperties.getCore().getImagePath());
         }
         status.put("configuration", config);

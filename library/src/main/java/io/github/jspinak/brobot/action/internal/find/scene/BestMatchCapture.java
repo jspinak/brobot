@@ -19,8 +19,7 @@ import org.springframework.stereotype.Component;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -172,15 +171,6 @@ public class BestMatchCapture {
                             "%s_%s_sim%s_match.png", timestamp, safePatternName, similarityStr);
             File matchFile = captureDir.resolve(matchFilename).toFile();
             ImageIO.write(matchRegion, "png", matchFile);
-
-            ConsoleReporter.println(
-                    "[BEST_MATCH] Captured best match for '"
-                            + pattern.getName()
-                            + "' with similarity "
-                            + String.format("%.3f", bestMatch.score)
-                            + " saved to: "
-                            + matchFile.getPath());
-
             // Optionally save the pattern image for comparison
             if (savePatternImage && pattern.getBImage() != null) {
                 String patternFilename =
@@ -189,9 +179,6 @@ public class BestMatchCapture {
                                 timestamp, safePatternName, similarityStr);
                 File patternFile = captureDir.resolve(patternFilename).toFile();
                 ImageIO.write(pattern.getBImage(), "png", patternFile);
-
-                ConsoleReporter.println(
-                        "[BEST_MATCH] Pattern image saved to: " + patternFile.getPath());
             }
 
             // Log additional debug information

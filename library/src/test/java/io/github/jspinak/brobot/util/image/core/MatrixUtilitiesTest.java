@@ -13,6 +13,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
+
 
 /** Test class for MatrixUtilities operations. Tests OpenCV Mat utilities in mock mode. */
 public class MatrixUtilitiesTest extends BrobotTestBase {

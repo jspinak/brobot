@@ -83,7 +83,7 @@ public class MockStateManagement {
                     .getState(stateName)
                     .ifPresent(
                             state -> {
-                                state.setProbabilityExists(probability);
+                                state.setMockFindStochasticModifier(probability);
                             });
         }
     }

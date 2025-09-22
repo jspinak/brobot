@@ -97,7 +97,10 @@ public class ImageFindDebugger {
         }
     }
 
-    /** Initialize debugging session. */
+    /**
+     * Initializes a new debugging session with unique ID and directory structure.
+     * Creates directories for screenshots, patterns, comparisons, visual output, and logs.
+     */
     public void initializeSession() {
         if (config == null || !config.isEnabled()) return;
 
@@ -118,7 +121,15 @@ public class ImageFindDebugger {
         }
     }
 
-    /** Debug a find operation with comprehensive output. */
+    /**
+     * Debugs a find operation with comprehensive output.
+     * Captures pattern info, search parameters, results, and optionally saves debug files.
+     *
+     * @param objectCollection the collection of objects being searched for
+     * @param options the find options with search parameters
+     * @param result the action result from the find operation
+     * @return FindDebugInfo containing all debug information
+     */
     public FindDebugInfo debugFindOperation(
             ObjectCollection objectCollection, PatternFindOptions options, ActionResult result) {
 
@@ -189,6 +200,12 @@ public class ImageFindDebugger {
         return debugInfo;
     }
 
+    /**
+     * Captures pattern information from a StateImage.
+     *
+     * @param stateImage the state image containing pattern(s)
+     * @param debugInfo the debug info to populate
+     */
     private void capturePatternInfo(StateImage stateImage, FindDebugInfo debugInfo) {
         debugInfo.patternName = stateImage.getName();
 
@@ -202,6 +219,12 @@ public class ImageFindDebugger {
         }
     }
 
+    /**
+     * Captures search parameters from find options.
+     *
+     * @param options the pattern find options
+     * @param debugInfo the debug info to populate
+     */
     private void captureSearchParameters(PatternFindOptions options, FindDebugInfo debugInfo) {
         if (options != null) {
             debugInfo.similarityThreshold = options.getSimilarity();
@@ -217,6 +240,12 @@ public class ImageFindDebugger {
         }
     }
 
+    /**
+     * Captures results from the action result.
+     *
+     * @param result the action result from find operation
+     * @param debugInfo the debug info to populate
+     */
     private void captureResults(ActionResult result, FindDebugInfo debugInfo) {
         debugInfo.found = result.isSuccess();
         debugInfo.matchCount = result.size();
@@ -233,6 +262,12 @@ public class ImageFindDebugger {
         debugInfo.searchDuration = result.getDuration().toMillis();
     }
 
+    /**
+     * Determines the reason for a find operation failure.
+     *
+     * @param debugInfo the debug info with match scores
+     * @return string describing the failure reason
+     */
     private String determineFailureReason(FindDebugInfo debugInfo) {
         if (debugInfo.bestScore > 0 && debugInfo.bestScore < debugInfo.similarityThreshold) {
             return String.format(
@@ -245,6 +280,12 @@ public class ImageFindDebugger {
         }
     }
 
+    /**
+     * Saves debug files including screenshots and pattern images.
+     *
+     * @param debugInfo the debug info with operation details
+     * @param objectCollection the object collection being searched
+     */
     private void saveDebugFiles(FindDebugInfo debugInfo, ObjectCollection objectCollection) {
         try {
             // Save screenshot

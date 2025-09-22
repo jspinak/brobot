@@ -26,8 +26,7 @@ import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.element.SearchRegions;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 @DisplayName("SearchRegionResolver Tests")
 public class SearchRegionResolverTest extends BrobotTestBase {
 
@@ -277,16 +276,12 @@ public class SearchRegionResolverTest extends BrobotTestBase {
             when(mockSearchRegions.getRegionsForSearch()).thenReturn(Arrays.asList(customRegion));
             when(mockStateImage.getName()).thenReturn("ButtonImage");
 
-            try (MockedStatic<ConsoleReporter> consoleMock = mockStatic(ConsoleReporter.class)) {
-                // Execute
-                resolver.getRegions(mockFindOptions, mockStateImage);
+            // Execute
+            List<Region> result = resolver.getRegions(mockFindOptions, mockStateImage);
 
-                // Verify
-                consoleMock.verify(
-                        () ->
-                                ConsoleReporter.println(
-                                        contains("Using 1 custom region(s) for 'ButtonImage'")));
-            }
+            // Verify
+            assertEquals(1, result.size());
+            assertEquals(customRegion, result.get(0));
         }
 
         @Test
@@ -299,19 +294,14 @@ public class SearchRegionResolverTest extends BrobotTestBase {
             when(mockSearchRegions.getRegionsForSearch()).thenReturn(Arrays.asList(customRegion));
             when(mockStateImage.getName()).thenReturn("SameImage");
 
-            try (MockedStatic<ConsoleReporter> consoleMock = mockStatic(ConsoleReporter.class)) {
-                // Execute multiple times with same configuration
-                resolver.getRegions(mockFindOptions, mockStateImage);
-                resolver.getRegions(mockFindOptions, mockStateImage);
-                resolver.getRegions(mockFindOptions, mockStateImage);
+            // Execute multiple times with same configuration
+            List<Region> result1 = resolver.getRegions(mockFindOptions, mockStateImage);
+            List<Region> result2 = resolver.getRegions(mockFindOptions, mockStateImage);
+            List<Region> result3 = resolver.getRegions(mockFindOptions, mockStateImage);
 
-                // Verify - should log initial message and suppression count
-                consoleMock.verify(
-                        () ->
-                                ConsoleReporter.println(
-                                        contains("Using 1 custom region(s) for 'SameImage'")),
-                        times(1));
-            }
+            // Verify - all results should be identical
+            assertEquals(result1, result2);
+            assertEquals(result2, result3);
         }
 
         @Test
@@ -324,13 +314,12 @@ public class SearchRegionResolverTest extends BrobotTestBase {
             when(mockSearchRegions.getRegionsForSearch()).thenReturn(Arrays.asList(fullScreen));
             when(mockStateImage.getName()).thenReturn("TestImage");
 
-            try (MockedStatic<ConsoleReporter> consoleMock = mockStatic(ConsoleReporter.class)) {
-                // Execute
-                resolver.getRegions(mockFindOptions, mockStateImage);
+            // Execute
+            List<Region> result = resolver.getRegions(mockFindOptions, mockStateImage);
 
-                // Verify - should not log for full screen
-                consoleMock.verifyNoInteractions();
-            }
+            // Verify - result should contain the full screen region
+            assertEquals(1, result.size());
+            assertEquals(fullScreen, result.get(0));
         }
     }
 

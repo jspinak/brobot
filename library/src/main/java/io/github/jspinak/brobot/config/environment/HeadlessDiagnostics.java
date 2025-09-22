@@ -8,7 +8,9 @@ import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.logging.unified.BrobotLogger;
+import io.github.jspinak.brobot.logging.BrobotLogger;
+import io.github.jspinak.brobot.logging.LogCategory;
+import io.github.jspinak.brobot.logging.LogLevel;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,14 +42,13 @@ public class HeadlessDiagnostics {
         String headlessProperty = System.getProperty("java.awt.headless");
         String display = System.getenv("DISPLAY");
 
-        brobotLogger
-                .log()
-                .observation("Headless Mode Diagnostics")
-                .metadata("GraphicsEnvironment.isHeadless()", awtHeadless)
-                .metadata("java.awt.headless property", headlessProperty)
-                .metadata("DISPLAY env variable", display)
-                .metadata("OS", System.getProperty("os.name"))
-                .metadata("OS version", System.getProperty("os.version"))
+        brobotLogger.builder(LogCategory.SYSTEM)
+                .message("Headless Mode Diagnostics")
+                .context("GraphicsEnvironment.isHeadless()", awtHeadless)
+                .context("java.awt.headless property", headlessProperty)
+                .context("DISPLAY env variable", display)
+                .context("OS", System.getProperty("os.name"))
+                .context("OS version", System.getProperty("os.version"))
                 .log();
 
         // Try to get graphics devices
@@ -55,11 +56,11 @@ public class HeadlessDiagnostics {
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             GraphicsDevice[] devices = ge.getScreenDevices();
 
-            brobotLogger
-                    .log()
-                    .observation("Graphics Devices")
-                    .metadata("deviceCount", devices.length)
-                    .metadata("defaultScreenDevice", ge.getDefaultScreenDevice().getIDstring())
+            // Removed incomplete logger call)
+            brobotLogger.builder(LogCategory.SYSTEM)
+                    .message("Graphics Devices")
+                    .context("deviceCount", devices.length)
+                    .context("defaultScreenDevice", ge.getDefaultScreenDevice().getIDstring())
                     .log();
 
             for (int i = 0; i < devices.length; i++) {
@@ -74,7 +75,7 @@ public class HeadlessDiagnostics {
             }
         } catch (Exception e) {
             log.error("Failed to enumerate graphics devices: {}", e.getMessage());
-            brobotLogger.error("Failed to enumerate graphics devices", e);
+            brobotLogger.builder(LogCategory.SYSTEM).level(LogLevel.ERROR).error(e).message("Failed to enumerate graphics devices").log();
         }
 
         // Test screen capture capability
@@ -97,7 +98,7 @@ public class HeadlessDiagnostics {
         if (captureProvider.toUpperCase().contains("FFMPEG")
                 || captureProvider.toUpperCase().contains("JAVACV")) {
             log.info("Using FFmpeg capture provider - skipping SikuliX screen capture test");
-            brobotLogger.observation("FFmpeg capture provider active - SikuliX test skipped");
+            brobotLogger.builder(LogCategory.SYSTEM).message("FFmpeg capture provider active - SikuliX test skipped");
             return;
         }
 
@@ -110,17 +111,17 @@ public class HeadlessDiagnostics {
 
             if (testCapture != null) {
                 log.info("✓ Screen capture test PASSED - SikuliX can capture screen");
-                brobotLogger.observation("Screen capture test passed");
+                brobotLogger.builder(LogCategory.SYSTEM).message("Screen capture test passed");
             } else {
                 log.warn("✗ Screen capture returned null");
-                brobotLogger.observation("Screen capture returned null");
+                brobotLogger.builder(LogCategory.SYSTEM).message("Screen capture returned null");
             }
         } catch (Exception e) {
             log.error(
                     "✗ Screen capture test FAILED - {}: {}",
                     e.getClass().getSimpleName(),
                     e.getMessage());
-            brobotLogger.error("Screen capture failed", e);
+            brobotLogger.builder(LogCategory.SYSTEM).level(LogLevel.ERROR).error(e).message("Screen capture failed").log();
         }
     }
 
@@ -131,19 +132,18 @@ public class HeadlessDiagnostics {
         String sshConnection = System.getenv("SSH_CONNECTION");
         if (sshConnection != null) {
             log.warn("Running via SSH connection - this may cause headless mode");
-            brobotLogger.observation("SSH connection detected: " + sshConnection);
+            brobotLogger.builder(LogCategory.SYSTEM).message("SSH connection detected: " + sshConnection);
         }
 
         // Check Apple specific properties
         String uiElement = System.getProperty("apple.awt.UIElement");
         String appName = System.getProperty("apple.awt.application.name");
 
-        brobotLogger
-                .log()
-                .observation("macOS Settings")
-                .metadata("apple.awt.UIElement", uiElement)
-                .metadata("apple.awt.application.name", appName)
-                .metadata("SSH_CONNECTION", sshConnection)
+        brobotLogger.builder(LogCategory.SYSTEM)
+                .message("macOS Settings")
+                .context("apple.awt.UIElement", uiElement)
+                .context("apple.awt.application.name", appName)
+                .context("SSH_CONNECTION", sshConnection)
                 .log();
 
         // Provide guidance
@@ -156,11 +156,10 @@ public class HeadlessDiagnostics {
             log.warn("4. Restart the application");
             log.warn("================================================");
 
-            brobotLogger
-                    .log()
-                    .observation("macOS Permission Guidance")
-                    .metadata("action", "Grant Screen Recording permission")
-                    .metadata(
+            brobotLogger.builder(LogCategory.SYSTEM)
+                    .message("macOS Permission Guidance")
+                    .context("action", "Grant Screen Recording permission")
+                    .context(
                             "path",
                             "System Preferences > Security & Privacy > Privacy > Screen Recording")
                     .log();

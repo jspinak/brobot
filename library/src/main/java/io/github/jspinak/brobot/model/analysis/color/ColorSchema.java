@@ -6,7 +6,6 @@ import java.util.TreeMap;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
 
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
 
 import lombok.Getter;
@@ -108,8 +107,6 @@ public class ColorSchema {
      */
     public void setValues(int infosIndex, double min, double max, double mean, double stddev) {
         if (infosIndex < 0 || infosIndex >= colorInfos.size()) {
-            ConsoleReporter.println(
-                    "Cannot add Info to ColorSchema: index " + infosIndex + " out of range");
             return;
         }
         ColorInfo colorInfo = colorInfos.values().toArray(new ColorInfo[0])[infosIndex];
@@ -186,12 +183,10 @@ public class ColorSchema {
      */
     public void print() {
         if (colorInfos.isEmpty()) {
-            ConsoleReporter.println("ColorSchema is empty");
             return;
         }
         for (ColorInfo info : colorInfos.values()) {
             info.print();
         }
-        ConsoleReporter.println();
     }
 }

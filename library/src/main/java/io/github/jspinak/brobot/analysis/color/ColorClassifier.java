@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.analysis.color;
 
+import io.github.jspinak.brobot.util.string.StringSimilarity;
+
 import static io.github.jspinak.brobot.model.analysis.color.ColorCluster.ColorSchemaName.BGR;
 import static io.github.jspinak.brobot.model.analysis.color.ColorCluster.ColorSchemaName.HSV;
 import static io.github.jspinak.brobot.model.analysis.color.ColorInfo.ColorStat.MEAN;
@@ -22,7 +24,6 @@ import io.github.jspinak.brobot.model.analysis.color.PixelProfiles;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalysis;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.image.core.ColorMatrixUtilities;
 
 /**
@@ -88,18 +89,11 @@ public class ColorClassifier {
             PixelProfiles pixelAnalysisCollection, ColorCluster.ColorSchemaName colorSchemaName) {
         List<PixelProfile> pixelAnalyses = pixelAnalysisCollection.getPixelAnalyses();
         if (pixelAnalyses.isEmpty()) {
-            ConsoleReporter.println(
-                    "No pixel analyses for " + pixelAnalysisCollection.getStateImage().getName());
             return new Mat();
         }
         Mat minScores =
                 pixelAnalyses.get(0).getAnalyses(PixelProfile.Analysis.SCORES, colorSchemaName);
         if (minScores == null) {
-            ConsoleReporter.println(
-                    "Scores is null for "
-                            + colorSchemaName
-                            + " "
-                            + pixelAnalysisCollection.getStateImage().getName());
             return new Mat();
         }
         for (int i = 1; i < pixelAnalyses.size(); i++) {

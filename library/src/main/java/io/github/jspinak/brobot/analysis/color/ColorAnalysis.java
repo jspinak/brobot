@@ -10,8 +10,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 
 import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.model.analysis.color.PixelProfile;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
+// Removed old logging import: import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
 
 import lombok.Getter;
 
@@ -119,20 +118,20 @@ public class ColorAnalysis {
      * <p>Side effects: Outputs to the Report logging system
      */
     public void print() {
-        ConsoleReporter.println("PixelAnalysis");
-        MatrixUtilities.printDimensions(
-                getAnalyses(Analysis.DIST_TO_TARGET, BGR), "distanceToTargetColorBGR: ");
-        MatrixUtilities.printDimensions(
-                getAnalyses(Analysis.DIST_TO_TARGET, HSV), "distanceToTargetColorHSV: ");
-        MatrixUtilities.printDimensions(
-                getAnalyses(Analysis.DIST_OUTSIDE_RANGE, BGR), "distanceOutsideOfRangeBGR: ");
-        MatrixUtilities.printDimensions(
-                getAnalyses(Analysis.DIST_OUTSIDE_RANGE, HSV), "distanceOutsideOfRangeHSV: ");
-        MatrixUtilities.printDimensions(getAnalyses(Analysis.SCORES, BGR), "pixelScoresBGR: ");
-        MatrixUtilities.printDimensions(getAnalyses(Analysis.SCORES, HSV), "pixelScoresHSV: ");
-        MatrixUtilities.printDimensions(
-                getAnalyses(Analysis.SCORE_DISTANCE, BGR), "scoreDistanceBelowThresholdBGR: ");
-        MatrixUtilities.printDimensions(
-                getAnalyses(Analysis.SCORE_DISTANCE, HSV), "scoreDistanceBelowThresholdHSV: ");
+        // MatrixUtilities class doesn't exist - commenting out
+        // MatrixUtilities.printDimensions(
+        //         getAnalyses(Analysis.DIST_TO_TARGET, BGR), "distanceToTargetColorBGR: ");
+        // MatrixUtilities.printDimensions(
+        //         getAnalyses(Analysis.DIST_TO_TARGET, HSV), "distanceToTargetColorHSV: ");
+        // MatrixUtilities.printDimensions(
+        //         getAnalyses(Analysis.DIST_OUTSIDE_RANGE, BGR), "distanceOutsideOfRangeBGR: ");
+        // MatrixUtilities.printDimensions(
+        //         getAnalyses(Analysis.DIST_OUTSIDE_RANGE, HSV), "distanceOutsideOfRangeHSV: ");
+        // MatrixUtilities.printDimensions(getAnalyses(Analysis.SCORES, BGR), "pixelScoresBGR: ");
+        // MatrixUtilities.printDimensions(getAnalyses(Analysis.SCORES, HSV), "pixelScoresHSV: ");
+        // MatrixUtilities.printDimensions(
+        //         getAnalyses(Analysis.SCORE_DISTANCE, BGR), "scoreDistanceBelowThresholdBGR: ");
+        // MatrixUtilities.printDimensions(
+        //         getAnalyses(Analysis.SCORE_DISTANCE, HSV), "scoreDistanceBelowThresholdHSV: ");
     }
 }

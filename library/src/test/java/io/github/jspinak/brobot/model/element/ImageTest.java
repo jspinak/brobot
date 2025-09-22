@@ -90,7 +90,7 @@ public class ImageTest extends BrobotTestBase {
         Pattern pattern = mock(Pattern.class);
         BufferedImage patternImage = new BufferedImage(50, 50, BufferedImage.TYPE_INT_ARGB);
         when(pattern.getBImage()).thenReturn(patternImage);
-        when(pattern.getName()).thenReturn("PatternName");
+        when(pattern.getImgpath()).thenReturn("PatternName");
 
         // When
         Image image = new Image(pattern);

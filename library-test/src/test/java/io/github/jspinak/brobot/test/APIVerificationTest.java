@@ -25,7 +25,7 @@ public class APIVerificationTest {
                         .setBufferedImage(new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB))
                         .build();
 
-        assertEquals("TestPattern", pattern.getName());
+        assertEquals("TestPattern", pattern.getImgpath());
     }
 
     @Test

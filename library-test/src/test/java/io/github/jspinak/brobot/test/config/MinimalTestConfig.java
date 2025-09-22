@@ -1,15 +1,12 @@
 package io.github.jspinak.brobot.test.config;
 
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
-import org.springframework.context.annotation.Primary;
 
 import io.github.jspinak.brobot.annotations.AnnotationProcessor;
 import io.github.jspinak.brobot.config.*;
 import io.github.jspinak.brobot.diagnostics.ImageLoadingDiagnosticsRunner;
-import io.github.jspinak.brobot.logging.unified.ConsoleOutputCapture;
 import io.github.jspinak.brobot.startup.orchestration.StartupRunner;
 import io.github.jspinak.brobot.startup.verification.AutoStartupVerifier;
 
@@ -24,7 +21,6 @@ import io.github.jspinak.brobot.startup.verification.AutoStartupVerifier;
             @ComponentScan.Filter(
                     type = FilterType.ASSIGNABLE_TYPE,
                     classes = {
-                        ConsoleOutputCapture.class,
                         StartupRunner.class,
                         AutoStartupVerifier.class,
                         ImageLoadingDiagnosticsRunner.class,
@@ -64,20 +60,6 @@ public class MinimalTestConfig {
         System.setProperty("brobot.diagnostics.enabled", "false");
     }
 
-    /** Mock ConsoleOutputCapture to prevent blocking */
-    @Bean
-    @Primary
-    public ConsoleOutputCapture mockConsoleOutputCapture() {
-        return new ConsoleOutputCapture() {
-            @Override
-            public void startCapture() {
-                // Do nothing - prevent blocking
-            }
-
-            @Override
-            public void stopCapture() {
-                // Do nothing
-            }
-        };
-    }
+    // ConsoleOutputCapture has been removed from the library
+    // This bean is no longer needed
 }

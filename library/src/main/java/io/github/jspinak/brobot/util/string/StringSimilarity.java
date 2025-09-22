@@ -2,8 +2,7 @@ package io.github.jspinak.brobot.util.string;
 
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 /**
  * Calculates string similarity using the Levenshtein distance algorithm.
  *
@@ -212,9 +211,5 @@ public class StringSimilarity {
      * @param t the second string to compare
      */
     public static void printSimilarity(String s, String t) {
-        ConsoleReporter.println(
-                String.format(
-                        "%.3f is the similarity between \"%s\" and \"%s\"",
-                        similarity(s, t), s, t));
     }
 }

@@ -8,8 +8,7 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 
 import io.github.jspinak.brobot.model.analysis.color.ColorInfo;
 import io.github.jspinak.brobot.model.analysis.color.ColorSchema;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 import lombok.Getter;
 
 /**
@@ -83,9 +82,7 @@ public class ColorStatProfile {
      * analysis purposes.
      */
     public void print() {
-        ConsoleReporter.println("color stat: " + colorStat);
         for (ColorSchema.ColorValue colorValue : means.keySet()) {
-            ConsoleReporter.formatln("%s = %,.0f", colorValue, means.get(colorValue));
         }
     }
 }

@@ -31,12 +31,15 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.aspects.annotations.CollectData;
-import io.github.jspinak.brobot.logging.unified.BrobotLogger;
-import io.github.jspinak.brobot.logging.unified.LogEvent;
+import io.github.jspinak.brobot.logging.BrobotLogger;
+import io.github.jspinak.brobot.logging.events.ActionEvent;
 import io.github.jspinak.brobot.model.state.StateObject;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import io.github.jspinak.brobot.logging.LogCategory;
+import io.github.jspinak.brobot.logging.LogLevel;
+
 
 /**
  * Aspect that automatically collects datasets for machine learning training.
@@ -453,16 +456,14 @@ public class DatasetCollectionAspect {
 
     /** Log data collection event */
     private void logDataCollection(DataSample sample) {
-        brobotLogger
-                .log()
-                .type(LogEvent.Type.OBSERVATION)
-                .level(LogEvent.Level.DEBUG)
-                .action("DATASET_COLLECTED")
-                .metadata("category", sample.getCategory())
-                .metadata("sampleId", sample.getId())
-                .metadata("method", sample.getMethodName())
-                .metadata("success", sample.isSuccess())
-                .observation("Dataset sample collected")
+        brobotLogger.builder(LogCategory.SYSTEM)
+                .level(LogLevel.DEBUG)
+                .action("DATASET_COLLECTED", sample.getCategory())
+                .context("category", sample.getCategory())
+                .context("sampleId", sample.getId())
+                .context("method", sample.getMethodName())
+                .context("success", sample.isSuccess())
+                .message("Dataset sample collected")
                 .log();
     }
 

@@ -10,8 +10,7 @@ import org.sikuli.script.Screen;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 /**
  * Sikuli-based implementation of the ScreenCaptureService interface.
  *
@@ -55,8 +54,6 @@ public class SikuliScreenCapture implements ScreenCaptureService {
             org.sikuli.script.ScreenImage screenImage = primaryScreen.capture();
             return screenImage.getImage();
         } catch (Exception e) {
-            ConsoleReporter.println(
-                    "[SikuliScreenCapture] Failed to capture screen: " + e.getMessage());
             return null;
         }
     }
@@ -67,7 +64,6 @@ public class SikuliScreenCapture implements ScreenCaptureService {
             // Find which screen contains this region
             Screen targetScreen = findScreenForRegion(x, y, width, height);
             if (targetScreen == null) {
-                ConsoleReporter.println("[SikuliScreenCapture] No screen found for region");
                 return null;
             }
 
@@ -76,8 +72,6 @@ public class SikuliScreenCapture implements ScreenCaptureService {
             org.sikuli.script.ScreenImage screenImage = targetScreen.capture(sikuliRegion);
             return screenImage.getImage();
         } catch (Exception e) {
-            ConsoleReporter.println(
-                    "[SikuliScreenCapture] Failed to capture region: " + e.getMessage());
             return null;
         }
     }
@@ -95,8 +89,6 @@ public class SikuliScreenCapture implements ScreenCaptureService {
             org.sikuli.script.ScreenImage screenImage = activeScreen.capture();
             return screenImage.getImage();
         } catch (Exception e) {
-            ConsoleReporter.println(
-                    "[SikuliScreenCapture] Failed to capture active screen: " + e.getMessage());
             return captureScreen(); // Fallback to primary screen
         }
     }
@@ -104,7 +96,6 @@ public class SikuliScreenCapture implements ScreenCaptureService {
     @Override
     public BufferedImage captureMonitor(int monitorIndex) {
         if (monitorIndex < 0 || monitorIndex >= screens.size()) {
-            ConsoleReporter.println("[SikuliScreenCapture] Invalid monitor index: " + monitorIndex);
             return null;
         }
 
@@ -113,11 +104,6 @@ public class SikuliScreenCapture implements ScreenCaptureService {
             org.sikuli.script.ScreenImage screenImage = screen.capture();
             return screenImage.getImage();
         } catch (Exception e) {
-            ConsoleReporter.println(
-                    "[SikuliScreenCapture] Failed to capture monitor "
-                            + monitorIndex
-                            + ": "
-                            + e.getMessage());
             return null;
         }
     }
@@ -138,8 +124,6 @@ public class SikuliScreenCapture implements ScreenCaptureService {
             Rectangle bounds = screen.getBounds();
             return new Region(bounds.x, bounds.y, bounds.width, bounds.height);
         } catch (Exception e) {
-            ConsoleReporter.println(
-                    "[SikuliScreenCapture] Failed to get monitor bounds: " + e.getMessage());
             return null;
         }
     }

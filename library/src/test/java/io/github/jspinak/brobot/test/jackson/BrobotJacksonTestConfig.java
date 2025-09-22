@@ -72,8 +72,8 @@ public class BrobotJacksonTestConfig {
         mapper.setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE);
         mapper.setVisibility(PropertyAccessor.IS_GETTER, JsonAutoDetect.Visibility.NONE);
 
-        // Enable default typing for polymorphic types
-        mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+        // Don't enable default typing - it causes issues with JSON fixtures
+        // Type information should be handled explicitly with @JsonTypeInfo annotations where needed
     }
 
     private static void registerJavaTimeModule(ObjectMapper mapper) {

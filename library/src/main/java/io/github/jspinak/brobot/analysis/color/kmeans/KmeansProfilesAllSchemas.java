@@ -12,8 +12,7 @@ import org.bytedeco.opencv.opencv_core.Size;
 
 import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.model.analysis.color.ColorSchema;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 import lombok.Getter;
 import lombok.Setter;
 
@@ -142,10 +141,6 @@ public class KmeansProfilesAllSchemas {
      */
     public List<ColorCluster> getColorProfiles(int means) {
         if (!containsAll(means)) {
-            ConsoleReporter.println(
-                    "KmeansProfiles does not have both BGR and HSV profiles for "
-                            + means
-                            + " means");
             return new ArrayList<>();
         }
         List<ColorCluster> colorClusters = new ArrayList<>();

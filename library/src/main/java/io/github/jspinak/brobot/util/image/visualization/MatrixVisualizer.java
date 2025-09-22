@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.analysis.color.ColorStatistics;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
 import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
 
@@ -124,12 +123,9 @@ public class MatrixVisualizer {
      */
     public void writeScoresHSV(Mat toShow, ColorStatistics color, String filename) {
         if (toShow == null || toShow.empty()) {
-            ConsoleReporter.println(
-                    "MatrixVisualizer.writeHSV: toShow is null or empty for " + filename);
             return;
         }
         if (color == null) {
-            ConsoleReporter.println("MatrixVisualizer.writeHSV: color is null for " + filename);
             return;
         }
         MatVector toShowChannels = new MatVector(toShow.channels());
@@ -147,9 +143,7 @@ public class MatrixVisualizer {
         // ch3 represents the score, so we want to invert it onto the value channel
         // this way, low scores are bright and high scores are dark
         bitwise_not(ch3, ch3);
-        MatrixUtilities.info(ch1, "ch1");
-        MatrixUtilities.info(ch2, "ch2");
-        MatrixUtilities.info(ch3, "ch3");
+        // Debug output removed - was MatrixUtilities.info
         MatVector matVector = new MatVector(ch1, ch2, ch3);
         Mat hsv = new Mat();
         merge(matVector, hsv);
@@ -182,7 +176,6 @@ public class MatrixVisualizer {
      */
     public Mat getHSVfromHue(Mat toShow) {
         if (toShow == null || toShow.empty()) {
-            ConsoleReporter.println("MatrixVisualizer.write2dHueMat: toShow is null or empty.");
             return null;
         }
         MatVector toShowChannels = new MatVector(toShow.channels());
@@ -216,7 +209,6 @@ public class MatrixVisualizer {
      */
     public Mat getBGRfromBW(Mat toShow) {
         if (toShow == null || toShow.empty()) {
-            ConsoleReporter.println("MatrixVisualizer.write2dHueMat: toShow is null or empty.");
             return null;
         }
         MatVector toShowChannels = new MatVector(toShow.channels());
@@ -345,8 +337,6 @@ public class MatrixVisualizer {
      * @param hues map from index values to HSV colors
      */
     public void writeIndices(Mat mat, String filename, Map<Integer, Scalar> hues) {
-        ConsoleReporter.print("hues = ");
-        ConsoleReporter.println();
         Mat bgrMat = getBGRColorMatFromHSV2dIndexMat(mat, hues);
         imwrite("history/" + filename + new Random().nextInt(1000) + ".png", bgrMat);
     }
@@ -387,8 +377,6 @@ public class MatrixVisualizer {
      */
     private Map<Integer, Scalar> getHueMap(List<Integer> indicesWithout0) {
         if (indicesWithout0.size() == 0) {
-            ConsoleReporter.println(
-                    "MatrixVisualizer getBGRMat...: Mat does not have valid index values.");
             return new HashMap<>();
         }
         int hueStep = 160 / indicesWithout0.size();
@@ -424,7 +412,6 @@ public class MatrixVisualizer {
         List<Integer> indices = new ArrayList<>();
         double[] minMax = MatrixUtilities.getMinMaxOfFirstChannel(indicesMat);
         if (minMax.length <= 1) {
-            ConsoleReporter.println("MatrixVisualizer getBGRMat...: min or max is null");
             return indices;
         }
         for (int i = (int) minMax[0]; i <= (int) minMax[1]; i++) {

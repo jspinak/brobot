@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 
 import lombok.extern.slf4j.Slf4j;
@@ -112,14 +111,12 @@ public class ImageFileUtilities {
         try {
             String newPath = getFreePath(path) + ".png";
             if (brobotProperties.getCore().isMock()) {
-                ConsoleReporter.format("Save file as %s \n", newPath);
                 return newPath;
             }
             // Remove debug print - use proper logging if needed
             ImageIO.write(bufferedImageOps.getBuffImgFromScreen(region), "png", new File(newPath));
             return newPath;
         } catch (IOException e) {
-            ConsoleReporter.println("Error saving region to file: " + e.getMessage());
             return null;
         }
     }
@@ -394,7 +391,6 @@ public class ImageFileUtilities {
                 filenames.size());
 
         if (mats.size() != filenames.size()) {
-            ConsoleReporter.println("Error: number of mats and filenames must be equal.");
             log.error(
                     "[IMAGE_WRITE] Size mismatch: {} mats vs {} filenames",
                     mats.size(),

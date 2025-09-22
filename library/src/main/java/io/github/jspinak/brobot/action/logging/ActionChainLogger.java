@@ -9,8 +9,10 @@ import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.logging.unified.BrobotLogger;
-import io.github.jspinak.brobot.logging.unified.LogEvent;
+import io.github.jspinak.brobot.logging.BrobotLogger;
+import io.github.jspinak.brobot.logging.LogCategory;
+import io.github.jspinak.brobot.logging.LogLevel;
+import io.github.jspinak.brobot.logging.events.ActionEvent;
 
 /**
  * Specialized logging for action chains with step-by-step tracking. Provides detailed logging for
@@ -118,11 +120,11 @@ public class ActionChainLogger {
         activeChains.put(chainId, context);
 
         if (logger != null) {
-            logger.log()
-                    .level(LogEvent.Level.INFO)
+            logger.builder(LogCategory.SYSTEM)
+                    .level(LogLevel.INFO)
                     .message("=== Starting Action Chain: " + chainName + " ===")
-                    .metadata("chainId", chainId)
-                    .metadata("description", description)
+                    .context("chainId", chainId)
+                    .context("description", description)
                     .log();
         }
 
@@ -139,8 +141,8 @@ public class ActionChainLogger {
         ChainContext context = activeChains.get(chainId);
         if (context == null) {
             if (logger != null) {
-                logger.log()
-                        .level(LogEvent.Level.WARNING)
+                logger.builder(LogCategory.SYSTEM)
+                        .level(LogLevel.WARN)
                         .message("No active chain found with ID: " + chainId)
                         .log();
             }
@@ -151,15 +153,15 @@ public class ActionChainLogger {
         int stepNumber = context.getCurrentStepIndex();
 
         if (context.isStepLoggingEnabled() && logger != null) {
-            logger.log()
-                    .level(LogEvent.Level.INFO)
+            logger.builder(LogCategory.SYSTEM)
+                    .level(LogLevel.INFO)
                     .message(String.format("  Step %d: %s -> %s", stepNumber, fromStep, toStep))
-                    .metadata("stepNumber", stepNumber)
-                    .metadata(
+                    .context("stepNumber", stepNumber)
+                    .context(
                             "configType",
                             config != null ? config.getClass().getSimpleName() : "null")
-                    .metadata("success", result != null ? result.isSuccess() : false)
-                    .metadata("matches", result != null ? result.getMatchList().size() : 0)
+                    .context("success", result != null ? result.isSuccess() : false)
+                    .context("matches", result != null ? result.getMatchList().size() : 0)
                     .log();
         }
 
@@ -172,8 +174,8 @@ public class ActionChainLogger {
         ChainContext context = activeChains.remove(chainId);
         if (context == null) {
             if (logger != null) {
-                logger.log()
-                        .level(LogEvent.Level.WARNING)
+                logger.builder(LogCategory.SYSTEM)
+                        .level(LogLevel.WARN)
                         .message("No active chain found with ID: " + chainId)
                         .log();
             }
@@ -182,14 +184,14 @@ public class ActionChainLogger {
 
         Duration duration = context.getDuration();
         if (logger != null) {
-            logger.log()
-                    .level(LogEvent.Level.INFO)
+            logger.builder(LogCategory.SYSTEM)
+                    .level(LogLevel.INFO)
                     .message("=== Action Chain Completed ===")
-                    .metadata("chainId", chainId)
-                    .metadata("success", success)
-                    .metadata("durationMs", duration.toMillis())
-                    .metadata("totalSteps", context.getSteps().size())
-                    .metadata("summary", summary != null ? summary : "")
+                    .context("chainId", chainId)
+                    .context("success", success)
+                    .context("durationMs", duration.toMillis())
+                    .context("totalSteps", context.getSteps().size())
+                    .context("summary", summary != null ? summary : "")
                     .log();
 
             // Log step summary if there were failures
@@ -198,8 +200,8 @@ public class ActionChainLogger {
                         .filter(step -> step.getResult() != null && !step.getResult().isSuccess())
                         .forEach(
                                 step ->
-                                        logger.log()
-                                                .level(LogEvent.Level.WARNING)
+                                        logger.builder(LogCategory.SYSTEM)
+                                                .level(LogLevel.WARN)
                                                 .message(
                                                         String.format(
                                                                 "  Failed Step %d: %s",
@@ -224,8 +226,8 @@ public class ActionChainLogger {
         ChainContext context = activeChains.get(chainId);
         if (context == null) {
             if (logger != null) {
-                logger.log()
-                        .level(LogEvent.Level.WARNING)
+                logger.builder(LogCategory.SYSTEM)
+                        .level(LogLevel.WARN)
                         .message("No active chain found with ID: " + chainId)
                         .log();
             }
@@ -234,8 +236,8 @@ public class ActionChainLogger {
 
         context.incrementStepIndex();
         if (context.isStepLoggingEnabled() && logger != null) {
-            logger.log()
-                    .level(LogEvent.Level.INFO)
+            logger.builder(LogCategory.SYSTEM)
+                    .level(LogLevel.INFO)
                     .message(
                             String.format(
                                     "  Step %d: %s",

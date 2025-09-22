@@ -77,7 +77,6 @@ public class StateMemoryTest extends BrobotTestBase {
 
             assertTrue(stateMemory.getActiveStates().contains(1L));
             assertEquals(1, stateMemory.getActiveStates().size());
-            verify(mockState1).setProbabilityExists(100);
             verify(mockState1).addVisit();
         }
 
@@ -88,7 +87,6 @@ public class StateMemoryTest extends BrobotTestBase {
             stateMemory.addActiveState(1L);
 
             assertEquals(1, stateMemory.getActiveStates().size());
-            verify(mockState1, times(1)).setProbabilityExists(100);
             verify(mockState1, times(1)).addVisit();
         }
 
@@ -110,8 +108,7 @@ public class StateMemoryTest extends BrobotTestBase {
 
             assertFalse(stateMemory.getActiveStates().contains(1L));
             assertTrue(stateMemory.getActiveStates().contains(2L));
-            verify(mockState1).setProbabilityExists(0);
-        }
+            }
 
         @Test
         @DisplayName("Should remove inactive state by name")
@@ -121,8 +118,7 @@ public class StateMemoryTest extends BrobotTestBase {
             stateMemory.removeInactiveState("State1");
 
             assertFalse(stateMemory.getActiveStates().contains(1L));
-            verify(mockState1).setProbabilityExists(0);
-        }
+            }
 
         @Test
         @DisplayName("Should remove multiple inactive states")
@@ -289,17 +285,20 @@ public class StateMemoryTest extends BrobotTestBase {
 
             assertTrue(stateMemory.getActiveStates().contains(1L));
             assertEquals(1, stateMemory.getActiveStates().size());
-            verify(mockState2, never()).setProbabilityExists(anyInt());
+            // mockFindStochasticModifier is not modified on state removal
         }
 
         @Test
-        @DisplayName("Should handle state addition with newline parameter")
-        void shouldHandleStateAdditionWithNewline() {
-            stateMemory.addActiveState(1L, true);
+        @DisplayName("Should handle multiple state additions")
+        void shouldHandleMultipleStateAdditions() {
+            stateMemory.addActiveState(1L);
+            stateMemory.addActiveState(2L);
+            stateMemory.addActiveState(3L);
 
-            assertTrue(stateMemory.getActiveStates().contains(1L));
-            verify(mockState1).setProbabilityExists(100);
+            assertEquals(3, stateMemory.getActiveStates().size());
             verify(mockState1).addVisit();
+            verify(mockState2).addVisit();
+            verify(mockState3).addVisit();
         }
     }
 }

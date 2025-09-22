@@ -28,10 +28,10 @@ import io.github.jspinak.brobot.capture.UnifiedCaptureService;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.config.core.SmartImageLoader;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
+import io.github.jspinak.brobot.util.file.FilenameUtils;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.monitor.MonitorManager;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-import io.github.jspinak.brobot.util.file.FilenameUtils;
+// Removed old logging import: import io.github.jspinak.brobot.util.file.FilenameUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -171,7 +171,6 @@ public class BufferedImageUtilities {
             loggedImages.add(path);
             // Don't log status here - let the actual loading code report success/failure
             // The "not found" message is misleading when SikuliX can find it in ImagePath
-            ConsoleReporter.println("[IMAGE] " + path);
         }
 
         // Try SmartImageLoader first if available
@@ -181,7 +180,6 @@ public class BufferedImageUtilities {
                 if (result.isSuccess()) {
                     BufferedImage img = instance.smartImageLoader.getFromCache(path);
                     if (shouldLog) {
-                        ConsoleReporter.println("  -> " + img.getWidth() + "x" + img.getHeight());
                     }
                     return img;
                 }
@@ -205,20 +203,12 @@ public class BufferedImageUtilities {
                 BufferedImage bi = sikuliPattern.getBImage();
                 if (bi != null) {
                     if (shouldLog) {
-                        ConsoleReporter.println(
-                                "  -> SikuliX Pattern: "
-                                        + bi.getWidth()
-                                        + "x"
-                                        + bi.getHeight()
-                                        + " type="
-                                        + getImageTypeName(bi.getType()));
                         validateImageContent(bi, path);
                     }
                     return bi;
                 }
             } catch (Exception e) {
                 if (shouldLog) {
-                    ConsoleReporter.println("  -> SikuliX Pattern failed: " + e.getMessage());
                 }
             }
         }
@@ -226,13 +216,6 @@ public class BufferedImageUtilities {
         // Fall back to direct file reading
         BufferedImage result = getBuffImgDirectly(path);
         if (shouldLog && result != null) {
-            ConsoleReporter.println(
-                    "  -> Direct load: "
-                            + result.getWidth()
-                            + "x"
-                            + result.getHeight()
-                            + " type="
-                            + getImageTypeName(result.getType()));
             validateImageContent(result, path);
         }
         return result;
@@ -246,7 +229,6 @@ public class BufferedImageUtilities {
         int width = img.getWidth();
         int height = img.getHeight();
         if (width < 1 || height < 1) {
-            ConsoleReporter.println("  -> WARNING: Invalid dimensions for " + path);
             return;
         }
 
@@ -265,7 +247,6 @@ public class BufferedImageUtilities {
         if ((r < 5 && g < 5 && b < 5)
                 && (topLeft & 0xFFFFFF) < 0x050505
                 && (bottomRight & 0xFFFFFF) < 0x050505) {
-            ConsoleReporter.println("  -> WARNING: Image appears to be all black!");
         }
     }
 
@@ -344,8 +325,6 @@ public class BufferedImageUtilities {
         if (!f.exists()) {
             if (!loggedImages.contains(path + "_not_found")) {
                 loggedImages.add(path + "_not_found");
-                ConsoleReporter.println("[IMAGE NOT FOUND] " + path);
-                ConsoleReporter.println("  Searched: " + f.getAbsolutePath());
             }
             return null;
         }
@@ -363,20 +342,12 @@ public class BufferedImageUtilities {
 
         // Log environment info only once per session
         if (!environmentLogged) {
-            ConsoleReporter.println("[SCREEN CAPTURE] Environment check:");
-            ConsoleReporter.println("  -> Display available: " + env.hasDisplay());
-            ConsoleReporter.println("  -> Can capture screen: " + env.canCaptureScreen());
-            ConsoleReporter.println("  -> Mock mode: " + env.isMockMode());
-            ConsoleReporter.println("  -> Display env var: " + System.getenv("DISPLAY"));
-            ConsoleReporter.println(
-                    "  -> Java AWT headless: " + java.awt.GraphicsEnvironment.isHeadless());
             environmentLogged = true;
         }
 
         // Only return dummy image if we're in mock mode or don't have display
         // canCaptureScreen() may be too restrictive for illustration generation
         if (env.isMockMode() || !env.hasDisplay()) {
-            ConsoleReporter.println("[SCREEN CAPTURE] No display - returning dummy image");
             // Return dummy only when screen capture not possible
             BufferedImage dummy =
                     new BufferedImage(
@@ -403,9 +374,6 @@ public class BufferedImageUtilities {
                     // Search regions are used for filtering matches, not for cropping captures
                     captured = instance.unifiedCaptureService.captureScreen();
                 } catch (IOException e) {
-                    ConsoleReporter.println(
-                            "[CAPTURE] Failed to capture with UnifiedCaptureService: "
-                                    + e.getMessage());
                     // Fall back to SikuliX on IOException - also full screen capture
                     Screen screen = new Screen();
                     captured = screen.capture().getImage();
@@ -413,9 +381,6 @@ public class BufferedImageUtilities {
             } else {
                 // Fallback to SikuliX Screen if UnifiedCaptureService not available
                 // Always capture full screen
-                ConsoleReporter.println(
-                        "[CAPTURE] Warning: UnifiedCaptureService not available, using SikuliX"
-                                + " fallback");
                 Screen screen = new Screen();
                 captured = screen.capture().getImage();
             }
@@ -423,17 +388,6 @@ public class BufferedImageUtilities {
             // Validate captured image
             if (captured != null) {
                 // Log capture info concisely on one line
-                ConsoleReporter.println(
-                        String.format(
-                                "[CAPTURE] %dx%d region at (%d,%d) -> %dx%d %s",
-                                region.w(),
-                                region.h(),
-                                region.x(),
-                                region.y(),
-                                captured.getWidth(),
-                                captured.getHeight(),
-                                getImageTypeName(captured.getType())));
-
                 // Quick check if captured image is all black
                 int sampleCount = 10;
                 int blackPixels = 0;
@@ -445,20 +399,14 @@ public class BufferedImageUtilities {
                 }
 
                 if (blackPixels == sampleCount) {
-                    ConsoleReporter.println(
-                            "[CAPTURE WARNING] Black image - possible capture failure");
                     if (isRunningInWSL()) {
-                        ConsoleReporter.println(
-                                "[CAPTURE NOTE] WSL2 cannot capture Windows screens directly");
                     }
                 }
             } else {
-                ConsoleReporter.println("[CAPTURE ERROR] null image returned");
             }
 
             return captured;
         } catch (Exception e) {
-            ConsoleReporter.println("[CAPTURE FAILED] " + e.getMessage());
             // Return dummy image on capture failure
             BufferedImage dummy =
                     new BufferedImage(
@@ -519,17 +467,11 @@ public class BufferedImageUtilities {
                     // Search regions are used for filtering matches, not for cropping captures
                     captured = instance.unifiedCaptureService.captureScreen();
                 } catch (IOException e) {
-                    ConsoleReporter.println(
-                            "[CAPTURE] Failed to capture with UnifiedCaptureService: "
-                                    + e.getMessage());
                     // Fall back to SikuliX on IOException - also full screen capture
                     captured = screen.capture().getImage();
                 }
             } else {
                 // Fallback to SikuliX Screen - always full screen
-                ConsoleReporter.println(
-                        "[CAPTURE] Warning: UnifiedCaptureService not available, using SikuliX"
-                                + " fallback");
                 captured = screen.capture().getImage();
             }
             // Only log successful capture once

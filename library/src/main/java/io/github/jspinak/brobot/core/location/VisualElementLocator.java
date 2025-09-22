@@ -12,8 +12,7 @@ import io.github.jspinak.brobot.core.services.ScreenCaptureService;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 /**
  * Visual implementation of the ElementLocator interface.
  *
@@ -56,14 +55,12 @@ public class VisualElementLocator implements ElementLocator {
         // Capture the screen
         BufferedImage screen = screenCapture.captureScreen();
         if (screen == null) {
-            ConsoleReporter.println("[VisualElementLocator] Failed to capture screen");
             return new ArrayList<>();
         }
 
         // Get patterns to search for
         List<Pattern> patterns = extractPatterns(request);
         if (patterns.isEmpty()) {
-            ConsoleReporter.println("[VisualElementLocator] No patterns to search for");
             return new ArrayList<>();
         }
 
@@ -87,7 +84,6 @@ public class VisualElementLocator implements ElementLocator {
         // Capture the specific region
         BufferedImage regionImage = screenCapture.captureRegion(region);
         if (regionImage == null) {
-            ConsoleReporter.println("[VisualElementLocator] Failed to capture region");
             return new ArrayList<>();
         }
 

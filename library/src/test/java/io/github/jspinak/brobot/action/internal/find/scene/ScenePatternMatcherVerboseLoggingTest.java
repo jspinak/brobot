@@ -54,7 +54,7 @@ public class ScenePatternMatcherVerboseLoggingTest extends BrobotTestBase {
         System.setOut(new PrintStream(outputStream));
 
         // Setup mocks
-        when(pattern.getName()).thenReturn("TestPattern");
+        when(pattern.getImgpath()).thenReturn("TestPattern");
         when(pattern.w()).thenReturn(100);
         when(pattern.h()).thenReturn(100);
 
@@ -99,9 +99,9 @@ public class ScenePatternMatcherVerboseLoggingTest extends BrobotTestBase {
         System.out.println(expectedBehavior);
 
         String output = outputStream.toString();
-        assertTrue(output.contains("Expected output format"));
-        assertTrue(output.contains("TOP MATCHES"));
-        assertTrue(output.contains("more matches"));
+        assertTrue(output.contains("Expected output format in VERBOSE mode"));
+        assertTrue(output.contains("[TOP MATCHES]"));
+        assertTrue(output.contains("... and 10 more matches"));
     }
 
     @Test
@@ -122,7 +122,7 @@ public class ScenePatternMatcherVerboseLoggingTest extends BrobotTestBase {
         System.out.println(expectedBehavior);
 
         String output = outputStream.toString();
-        assertTrue(output.contains("NORMAL mode"));
+        assertTrue(output.contains("Expected output format in NORMAL mode"));
         assertFalse(output.contains("TOP MATCHES"));
     }
 

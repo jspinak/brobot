@@ -6,8 +6,7 @@ import java.util.Map;
 
 import org.bytedeco.opencv.opencv_core.Scalar;
 
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 import lombok.Getter;
 
 /**
@@ -95,9 +94,7 @@ public class ColorStatistics {
      * <p>Side effects: Outputs to the Report logging system
      */
     public void print() {
-        ConsoleReporter.println("color stat: " + colorStat);
         for (ColorSchema.ColorValue colorValue : means.keySet()) {
-            ConsoleReporter.formatln("%s = %,.0f", colorValue, means.get(colorValue));
         }
     }
 }

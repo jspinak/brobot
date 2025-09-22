@@ -3,12 +3,22 @@ package io.github.jspinak.brobot.test;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
+import org.mockito.Mockito;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.github.jspinak.brobot.config.mock.MockModeManager;
+import io.github.jspinak.brobot.logging.BrobotLogger;
+import io.github.jspinak.brobot.logging.LogBuilder;
+import io.github.jspinak.brobot.logging.LogCategory;
+import io.github.jspinak.brobot.logging.LogLevel;
 import io.github.jspinak.brobot.test.jackson.BrobotJacksonMixins;
 import io.github.jspinak.brobot.test.jackson.BrobotJacksonTestConfig;
+
+import java.time.Duration;
+
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Base test class for all Brobot tests. Provides common setup and configuration for consistent test
@@ -30,6 +40,18 @@ public abstract class BrobotTestBase {
      * problematic types (Mat, BufferedImage, SikuliX objects).
      */
     protected ObjectMapper testObjectMapper;
+
+    /**
+     * Mock BrobotLogger for testing logging functionality.
+     * Pre-configured with fluent API mock responses.
+     */
+    protected BrobotLogger mockLogger;
+
+    /**
+     * Mock LogBuilder for building log entries in tests.
+     * Pre-configured to support fluent API chaining.
+     */
+    protected LogBuilder mockLogBuilder;
 
     /**
      * Global setup for all tests in the class. Sets system properties to ensure headless operation
@@ -90,6 +112,10 @@ public abstract class BrobotTestBase {
         testObjectMapper = BrobotJacksonTestConfig.createTestObjectMapper();
         BrobotJacksonMixins.registerMixins(testObjectMapper);
 
+        // Initialize logging mocks
+        mockLogger = createMockLogger();
+        mockLogBuilder = createMockLogBuilder();
+
         // Reset any static state that might interfere between tests
         resetStaticState();
     }
@@ -134,5 +160,104 @@ public abstract class BrobotTestBase {
                 "Running test: %s.%s%n",
                 testInfo.getTestClass().map(Class::getSimpleName).orElse("Unknown"),
                 testInfo.getTestMethod().map(m -> m.getName()).orElse("unknown"));
+    }
+
+    /**
+     * Creates a mock BrobotLogger with pre-configured fluent API responses.
+     *
+     * @return A fully configured mock BrobotLogger
+     */
+    protected BrobotLogger createMockLogger() {
+        BrobotLogger logger = mock(BrobotLogger.class);
+        LogBuilder builder = createMockLogBuilder();
+        lenient().when(logger.builder(any(LogCategory.class))).thenReturn(builder);
+        return logger;
+    }
+
+    /**
+     * Creates a mock LogBuilder with fluent API support.
+     * All builder methods return the builder itself to support method chaining.
+     *
+     * @return A fully configured mock LogBuilder
+     */
+    protected LogBuilder createMockLogBuilder() {
+        LogBuilder builder = mock(LogBuilder.class);
+        // Configure fluent API with lenient stubbing to avoid UnnecessaryStubbingException
+        lenient().when(builder.level(any(LogLevel.class))).thenReturn(builder);
+        lenient().when(builder.message(anyString())).thenReturn(builder);
+        lenient().when(builder.message(anyString(), any())).thenReturn(builder);
+        lenient().when(builder.context(anyString(), any())).thenReturn(builder);
+        lenient().when(builder.action(anyString(), anyString())).thenReturn(builder);
+        lenient().when(builder.duration(any(Duration.class))).thenReturn(builder);
+        lenient().when(builder.error(any(Throwable.class))).thenReturn(builder);
+        lenient().when(builder.correlationId(anyString())).thenReturn(builder);
+        lenient().when(builder.state(anyString())).thenReturn(builder);
+        lenient().doNothing().when(builder).log();
+        return builder;
+    }
+
+    // Logging Verification Utilities
+
+    /**
+     * Verify that a log was created with specific category and level.
+     *
+     * @param category The expected log category
+     * @param level The expected log level
+     */
+    protected void verifyLogged(LogCategory category, LogLevel level) {
+        verify(mockLogger).builder(category);
+        verify(mockLogBuilder).level(level);
+        verify(mockLogBuilder).log();
+    }
+
+    /**
+     * Verify that an action was logged.
+     *
+     * @param actionType The type of action that should have been logged
+     * @param target The target of the action
+     */
+    protected void verifyActionLogged(String actionType, String target) {
+        verify(mockLogBuilder).action(actionType, target);
+        verify(mockLogBuilder).log();
+    }
+
+    /**
+     * Verify that an error was logged.
+     *
+     * @param error The error that should have been logged
+     */
+    protected void verifyErrorLogged(Throwable error) {
+        verify(mockLogBuilder).error(error);
+        verify(mockLogBuilder).log();
+    }
+
+    /**
+     * Verify that a specific message was logged.
+     *
+     * @param message The message that should have been logged
+     */
+    protected void verifyMessageLogged(String message) {
+        verify(mockLogBuilder).message(eq(message), any());
+        verify(mockLogBuilder).log();
+    }
+
+    /**
+     * Reset the mock logger and builder for fresh verification.
+     * Useful when testing multiple logging scenarios in a single test.
+     */
+    protected void resetLoggerMocks() {
+        Mockito.reset(mockLogger, mockLogBuilder);
+        // Re-configure the fluent API after reset without lenient stubbing for proper invocation
+        when(mockLogger.builder(any(LogCategory.class))).thenReturn(mockLogBuilder);
+        when(mockLogBuilder.level(any(LogLevel.class))).thenReturn(mockLogBuilder);
+        when(mockLogBuilder.message(anyString())).thenReturn(mockLogBuilder);
+        when(mockLogBuilder.message(anyString(), any())).thenReturn(mockLogBuilder);
+        when(mockLogBuilder.context(anyString(), any())).thenReturn(mockLogBuilder);
+        when(mockLogBuilder.action(anyString(), anyString())).thenReturn(mockLogBuilder);
+        when(mockLogBuilder.duration(any(Duration.class))).thenReturn(mockLogBuilder);
+        when(mockLogBuilder.error(any(Throwable.class))).thenReturn(mockLogBuilder);
+        when(mockLogBuilder.correlationId(anyString())).thenReturn(mockLogBuilder);
+        when(mockLogBuilder.state(anyString())).thenReturn(mockLogBuilder);
+        doNothing().when(mockLogBuilder).log();
     }
 }

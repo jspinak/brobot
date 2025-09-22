@@ -128,16 +128,14 @@ public class State {
     private LocalDateTime lastAccessed;
 
     /**
-     * The base probability that a State exists is transfered to the active variable
-     * 'probabilityExists', which is used by Find functions. ProbabilityExists is set to 0 when a
-     * State exits, and is set to the base probability when it should be found. Having a
-     * baseProbability of less than 100 will introduce unexpected behavior into a program (States
-     * may not appear when expected to), which can be useful for testing a program with built-in
-     * stochasticity.
+     * The base modifier for find operations in mock mode. This value modifies the probability
+     * of finding state elements during mock test runs. A value less than 100 will introduce
+     * realistic failures into mock tests, simulating environmental uncertainties like network
+     * issues, rendering problems, or unexpected UI overlays.
      */
-    private int baseProbabilityExists = 100;
+    private int baseMockFindStochasticModifier = 100;
 
-    private int probabilityExists = 0; // probability that the state exists. used for mocks.
+    private int mockFindStochasticModifier = 0; // modifier for find probability in mock mode
     private int timesVisited = 0;
 
     /**
@@ -185,7 +183,7 @@ public class State {
     }
 
     public void setProbabilityToBaseProbability() {
-        probabilityExists = baseProbabilityExists;
+        mockFindStochasticModifier = baseMockFindStochasticModifier;
     }
 
     public void addHiddenState(Long stateId) {
@@ -271,7 +269,7 @@ public class State {
         private final Set<String> hidden = new HashSet<>();
         private int pathCost = 1;
         private LocalDateTime lastAccessed;
-        private int baseProbabilityExists = 100;
+        private int baseMockFindStochasticModifier = 100;
         private final List<Scene> scenes = new ArrayList<>();
         private Region usableArea = new Region();
 
@@ -327,8 +325,8 @@ public class State {
             return this;
         }
 
-        public Builder setBaseProbabilityExists(int probabilityExists) {
-            this.baseProbabilityExists = probabilityExists;
+        public Builder setBaseMockFindStochasticModifier(int mockFindStochasticModifier) {
+            this.baseMockFindStochasticModifier = mockFindStochasticModifier;
             return this;
         }
 
@@ -363,7 +361,7 @@ public class State {
             state.canHide = canHide;
             state.hiddenStateNames = hidden;
             state.pathCost = pathCost;
-            state.baseProbabilityExists = baseProbabilityExists;
+            state.baseMockFindStochasticModifier = baseMockFindStochasticModifier;
             state.scenes = scenes;
             state.usableArea = usableArea;
             return state;

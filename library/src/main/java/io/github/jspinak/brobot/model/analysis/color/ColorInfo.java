@@ -4,8 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -102,13 +101,6 @@ public class ColorInfo implements Comparable<ColorInfo> {
      */
     public void print() {
         if (colorValue != null && stats != null && !stats.isEmpty()) {
-            ConsoleReporter.formatln(
-                    "%s min.max.mean.stddev = %,.0f %,.0f %,.1f %,.1f",
-                    colorValue,
-                    stats.get(ColorStat.MIN),
-                    stats.get(ColorStat.MAX),
-                    stats.get(ColorStat.MEAN),
-                    stats.get(ColorStat.STDDEV));
         }
     }
 

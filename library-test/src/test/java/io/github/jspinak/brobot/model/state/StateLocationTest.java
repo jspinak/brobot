@@ -21,7 +21,7 @@ public class StateLocationTest {
                         .setName("testLocation")
                         .setLocation(10, 20)
                         .setOwnerStateName("testState")
-                        .setProbabilityExists(90)
+                        .setMockFindStochasticModifier(90)
                         .setTimesActedOn(5)
                         .setPosition(Positions.Name.TOPLEFT)
                         .build();

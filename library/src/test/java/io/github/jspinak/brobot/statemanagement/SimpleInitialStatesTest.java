@@ -120,7 +120,7 @@ public class SimpleInitialStatesTest extends BrobotTestBase {
         initialStates.findInitialStates();
 
         // Should have added a state in mock mode with two parameters
-        verify(stateMemory, atLeastOnce()).addActiveState(eq(1L), eq(true));
+        verify(stateMemory, atLeastOnce()).addActiveState(eq(1L));
     }
 
     @Test
@@ -136,6 +136,6 @@ public class SimpleInitialStatesTest extends BrobotTestBase {
         // In mock mode with empty potentialActiveStates, it just returns
         // without calling stateDetector or stateMemory
         verify(stateDetector, never()).refreshActiveStates();
-        verify(stateMemory, never()).addActiveState(anyLong(), anyBoolean());
+        verify(stateMemory, never()).addActiveState(anyLong());
     }
 }

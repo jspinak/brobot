@@ -7,8 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.core.services.SikuliScreenCapture;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -29,13 +28,11 @@ public class DirectRobotCapture {
     @Autowired
     public DirectRobotCapture(SikuliScreenCapture screenCapture) {
         this.screenCapture = screenCapture;
-        ConsoleReporter.println("[DIRECT CAPTURE] SikuliX screen capture initialized successfully");
     }
 
     // For backward compatibility with tests that use no-arg constructor
     public DirectRobotCapture() {
         this.screenCapture = new SikuliScreenCapture();
-        ConsoleReporter.println("[DIRECT CAPTURE] SikuliX screen capture initialized successfully");
     }
 
     /**
@@ -50,55 +47,30 @@ public class DirectRobotCapture {
      */
     public BufferedImage captureRegion(int x, int y, int width, int height) {
         if (screenCapture == null) {
-            ConsoleReporter.println("[DIRECT CAPTURE] Screen capture not initialized!");
             return null;
         }
 
         // Validate dimensions
         if (width <= 0 || height <= 0) {
-            ConsoleReporter.println("[DIRECT CAPTURE] Invalid dimensions: " + width + "x" + height);
             return null;
         }
 
         try {
-            ConsoleReporter.println(
-                    "[DIRECT CAPTURE] Capturing region: "
-                            + x
-                            + ","
-                            + y
-                            + " "
-                            + width
-                            + "x"
-                            + height);
-
             BufferedImage captured = screenCapture.captureRegion(x, y, width, height);
 
             if (captured != null) {
-                ConsoleReporter.println(
-                        "[DIRECT CAPTURE] Success: "
-                                + captured.getWidth()
-                                + "x"
-                                + captured.getHeight()
-                                + " type="
-                                + getImageType(captured.getType()));
-
                 // Log pixel sample to verify content
                 if (captured.getWidth() > 0 && captured.getHeight() > 0) {
                     int centerX = captured.getWidth() / 2;
                     int centerY = captured.getHeight() / 2;
                     int rgb = captured.getRGB(centerX, centerY);
-                    ConsoleReporter.println(
-                            "[DIRECT CAPTURE] Center pixel RGB: "
-                                    + String.format("#%06X", rgb & 0xFFFFFF));
                 }
             } else {
-                ConsoleReporter.println("[DIRECT CAPTURE] Capture returned null");
             }
 
             return captured;
 
         } catch (Exception e) {
-            ConsoleReporter.println("[DIRECT CAPTURE] ERROR: " + e.getMessage());
             log.error("Direct capture failed", e);
             return null;
         }
@@ -111,23 +83,15 @@ public class DirectRobotCapture {
      */
     public BufferedImage captureFullScreen() {
         if (screenCapture == null) {
-            ConsoleReporter.println("[DIRECT CAPTURE] Screen capture not initialized!");
             return null;
         }
 
         try {
-            ConsoleReporter.println("[DIRECT CAPTURE] Capturing full screen");
 
             BufferedImage captured = screenCapture.captureScreen();
 
             if (captured != null) {
-                ConsoleReporter.println(
-                        "[DIRECT CAPTURE] Full screen captured: "
-                                + captured.getWidth()
-                                + "x"
-                                + captured.getHeight());
             } else {
-                ConsoleReporter.println("[DIRECT CAPTURE] Full screen capture returned null");
             }
 
             return captured;
@@ -152,19 +116,11 @@ public class DirectRobotCapture {
         BufferedImage directCapture = captureRegion(x, y, width, height);
 
         if (directCapture == null || sikuliCapture == null) {
-            ConsoleReporter.println("[DIRECT CAPTURE] Cannot compare - null capture");
             return;
         }
 
-        ConsoleReporter.println("[DIRECT CAPTURE] Comparison:");
-        ConsoleReporter.println(
-                "  Direct Robot: " + directCapture.getWidth() + "x" + directCapture.getHeight());
-        ConsoleReporter.println(
-                "  SikuliX:      " + sikuliCapture.getWidth() + "x" + sikuliCapture.getHeight());
-
         if (directCapture.getWidth() != sikuliCapture.getWidth()
                 || directCapture.getHeight() != sikuliCapture.getHeight()) {
-            ConsoleReporter.println("  WARNING: Size mismatch! SikuliX might be scaling!");
         }
 
         // Sample pixel comparison
@@ -178,9 +134,6 @@ public class DirectRobotCapture {
         int sikuliRGB = sikuliCapture.getRGB(sampleX, sampleY);
 
         if (directRGB != sikuliRGB) {
-            ConsoleReporter.println("  Pixel difference at (" + sampleX + "," + sampleY + "):");
-            ConsoleReporter.println("    Direct: " + String.format("#%06X", directRGB & 0xFFFFFF));
-            ConsoleReporter.println("    Sikuli: " + String.format("#%06X", sikuliRGB & 0xFFFFFF));
         }
     }
 

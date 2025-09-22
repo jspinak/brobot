@@ -18,8 +18,7 @@ import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.navigation.service.StateTransitionService;
 import io.github.jspinak.brobot.navigation.transition.StateTransitions;
 import io.github.jspinak.brobot.statemanagement.StateIdResolver;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 /**
  * Initialization service for the Brobot model-based GUI automation framework.
  *
@@ -159,9 +158,7 @@ public class FrameworkInitializer {
         if (!env.shouldSkipSikuliX()) {
             org.sikuli.script.ImagePath.setBundlePath(path);
         }
-        ConsoleReporter.println("Saving indices for images in states: ");
         allStatesInProjectService.getAllStates().forEach(this::preProcessImages);
-        ConsoleReporter.println();
     }
 
     /**
@@ -194,9 +191,9 @@ public class FrameworkInitializer {
      * @param state The state containing images to preprocess
      */
     private void preProcessImages(State state) {
-        if (!state.getStateImages().isEmpty()) ConsoleReporter.print(state.getName() + ": ");
+        if (!state.getStateImages().isEmpty()) {
+        }
         for (StateImage stateImage : state.getStateImages()) {
-            ConsoleReporter.print("[" + lastImageIndex + "," + stateImage.getName() + "] ");
             stateImage.setIndex(lastImageIndex);
             profileSetBuilder.setMatsAndColorProfiles(stateImage);
             lastImageIndex++;
@@ -206,7 +203,8 @@ public class FrameworkInitializer {
                 setKMeansProfiles.setProfiles(stateImage);
             }
         }
-        if (!state.getStateImages().isEmpty()) ConsoleReporter.println();
+        if (!state.getStateImages().isEmpty()) {
+        }
     }
 
     /**
@@ -339,9 +337,7 @@ public class FrameworkInitializer {
      */
     public void initializeStateStructure() {
         if (allStatesInProjectService.onlyTheUnknownStateExists()) {
-            ConsoleReporter.println("No states found to initialize.");
         } else {
-            ConsoleReporter.println("Initializing state structure...");
             populateStateIds();
             stateTransitionsRepository.populateStateTransitionsJointTable();
         }
@@ -355,12 +351,6 @@ public class FrameworkInitializer {
      */
     @EventListener
     public void onStatesRegistered(StatesRegisteredEvent event) {
-        ConsoleReporter.println(
-                "Received StatesRegisteredEvent with "
-                        + event.getStateCount()
-                        + " states and "
-                        + event.getTransitionCount()
-                        + " transitions.");
         initializeStateStructure();
     }
 }

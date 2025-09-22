@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.aspects.monitoring;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -24,12 +25,15 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.logging.unified.BrobotLogger;
-import io.github.jspinak.brobot.logging.unified.LogEvent;
+import io.github.jspinak.brobot.logging.BrobotLogger;
+import io.github.jspinak.brobot.logging.events.ActionEvent;
 import io.github.jspinak.brobot.model.state.State;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import io.github.jspinak.brobot.logging.LogCategory;
+import io.github.jspinak.brobot.logging.LogLevel;
+
 
 /**
  * Aspect that tracks and analyzes state transitions in the Brobot framework.
@@ -276,18 +280,16 @@ public class StateTransitionAspect {
 
     /** Log transition event */
     private void logTransition(TransitionEvent event) {
-        LogEvent.Level level = event.isSuccess() ? LogEvent.Level.DEBUG : LogEvent.Level.WARNING;
+        LogLevel level = event.isSuccess() ? LogLevel.DEBUG : LogLevel.WARN;
 
-        brobotLogger
-                .log()
-                .type(LogEvent.Type.TRANSITION)
+        brobotLogger.builder(LogCategory.TRANSITIONS)
                 .level(level)
-                .action("STATE_TRANSITION")
-                .success(event.isSuccess())
-                .duration(event.getDuration())
-                .metadata("fromStates", String.join(",", event.getFromStates()))
-                .metadata("toStates", String.join(",", event.getToStates()))
-                .metadata("error", event.getError())
+                .action("STATE_TRANSITION", "transition")
+                .context("success", event.isSuccess())
+                .duration(Duration.ofMillis(event.getDuration()))
+                .context("fromStates", String.join(",", event.getFromStates()))
+                .context("toStates", String.join(",", event.getToStates()))
+                .context("error", event.getError())
                 .log();
     }
 

@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.action.internal.mouse;
 
+import io.github.jspinak.brobot.util.location.LocationUtils;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -8,7 +10,6 @@ import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.model.element.Location;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 import io.github.jspinak.brobot.util.coordinates.CoordinateScaler;
 
@@ -184,12 +185,9 @@ public class SingleClickExecutor {
             double pauseBeforeUp,
             double pauseAfterUp) {
         if (brobotProperties.getCore().isMock()) {
-            ConsoleReporter.print("<click>");
             if (button != MouseButton.LEFT || numberOfClicks > 1) {
-                ConsoleReporter.print(button.name());
-                if (numberOfClicks > 1) ConsoleReporter.print(" x" + numberOfClicks);
+                
             }
-            ConsoleReporter.print(" ");
             return true;
         }
 
@@ -212,9 +210,6 @@ public class SingleClickExecutor {
             scaledLocation.doubleClick();
         } else {
             // Perform clicks with timing
-            if (numberOfClicks > 1) {
-                ConsoleReporter.print(numberOfClicks + " clicks ");
-            }
 
             // Convert MouseButton to legacy ClickType for wrapper compatibility
             ClickType.Type clickType = convertToClickType(button, numberOfClicks);

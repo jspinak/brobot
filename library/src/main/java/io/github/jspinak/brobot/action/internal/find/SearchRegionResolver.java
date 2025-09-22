@@ -11,8 +11,7 @@ import io.github.jspinak.brobot.action.basic.find.BaseFindOptions;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-
+// Removed old logging import: 
 /**
  * Selects appropriate search regions for find operations based on a priority hierarchy.
  *
@@ -55,13 +54,10 @@ public class SearchRegionResolver {
 
         // If we had suppressed messages, log the count
         if (suppressedCount > 0) {
-            ConsoleReporter.println(
-                    "    [Previous message repeated " + suppressedCount + " more time(s)]");
             suppressedCount = 0;
         }
 
         // Log the new message
-        ConsoleReporter.println(message);
         lastLoggedMessage = message;
     }
 

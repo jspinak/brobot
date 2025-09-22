@@ -18,10 +18,10 @@ import io.github.jspinak.brobot.navigation.path.PathTraverser;
 import io.github.jspinak.brobot.navigation.path.Paths;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
-import io.github.jspinak.brobot.tools.logging.ActionLogger;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-import io.github.jspinak.brobot.tools.logging.ExecutionSession;
-import io.github.jspinak.brobot.tools.logging.MessageFormatter;
+// Removed old logging imports that no longer exist:
+// // Removed old logging import: import io.github.jspinak.brobot.tools.logging.ActionLogger;
+// // Removed old logging import: // // Removed old logging import: import io.github.jspinak.brobot.tools.logging.ExecutionSession;
+// // Removed old logging import: import io.github.jspinak.brobot.tools.logging.MessageFormatter;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -101,8 +101,9 @@ public class StateNavigator {
     private final StateMemory stateMemory;
     private final PathTraverser pathTraverser;
     private final PathManager pathManager;
-    private final ActionLogger actionLogger;
-    private final ExecutionSession automationSession;
+    // Removed old logging dependencies that no longer exist:
+    // private final ActionLogger actionLogger;
+    // private final ExecutionSession automationSession;
 
     @Autowired(required = false)
     private AutomationConfig automationConfig;
@@ -114,16 +115,19 @@ public class StateNavigator {
             StateService allStatesInProjectService,
             StateMemory stateMemory,
             PathTraverser pathTraverser,
-            PathManager pathManager,
-            ActionLogger actionLogger,
-            ExecutionSession automationSession) {
+            PathManager pathManager
+            // Removed missing parameters:
+            // ActionLogger actionLogger,
+            // ExecutionSession automationSession
+    ) {
         this.pathFinder = pathFinder;
         this.allStatesInProjectService = allStatesInProjectService;
         this.stateMemory = stateMemory;
         this.pathTraverser = pathTraverser;
         this.pathManager = pathManager;
-        this.actionLogger = actionLogger;
-        this.automationSession = automationSession;
+        // Removed initialization of missing classes:
+        // this.actionLogger = actionLogger;
+        // this.automationSession = automationSession;
     }
 
     /**
@@ -138,11 +142,9 @@ public class StateNavigator {
      */
     public boolean openState(String stateName) {
         try {
-            ConsoleReporter.format("Open State %s\n", stateName);
             Long stateToOpen = allStatesInProjectService.getStateId(stateName);
             if (stateToOpen == null) {
                 String errorMsg = "Target state not found: " + stateName;
-                ConsoleReporter.println(MessageFormatter.fail + " " + errorMsg);
                 handleNavigationFailure(errorMsg, stateName, "state_lookup", false);
                 return false;
             }
@@ -194,9 +196,7 @@ public class StateNavigator {
      * @return true if target state was successfully reached, false otherwise
      */
     public boolean openState(Long stateToOpen) {
-        ConsoleReporter.format(
-                "Open State %s\n", allStatesInProjectService.getStateName(stateToOpen));
-        String sessionId = automationSession.getCurrentSessionId();
+        String sessionId = "default"; // automationSession.getCurrentSessionId();
         Instant startTime = Instant.now();
         activeStates = stateMemory.getActiveStates();
 
@@ -210,14 +210,12 @@ public class StateNavigator {
                             + "  2. Call InitialStates.addStateSet() to register initial states\n"
                             + "  3. Use InitialStateVerifier.verify() to find and activate initial"
                             + " states";
-            ConsoleReporter.println(MessageFormatter.fail + " " + errorMsg);
             log.error(errorMsg);
             return false;
         }
 
         Optional<State> targetState = allStatesInProjectService.getState(stateToOpen);
         if (targetState.isEmpty()) {
-            ConsoleReporter.println(MessageFormatter.fail + " Target state not found.");
             return false;
         }
         // Log transition attempt start
@@ -226,11 +224,11 @@ public class StateNavigator {
                         + stateMemory.getActiveStateNamesAsString()
                         + " to "
                         + targetState.get().getName();
-        actionLogger.logObservation(
-                automationSession.getCurrentSessionId(),
-                "Transition start:",
-                transitionDescription,
-                "info");
+        // actionLogger.logObservation(
+        //         automationSession.getCurrentSessionId(),
+        //         "Transition start:",
+        //         transitionDescription,
+        //         "info");
 
         // we find the paths once, and then reuse these paths when needed
         Paths paths = pathFinder.getPathsToState(activeStates, stateToOpen);
@@ -239,16 +237,15 @@ public class StateNavigator {
 
         // Log transition attempt end
         Set<State> activeStatesSet = allStatesInProjectService.findSetById(activeStates);
-        actionLogger.logStateTransition(
-                sessionId, // no duration for start log
-                activeStatesSet,
-                Collections.singleton(targetState.get()),
-                allStatesInProjectService.findSetById(activeStates),
-                success,
-                duration.toMillis());
+        // actionLogger.logStateTransition(
+        //         sessionId, // no duration for start log
+        //         activeStatesSet,
+        //         Collections.singleton(targetState.get()),
+        //         allStatesInProjectService.findSetById(activeStates),
+        //         success,
+        //         duration.toMillis());
 
         if (!success) {
-            ConsoleReporter.println(MessageFormatter.fail + " All paths tried, open failed.");
             String targetStateName = targetState.get().getName();
             handleNavigationFailure(
                     "Failed to navigate to state after trying all paths: " + targetStateName,
@@ -261,7 +258,6 @@ public class StateNavigator {
                 activeStates.stream()
                         .map(id -> id + "(" + allStatesInProjectService.getStateName(id) + ")")
                         .reduce("", (s1, s2) -> s1.isEmpty() ? s2 : s1 + ", " + s2);
-        ConsoleReporter.println("Active States: [" + activeStatesStr + "]\n");
         return success;
     }
 

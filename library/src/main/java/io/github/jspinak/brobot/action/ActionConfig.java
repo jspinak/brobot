@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.action;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -11,9 +10,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 
-import io.github.jspinak.brobot.tools.logging.model.LogEventType;
 
-import lombok.Data;
 import lombok.Getter;
 
 /**
@@ -78,43 +75,6 @@ public abstract class ActionConfig {
         USE_GLOBAL
     }
 
-    /**
-     * Configuration for automatic logging of action results. Enables streamlined success/failure
-     * logging without manual checks.
-     */
-    @Data
-    @lombok.Builder(builderClassName = "LoggingOptionsBuilder", toBuilder = true)
-    @lombok.NoArgsConstructor
-    @lombok.AllArgsConstructor
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @com.fasterxml.jackson.databind.annotation.JsonDeserialize(
-            builder = LoggingOptions.LoggingOptionsBuilder.class)
-    public static class LoggingOptions {
-        private String beforeActionMessage;
-        private String afterActionMessage;
-        private String successMessage;
-        private String failureMessage;
-        @lombok.Builder.Default private boolean logBeforeAction = false;
-        @lombok.Builder.Default private boolean logAfterAction = false;
-        @lombok.Builder.Default private boolean logOnSuccess = true;
-        @lombok.Builder.Default private boolean logOnFailure = true;
-        @lombok.Builder.Default private LogEventType beforeActionLevel = LogEventType.ACTION;
-        @lombok.Builder.Default private LogEventType afterActionLevel = LogEventType.ACTION;
-        @lombok.Builder.Default private LogEventType successLevel = LogEventType.ACTION;
-        @lombok.Builder.Default private LogEventType failureLevel = LogEventType.ERROR;
-
-        /** Creates default logging options with standard messages. */
-        public static LoggingOptions defaults() {
-            return LoggingOptions.builder().build();
-        }
-
-        @JsonPOJOBuilder(withPrefix = "")
-        @JsonIgnoreProperties(ignoreUnknown = true)
-        public static class LoggingOptionsBuilder {
-            // Lombok generates the implementation
-        }
-    }
-
     private final double pauseBeforeBegin;
     private final double pauseAfterEnd;
 
@@ -123,8 +83,6 @@ public abstract class ActionConfig {
 
     private final Illustrate illustrate;
     private final List<ActionConfig> subsequentActions;
-    private final LogEventType logType; // For chaining
-    private final LoggingOptions loggingOptions;
 
     /**
      * Protected constructor to be called by the builders of subclasses.
@@ -137,8 +95,6 @@ public abstract class ActionConfig {
         this.successCriteria = builder.successCriteria;
         this.illustrate = builder.illustrate;
         this.subsequentActions = builder.subsequentActions;
-        this.logType = builder.logType;
-        this.loggingOptions = builder.loggingOptions;
     }
 
     /**
@@ -172,8 +128,6 @@ public abstract class ActionConfig {
         @JsonIgnore private Predicate<ActionResult> successCriteria;
         private Illustrate illustrate = Illustrate.USE_GLOBAL;
         private List<ActionConfig> subsequentActions = new ArrayList<>();
-        private LogEventType logType = LogEventType.ACTION;
-        private LoggingOptions loggingOptions = LoggingOptions.defaults();
 
         /** Default constructor for the builder. */
         public Builder() {}
@@ -189,8 +143,6 @@ public abstract class ActionConfig {
             this.successCriteria = original.successCriteria;
             this.illustrate = original.illustrate;
             this.subsequentActions = new ArrayList<>(original.subsequentActions);
-            this.logType = original.logType;
-            this.loggingOptions = original.loggingOptions;
         }
 
         /**
@@ -247,16 +199,6 @@ public abstract class ActionConfig {
             return self();
         }
 
-        /**
-         * Sets the log event type for categorizing this action in logs.
-         *
-         * @param logType The type of log event this action represents.
-         * @return The builder instance for chaining.
-         */
-        public B setLogType(LogEventType logType) {
-            this.logType = logType;
-            return self();
-        }
 
         /**
          * Chains another action to be executed after this one. The subsequent action will operate
@@ -267,148 +209,6 @@ public abstract class ActionConfig {
          */
         public B then(ActionConfig nextActionConfig) {
             this.subsequentActions.add(nextActionConfig);
-            return self();
-        }
-
-        /**
-         * Sets a message to be logged before the action begins execution.
-         *
-         * @param message The message to log before action execution
-         * @return The builder instance for chaining.
-         */
-        public B withBeforeActionLog(String message) {
-            this.loggingOptions =
-                    LoggingOptions.builder()
-                            .beforeActionMessage(message)
-                            .afterActionMessage(this.loggingOptions.getAfterActionMessage())
-                            .successMessage(this.loggingOptions.getSuccessMessage())
-                            .failureMessage(this.loggingOptions.getFailureMessage())
-                            .logBeforeAction(true)
-                            .logAfterAction(this.loggingOptions.isLogAfterAction())
-                            .logOnSuccess(this.loggingOptions.isLogOnSuccess())
-                            .logOnFailure(this.loggingOptions.isLogOnFailure())
-                            .beforeActionLevel(this.loggingOptions.getBeforeActionLevel())
-                            .afterActionLevel(this.loggingOptions.getAfterActionLevel())
-                            .successLevel(this.loggingOptions.getSuccessLevel())
-                            .failureLevel(this.loggingOptions.getFailureLevel())
-                            .build();
-            return self();
-        }
-
-        /**
-         * Sets a message to be logged after the action completes (regardless of success/failure).
-         *
-         * @param message The message to log after action execution
-         * @return The builder instance for chaining.
-         */
-        public B withAfterActionLog(String message) {
-            this.loggingOptions =
-                    LoggingOptions.builder()
-                            .beforeActionMessage(this.loggingOptions.getBeforeActionMessage())
-                            .afterActionMessage(message)
-                            .successMessage(this.loggingOptions.getSuccessMessage())
-                            .failureMessage(this.loggingOptions.getFailureMessage())
-                            .logBeforeAction(this.loggingOptions.isLogBeforeAction())
-                            .logAfterAction(true)
-                            .logOnSuccess(this.loggingOptions.isLogOnSuccess())
-                            .logOnFailure(this.loggingOptions.isLogOnFailure())
-                            .beforeActionLevel(this.loggingOptions.getBeforeActionLevel())
-                            .afterActionLevel(this.loggingOptions.getAfterActionLevel())
-                            .successLevel(this.loggingOptions.getSuccessLevel())
-                            .failureLevel(this.loggingOptions.getFailureLevel())
-                            .build();
-            return self();
-        }
-
-        /**
-         * Sets a success message to be logged when the action completes successfully.
-         *
-         * @param message The message to log on success
-         * @return The builder instance for chaining.
-         */
-        public B withSuccessLog(String message) {
-            this.loggingOptions =
-                    LoggingOptions.builder()
-                            .beforeActionMessage(this.loggingOptions.getBeforeActionMessage())
-                            .afterActionMessage(this.loggingOptions.getAfterActionMessage())
-                            .successMessage(message)
-                            .failureMessage(this.loggingOptions.getFailureMessage())
-                            .logBeforeAction(this.loggingOptions.isLogBeforeAction())
-                            .logAfterAction(this.loggingOptions.isLogAfterAction())
-                            .logOnSuccess(true)
-                            .logOnFailure(this.loggingOptions.isLogOnFailure())
-                            .beforeActionLevel(this.loggingOptions.getBeforeActionLevel())
-                            .afterActionLevel(this.loggingOptions.getAfterActionLevel())
-                            .successLevel(this.loggingOptions.getSuccessLevel())
-                            .failureLevel(this.loggingOptions.getFailureLevel())
-                            .build();
-            return self();
-        }
-
-        /**
-         * Sets a failure message to be logged when the action fails.
-         *
-         * @param message The message to log on failure
-         * @return The builder instance for chaining.
-         */
-        public B withFailureLog(String message) {
-            this.loggingOptions =
-                    LoggingOptions.builder()
-                            .beforeActionMessage(this.loggingOptions.getBeforeActionMessage())
-                            .afterActionMessage(this.loggingOptions.getAfterActionMessage())
-                            .successMessage(this.loggingOptions.getSuccessMessage())
-                            .failureMessage(message)
-                            .logBeforeAction(this.loggingOptions.isLogBeforeAction())
-                            .logAfterAction(this.loggingOptions.isLogAfterAction())
-                            .logOnSuccess(this.loggingOptions.isLogOnSuccess())
-                            .logOnFailure(true)
-                            .beforeActionLevel(this.loggingOptions.getBeforeActionLevel())
-                            .afterActionLevel(this.loggingOptions.getAfterActionLevel())
-                            .successLevel(this.loggingOptions.getSuccessLevel())
-                            .failureLevel(this.loggingOptions.getFailureLevel())
-                            .build();
-            return self();
-        }
-
-        /**
-         * Configures logging options using a consumer function. Provides full control over all
-         * logging settings.
-         *
-         * @param configurator A consumer that configures the LoggingOptions
-         * @return The builder instance for chaining.
-         */
-        public B withLogging(
-                Consumer<ActionConfig.LoggingOptions.LoggingOptionsBuilder> configurator) {
-            ActionConfig.LoggingOptions.LoggingOptionsBuilder loggingBuilder =
-                    ActionConfig.LoggingOptions.builder();
-            // Copy existing values
-            loggingBuilder
-                    .beforeActionMessage(this.loggingOptions.getBeforeActionMessage())
-                    .afterActionMessage(this.loggingOptions.getAfterActionMessage())
-                    .successMessage(this.loggingOptions.getSuccessMessage())
-                    .failureMessage(this.loggingOptions.getFailureMessage())
-                    .logBeforeAction(this.loggingOptions.isLogBeforeAction())
-                    .logAfterAction(this.loggingOptions.isLogAfterAction())
-                    .logOnSuccess(this.loggingOptions.isLogOnSuccess())
-                    .logOnFailure(this.loggingOptions.isLogOnFailure())
-                    .beforeActionLevel(this.loggingOptions.getBeforeActionLevel())
-                    .afterActionLevel(this.loggingOptions.getAfterActionLevel())
-                    .successLevel(this.loggingOptions.getSuccessLevel())
-                    .failureLevel(this.loggingOptions.getFailureLevel());
-            // Apply customizations
-            configurator.accept(loggingBuilder);
-            this.loggingOptions = loggingBuilder.build();
-            return self();
-        }
-
-        /**
-         * Disables all automatic logging for this action.
-         *
-         * @return The builder instance for chaining.
-         */
-        public B withNoLogging() {
-            this.loggingOptions =
-                    LoggingOptions.builder().logOnSuccess(false).logOnFailure(false).build();
             return self();
         }
     }

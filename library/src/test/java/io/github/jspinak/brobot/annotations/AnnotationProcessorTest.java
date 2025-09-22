@@ -135,6 +135,9 @@ public class AnnotationProcessorTest extends BrobotTestBase {
                     mock(io.github.jspinak.brobot.model.state.State.class);
             when(mockState.getName()).thenReturn("TestState");
 
+            // Mock both the BeanPostProcessor and ApplicationContext
+            when(stateBeanPostProcessor.getStateBeans()).thenReturn(stateBeans);
+            when(transitionBeanPostProcessor.getTransitionSetBeans()).thenReturn(new HashMap<>());
             when(applicationContext.getBeansWithAnnotation(
                             io.github.jspinak.brobot.annotations.State.class))
                     .thenReturn(stateBeans);
@@ -169,6 +172,9 @@ public class AnnotationProcessorTest extends BrobotTestBase {
                     mock(io.github.jspinak.brobot.model.state.State.class);
             when(mockState.getName()).thenReturn("TestState");
 
+            // Mock both the BeanPostProcessor and ApplicationContext
+            when(stateBeanPostProcessor.getStateBeans()).thenReturn(stateBeans);
+            when(transitionBeanPostProcessor.getTransitionSetBeans()).thenReturn(new HashMap<>());
             when(applicationContext.getBeansWithAnnotation(
                             io.github.jspinak.brobot.annotations.State.class))
                     .thenReturn(stateBeans);
@@ -196,6 +202,10 @@ public class AnnotationProcessorTest extends BrobotTestBase {
             io.github.jspinak.brobot.model.state.State mockState =
                     mock(io.github.jspinak.brobot.model.state.State.class);
             when(mockState.getName()).thenReturn("ProfileState");
+
+            // Mock both the BeanPostProcessor and ApplicationContext
+            when(stateBeanPostProcessor.getStateBeans()).thenReturn(stateBeans);
+            when(transitionBeanPostProcessor.getTransitionSetBeans()).thenReturn(new HashMap<>());
 
             when(applicationContext.getBeansWithAnnotation(
                             io.github.jspinak.brobot.annotations.State.class))
@@ -248,6 +258,7 @@ public class AnnotationProcessorTest extends BrobotTestBase {
                     .thenReturn(transitionBeans);
 
             // Mock the BeanPostProcessors
+            when(stateBeanPostProcessor.getStateBeans()).thenReturn(stateBeans);
             when(transitionBeanPostProcessor.getTransitionSetBeans()).thenReturn(transitionBeans);
             when(applicationContext.getEnvironment()).thenReturn(environment);
             when(environment.getActiveProfiles()).thenReturn(new String[] {});
@@ -271,11 +282,14 @@ public class AnnotationProcessorTest extends BrobotTestBase {
                                     io.github.jspinak.brobot.model.transition.StateTransitionStore
                                             .class));
 
+            // Mock transitionSetProcessor to return true (success)
+            when(transitionSetProcessor.processTransitionSet(any(), any())).thenReturn(true);
+
             // Execute
             processor.processAnnotations();
 
-            // Verify transition was registered
-            verify(jointTable, atLeastOnce()).addToJointTable(any());
+            // Verify that transitionSetProcessor was called
+            verify(transitionSetProcessor, atLeastOnce()).processTransitionSet(any(), any());
         }
 
         @Test
@@ -348,6 +362,7 @@ public class AnnotationProcessorTest extends BrobotTestBase {
                     .thenReturn(transitionBeans);
 
             // Mock the BeanPostProcessors
+            when(stateBeanPostProcessor.getStateBeans()).thenReturn(new HashMap<>());
             when(transitionBeanPostProcessor.getTransitionSetBeans()).thenReturn(transitionBeans);
             when(applicationContext.getEnvironment()).thenReturn(environment);
             when(environment.getActiveProfiles()).thenReturn(new String[] {});
@@ -404,6 +419,9 @@ public class AnnotationProcessorTest extends BrobotTestBase {
                     mock(io.github.jspinak.brobot.model.state.State.class);
             when(mockState.getName()).thenReturn("TestState");
 
+            // Mock both the BeanPostProcessor and ApplicationContext
+            when(stateBeanPostProcessor.getStateBeans()).thenReturn(stateBeans);
+            when(transitionBeanPostProcessor.getTransitionSetBeans()).thenReturn(new HashMap<>());
             when(applicationContext.getBeansWithAnnotation(
                             io.github.jspinak.brobot.annotations.State.class))
                     .thenReturn(stateBeans);
@@ -432,6 +450,9 @@ public class AnnotationProcessorTest extends BrobotTestBase {
                     mock(io.github.jspinak.brobot.model.state.State.class);
             when(mockState.getName()).thenReturn("Simple"); // "State" suffix removed
 
+            // Mock both the BeanPostProcessor and ApplicationContext
+            when(stateBeanPostProcessor.getStateBeans()).thenReturn(stateBeans);
+            when(transitionBeanPostProcessor.getTransitionSetBeans()).thenReturn(new HashMap<>());
             when(applicationContext.getBeansWithAnnotation(
                             io.github.jspinak.brobot.annotations.State.class))
                     .thenReturn(stateBeans);

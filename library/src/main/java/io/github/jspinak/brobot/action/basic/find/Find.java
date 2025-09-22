@@ -5,8 +5,16 @@ import org.springframework.stereotype.Component;
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.logging.BrobotLogger;
+import io.github.jspinak.brobot.logging.LogCategory;
+import io.github.jspinak.brobot.logging.LogLevel;
+import io.github.jspinak.brobot.logging.events.ActionEvent;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.element.Location;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -67,9 +75,11 @@ public class Find implements ActionInterface {
     }
 
     private final FindPipeline findPipeline;
+    private final BrobotLogger brobotLogger;
 
-    public Find(FindPipeline findPipeline) {
+    public Find(FindPipeline findPipeline, BrobotLogger brobotLogger) {
         this.findPipeline = findPipeline;
+        this.brobotLogger = brobotLogger;
     }
 
     /**
@@ -98,87 +108,83 @@ public class Find implements ActionInterface {
      * @see FindPipeline#execute(BaseFindOptions, ActionResult, ObjectCollection...)
      */
     public void perform(ActionResult matches, ObjectCollection... objectCollections) {
-        log.info("[FIND] === Find.perform() CALLED ===");
-
-        // Handle null varargs
-        if (objectCollections == null) {
-            log.warn("[FIND] ObjectCollections is null");
-            matches.setSuccess(false);
-            return;
-        }
-
-        log.info("[FIND]   ObjectCollections: {}", objectCollections.length);
-        if (objectCollections.length > 0
-                && objectCollections[0] != null
-                && !objectCollections[0].getStateImages().isEmpty()) {
-            StateImage firstImage = objectCollections[0].getStateImages().get(0);
-            log.info(
-                    "[FIND]   First StateImage: name={}, instance={}",
-                    firstImage.getName(),
-                    System.identityHashCode(firstImage));
-        }
-        log.info(
-                "[FIND]   ActionConfig class: {}",
-                matches.getActionConfig() != null
-                        ? matches.getActionConfig().getClass().getName()
-                        : "null");
+        // Start timing
+        long startTime = System.currentTimeMillis();
 
         // Validate configuration
         if (!(matches.getActionConfig() instanceof BaseFindOptions)) {
-            log.error(
-                    "Find requires BaseFindOptions configuration, got: {}",
-                    matches.getActionConfig() != null
-                            ? matches.getActionConfig().getClass()
-                            : "null");
+            brobotLogger.error(LogCategory.ACTIONS,
+                String.format("Find requires BaseFindOptions configuration, got: %s",
+                    matches.getActionConfig() != null ? matches.getActionConfig().getClass() : "null"));
             throw new IllegalArgumentException("Find requires BaseFindOptions configuration");
         }
 
         BaseFindOptions findOptions = (BaseFindOptions) matches.getActionConfig();
-        log.info("  FindOptions strategy: {}", findOptions.getFindStrategy());
 
         // Handle null or empty object collections
         if (objectCollections == null
                 || objectCollections.length == 0
                 || (objectCollections.length == 1 && objectCollections[0] == null)) {
-            log.warn("[FIND] No valid object collections provided");
+            brobotLogger.warn(LogCategory.ACTIONS, "No valid object collections provided");
             matches.setSuccess(false);
             return;
         }
 
+        // Extract target for logging
+        String target = extractTarget(objectCollections);
+
+        // Log action start at appropriate level
+        if (brobotLogger.isLoggingEnabled(LogCategory.ACTIONS, LogLevel.DEBUG)) {
+            brobotLogger.log(LogCategory.ACTIONS, LogLevel.DEBUG,
+                String.format("FIND %s (strategy: %s)", target, findOptions.getFindStrategy()));
+        }
+
         // Delegate entire orchestration to the pipeline
-        log.info("[FIND]   Calling findPipeline.execute()...");
         findPipeline.execute(findOptions, matches, objectCollections);
-        log.info("[FIND]   findPipeline.execute() completed with {} matches", matches.size());
 
-        // Debug: Check if matches have StateObjectData
-        if (!matches.getMatchList().isEmpty()) {
-            log.info(
-                    "[FIND]   First match StateObjectData: {}",
-                    matches.getMatchList().get(0).getStateObjectData() != null
-                            ? matches.getMatchList()
-                                    .get(0)
-                                    .getStateObjectData()
-                                    .getStateObjectName()
-                            : "NULL");
+        // Calculate duration
+        long duration = System.currentTimeMillis() - startTime;
+        matches.setDuration(java.time.Duration.ofMillis(duration));
+
+        // Match count and confidence are now tracked internally by ActionResult components
+
+        // Create and log action event
+        ActionEvent.ActionEventBuilder eventBuilder = ActionEvent.builder()
+            .actionType("FIND")
+            .target(target)
+            .success(matches.isSuccess())
+            .duration(matches.getDuration());
+
+        if (matches.isSuccess() && !matches.getMatchList().isEmpty()) {
+            Match firstMatch = matches.getMatchList().get(0);
+            eventBuilder.location(new Location(firstMatch.getTarget().getX(), firstMatch.getTarget().getY()));
+            eventBuilder.similarity(firstMatch.getScore());
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put("matches_found", matches.getMatchList().size());
+            eventBuilder.metadata(metadata);
         }
 
-        // Update ActionMetrics with match information
-        ActionResult.ActionMetrics metrics = matches.getActionMetrics();
-        if (metrics == null) {
-            metrics = new ActionResult.ActionMetrics();
-            matches.setActionMetrics(metrics);
+        ActionEvent event = eventBuilder.build();
+        brobotLogger.logAction(event);
+    }
+
+    /**
+     * Extracts target description from object collections for logging.
+     */
+    private String extractTarget(ObjectCollection... collections) {
+        if (collections == null || collections.length == 0) {
+            return "unknown";
         }
 
-        // Always update match count and best score
-        metrics.setMatchCount(matches.size());
-
-        // Set best match confidence if matches exist
-        if (!matches.getMatchList().isEmpty()) {
-            double bestScore =
-                    matches.getMatchList().stream().mapToDouble(Match::getScore).max().orElse(0.0);
-            metrics.setBestMatchConfidence(bestScore);
-        } else {
-            metrics.setBestMatchConfidence(0.0);
+        ObjectCollection first = collections[0];
+        if (!first.getStateImages().isEmpty()) {
+            return first.getStateImages().get(0).getName();
+        } else if (!first.getStateLocations().isEmpty()) {
+            return "location:" + first.getStateLocations().get(0).toString();
+        } else if (!first.getStateRegions().isEmpty()) {
+            return "region:" + first.getStateRegions().get(0).toString();
         }
+
+        return "unknown";
     }
 }

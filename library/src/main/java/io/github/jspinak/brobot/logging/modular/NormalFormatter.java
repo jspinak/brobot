@@ -1,18 +1,18 @@
 package io.github.jspinak.brobot.logging.modular;
 
+import java.time.Duration;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.match.Match;
 
 /**
- * Formatter for NORMAL verbosity level.
- *
- * <p>Produces balanced output with timestamps, key info, and success indicators. Format examples:
- * [12:34:56] ✓ Find Working.ClaudeIcon completed in 234ms (1 match) [12:34:56] ✗ Click
- * Button.Submit failed in 156ms (No matches found)
+ * Provides standard output for action results.
+ * Shows important information without overwhelming detail.
  */
 @Component
 public class NormalFormatter implements ActionLogFormatter {
@@ -25,65 +25,43 @@ public class NormalFormatter implements ActionLogFormatter {
             return null;
         }
 
-        ActionResult.ActionExecutionContext context = actionResult.getExecutionContext();
-        if (context == null) {
-            return null;
-        }
-
         StringBuilder formatted = new StringBuilder();
 
-        // Timestamp
-        if (context.getEndTime() != null) {
-            formatted
-                    .append("[")
-                    .append(
-                            context.getEndTime()
-                                    .atZone(java.time.ZoneId.systemDefault())
-                                    .format(TIME_FORMATTER))
-                    .append("] ");
+        // Timestamp (if available)
+        if (actionResult.getStartTime() != null) {
+            formatted.append("[").append(actionResult.getStartTime().format(TIME_FORMATTER)).append("] ");
         }
 
         // Success/failure symbol
-        formatted.append(context.isSuccess() ? "✓" : "✗");
+        formatted.append(actionResult.isSuccess() ? "✓" : "✗");
         formatted.append(" ");
 
         // Action type
-        String actionType = context.getActionType();
-        if (actionType != null && !actionType.isEmpty()) {
-            actionType = cleanActionType(actionType);
-            formatted.append(actionType);
-        } else {
-            formatted.append("Action");
-        }
+        String actionType = extractActionType(actionResult);
+        formatted.append(actionType);
 
         // Target information
-        String target = buildTargetInfo(context);
+        String target = buildTargetInfo(actionResult);
         if (target != null && !target.isEmpty()) {
-            formatted.append(" ").append(target);
+            formatted.append(": ").append(target);
         }
 
-        // Completion status
-        formatted.append(context.isSuccess() ? " completed" : " failed");
-
-        // Duration
-        if (context.getExecutionDuration() != null && !context.getExecutionDuration().isZero()) {
-            formatted.append(" in ").append(context.getExecutionDuration().toMillis()).append("ms");
+        // Match count for find operations
+        if (!actionResult.getMatchList().isEmpty()) {
+            formatted.append(" (").append(actionResult.size()).append(" matches)");
         }
 
-        // Match information
-        if (!context.getResultMatches().isEmpty()) {
-            int matchCount = context.getResultMatches().size();
-            formatted
-                    .append(" (")
-                    .append(matchCount)
-                    .append(matchCount == 1 ? " match)" : " matches)");
-        } else if (!context.isSuccess()) {
-            formatted.append(" (No matches found)");
+        // Duration for significant actions
+        if (isSignificantAction(actionResult)) {
+            if (actionResult.getDuration() != null) {
+                formatted.append(" - ").append(formatDuration(actionResult.getDuration()));
+            }
         }
 
-        // Error information if available
-        if (context.getExecutionError() != null) {
-            formatted.append(" - ").append(context.getExecutionError().getMessage());
+        // Add failure reason if available and action failed
+        if (!actionResult.isSuccess() && actionResult.getOutputText() != null
+                && !actionResult.getOutputText().isEmpty()) {
+            formatted.append("\n  → ").append(actionResult.getOutputText());
         }
 
         return formatted.toString();
@@ -91,90 +69,101 @@ public class NormalFormatter implements ActionLogFormatter {
 
     @Override
     public boolean shouldLog(ActionResult actionResult) {
-        if (actionResult == null) {
+        if (actionResult == null || actionResult.getEndTime() == null) {
             return false;
         }
 
-        ActionResult.ActionExecutionContext context = actionResult.getExecutionContext();
-        if (context == null) {
-            return false;
+        // Always log failures
+        if (!actionResult.isSuccess()) {
+            return true;
         }
 
-        // Log completed actions and significant start events
-        return context.getEndTime() != null
-                || (context.getStartTime() != null && isSignificantAction(context));
+        // Log significant successful actions
+        return isSignificantAction(actionResult);
     }
 
     @Override
-    public VerbosityLevel getVerbosityLevel() {
+    public ActionLogFormatter.VerbosityLevel getVerbosityLevel() {
         return VerbosityLevel.NORMAL;
     }
 
-    /** Check if this is a significant action worth logging at start */
-    private boolean isSignificantAction(ActionResult.ActionExecutionContext context) {
-        // Log start events for actions with targets or specific action types
-        return !context.getTargetImages().isEmpty()
-                || !context.getTargetStrings().isEmpty()
-                || !context.getTargetRegions().isEmpty()
-                || (context.getActionType() != null
-                        && context.getActionType().matches("(FIND|CLICK|TYPE|WAIT).*"));
+    private String extractActionType(ActionResult actionResult) {
+        if (actionResult.getActionConfig() != null) {
+            String className = actionResult.getActionConfig().getClass().getSimpleName();
+            String type = className.replace("Options", "").replace("Config", "");
+
+            // Capitalize appropriately
+            if (type.length() > 0) {
+                return type.substring(0, 1).toUpperCase() + type.substring(1).toLowerCase();
+            }
+            return type;
+        }
+        return "Action";
     }
 
-    /** Clean action type by removing suffixes */
-    private String cleanActionType(String actionType) {
-        if (actionType == null) {
-            return "";
+    private boolean isSignificantAction(ActionResult actionResult) {
+        // Check if it's a significant action type based on config
+        if (actionResult.getActionConfig() != null) {
+            String className = actionResult.getActionConfig().getClass().getSimpleName().toLowerCase();
+
+            // Significant actions include clicks, typing, dragging, etc.
+            if (className.contains("click") || className.contains("type") ||
+                className.contains("drag") || className.contains("scroll")) {
+                return true;
+            }
+
+            // Find operations with matches are significant
+            if (className.contains("find") && !actionResult.getMatchList().isEmpty()) {
+                return true;
+            }
         }
 
-        actionType = actionType.replaceAll("_(COMPLETE|FAILED|START)$", "");
-
-        if (actionType.length() > 0) {
-            return actionType.substring(0, 1).toUpperCase() + actionType.substring(1).toLowerCase();
+        // Actions that take more than 500ms are significant
+        if (actionResult.getDuration() != null && actionResult.getDuration().toMillis() > 500) {
+            return true;
         }
 
-        return actionType;
+        // Actions that produce text output are significant
+        if (actionResult.getText() != null && !actionResult.getText().isEmpty()) {
+            return true;
+        }
+
+        return false;
     }
 
-    /** Build detailed target information */
-    private String buildTargetInfo(ActionResult.ActionExecutionContext context) {
-        StringBuilder targetInfo = new StringBuilder();
-
-        if (!context.getTargetImages().isEmpty()) {
-            if (context.getTargetImages().size() == 1) {
-                StateImage stateImage = context.getTargetImages().get(0);
-                String imageName = stateImage.getName();
-                String ownerState = stateImage.getOwnerStateName();
-
-                if (ownerState != null && !ownerState.isEmpty() && !ownerState.equals("null")) {
-                    targetInfo.append(ownerState).append(".");
-                }
-
-                if (imageName != null && !imageName.isEmpty()) {
-                    targetInfo.append(imageName);
-                } else {
-                    targetInfo.append("Image");
-                }
-            } else {
-                targetInfo.append("Images[").append(context.getTargetImages().size()).append("]");
-            }
-        } else if (!context.getTargetStrings().isEmpty()) {
-            if (context.getTargetStrings().size() == 1) {
-                String firstString = context.getTargetStrings().get(0);
-                if (firstString != null && firstString.length() <= 30) {
-                    targetInfo.append("\"").append(firstString).append("\"");
-                } else if (firstString != null) {
-                    targetInfo.append("\"").append(firstString.substring(0, 27)).append("...\"");
-                }
-            } else {
-                targetInfo.append("Strings[").append(context.getTargetStrings().size()).append("]");
-            }
-        } else if (!context.getTargetRegions().isEmpty()) {
-            targetInfo.append("Regions[").append(context.getTargetRegions().size()).append("]");
-        } else if (context.getPrimaryTargetName() != null
-                && !context.getPrimaryTargetName().isEmpty()) {
-            targetInfo.append(context.getPrimaryTargetName());
+    private String buildTargetInfo(ActionResult actionResult) {
+        // First try to get from log target name
+        String targetName = actionResult.getLogTargetName();
+        if (targetName != null && !targetName.equals("unknown")) {
+            return targetName;
         }
 
-        return targetInfo.toString();
+        // If we have matches, use the first match name
+        if (!actionResult.getMatchList().isEmpty()) {
+            Match firstMatch = actionResult.getMatchList().get(0);
+            if (firstMatch.getName() != null && !firstMatch.getName().isEmpty()) {
+                return firstMatch.getName();
+            }
+        }
+
+        // If we have extracted text, show a snippet
+        if (actionResult.getText() != null && !actionResult.getText().isEmpty()) {
+            String text = String.join(", ", actionResult.getText().getAll());
+            if (text.length() > 30) {
+                text = text.substring(0, 27) + "...";
+            }
+            return "\"" + text + "\"";
+        }
+
+        return "";
+    }
+
+    private String formatDuration(Duration duration) {
+        long millis = duration.toMillis();
+        if (millis < 1000) {
+            return millis + "ms";
+        } else {
+            return String.format("%.1fs", millis / 1000.0);
+        }
     }
 }

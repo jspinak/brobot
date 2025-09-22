@@ -14,8 +14,8 @@ import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.navigation.service.StateTransitionService;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
 import io.github.jspinak.brobot.statemanagement.StateVisibilityManager;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
-import io.github.jspinak.brobot.tools.logging.MessageFormatter;
+// Removed old logging imports that no longer exist:
+// // Removed old logging import: // // Removed old logging import: import io.github.jspinak.brobot.tools.logging.MessageFormatter;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -151,20 +151,8 @@ public class TransitionExecutor {
         String fromStateName = allStatesInProjectService.getStateName(fromStateId);
         String toStateName = allStatesInProjectService.getStateName(toStateId);
         if (doTransitions(fromStateId, toStateId)) {
-            ConsoleReporter.format(
-                    MessageFormatter.check + " Transition %s(%s)->%s(%s) successful. \n",
-                    fromStateId,
-                    fromStateName,
-                    toStateId,
-                    toStateName);
             return true;
         }
-        ConsoleReporter.format(
-                MessageFormatter.fail + " Transition %s(%s)->%s(%s) not successful. \n",
-                fromStateId,
-                fromStateName,
-                toStateId,
-                toStateName);
         return false;
     }
 
@@ -437,11 +425,13 @@ public class TransitionExecutor {
         }
 
         if (!result) { // transition failed
-            toState.setProbabilityExists(0); // mock assumes State is not present
+            // Note: mockFindStochasticModifier is NOT modified on failure
+            // It should retain its configured value for future mock runs
             return false;
         }
 
-        toState.setProbabilityExists(100); // State found
+        // Note: mockFindStochasticModifier is NOT modified on success
+        // The state being found doesn't change its inherent availability
         // Add the state to active states!
         stateMemory.addActiveState(toStateName);
         setHiddenStates.set(toStateName);

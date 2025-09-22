@@ -8,7 +8,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
-import io.github.jspinak.brobot.tools.logging.gui.GuiAccessConfig;
+// Removed old logging import that no longer exists:
+// import io.github.jspinak.brobot.tools.logging.gui.GuiAccessConfig;
 
 /**
  * Spring Boot auto-configuration for the Brobot framework.
@@ -36,7 +37,6 @@ import io.github.jspinak.brobot.tools.logging.gui.GuiAccessConfig;
 })
 @EnableConfigurationProperties({
     BrobotProperties.class,
-    GuiAccessConfig.class,
     io.github.jspinak.brobot.debug.ImageDebugConfig.class
 })
 public class BrobotAutoConfiguration {

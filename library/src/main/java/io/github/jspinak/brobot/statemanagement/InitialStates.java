@@ -267,7 +267,7 @@ public class InitialStates {
                 log.info("Mock mode: selected {} initial states", selectedStates.size());
                 selectedStates.forEach(
                         stateId -> {
-                            stateMemory.addActiveState(stateId, true);
+                            stateMemory.addActiveState(stateId);
                             allStatesInProjectService
                                     .getState(stateId)
                                     .ifPresent(

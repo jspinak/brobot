@@ -16,8 +16,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import io.github.jspinak.brobot.logging.unified.BrobotLogger;
-import io.github.jspinak.brobot.logging.unified.LogBuilder;
+import io.github.jspinak.brobot.logging.BrobotLogger;
+import io.github.jspinak.brobot.logging.LogCategory;
+import io.github.jspinak.brobot.logging.LogBuilder;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 
 /**
@@ -48,10 +49,10 @@ public class ScreenCaptureValidatorTest extends BrobotTestBase {
         validator = new ScreenCaptureValidator();
 
         // Setup logger mock chain with lenient stubbing
-        lenient().when(logger.log()).thenReturn(logBuilder);
+        lenient().when(logger.builder(any(LogCategory.class))).thenReturn(logBuilder);
         lenient().when(logBuilder.level(any())).thenReturn(logBuilder);
         lenient().when(logBuilder.message(anyString())).thenReturn(logBuilder);
-        lenient().when(logBuilder.metadata(anyString(), any())).thenReturn(logBuilder);
+        lenient().when(logBuilder.context(anyString(), any())).thenReturn(logBuilder);
         lenient().when(logBuilder.error(any(Throwable.class))).thenReturn(logBuilder);
         lenient().doNothing().when(logBuilder).log();
 
@@ -359,7 +360,7 @@ public class ScreenCaptureValidatorTest extends BrobotTestBase {
             boolean result = spyValidator.testScreenCapture();
 
             assertTrue(result);
-            verify(logger, atLeastOnce()).log();
+            verify(logBuilder, atLeastOnce()).log();
         }
 
         @Test
@@ -371,7 +372,7 @@ public class ScreenCaptureValidatorTest extends BrobotTestBase {
             boolean result = spyValidator.testScreenCapture();
 
             assertFalse(result);
-            verify(logger, atLeastOnce()).log();
+            verify(logBuilder, atLeastOnce()).log();
         }
     }
 
