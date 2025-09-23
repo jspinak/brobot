@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import io.github.jspinak.brobot.logging.*;
+import io.github.jspinak.brobot.logging.correlation.ActionSessionManager;
 import io.github.jspinak.brobot.logging.correlation.CorrelationContext;
 import io.github.jspinak.brobot.logging.formatter.*;
 
@@ -92,11 +93,28 @@ public class LoggingAutoConfiguration {
     }
 
     /**
-     * Creates the action logging integration for backward compatibility.
+     * Creates the ActionLogFormatter for concise action logging.
      *
-     * <p>This bean bridges the gap between the existing ActionConfig.LoggingOptions and the new
-     * structured logging system.
+     * <p>This formatter provides visual indicators and consistent formatting for action logging
+     * throughout the framework.
      */
+    @Bean
+    @ConditionalOnMissingBean
+    public ActionLogFormatter actionLogFormatter(BrobotLogger brobotLogger) {
+        return new ActionLogFormatter(brobotLogger);
+    }
+
+    /**
+     * Creates the ActionSessionManager for correlated logging sessions.
+     *
+     * <p>This manager handles session-based logging with MDC context for tracking related actions
+     * across workflows.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public ActionSessionManager actionSessionManager(BrobotLogger brobotLogger) {
+        return new ActionSessionManager(brobotLogger);
+    }
 
     /** Creates a logging preset manager for easy configuration. */
     @Bean

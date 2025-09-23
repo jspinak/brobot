@@ -17,6 +17,9 @@ import io.github.jspinak.brobot.control.ExecutionController;
 import io.github.jspinak.brobot.control.ExecutionStoppedException;
 import io.github.jspinak.brobot.logging.BrobotLogger;
 import io.github.jspinak.brobot.logging.LogCategory;
+import io.github.jspinak.brobot.logging.LogLevel;
+import io.github.jspinak.brobot.logging.LoggingConfiguration;
+import io.github.jspinak.brobot.logging.formatter.ActionLogFormatter;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
 import io.github.jspinak.brobot.tools.history.IllustrationController;
 import io.github.jspinak.brobot.tools.ml.dataset.DatasetManager;
@@ -80,6 +83,8 @@ public class ActionExecution {
     private final ExecutionController executionController;
     private final BrobotLogger brobotLogger;
     private final StateMemory stateMemory;
+    private final ActionLogFormatter actionLogFormatter;
+    private final LoggingConfiguration loggingConfiguration;
 
     /**
      * Constructs an ActionExecution instance with all required dependencies.
@@ -100,6 +105,8 @@ public class ActionExecution {
      * @param executionController Controls execution flow with pause/resume/stop functionality
      * @param brobotLogger Logger for framework-level events
      * @param stateMemory State management and history
+     * @param actionLogFormatter Formatter for concise action logging
+     * @param loggingConfiguration Logging configuration for checking enabled levels
      */
     public ActionExecution(
             BrobotProperties brobotProperties,
@@ -113,7 +120,9 @@ public class ActionExecution {
             ScreenshotCapture captureScreenshot,
             @Autowired(required = false) ExecutionController executionController,
             BrobotLogger brobotLogger,
-            StateMemory stateMemory) {
+            StateMemory stateMemory,
+            @Autowired(required = false) ActionLogFormatter actionLogFormatter,
+            @Autowired(required = false) LoggingConfiguration loggingConfiguration) {
         this.brobotProperties = brobotProperties;
         this.timeWrapper = timeWrapper;
         this.illustrateScreenshot = illustrateScreenshot;
@@ -126,6 +135,8 @@ public class ActionExecution {
         this.executionController = executionController;
         this.brobotLogger = brobotLogger;
         this.stateMemory = stateMemory;
+        this.actionLogFormatter = actionLogFormatter;
+        this.loggingConfiguration = loggingConfiguration;
     }
 
     /**
@@ -330,7 +341,35 @@ public class ActionExecution {
 
     /** Prints action details for ActionConfig-based actions. */
     private void printActionConfig(
-            ActionConfig actionConfig, ObjectCollection... objectCollections) {}
+            ActionConfig actionConfig, ObjectCollection... objectCollections) {
+        // Log action attempt if formatter is available and logging is configured
+        if (actionLogFormatter != null && shouldLogActions()) {
+            String actionType = getActionTypeFromConfig(actionConfig);
+            actionLogFormatter.logAttempt(actionType, objectCollections);
+        }
+    }
+
+    private boolean shouldLogActions() {
+        // Check if action logging is enabled via configuration
+        if (loggingConfiguration == null) {
+            return true; // Default to enabled if no configuration
+        }
+        return loggingConfiguration.isLoggingEnabled(LogCategory.ACTIONS, LogLevel.INFO);
+    }
+
+    private LogLevel getEffectiveLogLevel(LogCategory category) {
+        if (loggingConfiguration == null) {
+            return LogLevel.INFO; // Default level
+        }
+        return loggingConfiguration.getEffectiveLevel(category);
+    }
+
+    private String getActionTypeFromConfig(ActionConfig config) {
+        if (config == null) return "UNKNOWN";
+        String className = config.getClass().getSimpleName();
+        // Extract action type from class name (e.g., "ClickOptions" -> "CLICK")
+        return className.replace("Options", "").toUpperCase();
+    }
 
     /**
      * Safely checks for pause points when an ExecutionController is available.
@@ -407,7 +446,13 @@ public class ActionExecution {
     private void handleAutomaticLogging(
             ActionConfig actionConfig,
             ActionResult actionResult,
-            ObjectCollection... objectCollections) {}
+            ObjectCollection... objectCollections) {
+        // Log the action result using ActionLogFormatter if available and configured
+        if (actionLogFormatter != null && shouldLogActions()) {
+            String actionType = getActionTypeFromConfig(actionConfig);
+            actionLogFormatter.logAction(actionType, actionResult, objectCollections);
+        }
+    }
 
     /**
      * Formats a log message with placeholders replaced by actual values. Supports placeholders like
