@@ -23,7 +23,7 @@ import lombok.Data;
  * brobot.logging.performance.async=true
  * </pre>
  */
-@Component
+@Component("brobotLoggingConfiguration")
 @ConfigurationProperties(prefix = "brobot.logging")
 @Data
 public class LoggingConfiguration {
