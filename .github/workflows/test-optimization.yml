@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false  # Continue other jobs even if one fails
       matrix:
-        module: [library, library-test, persistence, runner]
+        module: [library, library-test, persistence]
 
     steps:
     - uses: actions/checkout@v4
@@ -65,13 +65,7 @@ jobs:
         ulimit -n 65536
         ulimit -u 32768
 
-        if [ "${{ matrix.module }}" = "runner" ]; then
-          # Skip runner tests - they timeout even with disabled tests
-          echo "⚠️ WARNING: Skipping runner module tests to unblock CI/CD"
-          echo "Runner tests are timing out after 20 minutes in CI environment"
-          echo "These tests need to be investigated and fixed separately"
-          exit 0
-        elif [ "${{ matrix.module }}" = "library" ]; then
+        if [ "${{ matrix.module }}" = "library" ]; then
           # Run library tests with reduced parallelism to prevent crashes
           ./gradlew ${{ matrix.module }}:test \
             --no-daemon \
