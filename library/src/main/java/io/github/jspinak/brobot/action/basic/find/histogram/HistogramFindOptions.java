@@ -54,7 +54,7 @@ public final class HistogramFindOptions extends BaseFindOptions {
         /**
          * Sets the hue, saturation, and value bins for histogram analysis.
          *
-         * @param binOptionsBuilder A builder for HSV bins.
+         * @param binOptions The HSV bin options.
          * @return this Builder instance for chaining.
          */
         public Builder setBinOptions(HSVBinOptions binOptions) {

@@ -56,10 +56,9 @@ import lombok.Data;
  *
  * @since 1.0
  * @see Anchor
- * @see StateObject
- * @see Pattern
- * @see StateRegion
- * @see StateLocation
+ * @see io.github.jspinak.brobot.model.element.Pattern
+ * @see io.github.jspinak.brobot.model.state.StateRegion
+ * @see io.github.jspinak.brobot.model.state.StateLocation
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)

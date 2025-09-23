@@ -49,14 +49,12 @@ import org.springframework.stereotype.Component;
  *
  * <ul>
  *   <li>Works with {@link Match} objects to mark their target locations
- *   <li>Complements {@link DrawArrow} for showing directional relationships
- *   <li>Often used with {@link HighlightMatch} for comprehensive match visualization
+ *   <li>Complements {@link DrawArrow} for showing directional relationships *
  *   <li>Pairs with {@link DrawLine} to connect marked points
  * </ul>
  *
  * @see DrawArrow
  * @see DrawLine
- * @see HighlightMatch
  * @see Match
  */
 @Component

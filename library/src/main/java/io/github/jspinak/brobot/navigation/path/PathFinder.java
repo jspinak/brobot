@@ -1,6 +1,11 @@
 package io.github.jspinak.brobot.navigation.path;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
@@ -11,10 +16,12 @@ import io.github.jspinak.brobot.navigation.service.StateTransitionService;
 import io.github.jspinak.brobot.navigation.transition.StateTransitions;
 import io.github.jspinak.brobot.navigation.transition.StateTransitionsJointTable;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Implements graph traversal algorithms to find navigation paths between States.
  *
- * <p>PathFinder is a core component of the Path Traversal Model (ξ) in the Brobot framework,
+ * <p>PathFinder is a core component of the Path Traversal Model in the Brobot framework,
  * responsible for discovering all possible routes from a set of starting states to a target state.
  * It treats the state structure as a directed graph and uses recursive traversal to find valid
  * paths.
@@ -48,6 +55,7 @@ import io.github.jspinak.brobot.navigation.transition.StateTransitionsJointTable
  * @see StateTransitionsJointTable
  */
 @Component
+@Slf4j
 public class PathFinder {
 
     private final StateTransitionsJointTable stateTransitionsJointTable;
@@ -102,7 +110,15 @@ public class PathFinder {
         this.pathList = new ArrayList<>();
         recursePath(new Path(), targetState);
 
-        if (pathList.isEmpty()) {}
+        if (pathList.isEmpty()) {
+            log.debug("No paths found from {} to {}", startStatesString, targetStateName);
+        } else {
+            log.info(
+                    "Found {} path(s) from [{}] to {}",
+                    pathList.size(),
+                    startStatesString,
+                    targetStateName);
+        }
         Paths paths = new Paths(pathList);
         paths.sort();
         paths.print(allStates);
@@ -110,45 +126,48 @@ public class PathFinder {
     }
 
     private void recursePath(Path path, Long stateInFocus) {
-        System.out.println("Recursing for state: " + allStates.getStateName(stateInFocus));
-        System.out.println("Current path: " + path.getStatesAsString());
-        String startStatesString =
-                startStates.stream()
-                        .map(allStates::getStateName)
-                        .reduce((s, s2) -> s + ", " + s2)
-                        .orElse("");
-        System.out.println("Start states: " + startStatesString);
+        String stateName = allStates.getStateName(stateInFocus);
+        log.debug("Recursing for state: {}, current path: {}", stateName, path.getStatesAsString());
+
+        if (log.isDebugEnabled()) {
+            String startStatesString =
+                    startStates.stream()
+                            .map(allStates::getStateName)
+                            .reduce((s, s2) -> s + ", " + s2)
+                            .orElse("");
+            log.debug("Start states: {}", startStatesString);
+        }
 
         if (!path.contains(stateInFocus)) {
             path.add(stateInFocus);
             addTransition(path);
             if (startStates.contains(stateInFocus)) {
-                System.out.println("Found a path: " + path.getStatesAsString());
                 Path successfulPath = path.getCopy();
                 successfulPath.reverse();
                 setPathScore(successfulPath);
                 pathList.add(successfulPath);
-                System.out.println("Added path to pathList. pathList size: " + pathList.size());
+                log.debug(
+                        "Found path: {}, total paths: {}",
+                        path.getStatesAsString(),
+                        pathList.size());
             } else {
                 Set<Long> parentStates =
                         stateTransitionsJointTable.getStatesWithTransitionsTo(stateInFocus);
-                String parentStatesAsString =
-                        parentStates.stream()
-                                .map(allStates::getStateName)
-                                .reduce((s, s2) -> s + ", " + s2)
-                                .orElse("");
-                System.out.println(
-                        "Parent states for "
-                                + allStates.getStateName(stateInFocus)
-                                + ": "
-                                + parentStatesAsString);
+                if (log.isDebugEnabled() && !parentStates.isEmpty()) {
+                    String parentStatesAsString =
+                            parentStates.stream()
+                                    .map(allStates::getStateName)
+                                    .reduce((s, s2) -> s + ", " + s2)
+                                    .orElse("");
+                    log.debug("Parent states for {}: {}", stateName, parentStatesAsString);
+                }
                 for (Long newState : parentStates) {
                     recursePath(path, newState);
                 }
             }
         }
         if (Objects.equals(path.get(path.size() - 1), stateInFocus)) path.remove(stateInFocus);
-        System.out.println("Finished recursing for state: " + allStates.getStateName(stateInFocus));
+        log.debug("Finished recursing for state: {}", stateName);
     }
 
     private void addTransition(Path path) {

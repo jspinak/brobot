@@ -11,6 +11,7 @@ import io.github.jspinak.brobot.navigation.transition.StateTransitions;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Represents a navigation path between states in the Brobot model-based GUI automation framework.
@@ -67,6 +68,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@Slf4j
 public class Path {
 
     private List<Long> states = new ArrayList<>(); // all states in the path
@@ -118,20 +120,22 @@ public class Path {
     }
 
     public void print() {
-        System.out.format("  (%d) ", pathCost);
-        states.forEach(s -> System.out.format("-> %s ", s));
-        System.out.println();
+        log.debug("  Path (score {}): {}", pathCost, getStatesAsString());
     }
 
     public void print(StateService stateService) {
-        System.out.format("  (%d) ", pathCost);
-        states.forEach(
-                s -> {
-                    String stateName =
-                            stateService != null ? stateService.getStateName(s) : "Unknown";
-                    System.out.format("-> %s(%s) ", s, stateName);
-                });
-        System.out.println();
+        log.debug("  Path (score {}): {}", pathCost, getPathAsString(stateService));
+    }
+
+    public String getPathAsString(StateService stateService) {
+        StringBuilder sb = new StringBuilder();
+        for (Long state : states) {
+            String stateName =
+                    stateService != null ? stateService.getStateName(state) : String.valueOf(state);
+            sb.append(stateName).append(" -> ");
+        }
+        if (sb.length() > 0) sb.delete(sb.length() - 4, sb.length()); // remove last " -> "
+        return sb.toString();
     }
 
     /**

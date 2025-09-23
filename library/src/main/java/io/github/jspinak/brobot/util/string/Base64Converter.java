@@ -48,8 +48,8 @@ import org.springframework.stereotype.Component;
  * visual data through text-based protocols.
  *
  * @since 1.0
- * @see Image
- * @see Pattern
+ * @see io.github.jspinak.brobot.model.element.Image
+ * @see io.github.jspinak.brobot.model.element.Pattern
  */
 @Component
 public class Base64Converter {

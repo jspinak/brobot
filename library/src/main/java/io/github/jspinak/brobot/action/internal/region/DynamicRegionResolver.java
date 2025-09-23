@@ -219,6 +219,7 @@ public class DynamicRegionResolver {
      *
      * @deprecated Use resolveRegionsFromActionResult instead
      */
+    @Deprecated
     private List<Region> resolveRegionsFromMatches(SearchRegionOnObject config) {
         // Find all source matches
         List<Match> sourceMatches = findMatchesForConfig(config);

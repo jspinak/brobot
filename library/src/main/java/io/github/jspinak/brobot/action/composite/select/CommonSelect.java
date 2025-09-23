@@ -51,7 +51,7 @@ public class CommonSelect {
      * specified number of times.
      *
      * @param swipeRegion The region where swiping will occur
-     * @param findType The type of find operation to use (e.g., FIRST, ALL, EACH)
+     * @param findStrategy The type of find strategy to use (e.g., FIRST, ALL, EACH)
      * @param clicksPerImage Number of clicks to perform on each found image
      * @param swipeDirection The direction to swipe (e.g., TOP, BOTTOM, LEFT, RIGHT)
      * @param maxSwipes Maximum number of swipes to perform before giving up
@@ -97,7 +97,7 @@ public class CommonSelect {
      * @param images The target images to search for during swiping
      * @param confirmationImages Images to find after clicking to confirm success (can be empty)
      * @param swipeRegion The region where swiping will occur
-     * @param findType The type of find operation to use (e.g., FIRST, ALL, EACH)
+     * @param findStrategy The type of find strategy to use (e.g., FIRST, ALL, EACH)
      * @param clicksPerImage Number of clicks to perform on each found image
      * @param swipeDirection The direction to swipe (e.g., TOP, BOTTOM, LEFT, RIGHT)
      * @param maxSwipes Maximum number of swipes to perform before giving up

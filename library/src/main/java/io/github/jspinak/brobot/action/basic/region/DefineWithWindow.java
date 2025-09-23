@@ -32,7 +32,6 @@ import io.github.jspinak.brobot.model.element.Region;
  * ActionResult.
  *
  * @see DefineRegion
- * @see RegionDefinitionHelper
  * @see ApplicationWindowProvider#focusedWindow()
  */
 @Component

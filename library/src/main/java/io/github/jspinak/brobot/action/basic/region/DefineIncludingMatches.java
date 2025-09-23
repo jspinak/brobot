@@ -35,7 +35,6 @@ import io.github.jspinak.brobot.model.match.Match;
  * </ul>
  *
  * @see DefineRegion
- * @see RegionDefinitionHelper
  * @see DefineRegionOptions.DefineAs#INCLUDING_MATCHES
  */
 @Component

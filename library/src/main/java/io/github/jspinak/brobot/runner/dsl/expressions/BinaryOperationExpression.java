@@ -10,8 +10,8 @@ import lombok.EqualsAndHashCode;
  * Represents a binary operation expression in the Brobot DSL.
  *
  * <p>Binary operations combine two expressions using an operator to produce a result. Supported
- * operations include arithmetic (e.g., +, -, *, /), comparison (e.g., ==, !=, <, >), and logical
- * operations (e.g., &&, ||).
+ * operations include arithmetic (e.g., +, -, *, /), comparison (e.g., ==, !=, &lt;, &gt;), and
+ * logical operations (e.g., &amp;&amp;, ||).
  *
  * <p>The operation is evaluated by first evaluating the left and right expressions, then applying
  * the operator to their values.
@@ -38,8 +38,8 @@ public class BinaryOperationExpression extends Expression {
      *
      * <ul>
      *   <li>Arithmetic: "+", "-", "*", "/", "%"
-     *   <li>Comparison: "==", "!=", "<", ">", "<=", ">="
-     *   <li>Logical: "&&", "||"
+     *   <li>Comparison: "==", "!=", "&lt;", "&gt;", "&lt;=", "&gt;="
+     *   <li>Logical: "&amp;&amp;", "||"
      * </ul>
      */
     private String operator;

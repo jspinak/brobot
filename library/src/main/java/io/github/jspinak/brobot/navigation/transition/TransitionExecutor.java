@@ -199,65 +199,37 @@ public class TransitionExecutor {
                     stateMemory.getActiveStates().stream()
                             .map(id -> id + "(" + allStatesInProjectService.getStateName(id) + ")")
                             .reduce("", (s1, s2) -> s1.isEmpty() ? s2 : s1 + ", " + s2);
-            System.out.println(
-                    "=== TRANSITION DEBUG: 'from' state "
-                            + from
-                            + "("
-                            + fromStateName
-                            + ") is not active. Active states: ["
-                            + activeStatesStr
-                            + "]");
+            log.debug(
+                    "State {} ({}) is not active. Active states: [{}]",
+                    from,
+                    fromStateName,
+                    activeStatesStr);
             return false; // the 'from' State is not active
         }
         Optional<TransitionFetcher> transitionsOpt = transitionFetcher.getTransitions(from, to);
         if (transitionsOpt.isEmpty()) {
-            System.out.println(
-                    "=== TRANSITION DEBUG: No transitions found from "
-                            + from
-                            + "("
-                            + fromStateName
-                            + ") to "
-                            + to
-                            + "("
-                            + toStateName
-                            + ")");
+            log.debug(
+                    "No transitions found {} ({}) -> {} ({})",
+                    from,
+                    fromStateName,
+                    to,
+                    toStateName);
             return false; // couldn't find one of the needed Transitions
         }
         TransitionFetcher transitions = transitionsOpt.get();
 
         // Execute FromTransition first
-        System.out.println(
-                "=== TRANSITION DEBUG: Executing FromTransition from "
-                        + from
-                        + "("
-                        + fromStateName
-                        + ") to "
-                        + to
-                        + "("
-                        + toStateName
-                        + ")");
+        log.debug("Executing transition {} ({}) -> {} ({})", from, fromStateName, to, toStateName);
         boolean fromTransitionSuccess = transitions.getFromTransitionFunction().getAsBoolean();
-        System.out.println(
-                "=== TRANSITION DEBUG: FromTransition result = " + fromTransitionSuccess);
+        log.debug("FromTransition result: {}", fromTransitionSuccess);
         if (!fromTransitionSuccess) return false; // the FromTransition didn't succeed
 
         // Now execute the ToTransition for the primary target state
-        System.out.println(
-                "=== TRANSITION DEBUG: Executing ToTransition for target state "
-                        + to
-                        + "("
-                        + toStateName
-                        + ")");
+        log.debug("Executing ToTransition for {} ({})", to, toStateName);
         boolean toTransitionSuccess = doTransitionTo(to);
-        System.out.println("=== TRANSITION DEBUG: ToTransition result = " + toTransitionSuccess);
+        log.debug("ToTransition result: {}", toTransitionSuccess);
         if (!toTransitionSuccess) {
-            System.out.println(
-                    "=== TRANSITION DEBUG: Transition failed - ToTransition for primary target"
-                            + " state "
-                            + to
-                            + "("
-                            + toStateName
-                            + ") did not succeed");
+            log.debug("ToTransition failed for {} ({})", to, toStateName);
             return false; // The ToTransition for the primary target didn't succeed
         }
 
@@ -296,12 +268,7 @@ public class TransitionExecutor {
 
         // Verify the primary target state is active
         if (!stateMemory.getActiveStates().contains(to)) {
-            System.out.println(
-                    "=== TRANSITION DEBUG: Transition failed - target state "
-                            + to
-                            + "("
-                            + toStateName
-                            + ") is not active after transition");
+            log.debug("Target state {} ({}) not active after transition", to, toStateName);
             return false;
         }
 
@@ -338,7 +305,7 @@ public class TransitionExecutor {
             statesToActivate.addAll(transitions.getFromState().getHiddenStateIds());
         statesToActivate.remove(
                 SpecialStateType.PREVIOUS.getId()); // previous can't be activated, so get rid of it
-        System.out.println("states to activate: " + statesToActivate);
+        log.debug("States to activate: {}", statesToActivate);
         return statesToActivate;
     }
 
@@ -398,28 +365,22 @@ public class TransitionExecutor {
                 BooleanSupplier booleanSupplier =
                         transitionBooleanSupplierPackager.toBooleanSupplier(stateTransition);
                 result = booleanSupplier.getAsBoolean();
-                System.out.println(
-                        "=== TRANSITION DEBUG: ToTransition for state "
-                                + toStateName
-                                + " ("
-                                + allStatesInProjectService.getStateName(toStateName)
-                                + ") returned: "
-                                + result);
+                log.debug(
+                        "ToTransition for {} ({}) returned: {}",
+                        toStateName,
+                        allStatesInProjectService.getStateName(toStateName),
+                        result);
             } else {
-                System.out.println(
-                        "=== TRANSITION DEBUG: No transition finish defined for state "
-                                + toStateName
-                                + " ("
-                                + allStatesInProjectService.getStateName(toStateName)
-                                + "), treating as successful");
+                log.debug(
+                        "No transition finish for {} ({}), treating as successful",
+                        toStateName,
+                        allStatesInProjectService.getStateName(toStateName));
             }
         } else {
-            System.out.println(
-                    "=== TRANSITION DEBUG: No StateTransitions found for state "
-                            + toStateName
-                            + " ("
-                            + allStatesInProjectService.getStateName(toStateName)
-                            + "), treating as terminal state");
+            log.debug(
+                    "No StateTransitions for {} ({}), treating as terminal state",
+                    toStateName,
+                    allStatesInProjectService.getStateName(toStateName));
         }
 
         if (!result) { // transition failed

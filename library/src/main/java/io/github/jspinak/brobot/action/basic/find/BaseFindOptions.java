@@ -14,16 +14,16 @@ import lombok.Getter;
  * of whether they use pattern matching, color analysis, or other techniques. It extends {@link
  * ActionConfig} to inherit general action configuration while adding find-specific settings.
  *
- * <p>Specialized find configurations (e.g., {@link PatternFindOptions}, {@link ColorFindOptions})
- * should extend this class to add their specific parameters while inheriting the common find
- * functionality.
+ * <p>Specialized find configurations (e.g., {@link PatternFindOptions}, {@link
+ * io.github.jspinak.brobot.action.basic.find.color.ColorFindOptions}) should extend this class to
+ * add their specific parameters while inheriting the common find functionality.
  *
  * <p>This design promotes code reuse and ensures consistency across different find implementations
  * while maintaining type safety and API clarity.
  *
  * @see ActionConfig
  * @see PatternFindOptions
- * @see ColorFindOptions
+ * @see io.github.jspinak.brobot.action.basic.find.color.ColorFindOptions
  */
 @Getter
 public abstract class BaseFindOptions extends ActionConfig {
@@ -152,7 +152,7 @@ public abstract class BaseFindOptions extends ActionConfig {
 
         /**
          * Limits the number of matches to act on when using strategies that find multiple matches.
-         * A value <= 0 means no limit.
+         * A value &lt;= 0 means no limit.
          *
          * @param maxMatchesToActOn The maximum number of matches to process.
          * @return this Builder instance for chaining.

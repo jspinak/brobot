@@ -13,6 +13,7 @@ import io.github.jspinak.brobot.navigation.service.StateTransitionService;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Retrieves and packages all transition components needed for state navigation.
@@ -75,6 +76,7 @@ import lombok.Getter;
  */
 @Component
 @Getter
+@Slf4j
 public class TransitionFetcher {
 
     private final StateMemory stateMemory;
@@ -167,15 +169,12 @@ public class TransitionFetcher {
         boolean toComplete = toState != null && (toTransitions == null || toTransition != null);
 
         if (!fromComplete || !toComplete) {
-            System.out.println("=== TRANSITION DEBUG: isComplete() check failed:");
-            System.out.println("===   transitionToEnum: " + transitionToEnum);
-            System.out.println("===   fromTransitions: " + (fromTransitions != null));
-            System.out.println("===   fromTransition: " + (fromTransition != null));
-            System.out.println("===   fromState: " + (fromState != null));
-            System.out.println("===   fromTransitionFunction: " + (fromTransitionFunction != null));
-            System.out.println("===   toState: " + (toState != null));
-            System.out.println("===   toTransitions: " + (toTransitions != null) + " (optional)");
-            System.out.println("===   toTransition: " + (toTransition != null) + " (optional)");
+            log.debug(
+                    "Transition incomplete - from: {}, to: {}, fromTransitions: {}, toState: {}",
+                    fromState != null ? fromState.getName() : null,
+                    toState != null ? toState.getName() : null,
+                    fromTransitions != null,
+                    toState != null);
         }
 
         return fromComplete && toComplete;
@@ -199,67 +198,29 @@ public class TransitionFetcher {
      * @param to Target state ID (may be PREVIOUS)
      */
     private void setFromTransitions(Long from, Long to) {
-        System.out.println(
-                "=== TRANSITION DEBUG: TransitionFetcher.setFromTransitions() from="
-                        + from
-                        + " to="
-                        + to);
+        log.debug("Setting transitions {} -> {}", from, to);
 
         Optional<StateTransitions> fromTransitions =
                 stateTransitionsInProjectService.getTransitions(from);
-        allStatesInProjectService
-                .getState(from)
-                .ifPresent(
-                        state -> {
-                            fromState = state;
-                            System.out.println(
-                                    "=== TRANSITION DEBUG: Found fromState: " + state.getName());
-                        });
+        allStatesInProjectService.getState(from).ifPresent(state -> fromState = state);
 
         if (fromTransitions.isEmpty()) {
-            System.out.println(
-                    "=== TRANSITION DEBUG: No StateTransitions found for from state " + from);
+            log.debug("No transitions found for state {}", from);
         }
 
         fromTransitions.ifPresent(
                 transitions -> {
                     this.fromTransitions = transitions;
-                    System.out.println(
-                            "=== TRANSITION DEBUG: Found transitions object for state " + from);
-                    System.out.println(
-                            "=== TRANSITION DEBUG: Number of transitions: "
-                                    + transitions.getTransitions().size());
-
                     transitionToEnum =
                             stateTransitionsInProjectService.getTransitionToEnum(from, to);
-                    System.out.println(
-                            "=== TRANSITION DEBUG: transitionToEnum resolved to: "
-                                    + transitionToEnum);
+                    log.debug("Transition {} -> {} (resolved to {})", from, to, transitionToEnum);
 
                     transitions
                             .getTransitionFunctionByActivatedStateId(transitionToEnum)
-                            .ifPresent(
-                                    trsn -> {
-                                        this.fromTransition = trsn;
-                                        System.out.println(
-                                                "=== TRANSITION DEBUG: Found transition function"
-                                                        + " for "
-                                                        + transitionToEnum);
-                                    });
+                            .ifPresent(trsn -> this.fromTransition = trsn);
 
                     if (this.fromTransition == null) {
-                        System.out.println(
-                                "=== TRANSITION DEBUG: NO transition function found for "
-                                        + transitionToEnum);
-                        System.out.println(
-                                "=== TRANSITION DEBUG: Available activations in transitions:");
-                        transitions
-                                .getTransitions()
-                                .forEach(
-                                        t -> {
-                                            System.out.println(
-                                                    "===   - Activates: " + t.getActivate());
-                                        });
+                        log.debug("No transition function found for target {}", transitionToEnum);
                     }
 
                     transitions

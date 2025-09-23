@@ -53,7 +53,6 @@ import org.springframework.context.annotation.Import;
  *
  * @see org.springframework.context.annotation.Configuration
  * @see org.springframework.context.annotation.ComponentScan
- * @see ExecutionEnvironment
  * @see BrobotProperties
  */
 @Configuration

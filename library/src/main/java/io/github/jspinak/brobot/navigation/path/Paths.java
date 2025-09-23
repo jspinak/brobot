@@ -8,6 +8,7 @@ import java.util.Set;
 import io.github.jspinak.brobot.navigation.service.StateService;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Collection of navigation paths in the Brobot model-based GUI automation framework.
@@ -59,6 +60,7 @@ import lombok.Getter;
  * @see PathTraverser
  */
 @Getter
+@Slf4j
 public class Paths {
 
     private List<Path> paths = new ArrayList<>();
@@ -108,13 +110,24 @@ public class Paths {
 
     public void print() {
         if (paths.isEmpty()) return;
-        System.out.println("\n=== Paths Found (score) ===");
-        paths.forEach(Path::print);
+        log.info("Paths found ({})", paths.size());
+        if (log.isDebugEnabled()) {
+            paths.forEach(Path::print);
+        }
     }
 
     public void print(StateService stateService) {
         if (paths.isEmpty()) return;
-        System.out.println("\n=== Paths Found (score) ===");
-        paths.forEach(path -> path.print(stateService));
+        log.info("Paths found ({})", paths.size());
+        if (log.isDebugEnabled()) {
+            paths.forEach(path -> path.print(stateService));
+        } else if (!paths.isEmpty()) {
+            // At INFO level, just show the best path concisely
+            Path bestPath = paths.get(0); // Already sorted by score
+            log.info(
+                    "  Best path (score {}): {}",
+                    bestPath.getPathCost(),
+                    bestPath.getPathAsString(stateService));
+        }
     }
 }

@@ -33,8 +33,8 @@ import lombok.extern.slf4j.Slf4j;
  *
  * <p>This class implements the action execution layer of the model-based GUI automation framework,
  * handling the complete lifecycle of an action from initialization through completion. It provides
- * a consistent execution environment for both {@link BasicActionRegistry} and {@link
- * CompositeActionRegistry} operations while managing critical cross-cutting concerns.
+ * a consistent execution environment for {@link BasicActionRegistry} operations while managing
+ * critical cross-cutting concerns.
  *
  * <p><strong>Key responsibilities:</strong>
  *
