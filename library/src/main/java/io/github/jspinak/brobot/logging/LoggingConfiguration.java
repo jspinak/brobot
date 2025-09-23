@@ -4,7 +4,6 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 import lombok.Data;
 
@@ -23,7 +22,6 @@ import lombok.Data;
  * brobot.logging.performance.async=true
  * </pre>
  */
-@Component("brobotLoggingConfiguration")
 @ConfigurationProperties(prefix = "brobot.logging")
 @Data
 public class LoggingConfiguration {
