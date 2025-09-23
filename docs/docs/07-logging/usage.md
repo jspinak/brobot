@@ -15,6 +15,198 @@ ActionResult result = action.find(stateImage);
 [ACTIONS] INFO  FIND submitButton → SUCCESS [25ms] loc:(100,200) sim:0.95
 ```
 
+## ActionConfig Custom Logging
+
+Brobot provides built-in logging methods for all ActionConfig subclasses (PatternFindOptions, ClickOptions, TypeOptions, etc.) allowing you to add custom log messages at key points in the action lifecycle.
+
+### Available Logging Methods
+
+Each ActionConfig builder supports four logging methods:
+
+- **`withBeforeActionLog(String message)`** - Logged before the action begins
+- **`withAfterActionLog(String message)`** - Logged after the action completes
+- **`withSuccessLog(String message)`** - Logged only when the action succeeds
+- **`withFailureLog(String message)`** - Logged only when the action fails
+
+### Basic Example
+```java
+PatternFindOptions findOptions = new PatternFindOptions.Builder()
+    .withBeforeActionLog("Searching for submit button...")
+    .withSuccessLog("Submit button found!")
+    .withFailureLog("Submit button not found - check if page loaded correctly")
+    .build();
+
+ActionResult result = action.find(findOptions, submitButton);
+```
+
+### Generated Log Output
+```
+[ACTIONS] INFO  Searching for submit button...
+[ACTIONS] INFO  FIND submitButton → SUCCESS [25ms] loc:(100,200) sim:0.95
+[ACTIONS] INFO  Submit button found!
+```
+
+### Complex Workflow Example
+```java
+// Step 1: Verify we're on the correct page
+PatternFindOptions verifyPage = new PatternFindOptions.Builder()
+    .withBeforeActionLog("Verifying arrival at login page...")
+    .withSuccessLog("Login page confirmed")
+    .withFailureLog("WARNING: Not on login page")
+    .build();
+
+// Step 2: Enter username
+TypeOptions typeUsername = new TypeOptions.Builder()
+    .withBeforeActionLog("Entering username...")
+    .withAfterActionLog("Username entry complete")
+    .build();
+
+// Step 3: Enter password
+TypeOptions typePassword = new TypeOptions.Builder()
+    .withBeforeActionLog("Entering password...")
+    .withAfterActionLog("Password entry complete")
+    .build();
+
+// Step 4: Click submit
+ClickOptions submitClick = new ClickOptions.Builder()
+    .withBeforeActionLog("Submitting login form...")
+    .withSuccessLog("Login form submitted successfully")
+    .withFailureLog("ERROR: Failed to submit login form")
+    .build();
+
+// Execute the workflow
+action.find(verifyPage, loginPageHeader);
+action.type(typeUsername, usernameField, username);
+action.type(typePassword, passwordField, password);
+action.click(submitClick, submitButton);
+```
+
+### State Transition Example
+```java
+public class LoginTransitions {
+
+    @Autowired
+    private Action action;
+
+    public void transitionToInventory() {
+        PatternFindOptions findInventory = new PatternFindOptions.Builder()
+            .withBeforeActionLog("Navigating to Inventory...")
+            .withSuccessLog("Successfully arrived at Inventory")
+            .withFailureLog("Failed to reach Inventory - may need to close dialogs")
+            .withSimilarity(0.85)
+            .build();
+
+        ClickOptions openInventory = new ClickOptions.Builder()
+            .withBeforeActionLog("Opening Inventory menu...")
+            .withAfterActionLog("Inventory menu interaction complete")
+            .build();
+
+        // Click to open, then verify arrival
+        action.click(openInventory, inventoryButton);
+        action.find(findInventory, inventoryHeader);
+    }
+}
+```
+
+### Debugging with Detailed Logging
+```java
+// Use detailed logging for debugging complex interactions
+DragOptions complexDrag = new DragOptions.Builder()
+    .withBeforeActionLog("Starting drag operation from item slot to storage...")
+    .withAfterActionLog("Drag operation completed - checking result")
+    .withSuccessLog("Item successfully moved to storage")
+    .withFailureLog("Drag failed - item may be locked or storage full")
+    .setFromLocation(itemSlot)
+    .setToLocation(storageSlot)
+    .setPauseBeforeBegin(0.5)  // Give UI time to respond
+    .build();
+
+action.drag(complexDrag);
+```
+
+### Conditional Logging Based on Context
+```java
+public PatternFindOptions buildFindOptions(boolean verbose) {
+    PatternFindOptions.Builder builder = new PatternFindOptions.Builder()
+        .withSimilarity(0.9);
+
+    if (verbose) {
+        builder.withBeforeActionLog("Performing high-precision search...")
+               .withSuccessLog("High-precision match found")
+               .withFailureLog("No match at 90% similarity");
+    }
+
+    return builder.build();
+}
+```
+
+### Integration with Transitions
+```java
+public class StateTransitions {
+
+    public PatternFindOptions arrivalVerification(String stateName) {
+        return new PatternFindOptions.Builder()
+            .withBeforeActionLog("Verifying arrival at " + stateName + "...")
+            .withSuccessLog("Successfully arrived at " + stateName)
+            .withFailureLog("Failed to confirm arrival at " + stateName)
+            .withSearchRegion(SearchRegion.TOP_HALF)
+            .build();
+    }
+
+    public ClickOptions navigationClick(String targetName) {
+        return new ClickOptions.Builder()
+            .withBeforeActionLog("Clicking " + targetName + "...")
+            .withSuccessLog(targetName + " clicked successfully")
+            .withFailureLog("Failed to click " + targetName)
+            .setClickType(ClickType.LEFT)
+            .build();
+    }
+}
+```
+
+### Best Practices for ActionConfig Logging
+
+1. **Be Descriptive but Concise**
+   ```java
+   // Good - clear and informative
+   .withBeforeActionLog("Validating form data before submission...")
+
+   // Too vague
+   .withBeforeActionLog("Processing...")
+
+   // Too verbose
+   .withBeforeActionLog("Now starting the process to validate all form fields including username, password, email...")
+   ```
+
+2. **Include Context in Failure Messages**
+   ```java
+   // Good - helps with debugging
+   .withFailureLog("Login button not found - check if page fully loaded or if button moved")
+
+   // Less helpful
+   .withFailureLog("Action failed")
+   ```
+
+3. **Use Success Logs for Important Milestones**
+   ```java
+   // Good - marks important workflow points
+   .withSuccessLog("Order successfully submitted - Order ID captured")
+
+   // Unnecessary - duplicates automatic logging
+   .withSuccessLog("Click successful")
+   ```
+
+4. **Combine with Other ActionConfig Options**
+   ```java
+   PatternFindOptions robust = new PatternFindOptions.Builder()
+       .withBeforeActionLog("Searching with reduced similarity...")
+       .withSimilarity(0.7)  // Lower threshold
+       .withSearchRegion(SearchRegion.FULL_SCREEN)  // Wider search
+       .setPauseBeforeBegin(1.0)  // Allow page to stabilize
+       .withFailureLog("Element not found even with relaxed criteria")
+       .build();
+   ```
+
 ## Programmatic Logging
 
 For custom logging needs, use the BrobotLogger directly:

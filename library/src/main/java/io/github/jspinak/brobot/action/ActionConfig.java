@@ -81,6 +81,12 @@ public abstract class ActionConfig {
     private final Illustrate illustrate;
     private final List<ActionConfig> subsequentActions;
 
+    // Logging fields
+    private final String beforeActionLog;
+    private final String afterActionLog;
+    private final String successLog;
+    private final String failureLog;
+
     /**
      * Protected constructor to be called by the builders of subclasses.
      *
@@ -92,6 +98,10 @@ public abstract class ActionConfig {
         this.successCriteria = builder.successCriteria;
         this.illustrate = builder.illustrate;
         this.subsequentActions = builder.subsequentActions;
+        this.beforeActionLog = builder.beforeActionLog;
+        this.afterActionLog = builder.afterActionLog;
+        this.successLog = builder.successLog;
+        this.failureLog = builder.failureLog;
     }
 
     /**
@@ -126,6 +136,12 @@ public abstract class ActionConfig {
         private Illustrate illustrate = Illustrate.USE_GLOBAL;
         private List<ActionConfig> subsequentActions = new ArrayList<>();
 
+        // Logging fields
+        private String beforeActionLog;
+        private String afterActionLog;
+        private String successLog;
+        private String failureLog;
+
         /** Default constructor for the builder. */
         public Builder() {}
 
@@ -140,6 +156,10 @@ public abstract class ActionConfig {
             this.successCriteria = original.successCriteria;
             this.illustrate = original.illustrate;
             this.subsequentActions = new ArrayList<>(original.subsequentActions);
+            this.beforeActionLog = original.beforeActionLog;
+            this.afterActionLog = original.afterActionLog;
+            this.successLog = original.successLog;
+            this.failureLog = original.failureLog;
         }
 
         /**
@@ -193,6 +213,50 @@ public abstract class ActionConfig {
          */
         public B setIllustrate(Illustrate illustrate) {
             this.illustrate = illustrate;
+            return self();
+        }
+
+        /**
+         * Sets a log message to be displayed before the action begins execution.
+         *
+         * @param message The log message to display before action execution.
+         * @return The builder instance for chaining.
+         */
+        public B withBeforeActionLog(String message) {
+            this.beforeActionLog = message;
+            return self();
+        }
+
+        /**
+         * Sets a log message to be displayed after the action has completed.
+         *
+         * @param message The log message to display after action execution.
+         * @return The builder instance for chaining.
+         */
+        public B withAfterActionLog(String message) {
+            this.afterActionLog = message;
+            return self();
+        }
+
+        /**
+         * Sets a log message to be displayed when the action succeeds.
+         *
+         * @param message The log message to display on successful action execution.
+         * @return The builder instance for chaining.
+         */
+        public B withSuccessLog(String message) {
+            this.successLog = message;
+            return self();
+        }
+
+        /**
+         * Sets a log message to be displayed when the action fails.
+         *
+         * @param message The log message to display on failed action execution.
+         * @return The builder instance for chaining.
+         */
+        public B withFailureLog(String message) {
+            this.failureLog = message;
             return self();
         }
 
