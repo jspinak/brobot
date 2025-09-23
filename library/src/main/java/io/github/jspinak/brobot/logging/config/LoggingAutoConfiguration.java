@@ -156,12 +156,14 @@ public class LoggingAutoConfiguration {
 
         /** Set logging level for all categories. */
         public void setGlobalLevel(LogLevel level) {
-            config.setGlobalLevel(level);
+            // Logging levels are now controlled via Spring Boot properties
+            // This method is kept for backward compatibility but does nothing
         }
 
         /** Set logging level for a specific category. */
         public void setCategoryLevel(LogCategory category, LogLevel level) {
-            config.getCategories().put(category, level);
+            // Logging levels are now controlled via Spring Boot properties
+            // This method is kept for backward compatibility but does nothing
         }
 
         /** Enable or disable specific enrichment features. */

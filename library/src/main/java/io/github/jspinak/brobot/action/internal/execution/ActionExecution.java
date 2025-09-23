@@ -359,10 +359,9 @@ public class ActionExecution {
     }
 
     private LogLevel getEffectiveLogLevel(LogCategory category) {
-        if (loggingConfiguration == null) {
-            return LogLevel.INFO; // Default level
-        }
-        return loggingConfiguration.getEffectiveLevel(category);
+        // Since logging levels are now controlled via Spring Boot properties,
+        // we'll return INFO as default. Actual filtering is done by SLF4J/Logback
+        return LogLevel.INFO;
     }
 
     private String getActionTypeFromConfig(ActionConfig config) {
