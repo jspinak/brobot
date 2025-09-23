@@ -12,6 +12,8 @@ import javax.imageio.ImageIO;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import io.github.jspinak.brobot.test.DisabledInCI;
+
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 
@@ -19,6 +21,7 @@ import net.sourceforge.tess4j.TesseractException;
  * Simple OCR test using saved FloraNext screenshots. Works in headless/CI environments since it
  * uses pre-saved images.
  */
+@DisabledInCI
 public class SimpleOcrTest {
 
     private static File screenshotDir;
