@@ -33,7 +33,7 @@ public class StateLocationTest {
         assertEquals(10, stateLocation.getLocation().getX());
         assertEquals(20, stateLocation.getLocation().getY());
         assertEquals("testState", stateLocation.getOwnerStateName());
-        assertEquals(90, stateLocation.getProbabilityExists());
+        assertEquals(90, stateLocation.getMockFindStochasticModifier());
         assertEquals(5, stateLocation.getTimesActedOn());
     }
 

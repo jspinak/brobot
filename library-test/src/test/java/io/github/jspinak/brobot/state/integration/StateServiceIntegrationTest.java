@@ -44,12 +44,12 @@ class StateServiceIntegrationTest extends BrobotIntegrationTestBase {
         loginState = new State();
         loginState.setName("LoginState");
         createLoginImages().forEach(loginState::addStateImage);
-        loginState.setBaseProbabilityExists(90);
+        loginState.setBaseMockFindStochasticModifier(90);
 
         dashboardState = new State();
         dashboardState.setName("DashboardState");
         createDashboardImages().forEach(dashboardState::addStateImage);
-        dashboardState.setBaseProbabilityExists(85);
+        dashboardState.setBaseMockFindStochasticModifier(85);
     }
 
     private List<StateImage> createLoginImages() {
@@ -224,7 +224,7 @@ class StateServiceIntegrationTest extends BrobotIntegrationTestBase {
 
             State state = retrieved.get();
             assertEquals("LoginState", state.getName());
-            assertEquals(90, state.getBaseProbabilityExists());
+            assertEquals(90, state.getBaseMockFindStochasticModifier());
             assertEquals(2, state.getStateImages().size());
         }
 

@@ -22,8 +22,6 @@ import io.github.jspinak.brobot.runner.dsl.model.TaskSequence;
 import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
 import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
 import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
 import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
 /**
@@ -49,8 +47,6 @@ import io.github.jspinak.brobot.test.mock.MockScreenConfig;
             "brobot.capture.physical-resolution=false"
         })
 @Import({
-    MockGuiAccessConfig.class,
-    MockGuiAccessMonitor.class,
     MockScreenConfig.class,
     io.github.jspinak.brobot.test.config.TestApplicationConfiguration.class
 })

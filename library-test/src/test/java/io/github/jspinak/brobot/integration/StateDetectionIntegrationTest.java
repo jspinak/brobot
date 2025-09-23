@@ -153,8 +153,10 @@ public class StateDetectionIntegrationTest extends BrobotTestBase {
                 stateService.getState("Dashboard").orElseThrow();
 
         // Initially, Login should have higher probability (it's the initial state)
-        log.info("Login initial probability: {}", loginState.getProbabilityExists());
-        log.info("Dashboard initial probability: {}", dashboardState.getProbabilityExists());
+        log.info("Login initial probability: {}", loginState.getMockFindStochasticModifier());
+        log.info(
+                "Dashboard initial probability: {}",
+                dashboardState.getMockFindStochasticModifier());
 
         // Add Dashboard to active states
         stateMemory.addActiveState(dashboardState.getId());
@@ -162,7 +164,7 @@ public class StateDetectionIntegrationTest extends BrobotTestBase {
         // Dashboard should now have 100% probability
         assertEquals(
                 100,
-                dashboardState.getProbabilityExists(),
+                dashboardState.getMockFindStochasticModifier(),
                 "Active state should have 100% probability");
 
         // Remove Login from active states
@@ -170,7 +172,9 @@ public class StateDetectionIntegrationTest extends BrobotTestBase {
 
         // Login should now have 0% probability
         assertEquals(
-                0, loginState.getProbabilityExists(), "Inactive state should have 0% probability");
+                0,
+                loginState.getMockFindStochasticModifier(),
+                "Inactive state should have 0% probability");
     }
 
     @Test

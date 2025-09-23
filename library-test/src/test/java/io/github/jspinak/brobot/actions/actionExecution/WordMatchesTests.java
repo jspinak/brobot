@@ -18,8 +18,6 @@ import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
 import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 import io.github.jspinak.brobot.testutils.TestPaths;
 
@@ -39,8 +37,6 @@ import io.github.jspinak.brobot.testutils.TestPaths;
             "brobot.mock.enabled=true"
         })
 @Import({
-    MockGuiAccessConfig.class,
-    MockGuiAccessMonitor.class,
     MockScreenConfig.class,
     io.github.jspinak.brobot.test.config.TestApplicationConfiguration.class
 })

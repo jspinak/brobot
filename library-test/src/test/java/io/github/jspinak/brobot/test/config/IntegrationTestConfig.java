@@ -19,7 +19,6 @@ import io.github.jspinak.brobot.config.core.BrobotConfig;
 import io.github.jspinak.brobot.config.mock.MockModeManager;
 import io.github.jspinak.brobot.core.services.ScreenCaptureService;
 import io.github.jspinak.brobot.test.TestLoggingConfig;
-import io.github.jspinak.brobot.test.mock.MockBrobotLoggerConfig;
 
 /**
  * Minimal integration test configuration that avoids bean conflicts. This configuration provides
@@ -36,7 +35,7 @@ import io.github.jspinak.brobot.test.mock.MockBrobotLoggerConfig;
             @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*MinimalTestConfig"),
             @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*BrobotTestConfiguration")
         })
-@Import({BrobotConfig.class, TestLoggingConfig.class, MockBrobotLoggerConfig.class})
+@Import({BrobotConfig.class, TestLoggingConfig.class})
 public class IntegrationTestConfig {
 
     static {
