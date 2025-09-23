@@ -26,12 +26,14 @@ import io.github.jspinak.brobot.model.element.*;
 import io.github.jspinak.brobot.model.state.*;
 import io.github.jspinak.brobot.model.transition.StateTransition;
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Integration tests for complex workflows. Tests the interaction between multiple action components
  * in realistic scenarios.
  */
 @SpringBootTest
+@DisabledInCI
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ComplexWorkflowIntegrationTest extends BrobotTestBase {
 

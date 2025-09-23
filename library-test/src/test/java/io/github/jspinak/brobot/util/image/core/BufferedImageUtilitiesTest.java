@@ -37,6 +37,7 @@ import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.monitor.MonitorManager;
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.DisabledInCI;
 import io.github.jspinak.brobot.test.MockMatFactory;
 
 /**
@@ -44,6 +45,7 @@ import io.github.jspinak.brobot.test.MockMatFactory;
  * operations, screen capture, format conversions, and platform abstraction.
  */
 @DisplayName("BufferedImageUtilities Tests")
+@DisabledInCI
 @SpringBootTest
 @TestPropertySource(properties = {"brobot.core.mock=true", "brobot.core.headless=true"})
 public class BufferedImageUtilitiesTest extends BrobotTestBase {

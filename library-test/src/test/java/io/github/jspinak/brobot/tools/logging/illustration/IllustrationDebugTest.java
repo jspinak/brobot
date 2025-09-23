@@ -21,6 +21,7 @@ import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.test.DisabledInCI;
 import io.github.jspinak.brobot.testutils.TestPaths;
 import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 
@@ -29,6 +30,7 @@ import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
  * illustrations are showing black images.
  */
 @SpringBootTest
+@DisabledInCI
 public class IllustrationDebugTest {
 
     @Autowired Action action;

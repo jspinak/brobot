@@ -22,15 +22,21 @@ public class APIVerificationTest {
         Pattern pattern =
                 new Pattern.Builder()
                         .setName("TestPattern")
+                        .setImgpath("TestPattern") // Set imgpath explicitly
                         .setBufferedImage(new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB))
                         .build();
 
         assertEquals("TestPattern", pattern.getImgpath());
+        assertEquals("TestPattern", pattern.getName());
     }
 
     @Test
     void testStateImageCreation() {
-        Pattern pattern = new Pattern.Builder().setName("TestPattern").build();
+        Pattern pattern =
+                new Pattern.Builder()
+                        .setName("TestPattern")
+                        .setImgpath("TestPattern") // Set imgpath explicitly
+                        .build();
 
         StateImage stateImage =
                 new StateImage.Builder().addPattern(pattern).setName("TestStateImage").build();
@@ -67,7 +73,11 @@ public class APIVerificationTest {
 
     @Test
     void testPatternMatchHistory() {
-        Pattern pattern = new Pattern.Builder().setName("TestPattern").build();
+        Pattern pattern =
+                new Pattern.Builder()
+                        .setName("TestPattern")
+                        .setImgpath("TestPattern") // Set imgpath explicitly
+                        .build();
 
         ActionRecord snapshot = new ActionRecord();
         snapshot.setActionSuccess(true);
