@@ -111,7 +111,7 @@ spotless {
     // Java formatting configuration
     java {
         target 'library/src/**/*.java', 'library-test/src/**/*.java', 'library-features/src/**/*.java',
-               'runner/src/**/*.java', 'persistence/src/**/*.java', 'pattern-capture-tool/src/**/*.java'
+               'persistence/src/**/*.java', 'pattern-capture-tool/src/**/*.java'
 
         // Note: Example projects that are included as subprojects handle their own spotless configuration
         
