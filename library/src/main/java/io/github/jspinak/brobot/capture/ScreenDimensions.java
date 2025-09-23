@@ -33,10 +33,9 @@ public class ScreenDimensions {
         screenHeight = height;
         initialized = true;
 
-        log.info("=== Screen Dimensions Initialized ===");
-        log.info("Capture Provider: {}", captureProvider);
-        log.info("Screen Resolution: {}x{}", screenWidth, screenHeight);
-        log.info("=====================================");
+        // Single concise log for screen dimensions
+        log.info("[Brobot] Screen: {}x{}", screenWidth, screenHeight);
+        log.debug("Screen dimensions initialized by {} provider", captureProvider);
     }
 
     /**

@@ -180,7 +180,7 @@ public class InitialStates {
                     .ifPresent(
                             state -> {
                                 stateIds.add(state.getId());
-                                log.info(
+                                log.debug(
                                         "Added state to initial set: {} (ID: {})",
                                         name,
                                         state.getId());

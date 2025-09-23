@@ -93,7 +93,7 @@ public class AnnotatedStateBuilder {
         log.trace("Set pathCost {} for state '{}'", stateAnnotation.pathCost(), stateName);
 
         State state = stateBuilder.build();
-        log.info(
+        log.debug(
                 "Built state '{}' with {} total components",
                 stateName,
                 components.getTotalComponents());
@@ -113,7 +113,7 @@ public class AnnotatedStateBuilder {
                 components.getStateImages()) {
             String previousOwner = stateImage.getOwnerStateName();
             stateImage.setOwnerStateName(stateName);
-            log.info(
+            log.debug(
                     "Set owner state '{}' for StateImage '{}' (was: '{}')",
                     stateName,
                     stateImage.getName(),

@@ -258,9 +258,10 @@ public class ActionLifecycleAspect {
         }
 
         // Use logging service to log the action
-        if (actionLoggingService != null) {
-            actionLoggingService.logAction(actionResult);
-        }
+        // DISABLED: Redundant with BrobotLogger - uncomment if you prefer this formatter
+        // if (actionLoggingService != null) {
+        //     actionLoggingService.logAction(actionResult);
+        // }
     }
 
     private void storeActionInHistory(ActionContext context) {

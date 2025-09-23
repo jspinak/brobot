@@ -29,12 +29,7 @@ public class DPIApplicationContextInitializer
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
         // This runs VERY early, before any beans are created
-        System.out.println("[Brobot] Initializing DPI settings...");
-
         // Ensure DPI awareness is configured before any AWT classes are loaded
         DPIAwarenessDisabler.ensureInitialized();
-
-        // Log the status for debugging
-        System.out.println("[Brobot] " + DPIAwarenessDisabler.getDPIStatus());
     }
 }

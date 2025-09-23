@@ -75,7 +75,22 @@ public class ProfileMatrixInitializer {
      *     oneColumnBGRMat and oneColumnHSVMat fields.
      */
     public void setOneColumnMats(StateImage stateImage) {
+        // Skip processing if no patterns are defined
+        if (stateImage.getPatterns() == null || stateImage.getPatterns().isEmpty()) {
+            stateImage.setOneColumnBGRMat(new Mat());
+            stateImage.setOneColumnHSVMat(new Mat());
+            return;
+        }
+
         List<Mat> imgMatsBGR = getImage.getMats(stateImage, BGR);
+
+        // Skip if no images were loaded (e.g., files don't exist yet)
+        if (imgMatsBGR == null || imgMatsBGR.isEmpty()) {
+            stateImage.setOneColumnBGRMat(new Mat());
+            stateImage.setOneColumnHSVMat(new Mat());
+            return;
+        }
+
         Mat oneColumnBGRMat = matOps3d.vConcatToSingleColumnPerChannel(imgMatsBGR);
 
         // Check if the BGR mat is empty before processing

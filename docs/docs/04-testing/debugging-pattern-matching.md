@@ -6,6 +6,65 @@ sidebar_position: 5
 
 When patterns fail to match during automation, Brobot provides several powerful debugging tools to help identify and resolve issues.
 
+## Image History and Debug Saving
+
+### Important: Images are NOT saved by default
+
+Brobot's image saving features are **disabled by default** to prevent filling up disk space. You must explicitly enable them when debugging.
+
+```properties
+# Image saving is DISABLED by default
+brobot.screenshot.save-history=false  # Default: false
+brobot.debug.image.enabled=false      # Default: false
+
+# Enable only when actively debugging
+brobot.screenshot.save-history=true   # Enable action history images
+brobot.debug.image.enabled=true       # Enable debug visualizations
+```
+
+### What Gets Saved
+
+When enabled, Brobot saves:
+- Screenshots with match highlights and search regions
+- Action visualization sidebars showing match details
+- Classification overlays showing image segmentation
+- Motion detection visualizations
+- Failed match comparisons
+
+### Configuration
+
+```properties
+# Master switches (both default to false)
+brobot.screenshot.save-history=false
+brobot.debug.image.enabled=false
+
+# Where to save images
+brobot.screenshot.history-path=history/
+brobot.screenshot.history-filename=hist
+brobot.debug.image.output-dir=debug/image-finding
+
+# Control what gets saved (when enabled)
+brobot.debug.image.save-screenshots=true
+brobot.debug.image.save-patterns=true
+brobot.debug.image.save-comparisons=true
+
+# Visual annotations
+brobot.debug.image.visual.show-search-regions=true
+brobot.debug.image.visual.show-match-scores=true
+brobot.debug.image.visual.show-failed-regions=true
+brobot.debug.image.visual.highlight-best-match=true
+```
+
+### When to Enable
+
+Enable image saving only when:
+- Debugging pattern matching failures
+- Analyzing automation behavior
+- Creating documentation
+- Training new patterns
+
+Remember to disable after debugging to avoid disk space issues.
+
 ## Best Match Capture
 
 The Best Match Capture feature helps debug pattern matching failures by capturing and saving the region that best matches your pattern, even when it doesn't meet the similarity threshold.

@@ -28,14 +28,7 @@ public class HeadlessDiagnostics {
 
     @EventListener(ApplicationStartedEvent.class)
     public void diagnoseHeadlessMode() {
-        log.info("=== Headless Mode Diagnostics ===");
-
-        // Debug: Log the timing of this check
-        System.out.println("[HeadlessDiagnostics] Called at: " + System.currentTimeMillis());
-        System.out.println("[HeadlessDiagnostics] StackTrace for timing analysis:");
-        for (int i = 0; i < Math.min(5, Thread.currentThread().getStackTrace().length); i++) {
-            System.out.println("  " + Thread.currentThread().getStackTrace()[i]);
-        }
+        log.debug("=== Headless Mode Diagnostics ===");
 
         // Check various headless indicators
         boolean awtHeadless = GraphicsEnvironment.isHeadless();
@@ -69,7 +62,7 @@ public class HeadlessDiagnostics {
             for (int i = 0; i < devices.length; i++) {
                 GraphicsDevice device = devices[i];
                 DisplayMode dm = device.getDisplayMode();
-                log.info(
+                log.debug(
                         "Display {}: {}x{} @ {}Hz",
                         i,
                         dm.getWidth(),
@@ -94,18 +87,18 @@ public class HeadlessDiagnostics {
             checkMacOSPermissions();
         }
 
-        log.info("=== End Headless Diagnostics ===");
+        log.debug("=== End Headless Diagnostics ===");
     }
 
     private void testScreenCapture() {
-        log.info("Testing screen capture capability...");
+        log.debug("Testing screen capture capability...");
 
         // Check which capture provider is being used
         String captureProvider = System.getProperty("brobot.capture.provider", "AUTO");
 
         if (captureProvider.toUpperCase().contains("FFMPEG")
                 || captureProvider.toUpperCase().contains("JAVACV")) {
-            log.info("Using FFmpeg capture provider - skipping SikuliX screen capture test");
+            log.debug("Using FFmpeg capture provider - skipping SikuliX screen capture test");
             brobotLogger
                     .builder(LogCategory.SYSTEM)
                     .message("FFmpeg capture provider active - SikuliX test skipped");
@@ -120,7 +113,7 @@ public class HeadlessDiagnostics {
             BufferedImage testCapture = screen.capture(testRegion).getImage();
 
             if (testCapture != null) {
-                log.info("✓ Screen capture test PASSED - SikuliX can capture screen");
+                log.debug("✓ Screen capture test PASSED - SikuliX can capture screen");
                 brobotLogger.builder(LogCategory.SYSTEM).message("Screen capture test passed");
             } else {
                 log.warn("✗ Screen capture returned null");
@@ -141,7 +134,7 @@ public class HeadlessDiagnostics {
     }
 
     private void checkMacOSPermissions() {
-        log.info("Checking macOS specific settings...");
+        log.debug("Checking macOS specific settings...");
 
         // Check if running via SSH or remote session
         String sshConnection = System.getenv("SSH_CONNECTION");

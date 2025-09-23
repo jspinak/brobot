@@ -79,10 +79,10 @@ public class EventListenerConfiguration {
                 super.invokeListener(listener, event);
                 long duration = System.currentTimeMillis() - startTime;
 
-                // Only warn about slow listeners
-                if (duration > 500) {
-                    log.warn(
-                            "Slow event listener: {} took {}ms for {}",
+                // Only log very slow listeners at debug level (5 seconds or more)
+                if (duration > 5000) {
+                    log.debug(
+                            "Very slow event listener: {} took {}ms for {}",
                             listenerName,
                             duration,
                             eventName);

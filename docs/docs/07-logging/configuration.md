@@ -2,32 +2,25 @@
 
 ## Configuration Properties
 
-The Brobot logging system is configured through standard Spring Boot application properties.
+The Brobot logging system uses standard Spring Boot logging configuration for level control.
 
-### Global Configuration
+### Logging Level Configuration
+
+Use standard Spring Boot properties to control logging levels:
 
 ```properties
-# Set the default level for all categories
+# Set the root logging level
 # Values: OFF, ERROR, WARN, INFO, DEBUG, TRACE
-brobot.logging.global-level=INFO
+logging.level.root=INFO
+
+# Control specific packages or classes
+logging.level.io.github.jspinak.brobot=INFO
+logging.level.io.github.jspinak.brobot.action=DEBUG
+logging.level.io.github.jspinak.brobot.statemanagement=WARN
+logging.level.com.bdo.automation=DEBUG  # Your application package
 ```
 
-### Category-Specific Configuration
-
-Override the global level for specific categories:
-
-```properties
-brobot.logging.categories.actions=DEBUG
-brobot.logging.categories.transitions=INFO
-brobot.logging.categories.matching=WARN
-brobot.logging.categories.performance=INFO
-brobot.logging.categories.state=DEBUG
-brobot.logging.categories.lifecycle=INFO
-brobot.logging.categories.validation=WARN
-brobot.logging.categories.system=ERROR
-```
-
-**Note:** ActionConfig custom logging messages (set via `withBeforeActionLog()`, `withSuccessLog()`, etc.) are logged to the `ACTIONS` category and respect the configured level for that category.
+**Note:** The Brobot library uses standard SLF4J logging, so all Spring Boot logging features apply.
 
 ### Output Format Configuration
 
@@ -77,52 +70,50 @@ brobot.logging.preset=DEVELOPMENT
 ### Preset Details
 
 #### PRODUCTION
-- Global level: WARN
+- Recommended level: `logging.level.root=WARN`
 - Format: JSON
 - Async: true
 - Minimal enrichment
 
 #### DEVELOPMENT
-- Global level: DEBUG
+- Recommended level: `logging.level.root=DEBUG`
 - Format: SIMPLE
 - Async: false
 - Full enrichment including screenshots
 
 #### TESTING
-- Global level: INFO
-- Actions: DEBUG
-- Matching: TRACE
+- Recommended level: `logging.level.root=INFO`
+- Additional: `logging.level.io.github.jspinak.brobot.action=DEBUG`
 - Focused on test execution
 
 #### SILENT
-- Global level: OFF
+- Recommended level: `logging.level.root=OFF`
 - No logging output
 
-## SLF4J Backend Configuration
+## Logback Configuration
 
-The Brobot logger delegates to SLF4J for actual output:
+The Brobot library includes a default logback-spring.xml that reduces verbosity for certain components. You can override these in your application.properties:
 
 ```properties
-# Control console/file output via SLF4J
-logging.level.io.github.jspinak.brobot.actions=INFO
-logging.level.io.github.jspinak.brobot.transitions=INFO
-logging.level.io.github.jspinak.brobot.matching=WARN
-logging.level.io.github.jspinak.brobot.performance=INFO
+# Override specific Brobot components if needed
+logging.level.io.github.jspinak.brobot.action.basic.find.FindPipeline=DEBUG
+logging.level.io.github.jspinak.brobot.action.internal.region.DynamicRegionResolver=INFO
 ```
 
 ## Example Configurations
 
 ### Minimal Action Logging
 ```properties
-brobot.logging.global-level=WARN
-brobot.logging.categories.actions=INFO
+logging.level.root=WARN
+logging.level.io.github.jspinak.brobot.action=INFO
 brobot.logging.output.format=SIMPLE
 brobot.logging.enrichment.include-similarity-scores=false
 ```
 
 ### Verbose Debugging
 ```properties
-brobot.logging.global-level=DEBUG
+logging.level.root=DEBUG
+logging.level.io.github.jspinak.brobot=DEBUG
 brobot.logging.output.format=STRUCTURED
 brobot.logging.output.include-correlation-id=true
 brobot.logging.enrichment.include-screenshots=true
@@ -131,29 +122,68 @@ brobot.logging.enrichment.include-timing-breakdown=true
 
 ### Production with Monitoring
 ```properties
-brobot.logging.global-level=WARN
-brobot.logging.categories.actions=INFO
-brobot.logging.categories.performance=INFO
+logging.level.root=WARN
+logging.level.io.github.jspinak.brobot.action=INFO
+logging.level.io.github.jspinak.brobot.performance=INFO
 brobot.logging.output.format=JSON
 brobot.logging.performance.async=true
 brobot.logging.enrichment.include-memory-usage=true
 ```
 
+## Image and History Saving Configuration
+
+Control whether debug images and action history are saved to disk:
+
+```properties
+# Image saving is DISABLED by default to avoid filling disk space
+# Set to true only when debugging or analyzing automation behavior
+brobot.screenshot.save-history=false  # Default: false
+
+# Configure where images are saved when enabled
+brobot.screenshot.history-path=history/
+brobot.screenshot.history-filename=hist
+
+# Additional debug image settings
+brobot.debug.image.enabled=false  # Default: false
+brobot.debug.image.output-dir=debug/image-finding
+```
+
+**Important Notes:**
+- **Images are NOT saved by default** - both `save-history` and `debug.image.enabled` default to `false`
+- Enable image saving only when actively debugging to avoid disk space issues
+- Images include action visualizations, match highlights, and search regions
+- When enabled at INFO log level, you may see `[SIDEBAR]` and `[IMAGE_WRITE]` messages
+
+### When to Enable Image Saving
+
+Enable image saving in these scenarios:
+- Debugging pattern matching issues
+- Analyzing why actions fail
+- Creating documentation of automation behavior
+- Training new patterns
+
+```properties
+# Development/debugging configuration
+brobot.screenshot.save-history=true
+brobot.debug.image.enabled=true
+logging.level.io.github.jspinak.brobot.tools.history.visual=DEBUG
+logging.level.io.github.jspinak.brobot.util.image.io=DEBUG
+```
+
 ## Programmatic Configuration
 
-Configure logging at runtime:
+Configure output format and enrichment at runtime:
 
 ```java
 @Autowired
 private LoggingConfiguration config;
 
-// Apply a preset
+// Apply a preset for format and performance settings
 config.applyPreset(LoggingPreset.DEVELOPMENT);
-
-// Set specific levels
-config.setGlobalLevel(LogLevel.DEBUG);
-config.getCategories().put(LogCategory.ACTIONS, LogLevel.TRACE);
 
 // Change output format
 config.getOutput().setFormat(OutputFormat.JSON);
+
+// Note: Logging levels are controlled via Spring Boot's
+// LoggingSystem and cannot be changed via LoggingConfiguration
 ```

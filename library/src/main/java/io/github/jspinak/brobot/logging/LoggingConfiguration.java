@@ -1,8 +1,5 @@
 package io.github.jspinak.brobot.logging;
 
-import java.util.EnumMap;
-import java.util.Map;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import lombok.Data;
@@ -10,14 +7,15 @@ import lombok.Data;
 /**
  * Configuration for the Brobot logging system.
  *
- * <p>Provides hierarchical configuration where category-specific levels override global settings.
- * Supports multiple output formats and performance optimizations.
- *
- * <p>Configuration can be set via application.properties:
+ * <p>Provides configuration for output formats, performance optimizations, and data enrichment.
+ * Logging levels should be controlled via standard Spring Boot properties:
  *
  * <pre>
- * brobot.logging.global-level=INFO
- * brobot.logging.categories.actions=DEBUG
+ * # Standard Spring Boot logging configuration
+ * logging.level.root=INFO
+ * logging.level.io.github.jspinak.brobot=DEBUG
+ *
+ * # Brobot-specific configuration
  * brobot.logging.output.format=STRUCTURED
  * brobot.logging.performance.async=true
  * </pre>
@@ -74,11 +72,8 @@ public class LoggingConfiguration {
         private boolean includeMemoryUsage = false;
     }
 
-    /** Global level - overrides all categories if set */
-    private LogLevel globalLevel = LogLevel.INFO;
-
-    /** Category-specific levels (optional - inherit from global if not set) */
-    private Map<LogCategory, LogLevel> categories = new EnumMap<>(LogCategory.class);
+    // Note: Logging levels are now controlled via standard Spring Boot properties
+    // Use logging.level.root and logging.level.* in application.properties
 
     /** Output configuration */
     private OutputConfiguration output = new OutputConfiguration();
@@ -90,74 +85,50 @@ public class LoggingConfiguration {
     private EnrichmentConfiguration enrichment = new EnrichmentConfiguration();
 
     /**
-     * Get effective level for a category (category-specific or global).
+     * Check if logging is enabled - delegates to SLF4J/Logback. This method is kept for backward
+     * compatibility but always returns true, letting the underlying logging framework handle level
+     * filtering.
      *
-     * @param category The log category to check
-     * @return The effective log level for this category
-     */
-    public LogLevel getEffectiveLevel(LogCategory category) {
-        return categories.getOrDefault(category, globalLevel);
-    }
-
-    /**
-     * Check if logging is enabled for the given category and level.
-     *
-     * @param category The log category
-     * @param level The log level to check
-     * @return true if logging is enabled for this category/level combination
+     * @param category The log category (unused)
+     * @param level The log level to check (unused)
+     * @return always true - actual filtering is done by SLF4J/Logback
      */
     public boolean isLoggingEnabled(LogCategory category, LogLevel level) {
-        LogLevel effectiveLevel = getEffectiveLevel(category);
-        return effectiveLevel != LogLevel.OFF && level.ordinal() <= effectiveLevel.ordinal();
+        // Delegate all level checking to SLF4J/Logback
+        // Configured via logging.level.* properties
+        return true;
     }
 
     /**
-     * Apply a preset configuration.
+     * Apply a preset configuration for output format and performance. Note: Logging levels should
+     * be set via logging.level.* properties.
      *
      * @param preset The preset to apply
      */
     public void applyPreset(LoggingPreset preset) {
         switch (preset) {
             case PRODUCTION:
-                globalLevel = LogLevel.WARN;
+                // Use logging.level.root=WARN in application.properties
                 performance.setAsync(true);
                 output.setFormat(OutputFormat.JSON);
                 enrichment.setIncludeScreenshots(false);
                 break;
             case DEVELOPMENT:
-                globalLevel = LogLevel.DEBUG;
+                // Use logging.level.root=DEBUG in application.properties
                 performance.setAsync(false);
                 output.setFormat(OutputFormat.SIMPLE);
                 enrichment.setIncludeScreenshots(true);
                 break;
             case TESTING:
-                globalLevel = LogLevel.INFO;
-                categories.put(LogCategory.ACTIONS, LogLevel.DEBUG);
-                categories.put(LogCategory.MATCHING, LogLevel.TRACE);
+                // Use logging.level.* properties for fine-grained control
                 performance.setAsync(false);
                 break;
             case SILENT:
-                globalLevel = LogLevel.OFF;
+                // Use logging.level.root=OFF in application.properties
                 break;
         }
     }
 
-    /**
-     * Set logging level for a specific category.
-     *
-     * @param category The category to configure
-     * @param level The level to set
-     */
-    public void setCategoryLevel(LogCategory category, LogLevel level) {
-        categories.put(category, level);
-    }
-
-    /**
-     * Remove category-specific configuration, falling back to global level.
-     *
-     * @param category The category to reset
-     */
-    public void resetCategoryLevel(LogCategory category) {
-        categories.remove(category);
-    }
+    // Category-specific logging levels are now controlled via Spring Boot properties
+    // Example: logging.level.io.github.jspinak.brobot.actions=DEBUG
 }

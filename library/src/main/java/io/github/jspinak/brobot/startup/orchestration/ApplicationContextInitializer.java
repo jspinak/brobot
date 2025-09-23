@@ -25,7 +25,7 @@ public class ApplicationContextInitializer
 
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
-        System.out.println("=== Brobot Early Initialization ===");
+        // Brobot early initialization
 
         ConfigurableEnvironment env = applicationContext.getEnvironment();
 
@@ -36,7 +36,7 @@ public class ApplicationContextInitializer
         // Initialize ImagePath very early to prevent errors during State construction
         initializeImagePath(env);
 
-        System.out.println("=== Brobot Early Initialization Complete ===");
+        // Early initialization complete
     }
 
     private void initializeImagePath(ConfigurableEnvironment env) {
@@ -112,34 +112,14 @@ public class ApplicationContextInitializer
             // Use DPIScalingStrategy for optimal configuration
             double displayScale = DPIScalingStrategy.detectDisplayScaling();
 
-            System.out.println(
-                    "[Brobot] Display scaling detected: " + (int) (displayScale * 100) + "%");
-
             // Calculate appropriate resize factor using strategy
             targetResize = DPIScalingStrategy.getOptimalResizeFactor(patternSource);
-            System.out.println("[Brobot] Calculated pattern scale factor: " + targetResize);
 
-            // Provide detailed diagnostics based on display scaling
-            if (Math.abs(displayScale - 1.25) < 0.01) {
-                System.out.println("[Brobot] 125% DPI scaling detected");
-                System.out.println("  - Logical 100px → Physical 125px on screen");
-                System.out.println("  - Pattern scale factor 0.8 will compensate");
-            } else if (Math.abs(displayScale - 1.5) < 0.01) {
-                System.out.println("[Brobot] 150% DPI scaling detected");
-                System.out.println("  - Logical 100px → Physical 150px on screen");
-                System.out.println("  - Pattern scale factor 0.67 will compensate");
-            } else if (Math.abs(displayScale - 2.0) < 0.01) {
-                System.out.println("[Brobot] 200% DPI scaling detected");
-                System.out.println("  - Logical 100px → Physical 200px on screen");
-                System.out.println("  - Pattern scale factor 0.5 will compensate");
-            } else if (Math.abs(displayScale - 1.0) < 0.01) {
-                System.out.println("[Brobot] No DPI scaling detected - patterns match directly");
-            } else {
-                System.out.println(
-                        "[Brobot] Non-standard "
-                                + (int) (displayScale * 100)
-                                + "% scaling detected");
-            }
+            // Single concise log for DPI scaling
+            System.out.println(
+                    String.format(
+                            "[Brobot] DPI: %d%% scaling detected, pattern scale: %.2f",
+                            (int) (displayScale * 100), targetResize));
 
             // Warn about pattern source implications
             if (patternSource == DPIScalingStrategy.PatternSource.WINDOWS_TOOL) {
@@ -166,9 +146,7 @@ public class ApplicationContextInitializer
         Settings.AlwaysResize = targetResize;
         Settings.CheckLastSeen = true; // Performance optimization
 
-        System.out.println("[Brobot] DPI Configuration Applied:");
-        System.out.println("  Settings.AlwaysResize = " + Settings.AlwaysResize);
-        System.out.println("  Settings.MinSimilarity = " + Settings.MinSimilarity);
+        // DPI configuration applied - Settings.AlwaysResize and MinSimilarity are set
 
         if (Settings.AlwaysResize != 1.0f) {
             System.out.println(

@@ -115,7 +115,7 @@ public class ColorMatrixUtilities {
             }
         }
         if (!hasValidMat) {
-            log.warn("No valid Mats found in vConcatToSingleColumnPerChannel");
+            log.debug("No valid Mats found in vConcatToSingleColumnPerChannel");
             return new Mat();
         }
 

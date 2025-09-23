@@ -49,17 +49,17 @@ public class TransitionAnnotationBeanPostProcessor implements BeanPostProcessor 
                 AnnotationUtils.findAnnotation(targetClass, TransitionSet.class);
 
         if (transitionSetAnnotation != null) {
-            log.info("=== TRANSITION SET BEAN DETECTED BY POST PROCESSOR ===");
-            log.info("Bean name: {}", beanName);
-            log.info("Bean class: {}", targetClass.getName());
-            log.info("TransitionSet annotation details:");
-            log.info("  - State: {}", transitionSetAnnotation.state().getSimpleName());
-            log.info("  - Name override: {}", transitionSetAnnotation.name());
-            log.info("  - Description: {}", transitionSetAnnotation.description());
+            log.debug(
+                    "TransitionSet bean detected: {} ({})", beanName, targetClass.getSimpleName());
+            log.debug(
+                    "  State: {}, Name: '{}', Description: '{}'",
+                    transitionSetAnnotation.state().getSimpleName(),
+                    transitionSetAnnotation.name(),
+                    transitionSetAnnotation.description());
 
             // Store the bean for later processing
             transitionSetBeans.put(beanName, bean);
-            log.info("Stored TransitionSet bean '{}' for later processing", beanName);
+            log.debug("Stored TransitionSet bean '{}' for later processing", beanName);
         }
 
         return bean;

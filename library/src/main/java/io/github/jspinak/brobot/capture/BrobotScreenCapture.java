@@ -11,6 +11,8 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Intelligent screen capture that handles DPI scaling and application scaling issues.
  *
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Component;
  * @since 1.1.0
  */
 @Component
+@Slf4j
 public class BrobotScreenCapture {
 
     @Value("${brobot.capture.strategy:ADAPTIVE}")
@@ -107,13 +110,12 @@ public class BrobotScreenCapture {
 
         // Check if we need to scale
         if (capture.getWidth() != expectedPhysicalWidth) {
-            System.out.println(
-                    String.format(
-                            "[BrobotCapture] Scaling from %dx%d to expected %dx%d",
-                            capture.getWidth(),
-                            capture.getHeight(),
-                            expectedPhysicalWidth,
-                            expectedPhysicalHeight));
+            log.debug(
+                    "Scaling capture from {}x{} to expected {}x{}",
+                    capture.getWidth(),
+                    capture.getHeight(),
+                    expectedPhysicalWidth,
+                    expectedPhysicalHeight);
 
             return scaleToPhysical(capture);
         }
@@ -164,17 +166,13 @@ public class BrobotScreenCapture {
                 BufferedImage image = ImageIO.read(file);
                 file.delete();
 
-                System.out.println(
-                        "[BrobotCapture] External capture: "
-                                + image.getWidth()
-                                + "x"
-                                + image.getHeight());
+                log.debug("External capture: {}x{}", image.getWidth(), image.getHeight());
 
                 return image;
             }
 
         } catch (Exception e) {
-            System.err.println("[BrobotCapture] External capture failed: " + e.getMessage());
+            log.debug("External capture failed: {}", e.getMessage());
         }
 
         // Fallback to native
@@ -229,7 +227,7 @@ public class BrobotScreenCapture {
             }
 
         } catch (Exception e) {
-            System.err.println("[BrobotCapture] Could not detect scaling: " + e.getMessage());
+            log.debug("Could not detect scaling: {}", e.getMessage());
         }
     }
 
@@ -241,10 +239,11 @@ public class BrobotScreenCapture {
             detectedScaleFactor = (double) expectedPhysicalWidth / width;
             scalingDetected = true;
 
-            System.out.println(
-                    String.format(
-                            "[BrobotCapture] Scaling detected: %.2fx (captured %d, expected %d)",
-                            detectedScaleFactor, width, expectedPhysicalWidth));
+            log.debug(
+                    "Scaling detected: {}x (captured {}, expected {})",
+                    detectedScaleFactor,
+                    width,
+                    expectedPhysicalWidth);
         }
     }
 
@@ -274,26 +273,17 @@ public class BrobotScreenCapture {
 
     /** Reports current configuration and detected settings. */
     private void reportConfiguration() {
-        System.out.println("\n=== Brobot Screen Capture Configuration ===");
-        System.out.println("Strategy: " + strategy);
-        System.out.println("Force Physical: " + forcePhysical);
-        System.out.println(
-                "Expected Resolution: " + expectedPhysicalWidth + "x" + expectedPhysicalHeight);
+        // Log configuration at debug level only
+        log.debug(
+                "Capture strategy: {}, Force physical: {}, Expected: {}x{}",
+                strategy,
+                forcePhysical,
+                expectedPhysicalWidth,
+                expectedPhysicalHeight);
 
         if (scalingDetected) {
-            System.out.println("Scaling Detected: " + String.format("%.2fx", detectedScaleFactor));
-            System.out.println(
-                    "Logical Resolution: "
-                            + (int) (expectedPhysicalWidth / detectedScaleFactor)
-                            + "x"
-                            + (int) (expectedPhysicalHeight / detectedScaleFactor));
-        } else {
-            System.out.println("Scaling: None detected");
+            log.debug("Scaling detected: {:.2f}x", detectedScaleFactor);
         }
-
-        System.out.println(
-                "Java DPI Aware: " + !"false".equals(System.getProperty("sun.java2d.dpiaware")));
-        System.out.println("=========================================\n");
     }
 
     /** Gets information about current capture configuration. */

@@ -141,12 +141,25 @@ new PatternFindOptions.Builder()
 - **Search Duration**: 3 seconds timeout
 - **Click Type**: Single left click
 - **Search Region**: Entire screen
+- **Image Saving**: DISABLED (no debug images saved by default)
 
 These convenience methods are perfect when:
 - You're prototyping or testing
 - Default settings work for your use case
 - You want minimal, readable code
 - You don't need fine-grained control
+
+:::tip Important: Debug Images Not Saved by Default
+Brobot does **NOT** save debug images or action history by default to prevent filling up disk space. To enable image saving for debugging:
+
+```properties
+# In application.properties - only enable when debugging
+brobot.screenshot.save-history=true
+brobot.debug.image.enabled=true
+```
+
+Remember to disable these after debugging!
+:::
 
 For production code requiring specific settings (higher similarity, custom timeouts, logging), use the full builder pattern shown in the first example.
 

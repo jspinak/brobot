@@ -18,6 +18,8 @@ import io.github.jspinak.brobot.capture.provider.FFmpegCaptureProvider;
 import io.github.jspinak.brobot.capture.provider.RobotCaptureProvider;
 import io.github.jspinak.brobot.capture.provider.SikuliXCaptureProvider;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Central service for screen capture operations in Brobot.
  *
@@ -30,6 +32,7 @@ import io.github.jspinak.brobot.capture.provider.SikuliXCaptureProvider;
  * @since 1.1.0
  */
 @Service
+@Slf4j
 public class BrobotCaptureService {
 
     @Autowired(required = false)
@@ -110,7 +113,8 @@ public class BrobotCaptureService {
         }
 
         activeProvider = provider;
-        System.out.println("[BrobotCapture] Switched to provider: " + provider.getName());
+        // Log provider switch at debug level
+        log.debug("Switched to capture provider: {}", provider.getName());
     }
 
     /** Selects the best available provider based on configuration and availability. */
@@ -131,8 +135,7 @@ public class BrobotCaptureService {
                 activeProvider = provider;
                 return;
             }
-            System.err.println(
-                    "[BrobotCapture] Configured provider not available: " + configuredProvider);
+            log.debug("Configured provider not available: {}", configuredProvider);
         }
 
         // Auto-select based on preferences
@@ -208,33 +211,15 @@ public class BrobotCaptureService {
 
     /** Reports the current capture configuration. */
     private void reportConfiguration() {
-        System.out.println("\n=== Brobot Capture Service Configuration ===");
-        System.out.println("Configured Provider: " + configuredProvider);
-        System.out.println("Prefer Physical Resolution: " + preferPhysicalResolution);
-        System.out.println("Fallback Enabled: " + fallbackEnabled);
-
-        System.out.println("\nAvailable Providers:");
-        for (Map.Entry<String, CaptureProvider> entry : providerMap.entrySet()) {
-            CaptureProvider provider = entry.getValue();
-            String status = provider.isAvailable() ? "✓" : "✗";
-            String resolution = provider.getResolutionType().toString();
-            System.out.println(
-                    String.format(
-                            "  %s %s (%s resolution)", status, provider.getName(), resolution));
-        }
-
+        // Log capture configuration concisely at INFO level
         if (activeProvider != null) {
             System.out.println(
-                    "\nActive Provider: "
-                            + activeProvider.getName()
-                            + " ("
-                            + activeProvider.getResolutionType()
-                            + " resolution)");
+                    String.format(
+                            "[Brobot] Capture: %s (%s resolution)",
+                            activeProvider.getName(), activeProvider.getResolutionType()));
         } else {
-            System.err.println("\n⚠ WARNING: No capture provider available!");
+            System.err.println("[Brobot] WARNING: No capture provider available!");
         }
-
-        System.out.println("=========================================\n");
     }
 
     /** Gets information about all available providers. */
