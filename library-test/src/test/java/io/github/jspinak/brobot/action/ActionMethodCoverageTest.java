@@ -287,7 +287,7 @@ public class ActionMethodCoverageTest extends BrobotIntegrationTestBase {
         String[] unicodeStrings = {"Hello 世界", "Привет мир", "مرحبا بالعالم", "😀😁😂🤣"};
 
         // When
-        ActionResult result = action.perform(ActionType.TYPE, unicodeStrings);
+        ActionResult result = action.perform(ActionType.TYPE, (Object[]) unicodeStrings);
 
         // Then - Unicode strings with deprecated method may return null
         if (result != null) {
