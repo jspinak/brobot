@@ -54,7 +54,7 @@ import org.springframework.context.annotation.Configuration;
  * @see NoOpLogSink
  * @see org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
  */
-@Configuration
+@Configuration("loggingInfrastructureConfig")
 public class LoggingConfiguration {
 
     /**
