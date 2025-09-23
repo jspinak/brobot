@@ -11,7 +11,6 @@ import io.github.jspinak.brobot.model.match.Match;
 
 import lombok.Builder;
 import lombok.Setter;
-import lombok.experimental.Accessors;
 
 /**
  * Builder for creating mock ActionHistory with bulk snapshots. Provides convenient methods for
@@ -30,7 +29,6 @@ import lombok.experimental.Accessors;
  * }</pre>
  */
 @Builder(builderClassName = "Builder")
-@Accessors(chain = true)
 public class MockActionHistoryBuilder {
 
     private static final Random random = new Random();

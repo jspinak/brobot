@@ -79,7 +79,7 @@ import lombok.Data;
  * @see ActionHistory
  * @see Match
  * @see ActionConfig
- * @see State
+ * @see io.github.jspinak.brobot.model.state.State
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)

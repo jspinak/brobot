@@ -128,7 +128,7 @@ public class ActionLifecycleManagement {
      * Determines if additional sequences are permitted for this action.
      *
      * <p>Compares the completed sequence count against the maximum allowed sequences configured in
-     * {@link ActionConfig#getMaxTimesToRepeatActionSequence()}.
+     * {@link RepetitionOptions#getMaxTimesToRepeatActionSequence()}.
      *
      * @param matches The ActionResult containing options and lifecycle data
      * @return true if more sequences can be executed, false if limit reached
@@ -221,9 +221,9 @@ public class ActionLifecycleManagement {
     /**
      * Checks if FIND FIRST strategy has achieved its goal.
      *
-     * <p>For actions configured with {@link ActionConfig.Find#FIRST}, this method determines if at
-     * least one match has been found, which satisfies the search criteria and allows the action to
-     * complete.
+     * <p>For actions configured with {@link PatternFindOptions.Strategy#FIRST}, this method
+     * determines if at least one match has been found, which satisfies the search criteria and
+     * allows the action to complete.
      *
      * @param matches The ActionResult containing found matches and options
      * @return true if FIND FIRST is configured and at least one match exists
@@ -302,9 +302,9 @@ public class ActionLifecycleManagement {
     /**
      * Checks if FIND EACH FIRST strategy has found all unique patterns.
      *
-     * <p>For actions configured with {@link ActionConfig.Find#EACH} and {@link
-     * ActionConfig.DoOnEach#FIRST}, this method verifies that at least one instance of each unique
-     * pattern has been found.
+     * <p>For actions configured with {@link PatternFindOptions.Strategy#EACH} and {@link
+     * PatternFindOptions.DoOnEach#FIRST}, this method verifies that at least one instance of each
+     * unique pattern has been found.
      *
      * @param matches The ActionResult containing found matches
      * @param numberOfPatterns Expected number of unique patterns to find

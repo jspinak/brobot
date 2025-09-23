@@ -54,13 +54,14 @@ import io.github.jspinak.brobot.model.state.StateImage;
  *   <li>Works with {@link SceneAnalysis} for classification data
  *   <li>Uses {@link ColorCluster} for color statistics
  *   <li>Designed to be merged with classification visualizations
- *   <li>Complements {@link DrawClassifications} and {@link DrawClassesLegend}
+ *   <li>Complements {@link io.github.jspinak.brobot.tools.history.draw.DrawClassifications} and
+ *       {@link io.github.jspinak.brobot.tools.history.draw.DrawClassesLegend}
  * </ul>
  *
  * @see SceneAnalysis
- * @see StateImage
+ * @see io.github.jspinak.brobot.model.state.StateImage
  * @see ColorCluster
- * @see DrawClassesLegend
+ * @see io.github.jspinak.brobot.tools.history.draw.DrawClassesLegend
  */
 @Component
 public class ClassificationLegend {

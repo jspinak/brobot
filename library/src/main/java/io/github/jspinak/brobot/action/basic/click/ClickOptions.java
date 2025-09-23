@@ -127,7 +127,7 @@ public final class ClickOptions extends ActionConfig {
         /**
          * Configures the pause behaviors for the press-and-release part of the click.
          *
-         * @param pressOptionsBuilder A builder for MousePressOptions.
+         * @param pressOptions The mouse press options.
          * @return this Builder instance for chaining.
          */
         public Builder setPressOptions(MousePressOptions pressOptions) {
@@ -139,7 +139,7 @@ public final class ClickOptions extends ActionConfig {
          * Sets the verification conditions that determine when this click action should stop
          * repeating.
          *
-         * @param verificationOptionsBuilder The builder for the verification options.
+         * @param verificationOptions The verification options.
          * @return this Builder instance for chaining.
          */
         public Builder setVerification(VerificationOptions verificationOptions) {
@@ -150,7 +150,7 @@ public final class ClickOptions extends ActionConfig {
         /**
          * Sets the repetition options for controlling how clicks are repeated.
          *
-         * @param repetitionOptionsBuilder The builder for the repetition options.
+         * @param repetitionOptions The repetition options.
          * @return this Builder instance for chaining.
          */
         public Builder setRepetition(RepetitionOptions repetitionOptions) {

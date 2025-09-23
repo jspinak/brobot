@@ -26,7 +26,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  *   <li>sikuli - Sikuli framework image wrapper
  * </ul>
  *
- * @see io.github.jspinak.brobot.datatypes.primitives.image.Image
+ * @see io.github.jspinak.brobot.model.element.Image
  * @see java.awt.image.BufferedImage
  * @see org.bytedeco.opencv.opencv_core.Mat
  * @see com.fasterxml.jackson.databind.ObjectMapper#addMixIn(Class, Class)

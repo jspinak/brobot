@@ -46,9 +46,9 @@ import io.github.jspinak.brobot.model.state.StateEnum;
  * mechanisms.
  *
  * @since 1.0
- * @see StateEnum
- * @see StateMemory
- * @see State
+ * @see io.github.jspinak.brobot.model.state.StateEnum
+ * @see io.github.jspinak.brobot.model.state.StateMemory
+ * @see io.github.jspinak.brobot.model.state.State
  */
 public class ActiveStateSet {
 

@@ -21,7 +21,7 @@ import lombok.Getter;
  * options are available for region definition, enhancing type safety and ease of use.
  *
  * @see ActionConfig
- * @see io.github.jspinak.brobot.action.basic.capture.DefineRegion
+ * @see DefineRegion
  */
 @Getter
 @JsonDeserialize(builder = DefineRegionOptions.Builder.class)
@@ -112,7 +112,7 @@ public final class DefineRegionOptions extends ActionConfig {
          * Sets the match adjustment options for post-processing matched regions. This allows for
          * resizing or repositioning the defined region based on matches.
          *
-         * @param matchAdjustmentBuilder A builder for MatchAdjustmentOptions.
+         * @param matchAdjustmentOptions The match adjustment options.
          * @return this Builder instance for chaining.
          */
         public Builder setMatchAdjustment(MatchAdjustmentOptions matchAdjustmentOptions) {

@@ -137,7 +137,7 @@ public final class ColorFindOptions extends BaseFindOptions {
         /**
          * Configures the area-based filtering options for this color find.
          *
-         * @param areaFilteringBuilder A builder for AreaFilteringOptions.
+         * @param areaFilteringOptions The area filtering options.
          * @return this Builder instance for chaining.
          */
         public Builder setAreaFiltering(AreaFilteringOptions areaFilteringOptions) {
@@ -148,7 +148,7 @@ public final class ColorFindOptions extends BaseFindOptions {
         /**
          * Sets the hue, saturation, and value bins.
          *
-         * @param binOptionsBuilder A builder for hsv bins.
+         * @param binOptions The HSV bin options.
          * @return this Builder instance for chaining.
          */
         public Builder setBinOptions(HSVBinOptions binOptions) {

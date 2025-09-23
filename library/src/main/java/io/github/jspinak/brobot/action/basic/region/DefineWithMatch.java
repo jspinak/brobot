@@ -34,7 +34,6 @@ import io.github.jspinak.brobot.model.element.Region;
  * direction.
  *
  * @see DefineRegion
- * @see RegionDefinitionHelper
  * @see DefineRegionOptions.DefineAs
  */
 @Component

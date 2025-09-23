@@ -72,8 +72,8 @@ import lombok.Data;
  *
  * @since 1.0
  * @see ActionRecord
- * @see Image
- * @see StateImage
+ * @see io.github.jspinak.brobot.model.element.Image
+ * @see io.github.jspinak.brobot.model.state.StateImage
  * @see MockMatchBuilder
  */
 @Data

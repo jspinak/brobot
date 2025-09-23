@@ -31,8 +31,8 @@ public enum FindStrategy {
     UNIVERSAL,
 
     /**
-     * User-defined custom find strategy. Must provide a BiConsumer<ActionResult,
-     * List<ObjectCollection>>.
+     * User-defined custom find strategy. Must provide a BiConsumer&lt;ActionResult,
+     * List&lt;ObjectCollection&gt;&gt;.
      */
     CUSTOM,
 

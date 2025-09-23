@@ -58,7 +58,7 @@ import lombok.Data;
  * @see Position
  * @see Positions
  * @see Region
- * @see StateRegion
+ * @see io.github.jspinak.brobot.model.state.StateRegion
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
