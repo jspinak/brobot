@@ -1,18 +1,43 @@
 # Logging Usage Guide
 
-## Automatic Action Logging
+## Transparent Logging - Zero Code Changes Required
 
-All Brobot actions automatically log their execution and results. No additional code is required.
+Brobot's logging is completely transparent and configuration-driven. You don't need to use special logging services or modify your code. Just use the standard `Action` class, and logging happens automatically based on your `application.properties` configuration.
 
-### Example Action Execution
+### Example: Standard Actions with Transparent Logging
 ```java
-// This automatically logs the action
-ActionResult result = action.find(stateImage);
+// Just write normal automation code - logging is automatic!
+action.click(usernameField);
+action.type("user123");
+action.click(passwordField);
+action.type(password);
+action.click(loginButton);
 ```
 
-### Generated Log Output
+### Automatic Log Output (when enabled in properties)
 ```
-[ACTIONS] INFO  FIND submitButton → SUCCESS [25ms] loc:(100,200) sim:0.95
+→ CLICK usernameField
+✓ CLICK usernameField | loc:(245,180) | sim:0.91 | 32ms
+→ TYPE "user123"
+✓ TYPE "user123" | 125ms
+→ CLICK passwordField
+✓ CLICK passwordField | loc:(245,220) | sim:0.90 | 28ms
+→ TYPE "********"
+✓ TYPE "********" | 95ms
+→ CLICK loginButton
+✓ CLICK loginButton | loc:(520,380) | sim:0.92 | 45ms
+```
+
+### Controlling Logging via Configuration
+```properties
+# Enable action logging (in application.properties)
+brobot.logging.categories.actions=INFO
+
+# Or disable it completely
+# brobot.logging.categories.actions=OFF
+
+# Or get more details
+# brobot.logging.categories.actions=DEBUG
 ```
 
 ## ActionConfig Custom Logging
@@ -36,14 +61,16 @@ PatternFindOptions findOptions = new PatternFindOptions.Builder()
     .withFailureLog("Submit button not found - check if page loaded correctly")
     .build();
 
-ActionResult result = action.find(findOptions, submitButton);
+// Use perform() with ActionConfig for custom messages
+ActionResult result = action.perform(findOptions, submitButton);
 ```
 
 ### Generated Log Output
 ```
-[ACTIONS] INFO  Searching for submit button...
-[ACTIONS] INFO  FIND submitButton → SUCCESS [25ms] loc:(100,200) sim:0.95
-[ACTIONS] INFO  Submit button found!
+Searching for submit button...
+→ FIND submitButton
+✓ FIND submitButton | loc:(100,200) | sim:0.95 | 25ms
+Submit button found!
 ```
 
 ### Complex Workflow Example
@@ -74,11 +101,11 @@ ClickOptions submitClick = new ClickOptions.Builder()
     .withFailureLog("ERROR: Failed to submit login form")
     .build();
 
-// Execute the workflow
-action.find(verifyPage, loginPageHeader);
-action.type(typeUsername, usernameField, username);
-action.type(typePassword, passwordField, password);
-action.click(submitClick, submitButton);
+// Execute the workflow - use perform() for custom messages
+action.perform(verifyPage, loginPageHeader);
+action.perform(typeUsername, usernameField, username);
+action.perform(typePassword, passwordField, password);
+action.perform(submitClick, submitButton);
 ```
 
 ### State Transition Example
@@ -102,8 +129,8 @@ public class LoginTransitions {
             .build();
 
         // Click to open, then verify arrival
-        action.click(openInventory, inventoryButton);
-        action.find(findInventory, inventoryHeader);
+        action.perform(openInventory, inventoryButton);
+        action.perform(findInventory, inventoryHeader);
     }
 }
 ```
@@ -164,6 +191,77 @@ public class StateTransitions {
 }
 ```
 
+## Session Management for Workflow Correlation
+
+The `ActionSessionManager` provides session-based logging for tracking related actions across workflows. Sessions use SLF4J MDC (Mapped Diagnostic Context) to add correlation IDs to all logs within a session.
+
+### Basic Session Usage
+```java
+@Autowired
+private ActionSessionManager sessionManager;
+
+public void processWorkflow() {
+    // Start a named session
+    sessionManager.startSession("Process Items Workflow");
+
+    try {
+        // Track each action in the session
+        sessionManager.nextAction();
+        action.click(inventoryButton);
+
+        sessionManager.nextAction();
+        action.click(processButton);
+
+        sessionManager.nextAction();
+        action.click(startButton);
+
+    } finally {
+        // Always end the session
+        sessionManager.endSession();
+    }
+}
+```
+
+### Generated Session Logs
+```
+=== Starting Task: Process Items Workflow | Session: abc12345 ===
+[session:abc12345 seq:001] → CLICK inventoryButton
+[session:abc12345 seq:001] ✓ CLICK inventoryButton | loc:(100,50) | sim:0.92 | 45ms
+[session:abc12345 seq:002] → CLICK processButton
+[session:abc12345 seq:002] ✓ CLICK processButton | loc:(200,100) | sim:0.91 | 38ms
+[session:abc12345 seq:003] → CLICK startButton
+[session:abc12345 seq:003] ✓ CLICK startButton | loc:(300,200) | sim:0.93 | 42ms
+=== Completed Task: Process Items Workflow | Session: abc12345 | Total Actions: 3 ===
+```
+
+### Automatic Session Management with Lambda
+```java
+// Session automatically starts and ends, even if exception occurs
+sessionManager.executeWithSession("Login Flow", () -> {
+    action.click(usernameField);
+    action.type(username);
+    action.click(passwordField);
+    action.type(password);
+    action.click(loginButton);
+});
+```
+
+### Combining Sessions with Custom Messages
+```java
+sessionManager.startSession("Critical Operation");
+
+PatternFindOptions options = new PatternFindOptions.Builder()
+    .withBeforeActionLog("Searching for critical element...")
+    .withSuccessLog("Critical element found - proceeding")
+    .withFailureLog("CRITICAL: Element not found - aborting")
+    .build();
+
+sessionManager.nextAction();
+action.perform(options, criticalElement);
+
+sessionManager.endSession();
+```
+
 ### Best Practices for ActionConfig Logging
 
 1. **Be Descriptive but Concise**
@@ -206,6 +304,77 @@ public class StateTransitions {
        .withFailureLog("Element not found even with relaxed criteria")
        .build();
    ```
+
+## Enhanced Action Logging Service
+
+Brobot provides an `ActionLoggingService` that wraps the standard Action class with automatic logging, session management, and formatted output.
+
+### Using ActionLoggingService
+
+```java
+@Autowired
+private ActionLoggingService actionLogger;
+
+// Simple usage - automatic logging of attempts and results
+actionLogger.click(submitButton);  // Logs: → CLICK submitButton
+                                   // Logs: ✓ CLICK submitButton | loc:(100,200) | sim:0.95 | 25ms
+```
+
+### Session Management
+
+Track related actions with session correlation:
+
+```java
+// Start a session for related actions
+actionLogger.startSession("User Registration");
+
+// All subsequent actions are tracked within this session
+actionLogger.find(registrationForm);
+actionLogger.type(emailField, "user@example.com");
+actionLogger.type(passwordField, "password");
+actionLogger.click(submitButton);
+
+// End the session with summary
+actionLogger.endSession();
+// Logs: === Completed Task: User Registration | Session: a1b2c3d4 | Total Actions: 4 ===
+```
+
+### Automatic Session Management
+
+```java
+// Execute with automatic session lifecycle management
+actionLogger.executeWithSession("Login Flow", () -> {
+    actionLogger.find(loginPage);
+    actionLogger.type(usernameField, username);
+    actionLogger.type(passwordField, password);
+    actionLogger.click(loginButton);
+}); // Session automatically ended even if exception occurs
+```
+
+### Formatted Action Output
+
+The service provides consistent, concise formatting:
+- **Success**: `✓ CLICK saveButton | loc:(520,380) | sim:0.92 | 45ms`
+- **Failure**: `✗ FIND submitButton | NOT FOUND | 1500ms`
+- **Attempt**: `→ TYPE[user@example.com] emailField`
+
+### Integration with ActionConfig Logging
+
+ActionLoggingService works seamlessly with ActionConfig custom logging:
+
+```java
+PatternFindOptions options = new PatternFindOptions.Builder()
+    .withBeforeActionLog("Searching for save button...")
+    .withSuccessLog("Save button found!")
+    .build();
+
+// Both custom and automatic logging will occur
+actionLogger.find(options, saveButton);
+// Logs: Searching for save button...
+// Logs: → FIND saveButton
+// Logs: ✓ FIND saveButton | loc:(100,50) | sim:0.95 | 30ms
+// Logs: Save button found!
+```
 
 ## Programmatic Logging
 

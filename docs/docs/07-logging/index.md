@@ -1,6 +1,10 @@
 # Brobot Logging System
 
-The Brobot framework provides a comprehensive, structured logging system designed specifically for GUI automation. The system uses hierarchical configuration, industry-standard log levels, and multiple output formats to provide clear visibility into automation execution.
+## Transparent, Configuration-Driven Logging
+
+The Brobot framework provides transparent, built-in logging that requires no code changes or special services. Simply use the standard `Action` class methods (`click()`, `find()`, `type()`, etc.), and logging happens automatically based on your `application.properties` configuration.
+
+**Key Principle**: Logging is a cross-cutting concern that should be transparent to your automation code. You write normal automation logic, and Brobot handles the logging based on your configuration.
 
 ## Core Concepts
 
@@ -24,25 +28,7 @@ Different aspects of automation are organized into categories:
 - **VALIDATION** - Input validation and checks
 - **SYSTEM** - System-level events
 
-## Quick Start
-
-### Basic Configuration
-
-```properties
-# application.properties
-
-# Set global log level (applies to all categories)
-brobot.logging.global-level=INFO
-
-# Override specific categories if needed
-brobot.logging.categories.actions=DEBUG
-brobot.logging.categories.matching=WARN
-
-# Choose output format
-brobot.logging.output.format=SIMPLE
-```
-
-### Using ActionConfig Logging
+Add custom log messages directly to your action configurations:
 
 Add custom log messages directly to your action configurations:
 
@@ -53,23 +39,36 @@ PatternFindOptions options = new PatternFindOptions.Builder()
     .withFailureLog("Login button not found - check page state")
     .build();
 
-action.find(options, loginButton);
+// Use perform() method with ActionConfig for custom logging
+action.perform(options, loginButton);
 ```
 
 ### Sample Output
 
-With the above configuration, you'll see:
+With transparent logging enabled, you'll see:
+
+**Standard actions (automatic logging only):**
 ```
-[ACTIONS] INFO  Searching for login button...
-[ACTIONS] INFO  FIND loginButton → SUCCESS [25ms] loc:(100,200) sim:0.95
-[ACTIONS] INFO  Login button found!
+→ CLICK usernameField
+✓ CLICK usernameField | loc:(245,180) | sim:0.91 | 32ms
+→ TYPE "user123"
+✓ TYPE "user123" | 125ms
+→ CLICK loginButton
+✓ CLICK loginButton | loc:(520,380) | sim:0.92 | 45ms
 ```
 
-For standard actions without custom logging:
+**With custom messages:**
 ```
-[ACTIONS] INFO  FIND submitButton → SUCCESS [25ms] loc:(100,200) sim:0.95
-[ACTIONS] DEBUG   Details: 3 matches found
-[TRANSITIONS] INFO  MainMenu → LoginPage SUCCESS [150ms]
+Searching for login button...
+→ FIND loginButton
+✓ FIND loginButton | loc:(520,380) | sim:0.92 | 45ms
+Login button found!
+```
+
+**Failed action:**
+```
+→ CLICK submitButton
+✗ CLICK submitButton | NOT FOUND | 5003ms
 ```
 
 ## Documentation Structure
@@ -81,10 +80,13 @@ For standard actions without custom logging:
 
 ## Key Features
 
-1. **Hierarchical Configuration** - Global settings cascade to specific categories
-2. **Structured Events** - Rich event objects with metadata and context
-3. **Multiple Output Formats** - SIMPLE, STRUCTURED, and JSON formats
-4. **Correlation Tracking** - Track related operations with correlation IDs
-5. **Performance Optimized** - Minimal overhead with early filtering
-6. **Clean Architecture** - No legacy code or backward compatibility baggage
-7. **ActionConfig Logging** - Built-in logging methods for all action configurations
+1. **Transparent Logging** - No code changes needed, just configuration
+2. **Configuration-Driven** - Control everything via application.properties
+3. **Hierarchical Configuration** - Global settings cascade to specific categories
+4. **Custom Messages** - Add context with ActionConfig logging methods
+5. **Session Management** - Track workflows with ActionSessionManager
+6. **Visual Indicators** - Clear symbols (→ ✓ ✗) for action status
+7. **Concise Format** - One-line summaries with essential information
+8. **Multiple Output Formats** - SIMPLE, STRUCTURED, and JSON
+9. **Performance Optimized** - Minimal overhead with early filtering
+10. **No Special Services** - Just use the standard Action class
