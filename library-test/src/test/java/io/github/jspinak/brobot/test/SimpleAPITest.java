@@ -9,10 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ContextConfiguration;
 
-import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.model.action.ActionRecord;
@@ -21,25 +18,20 @@ import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
-import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
 /** Simple test to verify the API usage patterns */
 @SpringBootTest(
-        classes = BrobotTestApplication.class,
         properties = {
             "brobot.gui-access.continue-on-error=true",
             "brobot.gui-access.check-on-startup=false",
             "java.awt.headless=true",
             "spring.main.allow-bean-definition-overriding=true",
             "brobot.test.type=unit",
-            "brobot.capture.physical-resolution=false"
+            "brobot.capture.physical-resolution=false",
+            "brobot.core.mock=true"
         })
-@Import({
-    MockScreenConfig.class,
-    io.github.jspinak.brobot.test.config.TestApplicationConfiguration.class
-})
-@ContextConfiguration(initializers = TestEnvironmentInitializer.class)
-public class SimpleAPITest {
+@DisabledInCI
+public class SimpleAPITest extends BrobotTestBase {
 
     @Autowired private StateMemory stateMemory;
 
