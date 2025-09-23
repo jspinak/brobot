@@ -13,6 +13,7 @@ import io.github.jspinak.brobot.action.basic.find.BaseFindOptions;
 import io.github.jspinak.brobot.analysis.color.DistanceMatrixCalculator;
 import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.model.analysis.color.PixelProfile;
+import io.github.jspinak.brobot.util.image.visualization.MatrixVisualizer;
 
 // Remove incorrect atanh import - will use custom implementation
 
@@ -51,7 +52,7 @@ import io.github.jspinak.brobot.model.analysis.color.PixelProfile;
 @Component
 public class PixelScoreCalculator {
 
-    // private MatrixVisualizer matVisualize;
+    private MatrixVisualizer matVisualize;
 
     private int outsideRangePenalty = 3; // 100
 
@@ -64,9 +65,8 @@ public class PixelScoreCalculator {
     private double maxTanh = Math.tanh(maxMinScoreForTanh);
     private double invMaxTanh = 1 - maxTanh;
 
-    public PixelScoreCalculator(
-            Object matVisualize) { // MatrixVisualizer temporarily replaced with Object
-        // this.matVisualize = matVisualize;
+    public PixelScoreCalculator(MatrixVisualizer matVisualize) {
+        this.matVisualize = matVisualize;
     }
 
     /**
