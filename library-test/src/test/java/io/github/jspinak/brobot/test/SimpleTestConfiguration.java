@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.test;
 
-import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.ComponentScan;
@@ -11,7 +10,6 @@ import org.springframework.context.annotation.FilterType;
  * tests to run.
  */
 @TestConfiguration
-@SpringBootConfiguration
 @EnableAutoConfiguration
 @ComponentScan(
         basePackages = "io.github.jspinak.brobot",
