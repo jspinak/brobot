@@ -16,6 +16,7 @@ import io.github.jspinak.brobot.config.core.BrobotProperties;
 import io.github.jspinak.brobot.control.ExecutionController;
 import io.github.jspinak.brobot.control.ExecutionStoppedException;
 import io.github.jspinak.brobot.logging.BrobotLogger;
+import io.github.jspinak.brobot.logging.LogCategory;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
 import io.github.jspinak.brobot.tools.history.IllustrationController;
 import io.github.jspinak.brobot.tools.ml.dataset.DatasetManager;
@@ -357,7 +358,12 @@ public class ActionExecution {
      * @param objectCollections The object collections involved in the action
      */
     private void handleBeforeActionLogging(
-            ActionConfig actionConfig, ObjectCollection... objectCollections) {}
+            ActionConfig actionConfig, ObjectCollection... objectCollections) {
+        if (actionConfig.getBeforeActionLog() != null
+                && !actionConfig.getBeforeActionLog().isEmpty()) {
+            brobotLogger.info(LogCategory.ACTIONS, actionConfig.getBeforeActionLog());
+        }
+    }
 
     /**
      * Handles logging after action execution completes.
@@ -369,7 +375,24 @@ public class ActionExecution {
     private void handleAfterActionLogging(
             ActionConfig actionConfig,
             ActionResult actionResult,
-            ObjectCollection... objectCollections) {}
+            ObjectCollection... objectCollections) {
+        // Log after action message if configured
+        if (actionConfig.getAfterActionLog() != null
+                && !actionConfig.getAfterActionLog().isEmpty()) {
+            brobotLogger.info(LogCategory.ACTIONS, actionConfig.getAfterActionLog());
+        }
+
+        // Log success or failure message based on result
+        if (actionResult.isSuccess()) {
+            if (actionConfig.getSuccessLog() != null && !actionConfig.getSuccessLog().isEmpty()) {
+                brobotLogger.info(LogCategory.ACTIONS, actionConfig.getSuccessLog());
+            }
+        } else {
+            if (actionConfig.getFailureLog() != null && !actionConfig.getFailureLog().isEmpty()) {
+                brobotLogger.warn(LogCategory.ACTIONS, actionConfig.getFailureLog());
+            }
+        }
+    }
 
     /**
      * Handles automatic logging based on ActionConfig logging options.

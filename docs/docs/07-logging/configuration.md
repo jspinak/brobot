@@ -27,6 +27,8 @@ brobot.logging.categories.validation=WARN
 brobot.logging.categories.system=ERROR
 ```
 
+**Note:** ActionConfig custom logging messages (set via `withBeforeActionLog()`, `withSuccessLog()`, etc.) are logged to the `ACTIONS` category and respect the configured level for that category.
+
 ### Output Format Configuration
 
 ```properties

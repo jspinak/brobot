@@ -42,9 +42,30 @@ brobot.logging.categories.matching=WARN
 brobot.logging.output.format=SIMPLE
 ```
 
+### Using ActionConfig Logging
+
+Add custom log messages directly to your action configurations:
+
+```java
+PatternFindOptions options = new PatternFindOptions.Builder()
+    .withBeforeActionLog("Searching for login button...")
+    .withSuccessLog("Login button found!")
+    .withFailureLog("Login button not found - check page state")
+    .build();
+
+action.find(options, loginButton);
+```
+
 ### Sample Output
 
 With the above configuration, you'll see:
+```
+[ACTIONS] INFO  Searching for login button...
+[ACTIONS] INFO  FIND loginButton → SUCCESS [25ms] loc:(100,200) sim:0.95
+[ACTIONS] INFO  Login button found!
+```
+
+For standard actions without custom logging:
 ```
 [ACTIONS] INFO  FIND submitButton → SUCCESS [25ms] loc:(100,200) sim:0.95
 [ACTIONS] DEBUG   Details: 3 matches found
@@ -66,3 +87,4 @@ With the above configuration, you'll see:
 4. **Correlation Tracking** - Track related operations with correlation IDs
 5. **Performance Optimized** - Minimal overhead with early filtering
 6. **Clean Architecture** - No legacy code or backward compatibility baggage
+7. **ActionConfig Logging** - Built-in logging methods for all action configurations
