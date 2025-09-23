@@ -161,9 +161,9 @@ public class AnalysisSidebar {
         Mat sidebar = getSidebar(illustrations.getScene(), sidebarEntries, matches, matchList);
 
         if (sidebar == null) {
-            log.error("[SIDEBAR] getSidebar returned null");
+            log.debug("[SIDEBAR] getSidebar returned null");
         } else if (sidebar.empty()) {
-            log.error("[SIDEBAR] getSidebar returned empty Mat");
+            log.debug("[SIDEBAR] getSidebar returned empty Mat");
         } else {
             log.debug("[SIDEBAR] Sidebar dimensions: {}x{}", sidebar.cols(), sidebar.rows());
         }
@@ -197,7 +197,7 @@ public class AnalysisSidebar {
         }
 
         if (illustrations.getSidebar() == null || illustrations.getSidebar().empty()) {
-            log.warn("[SIDEBAR] Sidebar is null or empty, using scene only");
+            log.debug("[SIDEBAR] Sidebar is null or empty, using scene only");
             // If no sidebar, just use the scene with matches
             illustrations.setSceneWithMatchesAndSidebar(illustrations.getMatchesOnScene());
             return;
@@ -220,9 +220,9 @@ public class AnalysisSidebar {
                         .build();
 
         if (sceneAndSidebar == null) {
-            log.error("[SIDEBAR] MatBuilder returned null");
+            log.debug("[SIDEBAR] MatBuilder returned null");
         } else if (sceneAndSidebar.empty()) {
-            log.error("[SIDEBAR] MatBuilder returned empty Mat");
+            log.debug("[SIDEBAR] MatBuilder returned empty Mat");
         } else {
             log.debug(
                     "[SIDEBAR] Merged Mat dimensions: {}x{}",

@@ -427,7 +427,7 @@ public class ImageFileUtilities {
             }
         }
 
-        log.info(
+        log.debug(
                 "[IMAGE_WRITE] Mat summary: {} total, {} null, {} empty, {} valid",
                 mats.size(),
                 nullCount,
@@ -453,7 +453,7 @@ public class ImageFileUtilities {
             }
         }
 
-        log.info(
+        log.debug(
                 "[IMAGE_WRITE] Write complete: {} of {} images written successfully",
                 successCount,
                 nonNullMats.size());

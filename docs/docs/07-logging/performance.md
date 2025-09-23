@@ -58,14 +58,14 @@ brobot.logging.enrichment.include-similarity-scores=true  # Low overhead
 
 ### 4. Category-Specific Levels
 
-Reduce noise by setting appropriate levels per category:
+Reduce noise by setting appropriate levels per package:
 
 ```properties
 # Production configuration
-brobot.logging.categories.actions=INFO       # Only success/failure
-brobot.logging.categories.matching=WARN      # Only problems
-brobot.logging.categories.performance=INFO   # Key metrics only
-brobot.logging.categories.validation=ERROR   # Only errors
+logging.level.io.github.jspinak.brobot.action=INFO       # Only success/failure
+logging.level.io.github.jspinak.brobot.matching=WARN     # Only problems
+logging.level.io.github.jspinak.brobot.performance=INFO  # Key metrics only
+logging.level.io.github.jspinak.brobot.validation=ERROR  # Only errors
 ```
 
 ## Memory Management
@@ -122,9 +122,9 @@ Test setup: 1000 find operations, averaged over 10 runs
 
 ```properties
 # Optimized for production
-brobot.logging.global-level=WARN
-brobot.logging.categories.actions=INFO
-brobot.logging.categories.performance=INFO
+logging.level.root=WARN
+logging.level.io.github.jspinak.brobot.action=INFO
+logging.level.io.github.jspinak.brobot.performance=INFO
 brobot.logging.output.format=JSON
 brobot.logging.performance.async=true
 brobot.logging.performance.buffer-size=32768
@@ -136,7 +136,8 @@ brobot.logging.enrichment.include-timing-breakdown=false
 
 ```properties
 # Full visibility for development
-brobot.logging.global-level=DEBUG
+logging.level.root=DEBUG
+logging.level.io.github.jspinak.brobot=DEBUG
 brobot.logging.output.format=SIMPLE
 brobot.logging.performance.async=false
 brobot.logging.enrichment.include-screenshots=true
@@ -147,7 +148,7 @@ brobot.logging.enrichment.include-timing-breakdown=true
 
 ```properties
 # Maximum performance
-brobot.logging.global-level=ERROR
+logging.level.root=ERROR
 brobot.logging.performance.async=true
 brobot.logging.performance.buffer-size=65536
 brobot.logging.output.format=JSON
@@ -163,7 +164,7 @@ brobot.logging.enrichment.include-memory-usage=false
 ### Enable Performance Metrics
 
 ```properties
-brobot.logging.categories.performance=DEBUG
+logging.level.io.github.jspinak.brobot.performance=DEBUG
 brobot.logging.enrichment.include-timing-breakdown=true
 ```
 
@@ -191,7 +192,8 @@ brobot.logging.enrichment.include-timing-breakdown=true
 **Cause**: Too much DEBUG/TRACE logging
 **Solution**: Reduce log levels
 ```properties
-brobot.logging.global-level=INFO
+logging.level.root=INFO
+logging.level.io.github.jspinak.brobot=WARN
 ```
 
 ### Symptoms: Memory Growth
@@ -217,6 +219,6 @@ brobot.logging.enrichment.include-screenshots=false
 **Cause**: TRACE level or JSON format
 **Solution**: Use appropriate levels and consider log rotation
 ```properties
-brobot.logging.global-level=INFO
+logging.level.root=INFO
 # Configure logback for rotation
 ```

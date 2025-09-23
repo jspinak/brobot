@@ -112,10 +112,10 @@ public class SimpleLogFormatter implements LogFormatter {
             }
         }
 
-        // Correlation ID (abbreviated)
-        if (entry.hasCorrelation()) {
-            sb.append(" [").append(entry.getCorrelationId()).append("]");
-        }
+        // Correlation ID (disabled for cleaner logs - uncomment if needed for debugging)
+        // if (entry.hasCorrelation()) {
+        //     sb.append(" [").append(entry.getCorrelationId()).append("]");
+        // }
 
         // Memory usage (if significant)
         if (entry.getMemoryUsage() != null && entry.getMemoryUsage() > 1024 * 1024) { // > 1MB

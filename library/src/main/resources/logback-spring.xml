@@ -44,6 +44,10 @@
     <logger name="io.github.jspinak.brobot.startup" level="WARN"/>
     <logger name="io.github.jspinak.brobot.matching" level="WARN"/>
 
+    <!-- Visual history and image writing - only show warnings and errors -->
+    <logger name="io.github.jspinak.brobot.tools.history.visual" level="WARN"/>
+    <logger name="io.github.jspinak.brobot.util.image.io" level="WARN"/>
+
     <!-- Framework dependencies -->
     <logger name="org.hibernate" level="WARN"/>
     <logger name="org.springframework" level="WARN"/>

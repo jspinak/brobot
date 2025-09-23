@@ -52,14 +52,8 @@ public class DPIAwarenessDisabler {
         if (shouldDisable) {
             disableDPIAwareness();
         } else {
-            System.out.println("[Brobot DPI] DPI awareness is ENABLED (Java 21 default behavior)");
-            System.out.println("[Brobot DPI] Capture resolution depends on provider:");
-            System.out.println("[Brobot DPI]   - FFmpeg/JavaCV: Physical resolution");
-            System.out.println("[Brobot DPI]   - Robot: Physical resolution (with scaling)");
-            System.out.println("[Brobot DPI]   - SikuliX: Logical resolution");
-            System.out.println(
-                    "[Brobot DPI] Set BROBOT_DISABLE_DPI=true or -Dbrobot.dpi.disable=true to"
-                            + " disable");
+            // DPI awareness is enabled by default, log at debug level
+            dpiAwarenessDisabled = false;
         }
     }
 

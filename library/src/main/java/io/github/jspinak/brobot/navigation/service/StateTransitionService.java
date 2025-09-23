@@ -14,6 +14,7 @@ import io.github.jspinak.brobot.navigation.transition.StateTransitions;
 import io.github.jspinak.brobot.navigation.transition.StateTransitionsJointTable;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Service layer for managing state transitions within the active project.
@@ -80,6 +81,7 @@ import lombok.Getter;
  * @see StateTransitionStore
  * @see SpecialStateType
  */
+@Slf4j
 @Component
 @Getter
 public class StateTransitionService {
@@ -158,19 +160,18 @@ public class StateTransitionService {
      */
     public Optional<StateTransitions> getTransitions(Long stateId) {
         // Debug: Log what we're looking for and what's available
-        System.out.println("=== TRANSITION DEBUG: getTransitions() called for stateId: " + stateId);
-        System.out.println(
-                "=== TRANSITION DEBUG: Repository contains transitions for states: "
-                        + stateTransitionsRepository.getAllStateIds());
+        log.debug("=== TRANSITION DEBUG: getTransitions() called for stateId: {}", stateId);
+        log.debug(
+                "=== TRANSITION DEBUG: Repository contains transitions for states: {}",
+                stateTransitionsRepository.getAllStateIds());
 
         Optional<StateTransitions> result = stateTransitionsRepository.get(stateId);
         if (result.isPresent()) {
-            System.out.println("=== TRANSITION DEBUG: Found StateTransitions for state " + stateId);
-            System.out.println(
-                    "=== TRANSITION DEBUG: Transitions: " + result.get().getTransitions().size());
+            log.debug("=== TRANSITION DEBUG: Found StateTransitions for state {}", stateId);
+            log.debug(
+                    "=== TRANSITION DEBUG: Transitions: {}", result.get().getTransitions().size());
         } else {
-            System.out.println(
-                    "=== TRANSITION DEBUG: NO StateTransitions found for state " + stateId);
+            log.debug("=== TRANSITION DEBUG: NO StateTransitions found for state {}", stateId);
         }
 
         return result;

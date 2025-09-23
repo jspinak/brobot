@@ -26,6 +26,7 @@ public class JavaCVFFmpegCapture {
     private static final boolean IS_WINDOWS = OS.contains("win");
     private static final boolean IS_MAC = OS.contains("mac");
     private static final boolean IS_LINUX = OS.contains("nux");
+    private static boolean initialized = false;
 
     static {
         // Initialize FFmpeg's device libraries
@@ -83,12 +84,16 @@ public class JavaCVFFmpegCapture {
             // Convert to BufferedImage
             BufferedImage image = converter.convert(frame);
 
-            System.out.println(
-                    "[JavaCVFFmpeg] Captured at: "
-                            + image.getWidth()
-                            + "x"
-                            + image.getHeight()
-                            + " (physical resolution via bundled FFmpeg)");
+            // Only log capture resolution on first initialization
+            if (!initialized && IS_WINDOWS) {
+                System.out.println(
+                        "[JavaCVFFmpeg] Windows gdigrab capturing at: "
+                                + image.getWidth()
+                                + "x"
+                                + image.getHeight()
+                                + " (physical resolution via bundled FFmpeg)");
+                initialized = true;
+            }
 
             return image;
 
@@ -125,8 +130,7 @@ public class JavaCVFFmpegCapture {
             grabber.setImageWidth(1920);
             grabber.setImageHeight(1080);
 
-            System.out.println(
-                    "[JavaCVFFmpeg] Windows gdigrab configured for 1920x1080 physical resolution");
+            // Configuration logging moved to initialization only
 
         } else if (IS_MAC) {
             // macOS: Use AVFoundation

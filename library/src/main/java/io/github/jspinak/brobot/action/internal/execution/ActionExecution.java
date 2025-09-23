@@ -343,10 +343,11 @@ public class ActionExecution {
     private void printActionConfig(
             ActionConfig actionConfig, ObjectCollection... objectCollections) {
         // Log action attempt if formatter is available and logging is configured
-        if (actionLogFormatter != null && shouldLogActions()) {
-            String actionType = getActionTypeFromConfig(actionConfig);
-            actionLogFormatter.logAttempt(actionType, objectCollections);
-        }
+        // DISABLED: Redundant with BrobotLogger - uncomment if you prefer this simpler format
+        // if (actionLogFormatter != null && shouldLogActions()) {
+        //     String actionType = getActionTypeFromConfig(actionConfig);
+        //     actionLogFormatter.logAttempt(actionType, objectCollections);
+        // }
     }
 
     private boolean shouldLogActions() {
@@ -448,10 +449,11 @@ public class ActionExecution {
             ActionResult actionResult,
             ObjectCollection... objectCollections) {
         // Log the action result using ActionLogFormatter if available and configured
-        if (actionLogFormatter != null && shouldLogActions()) {
-            String actionType = getActionTypeFromConfig(actionConfig);
-            actionLogFormatter.logAction(actionType, actionResult, objectCollections);
-        }
+        // DISABLED: Redundant with BrobotLogger - uncomment if you prefer this simpler format
+        // if (actionLogFormatter != null && shouldLogActions()) {
+        //     String actionType = getActionTypeFromConfig(actionConfig);
+        //     actionLogFormatter.logAction(actionType, actionResult, objectCollections);
+        // }
     }
 
     /**

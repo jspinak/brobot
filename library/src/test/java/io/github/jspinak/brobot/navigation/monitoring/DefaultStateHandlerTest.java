@@ -12,7 +12,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -22,6 +21,7 @@ import io.github.jspinak.brobot.navigation.transition.StateNavigator;
 import io.github.jspinak.brobot.navigation.transition.StateTransitions;
 import io.github.jspinak.brobot.navigation.transition.TaskSequenceStateTransition;
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Test suite for DefaultStateHandler. Tests the default state handling implementation with various
@@ -32,10 +32,7 @@ import io.github.jspinak.brobot.test.BrobotTestBase;
  */
 @DisplayName("DefaultStateHandler Tests")
 @Timeout(value = 10, unit = TimeUnit.SECONDS) // Prevent CI/CD timeout
-@DisabledIfEnvironmentVariable(
-        named = "CI",
-        matches = "true",
-        disabledReason = "Flaky test - times out intermittently in CI/CD")
+@DisabledInCI // Flaky test - times out intermittently in CI/CD
 class DefaultStateHandlerTest extends BrobotTestBase {
 
     @Mock private StateNavigator stateNavigator;

@@ -34,16 +34,15 @@ public class StateAnnotationBeanPostProcessor implements BeanPostProcessor {
         State stateAnnotation = AnnotationUtils.findAnnotation(targetClass, State.class);
 
         if (stateAnnotation != null) {
-            log.info("=== STATE BEAN DETECTED BY POST PROCESSOR ===");
-            log.info("Bean name: {}", beanName);
-            log.info("Bean class: {}", targetClass.getName());
-            log.info("State annotation details:");
-            log.info("  - name: {}", stateAnnotation.name());
-            log.info("  - initial: {}", stateAnnotation.initial());
-            log.info("  - priority: {}", stateAnnotation.priority());
-            log.info("  - profiles: {}", java.util.Arrays.toString(stateAnnotation.profiles()));
+            log.debug("State bean detected: {} ({})", beanName, targetClass.getSimpleName());
+            log.debug(
+                    "  Name: '{}', Initial: {}, Priority: {}, Profiles: {}",
+                    stateAnnotation.name(),
+                    stateAnnotation.initial(),
+                    stateAnnotation.priority(),
+                    java.util.Arrays.toString(stateAnnotation.profiles()));
             stateBeans.put(beanName, bean);
-            log.info("Total state beans collected so far: {}", stateBeans.size());
+            log.debug("Total state beans collected: {}", stateBeans.size());
         }
 
         return bean;

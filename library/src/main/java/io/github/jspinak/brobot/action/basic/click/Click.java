@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.action.basic.click;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,6 +17,8 @@ import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateLocation;
 import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.util.coordinates.CoordinateScaler;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Performs click operations on GUI elements without embedded Find operations.
@@ -45,10 +46,11 @@ import io.github.jspinak.brobot.util.coordinates.CoordinateScaler;
  * @since 2.0
  * @see ConditionalActionChain for chaining Find with Click
  */
+@Slf4j
 @Component
 public class Click implements ActionInterface {
 
-    private static final Logger logger = Logger.getLogger(Click.class.getName());
+    // Logger is now provided by @Slf4j annotation as 'log'
 
     @Autowired(required = false)
     private CoordinateScaler coordinateScaler;
@@ -62,7 +64,7 @@ public class Click implements ActionInterface {
     public void perform(ActionResult actionResult, ObjectCollection... objectCollections) {
         // Handle null ActionResult gracefully
         if (actionResult == null) {
-            logger.warning("Click: ActionResult is null, cannot proceed");
+            log.warn("Click: ActionResult is null, cannot proceed");
             return;
         }
 
@@ -73,7 +75,7 @@ public class Click implements ActionInterface {
             List<Location> locations = extractClickableLocations(objectCollections);
 
             if (locations.isEmpty()) {
-                logger.warning("No clickable objects provided to Click");
+                log.warn("No clickable objects provided to Click");
                 return;
             }
 
@@ -87,12 +89,12 @@ public class Click implements ActionInterface {
             }
 
             actionResult.setSuccess(successCount > 0);
-            logger.info(
+            log.info(
                     String.format(
                             "Click: Clicked %d of %d locations", successCount, locations.size()));
 
         } catch (Exception e) {
-            logger.severe("Error in Click: " + e.getMessage());
+            log.error("Error in Click: {}", e.getMessage(), e);
             actionResult.setSuccess(false);
         }
     }
@@ -144,39 +146,42 @@ public class Click implements ActionInterface {
     private boolean performClick(Location location) {
         // Handle null location
         if (location == null) {
-            logger.warning("Cannot click null location");
+            log.warn("Cannot click null location");
             return false;
         }
 
         try {
             // In mock mode, simulate the click without actual operations
             if (MockModeManager.isMockMode()) {
-                logger.fine("[MOCK] Simulated click at location: " + location);
+                log.debug("[MOCK] Simulated click at location: {}", location);
                 // Very small simulated pause for consistency (reduced for performance tests)
                 Thread.sleep(1);
                 return true;
             }
 
             // Debug logging for headless issue
-            logger.info("=== Click Debug Info ===");
-            logger.info("java.awt.headless property: " + System.getProperty("java.awt.headless"));
-            logger.info(
-                    "GraphicsEnvironment.isHeadless(): "
-                            + java.awt.GraphicsEnvironment.isHeadless());
-            logger.info("Location to click (capture coords): " + location);
+            log.debug("=== Click Debug Info ===");
+            log.debug("java.awt.headless property: {}", System.getProperty("java.awt.headless"));
+            log.debug(
+                    "GraphicsEnvironment.isHeadless(): {}",
+                    java.awt.GraphicsEnvironment.isHeadless());
+            log.debug("Location to click (capture coords): {}", location);
 
             // Scale coordinates if needed (from physical capture to logical SikuliX)
             org.sikuli.script.Location sikuliLoc;
             if (coordinateScaler != null && coordinateScaler.isScalingNeeded()) {
                 sikuliLoc = coordinateScaler.scaleLocationToLogical(location);
-                logger.info("Scaled to logical coords: " + sikuliLoc);
+                log.debug("Scaled to logical coords: {}", sikuliLoc);
                 double[] factors = coordinateScaler.getScaleFactors();
-                logger.info(String.format("Scale factors: X=%.3f, Y=%.3f", factors[0], factors[1]));
+                log.debug(
+                        "Scale factors: X={}, Y={}",
+                        String.format("%.3f", factors[0]),
+                        String.format("%.3f", factors[1]));
             } else {
                 sikuliLoc = location.sikuli();
-                logger.info("No scaling needed, using original coords");
+                log.debug("No scaling needed, using original coords");
             }
-            logger.info("========================");
+            log.debug("========================");
 
             // Use SikuliX directly - it handles Robot internally
             // Following Brobot 1.0.7 pattern of simplicity
@@ -185,14 +190,14 @@ public class Click implements ActionInterface {
             // Small pause after click
             Thread.sleep(100);
 
-            logger.fine("Clicked at location: " + location);
+            log.debug("Clicked at location: {}", location);
             return true;
 
         } catch (Exception e) {
-            logger.warning("Failed to click at location " + location + ": " + e.getMessage());
-            logger.warning("Exception type: " + e.getClass().getName());
+            log.warn("Failed to click at location {}: {}", location, e.getMessage());
+            log.warn("Exception type: {}", e.getClass().getName());
             if (e.getCause() != null) {
-                logger.warning("Cause: " + e.getCause().getMessage());
+                log.warn("Cause: {}", e.getCause().getMessage());
             }
             return false;
         }

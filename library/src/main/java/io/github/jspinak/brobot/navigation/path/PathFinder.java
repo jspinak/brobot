@@ -94,7 +94,8 @@ public class PathFinder {
         String startStatesString =
                 startStates.stream()
                         .map(allStates::getStateName)
-                        .reduce("", (s, s2) -> s + ", " + s2);
+                        .reduce((s, s2) -> s + ", " + s2)
+                        .orElse("");
 
         // Use instance fields - method is synchronized for thread safety
         this.startStates = startStates;
@@ -114,7 +115,8 @@ public class PathFinder {
         String startStatesString =
                 startStates.stream()
                         .map(allStates::getStateName)
-                        .reduce("", (s, s2) -> s + ", " + s2);
+                        .reduce((s, s2) -> s + ", " + s2)
+                        .orElse("");
         System.out.println("Start states: " + startStatesString);
 
         if (!path.contains(stateInFocus)) {
@@ -133,7 +135,8 @@ public class PathFinder {
                 String parentStatesAsString =
                         parentStates.stream()
                                 .map(allStates::getStateName)
-                                .reduce("", (s, s2) -> s + ", " + s2);
+                                .reduce((s, s2) -> s + ", " + s2)
+                                .orElse("");
                 System.out.println(
                         "Parent states for "
                                 + allStates.getStateName(stateInFocus)

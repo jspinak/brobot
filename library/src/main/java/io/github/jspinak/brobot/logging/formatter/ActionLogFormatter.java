@@ -43,14 +43,22 @@ public class ActionLogFormatter {
 
         String target = getTargetDescription(collections);
         String location = getLocationString(result);
-        double similarity = getHighestSimilarity(result);
         long duration = result.getDuration() != null ? result.getDuration().toMillis() : 0;
 
         if (result.isSuccess()) {
-            String message =
-                    String.format(
-                            "✓ %s %s | loc:%s | sim:%.2f | %dms",
-                            actionType, target, location, similarity, duration);
+            String message;
+            // CLICK actions don't need similarity scores
+            if ("CLICK".equalsIgnoreCase(actionType)) {
+                message =
+                        String.format(
+                                "✓ %s %s | loc:%s | %dms", actionType, target, location, duration);
+            } else {
+                double similarity = getHighestSimilarity(result);
+                message =
+                        String.format(
+                                "✓ %s %s | loc:%s | sim:%.2f | %dms",
+                                actionType, target, location, similarity, duration);
+            }
             logger.info(LogCategory.ACTIONS, message);
         } else {
             String message =
@@ -94,11 +102,15 @@ public class ActionLogFormatter {
     }
 
     private String getLocationString(ActionResult result) {
-        if (result.getMatchList().isEmpty()) return "none";
-
-        Match firstMatch = result.getMatchList().get(0);
-        Location target = firstMatch.getTarget();
-        return String.format("(%d,%d)", target.getX(), target.getY());
+        // For clicks, show the actual clicked location if available
+        if (!result.getMatchList().isEmpty()) {
+            Match firstMatch = result.getMatchList().get(0);
+            Location target = firstMatch.getTarget();
+            if (target != null && (target.getX() >= 0 || target.getY() >= 0)) {
+                return String.format("(%d,%d)", target.getX(), target.getY());
+            }
+        }
+        return "(-1,-1)"; // Default for no location
     }
 
     private double getHighestSimilarity(ActionResult result) {
