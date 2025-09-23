@@ -46,8 +46,10 @@ public class HeadlessDiagnostics {
                 .builder(LogCategory.SYSTEM)
                 .message("Headless Mode Diagnostics")
                 .context("GraphicsEnvironment.isHeadless()", awtHeadless)
-                .context("java.awt.headless property", headlessProperty)
-                .context("DISPLAY env variable", display)
+                .context(
+                        "java.awt.headless property",
+                        headlessProperty != null ? headlessProperty : "not set")
+                .context("DISPLAY env variable", display != null ? display : "not set")
                 .context("OS", System.getProperty("os.name"))
                 .context("OS version", System.getProperty("os.version"))
                 .log();
