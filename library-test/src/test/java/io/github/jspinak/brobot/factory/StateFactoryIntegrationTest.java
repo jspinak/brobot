@@ -67,14 +67,14 @@ public class StateFactoryIntegrationTest {
         void shouldCreateStateWithInitializer() {
             Consumer<State.Builder> initializer =
                     builder -> {
-                        builder.setBaseProbabilityExists(80);
+                        builder.setBaseMockFindStochasticModifier(80);
                     };
 
             State state = stateFactory.createState(TestStateEnum.TEST_STATE_2, initializer);
 
             assertNotNull(state);
             assertEquals(TestStateEnum.TEST_STATE_2.toString(), state.getName());
-            assertEquals(80, state.getBaseProbabilityExists());
+            assertEquals(80, state.getBaseMockFindStochasticModifier());
         }
 
         @Test
@@ -95,7 +95,7 @@ public class StateFactoryIntegrationTest {
             Consumer<State.Builder> initializer =
                     builder -> {
                         builder.withImages(image1, image2)
-                                .setBaseProbabilityExists(90)
+                                .setBaseMockFindStochasticModifier(90)
                                 .setBlocking(true);
                     };
 
@@ -103,7 +103,7 @@ public class StateFactoryIntegrationTest {
 
             assertNotNull(state);
             assertEquals(2, state.getStateImages().size());
-            assertEquals(90, state.getBaseProbabilityExists());
+            assertEquals(90, state.getBaseMockFindStochasticModifier());
             assertTrue(state.isBlocking());
         }
     }
@@ -353,7 +353,8 @@ public class StateFactoryIntegrationTest {
             // Create state with all components
             Consumer<State.Builder> initializer =
                     builder -> {
-                        builder.withImages(loginButton, usernameField).setBaseProbabilityExists(95);
+                        builder.withImages(loginButton, usernameField)
+                                .setBaseMockFindStochasticModifier(95);
                         // Add text using actual StateString names if they exist
                         if (username.getName() != null && !username.getName().isEmpty()) {
                             builder.withText(username.getName());
@@ -369,7 +370,7 @@ public class StateFactoryIntegrationTest {
             assertNotNull(loginState);
             assertEquals(2, loginState.getStateImages().size());
             assertTrue(loginState.getStateText().size() >= 0); // May vary based on name handling
-            assertEquals(95, loginState.getBaseProbabilityExists());
+            assertEquals(95, loginState.getBaseMockFindStochasticModifier());
 
             // Verify images have patterns
             for (StateImage image : loginState.getStateImages()) {
@@ -385,13 +386,13 @@ public class StateFactoryIntegrationTest {
             StateImage img2 = stateFactory.createStateImage("img2.png", "img3.png");
 
             Consumer<State.Builder> fluentInitializer =
-                    builder -> builder.withImages(img1, img2).setBaseProbabilityExists(70);
+                    builder -> builder.withImages(img1, img2).setBaseMockFindStochasticModifier(70);
 
             State state = stateFactory.createState(TestStateEnum.ANOTHER_STATE, fluentInitializer);
 
             assertNotNull(state);
             assertEquals(2, state.getStateImages().size());
-            assertEquals(70, state.getBaseProbabilityExists());
+            assertEquals(70, state.getBaseMockFindStochasticModifier());
 
             // Verify total pattern count across all images
             // First StateImage has 1 pattern, second StateImage has 2 patterns

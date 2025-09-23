@@ -19,8 +19,6 @@ import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
 import io.github.jspinak.brobot.test.config.TestApplicationConfiguration;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
 import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 import io.github.jspinak.brobot.test.utils.BrobotTestUtils;
 
@@ -36,12 +34,7 @@ import io.github.jspinak.brobot.test.utils.BrobotTestUtils;
             "brobot.test.type=unit",
             "brobot.capture.physical-resolution=false"
         })
-@Import({
-    TestApplicationConfiguration.class,
-    MockGuiAccessConfig.class,
-    MockGuiAccessMonitor.class,
-    MockScreenConfig.class
-})
+@Import({TestApplicationConfiguration.class, MockScreenConfig.class})
 @ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 @Disabled("CI failure - needs investigation")
 class FindSafetyTest extends BrobotTestBase {

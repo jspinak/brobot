@@ -256,7 +256,7 @@ public class InitialStateVerifierTest extends BrobotTestBase {
 
             // Verify
             assertTrue(result);
-            verify(stateMemory).addActiveState(eq(1L), anyBoolean());
+            verify(stateMemory).addActiveState(eq(1L));
             // In mock mode, doesn't check with stateDetector
             verify(stateDetector, never()).findState(anyLong());
         }
@@ -361,7 +361,7 @@ public class InitialStateVerifierTest extends BrobotTestBase {
             // Verify - in mock mode it should activate based on probabilities
             assertTrue(result);
             // Should activate at least one state
-            verify(stateMemory, atLeastOnce()).addActiveState(anyLong(), anyBoolean());
+            verify(stateMemory, atLeastOnce()).addActiveState(anyLong());
         }
 
         @Test

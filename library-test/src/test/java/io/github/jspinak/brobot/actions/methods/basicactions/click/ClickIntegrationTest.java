@@ -24,8 +24,6 @@ import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
 import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
 @SpringBootTest(
@@ -40,8 +38,6 @@ import io.github.jspinak.brobot.test.mock.MockScreenConfig;
             "brobot.mock.enabled=true"
         })
 @Import({
-    MockGuiAccessConfig.class,
-    MockGuiAccessMonitor.class,
     MockScreenConfig.class,
     io.github.jspinak.brobot.test.config.TestApplicationConfiguration.class
 })

@@ -70,7 +70,7 @@ public class StateJsonParserTestUpdated {
         assertTrue(state.getStateText().contains("TestText2"));
         assertTrue(state.isBlocking());
         assertEquals(5, state.getPathCost());
-        assertEquals(80, state.getBaseProbabilityExists());
+        assertEquals(80, state.getBaseMockFindStochasticModifier());
 
         // Verify usable area
         assertNotNull(state.getUsableArea());
@@ -106,7 +106,7 @@ public class StateJsonParserTestUpdated {
 
         state.setBlocking(true);
         state.setPathCost(3);
-        state.setBaseProbabilityExists(90);
+        state.setBaseMockFindStochasticModifier(90);
         state.setUsableArea(new Region(50, 50, 1000, 800));
 
         // Add a StateImage
@@ -177,7 +177,7 @@ public class StateJsonParserTestUpdated {
         assertTrue(deserializedState.getStateText().contains("Text3"));
         assertTrue(deserializedState.isBlocking());
         assertEquals(3, deserializedState.getPathCost());
-        assertEquals(90, deserializedState.getBaseProbabilityExists());
+        assertEquals(90, deserializedState.getBaseMockFindStochasticModifier());
 
         // Verify usable area
         assertNotNull(deserializedState.getUsableArea());

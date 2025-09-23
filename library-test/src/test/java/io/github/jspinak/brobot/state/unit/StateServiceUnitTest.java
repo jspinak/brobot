@@ -41,7 +41,7 @@ class StateServiceUnitTest {
         testState = new State();
         testState.setName("TestState");
         testState.setId(1L);
-        testState.setBaseProbabilityExists(90);
+        testState.setBaseMockFindStochasticModifier(90);
 
         // Create StateImage without loading actual image file
         testImage = new StateImage.Builder().setName("test-image").build();

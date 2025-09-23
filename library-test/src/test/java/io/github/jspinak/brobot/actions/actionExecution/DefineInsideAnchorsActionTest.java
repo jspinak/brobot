@@ -19,8 +19,6 @@ import io.github.jspinak.brobot.model.element.Positions;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
 import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
 /**
@@ -39,8 +37,6 @@ import io.github.jspinak.brobot.test.mock.MockScreenConfig;
             "brobot.mock.enabled=true"
         })
 @Import({
-    MockGuiAccessConfig.class,
-    MockGuiAccessMonitor.class,
     MockScreenConfig.class,
     io.github.jspinak.brobot.test.config.TestApplicationConfiguration.class
 })

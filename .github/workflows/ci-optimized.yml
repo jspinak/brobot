@@ -79,7 +79,7 @@ jobs:
           1) PATTERN="io.github.jspinak.brobot.action.*" ;;
           2) PATTERN="io.github.jspinak.brobot.navigation.*" ;;
           3) PATTERN="io.github.jspinak.brobot.state*" ;;
-          4) PATTERN="io.github.jspinak.brobot.logging.*" ;;
+          4) PATTERN="io.github.jspinak.brobot.util.*" ;;  # Changed from logging to util
           5) PATTERN="io.github.jspinak.brobot.*" ;;  # Catch-all
         esac
 

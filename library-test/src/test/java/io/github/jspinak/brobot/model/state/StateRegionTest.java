@@ -35,7 +35,7 @@ public class StateRegionTest {
         assertEquals(30, stateRegion.w());
         assertEquals(40, stateRegion.h());
         assertEquals("testState", stateRegion.getOwnerStateName());
-        assertEquals(80, stateRegion.getProbabilityExists());
+        assertEquals(80, stateRegion.getMockFindStochasticModifier());
         assertEquals(3, stateRegion.getTimesActedOn());
     }
 

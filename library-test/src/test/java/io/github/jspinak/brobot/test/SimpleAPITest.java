@@ -21,8 +21,6 @@ import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
 import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
 /** Simple test to verify the API usage patterns */
@@ -37,8 +35,6 @@ import io.github.jspinak.brobot.test.mock.MockScreenConfig;
             "brobot.capture.physical-resolution=false"
         })
 @Import({
-    MockGuiAccessConfig.class,
-    MockGuiAccessMonitor.class,
     MockScreenConfig.class,
     io.github.jspinak.brobot.test.config.TestApplicationConfiguration.class
 })
