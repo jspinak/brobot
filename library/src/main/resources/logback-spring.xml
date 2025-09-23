@@ -1,7 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    <!-- Console appender for INFO and above (clean format, no thread info) -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <encoder>
+            <!-- Clean pattern for INFO: HH:mm:ss - message -->
+            <pattern>%d{HH:mm:ss} - %msg%n</pattern>
+        </encoder>
+    </appender>
 
-    <!-- Set the logging level for Hibernate -->
-    <logger name="org.hibernate" level="DEBUG"/>
+    <!-- Console appender for DEBUG level (includes thread info for debugging) -->
+    <appender name="CONSOLE_DEBUG" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <encoder>
+            <!-- Debug pattern includes thread: HH:mm:ss [thread] DEBUG - message -->
+            <pattern>%d{HH:mm:ss} [%thread] DEBUG - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Set root logger level -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="CONSOLE_DEBUG" />
+    </root>
+
+    <!-- Brobot framework verbose components - reduce noise by default -->
+    <logger name="io.github.jspinak.brobot.action.basic.find.FindPipeline" level="WARN"/>
+    <logger name="io.github.jspinak.brobot.action.basic.find.FindAll" level="WARN"/>
+    <logger name="io.github.jspinak.brobot.action.internal.find.IterativePatternFinder" level="WARN"/>
+    <logger name="io.github.jspinak.brobot.action.internal.region.DynamicRegionResolver" level="WARN"/>
+
+    <!-- Keep action results at INFO level for important user feedback -->
+    <logger name="brobot.actions" level="INFO"/>
+
+    <!-- Other verbose Brobot components -->
+    <logger name="io.github.jspinak.brobot.config" level="WARN"/>
+    <logger name="io.github.jspinak.brobot.startup" level="WARN"/>
+    <logger name="io.github.jspinak.brobot.matching" level="WARN"/>
+
+    <!-- Framework dependencies -->
+    <logger name="org.hibernate" level="WARN"/>
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.springframework.boot" level="INFO"/>
 </configuration>
