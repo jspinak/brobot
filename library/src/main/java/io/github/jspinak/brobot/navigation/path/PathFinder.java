@@ -102,6 +102,7 @@ public class PathFinder {
         String startStatesString =
                 startStates.stream()
                         .map(allStates::getStateName)
+                        .filter(Objects::nonNull)
                         .reduce((s, s2) -> s + ", " + s2)
                         .orElse("");
 
@@ -133,6 +134,7 @@ public class PathFinder {
             String startStatesString =
                     startStates.stream()
                             .map(allStates::getStateName)
+                            .filter(Objects::nonNull)
                             .reduce((s, s2) -> s + ", " + s2)
                             .orElse("");
             log.debug("Start states: {}", startStatesString);
@@ -157,6 +159,7 @@ public class PathFinder {
                     String parentStatesAsString =
                             parentStates.stream()
                                     .map(allStates::getStateName)
+                                    .filter(Objects::nonNull)
                                     .reduce((s, s2) -> s + ", " + s2)
                                     .orElse("");
                     log.debug("Parent states for {}: {}", stateName, parentStatesAsString);
