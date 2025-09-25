@@ -8,13 +8,13 @@ import org.sikuli.script.Location;
 import org.sikuli.script.Region;
 import org.sikuli.script.Screen;
 
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /**
  * Systematic test to determine how SikuliX is mapping coordinates. This test will help identify the
  * transformation between requested and actual positions.
  */
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Debug test requires real images and display")
 public class CoordinateMappingTest extends DebugTestBase {
 
     @Test

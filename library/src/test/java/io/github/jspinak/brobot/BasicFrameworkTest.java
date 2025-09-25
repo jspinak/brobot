@@ -11,11 +11,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 @DisplayName("Basic Framework Test")
 @Timeout(value = 10, unit = TimeUnit.SECONDS) // Prevent CI/CD timeout
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Framework initialization requires display environment")
 public class BasicFrameworkTest extends BrobotTestBase {
 
     @BeforeAll

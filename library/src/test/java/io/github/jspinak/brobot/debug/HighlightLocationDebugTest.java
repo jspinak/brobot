@@ -5,13 +5,13 @@ import org.sikuli.script.Screen;
 
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /**
  * Test to diagnose the fundamental highlighting location issue. The regions have correct size but
  * appear in wrong locations.
  */
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Debug test requires real images and display")
 public class HighlightLocationDebugTest extends BrobotTestBase {
 
     @Test

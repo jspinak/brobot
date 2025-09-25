@@ -9,13 +9,13 @@ import org.junit.jupiter.api.Test;
 import org.sikuli.basics.Settings;
 import org.sikuli.script.*;
 
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /**
  * Diagnostic test to understand why SikuliX IDE finds patterns at 0.99 but our code doesn't find
  * them at all.
  */
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Debug test requires real images and display")
 public class DiagnosticPatternTest extends DebugTestBase {
 
     @Test

@@ -10,13 +10,13 @@ import org.junit.jupiter.api.Test;
 import org.sikuli.basics.Settings;
 import org.sikuli.script.*;
 
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /**
  * Definitive test to prove that file path vs BufferedImage loading makes no difference, and that
  * Settings.AlwaysResize is the real solution.
  */
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Debug test requires real images and display")
 public class DefinitivePatternTest extends DebugTestBase {
 
     @Test

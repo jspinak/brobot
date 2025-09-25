@@ -9,13 +9,13 @@ import javax.imageio.ImageIO;
 import org.junit.jupiter.api.Test;
 import org.sikuli.script.*;
 
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /**
  * Test that mimics exactly how SikuliX IDE captures screenshots. This will help us understand why
  * IDE patterns are sharp.
  */
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Debug test requires real images and display")
 public class IDEScreenCaptureTest extends DebugTestBase {
 
     @Test

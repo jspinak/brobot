@@ -10,10 +10,10 @@ import org.sikuli.basics.Settings;
 import org.sikuli.script.*;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /** Test with proper ImagePath configuration to match how SikuliX IDE loads images */
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Debug test requires real images and display")
 public class ProperImagePathTest extends BrobotTestBase {
 
     @Test

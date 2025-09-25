@@ -7,13 +7,13 @@ import org.sikuli.script.Env;
 import org.sikuli.script.Region;
 import org.sikuli.script.Screen;
 
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /**
  * Test to check if SikuliX is detecting monitors incorrectly, which could cause coordinate offset
  * issues.
  */
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Debug test requires real images and display")
 public class MonitorDetectionTest extends DebugTestBase {
 
     @Test

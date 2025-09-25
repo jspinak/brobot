@@ -10,13 +10,13 @@ import javax.imageio.ImageIO;
 
 import org.junit.jupiter.api.Test;
 
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /**
  * Test to identify Java version differences in image processing Java 8 vs Java 21 image handling
  * comparison
  */
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Debug test requires real images and display")
 public class JavaVersionImageComparisonTest extends DebugTestBase {
 
     @Test

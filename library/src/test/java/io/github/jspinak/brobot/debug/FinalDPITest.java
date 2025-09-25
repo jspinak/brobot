@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.sikuli.basics.Settings;
 import org.sikuli.script.*;
 
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /** Final test to verify DPI scaling solution. */
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Debug test requires real images and display")
 public class FinalDPITest extends DebugTestBase {
 
     @Test

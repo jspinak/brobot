@@ -10,7 +10,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -20,16 +19,15 @@ import io.github.jspinak.brobot.config.logging.LoggingVerbosityConfig.VerbosityL
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /**
  * Test to verify that verbose logging of matches is limited to top 3 matches and provides a summary
  * instead of logging all matches.
  */
 @DisplayName("ScenePatternMatcher Verbose Logging Test")
-@DisabledIfEnvironmentVariable(
-        named = "CI",
-        matches = "true",
-        disabledReason = "Test incompatible with CI environment")
+@DisabledInHeadlessEnvironment(
+        "Scene pattern matching requires real display for pattern operations")
 public class ScenePatternMatcherVerboseLoggingTest extends BrobotTestBase {
 
     @Mock private LoggingVerbosityConfig verbosityConfig;

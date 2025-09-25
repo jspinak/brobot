@@ -9,13 +9,13 @@ import javax.imageio.ImageIO;
 
 import org.junit.jupiter.api.Test;
 
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /**
  * Tests methods to capture screenshots at physical resolution (1920x1080) instead of logical
  * resolution (1536x864) on 125% scaled displays.
  */
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Debug test requires real images and display")
 public class PhysicalResolutionCaptureTest extends DebugTestBase {
 
     @Test

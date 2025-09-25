@@ -13,13 +13,13 @@ import org.sikuli.basics.Settings;
 import org.sikuli.script.*;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /**
  * Focused similarity test using only claude-prompt-1.png Compare with SikuliX IDE's 0.99 similarity
  * score
  */
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Debug test requires real images and display")
 public class ClaudePromptSimilarityTest extends BrobotTestBase {
 
     @Test

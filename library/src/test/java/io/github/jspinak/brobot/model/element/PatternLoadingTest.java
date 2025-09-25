@@ -16,7 +16,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -29,6 +28,7 @@ import io.github.jspinak.brobot.config.core.ImagePathManager;
 import io.github.jspinak.brobot.config.environment.ExecutionEnvironment;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 
 /**
@@ -36,10 +36,7 @@ import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
  * Pattern objects.
  */
 @DisplayName("Pattern Loading Tests")
-@DisabledIfEnvironmentVariable(
-        named = "CI",
-        matches = "true",
-        disabledReason = "Test incompatible with CI environment")
+@DisabledInHeadlessEnvironment("Pattern loading tests require real display for image operations")
 public class PatternLoadingTest extends BrobotTestBase {
 
     @Mock private ImagePathManager imagePathManager;

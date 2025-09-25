@@ -11,10 +11,10 @@ import org.sikuli.basics.Settings;
 import org.sikuli.script.*;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /** Deep dive into why patterns don't match even though they're the same files */
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Debug test requires real images and display")
 public class ImageComparisonDebugTest extends BrobotTestBase {
 
     @Test

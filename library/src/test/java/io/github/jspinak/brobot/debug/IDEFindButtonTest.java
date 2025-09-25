@@ -12,10 +12,10 @@ import org.sikuli.basics.Settings;
 import org.sikuli.script.*;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /** Test that replicates exactly what the SikuliX IDE "Find" button does */
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Debug test requires real images and display")
 public class IDEFindButtonTest extends BrobotTestBase {
 
     @Test

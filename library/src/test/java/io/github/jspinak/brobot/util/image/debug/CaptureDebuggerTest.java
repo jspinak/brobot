@@ -26,10 +26,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 @ExtendWith(MockitoExtension.class)
-@DisabledInCI
+@DisabledInHeadlessEnvironment(
+        "Capture debugger requires real display for debugging screen captures")
 public class CaptureDebuggerTest extends BrobotTestBase {
 
     private CaptureDebugger captureDebugger;

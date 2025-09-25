@@ -12,13 +12,13 @@ import javax.imageio.ImageIO;
 import org.junit.jupiter.api.Test;
 import org.sikuli.script.*;
 
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /**
  * Test to determine if there's a consistent offset pattern in SikuliX operations. If the offset is
  * consistent, we can create a compensation mechanism.
  */
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Debug test requires real images and display")
 public class OffsetPatternAnalysisTest extends DebugTestBase {
 
     static class OffsetData {

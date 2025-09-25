@@ -10,10 +10,10 @@ import org.junit.jupiter.api.Test;
 import org.sikuli.basics.Settings;
 import org.sikuli.script.*;
 
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /** Diagnoses the DPI scaling issue by comparing pattern and capture dimensions. */
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Debug test requires real images and display")
 public class DiagnoseDPIScalingTest extends DebugTestBase {
 
     @Test

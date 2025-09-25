@@ -14,10 +14,10 @@ import org.sikuli.script.Screen;
 import io.github.jspinak.brobot.config.dpi.DPIAutoDetector;
 import io.github.jspinak.brobot.config.dpi.DPIConfiguration;
 import io.github.jspinak.brobot.model.element.Pattern;
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /** Tests DPI scaling detection and automatic compensation. */
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Debug test requires real images and display")
 public class DPIScalingTest extends DebugTestBase {
 
     @Test

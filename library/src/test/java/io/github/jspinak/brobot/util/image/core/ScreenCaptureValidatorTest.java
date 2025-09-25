@@ -317,21 +317,21 @@ public class ScreenCaptureValidatorTest extends BrobotTestBase {
 
         @Test
         @DisplayName("Should handle screen capture exception")
-        void shouldHandleScreenCaptureException() throws AWTException {
-            // Create a spy that throws exception on capture
+        void shouldHandleScreenCaptureException() {
+            // Create a spy that returns null on capture (simulating exception handling)
             ScreenCaptureValidator spyValidator = spy(validator);
             doReturn(false).when(spyValidator).detectHeadlessMode();
-            doThrow(new AWTException("Test exception")).when(spyValidator).captureScreen();
+            doReturn(null).when(spyValidator).captureScreen();
 
             ScreenCaptureValidator.ValidationResult result = spyValidator.validateScreenCapture();
 
             assertFalse(result.isValid());
-            assertTrue(result.getMessage().contains("Exception during screen capture"));
+            assertTrue(result.getMessage().contains("Screen capture returned null"));
         }
 
         @Test
         @DisplayName("Should validate successful capture with non-black pixels")
-        void shouldValidateSuccessfulCapture() throws AWTException {
+        void shouldValidateSuccessfulCapture() {
             // Create a spy that returns our test image
             ScreenCaptureValidator spyValidator = spy(validator);
             doReturn(false).when(spyValidator).detectHeadlessMode();
