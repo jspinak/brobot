@@ -8,12 +8,14 @@ sidebar_position: 1
 
 The complete JavaDocs for Brobot are available online:
 
-- **[Current Version (1.0.7)](https://jspinak.github.io/brobot/api/)** - Currently deployed version
-- **Version 1.1.0** - Will be available after release at `https://jspinak.github.io/brobot/api/1.1.0/`
+- **[Latest Version (1.1.0)](https://jspinak.github.io/brobot/api/latest/)** - Current stable release
+- **[Version 1.1.0](https://jspinak.github.io/brobot/api/1.1.0/)** - Latest version documentation
+- **[Version 1.0.7](https://jspinak.github.io/brobot/api/1.0.7/)** - Previous stable release
 
-After version 1.1.0 is released and deployed:
-- **[Latest Version](https://jspinak.github.io/brobot/api/latest/)** - Will point to 1.1.0
-- **[Version 1.1.0](https://jspinak.github.io/brobot/api/1.1.0/)** - Specific version documentation
+### Quick Links
+- **[API Overview](https://jspinak.github.io/brobot/api/latest/index.html)** - Main documentation page
+- **[All Classes](https://jspinak.github.io/brobot/api/latest/allclasses-index.html)** - Complete class listing
+- **[Package Tree](https://jspinak.github.io/brobot/api/latest/overview-tree.html)** - Package hierarchy
 
 ## Maven Central Integration
 
@@ -157,8 +159,11 @@ public ActionResult click(StateImage stateImage) {
 
 ## Version History
 
-- **1.1.0** - Upcoming release with enhanced API documentation
-- **1.0.7** - Current stable release (JavaDocs available online)
-- Previous versions available on [Maven Central](https://central.sonatype.com/artifact/io.github.jspinak/brobot/versions)
+- **1.1.0** - Current release (December 2024)
+  - Enhanced API documentation
+  - Improved Javadoc coverage
+  - Cross-platform build compatibility
+- **1.0.7** - Previous stable release
+- Earlier versions available on [Maven Central](https://central.sonatype.com/artifact/io.github.jspinak/brobot/versions)
 
 For detailed release notes, see the [GitHub Releases](https://github.com/jspinak/brobot/releases) page.
