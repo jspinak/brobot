@@ -474,8 +474,9 @@ javadoc {
     exclude '**/module-info.java.disabled'
     exclude '**/module-info.java.v1.1.0'
     exclude '**/*.md'
-    // Disable doclint checking
+    // Disable doclint checking for Java 8+
     if (JavaVersion.current().isJava8Compatible()) {
+        // This generates -Xdoclint:none correctly
         options.addBooleanOption('Xdoclint:none', true)
     }
     options.windowTitle = "Brobot 1.1.0 API" // This sets the browser tab title
@@ -521,9 +522,14 @@ task javadocForGitHubPages(type: Javadoc) {
     description = 'Generate JavaDocs for GitHub Pages deployment'
     group = 'documentation'
 
-    source = sourceSets.main.allJava
+    dependsOn delombok
+    source = delombok
     classpath = configurations.compileClasspath + sourceSets.main.output
     destinationDir = file("${buildDir}/docs/javadoc/${project.version}")
+
+    exclude '**/module-info.java.disabled'
+    exclude '**/module-info.java.v1.1.0'
+    exclude '**/*.md'
 
     // Copy all javadoc task options
     options {
@@ -538,8 +544,9 @@ task javadocForGitHubPages(type: Javadoc) {
         splitIndex = true
         encoding = 'UTF-8'
         charSet = 'UTF-8'
-        // Disable doclint checking
+        // Disable doclint checking for Java 8+
         if (JavaVersion.current().isJava8Compatible()) {
+            // This generates -Xdoclint:none correctly
             addBooleanOption('Xdoclint:none', true)
         }
 
