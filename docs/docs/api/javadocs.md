@@ -19,6 +19,8 @@ The complete JavaDocs for Brobot are available online:
 
 ## Maven Central Integration
 
+> **Note**: Version 1.1.0 will be available on Maven Central in September 2025. The JavaDocs are already available online.
+
 When you include Brobot in your project via Maven or Gradle, your IDE will automatically download and display the JavaDocs:
 
 ### Maven
@@ -26,13 +28,18 @@ When you include Brobot in your project via Maven or Gradle, your IDE will autom
 <dependency>
     <groupId>io.github.jspinak</groupId>
     <artifactId>brobot</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.0</version> <!-- Available September 2025 -->
 </dependency>
 ```
 
 ### Gradle
 ```groovy
-implementation 'io.github.jspinak:brobot:1.1.0'
+implementation 'io.github.jspinak:brobot:1.1.0' // Available September 2025
+```
+
+For now, you can use version 1.0.7:
+```groovy
+implementation 'io.github.jspinak:brobot:1.0.7' // Current version on Maven Central
 ```
 
 ## Generating JavaDocs Locally
@@ -159,10 +166,11 @@ public ActionResult click(StateImage stateImage) {
 
 ## Version History
 
-- **1.1.0** - Current release (December 2024)
-  - Enhanced API documentation
-  - Improved Javadoc coverage
-  - Cross-platform build compatibility
+- **1.1.0** - Latest release (September 2025)
+  - Enhanced API documentation with comprehensive Javadoc coverage
+  - Cross-platform build compatibility (Windows, Linux, macOS)
+  - Improved CI/CD pipeline with full test coverage
+  - Fixed Javadoc generation issues across all platforms
 - **1.0.7** - Previous stable release
 - Earlier versions available on [Maven Central](https://central.sonatype.com/artifact/io.github.jspinak/brobot/versions)
 
