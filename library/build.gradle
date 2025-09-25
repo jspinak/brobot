@@ -474,7 +474,10 @@ javadoc {
     exclude '**/module-info.java.disabled'
     exclude '**/module-info.java.v1.1.0'
     exclude '**/*.md'
-    options.addStringOption('Xdoclint:none', '-quiet')
+    // Disable doclint checking
+    if (JavaVersion.current().isJava8Compatible()) {
+        options.addBooleanOption('Xdoclint:none', true)
+    }
     options.windowTitle = "Brobot 1.1.0 API" // This sets the browser tab title
     options.docTitle = "Brobot 1.1.0 API" // This sets the main header on the page
 
@@ -535,7 +538,10 @@ task javadocForGitHubPages(type: Javadoc) {
         splitIndex = true
         encoding = 'UTF-8'
         charSet = 'UTF-8'
-        addStringOption('Xdoclint:none', '-quiet')
+        // Disable doclint checking
+        if (JavaVersion.current().isJava8Compatible()) {
+            addBooleanOption('Xdoclint:none', true)
+        }
 
         links(
             'https://docs.oracle.com/en/java/javase/21/docs/api/',
