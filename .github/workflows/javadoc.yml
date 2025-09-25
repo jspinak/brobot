@@ -39,7 +39,15 @@ jobs:
       - name: Prepare JavaDocs for deployment
         run: |
           mkdir -p _site/api
-          cp -r library/build/docs/javadoc/* _site/api/
+
+          # Copy only the versioned directories and symlinks, not the root files
+          # This ensures the package structure is preserved
+          if [ -d library/build/docs/javadoc/1.1.0 ]; then
+            cp -r library/build/docs/javadoc/1.1.0 _site/api/
+          fi
+          if [ -L library/build/docs/javadoc/latest ] || [ -d library/build/docs/javadoc/latest ]; then
+            cp -r library/build/docs/javadoc/latest _site/api/
+          fi
 
           # Create an index.html at the root that redirects to the latest version
           cat > _site/api/index.html << 'EOF'
