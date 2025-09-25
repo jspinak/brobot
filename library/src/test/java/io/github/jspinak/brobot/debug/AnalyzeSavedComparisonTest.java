@@ -9,10 +9,10 @@ import javax.imageio.ImageIO;
 import org.junit.jupiter.api.Test;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /** Analyze the saved comparison images from previous tests */
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Debug test requires real images and display")
 public class AnalyzeSavedComparisonTest extends BrobotTestBase {
 
     @Test

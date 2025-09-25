@@ -10,10 +10,11 @@ import org.sikuli.script.Screen;
 import org.sikuli.script.ScreenImage;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /** Tests that DPI awareness is properly disabled and captures occur at physical resolution. */
-@DisabledInCI
+@DisabledInHeadlessEnvironment(
+        "DPI awareness testing requires real display with actual DPI settings")
 public class DPIAwarenessDisablerTest extends BrobotTestBase {
 
     @Test

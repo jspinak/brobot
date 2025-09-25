@@ -10,7 +10,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.sikuli.script.Region;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -19,11 +18,9 @@ import io.github.jspinak.brobot.capture.provider.FFmpegCaptureProvider;
 import io.github.jspinak.brobot.capture.provider.RobotCaptureProvider;
 import io.github.jspinak.brobot.capture.provider.SikuliXCaptureProvider;
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
-@DisabledIfEnvironmentVariable(
-        named = "CI",
-        matches = "true",
-        disabledReason = "Test incompatible with CI environment")
+@DisabledInHeadlessEnvironment("Capture service integration tests require real display")
 class BrobotCaptureServiceIntegrationTest extends BrobotTestBase {
 
     private BrobotCaptureService service;

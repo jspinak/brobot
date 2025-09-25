@@ -9,13 +9,13 @@ import org.junit.jupiter.api.Test;
 import org.sikuli.basics.Settings;
 import org.sikuli.script.*;
 
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /**
  * Comprehensive diagnostic test to understand why patterns don't match despite SikuliX IDE showing
  * 0.99 similarity
  */
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Debug test requires real images and display")
 public class PatternMatchingDiagnosticTest extends DebugTestBase {
 
     @Test

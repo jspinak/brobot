@@ -10,13 +10,13 @@ import org.sikuli.script.*;
 
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /**
  * Test to verify what similarity threshold Brobot is actually using and compare with direct SikuliX
  * matching
  */
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Debug test requires real images and display")
 public class BrobotSimilarityTest extends BrobotTestBase {
 
     @Test

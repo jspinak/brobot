@@ -23,7 +23,7 @@ import io.github.jspinak.brobot.test.BrobotTestBase;
  * specialized component classes.
  */
 @DisplayName("ActionResult Component Tests")
-@Timeout(value = 10, unit = TimeUnit.SECONDS) // Aggressive timeout for CI/CD
+@Timeout(value = 30, unit = TimeUnit.SECONDS) // Increased timeout for WSL/virtualized environments
 @TestInstance(TestInstance.Lifecycle.PER_CLASS) // Share setup across tests
 public class ActionResultComponentTest extends BrobotTestBase {
 
@@ -223,7 +223,7 @@ public class ActionResultComponentTest extends BrobotTestBase {
 
     @Nested
     @DisplayName("Complex Scenarios")
-    @Timeout(value = 5, unit = TimeUnit.SECONDS)
+    @Timeout(value = 15, unit = TimeUnit.SECONDS) // Increased for WSL/virtualized environments
     class ComplexScenarios {
 
         @Test

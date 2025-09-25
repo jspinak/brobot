@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.*;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /**
  * Unit tests for SikuliMouseController. Tests basic functionality in mock mode without mocking
@@ -16,7 +16,7 @@ import io.github.jspinak.brobot.test.DisabledInCI;
  */
 @DisplayName("SikuliMouseController Unit Tests")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Mouse controller tests require display for mouse operations")
 public class SikuliMouseControllerUnitTest extends BrobotTestBase {
 
     private SikuliMouseController controller;

@@ -14,7 +14,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -25,6 +24,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import io.github.jspinak.brobot.config.core.ImagePathManager;
 import io.github.jspinak.brobot.config.core.SmartImageLoader;
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /**
  * Comprehensive tests for ImageLoadingDiagnosticsRunner. Tests diagnostic capabilities, environment
@@ -32,10 +32,7 @@ import io.github.jspinak.brobot.test.BrobotTestBase;
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ImageLoadingDiagnosticsRunner Tests")
-@DisabledIfEnvironmentVariable(
-        named = "CI",
-        matches = "true",
-        disabledReason = "Test incompatible with CI environment")
+@DisabledInHeadlessEnvironment("Image loading diagnostics require real display for proper testing")
 public class ImageLoadingDiagnosticsRunnerTest extends BrobotTestBase {
 
     @Mock private SmartImageLoader smartImageLoader;

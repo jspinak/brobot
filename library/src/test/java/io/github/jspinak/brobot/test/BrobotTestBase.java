@@ -84,6 +84,14 @@ public abstract class BrobotTestBase {
         System.setProperty("sikuli.console", "false");
         System.setProperty("sikuli.splashscreen", "false");
 
+        // Disable SikuliX shutdown hook to prevent HeadlessException
+        System.setProperty("sikuli.cleanshutdown", "false");
+        System.setProperty("sikuli.nocleanupatshutdown", "true");
+
+        // Force SikuliX to not use mouse/keyboard in tests
+        System.setProperty("sikuli.typeDelay", "0");
+        System.setProperty("sikuli.waitAfterHighlight", "0");
+
         // Set mock timings for fast test execution
         System.setProperty("brobot.mock.time.find.first", "0.01");
         System.setProperty("brobot.mock.time.find.all", "0.04");
@@ -96,6 +104,17 @@ public abstract class BrobotTestBase {
 
         // Enable mock mode using MockModeManager for proper synchronization
         MockModeManager.setMockMode(true);
+
+        // Initialize headless safety measures
+        SikuliXHeadlessSafetyWrapper.initializeHeadlessSafety();
+
+        // Log environment information for debugging
+        if (EnvironmentDetector.isWSL()
+                || EnvironmentDetector.isHeadless()
+                || EnvironmentDetector.isCI()) {
+            System.out.println(
+                    "Test Environment: " + EnvironmentDetector.getEnvironmentDescription());
+        }
     }
 
     /**

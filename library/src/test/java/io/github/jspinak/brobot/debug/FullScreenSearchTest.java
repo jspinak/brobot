@@ -11,10 +11,10 @@ import javax.imageio.ImageIO;
 import org.junit.jupiter.api.Test;
 import org.sikuli.script.*;
 
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /** Test to see if patterns can be found anywhere on screen, even if not at expected locations. */
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Debug test requires real images and display")
 public class FullScreenSearchTest extends DebugTestBase {
 
     @Test

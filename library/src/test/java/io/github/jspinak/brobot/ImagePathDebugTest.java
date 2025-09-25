@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.sikuli.script.ImagePath;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
+@DisabledInHeadlessEnvironment("Requires image files for path testing")
 public class ImagePathDebugTest extends BrobotTestBase {
 
     @Test

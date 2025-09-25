@@ -12,7 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 import io.github.jspinak.brobot.util.file.SaveToFile;
 import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
@@ -22,7 +22,7 @@ import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
  * capture and recording capabilities.
  */
 @ExtendWith(MockitoExtension.class)
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Screenshot recorder requires real display for continuous capture")
 public class ScreenshotRecorderTest extends BrobotTestBase {
 
     @Mock private SaveToFile saveToFile;

@@ -11,13 +11,14 @@ import org.sikuli.basics.Settings;
 import org.sikuli.script.*;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /**
  * Test that compares different screenshot capture methods to understand why SikuliX IDE achieves
  * 0.99 similarity while Brobot gets 0.70.
  */
-@DisabledInCI
+@DisabledInHeadlessEnvironment(
+        "Screenshot comparison requires real display for capturing and comparing screenshots")
 public class CompareIDEScreenshotTest extends BrobotTestBase {
 
     @Test

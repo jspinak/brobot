@@ -5,13 +5,13 @@ import org.sikuli.script.Region;
 import org.sikuli.script.Screen;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /**
  * Live test to highlight specific regions and see where they actually appear. Run this test and
  * observe where the highlights show up on your screen.
  */
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Debug test requires real images and display")
 public class LiveHighlightTest extends BrobotTestBase {
 
     @Test

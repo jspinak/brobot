@@ -7,7 +7,9 @@ import org.sikuli.script.ImagePath;
 import org.sikuli.script.Pattern;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
+@DisabledInHeadlessEnvironment("Requires image files for SikuliX path testing")
 public class SikuliXPathTest extends BrobotTestBase {
 
     @Test

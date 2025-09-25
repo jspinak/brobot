@@ -16,14 +16,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import io.github.jspinak.brobot.core.services.SikuliScreenCapture;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /**
  * Comprehensive test class for DirectRobotCapture functionality. Tests direct screen capture
  * operations using SikuliX Screen API.
  */
 @ExtendWith(MockitoExtension.class)
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Direct robot capture requires real display for screen operations")
 public class DirectRobotCaptureTest extends BrobotTestBase {
 
     private DirectRobotCapture directRobotCapture;

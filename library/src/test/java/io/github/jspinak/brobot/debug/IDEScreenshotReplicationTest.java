@@ -10,13 +10,13 @@ import javax.imageio.ImageIO;
 import org.junit.jupiter.api.Test;
 import org.sikuli.script.*;
 
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /**
  * Replicates EXACTLY how the IDE takes screenshots to compare with Brobot. This mimics the code
  * from PatternWindow.takeScreenshot() in the IDE.
  */
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Debug test requires real images and display")
 public class IDEScreenshotReplicationTest extends DebugTestBase {
 
     @Test

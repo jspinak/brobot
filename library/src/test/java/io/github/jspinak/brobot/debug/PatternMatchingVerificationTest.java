@@ -12,9 +12,9 @@ import org.sikuli.script.Match;
 import org.sikuli.script.Pattern;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Debug test requires real images and display")
 public class PatternMatchingVerificationTest extends BrobotTestBase {
 
     @Test

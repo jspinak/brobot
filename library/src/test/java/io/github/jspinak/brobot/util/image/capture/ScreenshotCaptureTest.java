@@ -19,13 +19,13 @@ import org.sikuli.script.Image;
 import org.sikuli.script.Screen;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 import io.github.jspinak.brobot.util.file.SaveToFile;
 
 /**
  * Test class for ScreenshotCapture functionality. Tests screenshot capture operations in mock mode.
  */
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Screenshot capture requires display for testing")
 public class ScreenshotCaptureTest extends BrobotTestBase {
 
     @Mock private SaveToFile saveToFile;

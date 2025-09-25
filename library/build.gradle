@@ -185,10 +185,19 @@ test {
     
     // Standard test logging
     testLogging {
-        events "passed", "skipped", "failed"
+        // Only show failed tests by default
+        events "failed"
         exceptionFormat "full"
         showStandardStreams = false
         showStackTraces = true
+        showCauses = true
+
+        // Optional: show summary at the end
+        afterSuite { desc, result ->
+            if (!desc.parent && result.failedTestCount > 0) {
+                println "\n${result.failedTestCount} tests FAILED out of ${result.testCount} total tests"
+            }
+        }
     }
     
     // Ensure test classes can access main classes
@@ -337,17 +346,49 @@ task e2eTest(type: Test) {
 task fastTest(type: Test) {
     description = 'Runs all tests except slow and E2E tests'
     group = 'verification'
-    
+
     useJUnitPlatform {
         excludeTags 'slow', 'e2e'
     }
-    
+
     maxParallelForks = Runtime.runtime.availableProcessors()
     forkEvery = 100
-    
+
     testLogging {
         events "failed"
         showStandardStreams = false
+    }
+}
+
+// Task to run tests and show only failures
+task testFailuresOnly(type: Test) {
+    description = 'Run tests and show only failures'
+    group = 'verification'
+
+    useJUnitPlatform()
+
+    testLogging {
+        events "failed"
+        exceptionFormat "short"
+        showStandardStreams = false
+        showStackTraces = false
+        showCauses = false
+
+        // Show a concise summary of failures
+        afterSuite { desc, result ->
+            if (!desc.parent) {
+                if (result.failedTestCount > 0) {
+                    println "\n============ TEST FAILURES ============"
+                    println "${result.failedTestCount} tests FAILED"
+                    println "${result.successfulTestCount} tests PASSED"
+                    println "${result.skippedTestCount} tests SKIPPED"
+                    println "Total: ${result.testCount} tests"
+                    println "======================================="
+                } else {
+                    println "\nAll ${result.testCount} tests PASSED!"
+                }
+            }
+        }
     }
 }
 
@@ -437,12 +478,115 @@ javadoc {
     options.windowTitle = "Brobot 1.1.0 API" // This sets the browser tab title
     options.docTitle = "Brobot 1.1.0 API" // This sets the main header on the page
 
+    // Enhanced JavaDoc options for better documentation
+    options.author = true
+    options.version = true
+    options.use = true
+    options.splitIndex = true
+    options.encoding = 'UTF-8'
+    options.charSet = 'UTF-8'
+
+    // Add links to external JavaDocs
+    options.links(
+        'https://docs.oracle.com/en/java/javase/21/docs/api/',
+        'https://docs.spring.io/spring-framework/docs/current/javadoc-api/',
+        'https://docs.spring.io/spring-boot/docs/current/api/',
+        'https://projectlombok.org/api/',
+        'https://www.slf4j.org/apidocs/'
+    )
+
+    // Custom footer with version and Maven Central link
+    options.bottom = """
+        <div style="text-align: center; padding: 10px; background-color: #f0f0f0; margin-top: 20px;">
+            <b>Brobot ${project.version}</b> -
+            <a href="https://github.com/jspinak/brobot">GitHub</a> |
+            <a href="https://central.sonatype.com/artifact/io.github.jspinak/brobot">Maven Central</a> |
+            <a href="https://jspinak.github.io/brobot">Documentation</a>
+        </div>
+    """.stripIndent()
+
     // Include compiled classes in classpath for Lombok-generated code
     classpath = configurations.compileClasspath + sourceSets.main.output
 
     // JavaDoc configuration that works with Lombok
     // We include the compiled output so JavaDoc can see Lombok-generated methods
     // Removed invalid -sourcepath option for modern Javadoc
+}
+
+// Task to generate JavaDocs in a format suitable for GitHub Pages
+task javadocForGitHubPages(type: Javadoc) {
+    description = 'Generate JavaDocs for GitHub Pages deployment'
+    group = 'documentation'
+
+    source = sourceSets.main.allJava
+    classpath = configurations.compileClasspath + sourceSets.main.output
+    destinationDir = file("${buildDir}/docs/javadoc/${project.version}")
+
+    // Copy all javadoc task options
+    options {
+        if(JavaVersion.current().isJava9Compatible()) {
+            addBooleanOption('html5', true)
+        }
+        windowTitle = "Brobot ${project.version} API"
+        docTitle = "Brobot ${project.version} API"
+        author = true
+        version = true
+        use = true
+        splitIndex = true
+        encoding = 'UTF-8'
+        charSet = 'UTF-8'
+        addStringOption('Xdoclint:none', '-quiet')
+
+        links(
+            'https://docs.oracle.com/en/java/javase/21/docs/api/',
+            'https://docs.spring.io/spring-framework/docs/current/javadoc-api/',
+            'https://docs.spring.io/spring-boot/docs/current/api/',
+            'https://projectlombok.org/api/',
+            'https://www.slf4j.org/apidocs/'
+        )
+
+        bottom = """
+            <div style="text-align: center; padding: 10px; background-color: #f0f0f0; margin-top: 20px;">
+                <b>Brobot ${project.version}</b> -
+                <a href="https://github.com/jspinak/brobot">GitHub</a> |
+                <a href="https://central.sonatype.com/artifact/io.github.jspinak/brobot/${project.version}">Maven Central</a> |
+                <a href="https://jspinak.github.io/brobot">Documentation</a>
+            </div>
+        """.stripIndent()
+    }
+
+    exclude '**/module-info.java.disabled'
+    exclude '**/module-info.java.v1.1.0'
+    exclude '**/*.md'
+}
+
+// Task to create a symlink for 'latest' JavaDocs
+task createLatestSymlink {
+    dependsOn javadocForGitHubPages
+    description = 'Create a latest symlink for JavaDocs'
+    group = 'documentation'
+
+    doLast {
+        def latestLink = file("${buildDir}/docs/javadoc/latest")
+        if (latestLink.exists()) {
+            latestLink.delete()
+        }
+        // Create an index.html that redirects to the versioned docs
+        latestLink.mkdirs()
+        file("${latestLink}/index.html").text = """
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="0; url=../${project.version}/index.html">
+    <title>Redirecting to latest JavaDocs</title>
+</head>
+<body>
+    <p>Redirecting to <a href="../${project.version}/index.html">latest JavaDocs (${project.version})</a>...</p>
+</body>
+</html>
+        """.stripIndent()
+    }
 }
 
 // -- Publishing Configuration --

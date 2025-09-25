@@ -12,10 +12,10 @@ import org.junit.jupiter.api.Test;
 import org.sikuli.script.*;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /** Extract and save the matched regions to compare with pattern images */
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Debug test requires real images and display")
 public class ExtractMatchedRegionTest extends BrobotTestBase {
 
     @Test

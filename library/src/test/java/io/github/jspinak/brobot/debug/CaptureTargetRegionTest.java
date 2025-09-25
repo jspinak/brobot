@@ -10,13 +10,13 @@ import org.junit.jupiter.api.Test;
 import org.sikuli.script.*;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.test.DisabledInCI;
+import io.github.jspinak.brobot.test.annotations.DisabledInHeadlessEnvironment;
 
 /**
  * Test to capture the specific regions where patterns should be found and compare them with the
  * pattern images
  */
-@DisabledInCI
+@DisabledInHeadlessEnvironment("Debug test requires real images and display")
 public class CaptureTargetRegionTest extends BrobotTestBase {
 
     @Test
