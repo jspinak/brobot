@@ -474,10 +474,15 @@ javadoc {
     exclude '**/module-info.java.disabled'
     exclude '**/module-info.java.v1.1.0'
     exclude '**/*.md'
-    // Disable doclint checking for Java 8+
-    if (JavaVersion.current().isJava8Compatible()) {
-        // This generates -Xdoclint:none correctly
+    // Platform-specific handling for Xdoclint
+    // On Windows CI, addBooleanOption('Xdoclint:none', true) causes "invalid flag: -" error
+    def isWindows = System.getProperty("os.name").toLowerCase().contains("windows")
+    if (!isWindows && JavaVersion.current().isJava8Compatible()) {
+        // Only add on non-Windows systems where it works
         options.addBooleanOption('Xdoclint:none', true)
+    } else if (isWindows) {
+        // For Windows, try to suppress warnings differently
+        options.addBooleanOption('quiet', true)
     }
     options.windowTitle = "Brobot 1.1.0 API" // This sets the browser tab title
     options.docTitle = "Brobot 1.1.0 API" // This sets the main header on the page
@@ -544,10 +549,14 @@ task javadocForGitHubPages(type: Javadoc) {
         splitIndex = true
         encoding = 'UTF-8'
         charSet = 'UTF-8'
-        // Disable doclint checking for Java 8+
-        if (JavaVersion.current().isJava8Compatible()) {
-            // This generates -Xdoclint:none correctly
+        // Platform-specific handling for Xdoclint
+        def isWindows = System.getProperty("os.name").toLowerCase().contains("windows")
+        if (!isWindows && JavaVersion.current().isJava8Compatible()) {
+            // Only add on non-Windows systems where it works
             addBooleanOption('Xdoclint:none', true)
+        } else if (isWindows) {
+            // For Windows, try to suppress warnings differently
+            addBooleanOption('quiet', true)
         }
 
         links(
