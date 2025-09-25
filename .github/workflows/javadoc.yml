@@ -30,18 +30,16 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
-        working-directory: ./brobot
 
       - name: Generate JavaDocs
         run: |
           ./gradlew :library:javadocForGitHubPages
           ./gradlew :library:createLatestSymlink
-        working-directory: ./brobot
 
       - name: Prepare JavaDocs for deployment
         run: |
           mkdir -p _site/api
-          cp -r brobot/library/build/docs/javadoc/* _site/api/
+          cp -r library/build/docs/javadoc/* _site/api/
 
           # Create an index.html at the root that redirects to the latest version
           cat > _site/api/index.html << 'EOF'
