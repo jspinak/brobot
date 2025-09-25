@@ -39,7 +39,28 @@ jobs:
       run: |
         echo "Building on ${{ matrix.os }}..."
         if [[ "$RUNNER_OS" == "Windows" ]]; then
+          # Run build and capture exit code
           ./gradlew.bat build -x test --no-daemon --stacktrace
+          BUILD_EXIT_CODE=$?
+
+          # If build failed on Windows, capture javadoc options for debugging
+          if [ $BUILD_EXIT_CODE -ne 0 ]; then
+            echo "Build failed with exit code $BUILD_EXIT_CODE, capturing javadoc.options file for debugging..."
+            if [ -f library/build/tmp/javadoc/javadoc.options ]; then
+              echo "===== JAVADOC OPTIONS FILE CONTENT ====="
+              cat library/build/tmp/javadoc/javadoc.options
+              echo ""
+              echo "===== CHECKING FOR PROBLEMATIC PATTERNS ====="
+              grep -n " -$" library/build/tmp/javadoc/javadoc.options || echo "No trailing dash found"
+              grep -n "' -" library/build/tmp/javadoc/javadoc.options || echo "No quote-dash pattern found"
+              echo "===== HEX DUMP OF OPTIONS FILE (first 500 bytes) ====="
+              xxd -l 500 library/build/tmp/javadoc/javadoc.options 2>/dev/null || od -c library/build/tmp/javadoc/javadoc.options | head -20
+              echo "========================================="
+            else
+              echo "javadoc.options file not found at library/build/tmp/javadoc/javadoc.options"
+            fi
+            exit $BUILD_EXIT_CODE
+          fi
         else
           ./gradlew build -x test --no-daemon --stacktrace
         fi
