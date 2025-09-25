@@ -468,6 +468,35 @@ task coverageReport {
 javadoc {
     dependsOn compileJava
 
+    // Debug logging for CI
+    doFirst {
+        println "===== JAVADOC DEBUG INFO ====="
+        println "OS Name: ${System.getProperty('os.name')}"
+        println "OS Version: ${System.getProperty('os.version')}"
+        println "OS Arch: ${System.getProperty('os.arch')}"
+        println "Java Version: ${JavaVersion.current()}"
+        println "Java Home: ${System.getProperty('java.home')}"
+        println "Gradle Version: ${gradle.gradleVersion}"
+        println "Is Windows: ${System.getProperty('os.name').toLowerCase().contains('windows')}"
+        println "=============================="
+    }
+
+    // After javadoc execution, dump the options file for debugging
+    doLast {
+        def optionsFile = file("${buildDir}/tmp/javadoc/javadoc.options")
+        if (optionsFile.exists()) {
+            println "===== JAVADOC OPTIONS FILE ====="
+            println optionsFile.text
+            println "================================"
+
+            // Check for problematic patterns
+            def content = optionsFile.text
+            if (content.contains(" -\n") || content.contains(" -\r") || content.contains("' -") || content.contains("\" -")) {
+                println "WARNING: Found potential 'invalid flag: -' pattern in options file"
+            }
+        }
+    }
+
     if(JavaVersion.current().isJava9Compatible()) {
         options.addBooleanOption('html5', true)
     }
