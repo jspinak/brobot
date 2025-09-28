@@ -80,6 +80,13 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      announcementBar: {
+        id: 'doc_review',
+        content: '📚 Documentation for v1.1.0 is under active review and improvement. Code and JavaDocs are final. <a href="https://central.sonatype.com/artifact/io.github.jspinak/brobot/1.1.0">v1.1.0 now available on Maven Central!</a>',
+        backgroundColor: '#fafbfc',
+        textColor: '#091E42',
+        isCloseable: true,
+      },
       navbar: {
         title: 'Brobot', // Changed from 'Home' for clarity
         logo: {

@@ -7,7 +7,8 @@
 
 <p>
   <a href="https://jspinak.github.io/brobot/docs/getting-started/quick-start"><img src="https://img.shields.io/badge/docs-quickstart-blue" alt="Quickstart"></a>
-  <a href="https://maven-badges.herokuapp.com/maven-central/io.github.jspinak/brobot"><img src="https://img.shields.io/maven-central/v/io.github.jspinak/brobot.svg?label=Maven%20Central" alt="Maven Central"></a>
+  <a href="https://central.sonatype.com/artifact/io.github.jspinak/brobot"><img src="https://img.shields.io/maven-central/v/io.github.jspinak/brobot.svg?label=Maven%20Central" alt="Maven Central"></a>
+  <a href="https://jspinak.github.io/brobot/api/latest/"><img src="https://img.shields.io/badge/javadoc-1.1.0-blue.svg" alt="Javadocs"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License: MIT"></a>
   <a href="https://github.com/jspinak/brobot/actions"><img src="https://img.shields.io/github/actions/workflow/status/jspinak/brobot/main.yml?branch=main" alt="Build Status"></a>
   <a href="https://jspinak.github.io/brobot"><img src="https://img.shields.io/badge/website-live-brightgreen" alt="Website"></a>
@@ -55,6 +56,8 @@ stateNavigator.openState("login");
 ## 🚀 Quick Start
 
 ### Installation
+
+> **🎉 Version 1.1.0 is now available on Maven Central!** This is the final major release of Brobot with comprehensive documentation, enhanced CI/CD support, and full cross-platform compatibility.
 
 #### Maven
 ```xml
