@@ -44,10 +44,4 @@ public @interface IncomingTransition {
      */
     String description() default "";
 
-    /**
-     * Timeout for verifying arrival in seconds. Default is 5 seconds.
-     *
-     * @return the timeout in seconds
-     */
-    int timeout() default 5;
 }

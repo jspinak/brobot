@@ -94,8 +94,6 @@ public class IslandTransitions {
         description = "Capture new island (re-enter Island from World)"
     )
     public boolean captureNewIsland() {
-        // Since both World and Island are active (Island overlays World),
-        // this transition from World back to Island to capture another island
         // This properly uses the state management system
         return action.click(worldState.getNextIsland()).isSuccess();
     }
@@ -112,8 +110,6 @@ public class IslandTransitions {
 - Pagination (loading more results)
 - Sorting or filtering lists
 - Refreshing data
-- Expanding/collapsing sections
-- Form validation errors
 - Toggling view modes
 
 ```java
@@ -153,14 +149,21 @@ public class SearchResultsTransitions {
 }
 ```
 
-**When to use CurrentState**:
-- Actions that modify the current page without navigation
-- Data refresh operations
-- In-page interactions (sorting, filtering, pagination)
-- UI state changes (expand/collapse, show/hide)
-- Form submissions that stay on the same page (validation errors)
-- Re-entering an active state from another active state (overlapping states)
-- Game scenarios where capturing items doesn't change the active state
+**When to use CurrentState transitions** (vs. helper methods):
+- **Re-entering from overlapping states**: When transitioning from one active state back to another that remains active (e.g., Island → Island via World in tutorial-basics)
+- **Actions requiring pathfinding**: When you need the framework to navigate to this state as part of a longer path
+- **State-tracked operations**: When you want the state management system to track this as a transition
+- **Page refreshes**: Operations that reload or refresh the entire page content
+- **View mode changes**: Switching between different views of the same conceptual page (list/grid, compact/expanded)
+
+**When to use helper methods instead**:
+- **Direct manipulation**: Operations you call directly without needing pathfinding (pagination, sorting, filtering)
+- **Multiple similar operations**: When you'd need many transitions to CurrentState (would confuse pathfinder)
+- **Simple UI changes**: Basic interactions that don't warrant transition tracking (expand/collapse, show/hide)
+- **Form interactions**: Typing, selecting, toggling within a form
+- **Quick actions**: Operations that are too granular to be considered state transitions
+
+**Rule of thumb**: If you're calling the method directly and don't need pathfinding to reach it, use a helper method. If the framework should be able to navigate to this operation as part of a path, use a CurrentState transition.
 
 ### ExpectedState - Runtime-Determined (Not Yet Implemented)
 
@@ -169,6 +172,33 @@ public class SearchResultsTransitions {
 **Current alternatives**: Most "expected state" scenarios can be handled today using:
 
 1. **Multiple transitions with different path costs**:
+```java
+// Multiple ways to reach the same destination with different costs
+// Brobot will prefer lower-cost paths when multiple options are available
+
+@OutgoingTransition(activate = {SettingsPage.class}, pathCost = 0)
+public boolean settingsViaKeyboard() {
+    // Fastest way - keyboard shortcut
+    return action.type("{CTRL+,}").isSuccess();
+}
+
+@OutgoingTransition(activate = {SettingsPage.class}, pathCost = 3)
+public boolean settingsViaMenu() {
+    // Slower way - through menu system
+    action.click(menuButton);
+    return action.click(settingsMenuItem).isSuccess();
+}
+
+@OutgoingTransition(activate = {SettingsPage.class}, pathCost = 10)
+public boolean settingsViaUrl() {
+    // Slowest/most expensive - navigate via home then settings
+    action.click(homeButton);
+    action.click(profileIcon);
+    return action.click(settingsLink).isSuccess();
+}
+```
+
+2. **Conditional logic in transition methods**:
 ```java
 @OutgoingTransition(activate = {AdminDashboard.class}, pathCost = 0)
 public boolean loginAsAdmin() {
@@ -180,26 +210,6 @@ public boolean loginAsAdmin() {
 public boolean loginAsUser() {
     if (user.isAdmin()) return false;
     return performLogin();
-}
-```
-
-2. **Conditional logic in transition methods**:
-```java
-@OutgoingTransition(activate = {HomePage.class}, pathCost = 0)
-public boolean navigateToHome() {
-    // The HomePage state can handle different user types internally
-    return action.click(homeButton).isSuccess();
-}
-```
-
-3. **State detection after transition**:
-```java
-// Let the framework detect which state we ended up in
-@OutgoingTransition(activate = {HomePage.class}, pathCost = 10)
-public boolean attemptNavigation() {
-    action.click(navigationButton);
-    // Framework will verify actual state after transition
-    return true;
 }
 ```
 
@@ -235,8 +245,8 @@ public class UnknownStateTransitions {
         description = "Recover to login if session expired"
     )
     public boolean recoverToLogin() {
-        // Navigate to login page
-        return action.goToUrl(loginUrl).isSuccess();
+        // Try to navigate to login page via home button or known element
+        return action.click(homeButton).isSuccess();
     }
 }
 
@@ -244,33 +254,88 @@ public class UnknownStateTransitions {
 // @OutgoingTransition(activate = {UnknownState.class}) // ❌ DON'T DO THIS
 ```
 
+### How the Framework Selects Recovery Paths
+
+When the automation is in UnknownState and needs to reach a target state (e.g., DashboardState), the framework uses a sophisticated pathfinding algorithm:
+
+**The Process:**
+1. **Find All Paths**: The pathfinder discovers ALL possible paths from UnknownState to the target state
+2. **Calculate Total Costs**: For each path, it sums up:
+   - All state costs along the path
+   - All transition costs along the path
+3. **Sort by Cost**: Paths are sorted by their total cost
+4. **Execute Lowest-Cost Path**: The framework attempts the path with the lowest total cost first
+
+**Important:** The framework doesn't simply choose based on individual transition costs from UnknownState. It evaluates complete paths to the destination.
+
+**Example Scenario:**
+
+```java
+// Suppose we want to reach DashboardState from UnknownState
+// Two possible paths exist:
+
+// Path A: Unknown → Home → Dashboard
+//   - Unknown → Home transition: pathCost = 12
+//   - Home → Dashboard transition: pathCost = 5
+//   - Total: 17
+
+// Path B: Unknown → Login → Dashboard
+//   - Unknown → Login transition: pathCost = 10
+//   - Login → Dashboard transition: pathCost = 8
+//   - Total: 18
+
+// The framework chooses Path A (total cost 17) even though the first
+// transition from Unknown to Login has a lower individual cost (10).
+```
+
+**Key Insight:** Even though `recoverToLogin()` has a lower cost (10) than `recoverToHome()` (12), the framework might still choose the home path if subsequent transitions make it more efficient overall. The pathfinding algorithm considers the **complete journey**, not just the first step.
+
+**Practical Implications:**
+- Design your transition costs considering the full navigation graph
+- Lower-cost recovery transitions don't guarantee selection if they lead to longer overall paths
+- The framework will try alternative paths if the lowest-cost path fails
+
 ## Complete Working Example: Special States
 
 The following is a complete, tested example from the special-states-example project that demonstrates PreviousState and CurrentState in action. The full project is available at `examples/03-core-library/guides/dynamic-transitions/special-states-example/`.
 
+### Understanding the Hidden State Mechanism
+
+For PreviousState transitions to work, the framework needs to know which states can be hidden by the covering state. This is configured in the State definition using `.canHide()`:
+
+**How it works:**
+1. **State Definition**: The covering state (e.g., ModalDialog) declares which states it can hide using `.canHide("StateName1", "StateName2")`
+2. **Transition Occurs**: When transitioning TO the covering state with `staysVisible = true` on the source state, the framework checks if any currently active states are in the covering state's `canHide` list
+3. **States Hidden**: Matching active states are moved from "active" to "hidden" status
+4. **PreviousState Transition**: When the covering state executes a transition with `activate = {PreviousState.class}`, the framework returns to the hidden state
+
+**Important:** You must list ALL states that this state might potentially hide. If a state isn't in the `canHide` list, it won't be tracked as hidden, and PreviousState transitions won't be able to return to it.
+
 ### Modal Dialog State with PreviousState
+
+The modal dialog state must specify which states it can hide using `canHide()` in the State.Builder:
 
 ```java
 package com.example.specialstates.states;
 
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.annotations.State;
+import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.state.StateImage;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Modal dialog state that overlays the main page. This state hides whatever state was active before
- * it.
+ * Modal dialog state that overlays other pages. It specifies which states can be hidden
+ * when the modal appears.
  */
-@State(description = "Modal dialog overlay")
 @Component
 @Getter
 @Slf4j
 public class ModalDialogState {
 
+    private final State state;
     private final StateImage dialogTitle;
     private final StateImage confirmButton;
     private final StateImage cancelButton;
@@ -293,6 +358,12 @@ public class ModalDialogState {
                         .addPatterns("closeBtn", "xButton")
                         .setName("closeButton")
                         .build();
+
+        // IMPORTANT: Specify which states this modal can hide
+        state = new State.Builder("ModalDialog")
+                .withImages(dialogTitle, confirmButton, cancelButton, closeButton)
+                .canHide("MainPage", "SettingsPage")  // List all states that can be hidden
+                .build();
     }
 }
 ```
@@ -330,45 +401,21 @@ public class ModalDialogTransitions {
 
     @IncomingTransition
     public boolean verifyArrival() {
-        log.info("Verifying arrival at ModalDialog");
-        // In mock mode, always return true
-        return true;
+        return action.find(modalDialogState.getDialogTitle()).isSuccess();
     }
 
     @OutgoingTransition(
             activate = {PreviousState.class}, // Return to whatever state was hidden
             staysVisible = false, // Modal closes completely
             pathCost = 0,
-            description = "Confirm and close modal, returning to previous state")
-    public boolean confirmAndClose() {
-        log.info("Confirming and closing modal - returning to PreviousState");
-        log.info("This should return to whatever state was hidden (MainPage or SettingsPage)");
-        // In mock mode, just return true
-        return true;
-    }
-
-    @OutgoingTransition(
-            activate = {PreviousState.class}, // Return to whatever state was hidden
-            staysVisible = false, // Modal closes completely
-            pathCost = 0,
-            description = "Cancel and close modal, returning to previous state")
-    public boolean cancelAndClose() {
-        log.info("Cancelling and closing modal - returning to PreviousState");
-        log.info("This should return to whatever state was hidden (MainPage or SettingsPage)");
-        // In mock mode, just return true
-        return true;
-    }
-
-    @OutgoingTransition(
-            activate = {PreviousState.class}, // Return to whatever state was hidden
-            staysVisible = false, // Modal closes completely
-            pathCost = 0,
-            description = "Close modal with X button, returning to previous state")
+            description = "Close modal and return to previous state")
     public boolean closeModal() {
-        log.info("Closing modal with X button - returning to PreviousState");
-        log.info("This should return to whatever state was hidden (MainPage or SettingsPage)");
-        // In mock mode, just return true
-        return true;
+        // Use ObjectCollection to accept either confirm or cancel button
+        ObjectCollection closeButtons = new ObjectCollection.Builder()
+                .withImages(modalDialogState.getConfirmButton(),
+                           modalDialogState.getCancelButton())
+                .build();
+        return action.click(closeButtons).isSuccess();
     }
 }
 ```
@@ -405,9 +452,7 @@ public class MainPageTransitions {
 
     @IncomingTransition
     public boolean verifyArrival() {
-        log.info("Verifying arrival at MainPage");
-        // In mock mode, always return true
-        return true;
+        return action.find(mainPageState.getMainContent()).isSuccess();
     }
 
     @OutgoingTransition(
@@ -416,9 +461,7 @@ public class MainPageTransitions {
             pathCost = 0,
             description = "Open modal dialog over main page")
     public boolean openModal() {
-        log.info("Opening modal dialog from MainPage");
-        // In mock mode, just return true
-        return true;
+        return action.click(mainPageState.getOpenModalButton()).isSuccess();
     }
 
     @OutgoingTransition(
@@ -426,8 +469,7 @@ public class MainPageTransitions {
             pathCost = 1,
             description = "Navigate to settings page")
     public boolean toSettings() {
-        log.info("Navigating from MainPage to Settings");
-        return true;
+        return action.click(mainPageState.getSettingsButton()).isSuccess();
     }
 
     @OutgoingTransition(
@@ -435,24 +477,14 @@ public class MainPageTransitions {
             pathCost = 2,
             description = "Refresh main page")
     public boolean refresh() {
-        log.info("Refreshing MainPage (self-transition using CurrentState)");
-        // This demonstrates a self-transition
-        return true;
-    }
-
-    @OutgoingTransition(
-            activate = {CurrentState.class}, // Self-transition
-            pathCost = 3,
-            description = "Load next page of results")
-    public boolean nextPage() {
-        log.info("Loading next page of results (self-transition using CurrentState)");
-        // Another self-transition example
-        return true;
+        return action.click(mainPageState.getRefreshButton()).isSuccess();
     }
 }
 ```
 
-### Generic Data Grid Example with Self-Transitions
+### Data Grid Helper Methods (Not Transitions)
+
+For data grid operations like pagination, sorting, and filtering that don't change the conceptual state, use regular helper methods instead of transitions:
 
 ```java
 @TransitionSet(state = DataGridState.class)
@@ -461,84 +493,175 @@ public class DataGridTransitions {
     private final DataGridState grid;
     private final Action action;
 
-    @OutgoingTransition(
-        activate = {CurrentState.class},  // Stay in same state
-        pathCost = 5,
-        description = "Load next page of data"
-    )
+    @IncomingTransition
+    public boolean verifyArrival() {
+        return action.find(grid.getDataTable()).isSuccess();
+    }
+
+    // These are helper methods, NOT @OutgoingTransition
+    // They manipulate the grid but don't trigger pathfinding
+
+    /**
+     * Navigate to next page of results.
+     * Call directly when you need pagination.
+     */
     public boolean nextPage() {
         return action.click(grid.getNextPageButton()).isSuccess();
     }
 
-    @OutgoingTransition(
-        activate = {CurrentState.class},
-        pathCost = 5,
-        description = "Load previous page of data"
-    )
+    /**
+     * Navigate to previous page of results.
+     */
     public boolean previousPage() {
         return action.click(grid.getPrevPageButton()).isSuccess();
     }
 
-    @OutgoingTransition(
-        activate = {CurrentState.class},
-        pathCost = 3,
-        description = "Sort by column"
-    )
+    /**
+     * Sort data by clicking column header.
+     */
     public boolean sortByColumn() {
         return action.click(grid.getColumnHeader()).isSuccess();
     }
 
-    @OutgoingTransition(
-        activate = {CurrentState.class},
-        pathCost = 2,
-        description = "Apply filter"
-    )
-    public boolean applyFilter() {
-        action.type(grid.getFilterInput(), filterText);
+    /**
+     * Apply filter to the data grid.
+     */
+    public boolean applyFilter(String filterText) {
+        action.click(grid.getFilterInput());
+        action.type(filterText);
         return action.click(grid.getApplyButton()).isSuccess();
+    }
+
+    // If you need to navigate AWAY from the data grid, use @OutgoingTransition
+    @OutgoingTransition(activate = {DashboardState.class}, pathCost = 1)
+    public boolean backToDashboard() {
+        return action.click(grid.getBackButton()).isSuccess();
     }
 }
 ```
 
+**Why not use CurrentState transitions?**
+- These operations don't need pathfinding - you call them directly
+- Having multiple transitions to the same destination (CurrentState) would confuse the pathfinder
+- Helper methods are simpler and more appropriate for UI manipulation within a state
+
 ### Multi-Level Overlays
 
+For multi-level overlays, each covering state must specify what it can hide:
+
 ```java
-// Settings can be covered by Menu
-@State
-public class SettingsPage {
-    // Settings page elements
+// Settings page - base layer
+@Component
+@Getter
+public class SettingsPageState {
+    private final State state;
+    private final StateImage settingsPanel;
+
+    public SettingsPageState() {
+        settingsPanel = new StateImage.Builder()
+                .addPatterns("settingsPanel")
+                .setName("settingsPanel")
+                .build();
+
+        state = new State.Builder("SettingsPage")
+                .withImages(settingsPanel)
+                // Settings doesn't hide anything - it's a base page
+                .build();
+    }
 }
 
-// Menu can cover any page
-@State
-public class MenuOverlay {
-    // Menu elements
+// Menu can cover Settings (and other pages)
+@Component
+@Getter
+public class MenuOverlayState {
+    private final State state;
+    private final StateImage menuContainer;
+    private final StateImage closeButton;
+
+    public MenuOverlayState() {
+        menuContainer = new StateImage.Builder()
+                .addPatterns("menuContainer")
+                .setName("menuContainer")
+                .build();
+
+        closeButton = new StateImage.Builder()
+                .addPatterns("menuCloseBtn")
+                .setName("closeButton")
+                .build();
+
+        state = new State.Builder("MenuOverlay")
+                .withImages(menuContainer, closeButton)
+                .canHide("SettingsPage", "HomePage", "ProfilePage")  // Can cover multiple pages
+                .build();
+    }
 }
 
-// Help can cover the Menu
-@State
-public class HelpDialog {
-    // Help dialog elements
+// Help dialog can cover the Menu
+@Component
+@Getter
+public class HelpDialogState {
+    private final State state;
+    private final StateImage dialogTitle;
+    private final StateImage closeButton;
+
+    public HelpDialogState() {
+        dialogTitle = new StateImage.Builder()
+                .addPatterns("helpDialogTitle")
+                .setName("dialogTitle")
+                .build();
+
+        closeButton = new StateImage.Builder()
+                .addPatterns("helpCloseBtn", "xButton")
+                .setName("closeButton")
+                .build();
+
+        state = new State.Builder("HelpDialog")
+                .withImages(dialogTitle, closeButton)
+                .canHide("MenuOverlay")  // Can cover the menu
+                .build();
+    }
 }
 
 // Transitions maintain the hidden state stack
-@TransitionSet(state = HelpDialog.class)
+@TransitionSet(state = HelpDialogState.class)
+@Component
+@RequiredArgsConstructor
 public class HelpDialogTransitions {
+    private final HelpDialogState helpDialogState;
+    private final Action action;
+
     @OutgoingTransition(activate = {PreviousState.class}, pathCost = 0)
     public boolean closeHelp() {
-        // Returns to Menu (which is covering Settings)
-        return action.click(closeButton).isSuccess();
+        // Returns to MenuOverlay (which is covering SettingsPage)
+        return action.click(helpDialogState.getCloseButton()).isSuccess();
     }
 }
 
-@TransitionSet(state = MenuOverlay.class)
+@TransitionSet(state = MenuOverlayState.class)
+@Component
+@RequiredArgsConstructor
 public class MenuTransitions {
+    private final MenuOverlayState menuOverlayState;
+    private final Action action;
+
     @OutgoingTransition(activate = {PreviousState.class}, pathCost = 0)
     public boolean closeMenu() {
-        // Returns to Settings (or whatever was covered)
-        return action.click(closeButton).isSuccess();
+        // Returns to SettingsPage (or whichever page was covered)
+        return action.click(menuOverlayState.getCloseButton()).isSuccess();
     }
 }
+```
+
+**Stack Visualization:**
+```
+User opens Settings → Menu → Help
+
+Active: HelpDialog
+Hidden by Help: MenuOverlay
+Hidden by Menu: SettingsPage
+
+User closes Help (PreviousState) → MenuOverlay becomes active
+User closes Menu (PreviousState) → SettingsPage becomes active
 ```
 
 ## Decision Guide
@@ -606,11 +729,8 @@ Ensure overlays have clear visual indicators for state detection:
 ```java
 @State
 public class DialogState {
-    @StateImage
-    private StateImage dialogHeader;  // Unique to this dialog
-
-    @StateImage
-    private StateImage darkOverlay;   // Common overlay indicator
+    private StateImage dialogHeader;  
+    private StateImage darkOverlay;   
 }
 ```
 
@@ -654,35 +774,39 @@ The processor recognizes special marker classes and handles them appropriately:
 ```java
 @Component
 public class TransitionSetProcessor {
-    // Detects when to = PreviousState.class or CurrentState.class
-    // Sets special state IDs instead of regular state names
+    // Detects when activate = {PreviousState.class} or {CurrentState.class}
+    // Sets special state IDs (-2L, -3L) instead of regular state names
     // Enables dynamic resolution at runtime
 }
 ```
 
-### SetHiddenStates
+### StateVisibilityManager
 
-Manages the registration and tracking of hidden states:
+Manages the conversion of active states to hidden states during transitions:
 
 ```java
 @Component
-public class SetHiddenStates {
-    // Automatically invoked when states change
-    public void setHiddenStates(State coveringState, Set<State> coveredStates) {
-        // Registers which states are hidden by the covering state
+public class StateVisibilityManager {
+    // Invoked when a new state becomes active
+    public boolean set(Long stateToSet) {
+        // Examines currently active states
+        // Moves states to hidden if they match the new state's canHide list
+        // Removes hidden states from StateMemory's active list
+        return true;
     }
 }
 ```
 
 ### StateMemory
 
-Maintains the history of state transitions and hidden states:
+Maintains runtime memory of currently active states:
 
 ```java
 @Component
 public class StateMemory {
-    // Tracks the sequence of state activations
-    // Used to determine the "previous" state for dynamic transitions
+    // Tracks which states are currently active
+    // Provides active state list for visibility decisions
+    // Updated when states are hidden or activated
 }
 ```
 
@@ -691,10 +815,57 @@ public class StateMemory {
 ### Hidden State Not Found
 
 If a dynamic transition fails to find the previous state:
-1. Check that states are properly detecting overlays
-2. Verify StateImage definitions don't overlap incorrectly
-3. Ensure the covering state is properly registered
-4. Check logs for state transition history
+1. **Check `canHide` configuration**: Ensure the covering state's `.canHide()` list includes the state name
+2. **Verify state names match**: The names in `.canHide()` must exactly match the state names in State.Builder
+3. Check that states are properly detecting overlays
+4. Verify StateImage definitions don't overlap incorrectly
+5. Ensure the covering state is properly registered
+6. Check logs for state transition history
+
+**Common mistake - State name mismatch:**
+
+When using `.canHide()`, you must provide the **state name** (not the class name). With `@State` annotation (version 1.1.0+), the state name is automatically derived by removing the "State" suffix from the class name.
+
+```java
+@State
+@Getter
+public class MainPageState {  // Class: MainPageState, State name: "MainPage"
+    // ... state images ...
+}
+
+@State
+@Getter
+public class ModalDialogState {
+    private final State state;
+
+    public ModalDialogState() {
+        state = new State.Builder("ModalDialog")
+                .canHide("MainPageState")  // ❌ Wrong! This is the class name
+                .build();
+    }
+}
+
+@State
+@Getter
+public class ModalDialogState {
+    private final State state;
+
+    public ModalDialogState() {
+        state = new State.Builder("ModalDialog")
+                .canHide("MainPage")  // ✅ Correct! State name without "State" suffix
+                .build();
+    }
+}
+```
+
+**Key points:**
+- With `@State` annotation, the state name = class name minus "State" suffix
+  - `MainPageState` → state name is `"MainPage"`
+  - `ModalDialogState` → state name is `"ModalDialog"`
+- `.canHide("StateName")` must use the **state name**, not the class name
+- `.canHide()` is defined in the **covering/overlay** state (e.g., Modal, Menu)
+- When the modal opens over MainPage, Brobot checks: "Is 'MainPage' in modal's canHide list?"
+- If yes, MainPage becomes hidden and PreviousState transitions will work
 
 ### Self-Transitions Not Working
 
@@ -702,32 +873,6 @@ If CurrentState transitions aren't working:
 1. Verify the action actually completes
 2. Check that the state detection still passes after the action
 3. Ensure the UI change doesn't trigger a different state detection
-
-### Multiple States Claiming to be Active
-
-This can happen with poor state definition:
-1. Make StateImages more specific
-2. Use unique identifiers for each state
-3. Adjust pattern matching thresholds
-4. Consider using state priorities
-
-## Migration from Old Annotations
-
-If you have old code using the deprecated `@Transition` annotation:
-
-```java
-// OLD (no longer supported)
-@Transition(from = MenuState.class, to = PreviousState.class)
-
-// NEW
-@TransitionSet(state = MenuState.class)
-public class MenuTransitions {
-    @OutgoingTransition(to = PreviousState.class, pathCost = 0)
-    public boolean closeToPrevious() {
-        // Implementation
-    }
-}
-```
 
 ## Summary
 

@@ -37,11 +37,6 @@ public class HomeTransitions {
             description = "Navigate from Home to World")
     public boolean toWorld() {
         log.info("Navigating from Home to World");
-        // In mock mode, just return true for testing
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
-            log.info("Mock mode: simulating successful navigation");
-            return true;
-        }
         // Click the world button using Home's image
         return action.click(homeState.getToWorldButton()).isSuccess();
     }
@@ -53,14 +48,8 @@ public class HomeTransitions {
             description = "Navigate from Home to Island")
     public boolean toIsland() {
         log.info("Navigating from Home to Island");
-        // In mock mode, just return true for testing
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
-            log.info("Mock mode: simulating successful navigation");
-            return true;
-        }
         // TODO: Add island shortcut to HomeState and implement navigation
-        // For now, return true in mock mode only
-        return true;
+        return false;
     }
 
     /**
@@ -70,12 +59,6 @@ public class HomeTransitions {
     @IncomingTransition(description = "Verify arrival at Home state")
     public boolean verifyArrival() {
         log.info("Verifying arrival at Home state");
-        // In mock mode, just return true for testing
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
-            log.info("Mock mode: simulating successful verification");
-            return true;
-        }
-
         // Check for presence of home-specific elements
         boolean foundWorldButton = action.find(homeState.getToWorldButton()).isSuccess();
         boolean foundSearchButton = action.find(homeState.getSearchButton()).isSuccess();

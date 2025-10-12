@@ -24,9 +24,12 @@ The main classes enabling this object-oriented approach are:
 
 ## Example: Defining a Region
 
-Here's an example that defines a region around a match using the new ActionConfig API:
+Here's an example that defines a region around a match using the modern ActionConfig API:
 
 ```java
+@Autowired
+private Action action;
+
 // Define options for finding the minimap
 PatternFindOptions findOptions = new PatternFindOptions.Builder()
     .setSimilarity(0.6)
@@ -39,18 +42,17 @@ ObjectCollection mapImage = new ObjectCollection.Builder()
     .build();
 
 // Find the minimap
-ActionResult findResult = new ActionResult();
-findResult.setActionConfig(findOptions);
-ActionInterface findAction = actionService.getAction(findOptions);
-findAction.perform(findResult, mapImage);
+ActionResult findResult = action.perform(findOptions, mapImage);
 
-// Define a region around the found match
+// Define a region around the found match with adjustments
 DefineRegionOptions defineOptions = new DefineRegionOptions.Builder()
     .setDefineAs(DefineRegionOptions.DefineAs.MATCH)
-    .setOffsetX(-5)
-    .setOffsetY(-1)
-    .setWidth(296)
-    .setHeight(255)
+    .setMatchAdjustment(MatchAdjustmentOptions.builder()
+        .setAddX(-5)        // Offset x by -5 pixels
+        .setAddY(-1)        // Offset y by -1 pixel
+        .setAbsoluteW(296)  // Set absolute width to 296 pixels
+        .setAbsoluteH(255)  // Set absolute height to 255 pixels
+        .build())
     .build();
 
 // Use the matches from the previous find operation
@@ -59,10 +61,7 @@ ObjectCollection matchCollection = new ObjectCollection.Builder()
     .build();
 
 // Define the region
-ActionResult defineResult = new ActionResult();
-defineResult.setActionConfig(defineOptions);
-ActionInterface defineAction = actionService.getAction(defineOptions);
-defineAction.perform(defineResult, matchCollection);
+ActionResult defineResult = action.perform(defineOptions, matchCollection);
 ```
 
 ## Benefits of the New Type-Safe Approach
@@ -77,56 +76,59 @@ defineAction.perform(defineResult, matchCollection);
 The object-oriented approach makes it easy to create complex, reusable actions:
 
 ```java
+@Component
 public class SmartClick {
-    private final ActionService actionService;
-    
+    private final Action action;
+
+    @Autowired
+    public SmartClick(Action action) {
+        this.action = action;
+    }
+
     public boolean clickWithRetry(StateImage target, int maxRetries) {
         for (int i = 0; i < maxRetries; i++) {
             // First, find the target
-            PatternFindOptions findOptions = PatternFindOptions.forPreciseSearch();
-            ActionResult findResult = performAction(findOptions, target);
-            
+            PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setSimilarity(0.85)
+                .build();
+
+            ObjectCollection targetCollection = new ObjectCollection.Builder()
+                .withImages(target)
+                .build();
+
+            ActionResult findResult = action.perform(findOptions, targetCollection);
+
             if (findResult.isSuccess()) {
                 // Click on the found target
                 ClickOptions clickOptions = new ClickOptions.Builder()
-                    .setClickType(ClickOptions.Type.LEFT)
                     .setPauseAfterEnd(0.5)
                     .build();
-                    
-                ActionResult clickResult = performAction(clickOptions, 
-                    findResult.getMatchList());
-                
+
+                ObjectCollection matchCollection = new ObjectCollection.Builder()
+                    .withMatches(findResult.getMatchList())
+                    .build();
+
+                ActionResult clickResult = action.perform(clickOptions, matchCollection);
+
                 if (clickResult.isSuccess()) {
                     return true;
                 }
             }
-            
+
             // If this isn't the last attempt, add a pause
-            if (i < maxAttempts - 1) {
-                // Use a find action with pause to wait between attempts
+            if (i < maxRetries - 1) {
+                // Use pause configuration in the next find attempt
                 PatternFindOptions waitOptions = new PatternFindOptions.Builder()
-                    .setPauseAfterAction(1.0)  // 1 second pause
-                    .setMaxMatchesToFind(0)     // Don't actually search
+                    .setPauseBeforeBegin(1.0)  // 1 second pause before next attempt
                     .build();
-                performAction(waitOptions, target);
+                action.perform(waitOptions, targetCollection);
             }
         }
         return false;
     }
-    
-    private ActionResult performAction(ActionConfig config, Object data) {
-        ActionResult result = new ActionResult();
-        result.setActionConfig(config);
-        
-        ObjectCollection objects = createObjectCollection(data);
-        ActionInterface action = actionService.getAction(config);
-        action.perform(result, objects);
-        
-        return result;
-    }
 }
 ```
 
-This design philosophy allows Brobot to provide a framework for semi-intelligent automation, not just for automating static process flows. The type-safe ActionConfig classes in version 2.0 make this approach even more powerful and easier to use.
+This design philosophy allows Brobot to provide a framework for semi-intelligent automation, not just for automating static process flows. The type-safe ActionConfig classes in version 1.1.0 make this approach even more powerful and easier to use.
 
 For more information on migrating from the old ActionOptions API to the new ActionConfig API, see the [Migration Guide](./migration-guide).

@@ -1,8 +1,8 @@
-# Enhanced Conditional Action Chains
+# Conditional Action Chains
 
 ## Overview
 
-`ConditionalActionChain` provides a powerful fluent API for building complex action sequences with conditional execution. This enhanced implementation adds the missing features from the original design, including the crucial `then()` method for sequential composition and numerous convenience methods.
+`ConditionalActionChain` provides a powerful fluent API for building complex action sequences with conditional execution. This implementation includes the crucial `then()` method for sequential composition and numerous convenience methods.
 
 ## Key Features
 

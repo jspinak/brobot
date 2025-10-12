@@ -47,21 +47,21 @@ There are multiple ways to implement clickUntilFound in Brobot. Here are the mos
 
 #### Method 1: Traditional Loop Approach
 ```java
-// Using individual actions with retry logic
 public boolean clickUntilFound(StateImage clickTarget, StateImage findTarget, int maxAttempts) {
+    ClickOptions click = new ClickOptions.Builder()
+            .setPauseAfterEnd(1.0)
+            .build();
+
+    ObjectCollection clickCollection = new ObjectCollection.Builder()
+            .withImages(clickTarget).build();
+
+    ObjectCollection findCollection = new ObjectCollection.Builder()
+            .withImages(findTarget).build();
+
     for (int i = 0; i < maxAttempts; i++) {
-        // Click on target with pause after action
-        ClickOptions click = new ClickOptions.Builder()
-                .setPauseAfterEnd(1.0)  // 1 second pause after click
-                .build();
-        action.perform(click, new ObjectCollection.Builder()
-                .withImages(clickTarget).build());
-        
-        // Check if pattern appeared
-        PatternFindOptions find = PatternFindOptions.forQuickSearch();
-        ActionResult result = action.perform(find, new ObjectCollection.Builder()
-                .withImages(findTarget).build());
-        
+        action.perform(click, clickCollection);
+        ActionResult result = action.perform(PatternFindOptions.forQuickSearch(), findCollection);
+
         if (result.isSuccess()) {
             return true;
         }
@@ -72,102 +72,71 @@ public boolean clickUntilFound(StateImage clickTarget, StateImage findTarget, in
 
 #### Method 2: Fluent API with Action Chaining
 ```java
-// Using the fluent API to chain click and find operations
 public boolean clickUntilFoundFluent(StateImage clickTarget, StateImage findTarget) {
-    // Create a chain that clicks and then looks for the target
-    ClickOptions clickAndCheck = new ClickOptions.Builder()
-            .withBeforeActionLog("Clicking on " + clickTarget.getName() + "...")
-            .withSuccessLog("Click executed")
-            .setPauseAfterEnd(1.0)  // Wait after click
-            .then(new PatternFindOptions.Builder()
-                    .withBeforeActionLog("Checking if " + findTarget.getName() + " appeared...")
-                    .withSuccessLog(findTarget.getName() + " found!")
-                    .withFailureLog(findTarget.getName() + " not yet visible")
-                    .build())
-            .setRepetition(new RepetitionOptions.Builder()
-                    .setMaxTimesToRepeatActionSequence(10)  // Try up to 10 times
-                    .setPauseBetweenActionSequences(0.5)    // Brief pause between attempts
-                    .build())
-            .build();
-    
-    // Execute the chained action with both images
+    ClickOptions clickWithVerify = new ClickOptions.Builder()
+        .setVerification(new VerificationOptions.Builder()
+            .addVerifyImage(findTarget)  // Check if this appears
+            .build())
+        .setRepetition(new RepetitionOptions.Builder()
+            .setMaxTimesToRepeatActionSequence(10)
+            .setPauseBetweenActionSequences(0.5)
+            .build())
+        .build();
+
     ObjectCollection targets = new ObjectCollection.Builder()
-            .withImages(clickTarget, findTarget)
-            .build();
-    
-    ActionResult result = action.perform(clickAndCheck, targets);
+        .withImages(clickTarget, findTarget)
+        .build();
+
+    ActionResult result = action.perform(clickWithVerify, targets);
     return result.isSuccess();
 }
 ```
 
-#### Method 3: Using the Built-in ClickUntilOptions (Deprecated but Available)
+#### Method 3: Using ConditionalActionChain
 ```java
-// Using Brobot's built-in ClickUntil composite action
-public boolean clickUntilFoundBuiltIn(StateImage clickTarget, StateImage findTarget) {
-    // Create ClickUntilOptions configured to click until objects appear
-    ClickUntilOptions clickUntil = new ClickUntilOptions.Builder()
-            .setCondition(ClickUntilOptions.Condition.OBJECTS_APPEAR)
-            .withBeforeActionLog("Clicking until " + findTarget.getName() + " appears...")
-            .withSuccessLog(findTarget.getName() + " appeared!")
-            .withFailureLog("Timeout - " + findTarget.getName() + " did not appear")
-            .setRepetition(new RepetitionOptions.Builder()
-                    .setMaxTimesToRepeatActionSequence(10)
-                    .setPauseBetweenActionSequences(1.0)
-                    .build())
-            .build();
-    
-    // Create ObjectCollections
-    // If using 1 collection: clicks objects until they appear
-    // If using 2 collections: clicks collection 1 until collection 2 appears
-    ObjectCollection clickCollection = new ObjectCollection.Builder()
-            .withImages(clickTarget)
-            .build();
-    ObjectCollection appearCollection = new ObjectCollection.Builder()
-            .withImages(findTarget)
-            .build();
-    
-    // Execute with two collections - click first until second appears
-    ActionResult result = action.perform(clickUntil, clickCollection, appearCollection);
-    return result.isSuccess();
-}
+// Direct usage with ConditionalActionChain
+ConditionalActionChain clickUntilFound = ConditionalActionChain
+    .find(nextButton)
+    .ifFoundClick()
+    .then(new PatternFindOptions.Builder()
+        .setRepetition(new RepetitionOptions.Builder()
+            .setMaxTimesToRepeatActionSequence(10)
+            .setPauseBetweenActionSequences(1.0)
+            .build())
+        .build())
+    .withObjectCollection(new ObjectCollection.Builder()
+        .withImages(finishButton)
+        .build());
+
+ActionResult result = clickUntilFound.perform(action);
 ```
 
 #### Method 4: Creating a Reusable Click-Until-Found Function
 ```java
-// Creating a clean, reusable function that combines the best approaches
+// Creating a clean, reusable function using ConditionalActionChain
 public boolean clickUntilFound(StateImage clickTarget, StateImage findTarget, 
-                               int maxAttempts, double pauseBetween) {
-    // Use fluent chaining with automatic logging
-    PatternFindOptions clickAndCheck = new PatternFindOptions.Builder()
-            .withBeforeActionLog("Looking for click target...")
-            .withSuccessLog("Click target found")
-            .then(new ClickOptions.Builder()
-                    .withBeforeActionLog("Clicking...")
-                    .withSuccessLog("Clicked successfully")
-                    .setPauseAfterEnd(pauseBetween)
-                    .build())
-            .then(new PatternFindOptions.Builder()
-                    .withBeforeActionLog("Checking if target appeared...")
-                    .withSuccessLog("Target appeared!")
-                    .withFailureLog("Target not yet visible")
-                    .setSearchDuration(0.5) // Quick check
-                    .build())
-            .setRepetition(new RepetitionOptions.Builder()
-                    .setMaxTimesToRepeatActionSequence(maxAttempts)
-                    .setPauseBetweenActionSequences(0.5)
-                    .build())
-            .build();
-    
-    // Combine both images in one collection
-    ObjectCollection targets = new ObjectCollection.Builder()
-            .withImages(clickTarget, findTarget)
-            .build();
-    
+                                int maxAttempts, double pauseBetween) {
+
+    // Use RepetitionOptions on the find action for retry logic
+    PatternFindOptions findWithRetry = new PatternFindOptions.Builder()
+        .setRepetition(new RepetitionOptions.Builder()
+            .setMaxTimesToRepeatActionSequence(maxAttempts)
+            .setPauseBetweenActionSequences(pauseBetween)
+            .build())
+        .build();
+
+    // Build the conditional chain
+    ConditionalActionChain clickAndCheck = ConditionalActionChain
+        .find(clickTarget)
+        .ifFoundClick()
+        .then(findWithRetry)
+        .withObjectCollection(new ObjectCollection.Builder()
+            .withImages(findTarget)
+            .build());
+
     // Execute and check the final result
-    ActionResult result = action.perform(clickAndCheck, targets);
-    
-    // The chain succeeds if the final find action succeeded
-    return result.isSuccess() && result.getLastActionResult().isSuccess();
+    ActionResult result = clickAndCheck.perform(action);
+    return result.isSuccess();
 }
 
 // Usage example:
@@ -180,28 +149,24 @@ boolean success = clickUntilFound(nextButton, finishButton, 10, 1.0);
 |--------|------------|------|------|
 | **Traditional Loop** | Simple cases, full control needed | Complete control over logic | More verbose, manual logging |
 | **Fluent API Chaining** | Most common cases | Clean, automatic logging, easy to read | Requires understanding of chaining |
-| **ClickUntilOptions** | Legacy code or specific composite needs | Built-in, handles edge cases | Deprecated, less flexible |
 | **Reusable Function** | Multiple uses in codebase | DRY principle, consistent behavior | May need customization for edge cases |
 
 ### Best Practices for Click Until Found
 
 1. **Use Logging**: The fluent API approach (Method 2) provides the best logging and debugging experience
-2. **Set Reasonable Timeouts**: Always limit the number of attempts to prevent infinite loops
+2. **Set Reasonable Timeouts**: Set the number of attempts to balance search time and robustness
 3. **Add Pauses**: Include pauses between clicks to allow the UI to respond
-4. **Consider State Management**: In a state-based automation framework, clickUntilFound might trigger a state transition
-5. **ObjectCollection Usage**: Remember that all actions in a chain share the same ObjectCollection
+4. **Consider State Management**: Since it includes Find operations, clickUntilFound might add a new active state
 
 This modular approach makes it easy to create custom complex behaviors while maintaining the benefits of type safety and clear intent provided by the ActionConfig architecture.
 
-## Enhanced Conditional Action Chaining
+## Conditional Action Chaining
 
-Brobot 1.1.0+ introduces the powerful `EnhancedConditionalActionChain` class for building sophisticated conditional execution flows. This provides a fluent API for creating complex action sequences with conditional branching, error handling, and retry logic.
+Brobot 1.1.0+ introduces the powerful `ConditionalActionChain` class for building sophisticated conditional execution flows. This provides a fluent API for creating complex action sequences with conditional branching, error handling, and retry logic.
 
-> **Note:** The original `ConditionalActionChain` class is now deprecated. Use `EnhancedConditionalActionChain` for all new development.
+### ConditionalActionChain Overview
 
-### EnhancedConditionalActionChain Overview
-
-The `EnhancedConditionalActionChain` class allows you to:
+The `ConditionalActionChain` class allows you to:
 - Chain actions with conditional execution based on previous results
 - Add fallback actions when primary actions fail
 - Implement retry logic with different strategies
@@ -211,29 +176,36 @@ The `EnhancedConditionalActionChain` class allows you to:
 ### Basic Conditional Chaining
 
 ```java
-import io.github.jspinak.brobot.action.EnhancedConditionalActionChain;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.action.basic.click.ClickOptions;
-import io.github.jspinak.brobot.action.basic.type.TypeOptions;
-import io.github.jspinak.brobot.action.basic.find.color.ColorFindOptions;
-import io.github.jspinak.brobot.action.RepetitionOptions;
-import io.github.jspinak.brobot.action.ActionChainOptions;
+import io.github.jspinak.brobot.action.ConditionalActionChain;
+import io.github.jspinak.brobot.action.ActionResult;
 
 // Simple conditional chain: if login button found, click it and enter credentials
-EnhancedConditionalActionChain loginChain = EnhancedConditionalActionChain
-    .find(new PatternFindOptions.Builder().build())
-    .ifFoundClick()
-    .ifFoundDo(result -> {
-        action.type(usernameField, username);
-        action.type(passwordField, password);
-        action.click(submitButton);
-    })
+ConditionalActionChain loginChain = ConditionalActionChain
+    .find(loginButton)      // Pass StateImage directly
+    .ifFoundClick()         // Click the login button
+    .then(usernameField)    // Find username field
+    .ifFoundType(username)  // Type username (string)
+    .then(passwordField)    // Find password field
+    .ifFoundType(password)  // Type password (string)
+    .then(submitButton)     // Find submit button
+    .ifFoundClick()         // Click it
     .ifNotFoundLog("Login button not found - may already be logged in");
 
-ActionResult result = loginChain.perform(action, 
-    new ObjectCollection.Builder()
-        .withImages(loginButton)
-        .build());
+ActionResult result = loginChain.perform(action);  // No ObjectCollection needed
+```
+Or if you want to use the custom handler approach:
+```java 
+ConditionalActionChain loginChain = ConditionalActionChain
+    .find(loginButton)
+    .ifFoundClick()
+    .ifFoundDo(result -> {
+        action.click(usernameField);
+        action.type(username);
+        action.click(passwordField);
+        action.type(password);
+        action.click(submitButton);
+    })
+    .ifNotFoundLog("Login button not found");
 ```
 
 ### Advanced Conditional Patterns
@@ -241,63 +213,84 @@ ActionResult result = loginChain.perform(action,
 #### Pattern 1: Multi-Step Validation
 ```java
 // Validate each step and proceed only if successful
-EnhancedConditionalActionChain wizardChain = EnhancedConditionalActionChain
-    .find(new PatternFindOptions.Builder().build())
-    .ifFoundClick()  // Click step 1
-    .then(new PatternFindOptions.Builder().build())  // Find step 2
-    .ifFoundClick()  // Click step 2
-    .then(new PatternFindOptions.Builder().build())  // Find step 3
-    .ifFoundClick()  // Click step 3
-    .then(new PatternFindOptions.Builder()  // Find completion
-        .setSearchDuration(5.0)  // Wait up to 5 seconds
-        .build())
+ConditionalActionChain wizardChain = ConditionalActionChain
+    .find(step1Button)  // Just pass the StateImage
+    .ifFoundClick()
+    .then(step2Button)
+    .ifFoundClick()
+    .then(step3Button)
+    .ifFoundClick()
+    .then(completionMessage)  // Use then() with StateImage
     .ifFoundLog("Wizard completed successfully")
     .ifNotFoundLog("Wizard failed to complete");
 
-// Execute with all step buttons
-ObjectCollection steps = new ObjectCollection.Builder()
-    .withImages(step1Button, step2Button, step3Button, completionMessage)
-    .build();
-    
-ActionResult result = wizardChain.perform(action, steps);
+// Execute
+ActionResult result = wizardChain.perform(action);
 ```
+
+Or if you need custom options for specific steps, you need to use the internal pattern:
+```java
+// If you need custom search duration for completion
+ConditionalActionChain wizardChain = ConditionalActionChain
+    .find(step1Button)
+    .ifFoundClick()
+    .then(step2Button)
+    .ifFoundClick()
+    .then(step3Button)
+    .ifFoundClick()
+    .then(new PatternFindOptions.Builder()
+        .setSearchDuration(5.0)
+        .build())
+    .withObjectCollection(new ObjectCollection.Builder()
+        .withImages(completionMessage)
+        .build())  // Must manually attach the image
+    .ifFoundLog("Wizard completed successfully")
+    .ifNotFoundLog("Wizard failed to complete");
+
+ActionResult result = wizardChain.perform(action);
+```
+
+find() and then() methods accept either PatternFindOptions OR StateImage, but not both as separate parameters.
+When using options, you must manually attach the ObjectCollection with .withObjectCollection().
+
 
 #### Pattern 2: Retry with Different Strategies
 ```java
 // Try different approaches to close a dialog
 // Method 1: Try X button first
 ConditionalActionChain closeWithX = ConditionalActionChain
-    .find(new PatternFindOptions.Builder().build())  // Find close button
+    .find(closeButton)  // Pass the StateImage directly
     .ifFoundClick()
     .ifFoundLog("Closed dialog with X button");
 
-// Method 2: Try Escape key if X button fails
+// Method 2: Try Escape key if X button fails  
 ConditionalActionChain closeWithEsc = ConditionalActionChain
-    .start(new TypeOptions.Builder()
-        .setText("\u001B")  // ESC key
-        .build())
-    .always(new PatternFindOptions.Builder()  // Check if dialog gone
-        .setSearchDuration(1.0)
-        .build())
+    .pressEscape()  // Use the convenience method
+    .then(dialogImage)  // Check if dialog gone
     .ifNotFoundLog("Dialog closed with ESC key");
 
-// Method 3: Click outside dialog
+// Or using start():
+ConditionalActionChain closeWithEscAlt = ConditionalActionChain
+    .start(new TypeOptions.Builder().build())
+    .withObjectCollection(new ObjectCollection.Builder()
+        .withStrings(org.sikuli.script.Key.ESC)  // Pass Key.ESC as string
+        .build())
+    .then(dialogImage)
+    .ifNotFoundLog("Dialog closed with ESC key");
+
+// Method 3: Click at a screen location to dismiss
 ConditionalActionChain closeWithClick = ConditionalActionChain
-    .start(new ClickOptions.Builder()
-        .setClickLocation(ClickOptions.ClickLocation.OUTSIDE_MATCH)
+    .start(new ClickOptions.Builder().build())
+    .withObjectCollection(new ObjectCollection.Builder()
+        .withLocations(new Location(10, 10))  // Click at specific location
         .build())
-    .then(new PatternFindOptions.Builder()  // Verify dialog closed
-        .setSearchDuration(1.0)
-        .build())
+    .then(dialogImage)
     .ifNotFoundLog("Dialog closed by clicking outside");
 
-// Use RepetitionOptions for retry logic
-PatternFindOptions findDialog = new PatternFindOptions.Builder()
-    .setRepetition(new RepetitionOptions.Builder()
-        .setMaxTimesToRepeatActionSequence(3)
-        .setPauseBetweenActionSequences(0.5)
-        .build())
-    .build();
+// Execute each chain with the Action instance
+ActionResult result1 = closeWithX.perform(action);
+ActionResult result2 = closeWithEsc.perform(action);
+ActionResult result3 = closeWithClick.perform(action);
 ```
 
 #### Pattern 3: Conditional Branching Based on Application State
@@ -307,40 +300,42 @@ PatternFindOptions findDialog = new PatternFindOptions.Builder()
 
 // Chain for home screen
 ConditionalActionChain fromHome = ConditionalActionChain
-    .find(new PatternFindOptions.Builder().build())  // Find home screen
-    .ifFoundClick()  // Click menu button
-    .then(new PatternFindOptions.Builder().build())  // Find menu panel
+    .find(homeScreen)       // Find home screen (pass StateImage directly)
+    .then(menuButton)       // Find menu button
+    .ifFoundClick()         // Click it
+    .then(menuPanel)        // Find menu panel
     .ifFoundLog("Opened menu from home screen");
 
 // Chain for settings screen  
 ConditionalActionChain fromSettings = ConditionalActionChain
-    .find(new PatternFindOptions.Builder().build())  // Find settings screen
-    .ifFoundClick()  // Click back button
-    .then(new PatternFindOptions.Builder().build())  // Find home screen
+    .find(settingsScreen)   // Find settings screen
+    .then(backButton)       // Find back button
+    .ifFoundClick()         // Click it
+    .then(homeScreen)       // Find home screen
     .ifFoundLog("Returned to home from settings");
 
 // Chain for error dialog
 ConditionalActionChain fromError = ConditionalActionChain
-    .find(new PatternFindOptions.Builder().build())  // Find error dialog
-    .ifFoundClick()  // Click dismiss
-    .alwaysClick()  // Click home button
-    .then(new PatternFindOptions.Builder().build())  // Verify home screen
+    .find(errorDialog)      // Find error dialog
+    .then(dismissButton)    // Find dismiss button
+    .ifFoundClick()         // Click dismiss
+    .then(homeButton)       // Find home button
+    .ifFoundClick()         // Click home button
+    .then(homeScreen)       // Verify home screen
     .ifFoundLog("Recovered from error state");
 
 // Execute appropriate chain based on current state
 ActionResult result;
 if (action.find(homeScreen).isSuccess()) {
-    result = fromHome.perform(action, new ObjectCollection.Builder()
-        .withImages(homeScreen, menuButton, menuPanel).build());
+    result = fromHome.perform(action);
 } else if (action.find(settingsScreen).isSuccess()) {
-    result = fromSettings.perform(action, new ObjectCollection.Builder()
-        .withImages(settingsScreen, backButton, homeScreen).build());
+    result = fromSettings.perform(action);
 } else if (action.find(errorDialog).isSuccess()) {
-    result = fromError.perform(action, new ObjectCollection.Builder()
-        .withImages(errorDialog, dismissButton, homeButton, homeScreen).build());
+    result = fromError.perform(action);
 } else {
     log.warn("Unknown state - attempting recovery");
-    action.type(new ObjectCollection.Builder().withStrings("\u001B\u001B").build());
+    action.pressEscape();
+    action.pressEscape();
 }
 ```
 
@@ -366,19 +361,29 @@ ActionChainOptions nestedFind = new ActionChainOptions.Builder(
 // Then use ConditionalActionChain for conditional logic
 ConditionalActionChain robustClick = ConditionalActionChain
     .start(nestedFind)  // Start with the chained find
-    .ifFoundClick()  // Click if found
+    .ifFoundClick()     // Click if found
     .ifNotFoundDo(result -> {
         // Fallback: try with lower similarity
         PatternFindOptions relaxedFind = new PatternFindOptions.Builder()
             .setStrategy(PatternFindOptions.Strategy.BEST)
             .setSimilarity(0.7)
             .build();
-        
-        ActionResult fallbackResult = action.perform(relaxedFind, targetImage);
+
+        ObjectCollection targetCollection = new ObjectCollection.Builder()
+            .withImages(targetImage)
+            .build();
+
+        ActionResult fallbackResult = action.perform(relaxedFind, targetCollection);
         if (fallbackResult.isSuccess()) {
             action.click(targetImage);
         }
     });
+
+// Execute the chain (needs ObjectCollection with target image)
+ObjectCollection targets = new ObjectCollection.Builder()
+    .withImages(targetImage)
+    .build();
+ActionResult result = robustClick.perform(action, targets);
 
 // For retry logic, use RepetitionOptions
 PatternFindOptions withRetry = new PatternFindOptions.Builder()
@@ -392,21 +397,20 @@ PatternFindOptions withRetry = new PatternFindOptions.Builder()
 
 ### Comparison: ActionChainOptions vs ConditionalActionChain
 
-| Feature | ActionChainOptions | ConditionalActionChain |
-|---------|-------------------|----------------------|
-| **Purpose** | Chain actions with NESTED/CONFIRM strategies | Complex conditional workflows |
-| **Conditional Logic** | Limited (success/failure) | Full boolean conditions |
-| **Branching** | No | Yes (if/else/elseWhen) |
-| **Custom Logic** | No | Yes (lambda expressions) |
-| **Retry Handling** | Via RepetitionOptions | Built-in retry with delays |
-| **Use Case** | Pattern/color combining | Complex decision trees |
+| Feature           | ActionChainOptions                             | ConditionalActionChain                              |
+|-------------------|------------------------------------------------|-----------------------------------------------------|
+| Purpose           | Chain actions with NESTED/CONFIRM strategies   | Complex conditional workflows                       |
+| Conditional Logic | Limited (success/failure)                      | Full boolean conditions                             |
+| Branching         | No                                             | Partial (if/ifNot, no elseWhen)                     |
+| Custom Logic      | No                                             | Yes (lambda expressions via ifFoundDo/ifNotFoundDo) |
+| Retry Handling    | Via RepetitionOptions                          | Via static retry() method or manual loops           |
+| Use Case          | Pattern/color combining, hierarchical searches | Complex decision trees, recovery workflows          |
 
 ### When to Use Each Approach
 
 **Use ActionChainOptions when:**
 - Combining find operations (nested or confirmed)
 - Performing sequential actions on the same objects
-- Need automatic history recording
 - Working with pattern and color matching
 
 **Use ConditionalActionChain when:**
@@ -424,82 +428,93 @@ PatternFindOptions withRetry = new PatternFindOptions.Builder()
 4. **Set Reasonable Timeouts**: Prevent chains from running indefinitely
 5. **Test Edge Cases**: Ensure your fallback actions handle all scenarios
 6. **Document Complex Logic**: Add comments explaining the flow
-7. **Consider State Management**: Chains may trigger state transitions
+7. **Consider State Management**: Chains may trigger state activations
 
 ### Example: Complete Form Filling with Validation
 
 ```java
+@Slf4j  // Automatically creates: private static final Logger log
+@Component
 public class FormAutomation {
-    
+
     @Autowired
     private Action action;
-    
+
     public boolean fillComplexForm(FormData data) {
         // Check if form is open
         ConditionalActionChain openForm = ConditionalActionChain
-            .find(new PatternFindOptions.Builder().build())
+            .find(formTitle)  // Pass StateImage directly
             .ifNotFoundLog("Form not found")
             .ifNotFoundDo(result -> log.error("Cannot proceed - form not visible"));
-        
-        ActionResult formResult = openForm.perform(action, 
-            new ObjectCollection.Builder().withImages(formTitle).build());
-        
+
+        ActionResult formResult = openForm.perform(action);  // No ObjectCollection needed
+
         if (!formResult.isSuccess()) {
             return false;
         }
-        
+
         // Fill required fields
         boolean requiredFilled = fillRequiredFields(data);
         if (!requiredFilled) {
             log.error("Failed to fill required fields");
             return false;
         }
-        
+
         // Conditionally fill optional fields
         if (data.hasOptionalData()) {
             fillOptionalFields(data);
         }
-        
+
         // Validate before submission
         ConditionalActionChain validateChain = ConditionalActionChain
-            .start(new ClickOptions.Builder().build())  // Click validate
+            .find(validateButton)  // Find validate button
+            .ifFoundClick()        // Click it
             .then(new PatternFindOptions.Builder()
                 .setSearchDuration(2.0)  // Wait for validation
                 .build())
+            .withObjectCollection(new ObjectCollection.Builder()
+                .withImages(errorMessage)  // Look for error message
+                .build())
             .ifFoundDo(result -> {
                 // If error message found, handle it
-                String errorText = action.text(errorMessage).getText();
-                log.error("Validation error: {}", errorText);
-                fixValidationError(errorText);
+                ActionResult textResult = action.find(errorMessage);
+                if (textResult.isSuccess() && !textResult.getMatches().isEmpty()) {
+                    // Extract text from the error (if it's a text element)
+                    log.error("Validation error found");
+                    fixValidationError("validation_error");
+                }
             })
             .ifNotFoundLog("Validation passed");
-        
-        ActionResult validateResult = validateChain.perform(action,
-            new ObjectCollection.Builder()
-                .withImages(validateButton, errorMessage)
-                .build());
-        
+
+        ActionResult validateResult = validateChain.perform(action);
+
         // Submit if valid
         if (!action.find(errorMessage).isSuccess()) {
             ConditionalActionChain submitChain = ConditionalActionChain
-                .start(new ClickOptions.Builder().build())
+                .find(submitButton)    // Find submit button
+                .ifFoundClick()        // Click it
                 .then(new PatternFindOptions.Builder()
                     .setSearchDuration(5.0)
                     .build())
+                .withObjectCollection(new ObjectCollection.Builder()
+                    .withImages(successMessage)
+                    .build())
                 .ifFoundLog("Form submitted successfully");
-            
-            ActionResult submitResult = submitChain.perform(action,
-                new ObjectCollection.Builder()
-                    .withImages(submitButton, successMessage)
-                    .build());
-            
+
+            ActionResult submitResult = submitChain.perform(action);
+
             return submitResult.isSuccess();
         }
-        
+
         // Cancel if errors persist
         action.click(cancelButton);
         return false;
     }
+
+    // Helper methods (stubs)
+    private boolean fillRequiredFields(FormData data) { return true; }
+    private void fillOptionalFields(FormData data) {}
+    private void fixValidationError(String error) {}
 }
 ```
 

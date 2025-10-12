@@ -2,7 +2,7 @@
 
 ## Overview
 
-Starting with Brobot 1.1.0, the framework uses Spring's property-based configuration instead of static fields. This guide helps you migrate from the old `FrameworkSettings` approach to the new configuration system.
+**IMPORTANT: FrameworkSettings has been completely removed.** Brobot now exclusively uses Spring's property-based configuration via `BrobotProperties`. This guide helps you migrate from the old `FrameworkSettings` approach to the new configuration system.
 
 ## What's Changed
 
@@ -141,14 +141,7 @@ brobot:
     initial-states: HOME,LOGIN
 ```
 
-## Backward Compatibility
-
-During the transition period:
-- `FrameworkSettings` fields are still updated from properties
-- Old code continues to work
-- You can gradually migrate to using `BrobotProperties` directly
-
-### Accessing Properties in Code
+## Accessing Properties in Code
 
 If you need to access configuration in your code:
 
@@ -196,11 +189,12 @@ Properties are loaded in this order (later overrides earlier):
 4. Environment variables
 5. Command-line arguments
 
-## Future Plans
+## Migration Complete
 
-In Brobot 2.0:
-- `FrameworkSettings` will be deprecated
-- All code will use `BrobotProperties` directly
-- Static configuration will be removed
+`FrameworkSettings` has been completely removed. All configuration is now done through:
+- `application.properties` or `application.yml` files
+- Environment variables
+- Command-line arguments
+- Dependency injection with `BrobotProperties`
 
-Start migrating now to prepare for the future!
+This provides better testability, maintainability, and follows Spring Boot best practices.

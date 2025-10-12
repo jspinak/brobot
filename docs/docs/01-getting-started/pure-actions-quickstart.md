@@ -7,156 +7,286 @@ title: 'Pure Actions Quick Start Guide'
 
 ## What are Pure Actions?
 
-Pure actions are a new approach in Brobot that separates finding elements from performing actions on them. This makes your automation code clearer, more testable, and more efficient.
+Pure actions are Brobot's core action implementations (Click, Type, Move, etc.) that perform a single, specific operation without embedded Find logic. This separation enables:
 
-## The Old Way vs The New Way
+- **Better testability** - Mock finding and clicking separately
+- **Clearer code** - Explicit about what's happening
+- **More flexibility** - Reuse find results for multiple actions
+- **Action chaining** - Compose complex workflows from simple operations
 
-### Old Way (Embedded Find)
+## Three Ways to Use Actions
+
+Brobot provides three ways to perform actions, from simplest to most powerful:
+
+### 1. Convenience Methods (Easiest)
+
+For common operations with default settings:
+
 ```java
-// Find and click happen together - you can't control them separately
-action.click(buttonImage);
+// Click on an image (finds it first, then clicks)
+StateImage button = new StateImage.Builder().addPatterns("submit-button").build();
+action.click(button);
+
+// Click at a location
+action.click(new Location(100, 200));
+
+// Type text
+action.type("Hello World");
+
+// Find an image
+ActionResult result = action.find(button);
 ```
 
-### New Way (Pure Actions)
+**Use when:** You want simple one-line operations with default behavior.
+
+### 2. Explicit Find-Then-Act
+
+Manually control the find and action steps:
+
 ```java
 // Find first
-ActionResult found = action.find(buttonImage);
+ActionResult findResult = action.find(button);
 
-// Then click if found
-if (found.isSuccess()) {
-    action.perform(ActionType.CLICK, found.getFirstMatch());
+// Then act on the results
+if (findResult.isSuccess()) {
+    for (Match match : findResult.getMatchList()) {
+        action.click(match.getRegion());
+    }
 }
 ```
 
-### Even Better Way (Conditional Chains)
+**Use when:** You need to process find results before acting, or perform multiple different actions on the same found elements.
+
+### 3. Conditional Action Chains (Most Powerful)
+
+Compose complex conditional workflows:
+
 ```java
-// Elegant chaining with automatic conditional execution
-ConditionalActionChain.find(findOptions)
+ConditionalActionChain
+    .find(new PatternFindOptions.Builder().build())
     .ifFoundClick()
     .ifNotFoundLog("Button not found")
-    .perform(action, objectCollection);
+    .perform(action, new ObjectCollection.Builder()
+        .withImages(button)
+        .build());
 ```
+
+**Use when:** You need conditional logic, error handling, or multi-step workflows.
 
 ## Your First Pure Action
 
-Let's start with a simple example - clicking a button:
+Let's start with simple examples:
 
 ```java
-// Step 1: Import the required classes
-import io.github.jspinak.brobot.action.*;
-import io.github.jspinak.brobot.action.basic.click.ClickOptions;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.state.StateImage;
+import org.springframework.stereotype.Component;
+import lombok.RequiredArgsConstructor;
 
-// Step 2: Create your target image
-StateImage submitButton = new StateImage.Builder()
-    .addPattern("submit-button")  // No .png extension needed
-    .build();
+@Component
+@RequiredArgsConstructor
+public class SimpleAutomation {
 
-// Step 3: Find and click using conditional chain
-ActionResult result = ConditionalActionChain
-    .find(new PatternFindOptions.Builder().build())
-    .ifFoundClick()
-    .perform(action, new ObjectCollection.Builder()
-        .withImages(submitButton)
-        .build());
+    private final Action action;
+
+    public void clickButton() {
+        // Simplest: Click at a known location
+        action.click(new Location(100, 200));
+
+        // Find an image
+        StateImage button = new StateImage.Builder()
+            .addPatterns("submit-button")  // No .png extension needed
+            .build();
+        action.find(button);  
+
+        // Type some text
+        action.type("Hello World");
+    }
+}
 ```
 
 ## Common Use Cases
 
-### 1. Click a Button
-```java
-// Simplest form - using convenience method
-Location buttonLocation = new Location(100, 200);
-action.perform(ActionType.CLICK, buttonLocation);
+### 1. Click at a Location
 
-// Or with an image
-ConditionalActionChain.find(findOptions)
-    .ifFoundClick()
-    .perform(action, objectCollection);
+```java
+// Direct click at coordinates
+action.click(new Location(100, 200));
+
+// Click with custom configuration
+ClickOptions doubleClick = new ClickOptions.Builder()
+    .setNumberOfClicks(2)
+    .build();
+action.perform(doubleClick, new ObjectCollection.Builder()
+    .withLocations(new Location(100, 200))
+    .build());
 ```
 
-### 2. Type in a Field
-```java
-// Type at current cursor position
-action.perform(ActionType.TYPE, "Hello World");
+### 2. Find and Click an Image
 
-// Find field and type
-ConditionalActionChain.find(findOptions)
+```java
+StateImage button = new StateImage.Builder()
+    .addPatterns("submit-button")
+    .build();
+
+// Simple way
+action.click(button);
+
+// With conditional chain for error handling
+ConditionalActionChain
+    .find(new PatternFindOptions.Builder().build())
     .ifFoundClick()
-    .thenType("Hello World")
-    .perform(action, objectCollection);
+    .ifNotFoundLog("Submit button not found")
+    .perform(action, new ObjectCollection.Builder()
+        .withImages(button)
+        .build());
 ```
 
-### 3. Highlight Found Elements
+### 3. Type Text
+
 ```java
-// Find all matching elements and highlight them
-ActionResult matches = action.find(targetPattern);
-for (Match match : matches.getMatchList()) {
-    action.perform(ActionType.HIGHLIGHT, match.getRegion());
+// Simple typing
+action.type("Hello World");
+
+// Click field first, then type
+StateImage textField = new StateImage.Builder()
+    .addPatterns("username-field")
+    .build();
+
+action.click(textField);
+action.type("myusername");
+
+// Or with action chain
+ConditionalActionChain
+    .find(new PatternFindOptions.Builder().build())
+    .ifFoundClick()
+    .thenType("myusername")
+    .perform(action, new ObjectCollection.Builder()
+        .withImages(textField)
+        .build());
+```
+
+### 4. Process Multiple Matches
+
+```java
+// Find all matching elements
+StateImage checkboxes = new StateImage.Builder()
+    .addPatterns("checkbox")
+    .build();
+
+ActionResult findResult = action.find(checkboxes);
+
+// Click each one
+if (findResult.isSuccess()) {
+    for (Match match : findResult.getMatchList()) {
+        action.click(match.getRegion());
+    }
 }
 ```
 
-### 4. Right-Click Menu
+### 5. Right-Click Menu
+
 ```java
-// To right-click, use ifFound with ClickOptions configured for right-click
-ClickOptions rightClickOptions = new ClickOptions.Builder()
-    .setPressOptions(MousePressOptions.builder()
+import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
+import io.github.jspinak.brobot.model.action.MouseButton;
+
+// Using full API for right-click
+ClickOptions rightClick = new ClickOptions.Builder()
+    .setMousePressOptions(MousePressOptions.builder()
         .setButton(MouseButton.RIGHT)
         .build())
     .build();
 
-ConditionalActionChain.find(findOptions)
-    .ifFound(rightClickOptions)
-    .then(findDeleteOptions)
-    .ifFoundClick()
-    .perform(action, objectCollection);
+StateImage fileIcon = new StateImage.Builder()
+    .addPatterns("file-icon")
+    .build();
+
+// Find file, right-click it, then click delete option
+ConditionalActionChain
+    .find(new PatternFindOptions.Builder().build())
+    .ifFound(rightClick)  // Right-click the file
+    .then(new PatternFindOptions.Builder().build())  // Find delete option
+    .ifFoundClick()  // Click delete
+    .perform(action,
+        new ObjectCollection.Builder().withImages(fileIcon).build(),
+        new ObjectCollection.Builder().withImages(deleteOption).build());
 ```
 
-## Convenience Methods
+## All Convenience Methods
 
-The Action class now provides simple one-line methods for common operations:
+The Action class provides simple one-line methods for common operations:
 
 ```java
-// Click at a location
-action.perform(ActionType.CLICK, new Location(100, 200));
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.action.basic.scroll.ScrollOptions;
 
-// Highlight a region  
-action.perform(ActionType.HIGHLIGHT, new Region(50, 50, 200, 100));
+// Click operations
+action.click(new Location(100, 200));     // Click at location
+action.click(region);                      // Click region center
+action.click(match);                       // Click match
+action.click(stateImage);                  // Find and click
 
-// Type text
-action.perform(ActionType.TYPE, "Hello World");
+// Type operations
+action.type("Hello World");                // Type text
+action.type(stateString);                  // Type StateString
 
-// Double-click
-action.perform(ActionType.DOUBLE_CLICK, location);
+// Mouse movement
+action.move(new Location(500, 300));       // Move to location
+action.move(region);                       // Move to region center
+action.move(match);                        // Move to match
 
-// Right-click
-action.perform(ActionType.RIGHT_CLICK, region);
+// Find operations
+action.find(stateImage);                   // Find image
+action.find(pattern);                      // Find pattern
+action.findWithTimeout(2.0, stateImage);   // Find with timeout
+
+// Highlight
+action.highlight(region);                  // Highlight region
+action.highlight(match);                   // Highlight match
+
+// Drag
+action.drag(fromLocation, toLocation);     // Drag between locations
+action.drag(fromRegion, toRegion);         // Drag between regions
+
+// Scroll
+action.scroll(ScrollOptions.Direction.UP, 3);    // Scroll up 3 steps
+action.scroll(ScrollOptions.Direction.DOWN, 5);  // Scroll down 5 steps
+
+// Wait for vanish
+action.vanish(stateImage);                 // Wait for image to disappear
+action.vanish(pattern);                    // Wait for pattern to disappear
 ```
 
 ## Working with Results
 
-Pure actions give you more control over results:
+ActionResult gives you detailed information about what happened:
 
 ```java
 // Find returns matches you can work with
 ActionResult findResult = action.find(targetImage);
 
 if (findResult.isSuccess()) {
-    // Get the first match
-    Match firstMatch = findResult.getBestMatch().get();
-    
+    // Get the best match
+    Match bestMatch = findResult.getBestMatch().get();
+    System.out.println("Found at: " + bestMatch.getRegion());
+    System.out.println("Similarity: " + bestMatch.getScore());
+
     // Get all matches
     List<Match> allMatches = findResult.getMatchList();
-    
+    System.out.println("Total matches: " + allMatches.size());
+
     // Work with each match
     for (Match match : allMatches) {
         // Highlight each found instance
-        action.perform(ActionType.HIGHLIGHT, match.getRegion());
-        
+        action.highlight(match.getRegion());
+
         // Click each one
-        action.perform(ActionType.CLICK, match.getRegion());
+        action.click(match.getRegion());
     }
+} else {
+    System.out.println("Image not found");
 }
 ```
 
@@ -165,7 +295,8 @@ if (findResult.isSuccess()) {
 Pure actions make error handling explicit and clear:
 
 ```java
-ConditionalActionChain.find(criticalButton)
+ConditionalActionChain
+    .find(new PatternFindOptions.Builder().build())
     .ifFoundClick()
     .ifNotFoundLog("ERROR: Critical button not found!")
     .ifNotFoundDo(result -> {
@@ -173,77 +304,116 @@ ConditionalActionChain.find(criticalButton)
         takeScreenshot("error-state");
         notifyUser("Application in unexpected state");
     })
-    .perform(action, objectCollection);
+    .perform(action,  new ObjectCollection.Builder()
+        .withImages(criticalButton)
+        .build());
 ```
 
 ## Best Practices
 
-### 1. Separate Find from Action
+### 1. Use Convenience Methods When Possible
+
 ```java
-// Good: Clear separation
-ActionResult found = action.find(targetImage);
-if (found.isSuccess()) {
-    action.perform(ActionType.CLICK, found.getBestMatch().get().getTarget());
+// Good: Simple and clear
+action.click(button);
+action.type("password");
+
+// Overkill: Unnecessary complexity for simple case
+ClickOptions clickOptions = new ClickOptions.Builder().build(); // Default options
+ObjectCollection collection = new ObjectCollection.Builder()
+    .withImages(button)
+    .build();
+action.perform(clickOptions, collection); // 5 lines for a simple click
+```
+
+### 2. Use Full API for Custom Configuration
+
+```java
+// Right tool for the job
+ClickOptions doubleClick = new ClickOptions.Builder()
+    .setNumberOfClicks(2)
+    .setPauseAfterEnd(0.5)
+    .build();
+action.perform(doubleClick, new ObjectCollection.Builder()
+    .withImages(button)
+    .build());
+```
+
+### 3. Handle Both Success and Failure
+
+```java
+// Simple approach
+ActionResult result = action.click(saveButton);
+if (!result.isSuccess()) {
+    System.out.println("Save button not found");
+    tryAlternativeSave();
 }
 
-// Better: Use conditional chains
-ConditionalActionChain.find(findOptions)
+// Conditional chain approach
+ConditionalActionChain
+    .find(new PatternFindOptions.Builder().build())
     .ifFoundClick()
-    .perform(action, objectCollection);
+    .ifFoundLog("Document saved") // Success handler
+    .ifNotFoundLog("Save button not found") // Failure logging
+    .ifNotFoundDo(result -> tryAlternativeSave()) // Failure action
+    .perform(action, new ObjectCollection.Builder()
+        .withImages(saveButton)
+        .build());
 ```
 
-### 2. Handle Both Success and Failure
-```java
-ConditionalActionChain.find(saveButton)
-    .ifFoundClick()
-    .ifFoundLog("Document saved")
-    .ifNotFoundLog("Save button not found")
-    .ifNotFoundDo(result -> tryAlternativeSave())
-    .perform(action, objectCollection);
-```
+### 4. Reuse Find Results
 
-### 3. Reuse Find Results
 ```java
 // Find once, use multiple times
-ActionResult buttons = action.find(allButtons);
-for (Match button : buttons.getMatchList()) {
-    // Highlight with pause after
-    HighlightOptions highlight = new HighlightOptions.Builder()
-        .setPauseAfterEnd(0.5)  // 500ms pause after highlighting
-        .build();
-    action.perform(highlight, button.getRegion());
-    
-    // Then click
-    action.perform(ActionType.CLICK, button.getRegion());
+ActionResult findResult = action.find(allButtons); // Single find operation
+
+if (findResult.isSuccess()) {
+    for (Match match : findResult.getMatchList()) {
+        // Highlight with custom pause
+        HighlightOptions highlight = new HighlightOptions.Builder()
+            .setPauseAfterEnd(0.5)  // Custom pause - needs full API
+            .build();
+        action.perform(highlight, new ObjectCollection.Builder()
+            .withRegions(match.getRegion())
+            .build());
+
+        // Then click
+        action.click(match.getRegion()); // Convenience method
+    }
 }
 ```
 
-## Migration Tips
+## Choosing the Right Approach
 
-If you're migrating from the old API:
+Here's a decision tree to help you choose:
 
-1. **Start Small**: Migrate one action at a time
-2. **Both APIs Work Together**: You can use old and new actions in the same project
-3. **Look for Patterns**: Similar code often uses similar migration patterns
-4. **Use the Convenience Methods**: They make migration easier
+**Start here: Do you need custom configuration?**
 
-Example migration:
+**NO** → Use convenience methods:
 ```java
-// Old code
-action.click(submitButton);
+action.click(button);
+action.type("text");
+action.find(image);
+```
 
-// New code - Option 1 (explicit)
-ActionResult found = action.find(submitButton);
-if (found.isSuccess()) {
-    action.perform(ActionType.CLICK, found.getFirstMatch());
-}
+**YES** → Do you need conditional logic or chaining?
 
-// New code - Option 2 (chain)
-ConditionalActionChain.find(findOptions)
+**NO** → Use `action.perform()` with ActionConfig:
+```java
+ClickOptions doubleClick = new ClickOptions.Builder()
+    .setNumberOfClicks(2)
+    .build();
+action.perform(doubleClick, objectCollection);
+```
+
+**YES** → Use ConditionalActionChain:
+```java
+ConditionalActionChain
+    .find(findOptions)
     .ifFoundClick()
-    .perform(action, new ObjectCollection.Builder()
-        .withImages(submitButton)
-        .build());
+    .ifNotFoundLog("Not found")
+    .thenType("text")
+    .perform(action, objectCollection);
 ```
 
 ## Next Steps

@@ -27,141 +27,162 @@ implementation 'io.github.jspinak:brobot:1.1.0'
 
 ## Your First Brobot Application
 
-Here's a simple example that demonstrates the core concepts:
+Brobot uses a **model-based approach** with States and Transitions. Here's how to build a simple login automation:
+
+### Step 1: Define Your State
+
+States organize UI elements that appear together:
 
 ```java
-import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.action.basic.click.ClickOptions;
-import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.annotations.State;
 import io.github.jspinak.brobot.model.state.StateImage;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+
+@State  // Includes @Component, registers as Brobot state
+@Getter
+public class LoginState {
+
+    private final StateImage loginButton = new StateImage.Builder().addPatterns("login-button").build();
+    private final StateImage usernameField = new StateImage.Builder().addPatterns("username-field").build();
+    private final StateImage passwordField = new StateImage.Builder().addPatterns("password-field").build();
+}
+```
+
+### Step 2: Define Transitions
+
+Transitions define how to navigate between states:
+
+```java
+import io.github.jspinak.brobot.annotations.*;
+import io.github.jspinak.brobot.action.Action;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
-@Slf4j  // Add logging support
-public class SimpleAutomation {
-    
-    @Autowired
-    private Action action;
-    
-    public void clickButton() {
-        // 1. Define what to look for
-        StateImage buttonImage = new StateImage.Builder()
-                .setName("submit-button")
-                .addPatterns("submit-button")
-                .build();
-        
-        // 2. Configure how to find it
-        PatternFindOptions findOptions = new PatternFindOptions.Builder()
-                .setStrategy(PatternFindOptions.Strategy.FIRST)
-                .setSimilarity(0.9)
-                .build();
-        
-        // 3. Add the button to the objects to find
-        ObjectCollection objects = new ObjectCollection.Builder()
-                .withImages(buttonImage)
-                .build();
-        
-        // 4. Find the button
-        ActionResult findResult = action.perform(findOptions, objects);
-        
-        // 4. Click the found button
-        if (findResult.isSuccess()) {
-            ClickOptions clickOptions = new ClickOptions.Builder()
-                    .setClickType(ClickOptions.Type.LEFT)
-                    .build();
-            
-            // Click on the same objects we found
-            ActionResult clickResult = action.perform(clickOptions, objects);
-        }
+@TransitionSet(state = LoginState.class)
+@RequiredArgsConstructor
+public class LoginTransitions {
+
+    private final Action action;
+    private final LoginState loginState;
+
+    @IncomingTransition(description = "Verify login screen is visible")
+    public boolean verifyLoginScreen() {
+        return action.find(loginState.getLoginButton()).isSuccess();
+    }
+
+    @OutgoingTransition(activate = {DashboardState.class})
+    public boolean login() {
+        return action.click(loginState.getUsernameField()).isSuccess() &&
+               action.type("user@example.com").isSuccess() &&
+               action.click(loginState.getPasswordField()).isSuccess() &&
+               action.type("password123").isSuccess() &&
+               action.click(loginState.getLoginButton()).isSuccess();
     }
 }
 ```
 
-### Simplified Version Using Convenience Methods
+### Step 3: Use Navigation
 
-The above example can be greatly simplified using Brobot's convenience methods and default settings:
+Now you can navigate automatically:
 
 ```java
+import io.github.jspinak.brobot.navigation.transition.StateNavigator;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
 @Component
-@Slf4j
-public class SimpleAutomation {
-    
-    @Autowired
-    private Action action;
-    
-    public void clickButtonSimplified() {
-        // 1. Define the button image
-        StateImage buttonImage = new StateImage.Builder()
-                .setName("submit-button")
-                .addPatterns("submit-button")
-                .build();
-        
-        // 2. Find and click in one line
-        action.click(buttonImage);
-        
-        // That's it! 🎉
+@RequiredArgsConstructor
+public class LoginAutomation {
+
+    private final StateNavigator navigator;
+
+    public boolean navigateToDashboard() {
+        // Brobot automatically figures out the path and executes transitions!
+        return navigator.openState("Dashboard");
     }
 }
 ```
 
-**What happens behind the scenes:**
-- Uses default similarity of 0.7 (70% match)
-- Automatically finds the image first, then clicks if found
-- Uses `PatternFindOptions.Strategy.FIRST` (clicks first match)
-- Uses standard left click with no delays
-- No need to create ObjectCollections manually
+**That's it!** Brobot handles:
+- Finding the current state
+- Determining the path to the target state
+- Executing all necessary transitions
+- Verifying arrival at each state
 
-### Even More Concise
+### Why This Approach?
 
-For quick prototyping or simple cases:
+**Model-Based Benefits:**
+- ✅ **Separation of Concerns**: UI elements (State) separate from logic (Transitions)
+- ✅ **Automatic Pathfinding**: Navigator finds the shortest path between states
+- ✅ **Reusable**: Transitions can be reused in different navigation scenarios
+- ✅ **Testable**: Mock transitions for unit testing
+- ✅ **Maintainable**: UI changes only affect State definitions
+
+### Quick Actions (Without States)
+
+For simple scripts or prototyping, you can use Brobot's Action API directly:
 
 ```java
-// Find an image on screen
-ActionResult found = action.find(submitButton);
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.model.state.StateImage;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
-// Click an image (finds it first automatically)
-action.click(submitButton);
+@Component
+@RequiredArgsConstructor
+public class QuickScript {
 
-// Type text (with automatic focus)
-action.type(new ObjectCollection.Builder().withStrings("Hello World").build());
+    private final Action action;
 
-// Chain find and click with fluent API
-new PatternFindOptions.Builder()
-    .then(new ClickOptions.Builder().build())
-    .build();
+    public void simpleClick() {
+        StateImage button = new StateImage.Builder().addPatterns("submit-button").build();
+        action.click(button);
+    }
+}
 ```
 
-**Default values used:**
-- **Similarity**: 0.7 (defined in Sikuli's `Settings.MinSimilarity`)
-- **Search Strategy**: FIRST (find first match)
-- **Search Duration**: 3 seconds timeout
+**Default behavior:**
+- **Similarity**: 0.7 (70% match required) - from `Settings.MinSimilarity`
+- **Search Strategy**: FIRST (stops at first Pattern's best match ≥ 0.7 similarity)
+- **Search Duration**: 3.0 seconds
 - **Click Type**: Single left click
 - **Search Region**: Entire screen
-- **Image Saving**: DISABLED (no debug images saved by default)
 
-These convenience methods are perfect when:
-- You're prototyping or testing
-- Default settings work for your use case
-- You want minimal, readable code
-- You don't need fine-grained control
+:::tip Search Strategy Details
+- **Each Pattern returns its BEST match** - SikuliX finds the highest correlation for each pattern image
+- **FIRST strategy** - Stops after finding the first Pattern that has a match ≥ 0.7 (fast, good when Patterns are ordered by priority)
+- **BEST strategy** - Searches ALL Patterns and returns the one with highest similarity across all (slower, most accurate)
 
-:::tip Important: Debug Images Not Saved by Default
-Brobot does **NOT** save debug images or action history by default to prevent filling up disk space. To enable image saving for debugging:
-
-```properties
-# In application.properties - only enable when debugging
-brobot.screenshot.save-history=true
-brobot.debug.image.enabled=true
-```
-
-Remember to disable these after debugging!
+If your StateImage has multiple Patterns, FIRST returns the best match of the first Pattern found. BEST returns the best match across all Patterns.
 :::
 
-For production code requiring specific settings (higher similarity, custom timeouts, logging), use the full builder pattern shown in the first example.
+:::tip When to Use Each Approach
+
+**Use States & Transitions (Recommended):**
+- Production applications
+- Complex multi-screen workflows
+- When you need navigation between different UI states
+- Team projects requiring maintainable code
+
+**Use Direct Actions:**
+- Quick prototypes or scripts
+- Single-screen automation
+- One-off tasks
+- Learning Brobot basics
+:::
+
+:::info Debug Images Not Saved by Default
+Brobot does **NOT** save debug images or action history by default. Enable only when debugging:
+
+```properties
+# In application.properties
+brobot.screenshot.save-history=true
+```
+
+Remember to disable after debugging!
+:::
 
 ### Minimal Complete Example
 
@@ -172,27 +193,16 @@ import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.model.state.StateImage;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ApplicationContext;
 
 @SpringBootApplication
 public class MinimalBrobot {
-    
+
     public static void main(String[] args) {
-        // Start Spring context
-        ApplicationContext context = SpringApplication.run(MinimalBrobot.class, args);
-        
-        // Get the Action bean
-        Action action = context.getBean(Action.class);
-        
-        // Create an image to find
-        StateImage button = new StateImage.Builder()
-                .addPatterns("button")  // No .png extension needed
-                .build();
-        
-        // Find and click it
+        var context = SpringApplication.run(MinimalBrobot.class, args);
+        var action = context.getBean(Action.class);
+
+        var button = new StateImage.Builder().addPatterns("button").build();
         action.click(button);
-        
-        // Done!
     }
 }
 ```
@@ -204,162 +214,22 @@ public class MinimalBrobot {
 - Mouse movement and clicking
 - Error handling if image not found
 
-## Understanding the New API
+## Using Actions Directly (Without States)
 
-### 1. Type-Safe Configuration
+For simple scripts that don't need the full States + Transitions architecture, you can use Brobot's Action API directly. See the **[Pure Actions Quick Start Guide](pure-actions-quickstart.md)** for detailed examples and patterns.
 
-Instead of the generic `ActionOptions`, Brobot 1.1.0 uses specific configuration classes:
-
-```java
-// Find operations
-PatternFindOptions patternFind = new PatternFindOptions.Builder()
-    .setStrategy(PatternFindOptions.Strategy.ALL)
-    .setSimilarity(0.85)
-    .build();
-
-// Click operations
-ClickOptions click = new ClickOptions.Builder()
-    .setClickType(ClickOptions.Type.DOUBLE_LEFT)
-    .build();
-
-// Text/OCR operations
-TextFindOptions textFind = new TextFindOptions.Builder()
-    .setLanguage("eng")
-    .setMinScore(0.8)
-    .build();
-```
-
-### 2. Action Execution Pattern
-
-The new API follows a consistent pattern:
-
-```java
-// 1. Create configuration
-ActionConfig config = new SomeOptions.Builder().build();
-
-// 2. Create object collection
-ObjectCollection objects = new ObjectCollection.Builder()
-    .withImages(images)
-    .build();
-
-// 3. Execute action
-ActionResult result = action.perform(config, objects);
-
-// 4. Check results
-if (result.isSuccess()) {
-    // Handle success
-}
-```
-
-### 3. Common Actions
-
-#### Finding Images
-```java
-PatternFindOptions findOptions = PatternFindOptions.forPreciseSearch();
-// or
-PatternFindOptions findOptions = PatternFindOptions.forQuickSearch();
-```
-
-#### Clicking
-```java
-ClickOptions clickOptions = new ClickOptions.Builder()
-    .setClickType(ClickOptions.Type.RIGHT)
-    .setPauseAfterEnd(0.5)
-    .build();
-```
-
-#### Typing Text
-```java
-TypeOptions typeOptions = new TypeOptions.Builder()
-    .setModifierDelay(0.05)
-    .setClearFieldFirst(true)
-    .build();
-```
-
-#### Dragging
-```java
-DragOptions dragOptions = new DragOptions.Builder()
-    .setFromIndex(0)  // First match
-    .setToIndex(1)    // Second match
-    .setDragDuration(1.0)
-    .build();
-```
-
-## Working with States
-
-Define states to model your application:
-
-```java
-@State(initial = true)  // Mark as initial state, includes @Component
-@Getter  // Generate getters
-@Slf4j   // Add logging
-public class LoginState {
-    
-    private final State state;
-    
-    public LoginState(StateService stateService) {
-        StateImage usernameField = new StateImage.Builder()
-                .setName("username-field.png")
-                .build();
-        
-        StateImage passwordField = new StateImage.Builder()
-                .setName("password-field.png")
-                .build();
-        
-        StateImage loginButton = new StateImage.Builder()
-                .setName("login-button.png")
-                .build();
-        
-        state = new State.Builder("LOGIN")
-                .withImages(usernameField, passwordField, loginButton)
-                .build();
-        
-        stateService.save(state);
-    }
-    
-    // Getters...
-}
-```
-
-## State Transitions
-
-Define transitions between states:
-
+Quick example:
 ```java
 @Component
-public class LoginTransitions {
-    
-    @Autowired
-    private Action action;
-    
-    @Autowired
-    private LoginState loginState;
-    
-    public LoginTransitions(StateTransitionsRepository repo) {
-        StateTransitions transitions = new StateTransitions.Builder("LOGIN")
-                .addTransition(this::performLogin, "DASHBOARD")
-                .build();
-        repo.add(transitions);
+@RequiredArgsConstructor
+public class QuickScript {
+    private final Action action;
+
+    public void simpleTask() {
+        StateImage button = new StateImage.Builder().addPatterns("submit-button").build();
+        action.click(button);  // Finds and clicks
+        action.type("Hello World");
     }
-    
-    private boolean performLogin() {
-        // Click username field
-        if (!clickElement(loginState.getUsernameField())) return false;
-        
-        // Type username
-        if (!typeText("user@example.com")) return false;
-        
-        // Click password field
-        if (!clickElement(loginState.getPasswordField())) return false;
-        
-        // Type password
-        if (!typeText("password123")) return false;
-        
-        // Click login button
-        return clickElement(loginState.getLoginButton());
-    }
-    
-    // Helper methods...
 }
 ```
 

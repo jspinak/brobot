@@ -7,7 +7,7 @@ title: 'Transitions'
 
 ## Introduction
 
-While States define "where you can be" in a GUI, **Transitions** define "how you get there." Every State that is reachable needs an associated transitions class that defines the pathways to and from other states. 
+While states define "where you can be" in a GUI, **transitions** define "how you get there." Every state that is reachable needs an associated transitions class that defines the pathways to and from other states. 
 
 Formally, a transition is a process or a sequence of actions that changes the GUI from one state to another. They form the "edges" of the state graph and are the building blocks used by the framework's pathfinder to navigate the application. 
 
@@ -15,12 +15,12 @@ Formally, a transition is a process or a sequence of actions that changes the GU
 
 Brobot implements transitions using a cohesive pattern where each state's transition class contains:
 
-![Transition Diagram](/img/paper/transitions.png)
+![Transition Diagram](/img/paper/transitions.png)  
 _This diagram is based on Figure 8 from the research paper._
 
 * **IncomingTransition**: This verifies successful arrival at the state, regardless of which state initiated the transition. There is only one IncomingTransition per state, and it contains checks to confirm the state is active.
 
-* **OutgoingTransition**: These handle navigation FROM the current state TO other states. Since these transitions use the current state's images and UI elements, grouping them in the state's transition class creates better cohesion. Each OutgoingTransition contains the specific actions needed to navigate to a target state.
+* **OutgoingTransition**: These handle navigation FROM the current state TO other states. Each OutgoingTransition contains the specific actions needed to navigate to a target state.
 
 ## Using @TransitionSet Annotation
 
@@ -33,68 +33,33 @@ This pattern maintains high cohesion since outgoing transitions use the current 
 ### Complete Example
 
 ```java
-// Note: BrobotProperties must be injected as a dependency
-@Autowired
-private BrobotProperties brobotProperties;
-
-@TransitionSet(state = PricingState.class, description = "Pricing page transitions")
+/**
+ * TransitionSet for AmountState - handles all transitions for the Amount dialog
+ * Transition classes have ONLY methods, no state objects
+ */
+@TransitionSet(state = AmountState.class)
 @RequiredArgsConstructor
 @Slf4j
-public class PricingTransitions {
+public class AmountTransitions {
 
-    private final PricingState pricingState;
+    private final AmountState amountState;
     private final Action action;
-    
-    /**
-     * Verify that we have successfully arrived at the Pricing state.
-     * Checks for the presence of pricing-specific elements.
-     */
-    @IncomingTransition(description = "Verify arrival at Pricing state")
+
+    @OutgoingTransition(activate = {MainScreenState.class})
+    public boolean toMainScreen() {
+        return action.type(amountState.getClose()).isSuccess();
+    }
+
+    @IncomingTransition
     public boolean verifyArrival() {
-        log.info("Verifying arrival at Pricing state");
-        // In mock mode, just return true for testing
-        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
-            log.info("Mock mode: simulating successful verification");
-            return true;
-        }
+        PatternFindOptions findOptions = new PatternFindOptions.Builder()
+            .withBeforeActionLog("Verifying arrival at Amount dialog...")
+            .withSuccessLog("Successfully arrived at Amount dialog")
+            .withFailureLog("Failed to verify arrival at Amount dialog")
+            .setSearchDuration(5.0)
+            .build();
 
-        boolean found = action.find(pricingState.getStartForFreeButton()).isSuccess();
-
-        if (found) {
-            log.info("Successfully confirmed Pricing state is active");
-            return true;
-        } else {
-            log.error("Failed to confirm Pricing state - button not found");
-            return false;
-        }
-    }
-
-    /**
-     * Navigate from Pricing to Homepage by clicking the home/logo button.
-     */
-    @OutgoingTransition(activate = {HomepageState.class}, pathCost = 1, description = "Navigate from Pricing to Homepage")
-    public boolean toHomepage() {
-        log.info("Navigating from Pricing to Homepage");
-        // In mock mode, just return true for testing
-        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
-            log.info("Mock mode: simulating successful navigation");
-            return true;
-        }
-        return action.click(pricingState.getHomeLink()).isSuccess();
-    }
-
-    /**
-     * Navigate from Pricing to Menu by clicking the menu icon.
-     */
-    @OutgoingTransition(activate = {MenuState.class}, pathCost = 2, description = "Navigate from Pricing to Menu")
-    public boolean toMenu() {
-        log.info("Navigating from Pricing to Menu");
-        // In mock mode, just return true for testing
-        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
-            log.info("Mock mode: simulating successful navigation");
-            return true;
-        }
-        return action.click(pricingState.getMenuIcon()).isSuccess();
+        return action.perform(findOptions, amountState.getEingabe()).isSuccess();
     }
 }
 ```
@@ -110,7 +75,6 @@ Marks a class as containing all transitions for a specific state:
 #### @IncomingTransition
 Verifies successful arrival at the state:
 - **description**: Documentation for the verification
-- **timeout**: Verification timeout in seconds (optional)
 
 #### @OutgoingTransition
 Defines a transition FROM the current state TO other states:
@@ -134,54 +98,28 @@ public class WorldTransitions {
     private final Action action;
     
     /**
-     * Verify arrival at World state by checking for the world map.
+     * Verify arrival at World state by checking for the state's images.
      */
     @IncomingTransition(description = "Verify arrival at World state")
     public boolean verifyArrival() {
-        log.info("Verifying arrival at World state");
-        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
-            log.info("Mock mode: simulating successful verification");
-            return true;
-        }
-
         // Check for world-specific elements
-        boolean foundMap = action.find(worldState.getWorldMap()).isSuccess();
-        boolean foundIslands = action.find(worldState.getIsland1()).isSuccess();
-
-        if (foundMap || foundIslands) {
-            log.info("Successfully confirmed World state is active");
-            return true;
-        } else {
-            log.error("Failed to confirm World state - world elements not found");
-            return false;
-        }
+        return action.find(worldState.getWorldMap(), worldState.getIsland()).isSuccess();
     }
 
     /**
      * Navigate from World to Home by clicking the home button.
      */
-    @OutgoingTransition(activate = {HomeState.class}, pathCost = 1, description = "Navigate from World to Home")
+    @OutgoingTransition(activate = {HomeState.class}, description = "Navigate from World to Home")
     public boolean toHome() {
-        log.info("Navigating from World to Home");
-        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
-            log.info("Mock mode: simulating successful navigation");
-            return true;
-        }
         return action.click(worldState.getHomeButton()).isSuccess();
     }
 
     /**
-     * Navigate from World to Island by clicking on an island.
+     * Navigate from World to Island by clicking on the search button.
      */
     @OutgoingTransition(activate = {IslandState.class}, pathCost = 2, description = "Navigate from World to Island")
     public boolean toIsland() {
-        log.info("Navigating from World to Island");
-        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
-            log.info("Mock mode: simulating successful navigation");
-            return true;
-        }
-        // Click on first island
-        return action.click(worldState.getIsland1()).isSuccess();
+        return action.click(worldState.getSearchButton()).isSuccess();
     }
 }
 ```
@@ -205,15 +143,11 @@ public class SettingsModalTransitions {
     }
 
     /**
-     * Close the modal and return to dashboard.
-     * Dashboard state is reactivated when modal closes.
+     * Close the modal and return to previous state.
+     * Previous state is reactivated when modal closes.
      */
-    @OutgoingTransition(
-        activate = {DashboardState.class},
-        exit = {SettingsModalState.class},  // Explicitly exit the modal
-        pathCost = 0
-    )
-    public boolean closeToDashboard() {
+    @OutgoingTransition(activate = {PreviousState.class})
+    public boolean closeToPrevious() {
         return action.click(settingsModalState.getCloseButton()).isSuccess();
     }
 }
@@ -227,7 +161,7 @@ public class DashboardTransitions {
     @OutgoingTransition(
         activate = {SettingsModalState.class},
         staysVisible = true,  // Dashboard remains visible behind modal
-        pathCost = 1
+        pathCost = 2
     )
     public boolean openSettingsModal() {
         return action.click(dashboardState.getSettingsButton()).isSuccess();
@@ -246,8 +180,7 @@ public class LoginTransitions {
      */
     @OutgoingTransition(
         activate = {DashboardState.class, SidebarState.class, HeaderState.class, FooterState.class},
-        exit = {LoginState.class, SplashScreenState.class},  // Clean up login-related states
-        staysVisible = false,  // Login state is deactivated (default)
+        exit = {SplashScreenState.class},  // Clean up login-related states
         pathCost = 0  // Preferred path
     )
     public boolean login() {
@@ -263,75 +196,10 @@ public class LoginTransitions {
 1. **High Cohesion**: Each transition class only needs its own state as a dependency, since outgoing transitions use that state's images
 2. **Clear Separation**: IncomingTransition verifies arrival, OutgoingTransitions handle navigation FROM the state
 3. **Natural Organization**: File structure mirrors state structure (one transitions class per state)
-4. **Reduced Dependencies**: No need to inject other states just for their images in incoming transitions
-5. **Spring Integration**: Full dependency injection support (@TransitionSet includes @Component)
-6. **Type Safety**: Class-based state references prevent typos and enable IDE refactoring
-7. **Mock Mode Support**: Easy to add testing support with framework settings check
-8. **Cleaner Code**: Each transition class is self-contained with its state's navigation logic
-
-## File Organization
-
-Organize transition classes alongside state classes for clarity:
-
-```
-src/main/java/com/example/app/
-├── states/
-│   ├── HomeState.java
-│   ├── WorldState.java
-│   ├── IslandState.java
-│   └── PricingState.java
-└── transitions/
-    ├── HomeTransitions.java     # All transitions for Home state
-    ├── WorldTransitions.java    # All transitions for World state
-    ├── IslandTransitions.java   # All transitions for Island state
-    └── PricingTransitions.java  # All transitions for Pricing state
-```
-
-## Complex Transitions with Action Chains
-
-For transitions that require multiple steps, you can chain actions together:
-
-```java
-@TransitionSet(state = WorkingState.class, description = "Claude Working state transitions")
-@RequiredArgsConstructor
-@Slf4j
-public class WorkingTransitions {
-
-    private final WorkingState workingState;
-    private final Action action;
-    
-    @IncomingTransition
-    public boolean verifyArrival() {
-        log.info("Verifying arrival at Working state");
-        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
-            return true;
-        }
-        return action.find(workingState.getWorkingIndicator()).isSuccess();
-    }
-
-    /**
-     * Navigate from Working to Prompt when work is complete.
-     */
-    @OutgoingTransition(activate = {PromptState.class}, pathCost = 1)
-    public boolean toPrompt() {
-        try {
-            log.info("Navigating from Working to Prompt");
-
-            if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
-                return true;
-            }
-
-            // Wait for work to complete and return to prompt
-            // This might involve clicking a button or waiting for the prompt to reappear
-            return action.click(workingState.getStopButton()).isSuccess();
-
-        } catch (Exception e) {
-            log.error("Error during Working to Prompt transition", e);
-            return false;
-        }
-    }
-}
-```
+4. **Spring Integration**: Full dependency injection support (@TransitionSet includes @Component)
+5. **Type Safety**: Class-based state references prevent typos and enable IDE refactoring
+6. **Mock Mode Support**: Easy to add testing support with framework settings check
+7. **Cleaner Code**: Each transition class is self-contained with its state's navigation logic
 
 ## The Formal Model (Under the Hood)
 
@@ -348,7 +216,7 @@ Brobot supports transitions that activate multiple states simultaneously. This i
 
 ### Core Concept: No Primary Target State
 
-**Critical Understanding**: In Brobot, transitions don't have a "primary" target. ALL states in the `activate` set are treated equally for pathfinding purposes.
+**Critical Understanding**: In Brobot 1.1.0, transitions don't have a "primary" target. ALL states in the `activate` set are treated equally for pathfinding purposes.
 
 ```java
 // All four states are equal - any can be used as a path node
@@ -392,27 +260,25 @@ When a transition activates multiple states, **each activated state becomes a po
 
 ```java
 // Transition that activates multiple UI panels
-@TransitionSet(state = DashboardState.class)
+@TransitionSet(state = LoginState.class)
 @RequiredArgsConstructor
 @Slf4j
 public class DashboardTransitions {
 
     private final Action action;
-    private final DashboardState dashboardState;
     private final LoginState loginState;
 
-    @OutgoingTransition(activate = {LoginState.class})
-    public boolean toLogin() {
-        log.info("Navigating from Dashboard to Login");
-        // This transition would be configured to activate multiple states
-        // The actual multi-state activation is handled by the framework
-        return action.click(dashboardState.getLogoutButton()).isSuccess();
+    // This transition is configured to activate multiple states
+    @OutgoingTransition(activate = {DashboardState.class, NavigationBarState.class, StatusPanelState.class})
+    public boolean login() {
+        log.info("Navigating from Login to Dashboard, NavigationBar, and StatusPanel.");
+        return action.click(loginState.getLoginButton()).isSuccess();
     }
 
     @IncomingTransition
     public boolean verifyArrival() {
-        log.info("Verifying Dashboard with all panels is visible");
-        return action.find(dashboardState.getMainContent()).isSuccess();
+        log.info("Verifying login is visible");
+        return action.find(loginState.getLoginButton()).isSuccess();
     }
 }
 
@@ -476,34 +342,6 @@ transition.setStaysVisibleAfterTransition(StateTransition.StaysVisible.FALSE);
 transition.setStaysVisibleAfterTransition(StateTransition.StaysVisible.NONE);
 ```
 
-### Common Patterns
-
-#### 1. Modal Dialog Pattern
-Keep the background state visible while showing an overlay:
-```java
-// In the transition configuration
-transition.setActivate(Set.of(settingsModalId));
-transition.setStaysVisibleAfterTransition(StateTransition.StaysVisible.TRUE);
-// Dashboard remains visible in background
-```
-
-#### 2. Complete State Replacement
-Replace the current state entirely:
-```java
-// Activate new states and exit the old one
-transition.setActivate(Set.of(dashboardId, sidebarId));
-transition.setExit(Set.of(loginId));  // Explicitly deactivate Login
-```
-
-#### 3. Tab Switching
-Activate new tab content while deactivating old tab:
-```java
-// Switch from Tab1 to Tab2
-transition.setActivate(Set.of(tab2ContentId));
-transition.setExit(Set.of(tab1ContentId));  // Deactivate old tab
-// Tab navigation bar (separate state) remains active
-```
-
 ### Benefits of Multi-State Activation
 
 1. **Atomic Operations**: All states are verified together, ensuring UI consistency
@@ -518,6 +356,8 @@ Brobot supports dynamic transitions to handle common UI patterns like menus and 
 You can define transitions that return to the previous state dynamically:
 
 ```java
+import io.github.jspinak.brobot.model.state.special.*;
+
 @TransitionSet(state = MenuState.class, description = "Menu overlay transitions")
 @RequiredArgsConstructor
 @Slf4j
@@ -531,70 +371,18 @@ public class MenuTransitions {
      * This uses the PreviousState special marker for dynamic navigation.
      */
     @OutgoingTransition(
-        activate = {io.github.jspinak.brobot.model.state.special.PreviousState.class},
-        pathCost = 1,
+        activate = {PreviousState.class},
         description = "Close menu and return to previous state"
     )
     public boolean toPrevious() {
-        log.info("Closing menu to return to previous state");
-        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
-            return true;
-        }
         // Click close button or press ESC
         return action.click(menuState.getCloseButton()).isSuccess() ||
-               action.type("\u001B").isSuccess(); // ESC key
+               action.type(Key.ESC).isSuccess(); 
     }
     
     @IncomingTransition
     public boolean verifyArrival() {
-        log.info("Verifying arrival at Menu state");
-        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
-            return true;
-        }
         return action.find(menuState.getMenuHeader()).isSuccess();
-    }
-}
-```
-
-## Testing Transitions
-
-The new format makes testing easier and more straightforward:
-
-```java
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestConfiguration.class})
-public class PricingTransitionsTest {
-    
-    @Autowired
-    private PricingTransitions pricingTransitions;
-    
-    @MockBean
-    private Action action;
-    
-    @Test
-    public void testFromMenuTransition() {
-        // Given
-        when(action.click(any())).thenReturn(new ActionResult.Builder().setSuccess(true).build());
-        
-        // When
-        boolean result = pricingTransitions.fromMenu();
-        
-        // Then
-        assertTrue(result);
-        verify(action).click(menuState.getPricingButton());
-    }
-    
-    @Test
-    public void testVerifyArrival() {
-        // Given
-        when(action.find(any())).thenReturn(new ActionResult.Builder().setSuccess(true).build());
-        
-        // When
-        boolean arrived = pricingTransitions.verifyArrival();
-        
-        // Then
-        assertTrue(arrived);
-        verify(action).find(pricingState.getStartForFreeButton());
     }
 }
 ```
@@ -638,16 +426,106 @@ When multiple paths exist, Brobot automatically selects the path with the **lowe
 
 For comprehensive documentation on pathfinding, cost calculation, and advanced patterns, see the [**Pathfinding and Path Costs Guide**](/docs/core-library/guides/pathfinding-and-costs).
 
+## Important Pathfinding Limitation
+
+### One Transition Per State Pair
+
+**Critical**: Brobot's pathfinding algorithm supports **at most one transition** between any pair of states. If you define multiple `@OutgoingTransition` methods that activate the same destination state, **only the first one will be discovered by the pathfinder**.
+
+This limitation exists because the framework uses `getTransitionFunctionByActivatedStateId()` which returns the first matching transition:
+
+```java
+// From StateTransitions.java
+public Optional<StateTransition> getTransitionFunctionByActivatedStateId(Long to) {
+    for (StateTransition transition : transitions) {
+        if (transition.getActivate().contains(to))
+            return Optional.of(transition);  // Returns FIRST match only!
+    }
+    return Optional.empty();
+}
+```
+
+### Example of the Problem
+
+```java
+@TransitionSet(state = MainPageState.class)
+public class MainPageTransitions {
+
+    // ❌ WRONG - Two transitions to CurrentState
+    @OutgoingTransition(activate = {CurrentState.class}, pathCost = 2)
+    public boolean refresh() {
+        return action.click(mainPageState.getRefreshButton()).isSuccess();
+    }
+
+    @OutgoingTransition(activate = {CurrentState.class}, pathCost = 3)
+    public boolean nextPage() {
+        // This transition will NEVER be used by the pathfinder!
+        return action.click(mainPageState.getNextPageButton()).isSuccess();
+    }
+}
+```
+
+**Result**: The pathfinder will only ever discover and use the `refresh()` transition. The `nextPage()` transition is invisible to pathfinding.
+
+### Solutions
+
+**1. Use Different Destination States**
+```java
+@OutgoingTransition(activate = {MainPageState.class}, pathCost = 2)
+public boolean refresh() {
+    return action.click(mainPageState.getRefreshButton()).isSuccess();
+}
+
+@OutgoingTransition(activate = {MainPagePage2State.class}, pathCost = 3)
+public boolean nextPage() {
+    // Now pathfinder can discover this as a different destination
+    return action.click(mainPageState.getNextPageButton()).isSuccess();
+}
+```
+
+**2. Combine Multiple UI Elements in One Transition (Recommended)**
+```java
+@OutgoingTransition(activate = {PreviousState.class}, pathCost = 0)
+public boolean closeDialog() {
+    // Use ObjectCollection to accept multiple buttons
+    ObjectCollection closeButtons = new ObjectCollection.Builder()
+            .withImages(dialogState.getConfirmButton(),
+                       dialogState.getCancelButton(),
+                       dialogState.getXButton())
+            .build();
+    return action.click(closeButtons).isSuccess();
+}
+```
+
+**3. Make Them Helper Methods (Not Transitions)**
+```java
+// Not @OutgoingTransition - just regular helper methods
+public boolean refresh() {
+    return action.click(mainPageState.getRefreshButton()).isSuccess();
+}
+
+public boolean nextPage() {
+    return action.click(mainPageState.getNextPageButton()).isSuccess();
+}
+```
+
+### When This Matters
+
+This limitation is important when:
+- Using `CurrentState` for multiple self-transitions
+- Defining multiple ways to reach the same state (e.g., keyboard shortcut vs menu)
+- Creating fallback transitions to the same destination
+
+**Key Takeaway**: Design your state graph so there's only one transition between any pair of states. If you need multiple ways to trigger the same transition, use an `ObjectCollection` in a single transition method.
+
 ## Best Practices
 
-1. **Always include mock mode support** for testing environments
-2. **Use descriptive method names** like `toMenu()`, `toHomepage()` for outgoing transitions
-3. **Add logging** to track navigation flow during debugging
-4. **Verify critical elements** in IncomingTransition to ensure state is truly active
-5. **Set appropriate path costs** - use defaults for normal operations, 0 for free, higher for fallbacks
-6. **Handle exceptions** gracefully in complex transitions
-7. **Keep transitions focused** - each method should do one thing well
-8. **Minimize dependencies** - each transition class should only need its own state
+1. **Use descriptive method names** like `toMenu()`, `toHomepage()` for outgoing transitions
+2. **Verify critical elements** in IncomingTransition to ensure state is truly active
+3. **Set appropriate path costs** - use defaults for normal operations, 0 for free, higher for fallbacks
+4. **Keep transitions focused** - each method should do one thing well
+5. **Minimize dependencies** - each transition class should only need its own state
+6. **One transition per destination** - Ensure at most one `@OutgoingTransition` activates each destination state
 
 ## Summary
 

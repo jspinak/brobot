@@ -24,7 +24,7 @@ Brobot follows a strict separation of concerns:
 
 | Component | Purpose | What it Contains | What it NEVER Contains |
 |-----------|---------|------------------|------------------------|
-| **State Classes** | Data containers | StateImage/StateString objects only | Methods, business logic, actions |
+| **State Classes** | Data containers | StateImage, StateRegion, StateLocation, StateString objects | Methods, business logic, actions |
 | **TransitionSet Classes** | Navigation logic | Methods for state transitions | StateImage objects, state data |
 | **Navigation Service** | Orchestrates transitions | Path finding and execution | Direct state manipulation |
 | **Action Service** | Performs UI operations | Click, type, find methods | Thread.sleep(), direct SikuliX calls |
@@ -44,10 +44,6 @@ Brobot follows a strict separation of concerns:
 **These will BREAK the entire model-based automation system:**
 
 ```java
-// Note: BrobotProperties must be injected as a dependency
-@Autowired
-private BrobotProperties brobotProperties;
-
 // ❌ ABSOLUTELY FORBIDDEN - These break everything:
 Thread.sleep(2000);                          // Breaks mock testing completely
 action.pause(2.0);                           // This method DOES NOT EXIST in Brobot
@@ -60,14 +56,17 @@ ClickOptions clickWithPause = new ClickOptions.Builder()
     .setPauseBeforeBegin(1.0)  // Wait 1 second before clicking
     .setPauseAfterEnd(2.0)      // Wait 2 seconds after clicking
     .build();
-action.click(stateImage, clickWithPause);
+action.perform(clickWithPause, stateImage);
 
 PatternFindOptions findWithPause = new PatternFindOptions.Builder()
     .setPauseBeforeBegin(0.5)
     .setPauseAfterEnd(1.0)
-    .setWaitTime(5.0)  // Wait up to 5 seconds for pattern to appear
+    .setMaxSearchTime(5.0)  // Wait up to 5 seconds for pattern to appear
     .build();
-action.find(stateImage, findWithPause);
+action.perform(findWithPause, stateImage);
+
+// Note: BrobotProperties are automatically configured from application.properties
+// You do NOT need to inject them in your application code
 ```
 
 ### Rule 2: NEVER Call Transitions Directly
@@ -90,13 +89,13 @@ public class WrongApplication {
 @Component
 @RequiredArgsConstructor
 public class CorrectApplication {
-    private final Navigation navigation;
+    private final StateNavigator stateNavigator;
     private final Action action;
     private final PricingState pricingState;
 
     public void run() {
         // Navigate using state name (WITHOUT "State" suffix)
-        navigation.openState("Pricing");  // ✅ CORRECT
+        stateNavigator.openState("Pricing");  // ✅ CORRECT
 
         // Then perform actions on the state
         action.click(pricingState.getStartButton());
@@ -113,9 +112,9 @@ public class PricingState { }    // ✅ CORRECT
 public class Menu { }             // ❌ WRONG
 
 // Navigation uses name WITHOUT "State"
-navigation.openState("Menu");     // ✅ CORRECT - for MenuState class
-navigation.openState("Pricing");  // ✅ CORRECT - for PricingState class
-navigation.openState("MenuState"); // ❌ WRONG - don't include "State"
+stateNavigator.openState("Menu");     // ✅ CORRECT - for MenuState class
+stateNavigator.openState("Pricing");  // ✅ CORRECT - for PricingState class
+stateNavigator.openState("MenuState"); // ❌ WRONG - don't include "State"
 ```
 
 ### Rule 4: State Classes Have Objects, Not Methods
@@ -177,7 +176,7 @@ public class MenuTransitions {
     private final Action action;
 
     // Methods for navigation
-    @OutgoingTransition(to = PricingState.class)
+    @OutgoingTransition(activate = {PricingState.class})
     public boolean toPricing() {
         return action.click(menuState.getPricingButton()).isSuccess();
     }
@@ -325,9 +324,9 @@ public class PricingTransitions {
 
     /**
      * Navigate FROM Pricing TO Menu
-     * Priority determines order when multiple paths exist
+     * pathCost determines order when multiple paths exist (lower cost = preferred)
      */
-    @OutgoingTransition(to = MenuState.class, priority = 1)
+    @OutgoingTransition(activate = {MenuState.class}, pathCost = 1)
     public boolean toMenu() {
         log.info("Navigating from Pricing to Menu");
 
@@ -338,13 +337,13 @@ public class PricingTransitions {
             .build();
 
         // Click the menu button in pricing page
-        return action.click(pricingState.getMenuButton(), clickOptions).isSuccess();
+        return action.perform(clickOptions, pricingState.getMenuButton()).isSuccess();
     }
 
     /**
      * Navigate FROM Pricing TO Homepage
      */
-    @OutgoingTransition(to = HomepageState.class, priority = 2)
+    @OutgoingTransition(activate = {HomepageState.class}, pathCost = 2)
     public boolean toHomepage() {
         log.info("Navigating from Pricing to Homepage");
 
@@ -359,23 +358,16 @@ public class PricingTransitions {
      */
     @IncomingTransition
     public boolean verifyArrival() {
-        log.info("Verifying arrival at Pricing state");
-
-        // Wait for unique element with timeout
+        // All logging handled by the options configuration
         PatternFindOptions findOptions = new PatternFindOptions.Builder()
-            .setWaitTime(5.0)  // Wait up to 5 seconds
+            .setMaxSearchTime(5.0)  // Wait up to 5 seconds
             .setPauseAfterEnd(0.5)
+            .withBeforeActionLog("Verifying arrival at Pricing state")
+            .withSuccessLog("Successfully arrived at Pricing state")
+            .withFailureLog("Failed to verify arrival at Pricing state")
             .build();
 
-        boolean found = action.find(pricingState.getUniqueElement(), findOptions).isSuccess();
-
-        if (found) {
-            log.info("Successfully arrived at Pricing state");
-        } else {
-            log.error("Failed to verify arrival at Pricing state");
-        }
-
-        return found;
+        return action.perform(findOptions, pricingState.getUniqueElement()).isSuccess();
     }
 }
 ```
@@ -391,8 +383,8 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @ComponentScan(basePackages = {
-    "com.example.automation",
-    "io.github.jspinak.brobot"  // REQUIRED: Scan Brobot components
+    "com.example.automation",       // Your application package
+    "io.github.jspinak.brobot"      // REQUIRED: Scan Brobot framework components
 })
 public class Application {
 
@@ -411,7 +403,8 @@ import com.example.automation.states.*;
 import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
-import io.github.jspinak.brobot.navigation.Navigation;
+import io.github.jspinak.brobot.navigation.transition.StateNavigator;
+import io.github.jspinak.brobot.action.ObjectCollection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -422,7 +415,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class AutomationRunner implements CommandLineRunner {
 
-    private final Navigation navigation;
+    private final StateNavigator stateNavigator;
     private final Action action;
     private final MenuState menuState;
     private final PricingState pricingState;
@@ -435,7 +428,7 @@ public class AutomationRunner implements CommandLineRunner {
         try {
             // Step 1: Navigate to Pricing page
             log.info("Step 1: Navigating to Pricing");
-            navigation.openState("Pricing");  // Note: "Pricing" not "PricingState"
+            stateNavigator.openState("Pricing");  // Note: "Pricing" not "PricingState"
 
             // Step 2: Click on "Start for Free" button
             log.info("Step 2: Clicking Start for Free");
@@ -444,14 +437,14 @@ public class AutomationRunner implements CommandLineRunner {
                 .setPauseAfterEnd(2.0)
                 .build();
 
-            if (!action.click(pricingState.getStartForFreeButton(), clickOptions).isSuccess()) {
+            if (!action.perform(clickOptions, pricingState.getStartForFreeButton()).isSuccess()) {
                 log.error("Failed to click Start for Free button");
                 return;
             }
 
             // Step 3: Navigate to Homepage
             log.info("Step 3: Navigating to Homepage");
-            navigation.openState("Homepage");
+            stateNavigator.openState("Homepage");
 
             // Step 4: Type email address
             log.info("Step 4: Entering email address");
@@ -463,10 +456,13 @@ public class AutomationRunner implements CommandLineRunner {
             TypeOptions typeOptions = new TypeOptions.Builder()
                 .setPauseBeforeBegin(0.5)
                 .setPauseAfterEnd(1.0)
-                .setModifiers(new Key[]{})  // No modifier keys
                 .build();
 
-            action.type("user@example.com", typeOptions);
+            ObjectCollection textCollection = new ObjectCollection.Builder()
+                .withStrings("user@example.com")
+                .build();
+
+            action.perform(typeOptions, textCollection);
 
             // Step 5: Submit
             log.info("Step 5: Submitting form");
@@ -481,6 +477,15 @@ public class AutomationRunner implements CommandLineRunner {
 }
 ```
 
+The try-catch doesn't hurt and provides a safety net, but Brobot methods are designed to return failure status rather than throw exceptions, so you could also just check the return values instead:
+
+```java
+if (!stateNavigator.openState("Pricing")) {
+    log.error("Failed to navigate to Pricing");
+    return;
+}
+```
+
 ### 5. Complete application.properties Configuration
 
 ```properties
@@ -490,38 +495,33 @@ spring.main.banner-mode=off
 
 # Brobot Core Configuration
 brobot.core.image-path=images/
-brobot.core.mock=false
-brobot.core.allow-manual-override=true
 
 # Screenshot Configuration
-brobot.screenshot.save-history=true
+brobot.screenshot.save-history=false
 brobot.screenshot.history-path=history/
-brobot.screenshot.include-timestamp=true
-brobot.screenshot.format=png
 
-# Logging Configuration
-brobot.logging.verbosity=VERBOSE
+# Console Action Logging (Visual Feedback)
 brobot.console.actions.enabled=true
-brobot.console.actions.level=VERBOSE
-brobot.console.state-transitions.enabled=true
-brobot.console.matches.enabled=true
+brobot.console.actions.level=NORMAL
+brobot.console.actions.show-match-details=true
+brobot.console.actions.show-timing=true
+brobot.console.actions.report-transitions=true
 
-# Pattern Matching Configuration
-brobot.pattern.default-similarity=0.85
-brobot.pattern.wait-time=5.0
-brobot.pattern.scan-rate=0.3
+# Standard Spring Boot Logging
+logging.level.root=INFO
+logging.level.io.github.jspinak.brobot=INFO
+logging.level.io.github.jspinak.brobot.action=DEBUG
 
 # Mock Mode Configuration (for testing)
-brobot.mock.enabled=false
-brobot.mock.success-probability=0.9
-brobot.mock.find-duration=0.02
-brobot.mock.click-duration=0.01
-brobot.mock.type-duration=0.03
+brobot.mock=false
+brobot.mock.action.success.probability=1.0
+brobot.mock.time-find-first=0.1
+brobot.mock.time-click=0.05
 
-# Action Timing Defaults
-brobot.action.pause-before-begin=0.0
-brobot.action.pause-after-end=0.0
-brobot.action.move-mouse-delay=0.5
+# Mouse Action Settings
+brobot.mouse.move-delay=0.5
+brobot.mouse.pause-before-down=0.0
+brobot.mouse.pause-after-up=0.0
 ```
 
 ### 6. Complete State Class with Mock Mode Support (OPTIONAL)
@@ -596,7 +596,7 @@ Simply set these properties in `application.properties`:
 
 ```properties
 # Enable mock mode - this is the ONLY required setting
-brobot.core.mock=true
+brobot.mock=true
 
 # Optional: Control action success probability (default is 1.0 = 100%)
 brobot.mock.action.success.probability=1.0
@@ -611,7 +611,7 @@ package com.example.automation.runner;
 
 import com.example.automation.states.*;
 import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.navigation.Navigation;
+import io.github.jspinak.brobot.navigation.transition.StateNavigator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -622,7 +622,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class AutomationRunner implements CommandLineRunner {
 
-    private final Navigation navigation;
+    private final StateNavigator stateNavigator;
     private final Action action;
     private final MenuState menuState;
     private final PricingState pricingState;
@@ -633,12 +633,11 @@ public class AutomationRunner implements CommandLineRunner {
         // This code runs in BOTH live and mock mode
         // In mock mode, actions use ActionHistory instead of real GUI
 
-        log.info("Starting automation (Mock mode: {})",
-                io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock());
+        log.info("Starting automation");
 
         // Navigate to Pricing
         log.info("Navigating to Pricing page");
-        navigation.openState("Pricing");
+        stateNavigator.openState("Pricing");
 
         // Click Start for Free
         log.info("Clicking Start for Free button");
@@ -647,7 +646,7 @@ public class AutomationRunner implements CommandLineRunner {
 
         // Navigate to Homepage
         log.info("Navigating to Homepage");
-        navigation.openState("Homepage");
+        stateNavigator.openState("Homepage");
 
         // Enter email
         log.info("Entering email address");
@@ -668,26 +667,27 @@ Use Spring profiles or separate property files:
 
 ```properties
 # Live mode - interact with real GUI
-brobot.core.mock=false
+brobot.mock=false
 
 # Other production settings
 brobot.screenshot.save-history=true
-brobot.logging.verbosity=VERBOSE
+logging.level.io.github.jspinak.brobot=DEBUG
 ```
 
 **application-mock.properties** (Mock mode):
 
 ```properties
 # Enable mock mode - uses ActionHistory instead of real GUI
-brobot.core.mock=true
+brobot.mock=true
 
 # Optional: Control success probability (default 1.0 = 100%)
 brobot.mock.action.success.probability=1.0
 
-# Fast mock timings
-brobot.mock.find-duration=0.01
-brobot.mock.click-duration=0.01
-brobot.mock.type-duration=0.01
+# Fast mock timings (in seconds)
+brobot.mock.time-find-first=0.01
+brobot.mock.time-find-all=0.02
+brobot.mock.time-click=0.01
+brobot.mock.time-move=0.01
 
 # Disable screenshots in mock mode
 brobot.screenshot.save-history=false
@@ -834,32 +834,39 @@ ClickOptions clickWithPause = new ClickOptions.Builder()
     .setPauseAfterEnd(2.0)      // Wait 2 seconds after clicking
     .setNumberOfClicks(2)       // Double-click
     .build();
-action.click(stateImage, clickWithPause);
+action.perform(clickWithPause, new ObjectCollection.Builder()
+    .withImages(stateImage)
+    .build());
 
 // Find with timeout and pauses
 PatternFindOptions findOptions = new PatternFindOptions.Builder()
-    .setWaitTime(10.0)          // Wait up to 10 seconds
+    .setMaxSearchTime(10.0)     // Wait up to 10 seconds
     .setPauseBeforeBegin(0.5)   // Pause before searching
     .setPauseAfterEnd(1.0)      // Pause after finding
     .setSimilarity(0.95)        // 95% match required
     .build();
-action.find(stateImage, findOptions);
+action.perform(findOptions, new ObjectCollection.Builder()
+    .withImages(stateImage)
+    .build());
 
 // Type with pauses
 TypeOptions typeOptions = new TypeOptions.Builder()
     .setPauseBeforeBegin(0.5)
     .setPauseAfterEnd(1.0)
-    .setPauseBetweenKeys(0.1)  // Pause between each keystroke
     .build();
-action.type("text to type", typeOptions);
+ObjectCollection textCollection = new ObjectCollection.Builder()
+    .withStrings("text to type")
+    .build();
+action.perform(typeOptions, textCollection);
 
 // Drag with pauses
 DragOptions dragOptions = new DragOptions.Builder()
     .setPauseBeforeBegin(1.0)
     .setPauseAfterEnd(2.0)
-    .setPauseBeforeMouseUp(0.5)  // Pause before releasing
     .build();
-action.drag(fromImage, toImage, dragOptions);
+action.perform(dragOptions, new ObjectCollection.Builder()
+    .withImages(fromImage, toImage)
+    .build());
 ```
 
 ### Clean Logging with ActionConfig Options
@@ -908,7 +915,7 @@ public boolean verifyArrival() {
     return action.find(stateIdentifier, findOptions).isSuccess();
 }
 
-@OutgoingTransition(to = TargetState.class)
+@OutgoingTransition(activate = {TargetState.class})
 public boolean toTarget() {
     // All logging handled by the options configuration
     ClickOptions clickOptions = new ClickOptions.Builder()
@@ -942,20 +949,22 @@ ConditionalActionChain
     .then(submitButton)
     .ifFoundClick()
     .ifNotFoundLog("Login failed - submit button not found")
-    .perform(action, objectCollection);
+    .perform(action);
 
-// With custom success handling
+// With custom success handling using ifFoundDo
 ConditionalActionChain
     .find(element)
-    .ifFound(result -> {
-        log.info("Found at: " + result.getLocation());
-        return action.click(result.getLocation());
+    .ifFoundDo(result -> {
+        log.info("Element found with {} matches", result.getMatchList().size());
     })
-    .ifNotFound(result -> {
+    .ifFoundClick()
+    .ifNotFoundDo(result -> {
         log.error("Element not found, trying alternative");
-        return action.click(alternativeElement);
     })
-    .perform(action, objectCollection);
+    .ifNotFound(new ClickOptions.Builder().build())
+    .perform(action, new ObjectCollection.Builder()
+        .withImages(element, alternativeElement)
+        .build());
 ```
 
 ### Working with Regions
@@ -963,17 +972,22 @@ ConditionalActionChain
 ```java
 // Define a search region
 Region searchRegion = Region.builder()
-    .withX(100)
-    .withY(200)
-    .withWidth(500)
-    .withHeight(300)
+    .withPosition(100, 200)
+    .withSize(500, 300)
+    .build();
+
+// Or use single method
+Region searchRegion2 = Region.builder()
+    .withRegion(100, 200, 500, 300)
     .build();
 
 // Search within specific region
 PatternFindOptions regionSearch = new PatternFindOptions.Builder()
-    .setSearchRegion(searchRegion)
+    .setSearchRegions(new SearchRegions(searchRegion))
     .build();
-action.find(stateImage, regionSearch);
+action.perform(regionSearch, new ObjectCollection.Builder()
+    .withImages(stateImage)
+    .build());
 
 // Screen-relative regions
 Region topRight = Region.builder()
@@ -995,7 +1009,7 @@ action.move(center);
 @TransitionSet(state = TargetState.class)  // Must have this annotation
 @RequiredArgsConstructor  // For dependency injection
 public class TargetTransitions {
-    @OutgoingTransition(to = NextState.class)
+    @OutgoingTransition(activate = {NextState.class})
     public boolean toNext() { /* ... */ }
 
     @IncomingTransition
@@ -1012,7 +1026,7 @@ public class TargetTransitions {
 public class MenuState { }  // ✅ CORRECT
 
 // Navigation uses name without "State"
-navigation.openState("Menu");  // ✅ CORRECT
+stateNavigator.openState("Menu");  // ✅ CORRECT
 ```
 
 ### Transition Not Executing
@@ -1023,7 +1037,7 @@ navigation.openState("Menu");  // ✅ CORRECT
 transition.execute();
 
 // ✅ CORRECT
-navigation.openState("Target");
+stateNavigator.openState("Target");
 ```
 
 ## COMMON MISTAKES TO AVOID
@@ -1037,14 +1051,14 @@ public class TransitionManager {
     public void navigateToSettings() { ... }
 }
 
-// ✅ CORRECT - Use Navigation service
+// ✅ CORRECT - Use StateNavigator service
 @Component
 public class MyRunner {
     @Autowired
-    private Navigation navigation;
+    private StateNavigator stateNavigator;
 
     public void run() {
-        navigation.openState("Menu");
+        stateNavigator.openState("Menu");
     }
 }
 ```
@@ -1132,8 +1146,8 @@ public class MenuState {
 - [ ] State classes have ONLY objects (StateImage/StateString), NO methods
 - [ ] Each state has ONE TransitionSet class with ALL its transitions
 - [ ] TransitionSet classes have ONLY methods, NO StateImage objects
-- [ ] NO TransitionManager class exists (use Navigation service)
-- [ ] @OutgoingTransition methods navigate FROM the state TO other states
+- [ ] NO TransitionManager class exists (use StateNavigation service)
+- [ ] @OutgoingTransition methods navigate FROM the state and activate target states
 - [ ] Only ONE @IncomingTransition method per TransitionSet
 - [ ] Images organized in folders by state name
 - [ ] application.properties configured with brobot settings
@@ -1142,8 +1156,8 @@ public class MenuState {
 - [ ] NO Thread.sleep() anywhere in code
 - [ ] NO direct SikuliX calls
 - [ ] NO java.awt.Robot usage
-- [ ] Navigation.openState() used for all state transitions
-- [ ] Pauses configured via ActionConfig options, not action.pause()
+- [ ] stateNavigator.openState() used for all state transitions
+- [ ] Pauses configured via ActionConfig options, not Thread.sleep()
 
 ## Special Keys and Keyboard Input
 
@@ -1153,9 +1167,17 @@ When typing special keys (ENTER, ESC, TAB, etc.), use the SikuliX Key constants:
 import org.sikuli.script.Key;
 
 // Special keys use SikuliX Key constants (recommended)
-action.type(Key.ENTER, typeOptions);  // Press ENTER
-action.type(Key.ESC, typeOptions);    // Press ESC
-action.type(Key.TAB, typeOptions);    // Press TAB
+action.type(Key.ENTER);  // Press ENTER
+action.type(Key.ESC);    // Press ESC
+action.type(Key.TAB);    // Press TAB
+
+// With TypeOptions for custom configuration
+TypeOptions typeOptions = new TypeOptions.Builder()
+    .setPauseBeforeBegin(0.5)
+    .build();
+action.perform(typeOptions, new ObjectCollection.Builder()
+    .withStrings(Key.ENTER)
+    .build());
 
 // Or define as StateString for reusability
 StateString enterKey = new StateString.Builder()
@@ -1164,9 +1186,9 @@ StateString enterKey = new StateString.Builder()
     .build();
 
 // Alternative: Direct Unicode (if you prefer not to import Key)
-action.type("\n", typeOptions);      // ENTER
-action.type("\u001b", typeOptions);  // ESC
-action.type("\t", typeOptions);      // TAB
+action.type("\n");      // ENTER
+action.type("\u001b");  // ESC
+action.type("\t");      // TAB
 ```
 
 **Important**: Do NOT use string literals like `"ESC"` or `"ENTER"` - these will type the letters, not press the key!
@@ -1179,7 +1201,7 @@ For complete special keys documentation, see: [Special Keys Guide](../03-core-li
 2. **Mock mode REQUIRES ActionHistory** - Patterns will NEVER be found without it! Use withActionHistory() in StateImage.Builder
 3. **@State includes @Component** - Don't add @Component to State classes
 4. **@TransitionSet includes @Component** - Don't add @Component to TransitionSet classes
-5. **Navigation handles pathing** - It finds the route and executes transitions automatically
+5. **StateNavigator handles pathing** - It finds the route and executes transitions automatically
 6. **State suffix is removed** - MenuState becomes "Menu" in navigation
 7. **Pauses are in ActionConfig** - Use setPauseBeforeBegin/setPauseAfterEnd
 8. **One TransitionSet per state** - All transitions for a state in one class

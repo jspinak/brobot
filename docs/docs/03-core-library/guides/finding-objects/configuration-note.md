@@ -12,7 +12,7 @@ Brobot uses Spring Boot's configuration system. All framework settings should be
 - `application.properties`
 - Environment variables
 
-**Do not** directly set static fields on `FrameworkSettings` - this is deprecated and only exists for backward compatibility.
+Access configuration in your code via dependency injection with `BrobotProperties`.
 
 ## Example Configuration
 
@@ -20,8 +20,8 @@ Brobot uses Spring Boot's configuration system. All framework settings should be
 
 ```yaml
 brobot:
+  mock: true                # Enable mock mode for testing
   core:
-    mock: true              # Enable mock mode for testing
     image-path: images/     # Path to image resources
   screenshot:
     save-history: true      # Save action history
@@ -36,8 +36,10 @@ brobot:
 ### Using application.properties:
 
 ```properties
+# Mock mode
+brobot.mock=true
+
 # Core settings
-brobot.core.mock=true
 brobot.core.image-path=images/
 
 # Screenshot settings

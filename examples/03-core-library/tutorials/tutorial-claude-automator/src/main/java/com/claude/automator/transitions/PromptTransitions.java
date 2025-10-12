@@ -36,12 +36,6 @@ public class PromptTransitions {
             description = "Navigate from Prompt to Working")
     public boolean toWorking() {
         log.info("Navigating from Prompt to Working");
-        // In mock mode, just return true for testing
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
-            log.info("Mock mode: simulating successful navigation");
-            return true;
-        }
-
         // Type a command and submit it
         // This will trigger Claude to start working
         boolean typedCommand = action.type(promptState.getContinueCommand()).isSuccess();
@@ -59,12 +53,6 @@ public class PromptTransitions {
     @IncomingTransition(description = "Verify arrival at Prompt state")
     public boolean verifyArrival() {
         log.info("Verifying arrival at Prompt state");
-        // In mock mode, just return true for testing
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
-            log.info("Mock mode: simulating successful verification");
-            return true;
-        }
-
         // Check for presence of prompt-specific elements
         boolean foundPrompt = action.find(promptState.getClaudePrompt()).isSuccess();
 

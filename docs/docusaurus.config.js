@@ -101,9 +101,9 @@ const config = {
             position: 'left',
             label: 'Documentation',
           },
-          // The external link to your hosted API documentation
+          // Local API documentation (with version selector)
           {
-            href: 'https://jspinak.github.io/brobot/api/',
+            to: '/api/',
             label: 'API Reference',
             position: 'left',
           },

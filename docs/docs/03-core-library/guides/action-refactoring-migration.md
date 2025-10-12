@@ -33,15 +33,13 @@ We've introduced "pure" actions that only perform their core function without an
 - `TypeV2` - Pure typing operations
 - More pure actions coming soon
 
-### 3. Enhanced Conditional Action Chains
+### 3. Conditional Action Chains
 
-The `ConditionalActionChain` class has been replaced with `ConditionalActionChain`, which provides:
+The `ConditionalActionChain` class provides:
 
 - **Convenience Methods**: `ifFoundClick()`, `ifFoundType()`, `alwaysClick()` etc.
 - **Better Performance**: Optimized execution paths
-- **Enhanced Debugging**: Improved logging and error reporting
-
-> **Migration Note:** `ConditionalActionChain` is now deprecated. Update your imports to use `ConditionalActionChain` for all new development.
+- **Improved Debugging**: Better logging and error reporting
 
 ### 4. Convenience Methods
 

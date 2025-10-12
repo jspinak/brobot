@@ -40,13 +40,6 @@ public class WorkingTransitions {
     public boolean toPrompt() {
         try {
             log.info("Navigating from Working to Prompt");
-
-            // In mock mode, just return true for testing
-            if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
-                log.info("Mock mode: simulating successful navigation");
-                return true;
-            }
-
             // Wait for work to complete
             // The working indicator should disappear when Claude is done
             // We might need to wait or check for the absence of the working indicator
@@ -82,12 +75,6 @@ public class WorkingTransitions {
     @IncomingTransition(description = "Verify arrival at Working state")
     public boolean verifyArrival() {
         log.info("Verifying arrival at Working state");
-        // In mock mode, just return true for testing
-        if (io.github.jspinak.brobot.config.core.FrameworkSettings.mock) {
-            log.info("Mock mode: simulating successful verification");
-            return true;
-        }
-
         // Check for presence of working-specific elements
         boolean foundWorkingIndicator = action.find(workingState.getWorkingIndicator()).isSuccess();
 

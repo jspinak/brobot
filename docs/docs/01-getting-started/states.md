@@ -5,7 +5,7 @@ title: 'States'
 
 ## What is a Brobot State?
 
-A state in Brobot is a collection of related objects, including images, regions, and locations. This relationship usually involves space (objects are often grouped together) and time (objects often appear together). The defining characteristic of a state is the reliability of expected results: when a state is active, a specific action performed on one of its objects should give the same expected result every time.
+A state in Brobot is a collection of related objects, including images, regions, locations, and strings. This relationship usually involves space (objects are often grouped together) and time (objects often appear together). The defining characteristic of a state is the reliability of expected results: when a state is active, a specific action performed on one of its objects should give the same expected result every time.
 
 In the formal model, a **State (S)** is a collection of related GUI elements chosen to model a distinct configuration of the user interface.
 
@@ -31,74 +31,24 @@ The example below shows a screen with multiple states active simultaneously, eac
 
 > **📖 See [Pathfinding & Multi-State Activation](pathfinding.md) for detailed explanation**
 
-## Defining States in Code
-
-Brobot provides two approaches for defining states: the traditional approach shown in the research paper and the modern annotation-based approach introduced in version 1.1.0+.
-
-### Traditional Approach (From the Paper)
-
-This approach uses manual registration with the StateService:
-
-```java
-// Note: BrobotProperties must be injected as a dependency
-@Autowired
-private BrobotProperties brobotProperties;
-
-@Component
-@Getter
-public class Home { 
-    public enum Name implements StateEnum { HOME } 
-    
-    private StateImageObject toWorldButton = new StateImageObject.Builder() 
-        .withImage("toWorldButton") 
-        .isFixed(true) 
-        .addSnapshot(new MatchSnapshot(220, 600, 20, 20)) 
-        .build(); 
-
-    private State state = new State.Builder(HOME) 
-        .withImages(toWorldButton) 
-        .build(); 
-
-    public Home(StateService stateService) { 
-        stateService.save(state); 
-    } 
-}
-```
-
-Key characteristics:
-- Manual state registration in constructor
-- Uses `StateImageObject` (older API)
-- Requires explicit `@Component` annotation
-- State saved during construction
-
-### Modern Approach with @State Annotation (Recommended)
-
-The modern approach uses the `@State` annotation for automatic registration and cleaner code:
+## Defining States in Code (version 1.1.0+)
 
 ```java
 @State  // Automatically registers as Spring component and Brobot state
 @Getter
 @Slf4j
-public class HomeState {
-    private final StateImage toWorldButton;  // Only define the components you need
-    
-    public enum Name implements StateEnum { HOME }
-    
-    public HomeState() {
-        // Just initialize the components - no State object needed!
-        toWorldButton = new StateImage.Builder()
-            .addPatterns("toWorldButton")  // No .png extension needed
-            .setName("ToWorldButton")
-            .build();
-    }
+public class HomeState { // The state name will be the class name without "State" - here it is "Home".
+    private final StateImage toWorldButton = new StateImage.Builder()
+        .addPatterns("toWorldButton")  // No .png extension needed
+        .setName("ToWorldButton")
+        .build();
 }
 ```
 
-Key improvements:
+Key improvements over state definition in previous versions:
 - `@State` annotation handles everything automatically
 - No need to manually create a State object
 - Framework extracts components via reflection
-- Uses `StateImage` (modern API) instead of `StateImageObject`
 - Cleaner, less boilerplate code
 - Better naming convention (HomeState vs Home)
 
@@ -140,16 +90,9 @@ public class TransientState {
 public class SlowLoadingState {
     // Higher cost discourages routing through this state
 }
-
-@State(initial = true, pathCost = 0)  // Initial state with no cost
-@Getter
-@Slf4j
-public class StartState {
-    // Common pattern: initial states often have 0 cost
-}
 ```
 
-**Note**: As of v1.1.0, the default pathCost for states is 1. Lower total path costs are preferred during pathfinding. For comprehensive pathfinding documentation, see the [Pathfinding and Path Costs Guide](/docs/core-library/guides/pathfinding-and-costs).
+**Note**: The default pathCost for states is 1. Lower total path costs are preferred during pathfinding. For comprehensive pathfinding documentation, see the [Pathfinding and Path Costs Guide](/docs/core-library/guides/pathfinding-and-costs).
 
 ### State Components and Direct Access
 
@@ -160,35 +103,25 @@ The modern approach encourages exposing frequently-used components:
 @Getter
 @Slf4j
 public class GameMenuState {
-    private final StateImage playButton;
-    private final StateImage settingsButton;
-    private final StateImage exitButton;
-    private final StateRegion menuArea;
-    
-    public enum Name implements StateEnum { GAME_MENU }
-    
-    public GameMenuState() {
-        // Create all components with direct access
-        playButton = new StateImage.Builder()
-            .addPatterns("menu/play-button")
-            .setName("PlayButton")
-            .build();
-            
-        settingsButton = new StateImage.Builder()
-            .addPatterns("menu/settings-button")
-            .setName("SettingsButton")
-            .build();
-            
-        exitButton = new StateImage.Builder()
-            .addPatterns("menu/exit-button")
-            .setName("ExitButton")
-            .build();
-            
-        menuArea = new StateRegion.Builder()
-            .setSearchRegion(new Region(100, 100, 400, 600))
-            .setName("MenuArea")
-            .build();
-    }
+    private final StateImage playButton = new StateImage.Builder()
+        .addPatterns("menu/play-button")
+        .setName("PlayButton")
+        .build();
+        
+    private final StateImage settingsButton = new StateImage.Builder()
+        .addPatterns("menu/settings-button")
+        .setName("SettingsButton")
+        .build();
+        
+    private final StateImage exitButton = new StateImage.Builder()
+        .addPatterns("menu/exit-button")
+        .setName("ExitButton")
+        .build();
+        
+    private final StateRegion menuArea = new StateRegion.Builder()
+        .setSearchRegion(new Region(100, 100, 400, 600))
+        .setName("MenuArea")
+        .build();
 }
 ```
 
@@ -198,32 +131,24 @@ This pattern provides clean access in transitions:
 @Component
 @RequiredArgsConstructor
 public class GamePlayTransitions {
-    private final GameMenuState menuState;
     private final GamePlayState gamePlayState;
     private final Action action;
     
-    @FromTransition(from = GameMenuState.class, priority = 1)
-    public boolean fromMenu() {
-        // In mock mode, return true for testing
-        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
-            return true;
-        }
-        // Direct, readable access to state components
-        return action.click(menuState.getPlayButton()).isSuccess();
+    @OutgoingTransition(activate = {MainScreenState.class}, pathCost = 2)
+    public boolean toMainScreen() {
+        // Clicking the play button should take use to the main screen
+        return action.click(gamePlayState.getPlayButton()).isSuccess();
     }
     
     @IncomingTransition
     public boolean verifyArrival() {
         // Verify we're in the game play state
-        if (io.github.jspinak.brobot.config.core.brobotProperties.getCore().isMock()) {
-            return true;
-        }
         return action.find(gamePlayState.getGameBoard()).isSuccess();
     }
 }
 ```
 
-### Why Both Approaches Work
+### How State Inialization Works
 
 The `@State` annotation uses reflection through `AnnotatedStateBuilder` and `StateComponentExtractor` to:
 
@@ -235,17 +160,6 @@ This means:
 - When you use `@State`, you don't need an explicit `state` field
 - The framework creates the State object for you
 - It derives the state name from the class name (removing "State" suffix if present)
-
-### When to Use Each Approach
-
-**Use the traditional approach (with explicit State object) when:**
-- Working with legacy code that predates @State
-- You need explicit control over state construction
-
-**Use the modern approach (components only) when:**
-- You want cleaner, less boilerplate code
-- You only need access to the components (most common case)
-- Building new projects with Brobot 1.1.0+
 
 ### Optional: Explicit State with @State
 
@@ -271,12 +185,11 @@ However, this is rarely needed since:
 - State navigation uses state names/enums
 - The framework manages the State object internally
 
-### Migration Tips
+### Migration Tips (1.0.7 to 1.1.0)
 
 When migrating from traditional to modern approach:
 1. Add `@State` annotation to existing state classes
 2. Remove manual `stateService.save()` calls
 3. Remove the explicit `state` field (unless you specifically need it)
-4. Update `StateImageObject` to `StateImage`
-5. Consider renaming classes to follow StateNameState convention
-6. Expose commonly-used components as fields with getters
+4. Consider renaming classes to follow StateNameState convention
+5. Expose commonly-used components as fields with getters

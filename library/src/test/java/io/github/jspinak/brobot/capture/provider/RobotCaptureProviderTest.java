@@ -54,14 +54,9 @@ class RobotCaptureProviderTest extends BrobotTestBase {
     }
 
     private boolean isInMockMode() {
-        // Check if we're in mock mode (from BrobotTestBase)
-        try {
-            return (boolean)
-                    ReflectionTestUtils.getField(
-                            Class.forName("org.sikuli.script.support.FrameworkSettings"), "mock");
-        } catch (Exception e) {
-            return true; // Default to mock in test environment
-        }
+        // BrobotTestBase sets up mock mode
+        // In test environment, we're always in mock mode to avoid GUI dependencies
+        return true;
     }
 
     private boolean shouldSkipGraphicsTest() {

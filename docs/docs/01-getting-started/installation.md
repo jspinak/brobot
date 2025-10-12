@@ -50,38 +50,57 @@ Starting from version 1.1.0, Brobot includes the following transitive dependenci
 ### Core Dependencies (Automatically Included)
 
 * **SikuliX API (2.0.5)**: The core engine used for all visual automation, screen analysis, and control of the mouse and keyboard.
-* **JavaCV Platform (1.5.10)**: Provides the underlying computer vision functionality.
-* **OpenCV Platform (4.9.0-1.5.10)**: Computer vision algorithms for image recognition.
-* **FFmpeg Platform (6.1.1-1.5.10)**: Media handling capabilities.
+* **JavaCV Platform (1.5.3)**: Provides the underlying computer vision functionality.
+* **OpenCV Platform (4.3.0-1.5.3)**: Computer vision algorithms for image recognition (version matched to SikuliX 2.0.5).
+* **FFmpeg Platform (4.2.2-1.5.3)**: Media handling capabilities.
 * **Apache Commons Lang3 (3.0)**: Common utilities and helper methods.
 * **Spring Context**: Core Spring Framework for dependency injection.
 * **Spring Boot Autoconfigure**: Automatic configuration support for Spring Boot applications.
+* **Spring Boot Starter AOP**: Aspect-oriented programming support for Brobot's internal features.
+* **Jakarta Annotation API (2.1.1)**: Support for annotations like `@PostConstruct`.
 * **SLF4J API (2.0.9)**: Logging facade for consistent logging across the application.
-* **Project Lombok (1.18.32)**: Reduces boilerplate code with annotations like `@Getter`, `@Setter`, etc.
 
 ### What This Means for Your Project
 
 With Brobot 1.1.0+, you only need to add the Brobot dependency. The following are included automatically:
-- All computer vision libraries (SikuliX, OpenCV, JavaCV)
-- Spring Framework components
-- Logging framework (SLF4J)
-- Lombok for cleaner code
+- All computer vision libraries (SikuliX, OpenCV, JavaCV, FFmpeg)
+- Spring Framework components (Context, Boot Autoconfigure, AOP)
+- Logging framework (SLF4J API)
+- Jakarta annotations support
 
 You'll still need to add:
-- Spring Boot Starter Test (for testing)
-- Any specific implementation libraries your project needs
+- **Spring Boot Starter** (if running as a Spring Boot application)
+- **Spring Boot Starter Test** (for testing)
+- **Lombok** (NOT a transitive dependency - you must add it yourself)
 - A concrete SLF4J implementation (like Logback) if not using Spring Boot
+- Any specific implementation libraries your project needs
 
 ### Note on Lombok
-Since Lombok is now a transitive dependency, you still need to configure your IDE to recognize Lombok annotations:
+
+**Important**: Lombok is NOT included as a transitive dependency. You must add it to your project:
+
+**Gradle:**
+```groovy
+dependencies {
+    implementation 'io.github.jspinak:brobot:1.1.0'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+}
+```
+
+**Maven:**
+```xml
+<dependency>
+    <groupId>org.projectlombok</groupId>
+    <artifactId>lombok</artifactId>
+    <scope>provided</scope>
+</dependency>
+```
+
+You also need to configure your IDE to recognize Lombok annotations:
 - **IntelliJ IDEA**: Install the Lombok plugin
 - **Eclipse**: Install the Lombok plugin
 - **VS Code**: Install the Lombok Annotations Support extension
-
-You also need to add the annotation processor to your build file:
-```groovy
-annotationProcessor 'org.projectlombok:lombok:1.18.32'
-```
 
 ## Using Unstable (Snapshot) Versions
 

@@ -10,7 +10,7 @@ import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.model.state.StateImage;
 
 /**
- * Examples directly from the Enhanced Conditional Action Chains documentation. All code here should
+ * Examples directly from the Conditional Action Chains documentation. All code here should
  * match exactly what appears in the documentation.
  */
 @Component

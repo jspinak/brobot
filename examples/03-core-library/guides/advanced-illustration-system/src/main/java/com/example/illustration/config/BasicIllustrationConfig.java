@@ -103,8 +103,8 @@ public class BasicIllustrationConfig {
     /** Helper class to check illustration settings at runtime. */
     public static class IllustrationSettingsChecker {
         public void logCurrentSettings() {
-            // In v1.1.0, settings are accessed through FrameworkSettings
-            log.info("Current illustration settings would be checked via FrameworkSettings");
+            // Settings are accessed through BrobotProperties via dependency injection
+            log.info("Current illustration settings are accessed via BrobotProperties");
         }
     }
 }

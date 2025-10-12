@@ -359,9 +359,9 @@ public class FillLoginFormTransition {
 }
 ```
 
-## Enhanced Conditional Action Chaining
+## Conditional Action Chaining
 
-For more advanced conditional workflows with proper sequential composition, see the [Enhanced Conditional Action Chains](./conditional-chains-examples) documentation. The `ConditionalActionChain` class provides:
+For more advanced conditional workflows with proper sequential composition, see the [Conditional Action Chains](./conditional-chains-examples) documentation. The `ConditionalActionChain` class provides:
 
 - The crucial `then()` method for sequential action composition
 - Convenience methods like `click()`, `type()`, `scrollDown()`
@@ -371,7 +371,7 @@ For more advanced conditional workflows with proper sequential composition, see 
 
 ## Next Steps
 
-- Explore [Enhanced Conditional Action Chains](./conditional-chains-examples) for advanced patterns
+- Explore [Conditional Action Chains](./conditional-chains-examples) for advanced patterns
 - Learn about [Complex Workflows](./complex-workflows) for multi-step automation
 - Learn about [Conditional Actions](./conditional-actions) using RepeatUntilConfig
 - See [Form Automation](./form-automation) for practical examples

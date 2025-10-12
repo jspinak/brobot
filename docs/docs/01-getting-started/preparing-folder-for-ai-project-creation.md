@@ -46,9 +46,9 @@ The AI will:
 1. Create proper project structure
 2. Move your images to organized folders
 3. Create State classes for your UI screens
-4. Create TWO types of Transition classes:
-   - **FromTransitions**: Navigate FROM one state TO another (e.g., MenuToPricing)
-   - **IncomingTransitions**: Verify arrival AT any state (e.g., ToPricing)
+4. Create ONE TransitionSet class per state containing:
+   - **@OutgoingTransition** methods: Navigate FROM that state TO other states
+   - **@IncomingTransition** method: Verify successful arrival AT that state
 5. Generate a Spring Boot application with proper navigation
 
 ## Key Concepts for Your Brobot Application

@@ -9,7 +9,7 @@ title: 'Pathfinding & Multi-State Activation'
 
 Brobot's pathfinding system is designed to handle the reality of modern GUIs where actions often activate multiple UI elements simultaneously. Unlike traditional page-based navigation where you go from Page A to Page B, real applications often display multiple panels, sidebars, and overlays at once.
 
-**Key Insight**: In Brobot, there is no concept of a "primary target state" in transitions. All states activated by a transition are treated equally for pathfinding purposes.
+In Brobot 1.1.0, there is no concept of a "primary target state" in transitions. All states activated by a transition are treated equally for pathfinding purposes.
 
 ## How Pathfinding Works
 
@@ -24,14 +24,43 @@ Brobot builds a directed graph where:
 When a transition executes, it can activate multiple states simultaneously:
 
 ```java
-// This transition activates FOUR states at once
-JavaStateTransition loginTransition = new JavaStateTransition.Builder()
-    .setFunction(() -> action.click(loginButton))
-    .addToActivate("Dashboard")
-    .addToActivate("NavigationBar")
-    .addToActivate("StatusPanel")
-    .addToActivate("NotificationArea")
-    .build();
+import io.github.jspinak.brobot.annotations.*;
+import org.springframework.stereotype.Component;
+
+@Component
+@TransitionSet(state = LoginState.class)
+public class LoginTransitions {
+
+    @Autowired
+    private Action action;
+
+    @Autowired
+    private LoginState loginState;
+
+    /**
+     * Verify we've arrived at the Login state.
+     */
+    @IncomingTransition(description = "Verify login screen is visible")
+    public boolean verifyLoginScreen() {
+        return action.find(loginState.getLoginButton()).isSuccess();
+    }
+
+    /**
+     * Login transition that activates multiple states.
+     * Transitions FROM LoginState TO Dashboard (and related states).
+     */
+    @OutgoingTransition(
+        activate = {
+            DashboardState.class,
+            NavigationBarState.class,
+            StatusPanelState.class,
+            NotificationAreaState.class
+        }
+    )
+    public boolean login() {
+        return action.click(loginState.getLoginButton()).isSuccess();
+    }
+}
 ```
 
 ### Path Discovery Algorithm
@@ -65,23 +94,7 @@ navigator.openState("TargetState");
 
 ## Important Concepts for Developers
 
-### 1. No Primary Target
-
-**Traditional Approach (NOT how Brobot works):**
-```java
-// WRONG mental model:
-@Transition(from = "Login", to = "Dashboard", alsoActivates = {"Sidebar", "Header"})
-// This implies Dashboard is "primary" - IT IS NOT
-```
-
-**Brobot's Approach:**
-```java
-// CORRECT mental model:
-// ALL states are equal - any can be used for pathfinding
-transition.setActivate(Set.of("Dashboard", "Sidebar", "Header"));
-```
-
-### 2. Path Success vs. Complete Activation
+### 1. Path Success vs. Complete Activation
 
 **Critical Understanding**: Path success only requires the NEXT NODE in the path to be activated, not all activated states.
 
@@ -96,7 +109,7 @@ transition.setActivate(Set.of("Dashboard", "Sidebar", "Header"));
 // 4. If C, D, or E fail, path still succeeds (but log warnings)
 ```
 
-### 3. IncomingTransitions Execute for ALL Activated States
+### 2. IncomingTransitions Execute for ALL Activated States
 
 When a transition activates multiple states, each state's `@IncomingTransition` executes:
 
@@ -117,9 +130,6 @@ When a transition activates multiple states, each state's `@IncomingTransition` 
 Your automation has more navigation options:
 
 ```java
-// Old thinking: "I need a direct transition to StateX"
-// New thinking: "Any transition that activates StateX works"
-
 // If Login → [Dashboard, Menu, Profile]
 // Then you can reach Menu states via Login, even if
 // Login's "main purpose" seems to be Dashboard
@@ -151,186 +161,42 @@ States can be reached through unexpected routes:
 - Activation depends on conditions
 - States are mutually exclusive
 
-#### Example: Login Opens Everything
-
-```java
-@TransitionSet(state = LoginState.class)
-public class LoginTransitions {
-
-    @OutgoingTransition(to = ApplicationState.class)
-    public boolean login() {
-        // This transition activates multiple states
-        return action.click(loginButton).isSuccess();
-    }
-}
-
-// In ApplicationState definition:
-JavaStateTransition loginSuccess = new JavaStateTransition.Builder()
-    .setFunction(() -> true) // Login button does all the work
-    .addToActivate("Dashboard")
-    .addToActivate("NavigationMenu")
-    .addToActivate("UserProfile")
-    .addToActivate("NotificationPanel")
-    .build();
-```
-
-### 4. Pathfinding Strategies
-
-#### Finding States with Specific Combinations
-
-If you need multiple specific states active:
-
-```java
-// Need both Dashboard AND Settings open
-// Option 1: Find path to state that activates both
-StateTransition openBoth = findTransitionActivating(
-    Set.of("Dashboard", "Settings")
-);
-
-// Option 2: Sequential activation
-navigator.openState("Dashboard");
-navigator.openState("Settings"); // Finds path from Dashboard to Settings
-```
-
 #### Understanding Path Choices
 
 The pathfinder chooses paths based on:
 1. **Reachability**: Can we get there from current active states?
 2. **Path Length**: Fewer transitions preferred
 3. **Transition Costs**: Lower path costs preferred
-4. **Reliability**: Success history considered
 
 ## Best Practices
 
-### 1. Design Transitions Thoughtfully
-
 ```java
 // Good: Logical grouping of related states
-transition.setActivate(Set.of(
-    "EmailCompose",    // Main panel
-    "EmailToolbar",    // Related toolbar
-    "RecipientList"    // Related sidebar
-));
+@OutgoingTransition(
+    activate = {
+        EmailComposeState.class,    // Main panel
+        EmailToolbarState.class,    // Related toolbar
+        RecipientListState.class    // Related sidebar
+    }
+)
+public boolean openEmailCompose() {
+    return action.click(composeButton).isSuccess();
+}
 
 // Bad: Unrelated states that happen to appear together
-transition.setActivate(Set.of(
-    "EmailCompose",
-    "StockTicker",     // Unrelated
-    "WeatherWidget"    // Unrelated
-));
-```
-
-### 2. Document Multi-State Transitions
-
-```java
-/**
- * Opens the main application workspace.
- * Activates: Dashboard (main content)
- *           NavigationBar (top navigation)
- *           Sidebar (left panel)
- *           StatusBar (bottom status)
- *
- * All four states must be visible for successful workspace initialization.
- */
-@OutgoingTransition(to = WorkspaceState.class)
-public boolean openWorkspace() {
-    return action.click(workspaceButton).isSuccess();
-}
-```
-
-### 3. Test Path Variations
-
-```java
-@Test
-public void testAlternativePathsToDashboard() {
-    // Dashboard can be reached via Login
-    navigator.openState("Login");
-    navigator.openState("Dashboard"); // Via login transition
-    assertTrue(stateMemory.isActive("Dashboard"));
-
-    // Dashboard can also be reached via Home
-    navigator.openState("Home");
-    navigator.openState("Dashboard"); // Via home→dashboard
-    assertTrue(stateMemory.isActive("Dashboard"));
-}
-```
-
-### 4. Handle Partial Activation Gracefully
-
-```java
-@IncomingTransition
-public boolean verifyArrival() {
-    boolean primaryVisible = action.find(mainContent).isSuccess();
-    boolean secondaryVisible = action.find(sidebar).isSuccess();
-
-    if (primaryVisible && !secondaryVisible) {
-        log.warn("Main content visible but sidebar failed to load");
-        // Decide: Is this acceptable or should we fail?
-        return primaryVisible; // Accept partial success
+@OutgoingTransition(
+    activate = {
+        EmailComposeState.class,
+        StockTickerState.class,     // Unrelated - BAD!
+        WeatherWidgetState.class    // Unrelated - BAD!
     }
-
-    return primaryVisible && secondaryVisible;
-}
-```
-
-## Common Patterns
-
-### 1. Application Initialization
-
-```java
-// Login activates entire application structure
-JavaStateTransition loginToApp = new JavaStateTransition.Builder()
-    .setFunction(() -> action.click(loginButton).isSuccess())
-    .addToActivate("Dashboard")
-    .addToActivate("Navigation")
-    .addToActivate("Sidebar")
-    .addToActivate("StatusBar")
-    .addToActivate("NotificationArea")
-    .build();
-```
-
-### 2. Modal Overlays
-
-```java
-// Modal keeps background states active
-JavaStateTransition openModal = new JavaStateTransition.Builder()
-    .setFunction(() -> action.click(settingsButton).isSuccess())
-    .addToActivate("SettingsModal")
-    // Dashboard stays active (not in exit list)
-    .setStaysVisibleAfterTransition(StaysVisible.TRUE)
-    .build();
-```
-
-### 3. Tab Switching
-
-```java
-// Switch tabs while keeping navigation active
-JavaStateTransition switchToReports = new JavaStateTransition.Builder()
-    .setFunction(() -> action.click(reportsTab).isSuccess())
-    .addToActivate("ReportsContent")
-    .addToExit("DashboardContent") // Exit old tab
-    // Navigation stays active (not in exit list)
-    .build();
-```
-
-### 4. Contextual Activation
-
-```java
-// Different states activated based on context
-public boolean openDetails() {
-    if (isCustomerView()) {
-        // Activates customer-specific panels
-        return openCustomerDetails();
-    } else {
-        // Activates product-specific panels
-        return openProductDetails();
-    }
+)
+public boolean openEmailWithUnrelatedStuff() {
+    return action.click(composeButton).isSuccess();
 }
 ```
 
 ## Debugging Pathfinding
-
-### Enable Detailed Logging
 
 ```properties
 # application.properties
@@ -338,30 +204,19 @@ logging.level.io.github.jspinak.brobot.navigation.path=TRACE
 logging.level.io.github.jspinak.brobot.navigation.transition=TRACE
 ```
 
-### Understanding Path Decisions
+This will enable TRACE-level logging for:
+- Path package: PathFinder algorithm, path calculation, graph traversal
+- Transition package: Transition execution, state activation/deactivation
 
-When pathfinding seems to take unexpected routes:
-
-1. **Check what states are activated by each transition**
-```java
-StateTransitions transitions = transitionService.getTransitions(stateId);
-transitions.getTransitions().forEach(t ->
-    System.out.println("Activates: " + t.getActivate())
-);
+For even more detailed debugging, you could also add:
 ```
+# Enable all navigation logging
+logging.level.io.github.jspinak.brobot.navigation=TRACE
 
-2. **Verify the joint table indexing**
-```java
-Set<Long> pathsToTarget = jointTable.getIncomingTransitions(targetId);
-System.out.println("States that can reach " + targetId + ": " + pathsToTarget);
-```
-
-3. **Trace the path finder's decisions**
-```java
-Paths paths = pathFinder.getPathsToState(activeStates, targetState);
-paths.getPaths().forEach(path ->
-    System.out.println("Found path: " + path)
-);
+# Or be more specific
+logging.level.io.github.jspinak.brobot.navigation.path.PathFinder=TRACE
+logging.level.io.github.jspinak.brobot.navigation.transition.TransitionExecutor=TRACE
+logging.level.io.github.jspinak.brobot.navigation.transition.StateNavigator=TRACE
 ```
 
 ## Summary
