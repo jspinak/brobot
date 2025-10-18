@@ -18,6 +18,7 @@ import org.sikuli.script.Region;
 
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.DisabledInCI;
 
 /**
  * Comprehensive test suite for MovementAnalyzer - movement pattern detection utility. Tests
@@ -492,6 +493,7 @@ public class MovementAnalyzerTest extends BrobotTestBase {
     class PerformanceCharacteristics {
 
         @Test
+        @DisabledInCI("Performance test - timing assertions unreliable in CI environments")
         @DisplayName("Handle large number of matches")
         public void testLargeMatchSets() {
             List<Match> firstMatches = new ArrayList<>();
