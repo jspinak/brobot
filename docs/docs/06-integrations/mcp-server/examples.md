@@ -10,7 +10,7 @@ sidebar_position: 5
 
 **Critical Issues**:
 - **Incomplete implementations**: Many functions are stubs with `pass` statements
-- **Deprecated APIs**: Some examples use outdated library versions (OpenAI <1.0, LangChain <1.0)
+- **Deprecated APIs**: Some examples use outdated library versions (OpenAI &lt;1.0, LangChain &lt;1.0)
 - **Undefined functions**: Placeholder functions (ai_process_instruction, ai_verify_state, etc.) are not implemented
 - **Missing error handling**: Production code requires additional validation and error handling
 

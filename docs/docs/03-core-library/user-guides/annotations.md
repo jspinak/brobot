@@ -486,7 +486,7 @@ public class HomeTransitions {
 }
 ```
 
-> 📖 **Try It Yourself**: [Tutorial Basics](../../tutorials/tutorial-basics/index.md) provides hands-on practice with annotations
+> 📖 **Try It Yourself**: [Tutorial Basics](../../02-tutorials/tutorial-basics/index.md) provides hands-on practice with annotations
 
 ## How It Works
 
@@ -875,5 +875,5 @@ By using these annotations, you can focus on your automation logic rather than f
 - **[Unit Testing Guide](../../../04-testing/unit-testing.md)** - Unit test patterns
 
 ### Tutorials
-- **[Tutorial Basics](../../tutorials/tutorial-basics/index.md)** - Hands-on practice with annotations
-- **[Claude Automator Tutorial](../../tutorials/tutorial-claude-automator/index.md)** - Real-world annotation usage
+- **[Tutorial Basics](../../02-tutorials/tutorial-basics/index.md)** - Hands-on practice with annotations
+- **[Claude Automator Tutorial](../../02-tutorials/tutorial-claude-automator/index.md)** - Real-world annotation usage

@@ -664,7 +664,7 @@ logging:
 
 ## Migration from Legacy API
 
-If you have existing tests using `ActionOptions`, see the [ActionHistory Migration Guide](/docs/core-library/migration/actionhistory-migration-guide) for detailed migration instructions.
+If you have existing tests using `ActionOptions`, see the [ActionHistory Migration Guide](../03-core-library/migration/actionhistory-migration-guide.md) for detailed migration instructions.
 
 ## Related Documentation
 
@@ -676,9 +676,8 @@ If you have existing tests using `ActionOptions`, see the [ActionHistory Migrati
 - **[Integration Testing](./integration-testing.md)** - Integration testing patterns
 
 ### Migration & Advanced Topics
-- **[ActionHistory Migration Guide](../03-core-library/migration/actionhistory-migration-guide.md)** - Migrating from legacy ActionOptions API
+- **[Upgrading to Latest](../03-core-library/migration/upgrading-to-latest.md)** - Migration guide covering ActionHistory and ActionConfig updates
 - **[Enhanced Mocking](./advanced/enhanced-mocking.md)** - Advanced mocking scenarios
-- **[ActionOptions to ActionConfig Migration](../03-core-library/migration/actionoptions-to-actionconfig.md)** - Modern API migration
 
 ### Getting Started
 - **[States Guide](../01-getting-started/states.md)** - Understanding State and StateImage

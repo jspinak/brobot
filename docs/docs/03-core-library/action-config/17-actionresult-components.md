@@ -593,7 +593,7 @@ To use this in your Spring Boot application:
 
 ### Architectural Documentation
 - **[ActionResult Architecture](../architecture/actionresult-architecture.md)** - Complete architectural documentation and design decisions
-- **[ActionResult Migration Guide](../migration/actionresult-refactoring.md)** - Migration from v1.x to component-based architecture
+- **[Upgrading to Latest](../migration/upgrading-to-latest.md)** - Migration guide including ActionResult updates
 
 ### Getting Started Guides
 - **[Pure Actions Quick Start](../../01-getting-started/pure-actions-quickstart.md)** - Working with ActionResult in basic actions

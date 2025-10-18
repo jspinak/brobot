@@ -7,7 +7,7 @@ sidebar_position: 1
 Brobot provides comprehensive testing capabilities designed for GUI automation reliability and maintainability. The framework supports multiple testing approaches, each serving specific purposes in the automation testing lifecycle.
 
 :::tip Advanced Testing Features
-For advanced mock testing capabilities including scenario-based configurations and failure patterns, see the [Enhanced Mock Testing System](/docs/core-library/testing/enhanced-mocking) in the Core Library documentation.
+For advanced mock testing capabilities including scenario-based configurations and failure patterns, see the [Enhanced Mock Testing System](advanced/enhanced-mocking.md) in the Core Library documentation.
 :::
 
 ## Testing Types
@@ -52,7 +52,7 @@ For detailed unit testing patterns with BrobotTestBase, see the [Unit Testing Gu
 - **Screenshot-based validation** with real-time feedback
 - **Manual testing support** for complex scenarios
 
-> **💡 Visual Debugging**: Brobot's highlighting feature provides real-time visual feedback during automation. See the [Highlighting Feature Guide](/docs/core-library/user-guides/highlighting-feature.md) for details on visual debugging and validation techniques.
+> **💡 Visual Debugging**: Brobot's highlighting feature provides real-time visual feedback during automation. See the [Highlighting Feature Guide](../03-core-library/user-guides/highlighting-feature.md) for details on visual debugging and validation techniques.
 
 **Best for**: Development debugging, manual verification, complex scenario validation
 
@@ -63,7 +63,7 @@ For detailed unit testing patterns with BrobotTestBase, see the [Unit Testing Gu
 Brobot uses Spring Boot's configuration properties system with clean architectural patterns:
 
 :::info New Test Logging Architecture
-Brobot now includes a clean test logging architecture that follows Single Responsibility Principle and eliminates circular dependencies. See the [Test Logging Architecture](/docs/core-library/testing/test-logging-architecture) guide for details on using the TestLoggerFactory and related components.
+Brobot now includes a clean test logging architecture that follows Single Responsibility Principle and eliminates circular dependencies. See the [Test Logging Architecture](../03-core-library/testing/test-logging-architecture.md) guide for details on using the TestLoggerFactory and related components.
 :::
 
 ### Configuration Properties
@@ -118,7 +118,7 @@ For applications migrating from Brobot 1.0.x, the following APIs have been moder
 | Manual screenshot configuration | `brobot.screenshot.path` | Configure via properties |
 | `ActionOptions` classes | `ActionConfig` classes (e.g., `PatternFindOptions`, `ClickOptions`) | New fluent builder API |
 
-See [ActionOptions to ActionConfig Migration](../03-core-library/migration/actionoptions-to-actionconfig.md) for complete migration guide.
+See [Upgrading to Latest](../03-core-library/migration/upgrading-to-latest.md) for complete migration guide.
 
 ## Testing Workflow
 
@@ -246,7 +246,7 @@ void validateResults() {
 ### Spring Boot Integration
 
 #### Profile-Based Configuration (Recommended)
-For conflict-free test configuration, use [Profile-Based Testing](/docs/testing/profile-based-testing):
+For conflict-free test configuration, use [Profile-Based Testing](profile-based-testing.md):
 
 ```java
 @SpringBootTest(classes = IntegrationTestMinimalConfig.class)
@@ -351,7 +351,7 @@ For detailed examples and advanced patterns, see the specific testing type docum
 - **[ActionConfig Overview](../03-core-library/action-config/01-overview.md)** - ActionConfig system introduction
 - **[ActionConfig Examples](../03-core-library/action-config/03-examples.md)** - Practical testing examples
 - **[ActionConfig Reference](../03-core-library/action-config/05-reference.md)** - Complete API reference
-- **[ActionOptions to ActionConfig Migration](../03-core-library/migration/actionoptions-to-actionconfig.md)** - Migration guide from 1.0.x
+- **[Upgrading to Latest](../03-core-library/migration/upgrading-to-latest.md)** - Migration guide from 1.0.x
 
 ### Advanced Testing Features
 - **[Enhanced Mock Testing System](./advanced/enhanced-mocking.md)** - Scenario-based mock testing

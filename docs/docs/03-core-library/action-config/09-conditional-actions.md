@@ -9,7 +9,7 @@ description: Learn how to implement conditional and repeated actions using Condi
 Conditional actions are essential for robust automation. They allow your automation to adapt to different scenarios and handle dynamic UI elements. This guide shows the modern approach using `ConditionalActionChain` and action chaining.
 
 :::warning Legacy API Notice
-This guide has been updated to use the modern `ConditionalActionChain` API and `ActionConfig` hierarchy. If you're looking for information on the legacy `RepeatUntilConfig` with `ActionOptions`, see the [Migration Guide](./12-migration-guide.md).
+This guide has been updated to use the modern `ConditionalActionChain` API and `ActionConfig` hierarchy. If you're looking for information on the legacy `RepeatUntilConfig` with `ActionOptions`, see the [Upgrading to Latest](../migration/upgrading-to-latest.md) guide.
 :::
 
 ## Required Imports
@@ -623,7 +623,7 @@ ConditionalActionChain
     .perform(action);
 ```
 
-See the [Migration Guide](./12-migration-guide.md) for comprehensive migration instructions.
+See the [Upgrading to Latest](../migration/upgrading-to-latest.md) guide for comprehensive migration instructions.
 
 ## Next Steps
 
@@ -637,4 +637,4 @@ See the [Migration Guide](./12-migration-guide.md) for comprehensive migration i
 ### Reference Documentation
 - **[ActionConfig Overview](./01-overview.md)** - Conceptual foundation of ActionConfig
 - **[API Reference](./05-reference.md)** - Complete ActionConfig API documentation
-- **[Migration Guide](./12-migration-guide.md)** - Migrating from deprecated APIs
+- **[Upgrading to Latest](../migration/upgrading-to-latest.md)** - Migrating from deprecated APIs

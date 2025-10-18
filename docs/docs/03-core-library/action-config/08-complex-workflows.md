@@ -460,5 +460,4 @@ public ActionResult robustWorkflow(StateImage element1, StateImage element2) {
 - **[Troubleshooting Action Chains](./troubleshooting-chains.md)** - Common errors and solutions
 
 ### Migration Resources
-- **[Quick Migration Reference](./02-migration-quick-reference.md)** - Fast lookup for migrating from ActionOptions
-- **[Migration Guide](./12-migration-guide.md)** - Complete migration strategy
+- **[Upgrading to Latest](../migration/upgrading-to-latest.md)** - Complete migration guide

@@ -19,9 +19,9 @@ This document serves as a **historical record and framework development referenc
 4. **Agent-Based Review** - Internal review process documentation
 
 **For practical CI/CD testing guidance**, see:
-- **[Testing Introduction](/docs/04-testing/testing-intro.md)** - Complete testing overview for application developers
-- **[Mock Mode Guide](/docs/04-testing/mock-mode-guide.md)** - Mock mode configuration
-- **[Unit Testing Guide](/docs/04-testing/unit-testing.md)** - Writing tests with BrobotTestBase
+- **[Testing Introduction](../testing-intro.md)** - Complete testing overview for application developers
+- **[Mock Mode Guide](../mock-mode-guide.md)** - Mock mode configuration
+- **[Unit Testing Guide](../unit-testing.md)** - Writing tests with BrobotTestBase
 :::
 
 ## Background: Core Action Tests Analysis
@@ -98,7 +98,7 @@ Brobot supports both configuration styles:
 - **System Properties**: `brobot.mock=true` (checked by MockModeManager)
 - **Application Properties**: `brobot.core.headless=true` (mapped to BrobotProperties)
 
-See [Mock Mode Guide](/docs/04-testing/mock-mode-guide.md) for detailed configuration.
+See [Mock Mode Guide](../mock-mode-guide.md) for detailed configuration.
 :::
 
 #### 2. Focus on Logic, Not Physical Operations
@@ -628,15 +628,15 @@ See [Test Execution Solution](/TEST-EXECUTION-SOLUTION.md) for complete details 
 ## Related Documentation
 
 ### Core Testing Guides
-- **[Testing Introduction](/docs/04-testing/testing-intro.md)** - Overview of all testing approaches and workflows
-- **[Unit Testing Guide](/docs/04-testing/unit-testing.md)** - Writing unit tests with BrobotTestBase
-- **[Integration Testing](/docs/04-testing/integration-testing.md)** - Integration test patterns for CI/CD
-- **[Mock Mode Guide](/docs/04-testing/mock-mode-guide.md)** - Mock mode configuration and usage
-- **[Mock Mode Manager](/docs/04-testing/mock-mode-manager.md)** - Centralized mock mode management
-- **[Test Utilities](/docs/04-testing/test-utilities.md)** - BrobotTestBase and utility classes
-- **[Mat Testing Utilities](/docs/04-testing/mat-testing-utilities.md)** - OpenCV Mat testing utilities
-- **[Profile-Based Testing](/docs/04-testing/profile-based-testing.md)** - Profile-based test configuration
-- **[Testing Strategy](/docs/04-testing/testing-strategy.md)** - Overall testing strategy
+- **[Testing Introduction](../testing-intro.md)** - Overview of all testing approaches and workflows
+- **[Unit Testing Guide](../unit-testing.md)** - Writing unit tests with BrobotTestBase
+- **[Integration Testing](../integration-testing.md)** - Integration test patterns for CI/CD
+- **[Mock Mode Guide](../mock-mode-guide.md)** - Mock mode configuration and usage
+- **[Mock Mode Manager](../mock-mode-manager.md)** - Centralized mock mode management
+- **[Test Utilities](../test-utilities.md)** - BrobotTestBase and utility classes
+- **[Mat Testing Utilities](../mat-testing-utilities.md)** - OpenCV Mat testing utilities
+- **[Profile-Based Testing](../profile-based-testing.md)** - Profile-based test configuration
+- **[Testing Strategy](../testing-strategy.md)** - Overall testing strategy
 
 ### Advanced Testing
 - **[Enhanced Mock Testing](./enhanced-mocking.md)** - Advanced mock scenarios and failure patterns

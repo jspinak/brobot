@@ -485,5 +485,4 @@ jobs:
 - **[Fail-Safe Image Loading](./fail-safe-image-loading.md)** - Robust image loading for tests
 
 ### Migration Guides
-- **[ActionOptions to ActionConfig Migration](../03-core-library/migration/actionoptions-to-actionconfig.md)** - Updating legacy test code
-- **[ActionConfig Migration Guide](../03-core-library/action-config/12-migration-guide.md)** - Complete migration patterns
+- **[Upgrading to Latest](../03-core-library/migration/upgrading-to-latest.md)** - Complete migration guide for updating legacy code

@@ -31,7 +31,7 @@ The formal model of the GUI environment is defined by the state structure **Ω =
 
 ### Components
 
-**E = {e₁, e₂, ..., eₙ}**: The set of all GUI elements selected to model the environment
+**E = \{e₁, e₂, ..., eₙ\}**: The set of all GUI elements selected to model the environment
 - Examples: images, regions, locations, text patterns
 - Finite set of visual features used to identify states
 - These are the "landmarks" that define your GUI map
@@ -679,7 +679,7 @@ Remember: **Multiple states can be active**, so popups are additional active sta
 
 ### Practical Implementation
 - **[Getting Started](../01-getting-started/)** - Hands-on tutorials for creating states in Brobot applications
-- **[AI Brobot Project Creation](../../docs/ai-brobot-project-creation.md)** - Complete API reference for State and StateImage classes
+- **[AI Brobot Project Creation](../01-getting-started/ai-brobot-project-creation.md)** - Complete API reference for State and StateImage classes
 
 ### Source Code References
 - **State.java** (`library/src/main/java/io/github/jspinak/brobot/model/state/State.java`) - State model implementation

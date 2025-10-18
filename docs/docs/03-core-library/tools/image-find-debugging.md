@@ -445,7 +445,7 @@ implementation 'org.fusesource.jansi:jansi:2.4.0'
 
 ## Integration with CI/CD
 
-For comprehensive CI/CD testing strategies, see the [CI/CD Testing Guide](../testing/ci-cd-testing.md).
+For comprehensive CI/CD testing strategies, see the [CI/CD Testing Guide](../../04-testing/advanced/ci-cd-testing.md).
 
 ### GitHub Actions
 ```yaml

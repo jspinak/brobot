@@ -532,7 +532,7 @@ public class NewAutomation {
 ### Testing & Reliability
 - **[Testing Introduction](../../04-testing/testing-intro.md)** - Testing strategies for automation
 - **[Integration Testing](../../04-testing/integration-testing.md)** - End-to-end workflow testing
-- **[CI/CD Testing](./testing/ci-cd-testing.md)** - Continuous integration best practices
+- **[CI/CD Testing](../../04-testing/advanced/ci-cd-testing.md)** - Continuous integration best practices
 
 ### Getting Started
 - **[AI Brobot Project Creation](../../01-getting-started/ai-brobot-project-creation.md)** - Complete project setup guide

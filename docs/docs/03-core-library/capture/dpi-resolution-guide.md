@@ -572,7 +572,7 @@ brobot.capture.provider=JAVACV_FFMPEG
 
 **Symptoms**:
 - Captured images look pixelated or blurry
-- Pattern match accuracy is reduced (<95%)
+- Pattern match accuracy is reduced (&lt;95%)
 
 **Cause**: You're using Strategy 2 with pattern scaling, which introduces artifacts.
 
@@ -945,7 +945,7 @@ With correct configuration, Brobot handles DPI scaling transparently, ensuring r
 ### Testing
 - **[Testing Introduction](../../04-testing/testing-intro.md)** - Testing patterns and strategies
 - **[Integration Testing](../../04-testing/integration-testing.md)** - Spring Boot integration testing
-- **[CI/CD Testing Guide](../testing/ci-cd-testing.md)** - Testing in CI/CD pipelines
+- **[CI/CD Testing Guide](../../04-testing/advanced/ci-cd-testing.md)** - Testing in CI/CD pipelines
 
 ### Getting Started
 - **[Introduction](../../01-getting-started/introduction.md)** - Why Brobot and core concepts

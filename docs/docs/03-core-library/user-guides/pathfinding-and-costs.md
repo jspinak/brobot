@@ -454,15 +454,15 @@ By understanding and properly configuring path costs, you can ensure your automa
 
 ## Related Documentation
 
-- **[States Guide](/docs/getting-started/states)** - Understanding states and the @State annotation
-- **[Transitions Guide](/docs/getting-started/transitions)** - Defining transitions between states
-- **[Pathfinding & Multi-State Activation](/docs/getting-started/pathfinding)** - Introduction to pathfinding concepts
-- **[Annotations Guide](/docs/core-library/user-guides/annotations)** - Complete reference for @State, @TransitionSet, and transition annotations
-- **[Dynamic Transitions and Hidden States](/docs/core-library/user-guides/dynamic-transitions)** - Using PreviousState and CurrentState special markers
-- **[Core Concepts](/docs/getting-started/core-concepts)** - Overview of Brobot's architecture
+- **[States Guide](../../01-getting-started/states.md)** - Understanding states and the @State annotation
+- **[Transitions Guide](../../01-getting-started/transitions.md)** - Defining transitions between states
+- **[Pathfinding & Multi-State Activation](../../01-getting-started/pathfinding.md)** - Introduction to pathfinding concepts
+- **[Annotations Guide](annotations.md)** - Complete reference for @State, @TransitionSet, and transition annotations
+- **[Dynamic Transitions and Hidden States](dynamic-transitions.md)** - Using PreviousState and CurrentState special markers
+- **[Core Concepts](../../01-getting-started/core-concepts.md)** - Overview of Brobot's architecture
 
 ## Example Projects
 
 See path costs in action in these tutorials:
-- **[Tutorial Basics](/docs/core-library/tutorials/tutorial-basics)** - Basic state and transition setup
-- **[Special States Tutorial](/docs/core-library/tutorials/tutorial-special-states)** - Using CurrentState and PreviousState with path costs
+- **[Tutorial Basics](../../02-tutorials/tutorial-basics/index.md)** - Basic state and transition setup
+- **[Special States Tutorial](../../02-tutorials/tutorial-special-states/index.md)** - Using CurrentState and PreviousState with path costs

@@ -447,4 +447,4 @@ This pattern is especially valuable for long-running automation, background moni
 - **[Dynamic Transitions](./dynamic-transitions.md)** - Hidden states, overlays, and CurrentState/PreviousState patterns
 - **[Multi-State Transitions](./multi-state-transitions-guide.md)** - Coordinating transitions across multiple states
 - **[Mock Mode Testing](../../../04-testing/mock-mode-guide.md)** - Testing state-aware scheduling without GUI
-- **[Claude Automator Tutorial](../../tutorials/tutorial-claude-automator/automation.md)** - Real-world example using StateAwareScheduler
+- **[Claude Automator Tutorial](../../02-tutorials/tutorial-claude-automator/automation.md)** - Real-world example using StateAwareScheduler

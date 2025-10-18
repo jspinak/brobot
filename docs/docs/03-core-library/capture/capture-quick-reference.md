@@ -218,7 +218,7 @@ Your application automatically uses JAVACV_FFMPEG with physical resolution captu
 - **[Configuration Note](../finding-objects/configuration-note.md)** - Configuration best practices
 
 ### Testing & Deployment
-- **[CI/CD Testing Guide](../testing/ci-cd-testing.md)** - Testing Brobot applications in CI/CD pipelines
+- **[CI/CD Testing Guide](../../04-testing/advanced/ci-cd-testing.md)** - Testing Brobot applications in CI/CD pipelines
 - **[Mock Mode Guide](../../04-testing/mock-mode-guide.md)** - Testing without GUI using mock mode
 
 ### Technical Deep Dives

@@ -524,8 +524,7 @@ ConditionalActionChain.find(button)
 - **[Unit Testing](../../../04-testing/unit-testing.md)** - Unit test patterns
 
 ### Migration Resources
-- **[Migration Guide](./12-migration-guide.md)** - Upgrading from ActionOptions
-- **[Quick Migration Reference](./02-migration-quick-reference.md)** - Fast lookup guide
+- **[Upgrading to Latest](../migration/upgrading-to-latest.md)** - Complete migration guide
 
 ## Common Pitfalls to Avoid
 

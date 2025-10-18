@@ -194,8 +194,8 @@ This design philosophy allows Brobot to provide a framework for semi-intelligent
 
 ## Related Documentation
 
-- **[Migration Guide](../../action-config/migration-guide)** - Migrating from ActionOptions to ActionConfig
+- **[Migration Guide](../migration/upgrading-to-latest.md)** - Migrating from ActionOptions to ActionConfig
 - **[Search Regions and Fixed Locations](./search-regions-and-fixed-locations.md)** - Comprehensive guide to region definition
 - **[Declarative Region Definition](./declarative-region-definition.md)** - Define regions relative to other elements
-- **[ActionConfig API Reference](../../action-config/overview.md)** - Complete ActionConfig documentation
-- **[Pausing in Brobot](/docs/getting-started/quick-start#important-pausing-in-brobot)** - Best practices for pauses
+- **[ActionConfig API Reference](../action-config/01-overview.md)** - Complete ActionConfig documentation
+- **[Pausing in Brobot](../../01-getting-started/quick-start.md#important-pausing-in-brobot)** - Best practices for pauses

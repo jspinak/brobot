@@ -74,7 +74,7 @@ The scene captures pixel-level representation of the entire GUI, including all e
 
 The State Structure is a **tuple Ω = (E, S, T)** defined by:
 
-- **E = {e₁, e₂, ..., eₙ}**: The set of all GUI elements selected to model the environment (images, regions, locations, text patterns, etc.)
+- **E = \{e₁, e₂, ..., eₙ\}**: The set of all GUI elements selected to model the environment (images, regions, locations, text patterns, etc.)
 
 - **S**: The set of all GUI states, where:
   - Each state s ∈ S is a subset of E (a state is a collection of related GUI elements)
@@ -346,7 +346,7 @@ This represents a shift from a practically impossible task to a well-defined and
 
 ### Practical Implementation
 - **[Getting Started](../01-getting-started/)** - Hands-on tutorials for building Brobot applications
-- **[AI Brobot Project Creation](../../docs/ai-brobot-project-creation.md)** - Complete API reference and implementation patterns
+- **[AI Brobot Project Creation](../01-getting-started/ai-brobot-project-creation.md)** - Complete API reference and implementation patterns
 
 ---
 

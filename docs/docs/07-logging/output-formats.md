@@ -419,7 +419,7 @@ The `LogEntry` class provides extensive data for custom formatting:
 - `currentState`, `targetState`
 
 **Metadata:**
-- `metadata` (Map<String, Object>) for custom key-value data
+- `metadata` (Map&lt;String, Object&gt;) for custom key-value data
 
 ### Custom Formatter Implementation
 

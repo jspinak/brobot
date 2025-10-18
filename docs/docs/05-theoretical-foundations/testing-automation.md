@@ -1042,7 +1042,7 @@ Testing automation in model-based GUI automation provides:
 - **[Test Utilities](../04-testing/test-utilities.md)** - Helper classes and utilities
 
 ### Implementation
-- **[AI Brobot Project Creation Guide](../../ai-brobot-project-creation.md)** - Complete API reference
+- **[AI Brobot Project Creation Guide](../01-getting-started/ai-brobot-project-creation.md)** - Complete API reference
 - **[Getting Started](../01-getting-started/)** - Hands-on tutorials
 
 ## Appendix: Mathematical Notation Quick Reference

@@ -762,6 +762,6 @@ These patterns follow the principle of making the easy path the correct path, gu
 - **[Mock Mode Guide](../../../04-testing/mock-mode-guide.md)** - Using factories in tests
 
 ### Advanced Topics
-- **[Troubleshooting Chains](../../action-config/troubleshooting-chains.md)** - Debugging chain execution
-- **[Migration Guide](../../migration/actionoptions-to-actionconfig.md)** - Migrating from ActionOptions
-- **[AI Project Creation Guide](../../../01-getting-started/ai-brobot-project-creation.md)** - Complete guide with factory examples
+- **[Troubleshooting Chains](../action-config/troubleshooting-chains.md)** - Debugging chain execution
+- **[Upgrading to Latest](../migration/upgrading-to-latest.md)** - Complete migration guide
+- **[AI Project Creation Guide](../../01-getting-started/ai-brobot-project-creation.md)** - Complete guide with factory examples

@@ -122,7 +122,7 @@ Key academic references cited in this document:
 
 ### Practical Implementation
 - **[Getting Started](../01-getting-started/)** - Hands-on tutorials
-- **[AI Brobot Project Creation](../docs/ai-brobot-project-creation.md)** - Complete API reference
+- **[AI Brobot Project Creation](../01-getting-started/ai-brobot-project-creation.md)** - Complete API reference
 
 ## Academic Collaboration
 

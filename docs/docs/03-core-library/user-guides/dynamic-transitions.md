@@ -133,7 +133,7 @@ public class ModalDialogTransitions {
 **What it does**: Performs an action while staying in the same state. The UI might change slightly, but you remain conceptually in the same place. Also useful when transitioning between overlapping states where both remain active.
 
 **Tutorial Example - Island Capture**:
-In the [tutorial-basics](/docs/core-library/tutorials/tutorial-basics) example, the Island state overlays the World state. To capture multiple islands, instead of directly calling transition methods (which bypasses the state management system), use CurrentState:
+In the [tutorial-basics](../../02-tutorials/tutorial-basics/index.md) example, the Island state overlays the World state. To capture multiple islands, instead of directly calling transition methods (which bypasses the state management system), use CurrentState:
 
 **Example (Conceptual Snippet):**
 ```java
@@ -231,7 +231,7 @@ public class SearchResultsTransitions {
 ```
 
 **When to use CurrentState transitions** (vs. helper methods):
-- **Re-entering from overlapping states**: When transitioning from one active state back to another that remains active (e.g., Island → Island via World in [tutorial-basics](/docs/core-library/tutorials/tutorial-basics))
+- **Re-entering from overlapping states**: When transitioning from one active state back to another that remains active (e.g., Island → Island via World in [tutorial-basics](../../02-tutorials/tutorial-basics/index.md))
 - **Actions requiring pathfinding**: When you need the framework to navigate to this state as part of a longer path
 - **State-tracked operations**: When you want the state management system to track this as a transition
 - **Page refreshes**: Operations that reload or refresh the entire page content
@@ -1085,14 +1085,14 @@ These special states make your automation more resilient and adaptable to the dy
 ## Complete Tutorial and Example Project
 
 A complete, runnable example demonstrating all special state concepts is available:
-- **[Special States Tutorial](/docs/core-library/tutorials/tutorial-special-states)** - Step-by-step tutorial with full source code
+- **[Special States Tutorial](../../02-tutorials/tutorial-special-states/index.md)** - Step-by-step tutorial with full source code
 - **Example Project**: `examples/03-core-library/guides/dynamic-transitions/special-states-example/`
 
 ## Related Documentation
 
-- [Transitions Overview](/docs/getting-started/transitions) - General transition concepts
-- [Core Concepts](/docs/getting-started/core-concepts#handling-dynamic-overlays-hidden-states) - Brief hidden states overview
-- [States Overview](/docs/getting-started/states) - Understanding states in Brobot
-- [State-Aware Scheduling](/docs/core-library/user-guides/state-aware-scheduling) - Advanced state scheduling patterns
-- [Pathfinding](/docs/getting-started/core-concepts#pathfinding) - How Brobot calculates optimal paths between states
-- [ActionConfig API](/docs/core-library/action-config/overview) - Type-safe action configuration in Brobot 1.1.0+
+- [Transitions Overview](../../01-getting-started/transitions.md) - General transition concepts
+- [Core Concepts](../../01-getting-started/core-concepts.md#handling-dynamic-overlays-hidden-states) - Brief hidden states overview
+- [States Overview](../../01-getting-started/states.md) - Understanding states in Brobot
+- [State-Aware Scheduling](state-aware-scheduling.md) - Advanced state scheduling patterns
+- [Pathfinding](../../01-getting-started/core-concepts.md#pathfinding) - How Brobot calculates optimal paths between states
+- [ActionConfig API](../action-config/01-overview.md) - Type-safe action configuration in Brobot 1.1.0+

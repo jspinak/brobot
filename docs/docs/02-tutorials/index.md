@@ -26,7 +26,7 @@ Start with the **[Claude Automator Example](./tutorial-claude-automator/index.md
 
 ### Migrating from Older Versions?
 1. Review the Claude Automator example for new patterns
-2. Check the [Migration Guide](/docs/core-library/action-config/migration-guide) 
+2. Check the [Migration Guide](../03-core-library/action-config/migration-guide.md)
 3. Reference older tutorials for conceptual understanding
 
 ### Learning Specific Concepts?
@@ -51,7 +51,7 @@ ClickOptions options = new ClickOptions.Builder()
     .build();
 ```
 
-For a complete migration reference, see the [Action Config Migration Guide](/docs/core-library/action-config/migration-guide).
+For a complete migration reference, see the [Action Config Migration Guide](../03-core-library/action-config/migration-guide.md).
 
 ## Available Tutorials
 

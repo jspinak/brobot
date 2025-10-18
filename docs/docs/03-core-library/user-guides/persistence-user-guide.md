@@ -7,12 +7,12 @@ The Brobot Persistence Module allows you to record and analyze automation execut
 ## Prerequisites
 
 Before using the Persistence Module, you should be familiar with:
-- [Installation](/docs/getting-started/installation) - Adding Brobot to your project
-- [States](/docs/getting-started/states) - Understanding StateObjects and state management
-- [ActionConfig](/docs/core-library/action-config/01-overview) - Action configuration system
-- [Testing](/docs/testing/testing-intro) - Testing patterns for integration
+- [Installation](../../01-getting-started/installation.md) - Adding Brobot to your project
+- [States](../../01-getting-started/states.md) - Understanding StateObjects and state management
+- [ActionConfig](../action-config/01-overview.md) - Action configuration system
+- [Testing](../../04-testing/testing-intro.md) - Testing patterns for integration
 
-For architectural details, see the [Persistence Module Architecture](/docs/core-library/architecture/persistence-module).
+For architectural details, see the [Persistence Module Architecture](../architecture/persistence-module.md).
 
 ## Installation
 
@@ -212,7 +212,7 @@ PersistenceProvider provider = PersistenceProviderFactory.create(config);
 
 ### Database Persistence (Spring Boot)
 
-For enterprise applications with Spring Boot. See [Auto-Configuration Guide](/docs/core-library/configuration/auto-configuration) for more on Spring Boot integration.
+For enterprise applications with Spring Boot. See [Auto-Configuration Guide](../configuration/auto-configuration.md) for more on Spring Boot integration.
 
 **Configuration via YAML**:
 
@@ -261,7 +261,7 @@ public class AutomationService {
 
 ### Manual Recording
 
-Actions can be recorded using [ActionConfig](/docs/core-library/action-config/01-overview) classes like `PatternFindOptions`. For more on action configuration, see the [ActionConfig Overview](/docs/core-library/action-config/01-overview).
+Actions can be recorded using [ActionConfig](../action-config/01-overview.md) classes like `PatternFindOptions`. For more on action configuration, see the [ActionConfig Overview](../action-config/01-overview.md).
 
 ```java
 import io.github.jspinak.brobot.model.action.ActionRecord;
@@ -522,7 +522,7 @@ PersistenceProvider provider = PersistenceProviderFactory.create(config);
 
 ### JUnit Test Integration
 
-For comprehensive testing patterns, see the [Testing Introduction](/docs/testing/testing-intro) and [Integration Testing Guide](/docs/testing/integration-testing).
+For comprehensive testing patterns, see the [Testing Introduction](../../04-testing/testing-intro.md) and [Integration Testing Guide](../../04-testing/integration-testing.md).
 
 ```java
 import org.junit.jupiter.api.TestInstance;
@@ -576,7 +576,7 @@ class AutomationTest {
 
 ### CI/CD Integration
 
-For detailed CI/CD setup and best practices, see the [CI/CD Testing Guide](/docs/core-library/testing/ci-cd-testing).
+For detailed CI/CD setup and best practices, see the [CI/CD Testing Guide](../../04-testing/advanced/ci-cd-testing.md).
 
 ```java
 public class CIPersistenceConfig {
@@ -740,7 +740,7 @@ public void cleanupOldSessions() {
 
 Monitor recording overhead to ensure minimal impact on automation performance:
 
-> **📊 Performance Guidelines**: Recording should add <5ms overhead per action. Higher values indicate configuration issues or resource constraints.
+> **📊 Performance Guidelines**: Recording should add &lt;5ms overhead per action. Higher values indicate configuration issues or resource constraints.
 
 ```java
 import io.github.jspinak.brobot.persistence.PersistenceProvider;
@@ -1044,19 +1044,19 @@ try {
 ## Related Guides
 
 ### Core Concepts
-- [Persistence Module Architecture](/docs/core-library/architecture/persistence-module) - Technical architecture and design patterns
-- [States](/docs/getting-started/states) - Understanding StateObjects used in recording
-- [ActionConfig Overview](/docs/core-library/action-config/01-overview) - Action configuration system
+- [Persistence Module Architecture](../architecture/persistence-module.md) - Technical architecture and design patterns
+- [States](../../01-getting-started/states.md) - Understanding StateObjects used in recording
+- [ActionConfig Overview](../action-config/01-overview.md) - Action configuration system
 
 ### Testing and Integration
-- [Testing Introduction](/docs/testing/testing-intro) - Testing patterns and strategies
-- [Integration Testing](/docs/testing/integration-testing) - Using persistence in tests
-- [CI/CD Testing](/docs/core-library/testing/ci-cd-testing) - CI/CD integration patterns
-- [Action Recording](/docs/testing/action-recording) - Visual screenshot-based recording (different from persistence)
+- [Testing Introduction](../../04-testing/testing-intro.md) - Testing patterns and strategies
+- [Integration Testing](../../04-testing/integration-testing.md) - Using persistence in tests
+- [CI/CD Testing](../../04-testing/advanced/ci-cd-testing.md) - CI/CD integration patterns
+- [Action Recording](../../04-testing/action-recording.md) - Visual screenshot-based recording (different from persistence)
 
 ### Configuration
-- [Auto-Configuration](/docs/core-library/configuration/auto-configuration) - Spring Boot auto-configuration details
-- [Properties Reference](/docs/core-library/configuration/properties-reference) - All Brobot configuration properties
+- [Auto-Configuration](../configuration/auto-configuration.md) - Spring Boot auto-configuration details
+- [Properties Reference](../configuration/properties-reference.md) - All Brobot configuration properties
 
 ## Support
 

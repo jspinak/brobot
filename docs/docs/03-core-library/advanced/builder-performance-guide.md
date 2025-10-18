@@ -3,7 +3,7 @@
 ## Overview
 This guide provides best practices for optimizing builder pattern usage in Brobot for maximum performance.
 
-**Related Documentation**: [Builder Migration Guide](../../migration/builder-migration-guide.md) | [ActionConfig Overview](../../action-config/01-overview.md) | [ActionConfig API Reference](../../action-config/05-reference.md) | [ActionConfig Factory Guide](../configuration/action-config-factory.md)
+**Related Documentation**: [Upgrading to Latest](../migration/upgrading-to-latest.md) | [ActionConfig Overview](../action-config/01-overview.md) | [ActionConfig API Reference](../action-config/05-reference.md) | [ActionConfig Factory Guide](../configuration/action-config-factory.md)
 
 ## Important: Builder Pattern Conventions
 
@@ -844,9 +844,9 @@ public class BuilderMemoryProfileTest {
 
 ## Related Documentation
 
-- **[Builder Migration Guide](../../migration/builder-migration-guide.md)** - Builder pattern standardization and naming conventions
-- **[ActionConfig Overview](../../action-config/01-overview.md)** - Understanding ActionConfig architecture
-- **[ActionConfig API Reference](../../action-config/05-reference.md)** - Complete API documentation for all ActionConfig classes
+- **[Upgrading to Latest](../migration/upgrading-to-latest.md)** - Migration guide including builder pattern standardization
+- **[ActionConfig Overview](../action-config/01-overview.md)** - Understanding ActionConfig architecture
+- **[ActionConfig API Reference](../action-config/05-reference.md)** - Complete API documentation for all ActionConfig classes
 - **[ActionConfig Factory Guide](../configuration/action-config-factory.md)** - Enterprise patterns for configuration reuse and caching
-- **[Action Chaining](../../action-config/07-action-chaining.md)** - Builder chaining and action chaining patterns
+- **[Action Chaining](../action-config/07-action-chaining.md)** - Builder chaining and action chaining patterns
 - **[Logging Performance Guide](../../../../07-logging/performance.md)** - Related performance optimization techniques

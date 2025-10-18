@@ -1033,7 +1033,7 @@ Based on testing with the claude-automator project:
 
 - **Startup Time**: +15ms (registering 5 dependencies)
 - **Search Time per Dependent Object**: -120ms average (faster due to smaller search regions)
-- **Memory Overhead**: <1KB per dependency (negligible)
+- **Memory Overhead**: &lt;1KB per dependency (negligible)
 - **CPU Usage**: No measurable increase
 
 ### Recommendations
@@ -1161,4 +1161,4 @@ By defining regions declaratively, you create more robust automation that adapts
 - **[Mock Mode Guide](../../../04-testing/mock-mode-guide.md)** - Testing with ActionHistory and mock data
 
 ### Tutorials
-- **[Claude Automator Tutorial](../../tutorials/tutorial-claude-automator/automation.md)** - Real-world declarative region example
+- **[Claude Automator Tutorial](../../02-tutorials/tutorial-claude-automator/automation.md)** - Real-world declarative region example

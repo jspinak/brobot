@@ -493,7 +493,7 @@ cd brobot/persistence
 - [Properties Reference](../configuration/properties-reference.md) - Complete configuration options
 
 ### Migration
-- [ActionHistory Migration Guide](../migration/actionhistory-migration-guide.md) - Migrating from legacy APIs to modern ActionConfig
+- [Upgrading to Latest](../migration/upgrading-to-latest.md) - Complete migration guide including ActionHistory updates
 
 ### Testing and Integration
 - [Testing Introduction](../../04-testing/testing-intro.md) - Testing patterns and strategies

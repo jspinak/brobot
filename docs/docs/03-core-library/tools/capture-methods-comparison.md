@@ -53,7 +53,7 @@ This guide helps you choose and configure the optimal screen capture method for 
 - **SikuliX Tool ↔ SikuliX/Robot**: 97.2% similarity
 - Minor differences due to capture timing
 
-#### Significant Differences (<80% Similarity)
+#### Significant Differences (Less than 80% Similarity)
 - **Robot Tool** captures showed 69-75% similarity with other methods
 - Likely due to different color space handling or compression
 

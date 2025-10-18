@@ -438,7 +438,7 @@ public class BrobotAssertions {
 - Use `brobot.screenshot.path` for screenshot configuration
 - Use `brobot.mock.time-*` properties for mock timing configuration
 
-See [ActionOptions to ActionConfig Migration](../03-core-library/migration/actionoptions-to-actionconfig.md) for complete migration guide.
+See [Upgrading to Latest](../03-core-library/migration/upgrading-to-latest.md) for complete migration guide.
 
 ## Best Practices
 
@@ -495,7 +495,7 @@ See [ActionOptions to ActionConfig Migration](../03-core-library/migration/actio
 - **[ActionConfig Overview](../03-core-library/action-config/01-overview.md)** - ActionConfig system introduction
 - **[ActionConfig Examples](../03-core-library/action-config/03-examples.md)** - Practical testing examples
 - **[ActionConfig Reference](../03-core-library/action-config/05-reference.md)** - Complete API reference
-- **[ActionOptions to ActionConfig Migration](../03-core-library/migration/actionoptions-to-actionconfig.md)** - Migration guide from 1.0.x
+- **[Upgrading to Latest](../03-core-library/migration/upgrading-to-latest.md)** - Migration guide from 1.0.x
 
 ### Configuration & Setup
 - **[BrobotProperties Usage](../03-core-library/configuration/brobot-properties-usage.md)** - Configuration guide

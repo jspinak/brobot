@@ -163,9 +163,9 @@ import io.github.jspinak.brobot.model.state.special.CurrentState;
 
 ## Learn More
 
-- [Dynamic Transitions Guide](/docs/core-library/user-guides/dynamic-transitions) - Complete reference
-- [Core Concepts](/docs/getting-started/core-concepts) - Understanding states
-- [Transitions Overview](/docs/getting-started/transitions) - Transition basics
+- [Dynamic Transitions Guide](../../03-core-library/user-guides/dynamic-transitions.md) - Complete reference
+- [Core Concepts](../../01-getting-started/core-concepts.md) - Understanding states
+- [Transitions Overview](../../01-getting-started/transitions.md) - Transition basics
 
 ## Source Code
 

@@ -189,14 +189,14 @@ See [ActionResult Components](./17-actionresult-components.md) for details on pr
 
 ## Next Steps
 
-- [Quick Migration Reference](./02-migration-quick-reference.md) - Learn how to migrate from ActionOptions
+- [Upgrading to Latest](../migration/upgrading-to-latest.md) - Learn how to migrate from ActionOptions
 - [Code Examples](./03-examples.md) - See ActionConfig in action
 - [Action Chaining](./07-action-chaining.md) - Master action chaining patterns
 - [API Reference](./05-reference.md) - Detailed API documentation
 
 ## Related Documentation
 
-- [Actions Overview](/docs/03-core-library/guides/actions/actions-overview.md) - Understanding the Action system
-- [StateImage Guide](/docs/03-core-library/guides/states/state-images.md) - Working with state images
-- [Builder Pattern Guide](/docs/03-core-library/advanced/builder-patterns.md) - Advanced builder techniques
-- [Configuration Properties](/docs/03-core-library/configuration/properties-reference.md) - Application-level configuration
+- [Action Hierarchy](../../01-getting-started/action-hierarchy.md) - Understanding the Action system
+- [States Guide](../../01-getting-started/states.md) - Working with states and state images
+- [Builder Performance Guide](../advanced/builder-performance-guide.md) - Advanced builder techniques
+- [Configuration Properties](../configuration/properties-reference.md) - Application-level configuration

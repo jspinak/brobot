@@ -8,7 +8,7 @@ This page provides practical examples for using each ActionConfig class in real-
 
 > **New to ActionConfig?** Start with the [ActionConfig Overview](./01-overview.md) for concepts and patterns.
 >
-> **Migrating from ActionOptions?** See the [Quick Migration Reference](./02-migration-quick-reference.md).
+> **Migrating from ActionOptions?** See the [Upgrading to Latest](../migration/upgrading-to-latest.md) guide.
 >
 > **Looking for simpler alternatives?** Check out [Convenience Methods](./18-convenience-methods.md) for direct action calls.
 
@@ -1003,7 +1003,7 @@ action.perform(standardClick, button3);
 ### Core Documentation
 - [ActionConfig Overview](./01-overview.md) - Concepts and introduction
 - [ActionConfig API Reference](./05-reference.md) - Complete API documentation
-- [Migration Quick Reference](./02-migration-quick-reference.md) - Migrating from ActionOptions
+- [Upgrading to Latest](../migration/upgrading-to-latest.md) - Migrating from ActionOptions
 
 ### Advanced Topics
 - [Action Chaining](./07-action-chaining.md) - Complex multi-step workflows and chaining patterns

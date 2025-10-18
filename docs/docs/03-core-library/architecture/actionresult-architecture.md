@@ -34,7 +34,7 @@ sidebar_position: 4
 
 ActionResult serves as the universal return type for all actions in the Brobot framework, encapsulating comprehensive information generated during action execution. Version 2.0 introduces a component-based architecture that transforms the original monolithic design into a well-structured system of focused, single-responsibility components.
 
-**Related Documentation**: [ActionResult Components Quick Reference](../action-config/17-actionresult-components.md) | [Migration Guide](../migration/actionresult-refactoring.md) | [ActionConfig Overview](../action-config/01-overview.md)
+**Related Documentation**: [ActionResult Components Quick Reference](../action-config/17-actionresult-components.md) | [Upgrading to Latest](../migration/upgrading-to-latest.md) | [ActionConfig Overview](../action-config/01-overview.md)
 
 ## Architecture Evolution
 
@@ -540,7 +540,7 @@ public class GameMatchStatistics extends MatchStatistics {
 
 ## Migration Guide
 
-For complete migration details and examples, see the [ActionResult Refactoring Migration Guide](../migration/actionresult-refactoring.md).
+For complete migration details and examples, see the [Upgrading to Latest](../migration/upgrading-to-latest.md) guide.
 
 ### For API Consumers
 **No changes required!** The facade maintains complete backward compatibility:

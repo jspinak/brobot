@@ -11,7 +11,7 @@ This guide explains how to use the AspectJ enhancements in the Brobot framework.
 | **Unreliable UI elements** | ErrorRecoveryAspect | UI elements sometimes not found, network issues | Low (~5ms) |
 | **Slow operations** | PerformanceMonitoringAspect | Need to identify bottlenecks, track trends | Very Low (~1ms) |
 | **Complex state flows** | StateTransitionAspect | Multi-state automation, debugging state issues | Low (~2ms) |
-| **Testing/mocking** | SikuliInterceptionAspect | Running tests without display, CI/CD pipelines | Minimal (<1ms) |
+| **Testing/mocking** | SikuliInterceptionAspect | Running tests without display, CI/CD pipelines | Minimal (&lt;1ms) |
 | **ML model training** | DatasetCollectionAspect | Collecting training data for image recognition | Medium (~10ms) |
 | **Multiple monitors** | MultiMonitorRoutingAspect | Multi-screen setups, dynamic monitor selection | Minimal (<1ms) |
 | **Debugging visual issues** | VisualFeedbackAspect | Development, understanding what Brobot sees | Low (~3ms) |

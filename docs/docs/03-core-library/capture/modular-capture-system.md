@@ -595,7 +595,7 @@ Simply set `brobot.capture.provider` in your properties file and let the system 
 - **[Testing Introduction](../../04-testing/testing-intro.md)** - Overview of Brobot testing strategies and patterns
 - **[Mock Mode Guide](../../04-testing/mock-mode-guide.md)** - Testing without screen interaction using mock mode
 - **[Integration Testing](../../04-testing/integration-testing.md)** - Spring Boot integration testing with Brobot
-- **[CI/CD Testing Guide](../testing/ci-cd-testing.md)** - Testing Brobot applications in CI/CD pipelines
+- **[CI/CD Testing Guide](../../04-testing/advanced/ci-cd-testing.md)** - Testing Brobot applications in CI/CD pipelines
 
 ### Getting Started
 - **[Introduction](../../01-getting-started/introduction.md)** - Brobot overview, why use Brobot, and core concepts

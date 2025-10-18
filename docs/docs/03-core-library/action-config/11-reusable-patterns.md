@@ -924,4 +924,4 @@ public class SearchTransitionsTest extends BrobotTestBase {
 ### Reference Documentation
 - **[ActionConfig Overview](./01-overview.md)** - Foundation of all patterns
 - **[States in Brobot](../../01-getting-started/states.md)** - Understanding the state system
-- **[Migration Guide](./12-migration-guide.md)** - Updating legacy patterns to modern API
+- **[Upgrading to Latest](../migration/upgrading-to-latest.md)** - Updating legacy patterns to modern API

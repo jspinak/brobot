@@ -85,8 +85,8 @@ ActionResult result = action.click(new Location(Positions.Name.MIDDLEMIDDLE));
 ```
 
 **See Also:**
-- [ClickOptions Reference](/docs/core-library/action-config/05-reference.md#clickoptions)
-- [ActionResult Architecture](/docs/core-library/architecture/actionresult-architecture.md)
+- [ClickOptions Reference](../action-config/05-reference.md#clickoptions)
+- [ActionResult Architecture](../architecture/actionresult-architecture.md)
 
 ---
 
@@ -200,8 +200,8 @@ System.out.println("Found " + result.getMatchLocations().size() + " matches");
 ```
 
 **See Also:**
-- [PatternFindOptions Reference](/docs/core-library/action-config/05-reference.md#patternfindoptions)
-- [Finding Objects Guide](/docs/core-library/finding-objects/combining-finds.md)
+- [PatternFindOptions Reference](../action-config/05-reference.md#patternfindoptions)
+- [Finding Objects Guide](../finding-objects/combining-finds.md)
 
 ---
 
@@ -253,8 +253,8 @@ action.type(passwordField, password);
 ```
 
 **See Also:**
-- [TypeOptions Reference](/docs/core-library/action-config/05-reference.md#typeoptions)
-- [Security Best Practices](/docs/core-library/user-guides/annotations.md)
+- [TypeOptions Reference](../action-config/05-reference.md#typeoptions)
+- [Security Best Practices](../user-guides/annotations.md)
 
 ---
 
@@ -369,7 +369,7 @@ action.drop(new Location(500, 300));
 ```
 
 **See Also:**
-- [DragOptions Reference](/docs/core-library/action-config/05-reference.md#dragoptions)
+- [DragOptions Reference](../action-config/05-reference.md#dragoptions)
 
 ---
 
@@ -501,7 +501,7 @@ if (!result.getMatchLocations().isEmpty()) {
 ```
 
 **See Also:**
-- [ActionResult Architecture](/docs/core-library/architecture/actionresult-architecture.md)
+- [ActionResult Architecture](../architecture/actionresult-architecture.md)
 
 ---
 
@@ -539,8 +539,8 @@ StateImage customImage = new StateImage.Builder()
 ```
 
 **See Also:**
-- [States Guide](/docs/getting-started/states.md)
-- [StateImage Patterns](/docs/core-library/user-guides/search-regions-and-fixed-locations.md)
+- [States Guide](../../01-getting-started/states.md)
+- [StateImage Patterns](../user-guides/search-regions-and-fixed-locations.md)
 
 ---
 
@@ -556,7 +556,7 @@ All action methods can be configured using Options builders:
 - `ScrollOptions` - Configure scroll behavior
 - `MoveOptions` - Configure mouse movement
 
-**See:** [Complete ActionConfig Reference](/docs/core-library/action-config/05-reference.md)
+**See:** [Complete ActionConfig Reference](../action-config/05-reference.md)
 
 ---
 
@@ -632,28 +632,28 @@ action.find(options, dynamicContent);
 ## Related Documentation
 
 ### Core Guides
-- [Getting Started - Quick Start](/docs/getting-started/quick-start.md)
-- [States and Transitions](/docs/getting-started/states.md)
-- [ActionConfig Overview](/docs/core-library/action-config/01-overview.md)
+- [Getting Started - Quick Start](../../01-getting-started/quick-start.md)
+- [States and Transitions](../../01-getting-started/states.md)
+- [ActionConfig Overview](../action-config/01-overview.md)
 
 ### Advanced Topics
-- [Complete ActionConfig Reference](/docs/core-library/action-config/05-reference.md)
-- [Finding Objects Guide](/docs/core-library/finding-objects/combining-finds.md)
-- [Error Handling](/docs/core-library/user-guides/annotations.md)
+- [Complete ActionConfig Reference](../action-config/05-reference.md)
+- [Finding Objects Guide](../finding-objects/combining-finds.md)
+- [Error Handling](../user-guides/annotations.md)
 
 ### Testing
-- [Mock Mode Testing](/docs/testing/mock-mode-guide.md)
-- [Unit Testing](/docs/testing/unit-testing.md)
+- [Mock Mode Testing](../../04-testing/mock-mode-guide.md)
+- [Unit Testing](../../04-testing/unit-testing.md)
 
 ### API Documentation
-- [ActionResult Architecture](/docs/core-library/architecture/actionresult-architecture.md)
-- [BrobotProperties Reference](/docs/core-library/configuration/properties-reference.md)
+- [ActionResult Architecture](../architecture/actionresult-architecture.md)
+- [BrobotProperties Reference](../configuration/properties-reference.md)
 
 ---
 
 ## Examples
 
 For complete working examples, see:
-- [Quick Start Tutorial](/docs/getting-started/quick-start.md)
-- [Tutorial Basics](/docs/tutorials/tutorial-basics/index.md)
-- [ActionConfig Examples](/docs/core-library/action-config/03-examples.md)
+- [Quick Start Tutorial](../../01-getting-started/quick-start.md)
+- [Tutorial Basics](../../02-tutorials/tutorial-basics/index.md)
+- [ActionConfig Examples](../action-config/03-examples.md)

@@ -746,4 +746,4 @@ BrobotProperties provides a modern, flexible configuration system that integrate
 - **Auto-Configuration Details**: Learn how Brobot configures itself automatically in the [Auto-Configuration Guide](auto-configuration.md)
 - **Testing Setup**: Get started with testing using the [Testing Introduction](../../04-testing/testing-intro.md)
 - **Mock Mode**: Understand mock mode testing with the [Mock Mode Guide](../../04-testing/mock-mode-guide.md)
-- **Getting Started**: New to Brobot? Check out the [Quick Start Guide](../../01-getting-started/quickstart.md)
+- **Getting Started**: New to Brobot? Check out the [Quick Start Guide](../../01-getting-started/quick-start.md)

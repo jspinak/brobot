@@ -10,7 +10,7 @@ Complete reference for all ActionConfig classes and their methods.
 >
 > **Looking for examples?** See [ActionConfig Examples](./03-examples.md) for practical code samples.
 >
-> **Migrating from ActionOptions?** Check the [Quick Migration Reference](./02-migration-quick-reference.md).
+> **Migrating from ActionOptions?** Check the [Upgrading to Latest](../migration/upgrading-to-latest.md) guide.
 
 ## Quick Reference
 
@@ -1174,7 +1174,7 @@ Use lowercase `.builder()` method:
 
 ### Core Documentation
 - **[ActionConfig Overview](./01-overview.md)** - Concepts and architecture
-- **[Quick Migration Reference](./02-migration-quick-reference.md)** - Migrating from ActionOptions
+- **[Upgrading to Latest](../migration/upgrading-to-latest.md)** - Migrating from ActionOptions
 - **[ActionConfig Examples](./03-examples.md)** - Practical code samples
 
 ### Advanced Topics
@@ -1190,5 +1190,5 @@ Use lowercase `.builder()` method:
 
 ### Related Guides
 - **[States in Brobot](../../01-getting-started/states.md)** - State management
-- **[Finding Objects](../finding-objects/finding-overview.md)** - Finding strategies
-- **[Mouse & Keyboard](../guides/actions/mouse-keyboard.md)** - Mouse and keyboard actions
+- **[Finding Objects](../finding-objects/combining-finds.md)** - Finding strategies
+- **[Special Keys Guide](../keyboard/special-keys-guide.md)** - Keyboard and special keys actions

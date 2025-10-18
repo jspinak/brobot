@@ -586,4 +586,4 @@ class AutoConfigurationVerificationTest {
 - **[Properties Reference](./properties-reference.md)** - Complete list of all `brobot.*` properties
 - **[Testing Guide](../../04-testing/testing-intro.md)** - Using test profile and mock mode
 - **[Image Find Debugging](../tools/image-find-debugging.md)** - Troubleshooting pattern matching
-- **[Getting Started](../../01-getting-started/quickstart.md)** - Setting up your first Brobot application
+- **[Getting Started](../../01-getting-started/quick-start.md)** - Setting up your first Brobot application

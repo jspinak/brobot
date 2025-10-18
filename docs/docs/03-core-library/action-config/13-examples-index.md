@@ -15,10 +15,10 @@ This page provides a comprehensive index of all ActionConfig examples, organized
 All examples in this index assume you have:
 - A Spring `@Component` class with `@Autowired Action action;`
 - StateImage objects initialized for your UI elements
-- Required imports (see [Migration Guide Setup](./12-migration-guide.md#setup-for-migration-examples) for complete example)
+- Required imports (see [Upgrading to Latest](../migration/upgrading-to-latest.md) for complete example)
 
 For complete setup instructions, see:
-- **[Migration Guide Setup](./12-migration-guide.md#setup-for-migration-examples)** - Complete class structure and imports
+- **[Upgrading to Latest](../migration/upgrading-to-latest.md)** - Complete class structure and imports
 - **[Convenience Methods](./18-convenience-methods.md)** - Direct action methods
 
 ## Quick Start Examples
@@ -677,9 +677,7 @@ public void processItems(List<StateImage> items) {
 ## Migration Examples
 
 ### Before and After
-[View complete migration guide](./12-migration-guide.md) | [Quick migration reference](./02-migration-quick-reference.md)
-
-For more real-world migration scenarios, see [Migration Examples](./06-migration-examples.md).
+[View complete migration guide](../migration/upgrading-to-latest.md)
 
 ```java
 // Before (ActionOptions) - DEPRECATED
@@ -698,13 +696,11 @@ ClickOptions newClick = new ClickOptions.Builder()
 
 ### Core Documentation
 - **[ActionConfig Overview](./01-overview.md)** - Concepts and architecture introduction
-- **[Quick Migration Reference](./02-migration-quick-reference.md)** - Concise migration lookup table
 - **[Code Examples](./03-examples.md)** - Detailed examples for each ActionConfig class
 - **[ActionConfig API Reference](./05-reference.md)** - Complete API documentation
 
 ### Migration & Workflows
-- **[Migration Examples](./06-migration-examples.md)** - Real-world migration scenarios
-- **[Complete Migration Guide](./12-migration-guide.md)** - Step-by-step migration strategy
+- **[Upgrading to Latest](../migration/upgrading-to-latest.md)** - Complete migration guide
 - **[Action Chaining](./07-action-chaining.md)** - Complex multi-step workflows
 - **[Complex Workflows](./08-complex-workflows.md)** - Navigation and workflow patterns
 

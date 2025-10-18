@@ -237,7 +237,7 @@ Based on testing with various providers:
 
 ## Integration with CI/CD
 
-For comprehensive CI/CD testing strategies, see the [CI/CD Testing Guide](../testing/ci-cd-testing.md).
+For comprehensive CI/CD testing strategies, see the [CI/CD Testing Guide](../../04-testing/advanced/ci-cd-testing.md).
 
 ### Automated Pattern Validation
 
@@ -401,7 +401,7 @@ This tool was developed after extensive testing comparing:
 - **[Auto-Configuration](../configuration/auto-configuration.md)** - Spring Boot integration details
 
 ### Testing & Integration
-- **[CI/CD Testing Guide](../testing/ci-cd-testing.md)** - Automated pattern validation in pipelines
+- **[CI/CD Testing Guide](../../04-testing/advanced/ci-cd-testing.md)** - Automated pattern validation in pipelines
 - **[Testing Introduction](../../04-testing/testing-intro.md)** - Brobot testing strategies
 - **[Mock Mode Guide](../../04-testing/mock-mode-guide.md)** - Testing without screen interaction
 

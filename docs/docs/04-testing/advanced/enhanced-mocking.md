@@ -8,7 +8,7 @@ title: 'Enhanced Mock Testing System'
 :::info For Framework Developers
 This section covers **advanced mocking features** for developers extending the Brobot framework or building complex testing scenarios.
 
-For standard automation testing, see the [main Testing documentation](/docs/04-testing/testing-intro).
+For standard automation testing, see the [main Testing documentation](../testing-intro.md).
 :::
 
 Brobot's enhanced mock testing system provides sophisticated scenario-based testing capabilities with advanced failure patterns, verification, and structured test data management.
@@ -29,7 +29,7 @@ The enhanced mock system extends the basic mocking capabilities with:
 Brobot now provides the `MockModeManager` class as a single source of truth for mock mode configuration:
 
 :::note Clean Test Configuration
-For Spring-based tests, see the [Test Logging Architecture (Proposed)](/docs/proposals/test-logging-architecture) - a proposed design for factory-based configuration. Note: This is a design proposal, not currently implemented.
+For Spring-based tests, see the [Test Logging Architecture (Proposed)](../../proposals/test-logging-architecture.md) - a proposed design for factory-based configuration. Note: This is a design proposal, not currently implemented.
 :::
 
 ```java
@@ -931,22 +931,22 @@ public class MockTestConfig {
 ## Related Documentation
 
 ### Core Testing Guides
-- **[Testing Introduction](/docs/04-testing/testing-intro)** - Overview of Brobot testing approaches
-- **[Unit Testing Guide](/docs/04-testing/unit-testing.md)** - Writing unit tests with Brobot
-- **[Integration Testing Guide](/docs/04-testing/integration-testing.md)** - Integration test patterns and practices
-- **[Mock Mode Guide](/docs/04-testing/mock-mode-guide.md)** - Fundamentals of mock mode configuration
-- **[Test Utilities](/docs/04-testing/test-utilities.md)** - BrobotTestBase, BrobotTestUtils, and testing helpers
-- **[Mat Testing Utilities](/docs/04-testing/mat-testing-utilities.md)** - OpenCV Mat testing utilities for color analysis
+- **[Testing Introduction](../testing-intro.md)** - Overview of Brobot testing approaches
+- **[Unit Testing Guide](../unit-testing.md)** - Writing unit tests with Brobot
+- **[Integration Testing Guide](../integration-testing.md)** - Integration test patterns and practices
+- **[Mock Mode Guide](../mock-mode-guide.md)** - Fundamentals of mock mode configuration
+- **[Test Utilities](../test-utilities.md)** - BrobotTestBase, BrobotTestUtils, and testing helpers
+- **[Mat Testing Utilities](../mat-testing-utilities.md)** - OpenCV Mat testing utilities for color analysis
 - **[CI/CD Testing](./ci-cd-testing.md)** - CI/CD testing best practices
 
 ### ActionConfig and Actions
-- **[Action Config Overview](/docs/03-core-library/action-config/01-overview.md)** - ActionConfig class hierarchy
-- **[ActionResult Components](/docs/03-core-library/action-config/17-actionresult-components.md)** - ActionResult reference
-- **[PatternFindOptions](/docs/03-core-library/action-config/02-patternfindoptions.md)** - Find configuration
+- **[Action Config Overview](../../03-core-library/action-config/01-overview.md)** - ActionConfig class hierarchy
+- **[ActionResult Components](../../03-core-library/action-config/17-actionresult-components.md)** - ActionResult reference
+- **[PatternFindOptions](../../03-core-library/action-config/02-patternfindoptions.md)** - Find configuration
 
 ### Testing Strategy
-- **[Testing Strategy](/docs/04-testing/testing-strategy.md)** - Overall testing philosophy and approach
-- **[Test Logging Architecture (Proposed)](/docs/proposals/test-logging-architecture.md)** - Proposed factory-based test configuration (not implemented)
+- **[Testing Strategy](../testing-strategy.md)** - Overall testing philosophy and approach
+- **[Test Logging Architecture (Proposed)](../../proposals/test-logging-architecture.md)** - Proposed factory-based test configuration (not implemented)
 
 ---
 

@@ -11,7 +11,7 @@ keywords: [migration, upgrade, latest version]
 
 ## Current Recommended Approach
 
-**For new projects**: Follow the [Quick Start Guide](/docs/getting-started/quick-start.md)
+**For new projects**: Follow the [Quick Start Guide](../../01-getting-started/quick-start.md)
 
 **For existing projects**: We recommend using the current patterns rather than maintaining old code:
 
@@ -36,7 +36,7 @@ ClickOptions clickOptions = new ClickOptions.Builder()
     .build();
 ```
 
-**See:** [ActionConfig Overview](/docs/core-library/action-config/01-overview.md)
+**See:** [ActionConfig Overview](../action-config/01-overview.md)
 
 #### 2. Use @State and @Transition Annotations
 
@@ -60,7 +60,7 @@ public class LoginTransitions {
 }
 ```
 
-**See:** [States Guide](/docs/getting-started/states.md)
+**See:** [States Guide](../../01-getting-started/states.md)
 
 #### 3. Use Action Class Methods
 
@@ -77,7 +77,7 @@ public void performLogin() {
 }
 ```
 
-**See:** [Basic Actions API Reference](/docs/core-library/api-reference/basic-actions.md)
+**See:** [Basic Actions API Reference](../api-reference/basic-actions.md)
 
 ## If You Have Old Code
 
@@ -124,10 +124,10 @@ action.type(options, inputField, "text");
 
 ## Getting Help
 
-- **Documentation**: Start with [Getting Started](/docs/getting-started/quick-start.md)
-- **API Reference**: See [Basic Actions API](/docs/core-library/api-reference/basic-actions.md)
-- **Examples**: Check [Tutorials](/docs/tutorials/tutorial-basics/index.md)
-- **Testing**: See [Testing Guide](/docs/testing/testing-intro.md)
+- **Documentation**: Start with [Getting Started](../../01-getting-started/quick-start.md)
+- **API Reference**: See [Basic Actions API](../api-reference/basic-actions.md)
+- **Examples**: Check [Tutorials](../../02-tutorials/tutorial-basics/index.md)
+- **Testing**: See [Testing Guide](../../04-testing/testing-intro.md)
 
 ## Historical Migration Guides
 

@@ -793,4 +793,4 @@ public class FormComponents {
 ### Reference Documentation
 - **[ActionConfig Overview](./01-overview.md)** - Conceptual foundation
 - **[API Reference](./05-reference.md)** - Complete API documentation
-- **[Migration Guide](./12-migration-guide.md)** - Updating legacy form automation code
+- **[Upgrading to Latest](../migration/upgrading-to-latest.md)** - Updating legacy form automation code

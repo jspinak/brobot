@@ -302,7 +302,7 @@ For deeper understanding, explore:
 - **[States](./states.md)** - Detailed explanation of State Structure and state management
 - **[Transitions](./transitions.md)** - How transitions connect states and handle actions
 - **[Testing the Automation](./testing-automation.md)** - Novel testing capabilities for GUI automation code
-- **[AI Brobot Project Creation Guide](../../docs/ai-brobot-project-creation.md)** - Practical guide to building Brobot applications
+- **[AI Brobot Project Creation Guide](../01-getting-started/ai-brobot-project-creation.md)** - Practical guide to building Brobot applications
 
 ## Notation Guide
 
