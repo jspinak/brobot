@@ -83,7 +83,7 @@ public class TransitionAnnotationTest extends BrobotTestBase {
             return true;
         }
 
-        @IncomingTransition(description = "Verify contact form is visible", timeout = 15)
+        @IncomingTransition(description = "Verify contact form is visible")
         public boolean verifyContactForm() {
             return true;
         }
@@ -329,18 +329,16 @@ public class TransitionAnnotationTest extends BrobotTestBase {
 
             assertNotNull(annotation);
             assertEquals("", annotation.description());
-            assertEquals(5, annotation.timeout());
         }
 
         @Test
-        @DisplayName("Should support custom description and timeout")
-        void shouldSupportCustomDescriptionAndTimeout() throws NoSuchMethodException {
+        @DisplayName("Should support custom description")
+        void shouldSupportCustomDescription() throws NoSuchMethodException {
             Method verifyContact = ContactTransitions.class.getMethod("verifyContactForm");
             IncomingTransition annotation = verifyContact.getAnnotation(IncomingTransition.class);
 
             assertNotNull(annotation);
             assertEquals("Verify contact form is visible", annotation.description());
-            assertEquals(15, annotation.timeout());
         }
 
         @Test
