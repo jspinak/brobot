@@ -4,7 +4,7 @@
 
 > **New to Brobot states?** See the [States Guide](../../01-getting-started/states.md) for fundamental concepts.
 
-Brobot provides automatic initial state management through the [`@State(initial = true)` annotation](../guides/user-guides/annotations.md). This guide explains how to configure and use initial states in your Brobot applications.
+Brobot provides automatic initial state management through the [`@State(initial = true)` annotation](../user-guides/annotations.md). This guide explains how to configure and use initial states in your Brobot applications.
 
 For architecture and implementation details, see the [Initial State Handling Architecture](../architecture/initial-state-handling.md) guide.
 
@@ -348,7 +348,7 @@ With this configuration, the HomeState will automatically be found and activated
 
 ### Core Documentation
 - [States Guide](../../01-getting-started/states.md) - Introduction to Brobot state management
-- [@State Annotation Reference](../guides/user-guides/annotations.md) - Complete annotation documentation
+- [@State Annotation Reference](../user-guides/annotations.md) - Complete annotation documentation
 - [Initial State Handling Architecture](../architecture/initial-state-handling.md) - Internal implementation details
 
 ### Configuration

@@ -1093,6 +1093,6 @@ A complete, runnable example demonstrating all special state concepts is availab
 - [Transitions Overview](/docs/getting-started/transitions) - General transition concepts
 - [Core Concepts](/docs/getting-started/core-concepts#handling-dynamic-overlays-hidden-states) - Brief hidden states overview
 - [States Overview](/docs/getting-started/states) - Understanding states in Brobot
-- [State-Aware Scheduling](/docs/core-library/guides/user-guides/state-aware-scheduling) - Advanced state scheduling patterns
+- [State-Aware Scheduling](/docs/core-library/user-guides/state-aware-scheduling) - Advanced state scheduling patterns
 - [Pathfinding](/docs/getting-started/core-concepts#pathfinding) - How Brobot calculates optimal paths between states
 - [ActionConfig API](/docs/core-library/action-config/overview) - Type-safe action configuration in Brobot 1.1.0+

@@ -406,7 +406,7 @@ logging.level.io.github.jspinak.brobot.action.internal.find=DEBUG
 ### Configuration
 - **[Properties Reference](../03-core-library/configuration/properties-reference.md)** - Complete reference for all Brobot configuration properties
 - **[Auto-Configuration Guide](../03-core-library/configuration/auto-configuration.md)** - Spring Boot auto-configuration setup
-- **[Action Config Factory](../03-core-library/guides/configuration/action-config-factory.md)** - Factory patterns for creating action configurations
+- **[Action Config Factory](../03-core-library/configuration/action-config-factory.md)** - Factory patterns for creating action configurations
 
 ### Pattern Matching
 - **[Capture Quick Reference](../03-core-library/capture/capture-quick-reference.md)** - Screen capture provider setup
@@ -420,9 +420,9 @@ logging.level.io.github.jspinak.brobot.action.internal.find=DEBUG
 - **[ActionConfig Overview](../03-core-library/action-config/01-overview.md)** - Modern ActionConfig API for pattern matching
 - **[ActionConfig Examples](../03-core-library/action-config/03-examples.md)** - Practical pattern matching examples
 - **[ActionConfig Reference](../03-core-library/action-config/05-reference.md)** - Complete API reference including PatternFindOptions
-- **[Search Regions and Fixed Locations](../03-core-library/guides/user-guides/search-regions-and-fixed-locations.md)** - Optimizing pattern searches with regions
-- **[Declarative Region Definition](../03-core-library/guides/user-guides/declarative-region-definition.md)** - Defining search regions relative to other objects
-- **[Screen Adaptive Regions](../03-core-library/guides/user-guides/screen-adaptive-regions.md)** - Resolution-independent region definitions
+- **[Search Regions and Fixed Locations](../03-core-library/user-guides/search-regions-and-fixed-locations.md)** - Optimizing pattern searches with regions
+- **[Declarative Region Definition](../03-core-library/user-guides/declarative-region-definition.md)** - Defining search regions relative to other objects
+- **[Screen Adaptive Regions](../03-core-library/user-guides/screen-adaptive-regions.md)** - Resolution-independent region definitions
 
 ### Getting Started
 - **[Quick Start Guide](../01-getting-started/quick-start.md)** - Getting started with Brobot pattern matching

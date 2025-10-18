@@ -31,7 +31,7 @@ The example below shows a screen with multiple states active simultaneously, eac
 
 > **📖 See [Pathfinding & Multi-State Activation](pathfinding.md) for detailed explanation**
 >
-> **📖 Advanced Patterns**: [Multi-State Transitions Guide](/docs/core-library/guides/user-guides/multi-state-transitions-guide) for detailed multi-state patterns, verification strategies, and best practices
+> **📖 Advanced Patterns**: [Multi-State Transitions Guide](/docs/core-library/user-guides/multi-state-transitions-guide) for detailed multi-state patterns, verification strategies, and best practices
 
 ## Defining States in Code (version 1.1.0+)
 
@@ -94,7 +94,7 @@ public class SlowLoadingState {
 }
 ```
 
-**Note**: The default pathCost for states is 1. Lower total path costs are preferred during pathfinding. For comprehensive pathfinding documentation, see the [Pathfinding and Path Costs Guide](/docs/core-library/guides/user-guides/pathfinding-and-costs).
+**Note**: The default pathCost for states is 1. Lower total path costs are preferred during pathfinding. For comprehensive pathfinding documentation, see the [Pathfinding and Path Costs Guide](/docs/core-library/user-guides/pathfinding-and-costs).
 
 ### State Components and Direct Access
 
@@ -127,7 +127,7 @@ public class GameMenuState {
 }
 ```
 
-> **💡 Visual Debugging Tip**: StateImages support visual highlighting for debugging automation. You can manually highlight found patterns to verify your automation is working correctly. See the [Highlighting Feature Guide](/docs/core-library/guides/user-guides/highlighting-feature.md) for details on visual feedback and debugging techniques.
+> **💡 Visual Debugging Tip**: StateImages support visual highlighting for debugging automation. You can manually highlight found patterns to verify your automation is working correctly. See the [Highlighting Feature Guide](/docs/core-library/user-guides/highlighting-feature.md) for details on visual feedback and debugging techniques.
 
 This pattern provides clean access in transitions:
 ```java

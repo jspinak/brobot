@@ -5,7 +5,7 @@ sidebar_position: 1
 # Using Color
 
 Color can be used in a variety of ways to locate objects in a Brobot automation application.
-With the new API, you use ColorFindOptions for color-based finding and HistogramFindOptions for histogram-based finding. A look under the hood at how Brobot assesses color can be found in the [Color Analysis Guide](/docs/core-library/guides/labeling/color-analysis).  
+With the new API, you use ColorFindOptions for color-based finding and HistogramFindOptions for histogram-based finding. A look under the hood at how Brobot assesses color can be found in the [Color Analysis Guide](/docs/core-library/labeling/color-analysis).  
 
 ## ColorFindOptions
 

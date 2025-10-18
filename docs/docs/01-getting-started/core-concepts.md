@@ -291,7 +291,7 @@ Key concepts:
 
 This intelligent pathfinding means you can simply request to navigate to a target state, and Brobot will automatically find and execute the best path to get there.
 
-[Learn more about pathfinding and path costs...](../03-core-library/guides/user-guides/pathfinding-and-costs.md)
+[Learn more about pathfinding and path costs...](../03-core-library/user-guides/pathfinding-and-costs.md)
 
 ## State-Aware Scheduling
 
@@ -304,7 +304,7 @@ The `StateAwareScheduler` component wraps standard Java scheduling with intellig
 
 This is particularly useful for long-running automation, periodic maintenance tasks, and error recovery scenarios where maintaining state integrity is critical.
 
-[Learn more about state-aware scheduling...](../03-core-library/guides/user-guides/state-aware-scheduling.md)
+[Learn more about state-aware scheduling...](../03-core-library/user-guides/state-aware-scheduling.md)
 
 ## Benefits: Cleaner and Simpler Code
 

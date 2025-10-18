@@ -207,7 +207,7 @@ if (match != null) {
 }
 ```
 
-> **💡 Advanced Highlighting**: For more control over highlighting including custom colors, durations, and automatic visual feedback, see the [Highlighting Feature Guide](../guides/user-guides/highlighting-feature.md).
+> **💡 Advanced Highlighting**: For more control over highlighting including custom colors, durations, and automatic visual feedback, see the [Highlighting Feature Guide](../user-guides/highlighting-feature.md).
 
 ### Drag Operations
 

@@ -10,7 +10,7 @@ The Brobot Persistence Module provides a flexible, pluggable architecture for re
 - Export/import of action histories
 - Integration with both Java projects and the JavaFX runner
 
-> **For usage instructions, see the [Persistence User Guide](../guides/user-guides/persistence-user-guide.md).**
+> **For usage instructions, see the [Persistence User Guide](../user-guides/persistence-user-guide.md).**
 
 ## Architecture Design
 
@@ -488,7 +488,7 @@ cd brobot/persistence
 - [Installation Guide](../../01-getting-started/installation.md) - Adding Brobot to your project
 
 ### Configuration and Setup
-- [Persistence User Guide](../guides/user-guides/persistence-user-guide.md) - Comprehensive usage guide
+- [Persistence User Guide](../user-guides/persistence-user-guide.md) - Comprehensive usage guide
 - [Auto-Configuration](../configuration/auto-configuration.md) - Spring Boot integration details
 - [Properties Reference](../configuration/properties-reference.md) - Complete configuration options
 

@@ -406,4 +406,4 @@ For more troubleshooting guidance, see the [Troubleshooting Action Chains](./tro
 ### Troubleshooting
 
 - **[Troubleshooting Action Chains](./troubleshooting-chains.md)** - Common errors and solutions
-- **[Builder Performance Guide](../guides/advanced/builder-performance-guide.md)** - Optimizing builder usage
+- **[Builder Performance Guide](../advanced/builder-performance-guide.md)** - Optimizing builder usage

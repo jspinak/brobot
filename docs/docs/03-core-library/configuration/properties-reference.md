@@ -223,7 +223,7 @@ Brobot logging configuration. For comprehensive logging configuration, see the [
 
 ## Visual Feedback and Highlighting
 
-Properties for visual highlighting of found patterns and UI elements. See the [Highlighting Feature Guide](../guides/user-guides/highlighting-feature.md) for detailed usage.
+Properties for visual highlighting of found patterns and UI elements. See the [Highlighting Feature Guide](../user-guides/highlighting-feature.md) for detailed usage.
 
 ### Aspect-Based Visual Feedback (Working)
 
@@ -254,7 +254,7 @@ Properties for visual highlighting of found patterns and UI elements. See the [H
 
 ### Planned Highlighting Features (Not Yet Implemented)
 
-> **Note**: The following properties are defined in `brobot-visual-feedback.properties` but do not currently work because the configuration class to bind them has been removed. See the [Highlighting Feature Guide](../guides/user-guides/highlighting-feature.md) for details.
+> **Note**: The following properties are defined in `brobot-visual-feedback.properties` but do not currently work because the configuration class to bind them has been removed. See the [Highlighting Feature Guide](../user-guides/highlighting-feature.md) for details.
 
 | Property | Type | Default | Status |
 |----------|------|---------|--------|
@@ -272,7 +272,7 @@ Properties for visual highlighting of found patterns and UI elements. See the [H
 | `brobot.highlight.click.enabled` | boolean | `true` | ⚠️ Planned |
 | ... and 20+ other properties | - | - | ⚠️ Planned |
 
-For the complete list of planned properties and implementation status, see [Highlighting Feature Guide](../guides/user-guides/highlighting-feature.md#current-implementation-status).
+For the complete list of planned properties and implementation status, see [Highlighting Feature Guide](../user-guides/highlighting-feature.md#current-implementation-status).
 
 ---
 
@@ -572,5 +572,5 @@ export BROBOT_FIND_SIMILARITY=0.7
 - [Automation Runner Guide](../automation-runner.md) - Failure handling and retry logic
 - [DPI Resolution Guide](../capture/dpi-resolution-guide.md) - DPI and resolution configuration
 - [Modular Capture System](../capture/modular-capture-system.md) - Screen capture providers and configuration
-- [Highlighting Feature Guide](../guides/user-guides/highlighting-feature.md) - Visual feedback configuration
+- [Highlighting Feature Guide](../user-guides/highlighting-feature.md) - Visual feedback configuration
 - [Logging Configuration](../../07-logging/configuration.md) - Detailed logging setup

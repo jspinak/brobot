@@ -198,5 +198,5 @@ See [ActionResult Components](./17-actionresult-components.md) for details on pr
 
 - [Actions Overview](/docs/03-core-library/guides/actions/actions-overview.md) - Understanding the Action system
 - [StateImage Guide](/docs/03-core-library/guides/states/state-images.md) - Working with state images
-- [Builder Pattern Guide](/docs/03-core-library/guides/advanced/builder-patterns.md) - Advanced builder techniques
-- [Configuration Properties](/docs/03-core-library/guides/configuration/properties-reference.md) - Application-level configuration
+- [Builder Pattern Guide](/docs/03-core-library/advanced/builder-patterns.md) - Advanced builder techniques
+- [Configuration Properties](/docs/03-core-library/configuration/properties-reference.md) - Application-level configuration

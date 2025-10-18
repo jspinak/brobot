@@ -783,7 +783,7 @@ protected double getTimeoutMultiplier() {
 - **[Properties Reference](../../03-core-library/configuration/properties-reference.md)** - All available properties
 - **[Auto-Configuration](../../03-core-library/configuration/auto-configuration.md)** - How Brobot auto-configures
 - **[Headless Configuration](../../03-core-library/configuration/headless-configuration.md)** - Running without display
-- **[Action Config Factory](../../03-core-library/guides/configuration/action-config-factory.md)** - Reusable action configurations
+- **[Action Config Factory](../../03-core-library/configuration/action-config-factory.md)** - Reusable action configurations
 
 ### ActionConfig
 - **[ActionConfig Overview](../../03-core-library/action-config/01-overview.md)** - Introduction to ActionConfig system
@@ -798,8 +798,8 @@ protected double getTimeoutMultiplier() {
 ### State Management
 - **[States Overview](../../01-getting-started/states.md)** - Introduction to state management
 - **[State Transitions](../../01-getting-started/transitions.md)** - How transitions work
-- **[Annotations Guide](../../03-core-library/guides/user-guides/annotations.md)** - @State, @Transition usage
-- **[Dynamic Transitions](../../03-core-library/guides/user-guides/dynamic-transitions.md)** - Runtime transitions
+- **[Annotations Guide](../../03-core-library/user-guides/annotations.md)** - @State, @Transition usage
+- **[Dynamic Transitions](../../03-core-library/user-guides/dynamic-transitions.md)** - Runtime transitions
 
 ### Logging
 - **[Logging Overview](../../07-logging/index.md)** - Introduction to logging system

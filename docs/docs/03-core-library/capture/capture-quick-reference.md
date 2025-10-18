@@ -215,7 +215,7 @@ Your application automatically uses JAVACV_FFMPEG with physical resolution captu
 
 ### Configuration
 - **[Configuration Properties Reference](../configuration/properties-reference.md)** - Complete reference for all Brobot configuration properties
-- **[Configuration Note](../guides/finding-objects/configuration-note.md)** - Configuration best practices
+- **[Configuration Note](../finding-objects/configuration-note.md)** - Configuration best practices
 
 ### Testing & Deployment
 - **[CI/CD Testing Guide](../testing/ci-cd-testing.md)** - Testing Brobot applications in CI/CD pipelines

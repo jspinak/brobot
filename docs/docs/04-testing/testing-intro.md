@@ -52,7 +52,7 @@ For detailed unit testing patterns with BrobotTestBase, see the [Unit Testing Gu
 - **Screenshot-based validation** with real-time feedback
 - **Manual testing support** for complex scenarios
 
-> **💡 Visual Debugging**: Brobot's highlighting feature provides real-time visual feedback during automation. See the [Highlighting Feature Guide](/docs/core-library/guides/user-guides/highlighting-feature.md) for details on visual debugging and validation techniques.
+> **💡 Visual Debugging**: Brobot's highlighting feature provides real-time visual feedback during automation. See the [Highlighting Feature Guide](/docs/core-library/user-guides/highlighting-feature.md) for details on visual debugging and validation techniques.
 
 **Best for**: Development debugging, manual verification, complex scenario validation
 

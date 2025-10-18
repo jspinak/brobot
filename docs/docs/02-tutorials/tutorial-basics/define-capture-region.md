@@ -141,4 +141,4 @@ public class IslandRegion {
 
 ## Learn More
 
-For more details on declarative region definition, see the [Declarative Region Definition Guide](/docs/core-library/guides/user-guides/declarative-region-definition).
+For more details on declarative region definition, see the [Declarative Region Definition Guide](/docs/core-library/user-guides/declarative-region-definition).

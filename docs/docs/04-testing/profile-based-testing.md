@@ -518,7 +518,7 @@ This approach is particularly valuable for large projects with complex Spring co
 ### State Management
 - **[States Overview](../01-getting-started/states.md)** - Introduction to states
 - **[Transitions](../01-getting-started/transitions.md)** - State transitions
-- **[Annotations Guide](../03-core-library/guides/user-guides/annotations.md)** - @State and @Transition usage
+- **[Annotations Guide](../03-core-library/user-guides/annotations.md)** - @State and @Transition usage
 
 ### Advanced Topics
 - **[Enhanced Mocking](./advanced/enhanced-mocking.md)** - Advanced mock scenarios

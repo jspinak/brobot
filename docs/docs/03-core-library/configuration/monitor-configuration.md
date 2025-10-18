@@ -381,7 +381,7 @@ for (int i = 0; i < monitorManager.getMonitorCount(); i++) {
 - **[Modular Capture System](../../capture/modular-capture-system.md)** - Screen capture with multiple monitors
 
 ### Examples
-- **[Multi-Monitor Config Example](../examples/multimonitor-config.yml)** - Complete configuration file example
+- **[Multi-Monitor Config Example](./examples/multimonitor-config.yml)** - Complete configuration file example
 
 ## Summary
 

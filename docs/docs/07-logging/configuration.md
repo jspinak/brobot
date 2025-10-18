@@ -276,8 +276,8 @@ public class ProfileBasedLogging {
 
 ### Advanced Topics
 - **[AspectJ Usage Guide](../03-core-library/advanced/aspectj-usage-guide.md)** - Aspect-oriented programming with Brobot
-- **[Advanced Illustration System](../03-core-library/guides/advanced/advanced-illustration-system.md)** - Visual feedback and illustration features
-- **[Persistence User Guide](../03-core-library/guides/user-guides/persistence-user-guide.md)** - Persisting automation data and history
+- **[Advanced Illustration System](../03-core-library/advanced/advanced-illustration-system.md)** - Visual feedback and illustration features
+- **[Persistence User Guide](../03-core-library/user-guides/persistence-user-guide.md)** - Persisting automation data and history
 
 ### External Resources
 - **[Spring Boot Logging Documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.logging)** - Official Spring Boot logging guide

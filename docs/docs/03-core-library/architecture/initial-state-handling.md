@@ -13,7 +13,7 @@ keywords: [initial states, architecture, ApplicationReadyEvent, auto-configurati
 ## Quick Links
 
 - **[User Guide: Initial State Configuration](../configuration/initial-states.md)** - How to use initial states
-- **[@State Annotation Reference](../guides/user-guides/annotations.md#state-annotation)** - Annotation parameters
+- **[@State Annotation Reference](../user-guides/annotations.md#state-annotation)** - Annotation parameters
 - **[Configuration Properties](../configuration/properties-reference.md#startup-configuration)** - Property reference
 - **[Auto-Configuration Overview](../configuration/auto-configuration.md)** - Spring Boot integration
 - **[States Overview](../../01-getting-started/states.md)** - Introduction to states
@@ -754,7 +754,7 @@ brobot:
 ## Related Documentation
 
 - **[User Guide: Initial State Configuration](../configuration/initial-states.md)** - How to use initial states
-- **[@State Annotation Reference](../guides/user-guides/annotations.md#state-annotation)** - Complete annotation documentation
+- **[@State Annotation Reference](../user-guides/annotations.md#state-annotation)** - Complete annotation documentation
 - **[Configuration Properties Reference](../configuration/properties-reference.md#startup-configuration)** - All available properties
 - **[Auto-Configuration Guide](../configuration/auto-configuration.md)** - Other auto-configuration features
 - **[States Overview](../../01-getting-started/states.md)** - Introduction to state management

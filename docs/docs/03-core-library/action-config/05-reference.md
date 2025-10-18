@@ -1184,11 +1184,11 @@ Use lowercase `.builder()` method:
 - **[Convenience Methods](./18-convenience-methods.md)** - Simpler API for common operations
 
 ### Configuration & Testing
-- **[ActionConfig Factory](../guides/configuration/action-config-factory.md)** - Factory patterns for configuration
-- **[Builder Performance Guide](../guides/advanced/builder-performance-guide.md)** - Optimizing builder usage
+- **[ActionConfig Factory](../configuration/action-config-factory.md)** - Factory patterns for configuration
+- **[Builder Performance Guide](../advanced/builder-performance-guide.md)** - Optimizing builder usage
 - **[Testing Guide](../../04-testing/testing-intro.md)** - Testing automation code
 
 ### Related Guides
 - **[States in Brobot](../../01-getting-started/states.md)** - State management
-- **[Finding Objects](../guides/finding-objects/finding-overview.md)** - Finding strategies
+- **[Finding Objects](../finding-objects/finding-overview.md)** - Finding strategies
 - **[Mouse & Keyboard](../guides/actions/mouse-keyboard.md)** - Mouse and keyboard actions

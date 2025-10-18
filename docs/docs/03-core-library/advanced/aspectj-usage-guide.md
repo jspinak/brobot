@@ -1166,10 +1166,10 @@ If you need compile-time weaving for specific use cases, consult the Spring AOP 
 ### State Management
 - **[States Guide](../../01-getting-started/states.md)** - Understanding Brobot's state management
 - **[Transitions Guide](../../01-getting-started/transitions.md)** - State transitions tracked by StateTransitionAspect
-- **[Annotations Guide](../guides/user-guides/annotations.md)** - Using @State, @Transition, and other Brobot annotations
+- **[Annotations Guide](../user-guides/annotations.md)** - Using @State, @Transition, and other Brobot annotations
 
 ### Visual Feedback
-- **[Highlighting Feature Guide](../guides/user-guides/highlighting-feature.md)** - Visual feedback and highlighting using the VisualFeedbackAspect
+- **[Highlighting Feature Guide](../user-guides/highlighting-feature.md)** - Visual feedback and highlighting using the VisualFeedbackAspect
 
 ## Conclusion
 

@@ -457,8 +457,8 @@ By understanding and properly configuring path costs, you can ensure your automa
 - **[States Guide](/docs/getting-started/states)** - Understanding states and the @State annotation
 - **[Transitions Guide](/docs/getting-started/transitions)** - Defining transitions between states
 - **[Pathfinding & Multi-State Activation](/docs/getting-started/pathfinding)** - Introduction to pathfinding concepts
-- **[Annotations Guide](/docs/core-library/guides/user-guides/annotations)** - Complete reference for @State, @TransitionSet, and transition annotations
-- **[Dynamic Transitions and Hidden States](/docs/core-library/guides/user-guides/dynamic-transitions)** - Using PreviousState and CurrentState special markers
+- **[Annotations Guide](/docs/core-library/user-guides/annotations)** - Complete reference for @State, @TransitionSet, and transition annotations
+- **[Dynamic Transitions and Hidden States](/docs/core-library/user-guides/dynamic-transitions)** - Using PreviousState and CurrentState special markers
 - **[Core Concepts](/docs/getting-started/core-concepts)** - Overview of Brobot's architecture
 
 ## Example Projects

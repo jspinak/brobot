@@ -278,7 +278,7 @@ logging.level.root=INFO
 - **[Installation Guide](../01-getting-started/installation.md)** - Installation considerations
 
 ### Advanced Topics
-- **[Builder Performance Guide](../03-core-library/guides/advanced/builder-performance-guide.md)** - Optimizing ActionConfig builder usage to reduce logging overhead
+- **[Builder Performance Guide](../03-core-library/advanced/builder-performance-guide.md)** - Optimizing ActionConfig builder usage to reduce logging overhead
 - **[Image Find Debugging](../03-core-library/tools/image-find-debugging.md)** - Debug features with performance impact considerations
 
 ### Integration

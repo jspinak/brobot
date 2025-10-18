@@ -214,7 +214,7 @@ Brobot supports transitions that activate multiple states simultaneously. This i
 
 > **📖 For complete pathfinding details, see [Pathfinding & Multi-State Activation](pathfinding.md)**
 >
-> **📖 Deep Dive**: [Multi-State Transitions Guide](/docs/core-library/guides/user-guides/multi-state-transitions-guide) for comprehensive multi-state activation examples, verification patterns, and best practices
+> **📖 Deep Dive**: [Multi-State Transitions Guide](/docs/core-library/user-guides/multi-state-transitions-guide) for comprehensive multi-state activation examples, verification patterns, and best practices
 
 ### Core Concept: No Primary Target State
 
@@ -426,7 +426,7 @@ When multiple paths exist, Brobot automatically selects the path with the **lowe
 
 ### Learn More
 
-For comprehensive documentation on pathfinding, cost calculation, and advanced patterns, see the [**Pathfinding and Path Costs Guide**](/docs/core-library/guides/user-guides/pathfinding-and-costs).
+For comprehensive documentation on pathfinding, cost calculation, and advanced patterns, see the [**Pathfinding and Path Costs Guide**](/docs/core-library/user-guides/pathfinding-and-costs).
 
 ## Important Pathfinding Limitation
 
