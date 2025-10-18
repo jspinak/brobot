@@ -973,9 +973,9 @@ public class MetricsExample {
 
 ## Related Documentation
 
-- **[BrobotProperties Reference](../../configuration/properties-reference.md)** - Complete properties documentation
-- **[ActionConfig Overview](../../action-config/01-overview.md)** - ActionConfig system guide
-- **[Screenshot Configuration](../../capture/screenshot-configuration.md)** - Screenshot system details
+- **[BrobotProperties Reference](../configuration/properties-reference.md)** - Complete properties documentation
+- **[ActionConfig Overview](../action-config/01-overview.md)** - ActionConfig system guide
+- **[Capture Quick Reference](../capture/capture-quick-reference.md)** - Screenshot and capture system details
 - **[Example Project](https://github.com/jspinak/brobot/tree/main/examples/03-core-library/advanced-illustration-system)** - Working examples
 
 > **💡 For Working Examples**: See the example project's `README_V1.1.0.md` for accurate, tested code samples using the current v1.1.0 API.

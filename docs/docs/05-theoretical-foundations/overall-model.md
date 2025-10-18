@@ -139,9 +139,9 @@ The state management model is defined as **M = (S_Ξ)** where **S_Ξ ⊆ S** is 
 The state management function processes updates from actions or transitions:
 
 **f_M: (S_Ξ, S_a, S_t) → S'_Ξ** where:
-- **S_a** and **S_t** are state information from actions and transitions respectively, each a set of (s, value) pairs where s ∈ S and value ∈ {True, False}
-- **S_+ = {s ∈ S | (s, True) ∈ (S_a ∪ S_t)}**: states to activate
-- **S_- = {s ∈ S | (s, False) ∈ (S_a ∪ S_t)}**: states to deactivate
+- **S_a** and **S_t** are state information from actions and transitions respectively, each a set of (s, value) pairs where s ∈ S and value ∈ \{True, False\}
+- **S_+ = \{s ∈ S | (s, True) ∈ (S_a ∪ S_t)\}**: states to activate
+- **S_- = \{s ∈ S | (s, False) ∈ (S_a ∪ S_t)\}**: states to deactivate
 - **S'_Ξ = (S_Ξ ∪ S_+) \ S_-**: the resulting set of active states
 
 **Implementation:** `StateMemory.java`, `StateDetector.java`, `StateVisibilityManager.java`

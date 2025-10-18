@@ -366,6 +366,7 @@ void testPixelChangeDetection() {
 - [Testing Strategy](testing-strategy.md) - Overall testing strategy and guidelines
 
 ### Related Components
-- [PixelChangeDetector](../../api/analysis/motion/PixelChangeDetector.md) - Pixel change detection API
-- [MotionDetector](../../api/analysis/motion/MotionDetector.md) - Motion detection API
-- [BrobotTestBase](../../api/test/BrobotTestBase.md) - Base class for Brobot tests
+<!-- API reference documentation not yet available -->
+<!-- - PixelChangeDetector - Pixel change detection API -->
+<!-- - MotionDetector - Motion detection API -->
+<!-- - BrobotTestBase - Base class for Brobot tests (see test-utilities.md) -->

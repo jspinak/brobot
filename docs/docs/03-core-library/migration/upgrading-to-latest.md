@@ -7,7 +7,8 @@ keywords: [migration, upgrade, latest version]
 
 # Upgrading to Latest Brobot
 
-> **Philosophy**: Brobot is in active development and prioritizes clean, maintainable code over backward compatibility. See [CLAUDE.md](/CLAUDE.md) for development philosophy.
+> **Philosophy**: Brobot is in active development and prioritizes clean, maintainable code over backward compatibility. See CLAUDE.md in the repository root for development philosophy.
+<!-- /CLAUDE.md is a root file, not included in /docs/ directory -->
 
 ## Current Recommended Approach
 

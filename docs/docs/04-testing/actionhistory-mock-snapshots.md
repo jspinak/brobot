@@ -432,7 +432,7 @@ ActionHistory neverFound = MockActionHistoryBuilder.Presets.neverFound();
 ### Core API References
 - **[States in Brobot](../../01-getting-started/states.md)** - Understanding @State annotation and state management
 - **[StateImage API](../03-core-library/user-guides/search-regions-and-fixed-locations.md)** - StateImage builder reference and search regions
-- **[ActionRecord](../03-core-library/action-config/action-record.md)** - ActionRecord structure and usage (if exists)
+<!-- ActionRecord API documentation not yet available -->
 
 ### Testing Infrastructure
 - **[BrobotTestBase](./test-utilities.md#brobottestbase)** - Base class for Brobot tests with mock mode support

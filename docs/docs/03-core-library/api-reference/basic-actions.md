@@ -29,7 +29,8 @@ public class MyAutomation {
 }
 ```
 
-> **💡 Important**: Always use `Action` class methods. Never call SikuliX methods directly. See [CLAUDE.md](/CLAUDE.md) for API usage guidelines.
+> **💡 Important**: Always use `Action` class methods. Never call SikuliX methods directly. See CLAUDE.md in the repository root for API usage guidelines.
+<!-- /CLAUDE.md is a root file, not included in /docs/ directory -->
 
 ---
 

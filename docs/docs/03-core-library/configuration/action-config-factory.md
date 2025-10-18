@@ -10,12 +10,12 @@ Brobot provides powerful patterns for creating and managing action configuration
 ## Prerequisites
 
 Before using ActionConfigFactory and ActionChainBuilder, you should be familiar with:
-- [ActionConfig Overview](../../action-config/01-overview.md) - Understanding the ActionConfig architecture
-- [Action Chaining](../../action-config/07-action-chaining.md) - Comprehensive guide to action chains
+- [ActionConfig Overview](../../03-core-library/action-config/01-overview.md) - Understanding the ActionConfig architecture
+- [Action Chaining](../../03-core-library/action-config/07-action-chaining.md) - Comprehensive guide to action chains
 - [States](../../../01-getting-started/states.md) - StateObjects for organizing patterns
-- [Spring Boot Integration](../auto-configuration.md) - Dependency injection patterns
+- [Spring Boot Integration](./auto-configuration.md) - Dependency injection patterns
 
-For hands-on examples, see [ActionConfig Examples](../../action-config/03-examples.md).
+For hands-on examples, see [ActionConfig Examples](../../03-core-library/action-config/03-examples.md).
 
 ## ActionConfigFactory
 
@@ -70,7 +70,7 @@ The factory supports all Brobot action types:
 - `CLASSIFY` - Creates `ColorFindOptions` with classification strategy
 - `DEFINE` - Creates `DefineRegionOptions`
 
-> **📝 Note**: The `CLICK_UNTIL` action type has been refactored. Use `ClickOptions` combined with `VerificationOptions` and `RepetitionOptions` for click-until behavior. See the [Click Configuration Guide](../../action-config/click-config.md) for details.
+> **📝 Note**: The `CLICK_UNTIL` action type has been refactored. Use `ClickOptions` combined with `VerificationOptions` and `RepetitionOptions` for click-until behavior. See the [ActionConfig Reference](../../03-core-library/action-config/05-reference.md) for complete API details including ClickOptions.
 
 ### Common Overrides
 
@@ -573,7 +573,7 @@ Map<String, Object> overrides = Map.of("clickCount", 2);  // Field is "numberOfC
 Map<String, Object> overrides = Map.of("numberOfClicks", 2);
 ```
 
-**Prevention**: Refer to the [ActionConfig Reference](../../action-config/05-reference.md) for correct field names.
+**Prevention**: Refer to the [ActionConfig Reference](../../03-core-library/action-config/05-reference.md) for correct field names.
 
 ### Issue: Chain Fails at First Action
 
@@ -628,7 +628,7 @@ PatternFindOptions textFind = new PatternFindOptions.Builder()
     .build();
 ```
 
-**Prevention**: Check the [ActionConfig Reference](../../action-config/05-reference.md) for available Options classes in your Brobot version.
+**Prevention**: Check the [ActionConfig Reference](../../03-core-library/action-config/05-reference.md) for available Options classes in your Brobot version.
 
 ## Performance Considerations
 
@@ -745,16 +745,16 @@ These patterns follow the principle of making the easy path the correct path, gu
 ## Related Documentation
 
 ### Core Concepts
-- **[ActionConfig Overview](../../action-config/01-overview.md)** - Understanding ActionConfig architecture
-- **[Action Chaining](../../action-config/07-action-chaining.md)** - Comprehensive guide to action chains and fluent API patterns
-- **[ActionConfig Reference](../../action-config/05-reference.md)** - Complete API documentation
+- **[ActionConfig Overview](../../03-core-library/action-config/01-overview.md)** - Understanding ActionConfig architecture
+- **[Action Chaining](../../03-core-library/action-config/07-action-chaining.md)** - Comprehensive guide to action chains and fluent API patterns
+- **[ActionConfig Reference](../../03-core-library/action-config/05-reference.md)** - Complete API documentation
 - **[States in Brobot](../../../01-getting-started/states.md)** - State management for automation
 
 ### Examples and Patterns
-- **[ActionConfig Examples](../../action-config/03-examples.md)** - Code examples and patterns
-- **[Conditional Chains Examples](../../action-config/15-conditional-chains-examples.md)** - Real-world conditional patterns
+- **[ActionConfig Examples](../../03-core-library/action-config/03-examples.md)** - Code examples and patterns
+- **[Conditional Chains Examples](../../03-core-library/action-config/15-conditional-chains-examples.md)** - Real-world conditional patterns
 - **[Combining Find Operations](../finding-objects/combining-finds.md)** - Nested and confirmed find strategies
-- **[Reusable Patterns](../../action-config/11-reusable-patterns.md)** - Creating reusable configurations
+- **[Reusable Patterns](../../03-core-library/action-config/11-reusable-patterns.md)** - Creating reusable configurations
 
 ### Configuration and Testing
 - **[Auto-Configuration](../auto-configuration.md)** - Spring Boot integration
@@ -762,6 +762,6 @@ These patterns follow the principle of making the easy path the correct path, gu
 - **[Mock Mode Guide](../../../04-testing/mock-mode-guide.md)** - Using factories in tests
 
 ### Advanced Topics
-- **[Troubleshooting Chains](../action-config/troubleshooting-chains.md)** - Debugging chain execution
+- **[Troubleshooting Chains](../../03-core-library/action-config/troubleshooting-chains.md)** - Debugging chain execution
 - **[Upgrading to Latest](../migration/upgrading-to-latest.md)** - Complete migration guide
 - **[AI Project Creation Guide](../../01-getting-started/ai-brobot-project-creation.md)** - Complete guide with factory examples

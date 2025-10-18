@@ -29,7 +29,8 @@ The enhanced mock system extends the basic mocking capabilities with:
 Brobot now provides the `MockModeManager` class as a single source of truth for mock mode configuration:
 
 :::note Clean Test Configuration
-For Spring-based tests, see the [Test Logging Architecture (Proposed)](../../proposals/test-logging-architecture.md) - a proposed design for factory-based configuration. Note: This is a design proposal, not currently implemented.
+For Spring-based tests, Brobot provides centralized mock mode management via MockModeManager and BrobotTestBase.
+<!-- Proposal documentation not included in /docs/ directory -->
 :::
 
 ```java
@@ -942,11 +943,11 @@ public class MockTestConfig {
 ### ActionConfig and Actions
 - **[Action Config Overview](../../03-core-library/action-config/01-overview.md)** - ActionConfig class hierarchy
 - **[ActionResult Components](../../03-core-library/action-config/17-actionresult-components.md)** - ActionResult reference
-- **[PatternFindOptions](../../03-core-library/action-config/02-patternfindoptions.md)** - Find configuration
+- **[ActionConfig Reference](../../03-core-library/action-config/05-reference.md)** - Complete API reference including PatternFindOptions
 
 ### Testing Strategy
 - **[Testing Strategy](../testing-strategy.md)** - Overall testing philosophy and approach
-- **[Test Logging Architecture (Proposed)](../../proposals/test-logging-architecture.md)** - Proposed factory-based test configuration (not implemented)
+<!-- Proposal documentation not included in /docs/ directory -->
 
 ---
 

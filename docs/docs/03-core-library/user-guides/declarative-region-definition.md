@@ -1154,8 +1154,8 @@ By defining regions declaratively, you create more robust automation that adapts
 - **[Processes as Objects](./processes-as-objects.md)** - Complex UI process modeling
 
 ### Actions and Configuration
-- **[ActionConfig Overview](../../action-config/01-overview.md)** - PatternFindOptions and configuration
-- **[ActionConfig Examples](../../action-config/03-examples.md)** - Practical action examples
+- **[ActionConfig Overview](../../03-core-library/action-config/01-overview.md)** - PatternFindOptions and configuration
+- **[ActionConfig Examples](../../03-core-library/action-config/03-examples.md)** - Practical action examples
 
 ### Testing
 - **[Mock Mode Guide](../../../04-testing/mock-mode-guide.md)** - Testing with ActionHistory and mock data

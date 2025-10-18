@@ -62,8 +62,9 @@ For detailed unit testing patterns with BrobotTestBase, see the [Unit Testing Gu
 
 Brobot uses Spring Boot's configuration properties system with clean architectural patterns:
 
-:::info New Test Logging Architecture
-Brobot now includes a clean test logging architecture that follows Single Responsibility Principle and eliminates circular dependencies. See the [Test Logging Architecture](../03-core-library/testing/test-logging-architecture.md) guide for details on using the TestLoggerFactory and related components.
+:::info Test Logging Configuration
+Brobot includes a clean test logging architecture that follows Single Responsibility Principle and eliminates circular dependencies.
+<!-- Detailed architecture documentation not yet available -->
 :::
 
 ### Configuration Properties

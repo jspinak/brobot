@@ -522,4 +522,4 @@ class TestDataBuilder {
 ### Advanced Testing
 - **[Enhanced Mock Testing System](./advanced/enhanced-mocking.md)** - Advanced mock scenarios
 - **[CI/CD Testing](./advanced/ci-cd-testing.md)** - Mock mode in CI/CD pipelines
-- **[Test Logging Architecture (Proposed)](../proposals/test-logging-architecture.md)** - Proposed design, not implemented
+<!-- Proposal documentation not included in /docs/ directory -->

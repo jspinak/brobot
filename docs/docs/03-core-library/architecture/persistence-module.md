@@ -55,7 +55,8 @@ brobot-persistence/
 
 ### Interface Design
 
-The [`PersistenceProvider`](../../api/persistence/PersistenceProvider.md) interface in the library module defines the contract:
+The `PersistenceProvider` interface in the library module defines the contract:
+<!-- API reference documentation not yet available -->
 
 ```java
 public interface PersistenceProvider {

@@ -3,7 +3,7 @@
 ## Overview
 This guide provides best practices for optimizing builder pattern usage in Brobot for maximum performance.
 
-**Related Documentation**: [Upgrading to Latest](../migration/upgrading-to-latest.md) | [ActionConfig Overview](../action-config/01-overview.md) | [ActionConfig API Reference](../action-config/05-reference.md) | [ActionConfig Factory Guide](../configuration/action-config-factory.md)
+**Related Documentation**: [Upgrading to Latest](../migration/upgrading-to-latest.md) | [ActionConfig Overview](../../03-core-library/action-config/01-overview.md) | [ActionConfig API Reference](../../03-core-library/action-config/05-reference.md) | [ActionConfig Factory Guide](../configuration/action-config-factory.md)
 
 ## Important: Builder Pattern Conventions
 
@@ -265,7 +265,7 @@ for (int i = 0; i < 1000; i++) {
 }
 ```
 
-> **Note**: [ClickOptions](../../action-config/05-reference.md#clickoptions) uses a copy constructor pattern rather than `toBuilder()`. Classes with Lombok's `@Builder` annotation (like MousePressOptions, VerificationOptions) support `toBuilder()` instead.
+> **Note**: [ClickOptions](../../03-core-library/action-config/05-reference.md#clickoptions) uses a copy constructor pattern rather than `toBuilder()`. Classes with Lombok's `@Builder` annotation (like MousePressOptions, VerificationOptions) support `toBuilder()` instead.
 
 ### 2. Lazy Initialization
 
@@ -845,8 +845,8 @@ public class BuilderMemoryProfileTest {
 ## Related Documentation
 
 - **[Upgrading to Latest](../migration/upgrading-to-latest.md)** - Migration guide including builder pattern standardization
-- **[ActionConfig Overview](../action-config/01-overview.md)** - Understanding ActionConfig architecture
-- **[ActionConfig API Reference](../action-config/05-reference.md)** - Complete API documentation for all ActionConfig classes
+- **[ActionConfig Overview](../../03-core-library/action-config/01-overview.md)** - Understanding ActionConfig architecture
+- **[ActionConfig API Reference](../../03-core-library/action-config/05-reference.md)** - Complete API documentation for all ActionConfig classes
 - **[ActionConfig Factory Guide](../configuration/action-config-factory.md)** - Enterprise patterns for configuration reuse and caching
-- **[Action Chaining](../action-config/07-action-chaining.md)** - Builder chaining and action chaining patterns
+- **[Action Chaining](../../03-core-library/action-config/07-action-chaining.md)** - Builder chaining and action chaining patterns
 - **[Logging Performance Guide](../../../../07-logging/performance.md)** - Related performance optimization techniques

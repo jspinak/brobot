@@ -222,7 +222,7 @@ Your application automatically uses JAVACV_FFMPEG with physical resolution captu
 - **[Mock Mode Guide](../../04-testing/mock-mode-guide.md)** - Testing without GUI using mock mode
 
 ### Technical Deep Dives
-- **[SikuliX Physical Capture Analysis](../../../sikuli-physical-capture-analysis.md)** - Analysis of SikuliX's capture behavior and Java version differences
+<!-- Technical analysis documentation not included in /docs/ directory -->
 
 ### Troubleshooting
 - **[Action Config Troubleshooting](../action-config/troubleshooting-chains.md)** - Debugging action chains and configuration issues

@@ -15,7 +15,7 @@ Before configuring multi-monitor support, ensure you have:
 
 - **Multiple Physical Monitors**: Connected and recognized by your operating system
 - **Spring Boot Knowledge**: Understanding of Spring Boot configuration and profiles
-- **Brobot Basics**: Familiarity with [BrobotProperties](../../configuration/brobot-properties-usage.md) configuration system
+- **Brobot Basics**: Familiarity with [BrobotProperties](../../03-core-library/configuration/brobot-properties-usage.md) configuration system
 - **Java Environment**: Running in a graphical environment (not headless) with display access
 
 > **💡 Quick Check**: Run `GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices().length` in Java to verify monitor count.
@@ -344,7 +344,7 @@ brobot:
       click: 2
 ```
 
-This aspect is **disabled by default** and requires explicit enablement. For details, see the [AspectJ Usage Guide](../../advanced/aspectj-usage-guide.md).
+This aspect is **disabled by default** and requires explicit enablement. For details, see the [AspectJ Usage Guide](../../03-core-library/advanced/aspectj-usage-guide.md).
 
 ### Search All Monitors Status
 
@@ -364,21 +364,21 @@ for (int i = 0; i < monitorManager.getMonitorCount(); i++) {
 ## Related Documentation
 
 ### Configuration
-- **[Properties Reference](../../configuration/properties-reference.md)** - Complete Brobot properties reference
-- **[BrobotProperties Usage](../../configuration/brobot-properties-usage.md)** - Using properties in code
-- **[Auto-Configuration](../../configuration/auto-configuration.md)** - Spring Boot auto-configuration
+- **[Properties Reference](../../03-core-library/configuration/properties-reference.md)** - Complete Brobot properties reference
+- **[BrobotProperties Usage](../../03-core-library/configuration/brobot-properties-usage.md)** - Using properties in code
+- **[Auto-Configuration](../../03-core-library/configuration/auto-configuration.md)** - Spring Boot auto-configuration
 
 ### Screen and Region
 - **[Screen-Adaptive Regions](../user-guides/screen-adaptive-regions.md)** - Region positioning across screens
-- **[DPI Resolution Guide](../../capture/dpi-resolution-guide.md)** - Handling DPI scaling in multi-monitor setups
+- **[DPI Resolution Guide](../../03-core-library/capture/dpi-resolution-guide.md)** - Handling DPI scaling in multi-monitor setups
 
 ### Testing
 - **[Profile-Based Testing](../../../04-testing/profile-based-testing.md)** - Using Spring profiles in tests
 - **[Testing Configuration](../../../04-testing/testing-intro.md)** - Configuration for testing environments
 
 ### Advanced
-- **[AspectJ Usage Guide](../../advanced/aspectj-usage-guide.md)** - MultiMonitorRoutingAspect details
-- **[Modular Capture System](../../capture/modular-capture-system.md)** - Screen capture with multiple monitors
+- **[AspectJ Usage Guide](../../03-core-library/advanced/aspectj-usage-guide.md)** - MultiMonitorRoutingAspect details
+- **[Modular Capture System](../../03-core-library/capture/modular-capture-system.md)** - Screen capture with multiple monitors
 
 ### Examples
 - **[Multi-Monitor Config Example](./examples/multimonitor-config.yml)** - Complete configuration file example

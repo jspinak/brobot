@@ -9,7 +9,7 @@ Brobot provides visual feedback capabilities to help with debugging and monitori
 
 Before using visual feedback features, ensure you understand:
 - [States and StateImage](../../../01-getting-started/states.md) - How to define UI elements
-- [Actions](../../action-config/01-overview.md) - How to perform operations on elements
+- [Actions](../../03-core-library/action-config/01-overview.md) - How to perform operations on elements
 - [Testing](../../../04-testing/testing-intro.md) - How to test automation scripts
 
 ## Current Implementation Status
@@ -107,7 +107,7 @@ The default properties are in:
 brobot/library/src/main/resources/brobot-visual-feedback.properties
 ```
 
-For complete property documentation, see [Properties Reference](../../configuration/properties-reference.md).
+For complete property documentation, see [Properties Reference](../../03-core-library/configuration/properties-reference.md).
 
 ## Usage
 
@@ -268,7 +268,7 @@ For more testing patterns, see:
    - AOP-based automatic visual feedback
    - Intercepts find/click/type operations
    - Currently has limited functionality (much code commented out)
-   - For more on aspects, see [AspectJ Usage Guide](../../advanced/aspectj-usage-guide.md)
+   - For more on aspects, see [AspectJ Usage Guide](../../03-core-library/advanced/aspectj-usage-guide.md)
 
 3. **HighlightOptions** (`io.github.jspinak.brobot.action.basic.highlight.HighlightOptions`)
    - Configuration for highlight operations
@@ -402,20 +402,20 @@ If you need advanced highlighting features:
 
 ### Core Concepts
 - [States](../../../01-getting-started/states.md) - Define UI elements to highlight
-- [Actions](../../action-config/01-overview.md) - Perform operations with highlighting
-- [Action Convenience Methods](../../action-config/18-convenience-methods.md) - Includes `action.highlight()`
+- [Actions](../../03-core-library/action-config/01-overview.md) - Perform operations with highlighting
+- [Action Convenience Methods](../../03-core-library/action-config/18-convenience-methods.md) - Includes `action.highlight()`
 
 ### Configuration
-- [Properties Reference](../../configuration/properties-reference.md) - All configuration options
-- [BrobotProperties Usage](../../configuration/brobot-properties-usage.md) - Access properties in code
+- [Properties Reference](../../03-core-library/configuration/properties-reference.md) - All configuration options
+- [BrobotProperties Usage](../../03-core-library/configuration/brobot-properties-usage.md) - Access properties in code
 
 ### Testing and Debugging
 - [Testing Introduction](../../../04-testing/testing-intro.md) - Test framework overview
 - [Mock Mode Guide](../../../04-testing/mock-mode-guide.md) - Headless testing
-- [Image Find Debugging](../../tools/image-find-debugging.md) - Comprehensive debugging system
+- [Image Find Debugging](../../03-core-library/tools/image-find-debugging.md) - Comprehensive debugging system
 
 ### Advanced Topics
-- [AspectJ Usage Guide](../../advanced/aspectj-usage-guide.md) - How aspects work
+- [AspectJ Usage Guide](../../03-core-library/advanced/aspectj-usage-guide.md) - How aspects work
 - [Search Regions](./search-regions-and-fixed-locations.md) - Define where to look
 
 ## Best Practices

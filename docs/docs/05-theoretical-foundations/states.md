@@ -94,7 +94,7 @@ where:
 
 Equivalently, the set of active states can be expressed as:
 
-**S_Ξ = {s ∈ S | s ∩ E_Ξ ≠ ∅}**
+**S_Ξ = \{s ∈ S | s ∩ E_Ξ ≠ ∅\}**
 
 This reads: "S_Ξ is the set of all states s in S such that s has at least one visible element."
 

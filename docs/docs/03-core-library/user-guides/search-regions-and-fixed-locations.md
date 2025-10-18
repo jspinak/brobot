@@ -655,8 +655,8 @@ public class SearchRegionTest extends BrobotTestBase {
 - **[States Guide](../../../01-getting-started/states.md)** - Understanding states and StateImage
 
 ### Using Search Regions
-- **[ActionConfig Overview](../../action-config/01-overview.md)** - Using search regions with actions
-- **[ActionConfig Examples](../../action-config/03-examples.md)** - Practical examples of search regions in automation
+- **[ActionConfig Overview](../../03-core-library/action-config/01-overview.md)** - Using search regions with actions
+- **[ActionConfig Examples](../../03-core-library/action-config/03-examples.md)** - Practical examples of search regions in automation
 - **[Processes as Objects](./processes-as-objects.md)** - Complex UI process modeling with regions
 
 ### Testing

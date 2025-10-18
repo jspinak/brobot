@@ -159,7 +159,8 @@ public class MockActionTest extends BrobotTestBase {
 }
 ```
 
-See [CLAUDE.md guidelines](/CLAUDE.md) for complete API usage rules.
+See CLAUDE.md in the repository root for complete API usage rules.
+<!-- /CLAUDE.md is a root file, not included in /docs/ directory -->
 
 #### 4. Test Categories for CI/CD
 
@@ -599,7 +600,8 @@ python3 library/scripts/run-all-tests.py library --retry-failed
 python3 library/scripts/run-all-tests.py library --pattern "Click"
 ```
 
-See [Test Execution Solution](/TEST-EXECUTION-SOLUTION.md) for complete details on running the full test suite.
+See TEST-EXECUTION-SOLUTION.md in the repository root for complete details on running the full test suite.
+<!-- /TEST-EXECUTION-SOLUTION.md is a root file, not included in /docs/ directory -->
 
 ### Troubleshooting CI/CD Test Issues
 
@@ -642,5 +644,6 @@ See [Test Execution Solution](/TEST-EXECUTION-SOLUTION.md) for complete details 
 - **[Enhanced Mock Testing](./enhanced-mocking.md)** - Advanced mock scenarios and failure patterns
 
 ### Framework Guidelines
-- **[CLAUDE.md](/CLAUDE.md)** - Brobot API usage guidelines and testing best practices
-- **[Test Execution Solution](/TEST-EXECUTION-SOLUTION.md)** - Running 6000+ tests without hanging issues
+<!-- Root repository files not included in /docs/ directory -->
+<!-- - CLAUDE.md - Brobot API usage guidelines and testing best practices -->
+<!-- - TEST-EXECUTION-SOLUTION.md - Running 6000+ tests without hanging issues -->

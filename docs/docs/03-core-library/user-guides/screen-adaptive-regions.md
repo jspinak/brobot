@@ -24,7 +24,7 @@ The `RegionBuilder` class provides a fluent API for creating regions with precis
 - **[Search Regions and Fixed Locations](./search-regions-and-fixed-locations.md)** - Understand search regions vs fixed locations
 - **[Declarative Region Definition](./declarative-region-definition.md)** - Define regions relative to other objects
 - **[States Guide](../../../01-getting-started/states.md)** - Integrating regions in state definitions
-- **[ActionConfig Overview](../../action-config/01-overview.md)** - Using regions with actions
+- **[ActionConfig Overview](../../03-core-library/action-config/01-overview.md)** - Using regions with actions
 
 ## Basic Usage
 
@@ -480,7 +480,7 @@ assert flexible.getW() > 0 && flexible.getH() > 0;
 
 ## Integration with Brobot Actions
 
-RegionBuilder-created regions work seamlessly with Brobot's Action API for clicking, typing, and pattern matching. For complete Action API documentation, see [ActionConfig Overview](../../action-config/01-overview.md) and [ActionConfig Examples](../../action-config/03-examples.md).
+RegionBuilder-created regions work seamlessly with Brobot's Action API for clicking, typing, and pattern matching. For complete Action API documentation, see [ActionConfig Overview](../../03-core-library/action-config/01-overview.md) and [ActionConfig Examples](../../03-core-library/action-config/03-examples.md).
 
 For more on States and the `@State` annotation, see [States Guide](../../../01-getting-started/states.md) and [Annotations Reference](./annotations.md).
 
@@ -580,7 +580,7 @@ public class AdaptiveSearch {
 
 ## Troubleshooting
 
-For visual debugging of regions, use the [highlighting feature](./highlighting-feature.md) to see regions on screen. For complete configuration options, see the [Properties Reference](../../configuration/properties-reference.md). For handling different screen resolutions and DPI settings, see the [DPI Resolution Guide](../../capture/dpi-resolution-guide.md).
+For visual debugging of regions, use the [highlighting feature](./highlighting-feature.md) to see regions on screen. For complete configuration options, see the [Properties Reference](../../03-core-library/configuration/properties-reference.md). For handling different screen resolutions and DPI settings, see the [DPI Resolution Guide](../../03-core-library/capture/dpi-resolution-guide.md).
 
 ### Region Outside Screen Bounds
 
@@ -663,4 +663,4 @@ Use RegionBuilder to create robust, screen-adaptive automation that works consis
 - **[Declarative Region Definition](./declarative-region-definition.md)** - Define regions dynamically relative to other objects
 - **[States Guide](../../../01-getting-started/states.md)** - Integrate regions into state-based automation
 - **[Quick Start Guide](../../../01-getting-started/quick-start.md)** - Get started with Brobot
-- **[ActionConfig Examples](../../action-config/03-examples.md)** - Use regions with actions
+- **[ActionConfig Examples](../../03-core-library/action-config/03-examples.md)** - Use regions with actions
