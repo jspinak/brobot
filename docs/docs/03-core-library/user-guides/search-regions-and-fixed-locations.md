@@ -665,4 +665,4 @@ public class SearchRegionTest extends BrobotTestBase {
 - **[Unit Testing Guide](../../../04-testing/unit-testing.md)** - Unit test patterns
 
 ### Tutorials
-- **[Claude Automator Tutorial](../../tutorials/tutorial-claude-automator/intro.md)** - Real-world example using search regions and fixed locations
+- **[Claude Automator Tutorial](../../tutorials/tutorial-claude-automator/index.md)** - Real-world example using search regions and fixed locations

@@ -496,4 +496,4 @@ When implementing multi-state transitions:
 - **[Mock Mode Guide](../../../04-testing/mock-mode-guide.md)** - Testing multi-state transitions
 
 ### Tutorials
-- **[Tutorial Basics](../../tutorials/tutorial-basics/intro.md)** - Hands-on practice with multi-state patterns
+- **[Tutorial Basics](../../tutorials/tutorial-basics/index.md)** - Hands-on practice with multi-state patterns

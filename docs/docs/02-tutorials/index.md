@@ -3,7 +3,7 @@
 ## Version Information
 
 :::tip Latest Patterns (v1.1.0)
-For the most up-to-date Brobot patterns and best practices, see the **[Claude Automator Example](./tutorial-claude-automator/intro.md)** tutorial. This demonstrates:
+For the most up-to-date Brobot patterns and best practices, see the **[Claude Automator Example](./tutorial-claude-automator/index.md)** tutorial. This demonstrates:
 - Modern ActionConfig classes (replacing deprecated ActionOptions)
 - Fluent API with action chaining
 - Enhanced developer experience features
@@ -22,7 +22,7 @@ While these tutorials still contain valuable concepts, refer to the Claude Autom
 ## Choosing a Tutorial
 
 ### New to Brobot?
-Start with the **[Claude Automator Example](./tutorial-claude-automator/intro.md)** - it's the most current and demonstrates all modern patterns.
+Start with the **[Claude Automator Example](./tutorial-claude-automator/index.md)** - it's the most current and demonstrates all modern patterns.
 
 ### Migrating from Older Versions?
 1. Review the Claude Automator example for new patterns
@@ -56,9 +56,9 @@ For a complete migration reference, see the [Action Config Migration Guide](/doc
 ## Available Tutorials
 
 ### Latest (v1.1.0+)
-- **[Claude Automator Example](./tutorial-claude-automator/intro.md)** - Complete modern example with ActionConfig classes, fluent API, and best practices
+- **[Claude Automator Example](./tutorial-claude-automator/index.md)** - Complete modern example with ActionConfig classes, fluent API, and best practices
 - **[Special States Tutorial](./tutorial-special-states/index.md)** - Learn PreviousState and CurrentState for dynamic transitions and overlay handling
 
 ### Core Concepts
-- **[Tutorial Basics](./tutorial-basics/intro.md)** - Fundamental Brobot concepts (may use some older patterns)
-- **[MrDoob Tutorial](./tutorial-mrdoob/intro.md)** - Web automation example (concepts still valid, some older patterns)
+- **[Tutorial Basics](./tutorial-basics/index.md)** - Fundamental Brobot concepts (may use some older patterns)
+- **[MrDoob Tutorial](./tutorial-mrdoob/index.md)** - Web automation example (concepts still valid, some older patterns)

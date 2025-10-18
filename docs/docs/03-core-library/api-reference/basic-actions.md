@@ -655,5 +655,5 @@ action.find(options, dynamicContent);
 
 For complete working examples, see:
 - [Quick Start Tutorial](/docs/getting-started/quick-start.md)
-- [Tutorial Basics](/docs/tutorials/tutorial-basics/intro.md)
+- [Tutorial Basics](/docs/tutorials/tutorial-basics/index.md)
 - [ActionConfig Examples](/docs/core-library/action-config/03-examples.md)
