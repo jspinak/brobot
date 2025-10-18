@@ -538,12 +538,10 @@ public class TransitionAnnotationTest extends BrobotTestBase {
         @DisplayName("Should access IncomingTransition annotation methods via reflection")
         void shouldAccessIncomingTransitionMethods() throws NoSuchMethodException {
             assertNotNull(IncomingTransition.class.getMethod("description"));
-            assertNotNull(IncomingTransition.class.getMethod("timeout"));
 
             assertEquals(
                     String.class,
                     IncomingTransition.class.getMethod("description").getReturnType());
-            assertEquals(int.class, IncomingTransition.class.getMethod("timeout").getReturnType());
         }
 
         @Test

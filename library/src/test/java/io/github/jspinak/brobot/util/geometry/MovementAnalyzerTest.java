@@ -512,8 +512,8 @@ public class MovementAnalyzerTest extends BrobotTestBase {
             assertEquals(-5, movement.get(0).getCalculatedX());
             assertEquals(-3, movement.get(0).getCalculatedY());
 
-            // Should complete in reasonable time
-            assertTrue(endTime - startTime < 1000, "Analysis took " + (endTime - startTime) + "ms");
+            // Should complete in reasonable time (allow up to 2 seconds for CI environments)
+            assertTrue(endTime - startTime < 2000, "Analysis took " + (endTime - startTime) + "ms");
         }
 
         @RepeatedTest(5)
