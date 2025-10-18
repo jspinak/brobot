@@ -1043,7 +1043,7 @@ Testing automation in model-based GUI automation provides:
 
 ### Implementation
 - **[AI Brobot Project Creation Guide](../01-getting-started/ai-brobot-project-creation.md)** - Complete API reference
-- **[Getting Started](../01-getting-started/)** - Hands-on tutorials
+- **[Getting Started](../01-getting-started/introduction.md)** - Hands-on tutorials
 
 ## Appendix: Mathematical Notation Quick Reference
 

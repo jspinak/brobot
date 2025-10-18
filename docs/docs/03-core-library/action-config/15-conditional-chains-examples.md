@@ -519,9 +519,9 @@ ConditionalActionChain.find(button)
 - **[API Reference](./05-reference.md)** - Complete method signatures
 
 ### Testing Documentation
-- **[Mock Mode Guide](../../../04-testing/mock-mode-guide.md)** - Testing with mocks
-- **[Integration Testing](../../../04-testing/integration-testing.md)** - End-to-end testing
-- **[Unit Testing](../../../04-testing/unit-testing.md)** - Unit test patterns
+- **[Mock Mode Guide](../../04-testing/mock-mode-guide.md)** - Testing with mocks
+- **[Integration Testing](../../04-testing/integration-testing.md)** - End-to-end testing
+- **[Unit Testing](../../04-testing/unit-testing.md)** - Unit test patterns
 
 ### Migration Resources
 - **[Upgrading to Latest](../migration/upgrading-to-latest.md)** - Complete migration guide

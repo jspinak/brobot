@@ -849,4 +849,4 @@ public class BuilderMemoryProfileTest {
 - **[ActionConfig API Reference](../../03-core-library/action-config/05-reference.md)** - Complete API documentation for all ActionConfig classes
 - **[ActionConfig Factory Guide](../configuration/action-config-factory.md)** - Enterprise patterns for configuration reuse and caching
 - **[Action Chaining](../../03-core-library/action-config/07-action-chaining.md)** - Builder chaining and action chaining patterns
-- **[Logging Performance Guide](../../../../07-logging/performance.md)** - Related performance optimization techniques
+- **[Logging Performance Guide](../../07-logging/performance.md)** - Related performance optimization techniques

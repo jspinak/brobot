@@ -561,7 +561,7 @@ brobot.logging.verbose.show-search-regions=true
 
 This will highlight search regions during execution, helping you verify your configuration.
 
-> For testing search regions in headless environments or CI/CD pipelines, see [Mock Mode Guide](../../../04-testing/mock-mode-guide.md).
+> For testing search regions in headless environments or CI/CD pipelines, see [Mock Mode Guide](../../04-testing/mock-mode-guide.md).
 
 ## Testing Search Regions
 
@@ -652,7 +652,7 @@ public class SearchRegionTest extends BrobotTestBase {
 ### Core Concepts
 - **[Declarative Region Definition](./declarative-region-definition.md)** - Define search regions relative to other objects
 - **[Screen Adaptive Regions](./screen-adaptive-regions.md)** - Build regions with Region.builder() and percentage-based positioning
-- **[States Guide](../../../01-getting-started/states.md)** - Understanding states and StateImage
+- **[States Guide](../../01-getting-started/states.md)** - Understanding states and StateImage
 
 ### Using Search Regions
 - **[ActionConfig Overview](../../03-core-library/action-config/01-overview.md)** - Using search regions with actions
@@ -660,9 +660,9 @@ public class SearchRegionTest extends BrobotTestBase {
 - **[Processes as Objects](./processes-as-objects.md)** - Complex UI process modeling with regions
 
 ### Testing
-- **[Mock Mode Guide](../../../04-testing/mock-mode-guide.md)** - Testing search regions without a real GUI
-- **[Integration Testing](../../../04-testing/integration-testing.md)** - Integration test strategies
-- **[Unit Testing Guide](../../../04-testing/unit-testing.md)** - Unit test patterns
+- **[Mock Mode Guide](../../04-testing/mock-mode-guide.md)** - Testing search regions without a real GUI
+- **[Integration Testing](../../04-testing/integration-testing.md)** - Integration test strategies
+- **[Unit Testing Guide](../../04-testing/unit-testing.md)** - Unit test patterns
 
 ### Tutorials
 - **[Claude Automator Tutorial](../../02-tutorials/tutorial-claude-automator/index.md)** - Real-world example using search regions and fixed locations

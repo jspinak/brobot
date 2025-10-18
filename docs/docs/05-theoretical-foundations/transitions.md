@@ -71,7 +71,7 @@ A transition is formally defined as a tuple:
 
 where:
 - **A** = (a¹, a², ..., aⁿ) is a process or sequence of actions executed as part of the transition
-- **S_t^def** ∈ P(S × {True, False}) is the intended state information if the transition succeeds
+- **S_t^def** ∈ P(S × `&#123;True, False&#125;`) is the intended state information if the transition succeeds
 
 **What This Means**:
 
@@ -82,15 +82,15 @@ where:
 2. **S_t^def (Defined State Information)**: Explicit knowledge about state changes
    - Examples: "activate Dashboard", "deactivate LoginPage"
    - These are the "what" - the expected state transitions
-   - Type: P(S × {True, False}) means "set of (state, boolean) pairs"
-     - (s, True) means "activate state s"
-     - (s, False) means "deactivate state s"
+   - Type: P(S × `&#123;True, False&#125;`) means "set of (state, boolean) pairs"
+     - (s, `True`) means "activate state s"
+     - (s, `False`) means "deactivate state s"
 
 **Example Transition**:
 ```
 Login Transition:
 A = [click(loginButton), type(username, "user"), type(password, "pass"), click(submit)]
-S_t^def = {(LoginPage, False), (Dashboard, True)}
+S_t^def = &#123;(LoginPage, `False`), (Dashboard, `True`)&#125;
 
 Translation: "Execute these actions, then deactivate LoginPage and activate Dashboard"
 ```
@@ -142,8 +142,8 @@ where:
 
 **Example**:
 ```
-States: S = {Login, Dashboard, Settings}
-Transitions: T = {t_login, t_logout, t_toSettings, t_fromSettings}
+States: S = &#123;Login, Dashboard, Settings&#125;
+Transitions: T = &#123;t_login, t_logout, t_toSettings, t_fromSettings&#125;
 
 Transition Relation δ:
 (Login, t_login) ∈ δ          ← Can login from Login state
@@ -152,7 +152,7 @@ Transition Relation δ:
 (Settings, t_fromSettings) ∈ δ ← Can leave Settings
 ```
 
-> **From the Paper**: "A transition is a tuple t = (A, S_t^def) comprising: A, a process or sequence of actions A = (a¹, a², ..., aⁿ) executed as part of the transition; S_t^def ∈ P(S × {True, False}), the intended state information if the transition succeeds."
+> **From the Paper**: "A transition is a tuple t = (A, S_t^def) comprising: A, a process or sequence of actions A = (a¹, a², ..., aⁿ) executed as part of the transition; S_t^def ∈ P(S × `&#123;True, False&#125;`), the intended state information if the transition succeeds."
 
 ## The Critical Role of S_t^def: Optimization Through Knowledge
 
@@ -195,7 +195,7 @@ if (findImage("settings.png") == null) {
 // Transition encodes state knowledge
 Transition toSettings = new Transition(
     actions: [click(settingsButton)],
-    S_t^def: {(Dashboard, False), (Settings, True)}
+    S_t^def: &#123;(Dashboard, `False`), (Settings, `True`)&#125;
 );
 
 // Framework automatically:
@@ -219,11 +219,11 @@ In the DoT (Dawn of Titans) application from the paper, transitions encode state
 ```
 t_goToIsland = (
     A: [click(searchButton)],
-    S_t^def: {(World, True), (Island, True)}
+    S_t^def: &#123;(World, `True`), (Island, `True`)&#125;
 )
 ```
 
-Note: Both World and Island remain active (World, True) because the World map stays visible when viewing an Island. This knowledge is **explicitly encoded** in S_t^def, so the framework knows not to deactivate World.
+Note: Both World and Island remain active (World, `True`) because the World map stays visible when viewing an Island. This knowledge is **explicitly encoded** in S_t^def, so the framework knows not to deactivate World.
 
 **Without S_t^def**: The automation would need extra actions to verify World remains visible while Island becomes active. This would add complexity and potential for error.
 
@@ -345,7 +345,7 @@ public class WorldTransitions {
 
 This code implements the transition tuple t = (A, S_t^def):
 - **A** = `goToIsland()` method (action sequence: click search button)
-- **S_t^def** = {(ISLAND, True), (WORLD, True)} (encoded via `.addToActivate("ISLAND")` and `.setStaysVisibleAfterTransition(TRUE)`)
+- **S_t^def** = `&#123;(ISLAND, True), (WORLD, True)&#125;` (encoded via `.addToActivate("ISLAND")` and `.setStaysVisibleAfterTransition(TRUE)`)
 
 The ToTransition `finishTransition()` always verifies World state images are visible, ensuring the state is properly activated.
 
@@ -364,7 +364,7 @@ public class WorldTransitions {
     private WorldState world;
 
     @OutgoingTransition(
-        activate = {IslandState.class},
+        activate = &#123;IslandState.class&#125;,
         staysVisible = true
     )
     public boolean goToIsland() {
@@ -400,11 +400,11 @@ A path is defined as ρ = (S_ρ, T_ρ) where:
 1. **s₀ ∈ S_Ξ** - First state must be currently active
 2. **sₙ = s_target** - Last state must be the target
 3. **(s_i, t_i) ∈ δ** - Each transition must be accessible from its source state
-4. **(s_{i+1}, True) ∈ S_{t_i}^def** - Each transition must activate the next state
+4. **(s<sub>i+1</sub>, `True`) ∈ S_t<sub>i</sub>^def** - Each transition must activate the next state
 
 **Example Path**:
 ```
-Active States: {Login}
+Active States: &#123;Login&#125;
 Target: Settings
 
 Valid Path:
@@ -413,9 +413,9 @@ T_ρ = [t_login, t_toSettings]
 
 Where:
 - (Login, t_login) ∈ δ ✓
-- (Dashboard, True) ∈ S_{t_login}^def ✓
+- (Dashboard, `True`) ∈ S_{t_login}^def ✓
 - (Dashboard, t_toSettings) ∈ δ ✓
-- (Settings, True) ∈ S_{t_toSettings}^def ✓
+- (Settings, `True`) ∈ S_{t_toSettings}^def ✓
 ```
 
 ### Dynamic Path Selection with Transition Failures
@@ -432,8 +432,8 @@ Initial Path: Start → [t1] → State2 → [t2] → State5 → [t3] → End
 1. Transition t1 succeeds → State2 becomes active
 2. Transition t2 **fails** → State5 not activated
 3. Framework queries State Management: "What states are active?"
-4. Answer: {Start, State2} (State2 is active, State5 is not)
-5. Framework calculates **new paths** from {Start, State2} to End
+4. Answer: `&#123;Start, State2&#125;` (State2 is active, State5 is not)
+5. Framework calculates **new paths** from `&#123;Start, State2&#125;` to End
 6. Framework selects alternative path:
    ```
    State2 → [t4] → State6 → [t5] → End
@@ -516,10 +516,10 @@ t can be executed ⟺ ∃s ∈ S_Ξ: (s, t) ∈ δ
 
 ### 5. State Activation Guarantee
 
-**Property**: If (s, True) ∈ S_t^def and transition succeeds, then s ∈ S_Ξ after transition.
+**Property**: If (s, `True`) ∈ S_t^def and transition succeeds, then s ∈ S_Ξ after transition.
 
 **Proof**:
-1. Transition succeeds → r_t.success = True
+1. Transition succeeds → r_t.success = `True`
 2. By Property 3 → S_t = S_t^def
 3. State Management applies S_t → s becomes active
 4. Therefore → s ∈ S_Ξ
@@ -815,10 +815,10 @@ class PathTraversalIntegrationTest {
 | **Transition Function** | f_τ: (A, S_t^def) → (Ξ', r_t) | Executes transition, returns result |
 | **Process Function** | f_A: (A) → (Ξ') | Executes action sequence |
 | **Transition Relation** | δ ⊆ S × T | Maps states to accessible transitions |
-| **State Information Type** | S_t^def ∈ P(S × {True, False}) | Set of (state, activate/deactivate) pairs |
+| **State Information Type** | S_t^def ∈ P(S × `&#123;True, False&#125;`) | Set of (state, activate/deactivate) pairs |
 | **Transition Result** | r_t = (success, S_t) | Contains success flag and state info |
 | **State Application** | S_t = S_t^def if success, ∅ if fail | State changes applied only on success |
-| **Path Validity** | (s_i, t_i) ∈ δ ∧ (s_{i+1}, True) ∈ S_{t_i}^def | Transition accessible and activates next state |
+| **Path Validity** | (s_i, t_i) ∈ δ ∧ (s<sub>i+1</sub>, `True`) ∈ S_t<sub>i</sub>^def | Transition accessible and activates next state |
 
 ## Comparison with Finite State Machines (FSMs)
 
@@ -827,7 +827,7 @@ Model-based GUI automation shares concepts with FSMs but has critical difference
 | Aspect | Traditional FSM | Model-Based GUI Automation |
 |--------|-----------------|---------------------------|
 | **States** | Single active state | Multiple simultaneous active states |
-| **Transitions** | State → State | State → {States} with explicit S_t^def |
+| **Transitions** | State → State | State → `{States}` with explicit S_t^def |
 | **Determinism** | Deterministic transitions | Non-deterministic (stochasticity Θ) |
 | **Observation** | Perfect state knowledge | Probabilistic pattern matching |
 | **Recovery** | No error recovery | Dynamic path recalculation |
@@ -850,7 +850,7 @@ The key innovation is **S_t^def**, which allows transitions to explicitly encode
 
 ### Practical Implementation
 - **[AI Brobot Project Creation Guide](../01-getting-started/ai-brobot-project-creation.md)** - Complete API reference
-- **[Getting Started](../01-getting-started/)** - Hands-on tutorials
+- **[Getting Started](../01-getting-started/introduction.md)** - Hands-on tutorials
 
 ## Appendix: Mathematical Notation Quick Reference
 
@@ -866,4 +866,4 @@ The key innovation is **S_t^def**, which allows transitions to explicitly encode
 - **S_ρ** = State sequence in path
 - **T_ρ** = Transition sequence in path
 - **c_T(t)** = Cost of transition t
-- **P(S × {True, False})** = Power set of (state, boolean) pairs
+- **P(S × `&#123;True, False&#125;`)** = Power set of (state, boolean) pairs

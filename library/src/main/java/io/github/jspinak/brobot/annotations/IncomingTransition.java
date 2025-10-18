@@ -43,5 +43,4 @@ public @interface IncomingTransition {
      * @return the transition description
      */
     String description() default "";
-
 }

@@ -6,9 +6,9 @@ title: 'Multi-State Transitions Guide'
 # Multi-State Transitions Developer Guide
 
 > 📖 **Prerequisites**: Before diving into multi-state patterns, ensure you understand:
-> - **[States fundamentals](../../../01-getting-started/states.md)** - What states are and how they work
-> - **[Transitions basics](../../../01-getting-started/transitions.md)** - Using @TransitionSet and @OutgoingTransition
-> - **[Pathfinding concepts](../../../01-getting-started/pathfinding.md)** - How Brobot navigates between states
+> - **[States fundamentals](../../01-getting-started/states.md)** - What states are and how they work
+> - **[Transitions basics](../../01-getting-started/transitions.md)** - Using @TransitionSet and @OutgoingTransition
+> - **[Pathfinding concepts](../../01-getting-started/pathfinding.md)** - How Brobot navigates between states
 
 ## Quick Reference
 
@@ -21,7 +21,7 @@ title: 'Multi-State Transitions Guide'
 | **Path Success** | Only next path node needs activation |
 | **IncomingTransition Execution** | ALL activated states verify arrival |
 
-> 📖 **Learn More**: [Pathfinding & Multi-State Activation](../../../01-getting-started/pathfinding.md) for detailed pathfinding behavior
+> 📖 **Learn More**: [Pathfinding & Multi-State Activation](../../01-getting-started/pathfinding.md) for detailed pathfinding behavior
 
 ### Code Patterns
 
@@ -238,7 +238,7 @@ stateNavigator.openState("Target");
 // the path only needs B to continue
 ```
 
-> 📖 **Deep Dive**: [Pathfinding & Multi-State Activation](../../../01-getting-started/pathfinding.md) for complete algorithm details
+> 📖 **Deep Dive**: [Pathfinding & Multi-State Activation](../../01-getting-started/pathfinding.md) for complete algorithm details
 
 ### Testing Multiple Paths
 
@@ -284,7 +284,7 @@ public void testMultiplePathsToTarget() {
 }
 ```
 
-> 📖 **Testing Guide**: [Testing Introduction](../../../04-testing/testing-intro.md) for comprehensive testing strategies
+> 📖 **Testing Guide**: [Testing Introduction](../../04-testing/testing-intro.md) for comprehensive testing strategies
 
 ## Verification Patterns
 
@@ -482,9 +482,9 @@ When implementing multi-state transitions:
 ## Related Documentation
 
 ### Foundational Concepts
-- **[States Guide](../../../01-getting-started/states.md)** - Understanding states and state management
-- **[Transitions Guide](../../../01-getting-started/transitions.md)** - Transition fundamentals
-- **[Pathfinding & Multi-State Activation](../../../01-getting-started/pathfinding.md)** - How pathfinding uses multi-state activation
+- **[States Guide](../../01-getting-started/states.md)** - Understanding states and state management
+- **[Transitions Guide](../../01-getting-started/transitions.md)** - Transition fundamentals
+- **[Pathfinding & Multi-State Activation](../../01-getting-started/pathfinding.md)** - How pathfinding uses multi-state activation
 
 ### Advanced Patterns
 - **[Dynamic Transitions Guide](./dynamic-transitions.md)** - Hidden states, overlays, PreviousState patterns
@@ -492,8 +492,8 @@ When implementing multi-state transitions:
 - **[Annotations Guide](./annotations.md)** - Complete @TransitionSet and @OutgoingTransition reference
 
 ### Testing
-- **[Testing Introduction](../../../04-testing/testing-intro.md)** - Testing strategy overview
-- **[Mock Mode Guide](../../../04-testing/mock-mode-guide.md)** - Testing multi-state transitions
+- **[Testing Introduction](../../04-testing/testing-intro.md)** - Testing strategy overview
+- **[Mock Mode Guide](../../04-testing/mock-mode-guide.md)** - Testing multi-state transitions
 
 ### Tutorials
 - **[Tutorial Basics](../../02-tutorials/tutorial-basics/index.md)** - Hands-on practice with multi-state patterns

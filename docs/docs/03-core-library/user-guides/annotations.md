@@ -7,7 +7,7 @@ title: 'Annotations API'
 
 Brobot provides a powerful annotation system that simplifies state and transition configuration by using declarative annotations instead of manual registration code.
 
-> 📖 **See Also**: [States Guide](../../../01-getting-started/states.md) for foundational concepts | [Transitions Guide](../../../01-getting-started/transitions.md) for transition fundamentals
+> 📖 **See Also**: [States Guide](../../01-getting-started/states.md) for foundational concepts | [Transitions Guide](../../01-getting-started/transitions.md) for transition fundamentals
 
 ## Overview
 
@@ -127,7 +127,7 @@ public class PromptTransitions {
 
 The `@State` annotation marks a class as a Brobot state and includes Spring's `@Component` for automatic discovery.
 
-> 📖 **Learn More**: [States Guide](../../../01-getting-started/states.md) explains state concepts in detail
+> 📖 **Learn More**: [States Guide](../../01-getting-started/states.md) explains state concepts in detail
 
 ### Basic Usage
 
@@ -221,7 +221,7 @@ public class HeaderState {
 
 Brobot uses a cohesive annotation pattern where each state's transitions are grouped in one class.
 
-> 📖 **Learn More**: [Transitions Guide](../../../01-getting-started/transitions.md) explains the transition model
+> 📖 **Learn More**: [Transitions Guide](../../01-getting-started/transitions.md) explains the transition model
 
 ### @TransitionSet
 
@@ -836,7 +836,7 @@ public class StateAnnotationTest extends BrobotTestBase {
 }
 ```
 
-> 📖 **See Also**: [Testing Introduction](../../../04-testing/testing-intro.md) | [Mock Mode Guide](../../../04-testing/mock-mode-guide.md) for testing strategies
+> 📖 **See Also**: [Testing Introduction](../../04-testing/testing-intro.md) | [Mock Mode Guide](../../04-testing/mock-mode-guide.md) for testing strategies
 
 ## Summary
 
@@ -859,10 +859,10 @@ By using these annotations, you can focus on your automation logic rather than f
 ## Related Documentation
 
 ### Core Concepts
-- **[States Guide](../../../01-getting-started/states.md)** - Understanding states and state management
-- **[Transitions Guide](../../../01-getting-started/transitions.md)** - Transition fundamentals and patterns
-- **[Core Concepts](../../../01-getting-started/core-concepts.md)** - Brobot architecture overview
-- **[Quick Start Guide](../../../01-getting-started/quick-start.md)** - Get started with annotations immediately
+- **[States Guide](../../01-getting-started/states.md)** - Understanding states and state management
+- **[Transitions Guide](../../01-getting-started/transitions.md)** - Transition fundamentals and patterns
+- **[Core Concepts](../../01-getting-started/core-concepts.md)** - Brobot architecture overview
+- **[Quick Start Guide](../../01-getting-started/quick-start.md)** - Get started with annotations immediately
 
 ### Advanced Features
 - **[Pathfinding and Path Costs Guide](./pathfinding-and-costs.md)** - Cost-based pathfinding configuration
@@ -870,9 +870,9 @@ By using these annotations, you can focus on your automation logic rather than f
 - **[Multi-State Transitions Guide](./multi-state-transitions-guide.md)** - Complex multi-state activation patterns
 
 ### Testing
-- **[Testing Introduction](../../../04-testing/testing-intro.md)** - Testing strategy overview
-- **[Mock Mode Guide](../../../04-testing/mock-mode-guide.md)** - Headless testing with annotations
-- **[Unit Testing Guide](../../../04-testing/unit-testing.md)** - Unit test patterns
+- **[Testing Introduction](../../04-testing/testing-intro.md)** - Testing strategy overview
+- **[Mock Mode Guide](../../04-testing/mock-mode-guide.md)** - Headless testing with annotations
+- **[Unit Testing Guide](../../04-testing/unit-testing.md)** - Unit test patterns
 
 ### Tutorials
 - **[Tutorial Basics](../../02-tutorials/tutorial-basics/index.md)** - Hands-on practice with annotations

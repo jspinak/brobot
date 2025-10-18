@@ -12,7 +12,7 @@ Brobot provides powerful patterns for creating and managing action configuration
 Before using ActionConfigFactory and ActionChainBuilder, you should be familiar with:
 - [ActionConfig Overview](../../03-core-library/action-config/01-overview.md) - Understanding the ActionConfig architecture
 - [Action Chaining](../../03-core-library/action-config/07-action-chaining.md) - Comprehensive guide to action chains
-- [States](../../../01-getting-started/states.md) - StateObjects for organizing patterns
+- [States](../../01-getting-started/states.md) - StateObjects for organizing patterns
 - [Spring Boot Integration](./auto-configuration.md) - Dependency injection patterns
 
 For hands-on examples, see [ActionConfig Examples](../../03-core-library/action-config/03-examples.md).
@@ -133,8 +133,8 @@ The `ActionChainBuilder` provides a fluent API for creating complex action seque
 ### Related Documentation
 
 - **[Combining Find Operations](../finding-objects/combining-finds.md)** - Learn about nested and confirmed find strategies
-- **[Conditional Action Chaining](../../../01-getting-started/ai-brobot-project-creation.md#conditional-action-chains)** - Advanced conditional execution patterns
-- **[AI Project Creation Guide](../../../01-getting-started/ai-brobot-project-creation.md)** - Complete guide with chaining examples
+- **[Conditional Action Chaining](../../01-getting-started/ai-brobot-project-creation.md#conditional-action-chains)** - Advanced conditional execution patterns
+- **[AI Project Creation Guide](../../01-getting-started/ai-brobot-project-creation.md)** - Complete guide with chaining examples
 
 ### Benefits
 
@@ -748,7 +748,7 @@ These patterns follow the principle of making the easy path the correct path, gu
 - **[ActionConfig Overview](../../03-core-library/action-config/01-overview.md)** - Understanding ActionConfig architecture
 - **[Action Chaining](../../03-core-library/action-config/07-action-chaining.md)** - Comprehensive guide to action chains and fluent API patterns
 - **[ActionConfig Reference](../../03-core-library/action-config/05-reference.md)** - Complete API documentation
-- **[States in Brobot](../../../01-getting-started/states.md)** - State management for automation
+- **[States in Brobot](../../01-getting-started/states.md)** - State management for automation
 
 ### Examples and Patterns
 - **[ActionConfig Examples](../../03-core-library/action-config/03-examples.md)** - Code examples and patterns
@@ -757,9 +757,9 @@ These patterns follow the principle of making the easy path the correct path, gu
 - **[Reusable Patterns](../../03-core-library/action-config/11-reusable-patterns.md)** - Creating reusable configurations
 
 ### Configuration and Testing
-- **[Auto-Configuration](../auto-configuration.md)** - Spring Boot integration
-- **[Testing Overview](../../../04-testing/testing-intro.md)** - Testing factory patterns
-- **[Mock Mode Guide](../../../04-testing/mock-mode-guide.md)** - Using factories in tests
+- **[Auto-Configuration](./auto-configuration.md)** - Spring Boot integration
+- **[Testing Overview](../../04-testing/testing-intro.md)** - Testing factory patterns
+- **[Mock Mode Guide](../../04-testing/mock-mode-guide.md)** - Using factories in tests
 
 ### Advanced Topics
 - **[Troubleshooting Chains](../../03-core-library/action-config/troubleshooting-chains.md)** - Debugging chain execution

@@ -121,7 +121,7 @@ Key academic references cited in this document:
 - **[Testing the Automation](./testing-automation.md)** - Novel testing capabilities
 
 ### Practical Implementation
-- **[Getting Started](../01-getting-started/)** - Hands-on tutorials
+- **[Getting Started](../01-getting-started/introduction.md)** - Hands-on tutorials
 - **[AI Brobot Project Creation](../01-getting-started/ai-brobot-project-creation.md)** - Complete API reference
 
 ## Academic Collaboration

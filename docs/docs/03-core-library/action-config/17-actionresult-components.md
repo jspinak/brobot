@@ -607,6 +607,6 @@ To use this in your Spring Boot application:
 - **[Conditional Chains Examples](./15-conditional-chains-examples.md)** - Practical patterns for conditional workflows
 
 ### Testing Documentation
-- **[Unit Testing Guide](../../../04-testing/unit-testing.md)** - Testing with ActionResult
-- **[Integration Testing Guide](../../../04-testing/integration-testing.md)** - Integration test patterns
-- **[Mock Mode Guide](../../../04-testing/mock-mode-guide.md)** - Mocking ActionResult for tests
+- **[Unit Testing Guide](../../04-testing/unit-testing.md)** - Testing with ActionResult
+- **[Integration Testing Guide](../../04-testing/integration-testing.md)** - Integration test patterns
+- **[Mock Mode Guide](../../04-testing/mock-mode-guide.md)** - Mocking ActionResult for tests

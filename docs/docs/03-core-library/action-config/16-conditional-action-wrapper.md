@@ -734,8 +734,8 @@ public class LoginAutomationTest {
 - **[Convenience Methods](./18-convenience-methods.md)** - Simpler one-line action API
 
 ### Testing
-- **[Mock Mode Guide](../../../04-testing/mock-mode-guide.md)** - Testing with mocks
-- **[Integration Testing](../../../04-testing/integration-testing.md)** - Spring Boot testing patterns
+- **[Mock Mode Guide](../../04-testing/mock-mode-guide.md)** - Testing with mocks
+- **[Integration Testing](../../04-testing/integration-testing.md)** - Spring Boot testing patterns
 
 ## Summary
 

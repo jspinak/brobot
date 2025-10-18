@@ -758,7 +758,7 @@ brobot:
 - **[Configuration Properties Reference](../configuration/properties-reference.md#startup-configuration)** - All available properties
 - **[Auto-Configuration Guide](../configuration/auto-configuration.md)** - Other auto-configuration features
 - **[States Overview](../../01-getting-started/states.md)** - Introduction to state management
-- **[Testing Initial States](../../04-testing/integration-testing.md#initial-state-testing)** - Testing strategies
+- **[Testing Initial States](../../04-testing/integration-testing.md#state-object-initialization)** - Testing strategies
 
 ## Summary
 

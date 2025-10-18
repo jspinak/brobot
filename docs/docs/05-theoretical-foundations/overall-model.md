@@ -116,7 +116,7 @@ The action function is defined as:
 
 From these action results, state information is derived by the function:
 
-**S_a: r_a → P(S × {True, False})**
+**S_a: r_a → P(S × \{True, False\})**
 
 This function maps action results to a set of (state, boolean) pairs indicating which states should be activated (True) or deactivated (False).
 
@@ -150,7 +150,7 @@ The state management function processes updates from actions or transitions:
 
 The State Management system (M) maintains an explicit set of active states (S_Ξ), enabling:
 
-- **Handling Multiple Active States:** The system can reason holistically about combinations like {StateA, StateB} as a coherent "world view," finding transitions available from *any* of the currently active states.
+- **Handling Multiple Active States:** The system can reason holistically about combinations like \{StateA, StateB\} as a coherent "world view," finding transitions available from *any* of the currently active states.
 
 - **Recovering from Unexpected Events:** When environmental stochasticity (Θ) causes unexpected state changes, M adjusts the active states using results from transitions and actions, giving the system an accurate understanding of its current context for recovery.
 
@@ -166,7 +166,7 @@ The State Management system acts as the reliable "You Are Here" marker on the ma
 
 A transition is a **tuple t = (A, S_t^def)** comprising:
 - **A = (a¹, a², ..., aⁿ)**: a process or sequence of actions executed as part of the transition
-- **S_t^def ∈ P(S × {True, False})**: the intended state information if the transition succeeds
+- **S_t^def ∈ P(S × \{True, False\})**: the intended state information if the transition succeeds
 
 The transition function is defined as:
 
@@ -205,7 +205,7 @@ Within the Path Traversal Model, a path is defined as a **tuple ρ = (S_ρ, T_ρ
 - **T_ρ = [t₀, t₁, ..., tₙ₋₁]**: the sequence of transitions, where:
   - **t_i ∈ T** (each transition is in the set of all transitions)
   - **(s_i, t_i) ∈ δ** (each transition is accessible from its begin state)
-  - **(s_{i+1}, True) ∈ S_t_i^def** (the transition's end state is activated if the transition succeeds)
+  - **(s_\{i+1\}, True) ∈ S_t_i^def** (the transition's end state is activated if the transition succeeds)
 
 Path traversal is a **tuple § = (Ω, S_Ξ, s_target, H)** comprising:
 - **Ω**: the State Structure
@@ -225,13 +225,13 @@ The **path traversal function** is:
 
 where Ξ' is the resulting GUI after path execution attempts.
 
-The function f_§ internally uses f_pathfind to determine possible paths P(ρ), applies the heuristic H to select an optimal path, and then executes the selected path. During execution, each transition t_i for i > 0 executes only if t_{i-1} is successful.
+The function f_§ internally uses f_pathfind to determine possible paths P(ρ), applies the heuristic H to select an optimal path, and then executes the selected path. During execution, each transition t_i for i > 0 executes only if t_\{i-1\} is successful.
 
 **Path Cost** depends on individual state and transition costs:
 - State Cost Function: **c_S : S → ℝ** assigns a cost to each state
 - Transition Cost Function: **c_T : T → ℝ** assigns a cost to each transition
-- Path Cost: **c(ρ) = Σ_{i=0}^{n-1}[c_T(t_i) + c_S(s_{i+1})]**
-- Path Selection: **ρ* = arg min_{ρ ∈ P} [ c(ρ) ]**
+- Path Cost: **c(ρ) = Σ_\{i=0\}^\{n-1\}[c_T(t_i) + c_S(s_\{i+1\})]**
+- Path Selection: **ρ* = arg min_\{ρ ∈ P\} [ c(ρ) ]**
 
 **Implementation:** `PathFinder.java` (pathfinding), `PathTraverser.java` (execution), `Path.java`, `PathManager.java`
 
@@ -264,7 +264,7 @@ When you call `stateNavigator.openState("Dashboard")`:
    - Actions detect the popup through visual comparison with Ξ
    - S_a indicates the popup state is active
    - M updates S_Ξ to include the popup state
-   - Path Traversal (§) checks if transitions exist from {Dashboard, Popup}
+   - Path Traversal (§) checks if transitions exist from \{Dashboard, Popup\}
    - If a "close popup" transition exists, it's executed
    - Process resumes navigation to Dashboard
 
@@ -345,7 +345,7 @@ This represents a shift from a practically impossible task to a well-defined and
 - **[Testing the Automation](./testing-automation.md)** - Novel testing capabilities enabled by the model
 
 ### Practical Implementation
-- **[Getting Started](../01-getting-started/)** - Hands-on tutorials for building Brobot applications
+- **[Getting Started](../01-getting-started/introduction.md)** - Hands-on tutorials for building Brobot applications
 - **[AI Brobot Project Creation](../01-getting-started/ai-brobot-project-creation.md)** - Complete API reference and implementation patterns
 
 ---

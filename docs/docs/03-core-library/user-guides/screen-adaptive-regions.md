@@ -23,7 +23,7 @@ The `RegionBuilder` class provides a fluent API for creating regions with precis
 
 - **[Search Regions and Fixed Locations](./search-regions-and-fixed-locations.md)** - Understand search regions vs fixed locations
 - **[Declarative Region Definition](./declarative-region-definition.md)** - Define regions relative to other objects
-- **[States Guide](../../../01-getting-started/states.md)** - Integrating regions in state definitions
+- **[States Guide](../../01-getting-started/states.md)** - Integrating regions in state definitions
 - **[ActionConfig Overview](../../03-core-library/action-config/01-overview.md)** - Using regions with actions
 
 ## Basic Usage
@@ -482,7 +482,7 @@ assert flexible.getW() > 0 && flexible.getH() > 0;
 
 RegionBuilder-created regions work seamlessly with Brobot's Action API for clicking, typing, and pattern matching. For complete Action API documentation, see [ActionConfig Overview](../../03-core-library/action-config/01-overview.md) and [ActionConfig Examples](../../03-core-library/action-config/03-examples.md).
 
-For more on States and the `@State` annotation, see [States Guide](../../../01-getting-started/states.md) and [Annotations Reference](./annotations.md).
+For more on States and the `@State` annotation, see [States Guide](../../01-getting-started/states.md) and [Annotations Reference](./annotations.md).
 
 ### Using RegionBuilder in State Definitions
 
@@ -661,6 +661,6 @@ Use RegionBuilder to create robust, screen-adaptive automation that works consis
 
 - **[Search Regions and Fixed Locations](./search-regions-and-fixed-locations.md)** - Learn how regions are used for pattern matching
 - **[Declarative Region Definition](./declarative-region-definition.md)** - Define regions dynamically relative to other objects
-- **[States Guide](../../../01-getting-started/states.md)** - Integrate regions into state-based automation
-- **[Quick Start Guide](../../../01-getting-started/quick-start.md)** - Get started with Brobot
+- **[States Guide](../../01-getting-started/states.md)** - Integrate regions into state-based automation
+- **[Quick Start Guide](../../01-getting-started/quick-start.md)** - Get started with Brobot
 - **[ActionConfig Examples](../../03-core-library/action-config/03-examples.md)** - Use regions with actions

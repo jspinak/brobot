@@ -284,7 +284,7 @@ public class ScheduledAutomationService {
 
 ## Integration with StateNavigator
 
-The `AutomationRunner` works seamlessly with Brobot's [`StateNavigator`](../../01-getting-started/pathfinding.md):
+The `AutomationRunner` works seamlessly with Brobot's [`StateNavigator`](../01-getting-started/pathfinding.md):
 
 ```java
 import io.github.jspinak.brobot.automation.AutomationRunner;
@@ -526,17 +526,17 @@ public class NewAutomation {
 - **[Headless Configuration](./configuration/headless-configuration.md)** - Running automation in headless environments
 
 ### Navigation & State Management
-- **[Pathfinding & Multi-State Activation](../../01-getting-started/pathfinding.md)** - How StateNavigator works with AutomationRunner
-- **[Quick Start Guide](../../01-getting-started/quick-start.md)** - Basic Spring Boot setup with automation
+- **[Pathfinding & Multi-State Activation](../01-getting-started/pathfinding.md)** - How StateNavigator works with AutomationRunner
+- **[Quick Start Guide](../01-getting-started/quick-start.md)** - Basic Spring Boot setup with automation
 
 ### Testing & Reliability
-- **[Testing Introduction](../../04-testing/testing-intro.md)** - Testing strategies for automation
-- **[Integration Testing](../../04-testing/integration-testing.md)** - End-to-end workflow testing
-- **[CI/CD Testing](../../04-testing/advanced/ci-cd-testing.md)** - Continuous integration best practices
+- **[Testing Introduction](../04-testing/testing-intro.md)** - Testing strategies for automation
+- **[Integration Testing](../04-testing/integration-testing.md)** - End-to-end workflow testing
+- **[CI/CD Testing](../04-testing/advanced/ci-cd-testing.md)** - Continuous integration best practices
 
 ### Getting Started
-- **[AI Brobot Project Creation](../../01-getting-started/ai-brobot-project-creation.md)** - Complete project setup guide
-- **[Project File Structure](../../01-getting-started/file-structure.md)** - Organizing your automation project
+- **[AI Brobot Project Creation](../01-getting-started/ai-brobot-project-creation.md)** - Complete project setup guide
+- **[Project File Structure](../01-getting-started/file-structure.md)** - Organizing your automation project
 
 ### Advanced Topics
 - **[AspectJ Usage Guide](./advanced/aspectj-usage-guide.md)** - Error recovery aspects and patterns

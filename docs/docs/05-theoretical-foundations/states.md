@@ -128,29 +128,29 @@ Mathematical verification:
 
 1. **Initial State**: LoginPage
    - **Screen shows**: Login form with username/password fields
-   - E_Ξ = {loginButton, usernameField, passwordField}
-   - LoginState ∩ E_Ξ = {loginButton, usernameField, passwordField} ≠ ∅
-   - **S_Ξ = {LoginState}** ✓
+   - E_Ξ = `{loginButton, usernameField, passwordField}`
+   - LoginState ∩ E_Ξ = `{loginButton, usernameField, passwordField}` ≠ ∅
+   - **S_Ξ = `{LoginState}`** ✓
 
 2. **After Login Transition**: Dashboard appears
    - **Screen shows**: Dashboard with logo, menu, user profile
-   - E_Ξ = {dashboardLogo, menuBar, userProfile}
-   - DashboardState ∩ E_Ξ = {dashboardLogo, menuBar, userProfile} ≠ ∅
+   - E_Ξ = `{dashboardLogo, menuBar, userProfile}`
+   - DashboardState ∩ E_Ξ = `{dashboardLogo, menuBar, userProfile}` ≠ ∅
    - LoginState ∩ E_Ξ = ∅ (login elements no longer visible)
-   - **S_Ξ = {DashboardState}** ✓
+   - **S_Ξ = `{DashboardState}`** ✓
 
 3. **Popup Appears**: Error dialog overlays dashboard
    - **Screen shows**: Error popup over partially visible dashboard
-   - E_Ξ = {dashboardLogo, errorIcon, closeButton} (dashboard partially visible)
-   - DashboardState ∩ E_Ξ = {dashboardLogo} ≠ ∅ (still active!)
-   - ErrorPopupState ∩ E_Ξ = {errorIcon, closeButton} ≠ ∅ (now active!)
-   - **S_Ξ = {DashboardState, ErrorPopupState}** ✓ (both active simultaneously)
+   - E_Ξ = `{dashboardLogo, errorIcon, closeButton}` (dashboard partially visible)
+   - DashboardState ∩ E_Ξ = `{dashboardLogo}` ≠ ∅ (still active!)
+   - ErrorPopupState ∩ E_Ξ = `{errorIcon, closeButton}` ≠ ∅ (now active!)
+   - **S_Ξ = `{DashboardState, ErrorPopupState}`** ✓ (both active simultaneously)
 
 4. **Close Popup**: Transition deactivates popup
    - **Screen shows**: Full dashboard (popup closed)
    - Transition explicitly marks ErrorPopupState as inactive
-   - E_Ξ = {dashboardLogo, menuBar, userProfile}
-   - **S_Ξ = {DashboardState}** ✓
+   - E_Ξ = `{dashboardLogo, menuBar, userProfile}`
+   - **S_Ξ = `{DashboardState}`** ✓
 
 **Key Insight**: The activation condition s ∈ S_Ξ ⟺ s ∩ E_Ξ ≠ ∅ automatically handles step 3 where two states are active. The framework doesn't need special logic for overlays—the mathematical model naturally supports compositional GUIs.
 
@@ -162,9 +162,9 @@ Mathematical verification:
 
 When an observation action (like `action.find()`) successfully locates an element, the element's parent state is marked as active.
 
-**Formal**: ∀ e ∈ E_found : (s_e, True) ∈ S_a
+**Formal**: ∀ e ∈ E_found : (s_e, `True`) ∈ S_a
 
-This means: "For every element found, add its state to the state information with value True."
+This means: "For every element found, add its state to the state information with value `True`."
 
 **Example**:
 ```java
@@ -203,9 +203,9 @@ public void addActiveState(Long activeState) {
 
 **Brobot's Solution**: States are deactivated **explicitly through transitions**, which provides more reliable state management:
 
-**Formal**: ∀ e ∈ E_a \ E_found : (s_e, False) ∉ S_a
+**Formal**: ∀ e ∈ E_a \ E_found : (s_e, `False`) ∉ S_a
 
-This means: "For elements not found, do NOT add their states to S_a with value False." Only transitions can deactivate.
+This means: "For elements not found, do NOT add their states to S_a with value `False`." Only transitions can deactivate.
 
 **State Management Function** (from Paper Section 6.2):
 
@@ -216,7 +216,7 @@ f_M(S_Ξ, S_a, S_t) = (S_Ξ ∪ {s ∈ S | (s, True) ∈ S_a ∪ S_t}) \ {s ∈ 
 where:
 1. States are added to S_Ξ when marked active in either S_a or S_t
 2. States are only removed from S_Ξ when explicitly marked inactive in S_t (transition-based updates)
-3. No state is removed based solely on action results (S_a never contains pairs with False)
+3. No state is removed based solely on action results (S_a never contains pairs with `False`)
 
 **Example**:
 ```java
@@ -246,12 +246,12 @@ Given the state structure Ω = (E, S, T), the following formal properties hold:
 1. **State-Element Relationship**: Each state is a subset of elements
    - **∀s ∈ S: s ⊆ E**
    - Consequence: A state cannot contain elements not in E
-   - Example: If E = {logo, button, field}, then s = {logo, button} is valid, but s = {logo, unknownElement} is invalid
+   - Example: If E = &#123;logo, button, field&#125;, then s = &#123;logo, button&#125; is valid, but s = &#123;logo, unknownElement&#125; is invalid
 
 2. **Power Set Constraint**: States form a subset of the power set of E
    - **S ⊆ P(E)** where P(E) is the power set of E
    - This means: not every possible subset of E needs to be a state
-   - Example: With E = {e₁, e₂, e₃}, we have 8 possible subsets, but might only define 3 as states
+   - Example: With E = &#123;e₁, e₂, e₃&#125;, we have 8 possible subsets, but might only define 3 as states
 
 3. **Simultaneous Active States**: Multiple states may be active at once
    - **S_Ξ ⊆ S** where |S_Ξ| ≥ 0
@@ -349,7 +349,7 @@ private State loginState = new State.Builder(Name.LOGIN)
 
 The Java code above defines a state in Brobot. In terms of our formal model:
 
-- **E_home = {toWorldButton}**: The element set for the Home state
+- **E_home = `{toWorldButton}`**: The element set for the Home state
 - **s_home = E_home ⊆ E**: The HOME state is this subset of the global element set E
 - **Activation**: s_home ∈ S_Ξ ⟺ toWorldButton ∈ E_Ξ
 
@@ -360,7 +360,7 @@ When Brobot's visual search successfully finds the `toWorldButton` pattern on sc
 1. Screen capture → Ξ (pixel output)
 2. Pattern matching → f(Ξ) extracts visible elements → E_Ξ
 3. Element found → toWorldButton ∈ E_Ξ
-4. Activation condition → s_home ∩ E_Ξ = {toWorldButton} ≠ ∅
+4. Activation condition → s_home ∩ E_Ξ = `{toWorldButton}` ≠ ∅
 5. State becomes active → s_home ∈ S_Ξ
 ```
 
@@ -551,8 +551,8 @@ You're experiencing all of these simultaneously—model-based GUI automation ref
 
 This allows S_Ξ to contain:
 - Zero states: S_Ξ = ∅ (no states active—rare, usually startup)
-- One state: S_Ξ = {DashboardState}
-- Multiple states: S_Ξ = {DashboardState, ErrorPopupState, LoadingState}
+- One state: S_Ξ = `{DashboardState}`
+- Multiple states: S_Ξ = `{DashboardState, ErrorPopupState, LoadingState}`
 
 **Cardinality Bounds**:
 - Minimum: |S_Ξ| = 0 (empty set)
@@ -678,7 +678,7 @@ Remember: **Multiple states can be active**, so popups are additional active sta
 - **[Testing the Automation](./testing-automation.md)** - Testing states independently using mock mode
 
 ### Practical Implementation
-- **[Getting Started](../01-getting-started/)** - Hands-on tutorials for creating states in Brobot applications
+- **[Getting Started](../01-getting-started/introduction.md)** - Hands-on tutorials for creating states in Brobot applications
 - **[AI Brobot Project Creation](../01-getting-started/ai-brobot-project-creation.md)** - Complete API reference for State and StateImage classes
 
 ### Source Code References
@@ -695,13 +695,13 @@ For quick reference, key symbols used in this document:
 | Symbol | Definition | Description |
 |--------|------------|-------------|
 | **Ω** | State Structure | Tuple (E, S, T) |
-| **E** | Element Set | {e₁, e₂, ..., eₙ} all GUI elements |
+| **E** | Element Set | &#123;e₁, e₂, ..., eₙ&#125; all GUI elements |
 | **S** | State Set | All possible GUI states |
 | **T** | Transition Set | All transitions between states |
 | **Ξ** | Visible GUI | Current screen pixel output |
 | **f(Ξ)** | Element Extraction | Function extracting visible elements from screen |
 | **E_Ξ** | Visible Elements | f(Ξ) ⊆ E, elements currently on screen |
-| **S_Ξ** | Active States | {s ∈ S \| s ∩ E_Ξ ≠ ∅}, currently active states |
+| **S_Ξ** | Active States | &#123;s ∈ S \| s ∩ E_Ξ ≠ ∅&#125;, currently active states |
 | **s ⊆ E** | State Definition | Each state is a subset of elements |
 | **s ∩ E_Ξ ≠ ∅** | Activation Condition | State is active iff it has visible elements |
 | **M** | State Management | System that maintains S_Ξ |
@@ -713,7 +713,7 @@ For quick reference, key symbols used in this document:
 ### Key Theorems and Properties
 
 1. **Activation Theorem**: s ∈ S_Ξ ⟺ s ∩ E_Ξ ≠ ∅
-2. **Active States Set**: S_Ξ = {s ∈ S | s ∩ E_Ξ ≠ ∅}
+2. **Active States Set**: S_Ξ = &#123;s ∈ S | s ∩ E_Ξ ≠ ∅&#125;
 3. **State-Element Relationship**: ∀s ∈ S: s ⊆ E
 4. **Power Set Constraint**: S ⊆ P(E)
 5. **State Management**: f_M: (S_Ξ, S_a, S_t) → S'_Ξ

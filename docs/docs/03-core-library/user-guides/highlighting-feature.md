@@ -8,9 +8,9 @@ Brobot provides visual feedback capabilities to help with debugging and monitori
 ## Prerequisites
 
 Before using visual feedback features, ensure you understand:
-- [States and StateImage](../../../01-getting-started/states.md) - How to define UI elements
+- [States and StateImage](../../01-getting-started/states.md) - How to define UI elements
 - [Actions](../../03-core-library/action-config/01-overview.md) - How to perform operations on elements
-- [Testing](../../../04-testing/testing-intro.md) - How to test automation scripts
+- [Testing](../../04-testing/testing-intro.md) - How to test automation scripts
 
 ## Current Implementation Status
 
@@ -250,9 +250,9 @@ public class HighlightingTest extends BrobotTestBase {
 ```
 
 For more testing patterns, see:
-- [Testing Introduction](../../../04-testing/testing-intro.md)
-- [Unit Testing Guide](../../../04-testing/unit-testing.md)
-- [Mock Mode Guide](../../../04-testing/mock-mode-guide.md)
+- [Testing Introduction](../../04-testing/testing-intro.md)
+- [Unit Testing Guide](../../04-testing/unit-testing.md)
+- [Mock Mode Guide](../../04-testing/mock-mode-guide.md)
 
 ## How It Works
 
@@ -295,7 +295,7 @@ Highlighting works in both live and mock modes:
 // - Useful for debugging and demonstrations
 ```
 
-For mock mode details, see [Mock Mode Guide](../../../04-testing/mock-mode-guide.md).
+For mock mode details, see [Mock Mode Guide](../../04-testing/mock-mode-guide.md).
 
 ## Environment-Specific Configuration
 
@@ -353,7 +353,7 @@ brobot.aspects.visual-feedback.enabled=false
 
 **Issue**: Tests fail with AWT/graphics exceptions
 
-**Solution**: Extend `BrobotTestBase` which automatically enables mock mode. See [Testing Guide](../../../04-testing/testing-intro.md).
+**Solution**: Extend `BrobotTestBase` which automatically enables mock mode. See [Testing Guide](../../04-testing/testing-intro.md).
 
 ### Console Output
 
@@ -401,7 +401,7 @@ If you need advanced highlighting features:
 ## Related Documentation
 
 ### Core Concepts
-- [States](../../../01-getting-started/states.md) - Define UI elements to highlight
+- [States](../../01-getting-started/states.md) - Define UI elements to highlight
 - [Actions](../../03-core-library/action-config/01-overview.md) - Perform operations with highlighting
 - [Action Convenience Methods](../../03-core-library/action-config/18-convenience-methods.md) - Includes `action.highlight()`
 
@@ -410,8 +410,8 @@ If you need advanced highlighting features:
 - [BrobotProperties Usage](../../03-core-library/configuration/brobot-properties-usage.md) - Access properties in code
 
 ### Testing and Debugging
-- [Testing Introduction](../../../04-testing/testing-intro.md) - Test framework overview
-- [Mock Mode Guide](../../../04-testing/mock-mode-guide.md) - Headless testing
+- [Testing Introduction](../../04-testing/testing-intro.md) - Test framework overview
+- [Mock Mode Guide](../../04-testing/mock-mode-guide.md) - Headless testing
 - [Image Find Debugging](../../03-core-library/tools/image-find-debugging.md) - Comprehensive debugging system
 
 ### Advanced Topics

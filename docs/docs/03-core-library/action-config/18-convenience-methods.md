@@ -731,6 +731,6 @@ These methods make Brobot more accessible to new users while maintaining the pow
 - **[Conditional Actions](./09-conditional-actions.md)** - Conditional execution patterns
 
 ### Testing
-- **[Unit Testing](../../../04-testing/unit-testing.md)** - Testing code that uses convenience methods
-- **[Integration Testing](../../../04-testing/integration-testing.md)** - End-to-end testing patterns
-- **[Mock Mode](../../../04-testing/mock-mode-guide.md)** - Testing with Brobot's mock framework
+- **[Unit Testing](../../04-testing/unit-testing.md)** - Testing code that uses convenience methods
+- **[Integration Testing](../../04-testing/integration-testing.md)** - End-to-end testing patterns
+- **[Mock Mode](../../04-testing/mock-mode-guide.md)** - Testing with Brobot's mock framework

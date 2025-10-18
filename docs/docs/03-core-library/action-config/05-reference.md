@@ -25,7 +25,7 @@ Complete reference for all ActionConfig classes and their methods.
 - [VanishOptions](#vanishoptions) - Wait for disappearance
 - [FixedPixelsFindOptions](#fixedpixelsfindoptions) - Static pixel detection
 - [DynamicPixelsFindOptions](#dynamicpixelsfindoptions) - Animated pixel detection
-- [SimilarImagesFindOptions](#similarimagefindoptions) - Image similarity comparison
+- [SimilarImagesFindOptions](#similarimagesfindoptions) - Image similarity comparison
 
 **Click & Mouse Operations**:
 - [ClickOptions](#clickoptions) - Mouse clicks with verification
@@ -44,7 +44,7 @@ Complete reference for all ActionConfig classes and their methods.
 - [NestedFindsOptions](#nestedfindsoptions) - Nested find operations
 
 **Visual Operations**:
-- [DefineRegionOptions](#definereginoptions) - Define screen regions
+- [DefineRegionOptions](#defineregionoptions) - Define screen regions
 - [HighlightOptions](#highlightoptions) - Visual highlighting
 
 **Supporting Classes** (not ActionConfig):

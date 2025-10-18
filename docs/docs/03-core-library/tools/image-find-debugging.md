@@ -478,7 +478,7 @@ stage('Test with Debug') {
 
 ### Programmatic Access
 
-Complete example showing session management. For more information on StateImage and state components, see the [States Guide](../../../01-getting-started/states.md#state-components-and-direct-access).
+Complete example showing session management. For more information on StateImage and state components, see the [States Guide](../../01-getting-started/states.md#state-components-and-direct-access).
 
 ```java
 package com.example.brobot.debugging;

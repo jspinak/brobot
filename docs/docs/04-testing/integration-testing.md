@@ -779,38 +779,38 @@ protected double getTimeoutMultiplier() {
 - **[Fail-Safe Image Loading](fail-safe-image-loading.md)** - Robust image loading
 
 ### Configuration
-- **[BrobotProperties Usage](../../03-core-library/configuration/brobot-properties-usage.md)** - Complete configuration guide
-- **[Properties Reference](../../03-core-library/configuration/properties-reference.md)** - All available properties
-- **[Auto-Configuration](../../03-core-library/configuration/auto-configuration.md)** - How Brobot auto-configures
-- **[Headless Configuration](../../03-core-library/configuration/headless-configuration.md)** - Running without display
-- **[Action Config Factory](../../03-core-library/configuration/action-config-factory.md)** - Reusable action configurations
+- **[BrobotProperties Usage](../03-core-library/configuration/brobot-properties-usage.md)** - Complete configuration guide
+- **[Properties Reference](../03-core-library/configuration/properties-reference.md)** - All available properties
+- **[Auto-Configuration](../03-core-library/configuration/auto-configuration.md)** - How Brobot auto-configures
+- **[Headless Configuration](../03-core-library/configuration/headless-configuration.md)** - Running without display
+- **[Action Config Factory](../03-core-library/configuration/action-config-factory.md)** - Reusable action configurations
 
 ### ActionConfig
-- **[ActionConfig Overview](../../03-core-library/action-config/01-overview.md)** - Introduction to ActionConfig system
-- **[ActionConfig Examples](../../03-core-library/action-config/03-examples.md)** - Practical examples
-- **[ActionConfig Reference](../../03-core-library/action-config/05-reference.md)** - Detailed API documentation
-- **[Action Chaining](../../03-core-library/action-config/07-action-chaining.md)** - Chaining actions with .then()
-- **[Complex Workflows](../../03-core-library/action-config/08-complex-workflows.md)** - Multi-step automation
-- **[Conditional Actions](../../03-core-library/action-config/09-conditional-actions.md)** - Conditional execution
-- **[Convenience Methods](../../03-core-library/action-config/18-convenience-methods.md)** - Simple action methods
-- **[ActionResult Components](../../03-core-library/action-config/17-actionresult-components.md)** - Processing results
+- **[ActionConfig Overview](../03-core-library/action-config/01-overview.md)** - Introduction to ActionConfig system
+- **[ActionConfig Examples](../03-core-library/action-config/03-examples.md)** - Practical examples
+- **[ActionConfig Reference](../03-core-library/action-config/05-reference.md)** - Detailed API documentation
+- **[Action Chaining](../03-core-library/action-config/07-action-chaining.md)** - Chaining actions with .then()
+- **[Complex Workflows](../03-core-library/action-config/08-complex-workflows.md)** - Multi-step automation
+- **[Conditional Actions](../03-core-library/action-config/09-conditional-actions.md)** - Conditional execution
+- **[Convenience Methods](../03-core-library/action-config/18-convenience-methods.md)** - Simple action methods
+- **[ActionResult Components](../03-core-library/action-config/17-actionresult-components.md)** - Processing results
 
 ### State Management
-- **[States Overview](../../01-getting-started/states.md)** - Introduction to state management
-- **[State Transitions](../../01-getting-started/transitions.md)** - How transitions work
-- **[Annotations Guide](../../03-core-library/user-guides/annotations.md)** - @State, @Transition usage
-- **[Dynamic Transitions](../../03-core-library/user-guides/dynamic-transitions.md)** - Runtime transitions
+- **[States Overview](../01-getting-started/states.md)** - Introduction to state management
+- **[State Transitions](../01-getting-started/transitions.md)** - How transitions work
+- **[Annotations Guide](../03-core-library/user-guides/annotations.md)** - @State, @Transition usage
+- **[Dynamic Transitions](../03-core-library/user-guides/dynamic-transitions.md)** - Runtime transitions
 
 ### Logging
-- **[Logging Overview](../../07-logging/index.md)** - Introduction to logging system
-- **[Logging Configuration](../../07-logging/configuration.md)** - Configuring logging behavior
-- **[Logging Usage](../../07-logging/usage.md)** - How to use loggers
+- **[Logging Overview](../07-logging/index.md)** - Introduction to logging system
+- **[Logging Configuration](../07-logging/configuration.md)** - Configuring logging behavior
+- **[Logging Usage](../07-logging/usage.md)** - How to use loggers
 
 ### Getting Started
-- **[Quick Start Guide](../../01-getting-started/quick-start.md)** - Getting started with Brobot
-- **[AI Brobot Project Creation](../../01-getting-started/ai-brobot-project-creation.md)** - Complete API reference
-- **[Core Concepts](../../01-getting-started/core-concepts.md)** - Fundamental concepts
-- **[Action Hierarchy](../../01-getting-started/action-hierarchy.md)** - Understanding actions
+- **[Quick Start Guide](../01-getting-started/quick-start.md)** - Getting started with Brobot
+- **[AI Brobot Project Creation](../01-getting-started/ai-brobot-project-creation.md)** - Complete API reference
+- **[Core Concepts](../01-getting-started/core-concepts.md)** - Fundamental concepts
+- **[Action Hierarchy](../01-getting-started/action-hierarchy.md)** - Understanding actions
 
 ## Best Practices
 

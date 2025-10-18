@@ -223,7 +223,7 @@ ActionChainOptions chain = new ActionChainOptions.Builder(
 :::warning No Backward Compatibility
 These classes were **completely removed** with no compatibility layer. Code using `MultipleActionsObject`, `ActionResultCombo`, or `ActionParameters` will not compile in Brobot 1.1.0+.
 
-For migration guidance, see the [Migration Guide](./migration-guide).
+For migration guidance, see the [Migration Guide](../migration/upgrading-to-latest).
 :::
 
 ## Critical Insight: Object Type Preservation in Chains

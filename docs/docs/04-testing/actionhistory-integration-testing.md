@@ -664,7 +664,7 @@ logging:
 
 ## Migration from Legacy API
 
-If you have existing tests using `ActionOptions`, see the [ActionHistory Migration Guide](../03-core-library/migration/actionhistory-migration-guide.md) for detailed migration instructions.
+If you have existing tests using `ActionOptions`, see the [Migration Guide](../03-core-library/migration/upgrading-to-latest.md) for detailed migration instructions.
 
 ## Related Documentation
 
@@ -686,4 +686,4 @@ If you have existing tests using `ActionOptions`, see the [ActionHistory Migrati
 
 ### Configuration
 - **[Properties Reference](../03-core-library/configuration/properties-reference.md)** - Complete configuration properties
-- **[Brobot Properties Usage](../03-core-library/configuration/brobot-properties-usage.md)** - Using BrobotProperties in code
+- **[BrobotProperties Usage](../03-core-library/configuration/brobot-properties-usage.md)** - Using BrobotProperties in code

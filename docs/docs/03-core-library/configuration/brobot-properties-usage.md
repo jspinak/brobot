@@ -482,9 +482,9 @@ Spring Boot loads properties in this order (highest priority first):
 2. **Command line arguments**: `--brobot.core.mock=true`
 3. **Java system properties**: `-Dbrobot.core.mock=true`
 4. **OS environment variables**: `BROBOT_CORE_MOCK=true`
-5. **application-{profile}.properties** for active profiles
+5. **`application-{profile}.properties`** for active profiles
 6. **application.properties** in your project
-7. **brobot-{profile}-defaults.properties** from Brobot library
+7. **`brobot-{profile}-defaults.properties`** from Brobot library
 8. **brobot-defaults.properties** from Brobot library (lowest priority)
 
 **Example of precedence**:
@@ -504,7 +504,7 @@ brobot.mouse.move-delay=0.01  # Overrides everything
 
 **Result**: In this scenario, tests use `0.01`, dev environment uses `0.1`, production uses `0.3`.
 
-> **Learn More**: See [Auto-Configuration Guide](auto-configuration.md#configuration-layers) for detailed explanation of property loading
+> **Learn More**: See [Auto-Configuration Guide](auto-configuration.md#auto-configuration-architecture) for detailed explanation of property loading
 
 ### Property Validation
 

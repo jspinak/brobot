@@ -475,5 +475,5 @@ To use this in your application:
 
 - See [Action Chaining Guide](./07-action-chaining.md) for detailed documentation
 - Review [Conditional Action Chains](./15-conditional-chains-examples.md) for advanced patterns
-- Check [Integration Tests](../../../04-testing/integration-testing.md) for working examples
+- Check [Integration Tests](../../04-testing/integration-testing.md) for working examples
 - Consult the [API Reference](./05-reference.md) for all options

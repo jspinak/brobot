@@ -1145,7 +1145,7 @@ By defining regions declaratively, you create more robust automation that adapts
 ## Related Documentation
 
 ### Core Concepts
-- **[States Guide](../../../01-getting-started/states.md)** - Understanding states and the @State annotation
+- **[States Guide](../../01-getting-started/states.md)** - Understanding states and the @State annotation
 - **[State-Aware Scheduling](./state-aware-scheduling.md)** - Scheduling with automatic state validation
 - **[Search Regions and Fixed Locations](./search-regions-and-fixed-locations.md)** - Search region fundamentals
 
@@ -1158,7 +1158,7 @@ By defining regions declaratively, you create more robust automation that adapts
 - **[ActionConfig Examples](../../03-core-library/action-config/03-examples.md)** - Practical action examples
 
 ### Testing
-- **[Mock Mode Guide](../../../04-testing/mock-mode-guide.md)** - Testing with ActionHistory and mock data
+- **[Mock Mode Guide](../../04-testing/mock-mode-guide.md)** - Testing with ActionHistory and mock data
 
 ### Tutorials
 - **[Claude Automator Tutorial](../../02-tutorials/tutorial-claude-automator/automation.md)** - Real-world declarative region example

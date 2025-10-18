@@ -135,8 +135,8 @@ public @interface State {
      * <p><b>Example use case:</b> A modal dialog that can appear over either MainPage or
      * SettingsPage should declare: {@code @State(canHide = {"MainPage", "SettingsPage"})}
      *
-     * <p>When the modal closes and has a PreviousState transition, Brobot will automatically
-     * return to whichever state was hidden.
+     * <p>When the modal closes and has a PreviousState transition, Brobot will automatically return
+     * to whichever state was hidden.
      *
      * <p><b>Important:</b> The state names in canHide must match the actual state names (either
      * derived from class name or explicitly set via the name parameter).

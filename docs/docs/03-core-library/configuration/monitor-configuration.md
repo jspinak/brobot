@@ -373,8 +373,8 @@ for (int i = 0; i < monitorManager.getMonitorCount(); i++) {
 - **[DPI Resolution Guide](../../03-core-library/capture/dpi-resolution-guide.md)** - Handling DPI scaling in multi-monitor setups
 
 ### Testing
-- **[Profile-Based Testing](../../../04-testing/profile-based-testing.md)** - Using Spring profiles in tests
-- **[Testing Configuration](../../../04-testing/testing-intro.md)** - Configuration for testing environments
+- **[Profile-Based Testing](../../04-testing/profile-based-testing.md)** - Using Spring profiles in tests
+- **[Testing Configuration](../../04-testing/testing-intro.md)** - Configuration for testing environments
 
 ### Advanced
 - **[AspectJ Usage Guide](../../03-core-library/advanced/aspectj-usage-guide.md)** - MultiMonitorRoutingAspect details

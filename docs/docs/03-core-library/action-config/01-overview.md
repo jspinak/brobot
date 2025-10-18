@@ -113,7 +113,7 @@ All ActionConfig classes inherit these properties from the base class:
 - `successCriteria` - Custom success validation logic
 - `subsequentActions` - Chained actions to execute after this action
 
-See [ActionConfig Base Class](./05-reference.md#actionconfig-base-class) for complete property documentation.
+See [ActionConfig Base Class](./05-reference.md#actionconfig) for complete property documentation.
 
 ## Getting Started
 

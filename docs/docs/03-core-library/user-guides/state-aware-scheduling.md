@@ -441,10 +441,10 @@ This pattern is especially valuable for long-running automation, background moni
 
 ## Related Documentation
 
-- **[Core Concepts](../../../01-getting-started/core-concepts.md)** - State management fundamentals and architecture
-- **[States Overview](../../../01-getting-started/states.md)** - Understanding states and the @State annotation
+- **[Core Concepts](../../01-getting-started/core-concepts.md)** - State management fundamentals and architecture
+- **[States Overview](../../01-getting-started/states.md)** - Understanding states and the @State annotation
 - **[Pathfinding](./pathfinding-and-costs.md)** - Path cost configuration for state transitions
 - **[Dynamic Transitions](./dynamic-transitions.md)** - Hidden states, overlays, and CurrentState/PreviousState patterns
 - **[Multi-State Transitions](./multi-state-transitions-guide.md)** - Coordinating transitions across multiple states
-- **[Mock Mode Testing](../../../04-testing/mock-mode-guide.md)** - Testing state-aware scheduling without GUI
+- **[Mock Mode Testing](../../04-testing/mock-mode-guide.md)** - Testing state-aware scheduling without GUI
 - **[Claude Automator Tutorial](../../02-tutorials/tutorial-claude-automator/automation.md)** - Real-world example using StateAwareScheduler
