@@ -533,7 +533,7 @@ javadoc {
         'https://docs.spring.io/spring-framework/docs/current/javadoc-api/',
         'https://docs.spring.io/spring-boot/docs/current/api/',
         'https://projectlombok.org/api/',
-        'https://www.slf4j.org/apidocs/'
+        'https://www.slf4j.org/api/'
     )
 
     // Custom footer with version and Maven Central link
@@ -597,7 +597,7 @@ task javadocForGitHubPages(type: Javadoc) {
             'https://docs.spring.io/spring-framework/docs/current/javadoc-api/',
             'https://docs.spring.io/spring-boot/docs/current/api/',
             'https://projectlombok.org/api/',
-            'https://www.slf4j.org/apidocs/'
+            'https://www.slf4j.org/api/'
         )
 
         bottom = """
