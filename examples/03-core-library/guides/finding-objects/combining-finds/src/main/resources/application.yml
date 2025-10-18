@@ -1,6 +1,6 @@
 brobot:
+  mock: true                # Use mock mode for demonstration
   core:
-    mock: true              # Use mock mode for demonstration
     image-path: images/     # Path to image resources
   screenshot:
     save-history: true      # Important to visualize nested/confirmed finds

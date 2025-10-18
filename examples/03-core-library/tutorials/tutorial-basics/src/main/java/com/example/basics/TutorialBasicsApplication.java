@@ -37,7 +37,7 @@ public class TutorialBasicsApplication {
         InitialStates initialStates = context.getBean(InitialStates.class);
         initialStates.addStateSet(90, WORLD);
         initialStates.addStateSet(10, HOME);
-        initialStates.findIntialStates();
+        initialStates.findInitialStates();
 
         // get and save labeled images
         SaveLabeledImages saveLabeledImages = context.getBean(SaveLabeledImages.class);

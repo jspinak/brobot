@@ -27,7 +27,7 @@ import io.github.jspinak.brobot.model.element.Region;
  *   <li>Efficient region capture
  * </ul>
  *
- * @since 2.0.0
+ * @since 1.1.0
  */
 @Component
 public class SikuliScreenCapture implements ScreenCaptureService {

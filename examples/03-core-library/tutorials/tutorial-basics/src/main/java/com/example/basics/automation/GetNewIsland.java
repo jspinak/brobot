@@ -38,7 +38,8 @@ public class GetNewIsland {
     }
 
     public String getIsland() {
-        islandTransitions.fromWorld();
+        // Note: Navigation to island state should be handled by caller using StateNavigator
+        // This method assumes we're already in the Island state
         String textRead = getIslandType();
         for (Map.Entry<String, String> type : islandTypes.entrySet()) {
             if (textRead.contains(type.getKey())) return type.getValue();

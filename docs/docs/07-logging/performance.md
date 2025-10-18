@@ -1,3 +1,9 @@
+---
+sidebar_position: 4
+title: Performance Guide
+description: Optimize Brobot logging performance with async configuration, memory management, and benchmarks
+---
+
 # Logging Performance Guide
 
 ## Performance Impact
@@ -16,13 +22,30 @@ The Brobot logging system is designed for minimal performance impact:
 The system checks log levels before building log entries:
 
 ```java
-// Level check happens first - no object creation if disabled
-if (logger.shouldLog(LogCategory.ACTIONS, LogLevel.DEBUG)) {
-    // Only build the log entry if it will be logged
-    logger.debug(LogCategory.ACTIONS, "Expensive operation: {}",
-        generateExpensiveReport());
+import io.github.jspinak.brobot.logging.BrobotLogger;
+import io.github.jspinak.brobot.logging.LogCategory;
+import io.github.jspinak.brobot.logging.LogLevel;
+
+public class PerformanceExample {
+    private final BrobotLogger logger;
+
+    public void performAction() {
+        // Level check happens first - no object creation if disabled
+        if (logger.isLoggingEnabled(LogCategory.ACTIONS, LogLevel.DEBUG)) {
+            // Only build the log entry if it will be logged
+            logger.debug(LogCategory.ACTIONS,
+                "Expensive operation: " + generateExpensiveReport());
+        }
+    }
+
+    private String generateExpensiveReport() {
+        // Expensive operation
+        return "Report data";
+    }
 }
 ```
+
+> **Note**: The `isLoggingEnabled()` method in Brobot currently delegates all level checking to SLF4J/Logback. This means actual filtering happens at the SLF4J level based on `logging.level.*` properties. The pattern above is still recommended to avoid expensive string building operations when logging is disabled.
 
 ### 2. Async Logging
 
@@ -56,6 +79,8 @@ brobot.logging.enrichment.include-memory-usage=false
 brobot.logging.enrichment.include-similarity-scores=true  # Low overhead
 ```
 
+> **Note**: `include-timing-breakdown` defaults to `true` in source code, but is typically disabled in production for optimal performance. The default enables comprehensive timing data during development, which can then be selectively disabled for deployment.
+
 ### 4. Category-Specific Levels
 
 Reduce noise by setting appropriate levels per package:
@@ -67,6 +92,14 @@ logging.level.io.github.jspinak.brobot.matching=WARN     # Only problems
 logging.level.io.github.jspinak.brobot.performance=INFO  # Key metrics only
 logging.level.io.github.jspinak.brobot.validation=ERROR  # Only errors
 ```
+
+**Available Log Levels** (in order of severity):
+- **OFF** - Disable all logging (maximum performance)
+- **ERROR** - Only errors requiring attention
+- **WARN** - Warnings and potential issues
+- **INFO** - Key events and action results
+- **DEBUG** - Detailed debugging information
+- **TRACE** - Most detailed information (highest overhead)
 
 ## Memory Management
 
@@ -161,29 +194,22 @@ brobot.logging.enrichment.include-memory-usage=false
 
 ## Monitoring Logging Performance
 
-### Enable Performance Metrics
+### Enable Performance Logging
+
+To monitor application performance (not logging system overhead):
 
 ```properties
 logging.level.io.github.jspinak.brobot.performance=DEBUG
 brobot.logging.enrichment.include-timing-breakdown=true
 ```
 
-### Sample Performance Log
+This enables logging of:
+- Action execution times
+- State transition durations
+- Pattern matching performance
+- Memory usage statistics
 
-```json
-{
-  "category": "PERFORMANCE",
-  "level": "DEBUG",
-  "message": "Logging overhead analysis",
-  "context": {
-    "log_build_time_ms": 0.5,
-    "format_time_ms": 0.2,
-    "write_time_ms": 0.8,
-    "total_overhead_ms": 1.5,
-    "entries_per_second": 650
-  }
-}
-```
+> **Note**: Brobot currently logs application performance metrics (action durations, memory usage) but does not yet track logging system overhead itself (log formatting time, write time, etc.). The performance benchmarks in this document are based on external measurements.
 
 ## Troubleshooting Performance Issues
 
@@ -222,3 +248,38 @@ brobot.logging.enrichment.include-screenshots=false
 logging.level.root=INFO
 # Configure logback for rotation
 ```
+
+## Related Documentation
+
+### Logging System
+- **[Logging Overview](index.md)** - Introduction to Brobot's transparent, configuration-driven logging system
+- **[Logging Configuration Guide](configuration.md)** - Comprehensive configuration options for output formats, enrichment, and performance settings
+- **[Logging Usage Guide](usage.md)** - How to use custom logging with ActionConfig methods and session management
+- **[Output Formats](output-formats.md)** - Detailed guide to SIMPLE, STRUCTURED, and JSON output formats with performance implications
+
+### Configuration & Properties
+- **[Properties Reference](../03-core-library/configuration/properties-reference.md)** - Complete reference for all `brobot.logging.performance.*` and `brobot.logging.enrichment.*` properties
+- **[BrobotProperties Usage Guide](../03-core-library/configuration/brobot-properties-usage.md)** - How to access logging properties programmatically
+- **[Auto-Configuration Guide](../03-core-library/configuration/auto-configuration.md)** - Spring Boot auto-configuration and logging system initialization
+- **[Headless Configuration](../03-core-library/configuration/headless-configuration.md)** - Logging in headless environments and performance considerations
+
+### Testing & Debugging
+- **[Testing Introduction](../04-testing/testing-intro.md)** - Testing with logging enabled and performance expectations
+- **[Mock Mode Guide](../04-testing/mock-mode-guide.md)** - Mock mode has different logging performance characteristics (0.01-0.04s vs real timing)
+- **[Profile-Based Testing](../04-testing/profile-based-testing.md)** - Using test profiles to configure logging levels and performance settings
+- **[CI/CD Testing](../04-testing/advanced/ci-cd-testing.md)** - Logging performance in CI/CD environments
+
+### Action Configuration
+- **[ActionConfig Overview](../03-core-library/action-config/01-overview.md)** - ActionConfig logging methods and their performance impact
+- **[ActionConfig Examples](../03-core-library/action-config/03-examples.md)** - Practical examples of ActionConfig with custom logging
+
+### Getting Started
+- **[Quick Start Guide](../01-getting-started/quick-start.md)** - Basic logging setup and configuration
+- **[Installation Guide](../01-getting-started/installation.md)** - Installation considerations
+
+### Advanced Topics
+- **[Builder Performance Guide](../03-core-library/guides/advanced/builder-performance-guide.md)** - Optimizing ActionConfig builder usage to reduce logging overhead
+- **[Image Find Debugging](../03-core-library/tools/image-find-debugging.md)** - Debug features with performance impact considerations
+
+### Integration
+- **[MCP Server Configuration](../06-integrations/mcp-server/configuration.md)** - Logging configuration for integrations and external monitoring

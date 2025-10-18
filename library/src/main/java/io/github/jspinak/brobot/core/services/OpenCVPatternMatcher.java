@@ -26,7 +26,7 @@ import io.github.jspinak.brobot.model.element.Pattern;
  *   <li>Handles pattern size validation
  * </ul>
  *
- * @since 2.0.0
+ * @since 1.1.0
  */
 @Component
 @Primary

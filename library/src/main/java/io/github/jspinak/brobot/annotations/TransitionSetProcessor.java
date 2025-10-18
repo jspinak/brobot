@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  * <p>This pattern is cohesive because outgoing transitions use the current state's images.
  *
- * @since 1.3.0
+ * @since 1.1.0
  */
 @Component
 @RequiredArgsConstructor

@@ -13,11 +13,13 @@ The Brobot Pattern Capture Tool is a standalone application that provides Sikuli
 - 📁 **Auto-organization**: Saves patterns with timestamps
 - 🔧 **Provider Switching**: Change capture methods on the fly
 
+For detailed information about capture providers and architecture, see the [Modular Capture System](../capture/modular-capture-system.md) documentation.
+
 ## Installation
 
 ### Prerequisites
 - Java 21 or higher
-- Brobot library built and installed
+- [Brobot library](../../01-getting-started/installation.md) built and installed
 
 ### Building the Tool
 
@@ -124,11 +126,13 @@ For capturing multiple patterns quickly:
 
 ### Resolution Handling
 
-The tool automatically handles DPI scaling:
+The tool automatically handles [DPI scaling](../capture/dpi-resolution-guide.md):
 
 - **Physical capture** (1920x1080): Scaled to fit logical display
 - **Logical capture** (1536x864): Displayed 1:1
 - **Selection coordinates**: Automatically converted to correct resolution
+
+For comprehensive DPI handling strategies and troubleshooting, see the [DPI and Resolution Guide](../capture/dpi-resolution-guide.md).
 
 ## Configuration for Brobot
 
@@ -139,9 +143,11 @@ After capturing patterns with the tool, configure Brobot:
 ```properties
 # application.properties
 brobot.capture.provider=JAVACV_FFMPEG  # Match the tool's FFmpeg
-brobot.dpi.resize-factor=auto
-brobot.action.similarity=0.70
+brobot.dpi.resize-factor=auto          # Auto-detect scaling (default: 1.0)
+brobot.action.similarity=0.70          # Global minimum similarity (default: 0.70)
 ```
+
+> **Note**: See [Properties Reference](../configuration/properties-reference.md) for complete configuration options. The `brobot.action.similarity` property sets the global minimum similarity threshold for pattern matching.
 
 ### Pattern Organization
 
@@ -227,23 +233,56 @@ Based on testing with various providers:
 
 *At logical resolution (1536x864)
 
+> **Note**: Performance metrics are approximate and vary based on system configuration, screen resolution, and image complexity. Use these as general guidelines, not exact measurements.
+
 ## Integration with CI/CD
 
-### Automated Pattern Capture
+For comprehensive CI/CD testing strategies, see the [CI/CD Testing Guide](../testing/ci-cd-testing.md).
+
+### Automated Pattern Validation
 
 ```java
-// Headless pattern validation
-@Test
-public void validatePatterns() {
-    File patternDir = new File("patterns");
-    for (File pattern : patternDir.listFiles()) {
-        StateImage img = new StateImage.Builder()
-            .withPath(pattern.getPath())
-            .build();
-        
-        // Validate pattern loads correctly
-        assertNotNull(img);
-        assertTrue(pattern.length() > 0);
+package io.github.jspinak.brobot.patterncapture;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.io.File;
+
+import org.junit.jupiter.api.Test;
+
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+
+/**
+ * Headless pattern validation test.
+ * Extends BrobotTestBase for proper mock mode and headless operation.
+ */
+public class PatternValidationTest extends BrobotTestBase {
+
+    @Test
+    public void validatePatterns() {
+        File patternDir = new File("patterns");
+
+        assertTrue(patternDir.exists() && patternDir.isDirectory(),
+                   "Pattern directory must exist");
+
+        File[] patternFiles = patternDir.listFiles((dir, name) ->
+                                                     name.toLowerCase().endsWith(".png"));
+
+        assertNotNull(patternFiles, "Unable to read pattern directory");
+        assertTrue(patternFiles.length > 0, "No pattern files found");
+
+        for (File pattern : patternFiles) {
+            // Use addPattern() - withPath() does not exist
+            StateImage img = new StateImage.Builder()
+                .addPattern(pattern.getAbsolutePath())
+                .build();
+
+            // Validate pattern loaded correctly
+            assertNotNull(img, "StateImage should not be null");
+            assertFalse(img.isEmpty(), "StateImage should contain patterns");
+            assertTrue(pattern.length() > 0, "Pattern file should not be empty");
+        }
     }
 }
 ```
@@ -260,33 +299,80 @@ WORKDIR /app
 
 ## Extending the Tool
 
-The tool is built with Spring Boot and can be extended:
+The tool is built with [Spring Boot](../configuration/auto-configuration.md) and can be extended:
 
 ### Adding Custom Providers
 
+Implement the complete CaptureProvider interface:
+
 ```java
+package io.github.jspinak.brobot.capture.provider;
+
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+
+import org.springframework.stereotype.Component;
+
+/**
+ * Custom screen capture provider implementation.
+ * Must implement all 7 methods from CaptureProvider interface.
+ */
 @Component
 public class CustomProvider implements CaptureProvider {
+
     @Override
     public String getName() {
         return "CUSTOM";
     }
-    
+
     @Override
-    public BufferedImage captureScreen() {
-        // Your capture implementation
+    public BufferedImage captureScreen() throws IOException {
+        // Your full-screen capture implementation
+        throw new UnsupportedOperationException("Implement custom capture logic");
+    }
+
+    @Override
+    public BufferedImage captureScreen(int screenId) throws IOException {
+        // Your specific screen capture implementation
+        throw new UnsupportedOperationException("Implement custom capture logic");
+    }
+
+    @Override
+    public BufferedImage captureRegion(Rectangle region) throws IOException {
+        // Your region capture implementation
+        throw new UnsupportedOperationException("Implement custom capture logic");
+    }
+
+    @Override
+    public BufferedImage captureRegion(int screenId, Rectangle region) throws IOException {
+        // Your screen-specific region capture implementation
+        throw new UnsupportedOperationException("Implement custom capture logic");
+    }
+
+    @Override
+    public boolean isAvailable() {
+        // Check if your capture method is available on this system
+        return true;
+    }
+
+    @Override
+    public ResolutionType getResolutionType() {
+        // Return PHYSICAL or LOGICAL based on your capture method
+        return ResolutionType.PHYSICAL;
     }
 }
 ```
 
 ### Adding Export Formats
 
-```java
-// In ImageGalleryPanel
-public void exportToSikuliXBundle() {
-    // Export patterns in SikuliX format
-}
-```
+The ImageGalleryPanel can be extended to support export formats. For example, to export to SikuliX bundle format:
+
+1. Create a `.sikuli` directory
+2. Copy all pattern PNG files
+3. Create a Python script file with metadata
+
+See the Pattern Capture Tool source code in `pattern-capture-tool/src/main/java/io/github/jspinak/brobot/patterncapture/ui/ImageGalleryPanel.java` for the complete implementation.
 
 ## Research Background
 
@@ -298,11 +384,35 @@ This tool was developed after extensive testing comparing:
 
 **Key finding**: While FFmpeg captures match Windows Snipping Tool when comparing full screenshots, **Windows Snipping Tool patterns achieve significantly better match rates (95-100% vs 70-80%)** when used as patterns during runtime automation. This is because clean, artifact-free patterns from native OS tools match better against runtime screenshots.
 
+## Related Documentation
+
+### Core Tools & Guides
+- **[Capture Methods Comparison](capture-methods-comparison.md)** - Detailed performance benchmarks and provider comparison
+- **[Quick Start Capture Setup](quick-start-capture-setup.md)** - Fast setup guide for optimal capture
+- **[Image Find Debugging](image-find-debugging.md)** - Troubleshooting pattern matching issues
+
+### Capture System
+- **[Modular Capture System](../capture/modular-capture-system.md)** - Complete capture provider architecture
+- **[DPI and Resolution Guide](../capture/dpi-resolution-guide.md)** - DPI scaling strategies and troubleshooting
+- **[Capture Quick Reference](../capture/capture-quick-reference.md)** - Quick provider switching guide
+
+### Configuration
+- **[Properties Reference](../configuration/properties-reference.md)** - Complete Brobot configuration properties
+- **[Auto-Configuration](../configuration/auto-configuration.md)** - Spring Boot integration details
+
+### Testing & Integration
+- **[CI/CD Testing Guide](../testing/ci-cd-testing.md)** - Automated pattern validation in pipelines
+- **[Testing Introduction](../../04-testing/testing-intro.md)** - Brobot testing strategies
+- **[Mock Mode Guide](../../04-testing/mock-mode-guide.md)** - Testing without screen interaction
+
+### Getting Started
+- **[Installation](../../01-getting-started/installation.md)** - Adding Brobot to your project
+- **[Quick Start](../../01-getting-started/quick-start.md)** - Get started with Brobot
+
 ## Support
 
 For issues or questions:
-- Check the [capture comparison study](capture-methods-comparison.md)
-- Review [quick start guide](quick-start-capture-setup.md)
+- Review the documentation links above
 - File issues on GitHub
 
 ## Version History

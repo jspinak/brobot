@@ -158,7 +158,7 @@ public class ColorFindingExamples {
                 new HistogramFindOptions.Builder()
                         .setSimilarity(0.8)
                         .setBinOptions(
-                                HSVBinOptions.builder().hueBins(90).saturationBins(2).valueBins(1))
+                                HSVBinOptions.builder().hueBins(90).saturationBins(2).valueBins(1).build())
                         .setMaxMatchesToActOn(5)
                         .setIllustrate(HistogramFindOptions.Illustrate.YES) // Save visual results
                         .build();

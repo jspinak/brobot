@@ -32,8 +32,8 @@ public class IslandTransitions {
 
     /** Navigate from Island back to World by clicking the back button. */
     @OutgoingTransition(
-            to = WorldState.class,
-            priority = 1,
+            activate = {WorldState.class},
+            pathCost = 1,
             description = "Navigate from Island to World")
     public boolean toWorld() {
         log.info("Navigating from Island to World");
@@ -43,8 +43,8 @@ public class IslandTransitions {
 
     /** Navigate from Island to Home (shortcut). */
     @OutgoingTransition(
-            to = HomeState.class,
-            priority = 2,
+            activate = {HomeState.class},
+            pathCost = 2,
             description = "Navigate from Island to Home")
     public boolean toHome() {
         log.info("Navigating from Island to Home");

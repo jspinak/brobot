@@ -28,7 +28,7 @@ import io.github.jspinak.brobot.model.match.Match;
  *   <li>Technology agnostic (OpenCV, Sikuli, etc.)
  * </ul>
  *
- * @since 2.0.0
+ * @since 1.1.0
  */
 public interface PatternMatcher {
 

@@ -15,7 +15,18 @@ import io.github.jspinak.brobot.model.state.special.CurrentState;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-/** Transitions for the MainPage state. Includes self-transitions using CurrentState. */
+/**
+ * Transitions for the MainPage state. Includes self-transitions using CurrentState.
+ *
+ * <p>Best Practices Demonstrated:
+ *
+ * <ul>
+ *   <li>staysVisible=true when opening overlays (modal stays on top)
+ *   <li>CurrentState for self-transitions (refresh, pagination)
+ *   <li>Error handling with try-catch and logging
+ *   <li>Progressive path costs (0 for instant, higher for complex operations)
+ * </ul>
+ */
 @TransitionSet(state = MainPageState.class)
 @Component
 @RequiredArgsConstructor
@@ -28,8 +39,15 @@ public class MainPageTransitions {
     @IncomingTransition
     public boolean verifyArrival() {
         log.info("Verifying arrival at MainPage");
-        // In mock mode, always return true
-        return true;
+        try {
+            // In mock mode, always return true
+            // In real mode, would check for main page visibility:
+            // return action.find(mainPageState.getLogo()).isSuccess();
+            return true;
+        } catch (Exception e) {
+            log.error("Error verifying arrival at MainPage", e);
+            return false;
+        }
     }
 
     @OutgoingTransition(
@@ -39,8 +57,15 @@ public class MainPageTransitions {
             description = "Open modal dialog over main page")
     public boolean openModal() {
         log.info("Opening modal dialog from MainPage");
-        // In mock mode, just return true
-        return true;
+        log.debug("MainPage will remain visible behind the modal (staysVisible=true)");
+        try {
+            // In real implementation, would click button to open modal:
+            // return action.click(mainPageState.getMenuButton()).isSuccess();
+            return true;
+        } catch (Exception e) {
+            log.error("Error opening modal from MainPage", e);
+            return false;
+        }
     }
 
     @OutgoingTransition(
@@ -49,7 +74,14 @@ public class MainPageTransitions {
             description = "Navigate to settings page")
     public boolean toSettings() {
         log.info("Navigating from MainPage to Settings");
-        return true;
+        try {
+            // In real implementation, would click settings button:
+            // return action.click(mainPageState.getSettingsButton()).isSuccess();
+            return true;
+        } catch (Exception e) {
+            log.error("Error navigating to Settings", e);
+            return false;
+        }
     }
 
     @OutgoingTransition(
@@ -58,8 +90,16 @@ public class MainPageTransitions {
             description = "Refresh main page")
     public boolean refresh() {
         log.info("Refreshing MainPage (self-transition using CurrentState)");
-        // This demonstrates a self-transition
-        return true;
+        log.debug("This demonstrates a self-transition - stays in MainPage");
+        try {
+            // In real implementation, would refresh the page:
+            // return action.click(mainPageState.getRefreshButton()).isSuccess();
+            // or: return action.type("{F5}").isSuccess();
+            return true;
+        } catch (Exception e) {
+            log.error("Error refreshing MainPage", e);
+            return false;
+        }
     }
 
     @OutgoingTransition(
@@ -68,7 +108,14 @@ public class MainPageTransitions {
             description = "Load next page of results")
     public boolean nextPage() {
         log.info("Loading next page of results (self-transition using CurrentState)");
-        // Another self-transition example
-        return true;
+        log.debug("Another self-transition example - pagination within MainPage");
+        try {
+            // In real implementation, would click next page button:
+            // return action.click(mainPageState.getNextPageButton()).isSuccess();
+            return true;
+        } catch (Exception e) {
+            log.error("Error loading next page", e);
+            return false;
+        }
     }
 }

@@ -420,14 +420,13 @@ ConditionalActionChain
 
 1. **Try the Examples**: Start with simple click and type operations
 2. **Explore Conditional Chains**: Learn about ifFound, ifNotFound, and always
-3. **Read the Full Documentation**: 
-   - [Pure Actions API Reference](../03-core-library/action-config/14-pure-actions-api.md)
+3. **Read the Full Documentation**:
+   - [Convenience Methods Documentation](../03-core-library/action-config/18-convenience-methods.md)
    - [Conditional Chains Examples](../03-core-library/action-config/15-conditional-chains-examples.md)
-   - [Migration Guide](../03-core-library/guides/action-refactoring-migration.md)
 
 ## Getting Help
 
-- Check the [API documentation](../03-core-library/action-config/14-pure-actions-api.md)
+- Check the [Convenience Methods documentation](../03-core-library/action-config/18-convenience-methods.md)
 - See [examples](../03-core-library/action-config/15-conditional-chains-examples.md) for common patterns
 - File issues on [GitHub](https://github.com/jspinak/brobot) if you encounter problems
 

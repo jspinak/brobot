@@ -81,7 +81,7 @@ Defines a transition FROM the current state TO other states:
 - **activate**: States to activate during this transition (required array of state classes)
 - **exit**: States to deactivate during this transition (optional array of state classes)
 - **staysVisible**: Whether the originating state remains visible after transition (default: false)
-- **pathCost**: Path-finding cost - LOWER costs are preferred when multiple paths exist (default: 1 as of v1.3.0)
+- **pathCost**: Path-finding cost - LOWER costs are preferred when multiple paths exist (default: 1 as of v1.1.0)
 - **description**: Documentation for this transition
 
 ## World State Example
@@ -213,6 +213,8 @@ The academic paper provides a formal definition for a transition as a tuple **t 
 Brobot supports transitions that activate multiple states simultaneously. This is useful for scenarios where opening one state brings multiple UI elements or panels into view.
 
 > **📖 For complete pathfinding details, see [Pathfinding & Multi-State Activation](pathfinding.md)**
+>
+> **📖 Deep Dive**: [Multi-State Transitions Guide](/docs/core-library/guides/user-guides/multi-state-transitions-guide) for comprehensive multi-state activation examples, verification patterns, and best practices
 
 ### Core Concept: No Primary Target State
 
@@ -424,7 +426,7 @@ When multiple paths exist, Brobot automatically selects the path with the **lowe
 
 ### Learn More
 
-For comprehensive documentation on pathfinding, cost calculation, and advanced patterns, see the [**Pathfinding and Path Costs Guide**](/docs/core-library/guides/pathfinding-and-costs).
+For comprehensive documentation on pathfinding, cost calculation, and advanced patterns, see the [**Pathfinding and Path Costs Guide**](/docs/core-library/guides/user-guides/pathfinding-and-costs).
 
 ## Important Pathfinding Limitation
 

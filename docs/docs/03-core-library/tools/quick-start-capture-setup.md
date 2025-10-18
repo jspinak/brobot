@@ -4,6 +4,8 @@ This guide helps you quickly set up the optimal pattern capture workflow based o
 
 ## TL;DR - Best Configuration
 
+For complete configuration details, see the [Properties Reference](../configuration/properties-reference.md).
+
 ```properties
 # Add to application.properties
 brobot.capture.provider=JAVACV_FFMPEG
@@ -16,7 +18,7 @@ brobot.action.similarity=0.70
 - **macOS**: Built-in screenshot (Cmd+Shift+4) - **95-100% match rate**
 - **Linux**: GNOME Screenshot or Spectacle - **95-100% match rate**
 
-**Note**: While FFmpeg captures match Windows screenshots pixel-perfectly, Windows Snipping Tool patterns achieve better runtime match rates.
+**Note**: While FFmpeg captures match Windows screenshots pixel-perfectly, Windows Snipping Tool patterns achieve better runtime match rates. For detailed comparison, see the [Capture Methods Comparison](./capture-methods-comparison.md) and [Pattern Creation Tools Guide](./pattern-creation-tools.md).
 
 ## Why This Configuration?
 
@@ -25,6 +27,8 @@ Based on comprehensive testing comparing 8 different capture methods:
 - **FFmpeg patterns only achieve 70-80% runtime match rates**
 - Clean, artifact-free patterns from native OS tools match better
 - JavaCV FFmpeg for runtime capture at physical resolution (1920x1080)
+
+For the complete technical explanation, see the [Modular Capture System](../capture/modular-capture-system.md) documentation.
 
 ## Setup Instructions
 
@@ -67,6 +71,9 @@ brobot.capture.enable-logging=true     # See what's happening
 **Cons:** Manual file organization
 
 #### Option B: Brobot Pattern Capture Tool (For Testing)
+
+For complete usage instructions, see the [Pattern Capture Tool Guide](./pattern-capture-tool-guide.md).
+
 1. Run the tool: `java -jar pattern-capture-tool-1.0.0.jar`
 2. Use any provider for testing similarity
 3. Press F1 or click "Capture"
@@ -82,21 +89,55 @@ SikuliX IDE can be used to test similarity thresholds but achieves lower runtime
 
 ### Test Your Setup
 
+For comprehensive testing strategies, see the [Testing Introduction](../../04-testing/testing-intro.md) and [Mock Mode Guide](../../04-testing/mock-mode-guide.md).
+
 1. Capture a test pattern using your chosen method
 2. Run this verification code:
 
 ```java
-@Test
-public void verifyPatternCapture() {
-    // Your captured pattern
-    StateImage testPattern = new StateImage.Builder()
-        .withPath("images/test/my-pattern.png")
-        .build();
-    
-    // Should find with high confidence
-    ActionResult result = action.find(testPattern);
-    assertTrue(result.isSuccess());
-    assertTrue(result.getScore() > 0.90); // Should be >90% with FFmpeg
+package io.github.jspinak.brobot.example;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+
+/**
+ * Test to verify pattern capture setup.
+ */
+@Component
+public class VerifyPatternCaptureTest extends BrobotTestBase {
+
+    @Autowired
+    private Action action;
+
+    @Test
+    public void verifyPatternCapture() {
+        // Your captured pattern - use addPattern(), not withPath()
+        StateImage testPattern = new StateImage.Builder()
+            .addPattern("images/test/my-pattern.png")
+            .build();
+
+        // Should find with high confidence
+        ActionResult result = action.find(testPattern);
+        assertTrue(result.isSuccess());
+
+        // Get similarity score from best match
+        if (result.getBestMatch().isPresent()) {
+            Match bestMatch = result.getBestMatch().get();
+            assertTrue(bestMatch.getScore() > 0.90,
+                      "Score should be >90% with FFmpeg: " + bestMatch.getScore());
+        } else {
+            fail("No match found");
+        }
+    }
 }
 ```
 
@@ -119,9 +160,11 @@ Your patterns will be captured at:
 | 150% | 1920x1080 | FFmpeg, Windows |
 | 150% | 1280x720 | SikuliX, Robot |
 
-**FFmpeg always captures at physical resolution**, making patterns portable across different scaling settings.
+**FFmpeg always captures at physical resolution**, making patterns portable across different scaling settings. For detailed DPI handling strategies, see the [DPI Resolution Guide](../capture/dpi-resolution-guide.md).
 
 ## Quick Troubleshooting
+
+For comprehensive debugging strategies, see the [Debugging Pattern Matching](../../04-testing/debugging-pattern-matching.md) guide.
 
 ### "Pattern not found" with high threshold
 ```properties
@@ -132,12 +175,27 @@ brobot.console.actions.enabled=true  # See match scores
 
 ### "FFmpeg not available"
 ```java
-// In your test or main class
-@Autowired
-private CaptureConfiguration captureConfig;
+package io.github.jspinak.brobot.example;
 
-// Check available providers
-captureConfig.printConfiguration();
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import io.github.jspinak.brobot.capture.CaptureConfiguration;
+
+/**
+ * Debugging helper to check available capture providers.
+ */
+@Component
+public class CaptureProviderCheck {
+
+    @Autowired
+    private CaptureConfiguration captureConfig;
+
+    public void checkAvailableProviders() {
+        // Check available providers - correct method name is printConfigurationReport()
+        captureConfig.printConfigurationReport();
+    }
+}
 ```
 
 ### Different colors between captures
@@ -174,6 +232,8 @@ Based on testing with 1000+ patterns:
    - Use Pattern Capture Tool for multiple patterns
    - Maintains consistent capture settings
 
+> **Note**: Performance metrics are approximate and vary based on system configuration, screen resolution, image complexity, and CPU load. Use these as general guidelines for relative performance comparison, not exact measurements.
+
 ## Next Steps
 
 1. ✅ Configure Brobot with recommended settings
@@ -184,10 +244,40 @@ Based on testing with 1000+ patterns:
 
 ## Summary
 
-The extensive testing proved that **FFmpeg with either Windows Snipping Tool or Brobot Pattern Capture Tool provides optimal results**. This configuration ensures:
-- 100% compatibility between tools
-- Consistent pattern matching
-- Best file compression
+The extensive testing proved that **FFmpeg runtime capture with Windows Snipping Tool patterns provides optimal results**. While the Brobot Pattern Capture Tool is useful for testing similarity thresholds, Windows Snipping Tool patterns achieve significantly better runtime match rates (95-100% vs 70-80%). This configuration ensures:
+- Clean, artifact-free patterns from native OS tools
+- Best runtime match rates (95-100%)
+- Consistent pattern matching across sessions
+- Optimal file compression with FFmpeg
 - Resolution independence
 
+**Key Finding**: Pattern creation tool matters more than you might expect. Use Windows Snipping Tool (or macOS/Linux equivalents) for patterns, and FFmpeg for runtime capture. This combination is proven by extensive testing across 1000+ patterns.
+
 No more guessing - this configuration is proven by data!
+
+## Related Documentation
+
+### Pattern Capture & Creation
+- **[Pattern Creation Tools Guide](./pattern-creation-tools.md)** - Complete guide to choosing and using pattern capture tools
+- **[Pattern Capture Tool Guide](./pattern-capture-tool-guide.md)** - Using Brobot's built-in pattern capture tool
+- **[Capture Methods Comparison](./capture-methods-comparison.md)** - Detailed performance benchmarks and provider comparison
+
+### Capture System Architecture
+- **[Modular Capture System](../capture/modular-capture-system.md)** - Complete capture provider details and configuration
+- **[DPI Resolution Guide](../capture/dpi-resolution-guide.md)** - DPI scaling strategies and troubleshooting
+- **[Capture Quick Reference](../capture/capture-quick-reference.md)** - Command reference for capture operations
+
+### Configuration & Properties
+- **[Properties Reference](../configuration/properties-reference.md)** - Complete Brobot configuration properties
+- **[Auto-Configuration](../configuration/auto-configuration.md)** - Spring Boot integration details
+- **[ActionConfig Overview](../action-config/01-overview.md)** - Configuring pattern matching with PatternFindOptions
+
+### Testing & Debugging
+- **[Debugging Pattern Matching](../../04-testing/debugging-pattern-matching.md)** - Troubleshooting pattern matching issues
+- **[Testing Introduction](../../04-testing/testing-intro.md)** - Brobot testing strategies
+- **[Mock Mode Guide](../../04-testing/mock-mode-guide.md)** - Testing without screen interaction
+
+### Getting Started
+- **[Installation](../../01-getting-started/installation.md)** - Adding Brobot to your project
+- **[Quick Start](../../01-getting-started/quick-start.md)** - Get started with Brobot
+- **[States in Brobot](../../01-getting-started/states.md)** - Understanding StateImage patterns

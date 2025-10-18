@@ -32,7 +32,7 @@ import io.github.jspinak.brobot.model.state.StateImage;
  *   <li>Supports all find strategies (ALL, BEST, FIRST, EACH)
  * </ul>
  *
- * @since 2.0.0
+ * @since 1.1.0
  */
 @Component
 public class VisualElementLocator implements ElementLocator {

@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  * <p>This approach is more reliable than getBeansWithAnnotation() for meta-annotations.
  *
- * @since 1.2.0
+ * @since 1.1.0
  */
 @Component
 @Slf4j

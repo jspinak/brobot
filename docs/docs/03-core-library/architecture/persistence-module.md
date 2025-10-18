@@ -10,6 +10,8 @@ The Brobot Persistence Module provides a flexible, pluggable architecture for re
 - Export/import of action histories
 - Integration with both Java projects and the JavaFX runner
 
+> **For usage instructions, see the [Persistence User Guide](../guides/user-guides/persistence-user-guide.md).**
+
 ## Architecture Design
 
 ### Three-Module Architecture
@@ -53,7 +55,7 @@ brobot-persistence/
 
 ### Interface Design
 
-The `PersistenceProvider` interface in the library module defines the contract:
+The [`PersistenceProvider`](../../api/persistence/PersistenceProvider.md) interface in the library module defines the contract:
 
 ```java
 public interface PersistenceProvider {
@@ -65,17 +67,25 @@ public interface PersistenceProvider {
     boolean isRecording();
     
     // Recording
-    void recordAction(ActionRecord record, StateObject stateObject);
+    void recordAction(ActionRecord record, StateObject stateObject); // StateObject: see States guide
     void recordBatch(List<ActionRecord> records);
-    
+
     // Export/Import
-    ActionHistory exportSession(String sessionId);
+    ActionHistory exportSession(String sessionId); // Returns ActionHistory for replay/analysis
     String importSession(ActionHistory history, String sessionName);
     
     // Query
     List<String> getAllSessions();
-    SessionMetadata getSessionMetadata(String sessionId);
+    SessionMetadata getSessionMetadata(String sessionId); // SessionMetadata is a nested class
     void deleteSession(String sessionId);
+
+    /**
+     * Metadata about a recording session.
+     * Defined as PersistenceProvider.SessionMetadata in the actual implementation.
+     */
+    class SessionMetadata {
+        // Session details
+    }
 }
 ```
 
@@ -86,7 +96,7 @@ public interface PersistenceProvider {
 **Use Case**: Projects that need persistence without database dependencies
 
 **Features**:
-- JSON and CSV format support
+- JSON and CSV format support (XML planned but not yet implemented)
 - Optional compression (GZIP)
 - Organized directory structure
 - Automatic file rotation
@@ -181,42 +191,99 @@ public class MyApplication {
 ### 1. Java Project with File Persistence
 
 ```java
-// Create persistence provider
-PersistenceConfiguration config = PersistenceConfiguration.fileDefault();
-config.getFile().setBasePath("./automation-history");
-PersistenceProvider persistence = PersistenceProviderFactory.create(config);
+package com.example.automation;
 
-// Start recording
-String sessionId = persistence.startSession("TestRun", "MyApp", null);
+import io.github.jspinak.brobot.persistence.PersistenceProvider;
+import io.github.jspinak.brobot.persistence.PersistenceProviderFactory;
+import io.github.jspinak.brobot.persistence.config.PersistenceConfiguration;
+import io.github.jspinak.brobot.model.action.ActionHistory;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.action.Action;
 
-// Your automation code
-action.click(stateImage);  // Actions are recorded automatically if integrated
+public class FilePersistenceExample {
+    public static void main(String[] args) {
+        // Create persistence provider
+        PersistenceConfiguration config = PersistenceConfiguration.fileDefault();
+        config.getFile().setBasePath("./automation-history");
+        PersistenceProvider persistence = PersistenceProviderFactory.create(config);
 
-// Stop and export
-persistence.stopSession();
-ActionHistory history = persistence.exportSession(sessionId);
+        // Start recording
+        String sessionId = persistence.startSession("TestRun", "MyApp", null);
+
+        try {
+            // Define StateImage for automation
+            StateImage stateImage = new StateImage.Builder()
+                .setName("submit-button")
+                .addPattern("submit.png")
+                .build();
+
+            // Your automation code (Action would be initialized via dependency injection in real apps)
+            // action.click(stateImage);  // Actions are recorded automatically if integrated
+
+            // Stop and export
+            persistence.stopSession();
+            ActionHistory history = persistence.exportSession(sessionId);
+
+            System.out.println("Session completed with " +
+                             history.getTimesSearched() + " actions recorded");
+        } catch (Exception e) {
+            persistence.stopSession();
+            throw e;
+        }
+    }
+}
 ```
 
 ### 2. Spring Boot Application
 
 ```java
+package com.example.automation;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import io.github.jspinak.brobot.persistence.PersistenceProvider;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.action.ActionResult;
+
 @Component
 public class AutomationService {
     @Autowired
     private PersistenceProvider persistence;
-    
+
     @Autowired
     private Action action;
-    
+
+    // Define StateImages for UI elements
+    private final StateImage loginButton = new StateImage.Builder()
+        .setName("loginButton")
+        .addPattern("login-button.png")
+        .build();
+
+    private final StateImage usernameField = new StateImage.Builder()
+        .setName("usernameField")
+        .addPattern("username-field.png")
+        .build();
+
+    private final StateImage submitButton = new StateImage.Builder()
+        .setName("submitButton")
+        .addPattern("submit-button.png")
+        .build();
+
     public void runAutomation() {
         persistence.startSession("Automated Test", "WebApp", null);
-        
-        // Automation with automatic recording
-        action.click(loginButton);
-        action.type(usernameField, "user");
-        action.click(submitButton);
-        
-        persistence.stopSession();
+
+        try {
+            // Automation with automatic recording
+            ActionResult loginResult = action.click(loginButton);
+            if (loginResult.isSuccess()) {
+                action.click(usernameField);
+                action.type("user");
+                action.click(submitButton);
+            }
+        } finally {
+            persistence.stopSession();
+        }
     }
 }
 ```
@@ -226,14 +293,46 @@ public class AutomationService {
 The runner uses the persistence module internally:
 
 ```java
+package io.github.jspinak.brobot.runner.persistence;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import io.github.jspinak.brobot.persistence.PersistenceProvider;
+
 @Service
 public class PersistenceAdapterService {
     @Autowired
     private PersistenceProvider persistenceProvider;
-    
+
+    // UI update callback for JavaFX runner (implementation-specific)
+    private Runnable uiUpdateCallback;
+
+    public void setUiUpdateCallback(Runnable callback) {
+        this.uiUpdateCallback = callback;
+    }
+
     public void startRecording(String name, String app) {
         persistenceProvider.startSession(name, app, null);
         updateUI();  // Runner-specific UI updates
+    }
+
+    public void stopRecording() {
+        persistenceProvider.stopSession();
+        updateUI();
+    }
+
+    public boolean isRecording() {
+        return persistenceProvider.isRecording();
+    }
+
+    /**
+     * Updates runner UI to reflect current recording state.
+     * Calls JavaFX UI update callback if configured.
+     */
+    private void updateUI() {
+        if (uiUpdateCallback != null) {
+            uiUpdateCallback.run();
+        }
     }
 }
 ```
@@ -273,6 +372,10 @@ public class PersistenceAdapterService {
 
 2. **Configure Persistence**:
 ```java
+import io.github.jspinak.brobot.persistence.PersistenceProvider;
+import io.github.jspinak.brobot.persistence.PersistenceProviderFactory;
+import io.github.jspinak.brobot.persistence.config.PersistenceConfiguration;
+
 PersistenceConfiguration config = new PersistenceConfiguration();
 config.setType(PersistenceConfiguration.PersistenceType.FILE);
 PersistenceProvider provider = PersistenceProviderFactory.create(config);
@@ -280,9 +383,35 @@ PersistenceProvider provider = PersistenceProviderFactory.create(config);
 
 3. **Integrate with Automation**:
 ```java
+import io.github.jspinak.brobot.model.action.ActionRecord;
+import io.github.jspinak.brobot.model.state.StateObject;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import org.springframework.context.event.EventListener;
+
 // Option 1: Manual recording
 provider.startSession("Test", "App", null);
-ActionRecord record = // ... execute action
+
+// Define StateImage and execute action
+StateImage testImage = new StateImage.Builder()
+    .setName("test-image")
+    .addPattern("test.png")
+    .build();
+
+// Execute action and create record
+PatternFindOptions findOptions = new PatternFindOptions.Builder().build();
+ActionResult result = action.perform(findOptions, testImage.asObjectCollection());
+
+ActionRecord record = new ActionRecord.Builder()
+    .setActionConfig(findOptions)
+    .setMatchList(result.getMatchList())
+    .setActionSuccess(result.isSuccess())
+    .build();
+
+// StateImage implements StateObject
+StateObject stateObject = testImage;
 provider.recordAction(record, stateObject);
 
 // Option 2: Event-based (if using Spring)
@@ -305,8 +434,12 @@ brobot:
 
 ## Testing
 
-The module includes comprehensive test coverage:
+The module includes comprehensive test coverage. For detailed testing guidance, see:
+- [Testing Introduction](../../04-testing/testing-intro.md) - Testing patterns and strategies
+- [Integration Testing](../../04-testing/integration-testing.md) - Spring Boot integration testing
+- [ActionHistory Integration Testing](../../04-testing/actionhistory-integration-testing.md) - Using ActionHistory in tests
 
+Test coverage includes:
 - Unit tests for each provider implementation
 - Integration tests with Spring context
 - Performance benchmarks
@@ -347,3 +480,27 @@ cd brobot/persistence
 - Compression algorithms
 - Encryption support
 - GraphQL API for querying
+
+## Related Documentation
+
+### Core Concepts
+- [States and State Management](../../01-getting-started/states.md) - Understanding StateObjects used in recording
+- [Installation Guide](../../01-getting-started/installation.md) - Adding Brobot to your project
+
+### Configuration and Setup
+- [Persistence User Guide](../guides/user-guides/persistence-user-guide.md) - Comprehensive usage guide
+- [Auto-Configuration](../configuration/auto-configuration.md) - Spring Boot integration details
+- [Properties Reference](../configuration/properties-reference.md) - Complete configuration options
+
+### Migration
+- [ActionHistory Migration Guide](../migration/actionhistory-migration-guide.md) - Migrating from legacy APIs to modern ActionConfig
+
+### Testing and Integration
+- [Testing Introduction](../../04-testing/testing-intro.md) - Testing patterns and strategies
+- [Integration Testing](../../04-testing/integration-testing.md) - Spring Boot integration testing
+- [ActionHistory Integration Testing](../../04-testing/actionhistory-integration-testing.md) - ActionRecord and ActionHistory API
+- [Mock Snapshots](../../04-testing/actionhistory-mock-snapshots.md) - Testing with mock data
+- [Action Recording](../../04-testing/action-recording.md) - Visual screenshot-based recording (different feature)
+
+### Architecture
+- [ActionResult Architecture](./actionresult-architecture.md) - Related action execution architecture

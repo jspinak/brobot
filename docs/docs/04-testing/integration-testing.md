@@ -22,14 +22,11 @@ Integration testing provides:
 For simple integration tests without Spring context, extend `BrobotTestBase`:
 
 ```java
-// Note: BrobotProperties must be injected as a dependency
-@Autowired
-private BrobotProperties brobotProperties;
-
 import io.github.jspinak.brobot.test.BrobotTestBase;
 
 public class WorkflowIntegrationTest extends BrobotTestBase {
     // Mock mode is automatically enabled
+    // BrobotProperties accessible via inherited protected field
     // All mock settings are synchronized via MockModeManager
 }
 ```
@@ -55,7 +52,7 @@ public class SpringIntegrationTest extends BrobotIntegrationTestBase {
 ```
 
 :::tip Clean Architecture for Spring Tests
-The test configuration architecture uses factory patterns and proper initialization order to ensure clean dependencies. See [Test Logging Architecture](/docs/core-library/testing/test-logging-architecture) for details.
+The test configuration architecture uses factory patterns and proper initialization order to ensure clean dependencies. See [Testing Introduction](testing-intro.md) and [Mock Mode Guide](mock-mode-guide.md) for details.
 :::
 
 ## Configuration
@@ -81,10 +78,7 @@ public class IntegrationTest extends BrobotTestBase {
 Additional testing configuration:
 
 ```properties
-# Mock mode is automatically enabled by BrobotTestBase
-# These properties are synchronized by MockModeManager:
-brobot.mock.mode=true
-brobot.core.mock=true
+# Mock mode configuration
 brobot.core.mock=true
 
 # Mock timing configuration
@@ -192,6 +186,16 @@ to see how your app will behave.
 State objects should be initialized with realistic action histories for proper mock behavior. The modern approach uses ActionConfig-based snapshots:
 
 ```java
+import org.springframework.stereotype.Component;
+
+import io.github.jspinak.brobot.action.action.config.options.ClickOptions;
+import io.github.jspinak.brobot.action.action.config.options.PatternFindOptions;
+import io.github.jspinak.brobot.model.action.ActionHistory;
+import io.github.jspinak.brobot.model.action.ActionRecord;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.state.stateObject.stateImage.StateImage;
+
 @Component
 public class StateInitializer {
     
@@ -229,8 +233,7 @@ public class StateInitializer {
     private ActionRecord createClickSnapshot() {
         return new ActionRecord.Builder()
             .setActionConfig(new ClickOptions.Builder()
-                .setClickType(ClickOptions.Type.LEFT)
-                .build())
+                .build())  // LEFT button is default
             .setActionSuccess(true)
             .build();
     }
@@ -315,6 +318,18 @@ private static List<ActionResult> getFindHistorySubmitButton() {
 Mock execution provides detailed logging for debugging and analysis:
 
 ```java
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
+
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.action.config.options.ClickOptions;
+import io.github.jspinak.brobot.action.action.config.options.PatternFindOptions;
+import io.github.jspinak.brobot.model.state.stateObject.stateImage.StateImage;
+
 @SpringBootTest
 @TestPropertySource(properties = {
     "brobot.core.mock=true",
@@ -322,14 +337,13 @@ Mock execution provides detailed logging for debugging and analysis:
     "brobot.logging.verbosity=VERBOSE"
 })
 public class IntegrationTestWithLogging {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(IntegrationTestWithLogging.class);
     
     @Autowired
     private Action action;
-    
-    @Autowired
-    private StateImageRepository stateImageRepo;
+
+    // No StateImageRepository - create StateImages directly in tests
     
     @Test
     public void testCompleteWorkflow() {
@@ -339,15 +353,23 @@ public class IntegrationTestWithLogging {
         PatternFindOptions findOptions = new PatternFindOptions.Builder()
             .setStrategy(PatternFindOptions.Strategy.BEST)
             .build();
-        
-        StateImage loginButton = stateImageRepo.get("login_button");
+
+        // Create StateImage directly for testing
+        StateImage loginButton = new StateImage.Builder()
+            .addPattern("login_button")
+            .setName("LoginButton")
+            .build();
         ActionResult loginResult = action.perform(findOptions, loginButton);
         logger.info("Login result: {} matches found", loginResult.size());
         
         ClickOptions clickOptions = new ClickOptions.Builder().build();
         action.perform(clickOptions, loginButton);
-        
-        StateImage dashboardMenu = stateImageRepo.get("dashboard_menu");
+
+        // Create StateImage directly for testing
+        StateImage dashboardMenu = new StateImage.Builder()
+            .addPattern("dashboard_menu")
+            .setName("DashboardMenu")
+            .build();
         ActionResult navigationResult = action.perform(findOptions, dashboardMenu);
         logger.info("Navigation result: success={}", navigationResult.isSuccess());
         
@@ -355,7 +377,12 @@ public class IntegrationTestWithLogging {
         PatternFindOptions findAllOptions = new PatternFindOptions.Builder()
             .setStrategy(PatternFindOptions.Strategy.ALL)
             .build();
-        StateImage dataRows = stateImageRepo.get("data_rows");
+
+        // Create StateImage directly for testing
+        StateImage dataRows = new StateImage.Builder()
+            .addPattern("data_rows")
+            .setName("DataRows")
+            .build();
         ActionResult dataResult = action.perform(findAllOptions, dataRows);
         logger.info("Data processing completed with {} operations", dataResult.size());
     }
@@ -386,8 +413,23 @@ Mock runs produce detailed output including:
 ### Modern Assertion Patterns
 
 ```java
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.action.config.options.ClickOptions;
+import io.github.jspinak.brobot.action.action.config.options.PatternFindOptions;
+import io.github.jspinak.brobot.model.state.stateObject.stateImage.StateImage;
+
 public class IntegrationTestAssertions {
-    
+
     @Test
     public void testWorkflowReliability() {
         // Test multiple mock runs for consistency
@@ -399,8 +441,12 @@ public class IntegrationTestAssertions {
             .setSimilarity(0.85)
             .then(new ClickOptions.Builder().build())  // Chain find with click
             .build();
-        
-        StateImage criticalButton = stateImageRepo.get("critical_button");
+
+        // Create StateImage directly for testing
+        StateImage criticalButton = new StateImage.Builder()
+            .addPattern("critical_button")
+            .setName("CriticalButton")
+            .build();
         
         for (int i = 0; i < 10; i++) {
             // Each iteration uses configuration properties
@@ -422,11 +468,12 @@ public class IntegrationTestAssertions {
     public void testStateTransitionProbabilities() {
         // Test state transition reliability
         Map<String, Integer> transitionCounts = new HashMap<>();
-        
-        State loginState = stateRepository.get("LOGIN");
-        StateImage dashboardLink = loginState.getStateImages().stream()
-            .filter(img -> img.getName().equals("dashboard_link"))
-            .findFirst().orElseThrow();
+
+        // Create StateImage directly for testing
+        StateImage dashboardLink = new StateImage.Builder()
+            .addPattern("dashboard_link")
+            .setName("DashboardLink")
+            .build();
         
         PatternFindOptions findAndClick = new PatternFindOptions.Builder()
             .setStrategy(PatternFindOptions.Strategy.BEST)
@@ -447,25 +494,31 @@ public class IntegrationTestAssertions {
     
     @Test
     public void testErrorRecovery() {
-        // Test recovery mechanisms with retry logic
-        StateImage problematicElement = stateImageRepo.get("problematic_element");
-        
-        // Configure action with retry
+        // Test recovery mechanisms with time-based search
+        // Create StateImage directly for testing
+        StateImage problematicElement = new StateImage.Builder()
+            .addPatterns("problematic_element")
+            .setName("ProblematicElement")
+            .build();
+
+        // Configure action with extended search duration (time-based, not iteration-based)
         PatternFindOptions findWithRetry = new PatternFindOptions.Builder()
             .setStrategy(PatternFindOptions.Strategy.BEST)
-            .setMaxIterations(3)  // Retry up to 3 times
-            .setPauseBeforeRetry(0.5)
+            .setSearchDuration(3.0)  // Search for up to 3 seconds
+            .setSimilarity(0.85)
             .build();
-        
+
+        long startTime = System.currentTimeMillis();
         ActionResult result = action.perform(findWithRetry, problematicElement);
-        
-        // In mock mode, the retry behavior is simulated
-        // Check that appropriate retries were attempted
-        assertTrue(result.getAttempts() <= 3, "Too many retry attempts");
-        
-        // For successful recovery after retries
+        long duration = System.currentTimeMillis() - startTime;
+
+        // In mock mode, the search duration behavior is simulated
+        // Verify search stayed within time limits
+        assertTrue(duration <= 3500, "Search exceeded maximum duration");
+
+        // For successful recovery
         if (result.isSuccess()) {
-            assertTrue(result.getAttempts() > 1, "Recovery should have required retries");
+            assertTrue(duration > 100, "Recovery should have required some search time");
         }
     }
 }
@@ -474,6 +527,17 @@ public class IntegrationTestAssertions {
 ### Performance Assertions
 
 ```java
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.action.config.options.ClickOptions;
+import io.github.jspinak.brobot.action.action.config.options.DefineRegionOptions;
+import io.github.jspinak.brobot.action.action.config.options.PatternFindOptions;
+import io.github.jspinak.brobot.model.state.stateObject.stateImage.StateImage;
+
 @Test
 public void testPerformanceCharacteristics() {
     long startTime = System.currentTimeMillis();
@@ -486,11 +550,15 @@ public void testPerformanceCharacteristics() {
             .setDefineAs(DefineRegionOptions.DefineAs.INSIDE_ANCHORS)
             .build())
         .then(new ClickOptions.Builder()
-            .setClickType(ClickOptions.Type.DOUBLE)
+            .setNumberOfClicks(2)  // Double-click
             .build())
         .build();
-    
-    StateImage complexElement = stateImageRepo.get("complex_element");
+
+    // Create StateImage directly for testing
+    StateImage complexElement = new StateImage.Builder()
+        .addPattern("complex_element")
+        .setName("ComplexElement")
+        .build();
     ActionResult result = action.perform(complexFind, complexElement);
     
     long duration = System.currentTimeMillis() - startTime;
@@ -508,8 +576,20 @@ public void testPerformanceCharacteristics() {
 ### Custom Test Matchers
 
 ```java
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
+import org.junit.jupiter.api.Test;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.action.config.options.PatternFindOptions;
+import io.github.jspinak.brobot.model.state.stateObject.stateImage.StateImage;
+
 public class BrobotMatchers {
-    
+
     public static Matcher<ActionResult> hasMinimumMatches(int minCount) {
         return new TypeSafeMatcher<ActionResult>() {
             @Override
@@ -545,8 +625,12 @@ public void testWithCustomMatchers() {
     PatternFindOptions findOptions = new PatternFindOptions.Builder()
         .setStrategy(PatternFindOptions.Strategy.ALL)
         .build();
-    
-    StateImage buttons = stateImageRepo.get("buttons");
+
+    // Create StateImage directly for testing
+    StateImage buttons = new StateImage.Builder()
+        .addPattern("buttons")
+        .setName("Buttons")
+        .build();
     ActionResult result = action.perform(findOptions, buttons);
     
     assertThat(result, hasMinimumMatches(2));
@@ -625,17 +709,27 @@ systemProp.gradle.test.retry.maxFailures=5
 Configure faster mock timings for test environments:
 
 ```java
+import org.junit.jupiter.api.extension.BeforeAllCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
+
+import io.github.jspinak.brobot.config.core.BrobotProperties;
+
 @TestConfiguration
 public class OptimizedTestConfig implements BeforeAllCallback {
-    
+
+    @Autowired
+    private BrobotProperties brobotProperties;
+
     @Override
     public void beforeAll(ExtensionContext context) {
         // Ultra-fast mock timings for tests
-        brobotProperties.getCore().isMock()TimeFindFirst = 0.005;
-        brobotProperties.getCore().isMock()TimeFindAll = 0.01;
-        brobotProperties.getCore().isMock()TimeClick = 0.005;
-        brobotProperties.getCore().isMock()TimeMove = 0.005;
-        brobotProperties.getCore().isMock()TimeDrag = 0.01;
+        brobotProperties.getMock().setTimeFindFirst(0.005);
+        brobotProperties.getMock().setTimeFindAll(0.01);
+        brobotProperties.getMock().setTimeClick(0.005);
+        brobotProperties.getMock().setTimeMove(0.005);
+        brobotProperties.getMock().setTimeDrag(0.01);
     }
 }
 ```
@@ -666,6 +760,57 @@ protected double getTimeoutMultiplier() {
     return 1.0;                       // Normal timeout locally
 }
 ```
+
+## Related Documentation
+
+### Testing Guides
+- **[Testing Introduction](testing-intro.md)** - Overview of Brobot testing capabilities
+- **[Unit Testing Guide](unit-testing.md)** - Unit test patterns with BrobotTestBase
+- **[Mock Mode Guide](mock-mode-guide.md)** - Using mock framework for testing
+- **[Mock Mode Manager](mock-mode-manager.md)** - Centralized mock mode management
+- **[Mock Mode Migration](mock-mode-migration.md)** - Migrating to new mock system
+- **[Mock Stochasticity](mock-stochasticity.md)** - Probabilistic testing patterns
+- **[Test Utilities](test-utilities.md)** - Available testing helper classes
+- **[Profile-Based Testing](profile-based-testing.md)** - Test profiles and configuration
+- **[Testing Strategy](testing-strategy.md)** - Overall testing strategy
+- **[ActionHistory Integration Testing](actionhistory-integration-testing.md)** - Testing with action histories
+- **[ActionHistory Mock Snapshots](actionhistory-mock-snapshots.md)** - Creating mock snapshots
+- **[Debugging Pattern Matching](debugging-pattern-matching.md)** - Pattern matching troubleshooting
+- **[Fail-Safe Image Loading](fail-safe-image-loading.md)** - Robust image loading
+
+### Configuration
+- **[BrobotProperties Usage](../../03-core-library/configuration/brobot-properties-usage.md)** - Complete configuration guide
+- **[Properties Reference](../../03-core-library/configuration/properties-reference.md)** - All available properties
+- **[Auto-Configuration](../../03-core-library/configuration/auto-configuration.md)** - How Brobot auto-configures
+- **[Headless Configuration](../../03-core-library/configuration/headless-configuration.md)** - Running without display
+- **[Action Config Factory](../../03-core-library/guides/configuration/action-config-factory.md)** - Reusable action configurations
+
+### ActionConfig
+- **[ActionConfig Overview](../../03-core-library/action-config/01-overview.md)** - Introduction to ActionConfig system
+- **[ActionConfig Examples](../../03-core-library/action-config/03-examples.md)** - Practical examples
+- **[ActionConfig Reference](../../03-core-library/action-config/05-reference.md)** - Detailed API documentation
+- **[Action Chaining](../../03-core-library/action-config/07-action-chaining.md)** - Chaining actions with .then()
+- **[Complex Workflows](../../03-core-library/action-config/08-complex-workflows.md)** - Multi-step automation
+- **[Conditional Actions](../../03-core-library/action-config/09-conditional-actions.md)** - Conditional execution
+- **[Convenience Methods](../../03-core-library/action-config/18-convenience-methods.md)** - Simple action methods
+- **[ActionResult Components](../../03-core-library/action-config/17-actionresult-components.md)** - Processing results
+
+### State Management
+- **[States Overview](../../01-getting-started/states.md)** - Introduction to state management
+- **[State Transitions](../../01-getting-started/transitions.md)** - How transitions work
+- **[Annotations Guide](../../03-core-library/guides/user-guides/annotations.md)** - @State, @Transition usage
+- **[Dynamic Transitions](../../03-core-library/guides/user-guides/dynamic-transitions.md)** - Runtime transitions
+
+### Logging
+- **[Logging Overview](../../07-logging/index.md)** - Introduction to logging system
+- **[Logging Configuration](../../07-logging/configuration.md)** - Configuring logging behavior
+- **[Logging Usage](../../07-logging/usage.md)** - How to use loggers
+
+### Getting Started
+- **[Quick Start Guide](../../01-getting-started/quick-start.md)** - Getting started with Brobot
+- **[AI Brobot Project Creation](../../01-getting-started/ai-brobot-project-creation.md)** - Complete API reference
+- **[Core Concepts](../../01-getting-started/core-concepts.md)** - Fundamental concepts
+- **[Action Hierarchy](../../01-getting-started/action-hierarchy.md)** - Understanding actions
 
 ## Best Practices
 

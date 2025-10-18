@@ -43,19 +43,19 @@ public class IslandState {
                         .setName("IslandCapture")
                         .setSearchRegionOnObject(
                                 SearchRegionOnObject.builder()
-                                        .targetType(StateObject.Type.IMAGE)
-                                        .targetStateName(
+                                        .setTargetType(StateObject.Type.IMAGE)
+                                        .setTargetStateName(
                                                 "World") // @State removes "State" suffix from class
                                         // name
-                                        .targetObjectName("searchButton")
-                                        .adjustments(
+                                        .setTargetObjectName("searchButton")
+                                        .setAdjustments(
                                                 MatchAdjustmentOptions.builder()
-                                                        .addX(-50) // 50 pixels to the left of
+                                                        .setAddX(-50) // 50 pixels to the left of
                                                         // search button
-                                                        .addY(-250) // 250 pixels above search
+                                                        .setAddY(-250) // 250 pixels above search
                                                         // button
-                                                        .absoluteW(200) // Fixed width of 200 pixels
-                                                        .absoluteH(
+                                                        .setAbsoluteW(200) // Fixed width of 200 pixels
+                                                        .setAbsoluteH(
                                                                 200) // Fixed height of 200 pixels
                                                         .build())
                                         .build())

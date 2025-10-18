@@ -32,7 +32,7 @@ public class WorldTransitions {
 
     /** Navigate from World to Home by clicking the home button. */
     @OutgoingTransition(
-            to = HomeState.class,
+            activate = {HomeState.class},
             pathCost = 1,
             description = "Navigate from World to Home")
     public boolean toHome() {
@@ -43,7 +43,7 @@ public class WorldTransitions {
 
     /** Navigate from World to Island by clicking on an island. */
     @OutgoingTransition(
-            to = IslandState.class,
+            activate = {IslandState.class},
             pathCost = 2,
             description = "Navigate from World to Island")
     public boolean toIsland() {

@@ -1,0 +1,135 @@
+================================================================================
+ACTION-HIERARCHY DOCUMENTATION vs EXAMPLE CODE - QUICK SUMMARY
+================================================================================
+
+PROJECT LOCATIONS:
+  Documentation: /home/jspinak/brobot_parent/brobot/docs/docs/01-getting-started/action-hierarchy.md
+  Example Code:  /home/jspinak/brobot_parent/brobot/examples/01-getting-started/action-hierarchy/
+
+VERSION INFO:
+  Brobot Version in Docs: 1.1.0
+  Brobot Version in Code: 1.1.0
+  Status: MATCH ✓
+
+CODE BLOCK ANALYSIS:
+  Total Code Blocks in Docs: 11 Java code blocks
+  Status Breakdown:
+    ✓ Fully Implemented:        0 blocks (0%)
+    ◐ Partially Implemented:    2 blocks (18%)  - Blocks 1, 2, 4
+    ✗ Not Implemented:          9 blocks (82%)  - Blocks 3, 5-11
+  
+  Overall Match Percentage: 45%
+
+TOP ISSUES FOUND:
+
+  1. CRITICAL - RepetitionOptions Missing
+     • Documented in Blocks 2, 4, and others
+     • Code comment says "doesn't exist in current version"
+     • Impact: Multiple documentation examples won't compile
+
+  2. CRITICAL - VerificationOptions Missing
+     • Shown in Block 2 example code
+     • Not used in actual example implementation
+     • Impact: Fluent API example won't work as documented
+
+  3. HIGH - ConditionalActionChain Underdocumented
+     • 6 out of 11 code blocks use ConditionalActionChain
+     • Only imported in example, not actually demonstrated
+     • Impact: 54% of documentation examples missing from code
+
+  4. HIGH - API Pattern Divergence
+     • Docs show .then() on ConditionalActionChain
+     • Code shows .then() on ActionOptions classes
+     • Confusing for developers on which class supports what
+
+  5. MEDIUM - ClickUntilOptions Not Documented
+     • Implemented in example (Method 3)
+     • Not mentioned in documentation
+     • Creates gap in documentation coverage
+
+DETAILED CODE BLOCK STATUS:
+
+  Block  Topic                              Lines  Status   Match%  Key Issue
+  ────────────────────────────────────────────────────────────────────────────
+  1      Traditional Loop Approach           49-71  ✓ Impl   95%     Minor formatting
+  2      Fluent API Chaining                 74-93  ◐ Part   40%     Missing VerificationOptions, RepetitionOptions
+  3      ConditionalActionChain Basic        96-112 ✗ Miss   0%      Not demonstrated
+  4      Reusable Click-Until Function      115-144 ◐ Part   35%     Uses different pattern
+  5      Basic Conditional Chaining         178-195 ✗ Miss   0%      Login example not in code
+  6      Multi-Step Validation Pattern      214-229 ✗ Miss   0%      Wizard pattern missing
+  7      Custom Search Duration Pattern     232-251 ✗ Miss   0%      Advanced pattern not shown
+  8      Retry with Different Strategies    258-294 ✗ Miss   0%      Multiple fallbacks missing
+  9      State-Based Conditional Logic      297-340 ✗ Miss   0%      State branching not implemented
+  10     ActionChainOptions Integration     346-396 ✗ Miss   0%      Advanced chaining missing
+  11     Complete Form Filling Example      435-519 ✗ Miss   0%      Comprehensive example missing
+
+WHAT'S IN THE EXAMPLE CODE:
+
+  Files:
+    • ActionHierarchyApplication.java    - Spring Boot app entry point
+    • ComplexActionExamples.java         - 4 different clickUntilFound approaches
+    • ExampleRunner.java                 - Demonstrates all 4 methods on startup
+    • ExampleState.java                  - @State annotation demonstration
+    • application.yml                    - Mock mode enabled
+
+  Methods Implemented:
+    1. clickUntilFound()               - Traditional loop (Docs Block 1) ✓
+    2. clickUntilFoundFluent()         - Fluent API (Docs Block 2) ◐
+    3. clickUntilFoundBuiltIn()        - ClickUntilOptions (NOT in docs) ✗
+    4. clickUntilFound(4-param)        - Reusable function (Docs Block 4) ◐
+
+WHAT'S IN THE DOCUMENTATION BUT NOT CODED:
+
+  Missing Implementations:
+    • 6+ ConditionalActionChain patterns (Blocks 3-10)
+    • FormAutomation complete example (Block 11)
+    • Login flow example (Block 5)
+    • Wizard multi-step pattern (Blocks 6-7)
+    • Retry fallback strategies (Block 8)
+    • State-based branching (Block 9)
+    • ActionChainOptions integration (Block 10)
+
+WHAT'S IN THE CODE BUT NOT DOCUMENTED:
+
+  Missing Documentation:
+    • ClickUntilOptions class and usage
+    • ExampleRunner implementation
+    • ExampleState with @State annotation usage
+    • Mock mode configuration details
+
+MAJOR API DISCREPANCIES:
+
+  Class/Method              | Documentation | Example Code | Status
+  ────────────────────────────────────────────────────────────────
+  VerificationOptions       | Used (Block 2) | Not used     | MISSING
+  RepetitionOptions         | Used (Blocks 2,4) | Not used  | MISSING
+  .setVerification()        | Shows usage    | Not used     | UNAVAILABLE
+  .setRepetition()          | Shows usage    | Commented out| UNAVAILABLE
+  ConditionalActionChain    | Extensive use  | Minimal use  | UNDERDOCUMENTED
+  ClickUntilOptions         | Not mentioned  | Implemented  | UNDERDOCUMENTED
+
+RECOMMENDATIONS (PRIORITY ORDER):
+
+  Documentation Updates:
+    1. Add note explaining API availability/deprecation status
+    2. Document ClickUntilOptions and Method 3
+    3. Clarify ConditionalActionChain actual capabilities
+    4. Add version compatibility matrix
+    5. Remove or update deprecated patterns
+
+  Example Code Updates:
+    1. Implement at least 3 ConditionalActionChain patterns from docs
+    2. Add direct code comments linking to documentation sections
+    3. Include ClickUntilOptions documentation reference
+    4. Verify and document RepetitionOptions/VerificationOptions status
+    5. Add comprehensive ConditionalActionChain example
+
+  Project Structure:
+    1. Consider separate "advanced-patterns" example
+    2. Create "conditional-chains-example" sub-project
+    3. Document which features are experimental vs stable
+
+================================================================================
+FULL DETAILED REPORT SAVED TO:
+/home/jspinak/brobot_parent/brobot/examples/01-getting-started/action-hierarchy/COMPARISON_REPORT.md
+================================================================================

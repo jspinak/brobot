@@ -1,20 +1,22 @@
-# Screenshot Capture Methods Comparison Study
+# Screen Capture Provider Configuration Guide
 
-## Executive Summary
+## Overview
 
-A comprehensive comparison study was conducted to determine the optimal screen capture methods for Brobot pattern matching. The research compared different capture tools and methods to identify the best combinations for reliable pattern recognition.
+This guide helps you choose and configure the optimal screen capture method for Brobot pattern matching. It compares different capture providers and tools to help you achieve the best results for reliable pattern recognition.
 
-### Key Finding
-**FFmpeg (JavaCV) achieves 100% pixel-perfect similarity with Windows Snipping Tool and SikuliX IDE**, making it the recommended capture method for Brobot.
+### Recommendation
+**FFmpeg (JavaCV) is the recommended capture provider for Brobot**, offering excellent compatibility with Windows Snipping Tool and SikuliX IDE patterns, while capturing at full physical resolution.
 
-## Test Methodology
+## Capture Methods Comparison
+
+> **Note**: The comparison data below is based on testing configurations. Results may vary depending on your specific environment, display settings, and Windows version.
 
 ### Tools Tested
 
 #### External Capture Tools
 - **Windows Snipping Tool** - Native Windows screen capture (Win+Shift+S)
 - **SikuliX IDE** - Traditional pattern capture tool
-- **Brobot Pattern Capture Tool** - Custom tool using Brobot's capture providers
+- **[Brobot Pattern Capture Tool](./pattern-capture-tool-guide.md)** - Custom tool using Brobot's capture providers
 
 #### Brobot Capture Providers
 - **SikuliX** - Legacy provider for backward compatibility
@@ -51,7 +53,7 @@ A comprehensive comparison study was conducted to determine the optimal screen c
 - **SikuliX Tool ↔ SikuliX/Robot**: 97.2% similarity
 - Minor differences due to capture timing
 
-#### Significant Differences (&lt;80% Similarity)
+#### Significant Differences (<80% Similarity)
 - **Robot Tool** captures showed 69-75% similarity with other methods
 - Likely due to different color space handling or compression
 
@@ -71,15 +73,16 @@ A 200x100 pixel pattern was extracted and matched across all capture methods:
 
 ### Optimal Configuration
 
-Based on the research, the following configuration provides the best results:
+The following configuration provides reliable results (see [Properties Reference](../configuration/properties-reference.md) for all options):
 
 ```properties
 # Recommended Brobot Configuration
 brobot.capture.provider=JAVACV_FFMPEG  # Use bundled FFmpeg
-brobot.dpi.disable=false               # Keep DPI awareness enabled
-brobot.dpi.resize-factor=auto          # Auto-detect scaling
-brobot.action.similarity=0.70          # Can use higher threshold with FFmpeg
+brobot.dpi.disable=true                # Disable DPI awareness for physical resolution
+brobot.dpi.resize-factor=1.0           # No scaling (1.0 = physical resolution)
 ```
+
+> **Note**: Similarity thresholds are configured per-action using `PatternFindOptions`, not as global properties. See [Action Config Reference](../action-config/05-reference.md) for details.
 
 ### Best Practice Workflows
 
@@ -132,6 +135,8 @@ brobot.action.similarity=0.70          # Can use higher threshold with FFmpeg
 4. **No Scaling Artifacts**: Avoids interpolation issues from resolution conversion
 
 ### DPI Scaling Considerations
+
+> For comprehensive DPI handling strategies, see the [DPI and Resolution Guide](../capture/dpi-resolution-guide.md).
 
 With 125% Windows scaling:
 - **Logical methods** (SikuliX, Robot): Capture at 1536x864
@@ -188,23 +193,35 @@ FFmpeg provides the best compression efficiency:
 #### Different Colors Between Captures
 **Solution**: This is normal - slight color variations don't affect pattern matching above 70% similarity threshold.
 
-## Conclusion
+## Summary
 
-The research definitively shows that **FFmpeg (JavaCV) is the optimal capture provider** for Brobot, achieving perfect pixel similarity with both Windows native tools and SikuliX IDE. This makes it the recommended choice for new projects and provides seamless compatibility with existing pattern libraries.
+Based on testing and configuration analysis, **FFmpeg (JavaCV) is the recommended capture provider** for Brobot. It captures at full physical resolution and works well with patterns created using Windows Snipping Tool or SikuliX IDE.
 
 ### Key Takeaways
-- ✅ FFmpeg provides 100% compatibility with Windows and SikuliX IDE
-- ✅ Physical resolution capture (1920x1080) is more reliable than logical
-- ✅ The Brobot Pattern Capture Tool with FFmpeg matches Windows quality exactly
-- ✅ All capture methods are compatible for pattern matching with proper configuration
+- ✅ FFmpeg captures at physical resolution for better accuracy
+- ✅ Compatible with Windows Snipping Tool and SikuliX IDE patterns
+- ✅ The Brobot Pattern Capture Tool supports all capture providers
+- ✅ All capture methods can work together with proper configuration
 
-## Research Data
+### Next Steps
+1. Configure your `application.properties` with recommended settings
+2. Choose a capture workflow that fits your process
+3. Test pattern matching with your specific display configuration
+4. Adjust DPI settings if needed (see [DPI Guide](../capture/dpi-resolution-guide.md))
 
-The complete comparison data is available in the test results, showing:
-- 28 pairwise comparisons between capture methods
-- Pixel-by-pixel similarity analysis
-- File size and compression metrics
-- Color space and brightness analysis
-- Pattern matching simulation results
+## Related Documentation
 
-This comprehensive testing ensures users can confidently choose their capture workflow knowing the exact compatibility and performance characteristics.
+### Capture System
+- **[DPI and Resolution Guide](../capture/dpi-resolution-guide.md)** - Comprehensive DPI scaling strategies and troubleshooting
+- **[Modular Capture System](../capture/modular-capture-system.md)** - Complete capture provider details and configuration
+- **[Pattern Capture Tool Guide](./pattern-capture-tool-guide.md)** - Using the Brobot Pattern Capture Tool
+- **[Quick Start Capture Setup](./quick-start-capture-setup.md)** - Fast setup guide for optimal capture
+- **[Capture Quick Reference](../capture/capture-quick-reference.md)** - Command reference for capture operations
+
+### Configuration
+- **[Properties Reference](../configuration/properties-reference.md)** - Complete Brobot configuration properties
+- **[ActionConfig Reference](../action-config/05-reference.md)** - Action configuration including similarity thresholds
+
+### Testing & Debugging
+- **[Debugging Pattern Matching](../../04-testing/debugging-pattern-matching.md)** - Troubleshooting pattern matching issues
+- **[Mock Mode Guide](../../04-testing/mock-mode-guide.md)** - Testing without GUI

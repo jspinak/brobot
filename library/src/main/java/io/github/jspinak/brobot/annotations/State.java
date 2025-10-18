@@ -13,10 +13,9 @@ import org.springframework.stereotype.Component;
  * getters - @Slf4j from Lombok for logging
  *
  * <p><b>Hidden States:</b> When a state overlays another (e.g., a modal dialog opening over a
- * page), the framework automatically tracks the covered state as "hidden". This enables dynamic
- * transitions using {@code PreviousState.class} to return to whatever was covered. States don't
- * need to explicitly define their hidden states - this is managed automatically by the framework
- * based on state activation patterns.
+ * page), use the canHide parameter to declare which states can be hidden. This enables automatic
+ * hidden state tracking and dynamic transitions using {@code PreviousState.class} to return to
+ * whatever was covered.
  *
  * <p>Usage:
  *
@@ -39,6 +38,20 @@ import org.springframework.stereotype.Component;
  * @Slf4j
  * public class InitialState {
  *     // state definition
+ * }
+ * </pre>
+ *
+ * For modal states that can hide other states:
+ *
+ * <pre>
+ * @State(
+ *     description = "Modal dialog overlay",
+ *     canHide = {"MainPage", "SettingsPage"}
+ * )
+ * @Getter
+ * @Slf4j
+ * public class ModalDialogState {
+ *     // PreviousState transitions will automatically return to hidden state
  * }
  * </pre>
  */
@@ -78,7 +91,7 @@ public @interface State {
      * probability among all initial states. Only applies when initial = true.
      *
      * @return priority value for this initial state
-     * @since 1.2.0
+     * @since 1.1.0
      */
     int priority() default 100;
 
@@ -89,7 +102,7 @@ public @interface State {
      * <p>Example: @State(initial = true, profiles = {"test", "development"})
      *
      * @return array of profile names where this state is initial
-     * @since 1.2.0
+     * @since 1.1.0
      */
     String[] profiles() default {};
 
@@ -108,7 +121,28 @@ public @interface State {
      * </ul>
      *
      * @return the path cost for being in this state
-     * @since 1.3.0
+     * @since 1.1.0
      */
     int pathCost() default 1;
+
+    /**
+     * Names of states that this state can hide when it becomes active.
+     *
+     * <p>This is CRITICAL for PreviousState transitions to work correctly. When a modal or overlay
+     * state becomes active, Brobot needs to know which states it can potentially cover. By
+     * specifying canHide, you enable automatic hidden state tracking.
+     *
+     * <p><b>Example use case:</b> A modal dialog that can appear over either MainPage or
+     * SettingsPage should declare: {@code @State(canHide = {"MainPage", "SettingsPage"})}
+     *
+     * <p>When the modal closes and has a PreviousState transition, Brobot will automatically
+     * return to whichever state was hidden.
+     *
+     * <p><b>Important:</b> The state names in canHide must match the actual state names (either
+     * derived from class name or explicitly set via the name parameter).
+     *
+     * @return array of state names that this state can hide
+     * @since 1.1.0
+     */
+    String[] canHide() default {};
 }

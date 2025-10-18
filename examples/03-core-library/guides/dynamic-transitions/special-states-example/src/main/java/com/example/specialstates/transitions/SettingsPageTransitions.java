@@ -15,7 +15,18 @@ import io.github.jspinak.brobot.model.state.special.CurrentState;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-/** Transitions for the SettingsPage state. Can also open modal and includes self-transitions. */
+/**
+ * Transitions for the SettingsPage state. Can also open modal and includes self-transitions.
+ *
+ * <p>Best Practices Demonstrated:
+ *
+ * <ul>
+ *   <li>staysVisible=true when opening modal (Settings stays behind modal)
+ *   <li>CurrentState for in-page actions (save without leaving page)
+ *   <li>Error handling with try-catch blocks
+ *   <li>Clear logging at different levels (info, debug, error)
+ * </ul>
+ */
 @TransitionSet(state = SettingsPageState.class)
 @Component
 @RequiredArgsConstructor
@@ -28,8 +39,15 @@ public class SettingsPageTransitions {
     @IncomingTransition
     public boolean verifyArrival() {
         log.info("Verifying arrival at SettingsPage");
-        // In mock mode, always return true
-        return true;
+        try {
+            // In mock mode, always return true
+            // In real mode, would check for settings page visibility:
+            // return action.find(settingsPageState.getSettingsHeader()).isSuccess();
+            return true;
+        } catch (Exception e) {
+            log.error("Error verifying arrival at SettingsPage", e);
+            return false;
+        }
     }
 
     @OutgoingTransition(
@@ -38,7 +56,14 @@ public class SettingsPageTransitions {
             description = "Navigate back to main page")
     public boolean backToMain() {
         log.info("Navigating from SettingsPage to MainPage");
-        return true;
+        try {
+            // In real implementation, would click back button:
+            // return action.click(settingsPageState.getBackButton()).isSuccess();
+            return true;
+        } catch (Exception e) {
+            log.error("Error navigating back to MainPage", e);
+            return false;
+        }
     }
 
     @OutgoingTransition(
@@ -48,8 +73,16 @@ public class SettingsPageTransitions {
             description = "Open modal dialog over settings page")
     public boolean openModal() {
         log.info("Opening modal dialog from SettingsPage");
-        // This will make SettingsPage the hidden state for the modal
-        return true;
+        log.debug("This will make SettingsPage the hidden state for the modal");
+        try {
+            // In real implementation, would trigger modal:
+            // Could be a button click, keyboard shortcut, etc.
+            // return action.click(settingsPageState.getHelpButton()).isSuccess();
+            return true;
+        } catch (Exception e) {
+            log.error("Error opening modal from SettingsPage", e);
+            return false;
+        }
     }
 
     @OutgoingTransition(
@@ -58,7 +91,14 @@ public class SettingsPageTransitions {
             description = "Save settings and stay on page")
     public boolean saveSettings() {
         log.info("Saving settings (self-transition using CurrentState)");
-        // Demonstrates CurrentState usage in settings
-        return true;
+        log.debug("Demonstrates CurrentState usage - settings saved but page doesn't change");
+        try {
+            // In real implementation, would click save button:
+            // return action.click(settingsPageState.getSaveButton()).isSuccess();
+            return true;
+        } catch (Exception e) {
+            log.error("Error saving settings", e);
+            return false;
+        }
     }
 }

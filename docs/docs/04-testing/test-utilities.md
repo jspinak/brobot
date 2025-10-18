@@ -13,14 +13,14 @@ Brobot provides comprehensive test utilities to help you write robust and mainta
 All Brobot tests should extend `BrobotTestBase` to ensure proper test configuration:
 
 ```java
-// Note: BrobotProperties must be injected as a dependency
-@Autowired
-private BrobotProperties brobotProperties;
-
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.config.mock.MockModeManager;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class MyBrobotTest extends BrobotTestBase {
+
+    // Note: BrobotProperties is automatically available from BrobotTestBase parent
     
     @Test
     public void testMyFeature() {
@@ -57,6 +57,11 @@ Provides factory methods for creating test data:
 
 ```java
 import io.github.jspinak.brobot.test.utils.BrobotTestUtils;
+import io.github.jspinak.brobot.datatypes.state.state.State;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
+import io.github.jspinak.brobot.reports.ActionResult;
+import java.util.List;
 
 // Create test objects
 State testState = BrobotTestUtils.createTestState("MyState");
@@ -77,6 +82,7 @@ Comprehensive utilities for safe OpenCV Mat operations in tests:
 
 ```java
 import io.github.jspinak.brobot.test.utils.MatTestUtils;
+import org.bytedeco.opencv.opencv_core.Mat;
 
 // Create safe, validated Mats
 Mat colorMat = MatTestUtils.createColorMat(100, 100, 255, 0, 0); // Red
@@ -107,7 +113,7 @@ See [Mat Testing Utilities](mat-testing-utilities.md) for complete documentation
 The `MockModeManager` provides a single source of truth for mock mode configuration:
 
 ```java
-import io.github.jspinak.brobot.config.MockModeManager;
+import io.github.jspinak.brobot.config.mock.MockModeManager;
 
 // Enable mock mode globally
 MockModeManager.setMockMode(true);
@@ -204,6 +210,9 @@ assertTrue(failed.getMatches().isEmpty());
 ### Working with Locations
 
 ```java
+import io.github.jspinak.brobot.test.utils.BrobotTestUtils;
+import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+
 // Create a specific location
 Location loc = BrobotTestUtils.createTestLocation(100, 200);
 
@@ -221,6 +230,9 @@ boolean isClose = BrobotTestUtils.areLocationsApproximatelyEqual(
 ### Working with Regions
 
 ```java
+import io.github.jspinak.brobot.test.utils.BrobotTestUtils;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+
 // Create a specific region
 Region region = BrobotTestUtils.createTestRegion(
     10,   // x
@@ -243,13 +255,17 @@ boolean isClose = BrobotTestUtils.areRegionsApproximatelyEqual(
 ### CI/CD Detection
 
 ```java
+import io.github.jspinak.brobot.test.utils.BrobotTestUtils;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
+
 @Test
 void testRequiringDisplay() {
     if (BrobotTestUtils.isRunningInCI()) {
         // Skip or use mock mode in CI environment
         assumeFalse(true, "Skipping in CI environment");
     }
-    
+
     // Test requiring actual display
     // ...
 }
@@ -258,14 +274,17 @@ void testRequiringDisplay() {
 ### Headless Environment Detection
 
 ```java
+import io.github.jspinak.brobot.test.utils.BrobotTestUtils;
+import org.junit.jupiter.api.Test;
+
 @Test
 void testScreenCapture() {
     if (BrobotTestUtils.isHeadless()) {
         // Use mock mode for headless environments
         // Mock mode is now configured via application.properties:
-// brobot.core.mock=true;
+        // brobot.mock=true
     }
-    
+
     // Proceed with test
     // ...
 }
@@ -276,6 +295,10 @@ void testScreenCapture() {
 ### Sleep Functions
 
 ```java
+import io.github.jspinak.brobot.test.utils.BrobotTestUtils;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 // Short sleep (100ms)
 BrobotTestUtils.shortSleep();
 
@@ -294,6 +317,9 @@ void testWithTiming() {
 ## Test Name Generation
 
 ```java
+import io.github.jspinak.brobot.test.utils.BrobotTestUtils;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+
 // Generate unique test names
 String testName = BrobotTestUtils.generateTestName("TestRun");
 // Result: "TestRun_1735000123456_789"
@@ -343,7 +369,7 @@ void setup() {
     if (BrobotTestUtils.isHeadless() || BrobotTestUtils.isRunningInCI()) {
         // Enable mock mode for headless/CI environments
         // Mock mode is now configured via application.properties:
-// brobot.core.mock=true;
+        // brobot.mock=true
     }
 }
 ```
@@ -370,23 +396,34 @@ void testMouseMovement() {
 ### JUnit 5 Integration
 
 ```java
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.utils.BrobotTestUtils;
+import io.github.jspinak.brobot.datatypes.state.state.State;
+import io.github.jspinak.brobot.reports.ActionResult;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @ExtendWith(MockitoExtension.class)
 class MyBrobotTest extends BrobotTestBase {
-    
+
     @BeforeEach
     void setup() {
         // Use utilities for test setup
         if (BrobotTestUtils.isHeadless()) {
             // Mock mode is now configured via application.properties:
-// brobot.core.mock=true;
+            // brobot.mock=true
         }
     }
-    
+
     @Test
     void testWithUtilities() {
         State state = BrobotTestUtils.createTestState("TestState");
         ActionResult result = BrobotTestUtils.createSuccessfulResult(1);
-        
+
         // Your test logic
         assertNotNull(state);
         assertTrue(result.isSuccess());
@@ -397,11 +434,18 @@ class MyBrobotTest extends BrobotTestBase {
 ### Parameterized Tests
 
 ```java
+import io.github.jspinak.brobot.test.utils.BrobotTestUtils;
+import io.github.jspinak.brobot.reports.ActionResult;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @ParameterizedTest
 @ValueSource(ints = {1, 3, 5, 10})
 void testMultipleMatches(int matchCount) {
     ActionResult result = BrobotTestUtils.createSuccessfulResult(matchCount);
-    
+
     assertEquals(matchCount, result.getMatches().size());
     assertTrue(result.isSuccess());
 }
@@ -449,10 +493,33 @@ class TestDataBuilder {
 - Utilities are designed to work in both mock and real modes
 - Thread-safe for use in parallel test execution
 
-## See Also
+## Related Documentation
 
-- [Unit Testing Guide](unit-testing.md)
-- [Integration Testing](integration-testing.md)
-- [Mock Mode Guide](mock-mode-guide.md)
-- [Enhanced Mock Testing System](../03-core-library/testing/enhanced-mocking.md)
-- [Test Logging Architecture](../03-core-library/testing/test-logging-architecture.md)
+### Testing Guides
+- **[Testing Introduction](./testing-intro.md)** - Overview of Brobot testing approaches
+- **[Unit Testing Guide](./unit-testing.md)** - Unit testing patterns with BrobotTestBase
+- **[Integration Testing](./integration-testing.md)** - Integration test patterns with Spring
+- **[Profile-Based Testing](./profile-based-testing.md)** - Profile-specific test configurations
+- **[Testing Strategy](./testing-strategy.md)** - Overall testing strategy and patterns
+
+### Mock Mode Documentation
+- **[Mock Mode Guide](./mock-mode-guide.md)** - Comprehensive guide to mock mode
+- **[Mock Mode Manager](./mock-mode-manager.md)** - Centralized mock mode management
+- **[Mock Mode Migration](./mock-mode-migration.md)** - Migrating to MockModeManager
+- **[Mock Stochasticity](./mock-stochasticity.md)** - Probabilistic mock behavior
+- **[ActionHistory Mock Snapshots](./actionhistory-mock-snapshots.md)** - Creating mock data
+- **[Action Recording](./action-recording.md)** - Recording actions for mocks
+
+### Mat Testing Documentation
+- **[Mat Testing Utilities](./mat-testing-utilities.md)** - Complete MatTestUtils documentation
+- **[Debugging Pattern Matching](./debugging-pattern-matching.md)** - Troubleshooting pattern matching
+
+### Configuration Documentation
+- **[BrobotProperties Usage](../03-core-library/configuration/brobot-properties-usage.md)** - Complete configuration guide
+- **[Properties Reference](../03-core-library/configuration/properties-reference.md)** - All available properties
+- **[Headless Configuration](../03-core-library/configuration/headless-configuration.md)** - Headless mode setup
+
+### Advanced Testing
+- **[Enhanced Mock Testing System](./advanced/enhanced-mocking.md)** - Advanced mock scenarios
+- **[CI/CD Testing](./advanced/ci-cd-testing.md)** - Mock mode in CI/CD pipelines
+- **[Test Logging Architecture (Proposed)](../proposals/test-logging-architecture.md)** - Proposed design, not implemented

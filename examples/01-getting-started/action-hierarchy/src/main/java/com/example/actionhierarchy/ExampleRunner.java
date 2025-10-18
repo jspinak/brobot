@@ -36,22 +36,18 @@ public class ExampleRunner implements ApplicationRunner {
                         exampleState.getNextButton(), exampleState.getFinishButton());
         log.info("Fluent API approach result: {}", result2);
 
-        log.info("\n3. Built-in ClickUntilOptions approach:");
+        log.info("\n3. Reusable function approach (recommended pattern):");
         boolean result3 =
-                complexActionExamples.clickUntilFoundBuiltIn(
-                        exampleState.getNextButton(), exampleState.getFinishButton());
-        log.info("Built-in approach result: {}", result3);
-
-        log.info("\n4. Reusable function approach (overloaded method):");
-        boolean result4 =
                 complexActionExamples.clickUntilFound(
                         exampleState.getNextButton(), exampleState.getFinishButton(), 10, 1.0);
-        log.info("Reusable function result: {}", result4);
+        log.info("Reusable function result: {}", result3);
 
-        log.info("\n5. Usage example:");
+        log.info("\n4. Usage example:");
         complexActionExamples.usageExample(
                 exampleState.getNextButton(), exampleState.getFinishButton());
 
         log.info("\n=== Action Hierarchy Examples Complete ===");
+        log.info("Note: ClickUntilOptions (previously Method 3) has been removed in Brobot 1.1.0+");
+        log.info("The reusable function approach (Method 3 above) is now the recommended pattern.");
     }
 }

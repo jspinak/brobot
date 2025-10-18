@@ -8,6 +8,69 @@ description: Build sophisticated multi-step automation workflows using ActionCha
 
 This guide demonstrates how to build sophisticated automation workflows by combining multiple actions into complex sequences. These patterns are essential for real-world automation scenarios.
 
+> **Foundation**: This guide assumes familiarity with [Action Chaining](./07-action-chaining.md) basics. For NESTED vs CONFIRM strategies and object type preservation, see that guide.
+
+## Required Imports
+
+All examples in this guide require these imports:
+
+```java
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionChainOptions;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MouseDownOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MouseUpOptions;
+import io.github.jspinak.brobot.action.basic.type.TypeOptions;
+import io.github.jspinak.brobot.action.composite.drag.DragOptions;
+import io.github.jspinak.brobot.action.internal.execution.ActionChainExecutor;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import org.springframework.stereotype.Component;
+```
+
+## Setup: Dependency Injection
+
+All workflow examples require `ActionChainExecutor` and optionally `Action`:
+
+```java
+@Component
+public class MyWorkflows {
+    private final ActionChainExecutor chainExecutor;
+    private final Action action;
+
+    public MyWorkflows(ActionChainExecutor chainExecutor, Action action) {
+        this.chainExecutor = chainExecutor;
+        this.action = action;
+    }
+
+    // Workflow methods go here...
+}
+```
+
+## StateImage Initialization
+
+Before using workflows, create your StateImages:
+
+```java
+StateImage usernameField = new StateImage.Builder()
+    .setName("username-field")
+    .addPattern("images/forms/username.png")
+    .build();
+
+StateImage passwordField = new StateImage.Builder()
+    .setName("password-field")
+    .addPattern("images/forms/password.png")
+    .build();
+
+StateImage loginButton = new StateImage.Builder()
+    .setName("login-button")
+    .addPattern("images/forms/login-btn.png")
+    .build();
+```
+
 ## Form Automation Example
 
 One of the most common automation tasks is filling out forms. Here's a comprehensive example:
@@ -55,44 +118,101 @@ public ActionResult fillLoginForm(StateImage usernameField, String username,
 - Each action in the chain corresponds to a specific UI interaction
 - Delays are added to allow the UI to respond
 - Object collections are passed in the same order as the actions
+- **Important**: The number of ObjectCollections must match the number of actions in the chain
+
+### Object Collection Ordering
+
+The `executeChain()` method accepts variable arguments of ObjectCollections. The ordering is critical:
+- First ObjectCollection → First action
+- Second ObjectCollection → Second action
+- And so on...
+
+In the example above:
+1. `usernameField.asObjectCollection()` → ClickOptions (click username field)
+2. `new ObjectCollection.Builder().withStrings(username).build()` → TypeOptions (type username)
+3. `passwordField.asObjectCollection()` → ClickOptions (click password field)
+4. `new ObjectCollection.Builder().withStrings(password).build()` → TypeOptions (type password)
+5. `loginButton.asObjectCollection()` → ClickOptions (click login button)
+
+**Mismatch Warning**: If the count doesn't match, actions will receive wrong data or fail.
+
+## Recommended: ConditionalActionChain for Forms
+
+For most form workflows, `ConditionalActionChain` provides a more intuitive API:
+
+```java
+import io.github.jspinak.brobot.action.ConditionalActionChain;
+
+public ActionResult fillLoginFormSimple(StateImage usernameField, String username,
+                                        StateImage passwordField, String password,
+                                        StateImage loginButton) {
+    return ConditionalActionChain
+        .find(usernameField)
+        .ifFoundClick()
+        .ifFoundType(username)
+        .then(passwordField)
+        .ifFoundClick()
+        .ifFoundType(password)
+        .then(loginButton)
+        .ifFoundClick()
+        .perform(action);
+}
+```
+
+**Advantages**:
+- Clearer intent with `ifFoundClick()`, `ifFoundType()` methods
+- Automatic error handling with conditional logic
+- No need to manage ObjectCollection ordering manually
+- Built-in logging and debugging
+
+See [Conditional Action Chains](./15-conditional-chains-examples.md) for comprehensive examples.
 
 ## Multi-Step Navigation
 
-Navigate through complex UI hierarchies:
+Navigate through complex UI hierarchies using implicit chaining (simpler and clearer):
 
 ```java
-public ActionResult navigateToSettings(StateImage menuButton, 
-                                     StateImage settingsMenu,
-                                     StateImage securityTab) {
-    
-    ActionChainOptions navigationChain = new ActionChainOptions.Builder(
-        // Open main menu
-        new ClickOptions.Builder()
-            .setPauseAfterEnd(0.5)
-            .build())
-        // Find and click settings in menu
-        .then(new PatternFindOptions.Builder()
-            .setStrategy(PatternFindOptions.Strategy.FIRST)
-            .build())
+public ActionResult navigateToSettings(StateImage menuButton,
+                                       StateImage settingsMenu,
+                                       StateImage securityTab) {
+
+    // Create reusable find-and-click pattern
+    PatternFindOptions findAndClick = new PatternFindOptions.Builder()
+        .setStrategy(PatternFindOptions.Strategy.FIRST)
         .then(new ClickOptions.Builder()
             .setPauseAfterEnd(0.5)
-            .build())
-        // Find and click security tab
-        .then(new PatternFindOptions.Builder()
-            .setStrategy(PatternFindOptions.Strategy.FIRST)
-            .build())
-        .then(new ClickOptions.Builder()
-            .setPauseAfterEnd(0.3)
             .build())
         .build();
-    
-    return chainExecutor.executeChain(navigationChain, new ActionResult(),
-        menuButton.asObjectCollection(),
-        settingsMenu.asObjectCollection(),
-        settingsMenu.asObjectCollection(), // Click the found menu item
-        securityTab.asObjectCollection(),
-        securityTab.asObjectCollection()  // Click the found tab
-    );
+
+    // Step 1: Click menu button
+    action.perform(new ClickOptions.Builder()
+        .setPauseAfterEnd(0.5)
+        .build(), menuButton.asObjectCollection());
+
+    // Step 2: Find and click settings in menu
+    action.perform(findAndClick, settingsMenu.asObjectCollection());
+
+    // Step 3: Find and click security tab
+    ActionResult result = action.perform(findAndClick, securityTab.asObjectCollection());
+
+    return result;
+}
+```
+
+### Alternative: Using ConditionalActionChain
+
+```java
+public ActionResult navigateToSettingsSimple(StateImage menuButton,
+                                             StateImage settingsMenu,
+                                             StateImage securityTab) {
+    return ConditionalActionChain
+        .find(menuButton)
+        .ifFoundClick()
+        .then(settingsMenu)
+        .ifFoundClick()
+        .then(securityTab)
+        .ifFoundClick()
+        .perform(action);
 }
 ```
 
@@ -136,11 +256,36 @@ public ActionResult complexWorkflow(StateImage target, StateImage expectedResult
 
 ## Drag and Drop Operations
 
-While Brobot has a dedicated Drag action, you can also build custom drag operations:
+Brobot provides a dedicated `DragOptions` API for drag-and-drop operations:
+
+```java
+public ActionResult dragAndDrop(StateImage source, StateImage target) {
+
+    DragOptions dragOptions = new DragOptions.Builder()
+        .setDelayBetweenMouseDownAndMove(0.5)
+        .setDelayAfterDrag(0.5)
+        .build();
+
+    ObjectCollection sourceCollection = source.asObjectCollection();
+    ObjectCollection targetCollection = target.asObjectCollection();
+
+    return action.perform(dragOptions, sourceCollection, targetCollection);
+}
+```
+
+**Key Points**:
+- DragOptions handles finding, mouse down, move, and mouse up automatically
+- Pass source and target as separate ObjectCollections
+- Configure timing delays to ensure smooth drag operations
+- Result contains a `Movement` object with start/end locations
+
+### Advanced: Custom Drag Implementation
+
+For specialized drag operations requiring fine control, you can build custom drag workflows:
 
 ```java
 public ActionResult customDragDrop(StateImage source, StateImage target) {
-    
+
     ActionChainOptions dragChain = new ActionChainOptions.Builder(
         // Find source element
         new PatternFindOptions.Builder()
@@ -167,7 +312,7 @@ public ActionResult customDragDrop(StateImage source, StateImage target) {
             .setPauseAfterEnd(0.5)
             .build())
         .build();
-    
+
     return chainExecutor.executeChain(dragChain, new ActionResult(),
         source.asObjectCollection(),
         source.asObjectCollection(), // For mouse move
@@ -178,6 +323,11 @@ public ActionResult customDragDrop(StateImage source, StateImage target) {
     );
 }
 ```
+
+**When to use custom implementation**:
+- Need precise control over each drag phase
+- Require custom validation between drag steps
+- Implementing complex drag patterns like multi-stop dragging
 
 ## Dynamic Workflow Building
 
@@ -208,7 +358,8 @@ public class DynamicWorkflowBuilder {
     public static class WorkflowStep {
         private final String actionType;
         private final Map<String, Object> parameters;
-        
+
+        // Returns an ActionConfig (abstract base class for all action configuration)
         public ActionConfig toActionConfig() {
             switch (actionType) {
                 case "click":
@@ -285,6 +436,7 @@ public ActionResult robustWorkflow(StateImage element1, StateImage element2) {
 4. **Consider failure points**: Build in fallback strategies
 5. **Log intermediate results**: Helps with debugging complex chains
 6. **Test incrementally**: Build and test workflows step by step
+7. **Understand NESTED strategy limitations**: The NESTED strategy creates new ObjectCollections containing only regions from previous matches, **discarding other object types like StateStrings**. This can cause silent failures when chaining actions that use different object types (e.g., find→click→type). For details and solutions, see [Action Chaining](./07-action-chaining.md#critical-insight-object-type-preservation-in-chains)
 
 ## Performance Considerations
 
@@ -295,6 +447,18 @@ public ActionResult robustWorkflow(StateImage element1, StateImage element2) {
 
 ## Next Steps
 
-- Learn about [Conditional Actions](./09-conditional-actions.md) for dynamic workflows
-- Explore [Form Automation](./10-form-automation.md) patterns
-- See [Reusable Patterns](./11-reusable-patterns.md) for building a library of common workflows
+### Related Action Guides
+- **[Action Chaining](./07-action-chaining.md)** - Essential foundation for understanding NESTED vs CONFIRM strategies and object type preservation
+- **[Conditional Action Chains](./15-conditional-chains-examples.md)** - Modern fluent API for building workflows with conditional logic
+- **[Conditional Actions](./09-conditional-actions.md)** - Using RepeatUntilConfig for dynamic conditional workflows
+- **[Form Automation](./10-form-automation.md)** - Specialized patterns for automating form interactions
+- **[Reusable Patterns](./11-reusable-patterns.md)** - Building a library of common workflow patterns
+
+### Reference Documentation
+- **[ActionConfig Overview](./01-overview.md)** - Conceptual foundation and architecture
+- **[API Reference](./05-reference.md)** - Complete ActionConfig class documentation
+- **[Troubleshooting Action Chains](./troubleshooting-chains.md)** - Common errors and solutions
+
+### Migration Resources
+- **[Quick Migration Reference](./02-migration-quick-reference.md)** - Fast lookup for migrating from ActionOptions
+- **[Migration Guide](./12-migration-guide.md)** - Complete migration strategy

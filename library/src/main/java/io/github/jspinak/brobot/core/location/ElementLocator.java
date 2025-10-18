@@ -26,7 +26,7 @@ import io.github.jspinak.brobot.model.state.StateImage;
  *   <li>Thread-safe and stateless
  * </ul>
  *
- * @since 2.0.0
+ * @since 1.1.0
  */
 public interface ElementLocator {
 

@@ -2,7 +2,9 @@
 
 ## Overview
 
-Starting with Brobot 1.1.0, headless mode is **explicitly configured** via properties rather than auto-detected. This simplifies the codebase and avoids issues with Java's unreliable `GraphicsEnvironment.isHeadless()` detection, particularly on Windows systems.
+Starting with Brobot 1.1.x (September 2025), headless mode is **explicitly configured** via properties rather than auto-detected. This simplifies the codebase and avoids issues with Java's unreliable `GraphicsEnvironment.isHeadless()` detection, particularly on Windows systems.
+
+For comprehensive configuration options, see the [Brobot Properties Usage Guide](./brobot-properties-usage.md).
 
 ## Configuration
 
@@ -15,6 +17,14 @@ Headless mode must be explicitly configured via properties:
 # Explicitly set headless mode (default: false)
 brobot.headless=false
 ```
+
+:::info Property Path Options
+Brobot supports two property paths for headless configuration:
+- **`brobot.headless`** - Flat property path (used by `HeadlessDetector` via `@Value` injection)
+- **`brobot.core.headless`** - Nested property path (used in `BrobotProperties` configuration)
+
+Both paths reference the same configuration value. Use `brobot.headless` for simplicity in `application.properties`.
+:::
 
 ### Property Values
 
@@ -30,8 +40,15 @@ brobot.headless=false
 The `HeadlessDetector` component simply reads the configured property value:
 
 ```java
+package io.github.jspinak.brobot.config.environment;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 @Component
 public class HeadlessDetector {
+
+    private final boolean headlessMode;
 
     public HeadlessDetector(@Value("${brobot.headless:false}") boolean brobotHeadless) {
         // Uses configured value ONLY - no auto-detection
@@ -67,8 +84,14 @@ Previous versions attempted various workarounds for headless detection issues. T
 ```properties
 # application-ci.properties
 brobot.headless=true
-brobot.mock=true  # Also enable mock mode for testing
+brobot.mock=true  # Enable mock mode for testing without real UI interactions
 ```
+
+:::tip Mock Mode vs Headless Mode
+- **Mock mode** (`brobot.mock=true`) simulates actions for testing - see [Mock Mode Guide](../../04-testing/mock-mode-guide.md)
+- **Headless mode** (`brobot.headless=true`) indicates no display is available
+- Use both together in CI/CD for complete test environment setup
+:::
 
 ### Docker Container
 
@@ -135,12 +158,32 @@ By using explicit configuration:
 
 **Solution**: Ensure consistent configuration:
 ```java
-// In tests, extend BrobotTestBase
+package com.example.automation;
+
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.action.Action;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+// In tests, extend BrobotTestBase for headless-safe environment
 public class MyTest extends BrobotTestBase {
-    // Mock mode is automatically enabled
-    // Headless-safe testing environment
+
+    @Autowired
+    private Action action;
+
+    @Test
+    public void testMyAutomation() {
+        // Mock mode is automatically enabled
+        // Headless-safe testing environment
+        // Test your automation here
+    }
 }
 ```
+
+For comprehensive testing guidance, see:
+- [Unit Testing Guide](../../04-testing/unit-testing.md)
+- [Integration Testing Guide](../../04-testing/integration-testing.md)
+- [Mock Mode Guide](../../04-testing/mock-mode-guide.md)
 
 ## Best Practices
 
@@ -160,30 +203,50 @@ public class MyTest extends BrobotTestBase {
 
 3. **Use HeadlessDetector, not GraphicsEnvironment**:
    ```java
-   // Good
-   @Autowired
-   private HeadlessDetector headlessDetector;
+   package com.example.automation;
 
-   if (headlessDetector.isHeadless()) { }
+   import io.github.jspinak.brobot.config.environment.HeadlessDetector;
+   import org.springframework.beans.factory.annotation.Autowired;
+   import org.springframework.stereotype.Component;
+   import java.awt.GraphicsEnvironment;
 
-   // Avoid - unreliable
-   if (GraphicsEnvironment.isHeadless()) { }
+   @Component
+   public class MyAutomation {
+
+       @Autowired
+       private HeadlessDetector headlessDetector;
+
+       public void performAction() {
+           // Good - uses Brobot's reliable configuration
+           if (headlessDetector.isHeadless()) {
+               // Handle headless case
+           }
+
+           // Avoid - unreliable due to caching and platform issues
+           if (GraphicsEnvironment.isHeadless()) {
+               // This may give incorrect results
+           }
+       }
+   }
    ```
 
 ## Related Configuration
 
 ### Mock Mode
 Mock mode (simulated actions) is separate from headless mode:
-- **Mock mode**: `brobot.mock=true` - Simulates actions for testing
+- **Mock mode**: `brobot.mock=true` - Simulates actions for testing - see [Mock Mode Guide](../../04-testing/mock-mode-guide.md)
 - **Headless mode**: `brobot.headless=true` - No display available
 
-Both can be used together for CI/CD testing.
+Both can be used together for CI/CD testing. When mock mode is enabled, Brobot automatically uses `MockScreenCaptureService` for screen capture operations.
 
 ### Screen Capture
-When `brobot.headless=true`, ensure appropriate capture provider:
+When running in headless environments, screen capture is typically handled by enabling mock mode:
 ```properties
-brobot.capture.provider=MOCK  # Use mock provider for headless
+brobot.headless=true
+brobot.mock=true  # Automatically uses MockScreenCaptureService
 ```
+
+For advanced capture configuration, see the [Modular Capture System documentation](../capture/modular-capture-system.md). Valid capture provider values include: `JAVACV_FFMPEG`, `ROBOT`, `FFMPEG`, `SIKULIX`, `AUTO`.
 
 ## Summary
 
@@ -192,3 +255,20 @@ brobot.capture.provider=MOCK  # Use mock provider for headless
 - Default is `false` (assumes display is available)
 - No more complex workarounds or Robot initialization tricks
 - SikuliX handles all low-level details automatically
+
+## See Also
+
+### Configuration Guides
+- [Brobot Properties Usage Guide](./brobot-properties-usage.md) - Complete property reference
+- [Auto-Configuration Guide](./auto-configuration.md) - Spring Boot auto-configuration details
+- [Modular Capture System](../capture/modular-capture-system.md) - Screen capture configuration
+
+### Testing Documentation
+- [Mock Mode Guide](../../04-testing/mock-mode-guide.md) - Testing with simulated actions
+- [Unit Testing Guide](../../04-testing/unit-testing.md) - Writing unit tests for Brobot
+- [Integration Testing Guide](../../04-testing/integration-testing.md) - Integration test patterns
+- [Profile-Based Testing](../../04-testing/profile-based-testing.md) - Environment-specific test configuration
+
+### Related Topics
+- [Pure Actions Quick Start](../../01-getting-started/pure-actions-quickstart.md) - Basic action usage
+- [States in Brobot](../../01-getting-started/states.md) - State management concepts

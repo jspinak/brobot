@@ -45,13 +45,18 @@ public class MyUnitTest extends BrobotTestBase {
 When extending `BrobotTestBase`, mock mode is automatically configured via `MockModeManager`:
 
 ```java
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.config.mock.MockModeManager;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class LoginTest extends BrobotTestBase {
     // No manual mock configuration needed!
-    
+
     @Test
     public void testLogin() {
         // Mock mode is already enabled
-        assertTrue(brobotProperties.getCore().isMock());
+        assertTrue(MockModeManager.isMockMode());
     }
 }
 ```
@@ -62,10 +67,7 @@ If not using `BrobotTestBase`, configure through `application.properties`:
 
 ```properties
 # Enable mock mode for unit testing
-brobot.mock.mode=true
-# These are automatically synchronized by MockModeManager:
-brobot.core.mock=true
-brobot.core.mock=true
+brobot.mock=true
 
 # Screenshot configuration
 brobot.screenshot.path=screenshots/
@@ -80,8 +82,7 @@ Or using YAML:
 
 ```yaml
 brobot:
-  core:
-    mock: true
+  mock: true
   screenshot:
     path: screenshots/
     filename: screen
@@ -123,6 +124,21 @@ public class SimpleUnitTest extends BrobotTestBase {
 ### Basic Unit Test Example
 
 ```java
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.actions.actionExecution.Action;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.PatternFindOptions;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.ClickOptions;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.TypeOptions;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.reports.ActionResult;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
 @SpringBootTest
 @TestPropertySource(properties = {
     "brobot.screenshot.test-path=src/test/resources/screenshots/"
@@ -170,8 +186,7 @@ class LoginAutomationTest extends BrobotTestBase {
         
         // Click login button
         ClickOptions clickOptions = new ClickOptions.Builder()
-            .setClickType(ClickOptions.Type.LEFT)
-            .build();
+            .build();  // LEFT button is default
         ActionResult loginResult = action.perform(clickOptions, loginButton);
         
         // Assert
@@ -187,12 +202,21 @@ class LoginAutomationTest extends BrobotTestBase {
 ### Testing with Multiple Screenshots
 
 ```java
+import io.github.jspinak.brobot.actions.actionExecution.Action;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.PatternFindOptions;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.ClickOptions;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.reports.ActionResult;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @Test
 void testNavigationFlow() {
     // Screenshots configured via properties file
     // brobot.screenshot.path=src/test/resources/screenshots/
     // Place files: step1_login.png, step2_dashboard.png, step3_settings.png
-    
+
     // Create find options for navigation
     PatternFindOptions findOptions = new PatternFindOptions.Builder()
         .setStrategy(PatternFindOptions.Strategy.BEST)
@@ -230,9 +254,22 @@ void testNavigationFlow() {
 
 ## Working with ActionResult
 
-The modern API uses `ActionResult` instead of the deprecated `MatchSnapshot`:
+`ActionResult` is returned by action executions and provides comprehensive information about matches found:
 
 ```java
+import io.github.jspinak.brobot.actions.actionExecution.Action;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.PatternFindOptions;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.reports.ActionResult;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Optional;
+import java.util.List;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
 @Test
 void testFindOperations() {
     // Create find configuration
@@ -272,6 +309,16 @@ void testFindOperations() {
 ## Mock Behavior Verification
 
 ```java
+import io.github.jspinak.brobot.actions.actionExecution.Action;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.PatternFindOptions;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.ClickOptions;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.reports.ActionResult;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @Test
 @TestPropertySource(properties = {
     "brobot.mock.time-click=0.1",
@@ -305,6 +352,14 @@ void testMockTimings() {
 ### Pattern-Based Testing
 
 ```java
+import io.github.jspinak.brobot.actions.actionExecution.Action;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.PatternFindOptions;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.reports.ActionResult;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @Test
 void testPatternMatching() {
     // Test with different similarity thresholds
@@ -336,8 +391,14 @@ void testPatternMatching() {
 ### Custom Assertions
 
 ```java
+import io.github.jspinak.brobot.reports.ActionResult;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
+import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class BrobotAssertions {
-    
+
     public static void assertFoundInRegion(ActionResult result, Region expectedRegion) {
         assertTrue(result.isSuccess(), "Expected to find matches");
         
@@ -360,13 +421,24 @@ public class BrobotAssertions {
 
 ## API Migration Notes
 
-**Important**: The Brobot testing framework is transitioning from legacy `ActionOptions` to modern `ActionConfig` classes. While the examples above show the recommended modern approach:
+**Important**: Brobot 1.1.0+ uses modern API patterns. When migrating from Brobot 1.0.x:
 
-- Use `PatternFindOptions`, `ClickOptions`, etc. instead of `ActionOptions`
-- Configure via properties files rather than programmatic setup
-- Some internal components (like `ActionHistory`) still use legacy APIs during the transition
+### ActionOptions → ActionConfig Migration
+- Use `PatternFindOptions`, `ClickOptions`, `TypeOptions`, etc. instead of legacy `ActionOptions`
+- Configure via properties files (`brobot.mock=true`) rather than programmatic setup
+- ActionConfig classes provide better type safety and clearer separation of concerns
 
-This migration ensures better type safety, clearer separation of concerns, and more maintainable test code.
+### ActionRecord for Test History
+- `ActionRecord` is the class for recording action history and mock data
+- Use `ActionRecord` for creating test snapshots and mock responses
+- ActionRecord replaced the legacy MatchSnapshot class from Brobot 1.0.x
+
+### Modern Property Names
+- Use `brobot.mock=true` (NOT `brobot.core.mock` or `brobot.mock.mode`)
+- Use `brobot.screenshot.path` for screenshot configuration
+- Use `brobot.mock.time-*` properties for mock timing configuration
+
+See [ActionOptions to ActionConfig Migration](../03-core-library/migration/actionoptions-to-actionconfig.md) for complete migration guide.
 
 ## Best Practices
 
@@ -398,7 +470,41 @@ This migration ensures better type safety, clearer separation of concerns, and m
 ## Troubleshooting
 
 - **No matches found**: Verify screenshot path configuration in properties
-- **Unexpected results**: Check mock mode is enabled (`brobot.core.mock=true`)
+- **Unexpected results**: Check mock mode is enabled (`brobot.mock=true`)
 - **Slow tests**: Adjust mock timings in properties for faster execution
 - **Flaky tests**: Ensure screenshots represent stable UI states
 - **API conflicts**: Use ActionConfig classes instead of deprecated ActionOptions
+
+## Related Documentation
+
+### Essential Testing Guides
+- **[Testing Introduction](./testing-intro.md)** - Overview of all Brobot testing approaches
+- **[Integration Testing](./integration-testing.md)** - Spring Boot integration testing patterns
+- **[Profile-Based Testing](./profile-based-testing.md)** - Test profiles and configuration isolation
+- **[Test Utilities](./test-utilities.md)** - BrobotTestBase and testing helper classes
+- **[Testing Strategy](./testing-strategy.md)** - Comprehensive testing strategy and best practices
+
+### Mock Mode & Testing
+- **[Mock Mode Guide](./mock-mode-guide.md)** - Comprehensive mock testing framework
+- **[Mock Mode Manager](./mock-mode-manager.md)** - Centralized mock configuration
+- **[Mock Stochasticity](./mock-stochasticity.md)** - Probabilistic testing patterns
+- **[ActionHistory Mock Snapshots](./actionhistory-mock-snapshots.md)** - Creating mock test data
+- **[Action Recording](./action-recording.md)** - Recording actions for test creation
+
+### ActionConfig System
+- **[ActionConfig Overview](../03-core-library/action-config/01-overview.md)** - ActionConfig system introduction
+- **[ActionConfig Examples](../03-core-library/action-config/03-examples.md)** - Practical testing examples
+- **[ActionConfig Reference](../03-core-library/action-config/05-reference.md)** - Complete API reference
+- **[ActionOptions to ActionConfig Migration](../03-core-library/migration/actionoptions-to-actionconfig.md)** - Migration guide from 1.0.x
+
+### Configuration & Setup
+- **[BrobotProperties Usage](../03-core-library/configuration/brobot-properties-usage.md)** - Configuration guide
+- **[Properties Reference](../03-core-library/configuration/properties-reference.md)** - Complete properties documentation
+- **[Headless Configuration](../03-core-library/configuration/headless-configuration.md)** - Headless environment setup
+- **[Auto Configuration](../03-core-library/configuration/auto-configuration.md)** - Spring Boot auto-configuration
+
+### Advanced Testing
+- **[Enhanced Mock Testing System](./advanced/enhanced-mocking.md)** - Advanced mock scenarios
+- **[Mat Testing Utilities](./mat-testing-utilities.md)** - OpenCV Mat testing utilities
+- **[Debugging Pattern Matching](./debugging-pattern-matching.md)** - Troubleshooting pattern matching
+- **[CI/CD Testing](./advanced/ci-cd-testing.md)** - Continuous integration patterns

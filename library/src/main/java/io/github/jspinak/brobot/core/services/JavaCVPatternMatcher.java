@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
  * <p>Benefits over SikuliX: - Direct OpenCV access (no abstraction overhead) - Smaller memory
  * footprint - Better control over matching algorithms - Consistent with JavaCV FFmpeg capture
  *
- * @since 2.0.0
+ * @since 1.1.0
  */
 @Component
 public class JavaCVPatternMatcher implements PatternMatcher {

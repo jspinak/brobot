@@ -32,19 +32,26 @@ ActionConfig (abstract base)
 │   ├── PatternFindOptions
 │   ├── HistogramFindOptions
 │   ├── MotionFindOptions
+│   ├── ColorFindOptions
+│   ├── TextFindOptions
 │   └── VanishOptions
 ├── ClickOptions
 ├── TypeOptions
 ├── MouseMoveOptions
 ├── MouseDownOptions
 ├── MouseUpOptions
-├── ScrollMouseWheelOptions
+├── MousePressOptions
+├── ScrollOptions
 ├── DefineRegionOptions
 ├── HighlightOptions
 ├── DragOptions
-├── ClickUntilOptions
+├── KeyDownOptions
+├── KeyUpOptions
+├── TimeOptions
 └── PlaybackOptions
 ```
+
+See [ActionConfig Reference](./05-reference.md) for detailed documentation of each class.
 
 ## Key Concepts
 
@@ -53,6 +60,8 @@ ActionConfig (abstract base)
 All ActionConfig classes use the builder pattern for construction:
 
 ```java
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+
 ClickOptions click = new ClickOptions.Builder()
     .setNumberOfClicks(2)
     .setPauseBeforeBegin(0.5)
@@ -64,6 +73,9 @@ ClickOptions click = new ClickOptions.Builder()
 Actions can be chained together using the `then()` method:
 
 ```java
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+
 BaseFindOptions findAndClick = new PatternFindOptions.Builder()
     .setSimilarity(0.9)
     .then(new ClickOptions.Builder()
@@ -72,14 +84,20 @@ BaseFindOptions findAndClick = new PatternFindOptions.Builder()
     .build();
 ```
 
+See [Action Chaining](./07-action-chaining.md) for advanced chaining patterns.
+
 ### 3. Composition Over Inheritance
 
 Shared configurations like `MousePressOptions` are composed rather than inherited:
 
 ```java
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
+import io.github.jspinak.brobot.manageStates.mouse.MouseButton;
+
 ClickOptions rightClick = new ClickOptions.Builder()
     .setNumberOfClicks(1)
-    .setPressOptions(new MousePressOptions.Builder()
+    .setPressOptions(MousePressOptions.builder()
         .setButton(MouseButton.RIGHT)
         .build())
     .build();
@@ -91,9 +109,11 @@ All ActionConfig classes inherit these properties from the base class:
 
 - `pauseBeforeBegin` - Delay before starting the action
 - `pauseAfterEnd` - Delay after completing the action
-- `illustrate` - Whether to create visual feedback
-- `successCriteria` - Custom success validation
-- `subsequentActions` - Chained actions to execute
+- `illustrate` - Whether to create visual feedback for debugging
+- `successCriteria` - Custom success validation logic
+- `subsequentActions` - Chained actions to execute after this action
+
+See [ActionConfig Base Class](./05-reference.md#actionconfig-base-class) for complete property documentation.
 
 ## Getting Started
 
@@ -101,9 +121,18 @@ To start using ActionConfig:
 
 ### Option 1: Convenience Methods (Recommended for Simple Operations)
 
-As of Brobot 2.1, the simplest way to perform common actions is through convenience methods:
+As of Brobot 1.1.0, the simplest way to perform common actions is through convenience methods:
 
 ```java
+import org.springframework.beans.factory.annotation.Autowired;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import org.sikuli.script.Pattern;
+import org.sikuli.script.Location;
+
+@Autowired
+private Action action;
+
 // Direct actions without ObjectCollection
 action.click(region);
 action.type("text");
@@ -125,7 +154,22 @@ For more complex operations or when you need fine control:
 Example:
 
 ```java
-// Find and click a button
+import org.springframework.beans.factory.annotation.Autowired;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+
+@Autowired
+private Action action;
+
+// Define the button image to find
+StateImage buttonImage = new StateImage.Builder()
+    .withPattern(new Pattern("button.png"))
+    .build();
+
+// Find and click the button with custom similarity
 ActionResult result = action.perform(
     new PatternFindOptions.Builder()
         .setSimilarity(0.85)
@@ -141,9 +185,18 @@ if (result.isSuccess()) {
 }
 ```
 
+See [ActionResult Components](./17-actionresult-components.md) for details on processing results.
+
 ## Next Steps
 
-- [Quick Migration Reference](./quick-migration-reference) - Learn how to migrate from ActionOptions
-- [Code Examples](./examples) - See ActionConfig in action
-- [Fluent API Guide](./fluent-api) - Master the fluent API patterns
-- [API Reference](./reference) - Detailed API documentation
+- [Quick Migration Reference](./02-migration-quick-reference.md) - Learn how to migrate from ActionOptions
+- [Code Examples](./03-examples.md) - See ActionConfig in action
+- [Action Chaining](./07-action-chaining.md) - Master action chaining patterns
+- [API Reference](./05-reference.md) - Detailed API documentation
+
+## Related Documentation
+
+- [Actions Overview](/docs/03-core-library/guides/actions/actions-overview.md) - Understanding the Action system
+- [StateImage Guide](/docs/03-core-library/guides/states/state-images.md) - Working with state images
+- [Builder Pattern Guide](/docs/03-core-library/guides/advanced/builder-patterns.md) - Advanced builder techniques
+- [Configuration Properties](/docs/03-core-library/guides/configuration/properties-reference.md) - Application-level configuration

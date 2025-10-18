@@ -7,7 +7,6 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.action.composite.repeat.ClickUntilOptions;
 import io.github.jspinak.brobot.model.state.StateImage;
 
 import lombok.RequiredArgsConstructor;
@@ -67,14 +66,10 @@ public class ComplexActionExamples {
                                         .withSuccessLog(findTarget.getName() + " found!")
                                         .withFailureLog(findTarget.getName() + " not yet visible")
                                         .build())
-                        // Note: setRepetition method doesn't exist in current version
-                        // This would handle repetition in the documentation version
-                        // .setRepetition(new RepetitionOptions.Builder()
-                        //         .setMaxTimesToRepeatActionSequence(10)  // Try up to 10 times
-                        //         .setPauseBetweenActionSequences(0.5)    // Brief pause between
-                        // attempts
-                        //         .build())
                         .build();
+
+        // Note: RepetitionOptions shown in documentation is not implemented in Brobot 1.1.0+.
+        // For retry logic, use a manual loop (Method 1) or create a custom function (Method 3).
 
         // Execute the chained action with both images
         ObjectCollection targets =
@@ -85,43 +80,12 @@ public class ComplexActionExamples {
     }
 
     /**
-     * Method 3: Using the Built-in ClickUntilOptions (Deprecated but Available) From
-     * action-hierarchy.md lines 104-133
-     */
-    // Using Brobot's built-in ClickUntil composite action
-    public boolean clickUntilFoundBuiltIn(StateImage clickTarget, StateImage findTarget) {
-        // Create ClickUntilOptions configured to click until objects appear
-        ClickUntilOptions clickUntil =
-                new ClickUntilOptions.Builder()
-                        .setCondition(ClickUntilOptions.Condition.OBJECTS_APPEAR)
-                        .withBeforeActionLog(
-                                "Clicking until " + findTarget.getName() + " appears...")
-                        .withSuccessLog(findTarget.getName() + " appeared!")
-                        .withFailureLog("Timeout - " + findTarget.getName() + " did not appear")
-                        // Note: setRepetition method doesn't exist in current version
-                        // This would handle repetition in the documentation version
-                        // .setRepetition(new RepetitionOptions.Builder()
-                        //         .setMaxTimesToRepeatActionSequence(10)
-                        //         .setPauseBetweenActionSequences(1.0)
-                        //         .build())
-                        .build();
-
-        // Create ObjectCollections
-        // If using 1 collection: clicks objects until they appear
-        // If using 2 collections: clicks collection 1 until collection 2 appears
-        ObjectCollection clickCollection =
-                new ObjectCollection.Builder().withImages(clickTarget).build();
-        ObjectCollection appearCollection =
-                new ObjectCollection.Builder().withImages(findTarget).build();
-
-        // Execute with two collections - click first until second appears
-        ActionResult result = action.perform(clickUntil, clickCollection, appearCollection);
-        return result.isSuccess();
-    }
-
-    /**
-     * Method 4: Creating a Reusable Click-Until-Found Function From action-hierarchy.md lines
+     * Method 3: Creating a Reusable Click-Until-Found Function From action-hierarchy.md lines
      * 136-175
+     *
+     * Note: The built-in ClickUntilOptions demonstrated in the documentation has been removed
+     * in Brobot 1.1.0+ as part of clean API refactoring. This reusable function approach
+     * is now the recommended pattern for implementing click-until-found behavior.
      */
     // Creating a clean, reusable function that combines the best approaches
     public boolean clickUntilFound(
@@ -144,13 +108,11 @@ public class ComplexActionExamples {
                                         .withFailureLog("Target not yet visible")
                                         .setSearchDuration(0.5) // Quick check
                                         .build())
-                        // Note: setRepetition method doesn't exist in current version
-                        // This would handle repetition in the documentation version
-                        // .setRepetition(new RepetitionOptions.Builder()
-                        //         .setMaxTimesToRepeatActionSequence(maxAttempts)
-                        //         .setPauseBetweenActionSequences(0.5)
-                        //         .build())
                         .build();
+
+        // Note: RepetitionOptions not implemented in Brobot 1.1.0+.
+        // This function demonstrates the recommended pattern: wrap retry logic in a clean function
+        // with configurable parameters (maxAttempts, pauseBetween).
 
         // Combine both images in one collection
         ObjectCollection targets =
@@ -159,10 +121,9 @@ public class ComplexActionExamples {
         // Execute and check the final result
         ActionResult result = action.perform(clickAndCheck, targets);
 
-        // The chain succeeds if the final find action succeeded
-        // The chain succeeds if the final find action succeeded
-        // Note: getLastActionResult() doesn't exist in current version
-        return result.isSuccess(); // && result.getLastActionResult().isSuccess();
+        // Return overall success status
+        // Note: getLastActionResult() method not implemented in Brobot 1.1.0+
+        return result.isSuccess();
     }
 
     /** Usage example from documentation line 174 */

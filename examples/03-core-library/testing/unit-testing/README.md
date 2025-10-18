@@ -307,6 +307,58 @@ void testActionPerformance() {
    - Minimize Spring context loading
    - Use unit tests over integration tests when possible
 
+## Known Limitations
+
+### Tests Requiring Full Brobot Integration
+
+**Status**: 8 out of 63 tests (13%) require full Brobot framework integration and will fail without it.
+
+This example project focuses on **unit testing patterns** and uses simplified placeholder annotations to demonstrate testing techniques. The following test classes require the full Brobot `Action` bean which is only available when Brobot's complete Spring Boot auto-configuration is loaded:
+
+- `DocumentationExamplesTest` (5 tests) - Demonstrates action patterns from Brobot documentation
+- `CustomAssertionsTest` (3 tests) - Shows custom assertions for ActionResult objects
+
+**Working Tests** (55/63 = 87% success rate):
+- ✅ State unit tests (13 tests)
+- ✅ Transition unit tests (17 tests)
+- ✅ Service unit tests (13 tests)
+- ✅ Integration tests (4 tests)
+- ✅ Mock mode tests (3 tests)
+- ✅ Test builder examples (5 tests)
+
+### Why This Limitation Exists
+
+This example uses **placeholder annotations** (`@State`, `@StateObject`, `@StateString`, `@StateRegion`) that mimic Brobot's real annotations but don't include the full framework integration. This design choice:
+
+1. **Focuses on testing patterns** - Shows how to write good tests without requiring full Brobot setup
+2. **Enables fast testing** - Unit tests run in milliseconds without framework overhead
+3. **Demonstrates isolation** - Shows how to test components independently
+4. **Simplifies setup** - No complex Brobot configuration needed for most tests
+
+### Running Tests
+
+```bash
+# Run all tests (8 will fail, 55 will pass)
+./gradlew test
+
+# Run only unit tests (all pass)
+./gradlew unitTests
+
+# Run integration tests (all pass)
+./gradlew integrationTests
+```
+
+### Using These Patterns in Real Projects
+
+When building a real Brobot application:
+
+1. **Use real Brobot annotations** from `io.github.jspinak:brobot` dependency
+2. **Enable Brobot auto-configuration** in your Spring Boot application
+3. **All tests will pass** including DocumentationExamplesTest and CustomAssertionsTest
+4. **Follow these same testing patterns** - they work in full Brobot applications
+
+The testing techniques demonstrated here (parameterized tests, nested organization, custom builders, custom assertions, mock mode) all work identically in real Brobot applications.
+
 ## Next Steps
 
 - Add mutation testing with PITest

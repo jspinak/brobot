@@ -1,5 +1,66 @@
 # Conditional Action Chains
 
+## Required Imports
+
+All examples in this guide assume the following imports:
+
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.type.TypeOptions;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.conditionals.ConditionalActionChain;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+```
+
+## Setup and Prerequisites
+
+### Component Setup
+
+All ConditionalActionChain examples require a Spring component with injected Action service:
+
+```java
+@Component
+public class MyAutomation {
+    private static final Logger log = LoggerFactory.getLogger(MyAutomation.class);
+
+    @Autowired
+    private Action action;
+
+    // Your automation methods here
+}
+```
+
+### StateImage Initialization
+
+StateImages must be initialized before use. Example:
+
+```java
+StateImage buttonImage = new StateImage.Builder()
+    .addPattern("images/buttons/my-button.png")
+    .setSimilarity(0.85)
+    .build();
+```
+
+For more on StateImage setup, see [States in Brobot](../../01-getting-started/states.md).
+
+### Assumed Variables
+
+:::info Assumed Variables
+Unless otherwise specified, the following examples assume you have:
+- `@Autowired Action action` - Injected Brobot Action service
+- StateImage variables (e.g., `buttonImage`, `menuButton`) - Pre-initialized StateImage instances
+- Proper Spring component context with `@Component` annotation
+
+See the [Production Examples](#production-examples) section for complete, compilable code.
+:::
+
 ## Overview
 
 `ConditionalActionChain` provides a powerful fluent API for building complex action sequences with conditional execution. This implementation includes the crucial `then()` method for sequential composition and numerous convenience methods.
@@ -233,7 +294,7 @@ public ActionResult debugWorkflow() {
 
 ### No Explicit Waits
 
-Unlike process-based automation, ConditionalActionChain does **not** include a `wait()` method. This is intentional:
+Following model-based automation principles, ConditionalActionChain does **not** include a `wait()` method. Instead, timing is configured through action options:
 
 ```java
 // WRONG - Process-based approach with explicit waits
@@ -340,6 +401,76 @@ public void testEnhancedChainFeatures() {
 - `ifFound(Consumer<ConditionalActionChain>)` - Chain operations
 - `ifNotFound(Consumer<ConditionalActionChain>)` - Chain operations
 
+## Production Examples
+
+Here's a complete, compilable example showing ConditionalActionChain in a real component:
+
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.conditionals.ConditionalActionChain;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+
+@Component
+public class LoginAutomationExample {
+    private static final Logger log = LoggerFactory.getLogger(LoginAutomationExample.class);
+
+    @Autowired
+    private Action action;
+
+    // Initialize StateImages (in real code, these would come from State definitions)
+    private final StateImage loginButton = new StateImage.Builder()
+        .addPattern("images/login/login-button.png")
+        .build();
+
+    private final StateImage usernameField = new StateImage.Builder()
+        .addPattern("images/login/username-field.png")
+        .build();
+
+    private final StateImage passwordField = new StateImage.Builder()
+        .addPattern("images/login/password-field.png")
+        .build();
+
+    private final StateImage submitButton = new StateImage.Builder()
+        .addPattern("images/login/submit-button.png")
+        .build();
+
+    private final StateImage successMessage = new StateImage.Builder()
+        .addPattern("images/login/success-message.png")
+        .build();
+
+    public ActionResult performLogin(String username, String password) {
+        return ConditionalActionChain.find(loginButton)
+            .ifFoundClick()
+            .ifNotFoundLog("Login button not visible")
+            .then(usernameField)
+            .ifFoundClick()
+            .ifFoundType(username)
+            .then(passwordField)
+            .ifFoundClick()
+            .ifFoundType(password)
+            .then(submitButton)
+            .ifFoundClick()
+            .then(successMessage)
+            .ifFoundLog("Login successful!")
+            .ifNotFoundLog("Login might have failed")
+            .perform(action, new ObjectCollection.Builder().build());
+    }
+}
+```
+
+This example is fully compilable and demonstrates:
+- Complete Spring component setup with @Component and @Autowired
+- StateImage initialization with proper builders
+- ConditionalActionChain usage with real variables
+- Error handling and logging
+- Production-ready code structure
+
 ## Best Practices
 
 1. **Use then() for Sequential Actions**: The then() method is essential for multi-step workflows
@@ -369,10 +500,37 @@ ConditionalActionChain.find(button)
     .ifFoundType("text")
 ```
 
+## Related Documentation
+
+### Getting Started
+- **[Pure Actions Quick Start](../../01-getting-started/pure-actions-quickstart.md)** - Simpler alternatives for basic operations
+- **[States in Brobot](../../01-getting-started/states.md)** - Understanding StateImage and state management
+
+### Core ActionConfig Guides
+- **[ActionConfig Overview](./01-overview.md)** - ActionConfig architecture and concepts
+- **[Action Chaining](./07-action-chaining.md)** - ActionChainOptions for complex workflows
+- **[Complex Workflows](./08-complex-workflows.md)** - Advanced workflow patterns
+- **[Form Automation](./10-form-automation.md)** - Complete form examples
+- **[Conditional Actions](./09-conditional-actions.md)** - Alternative conditional approaches
+- **[Convenience Methods](./18-convenience-methods.md)** - Simpler one-line API
+
+### Reference Documentation
+- **[ActionResult Components](./17-actionresult-components.md)** - Understanding action results
+- **[API Reference](./05-reference.md)** - Complete method signatures
+
+### Testing Documentation
+- **[Mock Mode Guide](../../../04-testing/mock-mode-guide.md)** - Testing with mocks
+- **[Integration Testing](../../../04-testing/integration-testing.md)** - End-to-end testing
+- **[Unit Testing](../../../04-testing/unit-testing.md)** - Unit test patterns
+
+### Migration Resources
+- **[Migration Guide](./12-migration-guide.md)** - Upgrading from ActionOptions
+- **[Quick Migration Reference](./02-migration-quick-reference.md)** - Fast lookup guide
+
 ## Common Pitfalls to Avoid
 
-1. **Don't Use Explicit Waits**: No wait() method by design - use action configurations
+1. **Don't Use Explicit Waits**: No wait() method - use action configurations for timing
 2. **Don't Forget then()**: Use then() to move between different elements
-3. **Don't Mix APIs**: Use ConditionalActionChain, not the basic version
+3. **Don't Mix APIs**: Use ConditionalActionChain consistently
 4. **Don't Ignore State**: Think in terms of application states, not process steps
 5. **Don't Skip Error Handling**: Always handle the ifNotFound case

@@ -1,8 +1,14 @@
+---
+sidebar_position: 2
+title: Configuration Guide
+description: Comprehensive guide to configuring Brobot's logging system
+---
+
 # Logging Configuration Guide
 
 ## Configuration Properties
 
-The Brobot logging system uses standard Spring Boot logging configuration for level control.
+Brobot extends standard Spring Boot logging with custom formatters, enrichment features, and correlation tracking. You can use both standard Spring Boot logging properties (`logging.level.*`) and Brobot-specific properties for advanced features.
 
 ### Logging Level Configuration
 
@@ -60,35 +66,41 @@ brobot.logging.enrichment.include-memory-usage=false
 
 ## Preset Configurations
 
-Use presets for common scenarios:
+Brobot provides logging presets for common scenarios. Presets must be applied programmatically (they cannot be set via properties):
 
 ```properties
-# Available presets: PRODUCTION, DEVELOPMENT, TESTING, SILENT
-brobot.logging.preset=DEVELOPMENT
+# Presets are applied programmatically, not via properties
+# Use Spring profiles to trigger preset application:
+spring.profiles.active=development  # Triggers DEVELOPMENT preset via LoggingPresetManager
 ```
+
+**Available Presets**: PRODUCTION, DEVELOPMENT, TESTING, SILENT
+
+**Note**: Presets configure output format, async performance, and enrichment settings. You must still configure Spring Boot logging levels separately via `logging.level.*` properties.
 
 ### Preset Details
 
+**Important**: Presets configure output format, async settings, and enrichment. They do NOT automatically set logging levels - you must configure `logging.level.*` properties manually in `application.properties`.
+
 #### PRODUCTION
-- Recommended level: `logging.level.root=WARN`
-- Format: JSON
-- Async: true
-- Minimal enrichment
+- **Sets**: Format=JSON, Async=true, Screenshots=false
+- **Recommended level** (set manually): `logging.level.root=WARN`
+- **Use case**: Production environments with log aggregation
 
 #### DEVELOPMENT
-- Recommended level: `logging.level.root=DEBUG`
-- Format: SIMPLE
-- Async: false
-- Full enrichment including screenshots
+- **Sets**: Format=SIMPLE, Async=false, Screenshots=true
+- **Recommended level** (set manually): `logging.level.root=DEBUG`
+- **Use case**: Local development with full debugging
 
 #### TESTING
-- Recommended level: `logging.level.root=INFO`
-- Additional: `logging.level.io.github.jspinak.brobot.action=DEBUG`
-- Focused on test execution
+- **Sets**: Format=STRUCTURED, Screenshots=false
+- **Recommended level** (set manually): `logging.level.root=INFO` and `logging.level.io.github.jspinak.brobot.action=DEBUG`
+- **Use case**: Automated test execution
 
 #### SILENT
-- Recommended level: `logging.level.root=OFF`
-- No logging output
+- **Sets**: Format=SIMPLE, minimal enrichment
+- **Recommended level** (set manually): `logging.level.root=OFF`
+- **Use case**: Suppressing all logging output
 
 ## Logback Configuration
 
@@ -149,7 +161,8 @@ brobot.debug.image.output-dir=debug/image-finding
 ```
 
 **Important Notes:**
-- **Images are NOT saved by default** - both `save-history` and `debug.image.enabled` default to `false`
+- **Images are NOT saved by default** - both `save-history` and `debug.image.enabled` default to `false` (set in `brobot-defaults.properties`)
+- **Logging defaults** are defined in `brobot-logging-defaults.properties` (separate from main `brobot-defaults.properties`)
 - Enable image saving only when actively debugging to avoid disk space issues
 - Images include action visualizations, match highlights, and search regions
 - When enabled at INFO log level, you may see `[SIDEBAR]` and `[IMAGE_WRITE]` messages
@@ -175,15 +188,98 @@ logging.level.io.github.jspinak.brobot.util.image.io=DEBUG
 Configure output format and enrichment at runtime:
 
 ```java
-@Autowired
-private LoggingConfiguration config;
+import io.github.jspinak.brobot.logging.LoggingConfiguration;
+import io.github.jspinak.brobot.logging.LoggingConfiguration.LoggingPreset;
+import io.github.jspinak.brobot.logging.LoggingConfiguration.OutputFormat;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-// Apply a preset for format and performance settings
-config.applyPreset(LoggingPreset.DEVELOPMENT);
+@Component
+public class LoggingSetup {
 
-// Change output format
-config.getOutput().setFormat(OutputFormat.JSON);
+    @Autowired
+    private LoggingConfiguration config;
 
-// Note: Logging levels are controlled via Spring Boot's
-// LoggingSystem and cannot be changed via LoggingConfiguration
+    public void configureLogging() {
+        // Apply a preset for format and performance settings
+        config.applyPreset(LoggingPreset.DEVELOPMENT);
+
+        // Change output format
+        config.getOutput().setFormat(OutputFormat.JSON);
+
+        // Configure enrichment
+        config.getEnrichment().setIncludeScreenshots(true);
+        config.getEnrichment().setIncludeSimilarityScores(true);
+
+        // Configure performance
+        config.getPerformance().setAsync(false);
+
+        // Note: Logging levels are controlled via Spring Boot's
+        // LoggingSystem and cannot be changed via LoggingConfiguration
+    }
+}
 ```
+
+**Alternative**: Use `LoggingPresetManager` with Spring profiles:
+
+```java
+import io.github.jspinak.brobot.logging.config.LoggingAutoConfiguration.LoggingPresetManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
+
+@Component
+public class ProfileBasedLogging {
+
+    @Autowired
+    private LoggingPresetManager presetManager;
+
+    @Autowired
+    private Environment environment;
+
+    public void applyProfilePreset() {
+        // Automatically applies preset based on active Spring profile
+        presetManager.applyProfilePreset(environment.getActiveProfiles());
+    }
+}
+```
+
+## Related Documentation
+
+### Logging System
+- **[Logging Overview](index.md)** - Introduction to Brobot's logging system and key concepts
+- **[Usage Guide](usage.md)** - How to use logging in your code with ActionConfig and custom messages
+- **[Output Formats](output-formats.md)** - Detailed guide to SIMPLE, STRUCTURED, and JSON output formats
+- **[Performance Guide](performance.md)** - Performance considerations and optimization strategies
+
+### Configuration & Properties
+- **[Properties Reference](../03-core-library/configuration/properties-reference.md)** - Complete reference for all Brobot configuration properties
+- **[BrobotProperties Usage](../03-core-library/configuration/brobot-properties-usage.md)** - How to access and use configuration in your code
+- **[Auto-Configuration Guide](../03-core-library/configuration/auto-configuration.md)** - Spring Boot auto-configuration and property loading
+
+### Testing & Debugging
+- **[Testing Introduction](../04-testing/testing-intro.md)** - Overview of Brobot testing capabilities
+- **[Mock Mode Guide](../04-testing/mock-mode-guide.md)** - Testing without GUI using mock mode
+- **[Profile-Based Testing](../04-testing/profile-based-testing.md)** - Using Spring profiles for test configuration
+- **[Integration Testing](../04-testing/integration-testing.md)** - Full workflow testing patterns
+- **[Debugging Pattern Matching](../04-testing/debugging-pattern-matching.md)** - Image debugging and capture configuration
+
+### Action Configuration
+- **[ActionConfig Overview](../03-core-library/action-config/01-overview.md)** - Modern ActionConfig API introduction
+- **[ActionConfig Reference](../03-core-library/action-config/05-reference.md)** - Complete API reference including all Options classes
+- **[ActionConfig Examples](../03-core-library/action-config/03-examples.md)** - Practical examples of using ActionConfig
+
+### Getting Started
+- **[Quick Start Guide](../01-getting-started/quick-start.md)** - Getting started with Brobot
+- **[Installation Guide](../01-getting-started/installation.md)** - Platform setup and dependencies
+- **[AI Project Creation](../01-getting-started/ai-brobot-project-creation.md)** - Comprehensive project setup guide
+
+### Advanced Topics
+- **[AspectJ Usage Guide](../03-core-library/advanced/aspectj-usage-guide.md)** - Aspect-oriented programming with Brobot
+- **[Advanced Illustration System](../03-core-library/guides/advanced/advanced-illustration-system.md)** - Visual feedback and illustration features
+- **[Persistence User Guide](../03-core-library/guides/user-guides/persistence-user-guide.md)** - Persisting automation data and history
+
+### External Resources
+- **[Spring Boot Logging Documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.logging)** - Official Spring Boot logging guide
+- **[Logback Documentation](https://logback.qos.ch/manual/)** - Logback configuration and usage
+- **[SLF4J Documentation](https://www.slf4j.org/manual.html)** - SLF4J logging facade guide

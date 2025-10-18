@@ -1,7 +1,7 @@
 # Pattern Creation Tools Guide
 
 ## Overview
-This guide helps you choose the best tool for creating pattern images that work with Brobot's pattern matching system. The choice of pattern creation tool directly impacts the accuracy of your UI automation.
+This guide helps you choose the best tool for creating pattern images that work with Brobot's [pattern matching system](../../04-testing/debugging-pattern-matching.md). The choice of pattern creation tool directly impacts the accuracy of your UI automation.
 
 ## Recommended Tools
 
@@ -10,13 +10,15 @@ These tools provide the best pattern matching during runtime automation:
 
 #### 1. **Windows Snipping Tool** (RECOMMENDED)
 - **Resolution**: 1920x1080 (physical)
-- **Runtime Match Rate**: **95-100%** with Brobot's JAVACV_FFMPEG capture
+- **Runtime Match Rate**: **95-100%** with Brobot's [JAVACV_FFMPEG capture provider](../capture/modular-capture-system.md)
 - **Platform**: Windows only
 - **Why it's best**: Produces the cleanest, artifact-free patterns
 - **How to use**:
   1. Press `Win + Shift + S` to open Snipping Tool
   2. Select the area you want to capture
   3. Save as PNG in your project's `images/` directory
+
+For detailed provider comparison, see the [Capture Methods Comparison](./capture-methods-comparison.md).
 
 #### 2. **macOS Screenshot Tool**
 - **Platform**: macOS
@@ -50,7 +52,7 @@ These tools provide the best pattern matching during runtime automation:
 ## Brobot Configuration
 
 ### Default Configuration (Optimal)
-The default Brobot configuration is optimized for patterns created with Windows Snipping Tool, SikuliX IDE, or Brobot FFmpeg Tool:
+The default Brobot configuration is optimized for patterns created with Windows Snipping Tool, SikuliX IDE, or Brobot FFmpeg Tool. See the [Properties Reference](../configuration/properties-reference.md) for complete configuration options.
 
 ```properties
 # Already configured in brobot-defaults.properties
@@ -64,6 +66,8 @@ This configuration:
 - Disables DPI awareness to avoid scaling issues
 - Uses no pattern scaling for 1:1 pixel matching
 - Provides 100% similarity with recommended tools
+
+For more on DPI handling, see the [DPI Resolution Guide](../capture/dpi-resolution-guide.md).
 
 ### Alternative Configuration (For Logical Resolution Tools)
 If you're using tools that capture at logical resolution (1536x864 with 125% DPI scaling):
@@ -82,7 +86,7 @@ brobot.dpi.resize-factor=1.0
    - Windows: Windows Snipping Tool (Win+Shift+S)
    - macOS: Built-in screenshot (Cmd+Shift+4)
    - Linux: GNOME Screenshot or Spectacle
-2. **For testing patterns**: Use Brobot Pattern Capture Tool
+2. **For testing patterns**: Use [Brobot Pattern Capture Tool](./pattern-capture-tool-guide.md)
 3. **If you have existing patterns**: Test their match rates and consider recapturing with native tools
 
 ### Step 2: Capture Patterns
@@ -105,18 +109,40 @@ your-project/
 ```
 
 ### Step 4: Verify Pattern Matching
+
+Test your patterns to ensure they match correctly. For more details, see the [States Guide](../../01-getting-started/states.md) and [Action API](../../01-getting-started/action-hierarchy.md).
+
 ```java
-// Test your patterns
-@Autowired
-private Action action;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.match.Match;
 
-StateImage pattern = new StateImage.Builder()
-    .withImage("button-login.png")
-    .build();
+@Component
+public class PatternVerificationExample {
 
-ActionResult result = action.find(pattern);
-System.out.println("Similarity: " + result.getMaxSimilarity());
-// Should be > 0.94 for optimal tools
+    @Autowired
+    private Action action;
+
+    public void verifyPattern() {
+        StateImage pattern = new StateImage.Builder()
+            .addPattern("button-login.png")  // Use addPattern, not withImage
+            .build();
+
+        ActionResult result = action.find(pattern);
+
+        // Get similarity score from best match
+        if (result.getBestMatch().isPresent()) {
+            Match bestMatch = result.getBestMatch().get();
+            System.out.println("Similarity: " + bestMatch.getScore());
+            // Should be > 0.94 for optimal tools
+        } else {
+            System.out.println("No match found");
+        }
+    }
+}
 ```
 
 ## Troubleshooting
@@ -127,6 +153,7 @@ If you're getting similarity scores below 90%:
 1. **Check Resolution Mismatch**
    - Pattern: 1920x1080, Capture: 1536x864 → ~77% similarity
    - Solution: Use matching capture provider or enable scaling
+   - See the [DPI Resolution Guide](../capture/dpi-resolution-guide.md) for troubleshooting
 
 2. **Check DPI Settings**
    ```bash
@@ -184,8 +211,8 @@ If you're getting similarity scores below 90%:
 - Perfect compatibility with default Brobot configuration
 
 ### macOS
-- Use SikuliX IDE for best results
-- Built-in screenshot tool may not capture at correct resolution
+- **Use built-in screenshot tool (Cmd+Shift+4) for best results** - achieves 95-100% match rates
+- Alternative: SikuliX IDE for cross-platform consistency
 - Verify resolution before creating many patterns
 
 ### Linux
@@ -199,7 +226,7 @@ If you're getting similarity scores below 90%:
 - **Development only** - Use WSL for coding, not for running pattern matching
 - **Solutions**:
   1. Run Brobot on Windows directly (use PowerShell or Command Prompt)
-  2. Use mock mode for testing in WSL (`brobot.core.mock=true`)
+  2. Use [mock mode](../../04-testing/mock-mode-guide.md) for testing in WSL (`brobot.mock=true`)
   3. Create patterns on Windows, test on Windows
 
 ## Migration Guide
@@ -220,11 +247,39 @@ If you have patterns created with other tools:
    - Other resolutions → May need custom scaling
 
 3. **Test and verify**:
+
+   For more on ActionConfig, see the [ActionConfig Overview](../action-config/01-overview.md).
+
    ```java
-   // Run similarity test
-   PatternFindOptions options = new PatternFindOptions.Builder()
-       .setSimilarity(0.7)  // Start low for testing
-       .build();
+   import io.github.jspinak.brobot.action.Action;
+   import io.github.jspinak.brobot.action.ActionResult;
+   import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+   import io.github.jspinak.brobot.model.state.StateImage;
+   import org.springframework.beans.factory.annotation.Autowired;
+
+   @Component
+   public class MigrationTest {
+
+       @Autowired
+       private Action action;
+
+       public void testMigratedPattern() {
+           // Run similarity test with lower threshold
+           PatternFindOptions options = new PatternFindOptions.Builder()
+               .setSimilarity(0.7)  // Start low for testing
+               .build();
+
+           StateImage pattern = new StateImage.Builder()
+               .addPattern("legacy-button.png")
+               .build();
+
+           ActionResult result = action.perform(options, pattern.asObjectCollection());
+
+           if (result.isSuccess()) {
+               System.out.println("Found " + result.size() + " matches");
+           }
+       }
+   }
    ```
 
 ## Frequently Asked Questions
@@ -254,3 +309,32 @@ For optimal pattern matching:
 4. **Organize patterns by state** - Easier maintenance
 
 **Key insight**: Clean, artifact-free patterns from native OS tools match better during runtime than patterns captured with the same tool used for runtime capture. This counterintuitive result occurs because noise and artifacts compound when present in both pattern and runtime images.
+
+> **Note**: Match rate claims are based on testing configurations. Results may vary based on your specific environment, display settings, and Windows version.
+
+## Related Documentation
+
+### Getting Started
+- **[Installation Guide](../../01-getting-started/installation.md)** - Platform setup including WSL considerations
+- **[States in Brobot](../../01-getting-started/states.md)** - Understanding StateImage patterns
+- **[Action Hierarchy](../../01-getting-started/action-hierarchy.md)** - Using patterns with Actions
+
+### Capture System
+- **[Modular Capture System](../capture/modular-capture-system.md)** - Understanding JAVACV_FFMPEG and other providers
+- **[Capture Methods Comparison](./capture-methods-comparison.md)** - Detailed comparison of all capture providers
+- **[DPI Resolution Guide](../capture/dpi-resolution-guide.md)** - Handling DPI scaling and resolution mismatches
+- **[Pattern Capture Tool Guide](./pattern-capture-tool-guide.md)** - Using Brobot's built-in pattern capture tool
+
+### Configuration
+- **[Properties Reference](../configuration/properties-reference.md)** - Complete list of Brobot properties including similarity, capture provider, and DPI settings
+- **[ActionConfig Overview](../action-config/01-overview.md)** - Configuring pattern matching with PatternFindOptions
+- **[ActionConfig Reference](../action-config/05-reference.md)** - Complete ActionConfig API including similarity configuration
+
+### Testing & Debugging
+- **[Mock Mode Guide](../../04-testing/mock-mode-guide.md)** - Testing patterns without display (essential for WSL/headless environments)
+- **[Debugging Pattern Matching](../../04-testing/debugging-pattern-matching.md)** - Troubleshooting pattern matching issues
+- **[Integration Testing](../../04-testing/integration-testing.md)** - Testing automation with patterns
+
+### Advanced Topics
+- **[Reusable Patterns](../action-config/11-reusable-patterns.md)** - Creating pattern libraries and reusable configurations
+- **[Convenience Methods](../action-config/18-convenience-methods.md)** - Simplified API for pattern finding and clicking

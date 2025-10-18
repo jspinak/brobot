@@ -161,6 +161,8 @@ States can be reached through unexpected routes:
 - Activation depends on conditions
 - States are mutually exclusive
 
+> **📖 Practical Examples**: [Multi-State Transitions Guide](/docs/core-library/guides/user-guides/multi-state-transitions-guide) for real-world multi-state scenarios, verification patterns, debugging strategies, and complete working examples
+
 #### Understanding Path Choices
 
 The pathfinder chooses paths based on:

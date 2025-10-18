@@ -19,7 +19,7 @@ public class MrdoobApplication {
         // find initial active States
         InitialStates initialStates = context.getBean(InitialStates.class);
         initialStates.addStateSet(100, "homepage");
-        initialStates.findIntialStates();
+        initialStates.findInitialStates();
 
         AutomationInstructions automationInstructions =
                 context.getBean(AutomationInstructions.class);

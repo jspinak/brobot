@@ -32,7 +32,8 @@ This means:
 - Search region updates automatically when prompt moves
 
 ### 3. **Automatic Transitions**
-- Using `@Transition` annotation for state transitions
+- Using `@TransitionSet` to group transitions by state
+- `@OutgoingTransition` and `@IncomingTransition` for navigation and verification
 - Framework automatically checks transitions
 - Clean separation of transition logic
 
@@ -40,13 +41,14 @@ This means:
 
 ```
 tutorial-claude-automator/
-├── src/main/java/com/example/claudeautomator/
+├── src/main/java/com/claude/automator/
 │   ├── ClaudeAutomatorApplication.java    # Spring Boot main
 │   ├── states/
 │   │   ├── PromptState.java              # Initial state
 │   │   └── WorkingState.java             # Shows declarative regions
 │   ├── transitions/
-│   │   └── PromptToWorkingTransition.java
+│   │   ├── PromptTransitions.java        # @TransitionSet for Prompt state
+│   │   └── WorkingTransitions.java       # @TransitionSet for Working state
 │   └── automation/
 │       └── ClaudeAutomatorRunner.java    # Demo runner
 ├── src/main/resources/
@@ -106,8 +108,32 @@ tutorial-claude-automator/
 - Implement actual automation actions (click, type, etc.)
 - Explore other Brobot features like color finding and motion detection
 
+## Console Output
+
+When running the tutorial, you'll see colorful console output with symbols indicating progress:
+
+**Typical Output:**
+```
+→ Searching for Claude prompt...
+✓ Found prompt at location (520, 380) | similarity: 0.92 | 45ms
+
+→ Searching for working icon...
+✓ Found icon at location (545, 395) | similarity: 0.88 | 31ms
+
+Claude Automator is running. Press Ctrl+C to stop.
+```
+
+**Symbol Meanings:**
+- `→` - Action in progress
+- `✓` - Success
+- `✗` - Failure
+- `⚠` - Warning
+
+> **💡 Visual Output**: Brobot uses Unicode symbols and ANSI colors for clear console feedback. For details on customizing console output, see the [Logging Output Formats Guide](/docs/logging/output-formats.md).
+
 ## Related Documentation
 
-- [Declarative Region Definition Guide](../../../guides/declarative-region-definition.md)
-- [States and Transitions](../../../../01-getting-started/states.md)
-- [Action Configuration](../../action-config/README.md)
+- [Declarative Region Definition Guide](../../../docs/docs/03-core-library/guides/user-guides/declarative-region-definition.md)
+- [States and Transitions](../../../docs/docs/01-getting-started/states.md)
+- [Action Configuration](../../../docs/docs/03-core-library/action-config/README.md)
+- [Logging and Console Output](../../../docs/docs/07-logging/index.md)

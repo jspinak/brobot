@@ -61,24 +61,19 @@ public class SpecialStatesTestRunner implements CommandLineRunner {
         log.info("MainPage opened: {}", mainPageSuccess);
         printCurrentStates();
 
-        // Step 2: Open Modal (which hides MainPage)
+        // Step 2: Open Modal (which automatically hides MainPage)
         log.info("\nStep 2: Opening Modal from MainPage...");
-        log.info("This should hide MainPage and make it the 'previous' state");
-
-        // Manually set the hidden state relationship for testing
-        // In real execution, this would be done automatically by the framework
-        var mainState = stateService.getState("MainPage").orElseThrow();
-        var modalState = stateService.getState("ModalDialog").orElseThrow();
-
-        // First activate modal
-        stateMemory.addActiveState(modalState.getId());
-        // Then set MainPage as hidden by modal
-        modalState.addHiddenState(mainState.getId());
-        stateMemory.removeInactiveState(mainState.getId());
+        log.info(
+                "The modal will automatically hide MainPage because ModalDialog has"
+                        + " canHide=[\"MainPage\", \"SettingsPage\"]");
 
         boolean modalSuccess = navigator.openState("ModalDialog");
         log.info("Modal opened: {}", modalSuccess);
         printCurrentStates();
+
+        // Verify hidden state was tracked automatically
+        var modalState = stateService.getState("ModalDialog").orElseThrow();
+        log.info("Hidden states tracked by ModalDialog: {}", modalState.getHiddenStateIds());
 
         // Step 3: Use navigator.openState with MainPage as target
         // This should trigger the PreviousState transition from Modal
@@ -111,23 +106,19 @@ public class SpecialStatesTestRunner implements CommandLineRunner {
         log.info("SettingsPage opened: {}", settingsSuccess);
         printCurrentStates();
 
-        // Step 2: Open Modal (which hides SettingsPage)
+        // Step 2: Open Modal (which automatically hides SettingsPage)
         log.info("\nStep 2: Opening Modal from SettingsPage...");
-        log.info("This should hide SettingsPage and make it the 'previous' state");
-
-        // Manually set the hidden state relationship for testing
-        var settingsState = stateService.getState("SettingsPage").orElseThrow();
-        var modalState = stateService.getState("ModalDialog").orElseThrow();
-
-        // First activate modal
-        stateMemory.addActiveState(modalState.getId());
-        // Then set SettingsPage as hidden by modal
-        modalState.addHiddenState(settingsState.getId());
-        stateMemory.removeInactiveState(settingsState.getId());
+        log.info(
+                "The modal will automatically hide SettingsPage because ModalDialog has"
+                        + " canHide=[\"MainPage\", \"SettingsPage\"]");
 
         boolean modalSuccess = navigator.openState("ModalDialog");
         log.info("Modal opened: {}", modalSuccess);
         printCurrentStates();
+
+        // Verify hidden state was tracked automatically
+        var modalState = stateService.getState("ModalDialog").orElseThrow();
+        log.info("Hidden states tracked by ModalDialog: {}", modalState.getHiddenStateIds());
 
         // Step 3: Use navigator.openState with SettingsPage as target
         // This should trigger the PreviousState transition from Modal

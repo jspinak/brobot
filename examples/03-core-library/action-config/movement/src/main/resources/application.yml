@@ -1,63 +1,60 @@
-# Movement Examples Configuration
+# Motion Detection Examples Configuration
+#
+# This project demonstrates MOTION DETECTION (finding moving objects on screen),
+# not mouse movement control. For mouse control examples, see the mouse-movement project.
+
 spring:
   application:
-    name: movement-examples
+    name: motion-detection-examples
   main:
     banner-mode: off
 
 # Brobot Configuration
 brobot:
   core:
-    # Run in mock mode for examples
+    # Run in mock mode for examples - simulates motion detection without real screen capture
     mock: true
-    # Enable verbose logging
+    # Enable verbose logging to see motion detection details
     verbose: true
 
   # Action settings
   action:
-    # Default timeouts
+    # Maximum wait time for actions (seconds)
     max-wait: 5
 
-  # Find settings
+  # Find settings - used for pattern matching if combined with motion detection
   find:
     similarity: 0.8
 
-  # Movement settings
+  # NOTE: The configuration below is NOT used by motion detection examples.
+  # These settings would be used if this were a mouse movement control project.
+  # They are preserved for reference but do not affect MotionFindOptions.
+
+  # Movement settings (NOT USED - for reference only)
   movement:
-    # Default movement time (seconds)
-    default-move-time: 0.5
-    # Default movement pattern
-    default-pattern: SMOOTH
+    default-move-time: 0.5    # Would control MouseMoveOptions if implemented
+    default-pattern: SMOOTH    # Would control movement patterns if implemented
 
-  # Drag settings
+  # Drag settings (NOT USED - for reference only)
   drag:
-    # Default hold time before drag
-    default-hold-time: 0.5
-    # Default drag speed
-    default-speed: NORMAL
+    default-hold-time: 0.5     # Would control DragOptions if implemented
+    default-speed: NORMAL       # Would control drag speed if implemented
 
-  # Scroll settings
+  # Scroll settings (NOT USED - for reference only)
   scroll:
-    # Default scroll clicks
-    default-clicks: 3
-    # Default pause between scrolls
-    default-pause: 0.1
+    default-clicks: 3          # Would control ScrollOptions if implemented
+    default-pause: 0.1         # Would control scroll timing if implemented
 
-# Mouse movement configuration
+# Mouse movement configuration (NOT USED - for reference only)
+# These settings would be used for MouseMoveOptions, DragOptions, and ScrollOptions
+# which are NOT implemented in this motion detection example.
 mouse:
-  # Movement patterns available:
-  # - SMOOTH: Natural curved movement
-  # - LINEAR: Direct line movement
-  # - SIGMOID: S-curve movement
-  # - RANDOM: Random variations
   movement:
     patterns:
       - SMOOTH
       - LINEAR
       - SIGMOID
       - RANDOM
-
-  # Speed presets
   speed:
     slow: 2.0
     normal: 1.0
@@ -69,9 +66,8 @@ logging:
     root: INFO
     com.example.movement: DEBUG
     io.github.jspinak.brobot: INFO
-    # Show movement details
-    io.github.jspinak.brobot.action.basic.move: DEBUG
-    io.github.jspinak.brobot.action.composite.drag: DEBUG
-    io.github.jspinak.brobot.action.basic.scroll: DEBUG
+    # Motion detection logging
+    io.github.jspinak.brobot.action.basic.find.motion: DEBUG
+    io.github.jspinak.brobot.action.basic.find: DEBUG
   pattern:
     console: '%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n'

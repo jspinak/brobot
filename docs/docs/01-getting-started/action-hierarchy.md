@@ -521,6 +521,6 @@ public class FormAutomation {
 ### Related Documentation
 
 - **[Conditional Action Chaining Guide](ai-brobot-project-creation#conditional-action-chains)** - Comprehensive guide with more examples
-- **[Action Config Factory](../03-core-library/guides/action-config-factory.md)** - Creating and managing action configurations
+- **[Action Config Factory](../03-core-library/guides/configuration/action-config-factory.md)** - Creating and managing action configurations
 - **[Combining Finds](../03-core-library/guides/finding-objects/combining-finds.md)** - Pattern and color combination strategies
 - **[ConditionalActionChain Example](https://github.com/jspinak/brobot/tree/main/examples/03-core-library/action-config/conditional-chains-examples)** - Complete implementation examples

@@ -90,7 +90,7 @@ To run with real GUI:
    - `color-region.png`
    - `colored-button.png`
    - `adjustable-target.png`
-3. Set `brobot.core.mock: false` in application.yml
+3. Set `brobot.mock: false` in application.yml (or use deprecated `brobot.core.mock: false`)
 
 ## Next Steps
 

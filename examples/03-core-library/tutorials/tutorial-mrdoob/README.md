@@ -38,8 +38,9 @@ tutorial-mrdoob/
     │   │   ├── Harmony.java                # Harmony drawing page state
     │   │   └── About.java                  # About page state
     │   └── transitions/                    # State transition definitions
-    │       ├── HomepageToHarmonyTransition.java
-    │       └── HarmonyToAboutTransition.java
+    │       ├── HomepageTransitions.java    # Homepage transition set
+    │       ├── HarmonyTransitions.java     # Harmony transition set
+    │       └── AboutTransitions.java       # About transition set
     └── resources/
         └── application.yml                  # Application configuration
 ```
@@ -63,12 +64,17 @@ public class Homepage {
 
 **Transition Definition:**
 ```java
-@Transition(from = Homepage.class, to = Harmony.class)
+@TransitionSet(state = Homepage.class)
+@Component
 @RequiredArgsConstructor
 @Slf4j
-public class HomepageToHarmonyTransition {
-    public boolean execute() {
-        return action.perform(CLICK, homepage.getHarmony()).isSuccess();
+public class HomepageTransitions {
+    private final Homepage homepage;
+    private final Action action;
+
+    @OutgoingTransition(activate = {Harmony.class}, pathCost = 1)
+    public boolean toHarmony() {
+        return action.click(homepage.getHarmony()).isSuccess();
     }
 }
 ```
@@ -77,8 +83,9 @@ public class HomepageToHarmonyTransition {
 
 1. **Automatic Registration**: No manual state or transition registration
 2. **Less Boilerplate**: Cleaner, more focused code
-3. **Declarative**: Clear intent with `@State` and `@Transition` annotations
+3. **Declarative**: Clear intent with `@State`, `@TransitionSet`, `@OutgoingTransition`, and `@IncomingTransition` annotations
 4. **Type Safety**: Compile-time checking of state relationships
+5. **Cohesive Organization**: All transitions for a state grouped in one TransitionSet class
 
 ## How to Run
 
@@ -115,7 +122,7 @@ The automation will:
 The application is configured via `application.yml`:
 - **Mock Mode**: Set to `false` for live automation
 - **Verbose Logging**: Enabled to show automation progress
-- **Auto-scan**: Automatically discovers `@State` and `@Transition` classes
+- **Auto-scan**: Automatically discovers `@State` and `@TransitionSet` annotated classes
 - **Timeouts**: Configured for web automation delays
 
 ## State Model
@@ -133,11 +140,12 @@ Each state contains the UI elements needed for:
 ## Learning Objectives
 
 By studying this example, you will learn:
-- How to define states using the new `@State` annotation
-- How to create transitions using the new `@Transition` annotation  
+- How to define states using the `@State` annotation
+- How to organize transitions using `@TransitionSet` with `@OutgoingTransition` and `@IncomingTransition`
 - How to structure a Brobot 1.1.0 project
 - How to handle web automation with image matching
 - How to use dependency injection with Brobot components
+- How to verify state arrival with `@IncomingTransition`
 
 ## Troubleshooting
 

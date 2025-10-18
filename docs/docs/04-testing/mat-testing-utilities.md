@@ -53,8 +53,14 @@ Mat grayMat = MatTestUtils.createGrayMat(100, 100, 128); // Gray value 0-255
 Always validate Mats before risky operations:
 
 ```java
-Mat mat = someOperation();
-MatTestUtils.validateMat(mat, "operation result");  // Throws if invalid
+Mat mat = null;
+try {
+    mat = someOperation();
+    MatTestUtils.validateMat(mat, "operation result");  // Throws if invalid
+    // Continue with operations...
+} finally {
+    MatTestUtils.safeRelease(mat);
+}
 ```
 
 ### Safe Cleanup
@@ -176,13 +182,19 @@ try {
 ```java
 @Test
 void testImageProcessing() {
-    Mat input = MatTestUtils.createGrayMat(100, 100, 128);
-    MatTestUtils.validateMat(input, "input");
-    
-    Mat output = processImage(input);
-    MatTestUtils.validateMat(output, "output");
-    
-    assertTrue(MatTestUtils.areMatsEqual(input, output, 10.0));
+    Mat input = null;
+    Mat output = null;
+    try {
+        input = MatTestUtils.createGrayMat(100, 100, 128);
+        MatTestUtils.validateMat(input, "input");
+
+        output = processImage(input);
+        MatTestUtils.validateMat(output, "output");
+
+        assertTrue(MatTestUtils.areMatsEqual(input, output, 10.0));
+    } finally {
+        MatTestUtils.safeReleaseAll(input, output);
+    }
 }
 ```
 
@@ -211,6 +223,19 @@ MatVector vector = new MatVector(mat1, mat2, mat3);
 ## Example Test
 
 ```java
+package io.github.jspinak.brobot.imageprocessing;
+
+import io.github.jspinak.brobot.analysis.motion.MotionDetector;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.utils.MatTestUtils;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.MatVector;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.bytedeco.opencv.global.opencv_core.*;
+import static org.junit.jupiter.api.Assertions.*;
+
 public class MyImageProcessorTest extends BrobotTestBase {
     
     @Test
@@ -238,24 +263,22 @@ public class MyImageProcessorTest extends BrobotTestBase {
         }
     }
     
+    @Autowired
+    private MotionDetector motionDetector;
+
     @Test
     void testMotionDetection() {
         // Create motion sequence
         MatVector frames = MatTestUtils.createMotionMatVector(3, 100, 100, 50);
-        
+
         try {
-            // Build detector
-            MotionDetector detector = new MotionDetector.Builder()
-                .setFrames(frames)
-                .build();
-            
-            // Check motion detected
-            Mat motionMask = detector.getMotionMask();
+            // Detect motion using injected detector
+            Mat motionMask = motionDetector.getDynamicPixelMask(frames);
             MatTestUtils.validateMat(motionMask, "motion mask");
-            
+
             double motion = sumElems(motionMask).get(0);
             assertTrue(motion > 0, "Should detect motion between frames");
-            
+
         } finally {
             MatTestUtils.safeRelease(frames);
         }
@@ -314,7 +337,7 @@ void testPixelChangeDetection() {
     try {
         PixelChangeDetector detector = new PixelChangeDetector.Builder()
             .setMats(frames)
-            .useDilation(3, 3, CV_8U)  // Use safe kernel type
+            .useDilation(3, 3, CV_8UC1)  // Use single-channel kernel type
             .build();
         
         Mat changeMask = detector.getChangeMask();
@@ -331,7 +354,18 @@ void testPixelChangeDetection() {
 
 ## See Also
 
-- [Mock Mode Testing](mock-mode-guide.md)
-- [Test Utilities](test-utilities.md)
-- [Unit Testing](unit-testing.md)
-- [Integration Testing](integration-testing.md)
+### Testing Documentation
+- [Mock Mode Testing](mock-mode-guide.md) - Running tests without real images
+- [Test Utilities](test-utilities.md) - Other testing utilities available
+- [Unit Testing](unit-testing.md) - Unit testing best practices
+- [Integration Testing](integration-testing.md) - Integration testing patterns
+- [Profile-Based Testing](profile-based-testing.md) - Test profiles and configuration
+
+### Testing Strategy
+- [Testing Introduction](testing-intro.md) - Overview of Brobot testing approaches
+- [Testing Strategy](testing-strategy.md) - Overall testing strategy and guidelines
+
+### Related Components
+- [PixelChangeDetector](../../api/analysis/motion/PixelChangeDetector.md) - Pixel change detection API
+- [MotionDetector](../../api/analysis/motion/MotionDetector.md) - Motion detection API
+- [BrobotTestBase](../../api/test/BrobotTestBase.md) - Base class for Brobot tests

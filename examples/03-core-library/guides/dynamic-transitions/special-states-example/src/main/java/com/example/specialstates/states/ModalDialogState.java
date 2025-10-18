@@ -9,10 +9,16 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Modal dialog state that overlays the main page. This state hides whatever state was active before
- * it.
+ * Modal dialog state that overlays other pages. This state specifies which states it can hide using
+ * the canHide parameter, which is REQUIRED for PreviousState transitions to work correctly.
  */
-@State(description = "Modal dialog overlay")
+@State(
+        description = "Modal dialog overlay",
+        canHide = {
+            "MainPage",
+            "SettingsPage"
+        } // CRITICAL: List all states that can be hidden by this modal
+        )
 @Component
 @Getter
 @Slf4j
@@ -40,5 +46,7 @@ public class ModalDialogState {
                         .addPatterns("closeBtn", "xButton")
                         .setName("closeButton")
                         .build();
+
+        log.info("ModalDialog configured to hide: MainPage, SettingsPage");
     }
 }

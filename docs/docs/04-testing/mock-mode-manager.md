@@ -37,11 +37,7 @@ Built-in logging to help debug mock mode state across all components.
 ### Enabling Mock Mode
 
 ```java
-// Note: BrobotProperties must be injected as a dependency
-@Autowired
-private BrobotProperties brobotProperties;
-
-import io.github.jspinak.brobot.config.MockModeManager;
+import io.github.jspinak.brobot.config.mock.MockModeManager;
 
 // Enable mock mode globally
 MockModeManager.setMockMode(true);
@@ -71,15 +67,13 @@ This will output something like:
 ```
 Mock Mode State:
   System Properties:
-    brobot.mock.mode = true
     brobot.mock = true
-    brobot.mock-mode = true
+    brobot.mock.action.success.probability = 1.0
   ExecutionEnvironment:
     mockMode = true
     hasDisplay = false
     canCaptureScreen = false
-  // Mock mode is now configured via application.properties:
-// brobot.core.mock=true
+  BrobotProperties: Configured via Spring (brobot.core.mock)
 ```
 
 ## Integration with Tests
@@ -123,11 +117,16 @@ public class MyTest extends BrobotTestBase {
 For tests that don't extend `BrobotTestBase`:
 
 ```java
-import io.github.jspinak.brobot.config.MockModeManager;
+import io.github.jspinak.brobot.config.mock.MockModeManager;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class StandaloneTest {
+
+    @Autowired
+    private BrobotProperties brobotProperties;
     
     @BeforeEach
     public void setup() {
@@ -150,15 +149,17 @@ public class StandaloneTest {
 During application startup, you can initialize mock mode based on system properties:
 
 ```java
-import io.github.jspinak.brobot.config.MockModeManager;
+import io.github.jspinak.brobot.config.mock.MockModeManager;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class BrobotApplication {
-    
+
     public static void main(String[] args) {
         // Initialize mock mode based on system properties
         MockModeManager.initializeMockMode();
-        
+
         SpringApplication.run(BrobotApplication.class, args);
     }
 }
@@ -171,17 +172,19 @@ Configure mock mode through Spring properties:
 ```yaml
 # application.yml
 brobot:
-  mock:
-    mode: true
-  framework:
-    mock: true
   core:
-    mock-mode: true
+    mock: true  # Enable mock mode
+```
+
+Or via properties file:
+```properties
+# application.properties
+brobot.core.mock=true
 ```
 
 Or via command line:
 ```bash
-java -jar myapp.jar --brobot.mock.mode=true
+java -jar myapp.jar --brobot.core.mock=true
 ```
 
 ## Implementation Details
@@ -190,25 +193,25 @@ java -jar myapp.jar --brobot.mock.mode=true
 
 `MockModeManager.setMockMode(true)` sets the following:
 
-1. **System Properties:**
-   - `brobot.mock.mode`
-   - `brobot.mock`
-   - `brobot.mock-mode`
+1. **System Property:**
+   - `brobot.mock = "true"`
 
 2. **ExecutionEnvironment:**
    - `mockMode = true`
-   - `forceHeadless = true` (in mock mode)
-   - `allowScreenCapture = false` (in mock mode)
+   - `forceHeadless = true` (when enabling mock mode)
+   - `allowScreenCapture = false` (when enabling mock mode)
 
-3. **FrameworkSettings:**
-   - `// Mock mode is now configured via application.properties:
-// brobot.core.mock=true` (via reflection)
+3. **BrobotProperties:**
+   - Configured separately via Spring Boot's `brobot.core.mock` property
+   - Not directly updated by MockModeManager (Spring managed)
 
 ### Priority Order
 
-When checking mock mode status, `brobotProperties.getCore().isMock()` checks in this order:
-1. ExecutionEnvironment (if available)
-2. System properties (as fallback)
+When checking mock mode status, `MockModeManager.isMockMode()` checks in this order:
+1. **Primary**: ExecutionEnvironment.getInstance().isMockMode() (if available)
+2. **Fallback**: System property `brobot.mock` (if ExecutionEnvironment not available)
+
+For Spring-managed components, use `brobotProperties.getCore().isMock()` which reads from the Spring configuration property `brobot.core.mock`.
 
 ## Best Practices
 
@@ -279,8 +282,7 @@ public void testModeTransition() {
 Before:
 ```java
 System.setProperty("brobot.mock", "true");
-// Mock mode is now configured via application.properties:
-// brobot.core.mock=true;
+
 ExecutionEnvironment env = ExecutionEnvironment.builder()
     .mockMode(true)
     .build();
@@ -289,6 +291,8 @@ ExecutionEnvironment.setInstance(env);
 
 After:
 ```java
+import io.github.jspinak.brobot.config.mock.MockModeManager;
+
 MockModeManager.setMockMode(true);
 ```
 
@@ -339,6 +343,26 @@ If you see inconsistent behavior between components:
 
 ## Related Documentation
 
-- [Mock Mode Guide](./mock-mode-guide.md) - Comprehensive guide to using mock mode
-- [Test Utilities](./test-utilities.md) - Testing utilities and BrobotTestBase
-- [Enhanced Mocking](../03-core-library/testing/enhanced-mocking.md) - Advanced mock scenarios
+### Core Mock Mode Documentation
+- **[Mock Mode Guide](./mock-mode-guide.md)** - Comprehensive guide to using mock mode
+- **[Mock Mode Migration Guide](./mock-mode-migration.md)** - Migrating to MockModeManager from legacy patterns
+- **[Enhanced Mocking](./advanced/enhanced-mocking.md)** - Advanced mock scenarios
+
+### Testing Guides
+- **[Testing Introduction](./testing-intro.md)** - Overview of Brobot testing approaches
+- **[Unit Testing](./unit-testing.md)** - Using BrobotTestBase with MockModeManager
+- **[Integration Testing](./integration-testing.md)** - Integration test patterns with Spring
+- **[Profile-Based Testing](./profile-based-testing.md)** - Profile-specific mock configurations
+- **[CI/CD Testing](./advanced/ci-cd-testing.md)** - Mock mode in CI/CD pipelines
+- **[Test Utilities](./test-utilities.md)** - Testing utilities and BrobotTestBase reference
+
+### Configuration Guides
+- **[BrobotProperties Usage](../03-core-library/configuration/brobot-properties-usage.md)** - Configuring mock mode via properties
+- **[Properties Reference](../03-core-library/configuration/properties-reference.md)** - Complete property reference
+- **[Headless Configuration](../03-core-library/configuration/headless-configuration.md)** - Headless mode (often used with mock)
+- **[Auto-Configuration](../03-core-library/configuration/auto-configuration.md)** - How Brobot auto-configures mock mode
+
+### Advanced Mock Features
+- **[Mock Stochasticity](./mock-stochasticity.md)** - Probabilistic mock behavior
+- **[ActionHistory Mock Snapshots](./actionhistory-mock-snapshots.md)** - Using ActionHistory in mock mode
+- **[Testing Strategy](./testing-strategy.md)** - Overall testing strategy and patterns

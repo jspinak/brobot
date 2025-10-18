@@ -54,22 +54,28 @@ Add to your run command:
 Debug files are saved to:
 ```
 debug/image-finding/
-├── session-20250913-102030/
-│   ├── 001-LoginButton/
-│   │   ├── screenshot.png
-│   │   ├── pattern.png
-│   │   ├── annotated.png
-│   │   └── comparison-grid.png
-│   ├── 002-SubmitButton/
-│   │   └── ... similar files ...
-│   └── session-summary.json
+├── 2025-09-13_10-20-30/        # Session timestamp format: yyyy-MM-dd_HH-mm-ss
+│   ├── screenshots/
+│   │   ├── 001-LoginButton.png
+│   │   └── 002-SubmitButton.png
+│   ├── patterns/
+│   │   ├── 001-LoginButton-pattern.png
+│   │   └── 002-SubmitButton-pattern.png
+│   ├── comparisons/
+│   │   ├── 001-LoginButton-comparison.png
+│   │   └── 002-SubmitButton-comparison.png
+│   ├── visual/
+│   │   ├── 001-LoginButton-annotated.png
+│   │   └── 002-SubmitButton-annotated.png
+│   └── logs/
+│       └── session-summary.json
 ```
 
 ## Configuration
 
 ### Profile-Based Configuration
 
-Brobot uses Spring profiles for clean configuration:
+Brobot uses [Spring profiles](../../04-testing/profile-based-testing.md) for clean configuration:
 
 | Profile | Purpose | Properties File |
 |---------|---------|----------------|
@@ -105,6 +111,8 @@ brobot.debug.image.console.use-colors=true
 brobot.debug.image.console.show-box=true
 brobot.debug.image.console.show-timestamp=true
 ```
+
+> **Note**: Additional properties exist for advanced configuration including `visual.show-failed-regions`, `visual.create-heatmap`, logging properties, and real-time monitoring. See the [Properties Reference](../configuration/properties-reference.md) for a complete list.
 
 ## Debug Levels
 
@@ -200,8 +208,14 @@ Structured data for:
 ### Images Not Found
 
 1. **Check similarity threshold**
-   ```properties
-   brobot.find.similarity=0.7  # Lower for more lenient matching
+
+   Similarity is configured per-operation, not globally:
+   ```java
+   PatternFindOptions options = new PatternFindOptions.Builder()
+       .setSimilarity(0.7)  // Lower for more lenient matching
+       .build();
+
+   ActionResult result = action.find(options, stateImage);
    ```
 
 2. **Verify image format**
@@ -246,7 +260,7 @@ brobot.debug.image.level=VISUAL
 3. Review the comparison grid to see visual differences
 
 **Common Solutions**:
-- Lower similarity threshold: `brobot.find.similarity=0.7`
+- Lower similarity threshold in your `PatternFindOptions.Builder().setSimilarity(0.7)`
 - Check DPI settings in Windows Display Settings
 - Ensure consistent color profiles
 - Save patterns as PNG format
@@ -286,7 +300,152 @@ implementation 'org.fusesource.jansi:jansi:2.4.0'
 
 3. Try different terminal (Windows Terminal, Git Bash, etc.)
 
+### Issue: ClassNotFoundException for ImageFindDebugger
+
+**Symptoms**: `java.lang.ClassNotFoundException: io.github.jspinak.brobot.debug.ImageFindDebugger`
+
+**Cause**: Debug classes are conditional beans that only load when debugging is enabled.
+
+**Solution**:
+
+1. **Enable debug mode in properties**:
+   ```properties
+   brobot.debug.image.enabled=true
+   ```
+
+2. **Check Spring Boot autoconfiguration**:
+   - Ensure `@EnableAutoConfiguration` or `@SpringBootApplication` is present
+   - Verify Brobot library is in classpath
+
+3. **Check for conditional bean issues**:
+   ```java
+   // Debug classes use @ConditionalOnProperty
+   @ConditionalOnProperty(name = "brobot.debug.image.enabled", havingValue = "true")
+   ```
+
+4. **Verify in logs**:
+   ```
+   INFO  Conditional bean ImageFindDebugger matched
+   INFO  ImageFindDebugger initialized
+   ```
+
+### Issue: AOP Not Intercepting Find Operations
+
+**Symptoms**: Debug output not appearing even when enabled, no interception logs
+
+**Cause**: Spring AOP or AspectJ not properly configured
+
+**Solutions**:
+
+1. **Ensure Spring AOP is enabled**:
+   ```java
+   @SpringBootApplication
+   @EnableAspectJAutoProxy  // Add this annotation
+   public class MyApplication {
+       public static void main(String[] args) {
+           SpringApplication.run(MyApplication.class, args);
+       }
+   }
+   ```
+
+2. **Verify AspectJ dependencies**:
+   ```gradle
+   implementation 'org.springframework.boot:spring-boot-starter-aop'
+   implementation 'org.aspectj:aspectjweaver'
+   ```
+
+3. **Check AOP proxy creation**:
+   ```properties
+   # Enable CGLIB proxies if needed
+   spring.aop.proxy-target-class=true
+   ```
+
+4. **Verify interceptor initialization**:
+   ```
+   INFO  FindOperationInterceptor initialized
+   INFO  AOP pointcuts registered for Find.perform()
+   ```
+
+5. **Check method visibility**:
+   - AOP requires public methods on Spring beans
+   - Direct `new` instantiation bypasses AOP proxies
+
+### Issue: Jansi Library Loading Errors
+
+**Symptoms**: `java.lang.NoClassDefFoundError: org/fusesource/jansi/AnsiConsole`
+
+**Cause**: Jansi not in classpath or version conflict
+
+**Solutions**:
+
+1. **Add Jansi dependency**:
+   ```gradle
+   // In library/build.gradle
+   implementation 'org.fusesource.jansi:jansi:2.4.0'
+   ```
+
+2. **Check for version conflicts**:
+   ```bash
+   ./gradlew dependencies --configuration runtimeClasspath | grep jansi
+   ```
+
+3. **Exclude conflicting versions**:
+   ```gradle
+   configurations.all {
+       exclude group: 'org.fusesource.jansi', module: 'jansi'
+   }
+   dependencies {
+       implementation 'org.fusesource.jansi:jansi:2.4.0'
+   }
+   ```
+
+4. **Fallback: Disable colors**:
+   ```properties
+   brobot.debug.image.console.use-colors=false
+   ```
+
+### Issue: Debug Files Not Saving
+
+**Symptoms**: Console output works but no files in `debug/image-finding/` directory
+
+**Cause**: File permissions, path issues, or file saving disabled
+
+**Solutions**:
+
+1. **Verify file saving is enabled**:
+   ```properties
+   brobot.debug.image.save-screenshots=true
+   brobot.debug.image.save-patterns=true
+   brobot.debug.image.save-comparisons=true
+   ```
+
+2. **Check output directory path**:
+   ```properties
+   # Use absolute path if relative path fails
+   brobot.debug.image.output-dir=/absolute/path/to/debug/image-finding
+   ```
+
+3. **Verify write permissions**:
+   ```bash
+   # Check directory exists and is writable
+   ls -la debug/
+   mkdir -p debug/image-finding
+   chmod 755 debug/image-finding
+   ```
+
+4. **Check disk space**:
+   - Debug files can be large (screenshots, comparisons)
+   - Ensure sufficient disk space available
+
+5. **Review logs for I/O errors**:
+   ```
+   ERROR Failed to save screenshot: /path/to/file.png
+   java.io.IOException: Permission denied
+   ```
+
 ## Integration with CI/CD
+
+For comprehensive CI/CD testing strategies, see the [CI/CD Testing Guide](../testing/ci-cd-testing.md).
 
 ### GitHub Actions
 ```yaml
@@ -319,29 +478,105 @@ stage('Test with Debug') {
 
 ### Programmatic Access
 
+Complete example showing session management. For more information on StateImage and state components, see the [States Guide](../../../01-getting-started/states.md#state-components-and-direct-access).
+
 ```java
-@Autowired
-private ImageFindDebugger debugger;
+package com.example.brobot.debugging;
 
-// Initialize session
-debugger.initializeSession();
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import io.github.jspinak.brobot.debug.ImageFindDebugger;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.state.StateImage;
 
-// Debug operations are automatically intercepted
-ActionResult result = action.find(stateImage);
+@Component
+public class ImageDebugExample {
 
-// Finalize and generate reports
-debugger.finalizeSession();
+    @Autowired
+    private ImageFindDebugger debugger;
+
+    @Autowired
+    private Action action;
+
+    public void debugImageFind() {
+        // Example pattern to find
+        StateImage stateImage = new StateImage.Builder()
+            .addPatterns("button-pattern")
+            .build();
+
+        try {
+            // Initialize session
+            debugger.initializeSession();
+
+            // Debug operations are automatically intercepted
+            ActionResult result = action.find(stateImage);
+
+        } finally {
+            // Always finalize session, even if exception occurs
+            debugger.finalizeSession();
+        }
+    }
+}
 ```
 
 ### Custom Debug Info
 
-```java
-ImageFindDebugger.FindDebugInfo debugInfo = 
-    debugger.debugFindOperation(objectCollection, options, result);
+Access detailed debugging information programmatically:
 
-System.out.println("Operation ID: " + debugInfo.getOperationId());
-System.out.println("Best Score: " + debugInfo.getBestScore());
-System.out.println("Duration: " + debugInfo.getSearchDuration() + "ms");
+```java
+package com.example.brobot.debugging;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import io.github.jspinak.brobot.debug.ImageFindDebugger;
+import io.github.jspinak.brobot.debug.ImageFindDebugger.FindDebugInfo;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.model.state.StateImage;
+
+@Component
+public class DebugInfoExample {
+
+    @Autowired
+    private ImageFindDebugger debugger;
+
+    @Autowired
+    private Action action;
+
+    public void getDebugInfo() {
+        // Create pattern to find
+        StateImage stateImage = new StateImage.Builder()
+            .addPatterns("login-button")
+            .build();
+
+        // Create object collection
+        ObjectCollection objectCollection = new ObjectCollection.Builder()
+            .withImages(stateImage)
+            .build();
+
+        // Configure find options
+        PatternFindOptions options = new PatternFindOptions.Builder()
+            .setSimilarity(0.85)
+            .build();
+
+        // Perform find operation
+        ActionResult result = action.find(options, objectCollection);
+
+        // Get detailed debug info
+        FindDebugInfo debugInfo =
+            debugger.debugFindOperation(objectCollection, options, result);
+
+        // Access debug information (getters are auto-generated by Lombok)
+        System.out.println("Operation ID: " + debugInfo.getOperationId());
+        System.out.println("Best Score: " + debugInfo.getBestScore());
+        System.out.println("Duration: " + debugInfo.getSearchDuration() + "ms");
+        System.out.println("Found: " + debugInfo.isFound());
+        System.out.println("Match Count: " + debugInfo.getMatchCount());
+    }
+}
 ```
 
 ## Best Practices
@@ -361,6 +596,8 @@ System.out.println("Duration: " + debugInfo.getSearchDuration() + "ms");
 | VISUAL | Heavy | Heavy | ~15-20% |
 | FULL | Very Heavy | Very Heavy | ~25-30% |
 
+> **Note**: Performance impact percentages are approximate and vary based on system configuration, image sizes, screen resolution, pattern complexity, and operation types. Use these as general guidelines, not exact measurements. Actual impact may be higher on slower systems or when processing large images.
+
 ## Architecture
 
 ### Components
@@ -373,7 +610,7 @@ System.out.println("Duration: " + debugInfo.getSearchDuration() + "ms");
 
 ### Spring AOP Integration
 
-The system uses `@Aspect` and `@Around` advice to intercept:
+The system uses Spring AOP (see [AspectJ Usage Guide](../advanced/aspectj-usage-guide.md) for advanced AOP patterns) with `@Aspect` and `@Around` advice to intercept:
 - `Find.perform()` operations
 - `FindPipeline.saveMatchesToStateImages()` calls
 
@@ -381,40 +618,55 @@ This provides transparent debugging without code changes.
 
 ## Advanced Features
 
-### Custom Debug Handlers
+### Programmatic Control
 
-Implement custom debug handling:
+Dynamically control debugging at runtime:
 
 ```java
+package com.example.brobot.debugging;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import io.github.jspinak.brobot.debug.ImageDebugConfig;
+import io.github.jspinak.brobot.debug.ImageDebugConfig.DebugLevel;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.state.StateImage;
+
 @Component
-public class CustomDebugHandler {
-    
-    @EventListener
-    public void handleFindDebugEvent(FindDebugEvent event) {
-        // Custom logic for debug events
-        if (event.getSimilarity() < 0.5) {
-            // Alert on very low similarities
-            notifyLowSimilarity(event);
+public class ProgrammaticDebugControl {
+
+    @Autowired
+    private ImageDebugConfig debugConfig;
+
+    @Autowired
+    private Action action;
+
+    public void temporaryDebugMode() {
+        // Save original settings
+        boolean originalEnabled = debugConfig.isEnabled();
+        DebugLevel originalLevel = debugConfig.getLevel();
+
+        try {
+            // Temporarily enable debugging
+            debugConfig.setEnabled(true);
+            debugConfig.setLevel(DebugLevel.VISUAL);
+
+            // Example pattern to find
+            StateImage stateImage = new StateImage.Builder()
+                .addPatterns("login-button")
+                .build();
+
+            // Perform find operation with debugging enabled
+            ActionResult result = action.find(stateImage);
+
+        } finally {
+            // Always restore original settings
+            debugConfig.setEnabled(originalEnabled);
+            debugConfig.setLevel(originalLevel);
         }
     }
 }
-```
-
-### Programmatic Control
-
-```java
-@Autowired
-private ImageDebugConfig debugConfig;
-
-// Temporarily enable debugging
-debugConfig.setEnabled(true);
-debugConfig.setLevel(DebugLevel.VISUAL);
-
-// Perform find operation
-ActionResult result = action.find(stateImage);
-
-// Restore settings
-debugConfig.setEnabled(false);
 ```
 
 ## Related Documentation

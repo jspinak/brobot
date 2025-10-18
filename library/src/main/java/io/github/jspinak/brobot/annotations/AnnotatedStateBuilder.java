@@ -92,6 +92,15 @@ public class AnnotatedStateBuilder {
         stateBuilder.setPathCost(stateAnnotation.pathCost());
         log.trace("Set pathCost {} for state '{}'", stateAnnotation.pathCost(), stateName);
 
+        // Set canHide from annotation if provided
+        if (stateAnnotation.canHide() != null && stateAnnotation.canHide().length > 0) {
+            stateBuilder.canHide(stateAnnotation.canHide());
+            log.debug(
+                    "Set canHide {} for state '{}'",
+                    java.util.Arrays.toString(stateAnnotation.canHide()),
+                    stateName);
+        }
+
         State state = stateBuilder.build();
         log.debug(
                 "Built state '{}' with {} total components",

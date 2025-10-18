@@ -4,6 +4,21 @@ sidebar_position: 4
 
 # API Reference
 
+:::warning EXPERIMENTAL API
+
+**This API is experimental and under active development.** While core endpoints are implemented and functional, some advanced features and CLI integration are still in development.
+
+**Current Status**:
+- ✅ Core endpoints functional (health, state_structure, observation, execute)
+- ✅ Mock mode fully operational for testing
+- ⚠️ CLI integration requires Brobot CLI JAR (experimental)
+- ⚠️ Some documented parameters not yet implemented
+- ⚠️ API may change in future versions
+
+**Use for research, prototyping, and development purposes.**
+
+:::
+
 Complete reference documentation for all MCP Server API endpoints.
 
 ## Base URL
@@ -22,13 +37,17 @@ Currently, the API does not require authentication. Future versions will support
 - **Response**: `application/json`
 - **Encoding**: `UTF-8`
 
-## Common Response Headers
+## Response Format
+
+All responses use JSON format with UTF-8 encoding:
 
 ```http
 Content-Type: application/json
-X-Request-ID: <unique-request-id>
-X-Response-Time: <milliseconds>
 ```
+
+:::info FUTURE FEATURE
+Request tracking headers (X-Request-ID, X-Response-Time) are planned for future releases.
+:::
 
 ## Endpoints
 
@@ -136,12 +155,9 @@ print(f"Found {len(states)} states")
 
 Get current observation including screenshot and active states.
 
-**Query Parameters**
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `include_screenshot` | boolean | true | Include base64 screenshot |
-| `format` | string | "png" | Screenshot format (png/jpg) |
+:::info NOTE
+Currently, this endpoint always returns a full observation with screenshot. Query parameters for filtering are planned for future releases.
+:::
 
 **Response**
 
@@ -198,15 +214,14 @@ Get current observation including screenshot and active states.
 **Example**
 
 ```python
-# Get observation without screenshot
-response = requests.get(
-    "http://localhost:8000/api/v1/observation",
-    params={"include_screenshot": False}
-)
+import requests
+import base64
+
+# Get observation (always includes screenshot)
+response = requests.get("http://localhost:8000/api/v1/observation")
+obs = response.json()
 
 # Save screenshot to file
-import base64
-obs = response.json()
 if obs.get("screenshot"):
     img_data = base64.b64decode(obs["screenshot"])
     with open("screen.png", "wb") as f:
@@ -286,6 +301,10 @@ Execute an automation action on the target application.
 ---
 
 ## Action Types
+
+:::tip PARAMETER SIMPLIFICATION
+The API provides simplified parameters for common use cases. Advanced Brobot configuration options (search regions, verification options, repetition options) can be accessed through the Brobot CLI directly.
+:::
 
 ### Click Action
 
@@ -374,56 +393,69 @@ Drag from one location to another.
 
 *Either pattern or coordinates required for start/end
 
-### Wait Action
+### Find Action
 
-Wait for a specific state or condition.
+Find an image pattern without performing any action.
 
 **Parameters**
 
 ```json
 {
-  "action_type": "wait",
+  "action_type": "find",
   "parameters": {
-    "state_name": "dashboard",
-    "timeout": 30.0,
-    "check_interval": 1.0,
-    "stability_time": 2.0
+    "image_pattern": "element.png",
+    "confidence": 0.9,
+    "timeout": 5.0
   }
 }
 ```
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `state_name` | string | Yes | State to wait for |
-| `timeout` | float | No | Max wait time (default: 30.0) |
-| `check_interval` | float | No | Check frequency (default: 1.0) |
-| `stability_time` | float | No | Required stable time |
+| `image_pattern` | string | Yes | Image file to find |
+| `confidence` | float | No | Min similarity (0.0-1.0) |
+| `timeout` | float | No | Search timeout (default: 5.0) |
+
+:::info ADDITIONAL ACTION TYPES
+The Brobot framework supports additional action types including `vanish` (wait for element to disappear), `hover`, `double_click`, `right_click`, and more. See the [Brobot action documentation](../../01-getting-started/action-hierarchy.md) for the complete list.
+:::
 
 ## Error Handling
 
 ### Error Response Format
 
+The API uses FastAPI's standard error response format:
+
+**Simple Errors (4xx, 5xx)**:
 ```json
 {
-  "detail": "Detailed error message",
-  "type": "error_type",
-  "loc": ["field", "name"],
-  "ctx": {
-    "additional": "context"
-  }
+  "detail": "Error message"
+}
+```
+
+**Validation Errors (422)**:
+```json
+{
+  "detail": [
+    {
+      "loc": ["body", "field_name"],
+      "msg": "error description",
+      "type": "error_type"
+    }
+  ]
 }
 ```
 
 ### Common Error Codes
 
-| Status Code | Error Type | Description |
-|-------------|------------|-------------|
-| `400` | `bad_request` | Invalid request format |
-| `422` | `validation_error` | Parameter validation failed |
-| `404` | `not_found` | Resource not found |
-| `408` | `timeout` | Request timeout |
-| `500` | `internal_error` | Server error |
-| `503` | `service_unavailable` | Brobot CLI unavailable |
+| Status Code | Description | Usage |
+|-------------|-------------|-------|
+| `422` | Validation error | Invalid request parameters |
+| `500` | Internal server error | CLI errors, execution failures |
+
+:::info ERROR HANDLING
+The API currently uses simplified error responses. Future versions may include additional error context and custom error types.
+:::
 
 ### Error Examples
 
@@ -541,7 +573,21 @@ Access the OpenAPI (Swagger) specification:
 - **ReDoc**: http://localhost:8000/redoc
 - **OpenAPI JSON**: http://localhost:8000/openapi.json
 
+## Next Steps
+
+After reviewing the API reference:
+
+- 📦 Complete [Installation](./installation.md) if you haven't already
+- 🚀 Follow the [Getting Started](./getting-started.md) tutorial
+- ⚙️ Review [Configuration](./configuration.md) options
+- 💡 Explore [Examples](./examples.md) for practical use cases
+- 🐛 Check [Troubleshooting](./troubleshooting.md) if you encounter issues
+
 ## Support
 
+:::info COMMUNITY SUPPORT ONLY
+Support for this experimental API is limited to community contributions. There are no guarantees of responses or fixes.
+:::
+
 - **GitHub Issues**: [Report API issues](https://github.com/jspinak/brobot-mcp-server/issues)
-- **Discord**: [Get help on Discord](https://discord.gg/brobot)
+- **Documentation**: Full docs at [brobot.dev](https://brobot.dev)

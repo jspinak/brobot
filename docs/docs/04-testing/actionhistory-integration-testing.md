@@ -76,8 +76,7 @@ import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 
 ActionRecord clickRecord = new ActionRecord.Builder()
     .setActionConfig(new ClickOptions.Builder()
-        .setClickType(ClickOptions.Type.DOUBLE)
-        .setNumberOfClicks(2)
+        .setNumberOfClicks(2)  // Double-click
         .setPauseBeforeMouseDown(100)
         .setPauseAfterMouseUp(100)
         .build())
@@ -130,15 +129,26 @@ history.addSnapshot(vanishRecord);
 
 Enable mock mode in your test configuration:
 
-```yaml
-# application-test.yml
-brobot:
-  mock:
-    enabled: true
-    use-real-screenshots: false
+```properties
+# application-test.properties
+brobot.mock=true
 ```
 
-**Note**: ActionHistory persistence is handled by the Brobot Runner application, not the library itself. During live automation, the Runner captures and stores ActionRecords in its database. For testing, ActionHistory is maintained in memory or loaded from exported files.
+**ActionHistory Persistence**: Brobot provides two levels of persistence:
+
+1. **Library Level** (`ActionHistoryPersistence`) - File-based JSON persistence for test data
+   - **Location**: `io.github.jspinak.brobot.tools.actionhistory.ActionHistoryPersistence`
+   - **Use Case**: Mock testing, CI/CD test fixtures, development debugging
+   - **Storage**: `src/test/resources/histories/` directory
+   - **Format**: JSON files with session metadata
+
+2. **Runner Level** (Optional) - Database persistence with GUI
+   - **Location**: Brobot Runner application (`ActionRecordingService`)
+   - **Use Case**: Live recording during automation execution, session management
+   - **Storage**: H2 database with export to JSON/CSV
+   - **Note**: Runner is a separate application, not required for testing
+
+Most users will use the library-level `ActionHistoryPersistence` for creating mock test data. The Runner provides additional database persistence for live automation recording.
 
 ### 2. Initialize State Objects with ActionHistory
 
@@ -151,7 +161,7 @@ public class LoginStateInitializer {
     
     public StateImage createLoginButton() {
         StateImage loginButton = new StateImage.Builder()
-            .withPattern("login-button.png")
+            .addPattern("login-button.png")
             .build();
         
         // Add historical data for realistic mocking
@@ -172,7 +182,8 @@ public class LoginStateInitializer {
             history.addSnapshot(record);
         }
         
-        loginButton.setActionHistory(history);
+        // Apply ActionHistory to all patterns in the StateImage
+        loginButton.addActionSnapshotsToAllPatterns(history.getSnapshots().toArray(new ActionRecord[0]));
         return loginButton;
     }
     
@@ -194,8 +205,7 @@ import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
 @TestPropertySource(properties = {
-    "brobot.core.mock=true",
-    "brobot.action-history.source=database"
+    "brobot.mock=true"
 })
 public class LoginWorkflowIntegrationTest {
     
@@ -262,14 +272,14 @@ public class StateSpecificTesting {
         // Add state-specific records
         ActionRecord loginRecord = new ActionRecord.Builder()
             .setActionConfig(new PatternFindOptions.Builder().build())
-            .setStateId(loginStateId)
+            .setState("LoginState")  // Use state name, not ID
             .setActionSuccess(true)
             .addMatch(createLoginMatch())
             .build();
-        
+
         ActionRecord mainRecord = new ActionRecord.Builder()
             .setActionConfig(new PatternFindOptions.Builder().build())
-            .setStateId(mainStateId)
+            .setState("MainState")  // Use state name, not ID
             .setActionSuccess(true)
             .addMatch(createMainMatch())
             .build();
@@ -282,9 +292,9 @@ public class StateSpecificTesting {
             new PatternFindOptions.Builder().build(),
             loginStateId
         );
-        
+
         assertTrue(loginSnapshot.isPresent());
-        assertEquals(loginStateId, loginSnapshot.get().getStateId());
+        assertEquals("LoginState", loginSnapshot.get().getStateName());
     }
 }
 ```
@@ -318,11 +328,14 @@ public class FailureSimulation {
     
     @Test
     public void testRetryMechanism() {
+        ActionHistory flakeyHistory = createFlakeyButtonHistory();
+
         StateImage flakeyButton = new StateImage.Builder()
-            .withPattern("flakey-button.png")
+            .addPattern("flakey-button.png")
             .build();
-        
-        flakeyButton.setActionHistory(createFlakeyButtonHistory());
+
+        // Apply the flakey history to the button's patterns
+        flakeyButton.addActionSnapshotsToAllPatterns(flakeyHistory.getSnapshots().toArray(new ActionRecord[0]));
         
         // Test retry logic
         int attempts = 0;
@@ -411,9 +424,11 @@ public class DataDrivenTests {
         
         // Use historical data for testing
         StateImage loginButton = new StateImage.Builder()
-            .withPattern("login.png")
+            .addPattern("login.png")
             .build();
-        loginButton.setActionHistory(history);
+
+        // Apply loaded history to the pattern
+        loginButton.addActionSnapshotsToAllPatterns(history.getSnapshots().toArray(new ActionRecord[0]));
         
         // Run tests with real historical data
         Optional<ActionRecord> snapshot = history.getRandomSnapshot(
@@ -561,7 +576,7 @@ public class RealisticDataGenerator {
             ActionRecord record = new ActionRecord.Builder()
                 .setActionConfig(new PatternFindOptions.Builder().build())
                 .setActionSuccess(success)
-                .setTimestamp(LocalDateTime.now()
+                .setTimeStamp(LocalDateTime.now()  // Note: capital 'S' in Stamp
                     .withHour(hour)
                     .withMinute(i * 6))
                 .build();
@@ -651,8 +666,25 @@ logging:
 
 If you have existing tests using `ActionOptions`, see the [ActionHistory Migration Guide](/docs/core-library/migration/actionhistory-migration-guide) for detailed migration instructions.
 
-## Next Steps
+## Related Documentation
 
-- Learn about [Enhanced Mocking](/docs/core-library/testing/enhanced-mocking) for advanced scenarios
-- Explore [States](/docs/getting-started/states) for complex workflows
-- Read about [Core Concepts](/docs/getting-started/core-concepts) for foundational understanding
+### ActionHistory & Testing
+- **[ActionHistory Mock Snapshots](./actionhistory-mock-snapshots.md)** - Using ActionHistory snapshots for mocking
+- **[Action Recording](./action-recording.md)** - Recording ActionHistory during automation
+- **[Mock Mode Guide](./mock-mode-guide.md)** - Comprehensive mock testing guide
+- **[Testing Introduction](./testing-intro.md)** - Overview of Brobot testing strategies
+- **[Integration Testing](./integration-testing.md)** - Integration testing patterns
+
+### Migration & Advanced Topics
+- **[ActionHistory Migration Guide](../03-core-library/migration/actionhistory-migration-guide.md)** - Migrating from legacy ActionOptions API
+- **[Enhanced Mocking](./advanced/enhanced-mocking.md)** - Advanced mocking scenarios
+- **[ActionOptions to ActionConfig Migration](../03-core-library/migration/actionoptions-to-actionconfig.md)** - Modern API migration
+
+### Getting Started
+- **[States Guide](../01-getting-started/states.md)** - Understanding State and StateImage
+- **[Core Concepts](../01-getting-started/core-concepts.md)** - Foundational Brobot concepts
+- **[Quick Start](../01-getting-started/quick-start.md)** - Getting started with Brobot
+
+### Configuration
+- **[Properties Reference](../03-core-library/configuration/properties-reference.md)** - Complete configuration properties
+- **[Brobot Properties Usage](../03-core-library/configuration/brobot-properties-usage.md)** - Using BrobotProperties in code

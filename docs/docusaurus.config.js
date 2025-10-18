@@ -102,11 +102,12 @@ const config = {
             label: 'Documentation',
           },
           // Local API documentation (with version selector)
-          {
-            to: '/api/',
-            label: 'API Reference',
-            position: 'left',
-          },
+          // TODO: Re-enable when API documentation is available
+          // {
+          //   to: '/api/',
+          //   label: 'API Reference',
+          //   position: 'left',
+          // },
           {
             label: 'The Visual API',
             to: '/visualAPI',

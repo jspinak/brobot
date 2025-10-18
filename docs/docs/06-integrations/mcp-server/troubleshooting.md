@@ -4,6 +4,21 @@ sidebar_position: 6
 
 # Troubleshooting Guide
 
+:::caution EXPERIMENTAL TROUBLESHOOTING - LIMITED COVERAGE
+
+**This troubleshooting guide covers theoretical issues for an untested experimental feature.** Many real-world problems may not be documented here, and suggested solutions may not work.
+
+**Key Warnings**:
+- Issues described may not match actual problems encountered
+- Solutions provided are untested and may not resolve issues
+- New error types not covered in this guide are likely
+- Debug techniques may require modifications to work
+- Community support is limited for troubleshooting
+
+**Expect to encounter undocumented issues when using this experimental software.**
+
+:::
+
 Common issues and solutions when using the Brobot MCP Server.
 
 ## Server Issues
@@ -175,10 +190,13 @@ BrobotCLIError: Command timed out after 30 seconds
    top  # or htop
    ```
 
-3. **Optimize Brobot configuration**
-   ```env
-   BROBOT_SEARCH_TIMEOUT=10.0
-   BROBOT_MIN_SIMILARITY=0.7  # Lower threshold
+3. **Reduce CLI load**
+   ```bash
+   # Check if other Java processes are consuming resources
+   ps aux | grep java
+
+   # Use mock mode to isolate if issue is CLI or server
+   USE_MOCK_DATA=true python -m mcp_server.main
    ```
 
 ## API Issues
@@ -231,19 +249,22 @@ BrobotCLIError: Command timed out after 30 seconds
 
 2. **Lower confidence threshold**
    ```python
+   from brobot_client import BrobotClient
+
+   client = BrobotClient()
    client.click("button.png", confidence=0.7)
    ```
 
-3. **Use larger search region**
+3. **Save screenshot for debugging**
    ```python
-   # Future API feature
-   client.click("button.png", region=Region(0, 0, 800, 600))
-   ```
+   from brobot_client import BrobotClient
 
-4. **Save screenshot for debugging**
-   ```python
+   client = BrobotClient()
    obs = client.get_observation()
-   obs.save_screenshot("debug.png")
+
+   if obs.save_screenshot("debug.png"):
+       print("Screenshot saved successfully")
+       # Review debug.png to see what patterns are visible
    ```
 
 ---
@@ -263,15 +284,22 @@ BrobotCLIError: Command timed out after 30 seconds
 1. **Check state configuration**
    - Verify state images exist
    - Ensure patterns are up-to-date
+   - Check that images directory is accessible to the CLI
 
-2. **Adjust detection parameters**
+2. **Test in mock mode first**
    ```env
-   BROBOT_MIN_SIMILARITY=0.75
-   BROBOT_STATE_TIMEOUT=15.0
+   # Verify API works correctly
+   USE_MOCK_DATA=true
    ```
+
+   If mock mode shows states but real mode doesn't, the issue is with Brobot CLI configuration.
 
 3. **Debug state detection**
    ```python
+   from brobot_client import BrobotClient
+
+   client = BrobotClient()
+
    # Get detailed state info
    structure = client.get_state_structure()
    for state in structure.states:
@@ -305,6 +333,8 @@ BrobotConnectionError: Failed to connect to server at http://localhost:8000
 
 3. **Use correct URL**
    ```python
+   from brobot_client import BrobotClient
+
    client = BrobotClient("http://127.0.0.1:8000")  # Try IP instead
    ```
 
@@ -321,18 +351,20 @@ BrobotTimeoutError: Request timed out after 30s
 
 1. **Increase client timeout**
    ```python
+   from brobot_client import BrobotClient
+
    client = BrobotClient(timeout=60.0)
    ```
 
-2. **Use async client**
-   ```python
-   async with AsyncBrobotClient() as client:
-       result = await client.click("button.png")
-   ```
-
-3. **Check network latency**
+2. **Check network latency**
    ```bash
    ping localhost
+   ```
+
+3. **Use longer timeouts for slow operations**
+   ```python
+   # Set longer timeout for specific operations
+   result = client.click("slow_button.png", timeout=90.0)
    ```
 
 ## Performance Issues
@@ -346,36 +378,44 @@ BrobotTimeoutError: Request timed out after 30s
    - Remove unnecessary details
    - Use distinctive features
 
-2. **Cache patterns**
-   ```env
-   PATTERN_CACHE_ENABLED=true
+2. **Use lower confidence thresholds**
+   ```python
+   # Lower threshold for faster (but less accurate) matching
+   client.click("button.png", confidence=0.7)
    ```
 
-3. **Limit search area**
-   ```python
-   # Search specific region only
-   client.click("button.png", region=Region(100, 100, 200, 200))
+3. **Optimize timeout settings**
+   ```env
+   # Reduce CLI timeout if operations are simple
+   CLI_TIMEOUT=15.0
    ```
 
 ---
 
 ### High Memory Usage
 
-#### Solutions
+:::info FUTURE FEATURE
+Advanced memory management and performance tuning options are not yet implemented in the MCP server. These features may be added in future releases.
+:::
 
-1. **Limit worker processes**
+#### Current Solutions
+
+1. **Use mock mode for testing**
    ```env
-   WORKERS=2  # Instead of 4
+   USE_MOCK_DATA=true  # Reduces memory usage
    ```
 
-2. **Enable garbage collection**
-   ```env
-   GC_THRESHOLD=70
+2. **Restart server periodically**
+   ```bash
+   # Restart server to free memory
+   # Stop current server (Ctrl+C)
+   python -m mcp_server.main
    ```
 
-3. **Reduce cache size**
-   ```env
-   CACHE_MAX_SIZE=50MB
+3. **Monitor memory usage**
+   ```bash
+   # Check memory usage
+   ps aux | grep -E "(java|python)" | grep -v grep
    ```
 
 ## Docker Issues
@@ -447,6 +487,12 @@ client = BrobotClient()
 ### Save Debug Information
 
 ```python
+import json
+from datetime import datetime
+from brobot_client import BrobotClient
+
+client = BrobotClient()
+
 def debug_automation():
     try:
         result = client.click("button.png")
@@ -454,14 +500,14 @@ def debug_automation():
         # Save debug info
         obs = client.get_observation()
         obs.save_screenshot("error_screenshot.png")
-        
+
         with open("debug_log.json", "w") as f:
             json.dump({
                 "error": str(e),
                 "active_states": [s.name for s in obs.active_states],
                 "timestamp": datetime.now().isoformat()
             }, f, indent=2)
-        
+
         raise
 ```
 
@@ -472,18 +518,43 @@ def debug_automation():
 watch -n 1 'ps aux | grep -E "(java|python)" | grep -v grep'
 ```
 
+## Related Documentation
+
+Before seeking help, review these related guides:
+
+- 📦 **[Installation Guide](./installation.md)** - Platform-specific setup and system requirements
+- ⚙️ **[Configuration Guide](./configuration.md)** - All configuration options explained
+- 🚀 **[Getting Started](./getting-started.md)** - Basic usage patterns and examples
+- 📖 **[API Reference](./api-reference.md)** - Complete endpoint documentation
+- 💡 **[Examples](./examples.md)** - Integration patterns with AI services
+
+For core Brobot framework issues (not MCP server specific):
+- **[Brobot Installation](../../01-getting-started/installation.md)** - Core framework setup
+- **[Brobot States](../../01-getting-started/states.md)** - Understanding state-based automation
+- **[Brobot Core Concepts](../../01-getting-started/core-concepts.md)** - Framework architecture
+
 ## Getting Help
+
+:::info COMMUNITY SUPPORT ONLY
+Support for this experimental feature is limited to community contributions. Response times may be slow, and many issues may remain unresolved.
+:::
 
 If these solutions don't resolve your issue:
 
-1. **Search existing issues**: [GitHub Issues](https://github.com/jspinak/brobot-mcp-server/issues)
-2. **Create detailed bug report** with:
+1. **Review related documentation** - Check the guides listed above
+2. **Search existing issues**: [GitHub Issues](https://github.com/jspinak/brobot-mcp-server/issues)
+3. **Create detailed bug report** with:
    - Error messages
-   - System information
-   - Configuration files
+   - System information (OS, Python/Java versions)
+   - Configuration files (.env contents)
    - Steps to reproduce
-3. **Join Discord**: Get real-time help from the community
-4. **Check logs**: Always include relevant log output
+   - Relevant log output
+4. **Include environment details**:
+   ```bash
+   python --version
+   java -version
+   pip list | grep brobot
+   ```
 
 ## FAQ
 

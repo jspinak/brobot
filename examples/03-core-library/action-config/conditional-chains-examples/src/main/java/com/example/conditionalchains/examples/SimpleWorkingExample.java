@@ -77,11 +77,11 @@ public class SimpleWorkingExample {
 
         // Using ConditionalActionChain with convenience methods
         ActionResult result =
-                ConditionalActionChain.find(objects, findOptions)
-                        .ifFoundClick(clickOptions)
+                ConditionalActionChain.find(findOptions)
+                        .ifFound(clickOptions) // Use ifFound() with ClickOptions
                         .ifFoundLog("Successfully clicked button")
                         .ifNotFoundLog("Button not found")
-                        .perform(action);
+                        .perform(action, objects);
 
         log.info("Chain completed with success: {}", result.isSuccess());
     }
@@ -105,25 +105,20 @@ public class SimpleWorkingExample {
 
         // Complete login flow using chaining
         ActionResult result =
-                ConditionalActionChain.find(
-                                loginObjects,
-                                new PatternFindOptions.Builder().setSimilarity(0.8).build())
+                ConditionalActionChain.find(loginButton)
                         .ifFoundClick() // Uses default click options
                         .ifFoundLog("Clicked login button")
                         .ifNotFoundLog("Login button not found - aborting")
-                        .ifNotFoundStop() // Stop chain execution if login button not found
-                        .then()
-                        .find(usernameObjects, new PatternFindOptions.Builder().build())
+                        .stopIf(r -> !r.isSuccess()) // Stop chain execution if login button not found
+                        .then(usernameField)
                         .ifFoundClick()
                         .ifFoundType("testuser") // Convenience method for typing
                         .ifFoundLog("Entered username")
-                        .then()
-                        .find(passwordObjects, new PatternFindOptions.Builder().build())
+                        .then(passwordField)
                         .ifFoundClick()
                         .ifFoundType("password123")
                         .ifFoundLog("Entered password")
-                        .then()
-                        .find(submitObjects, new PatternFindOptions.Builder().build())
+                        .then(submitButton)
                         .ifFoundClick()
                         .ifFoundLog("Clicked submit button")
                         .ifNotFoundLog("Submit button not found")
@@ -140,22 +135,20 @@ public class SimpleWorkingExample {
 
         ActionResult result =
                 ConditionalActionChain.find(
-                                objects,
                                 new PatternFindOptions.Builder().setSimilarity(0.9).build())
                         .ifFoundDo(
                                 actionResult -> {
-                                    log.info(
-                                            "Button found at coordinates: {}",
-                                            actionResult.getBestMatch().getMatch().getCenter());
+                                    actionResult.getBestMatch().ifPresent(match ->
+                                        log.info("Button found at coordinates: {}", match.getTarget()));
                                     // Could perform additional validation here
                                 })
-                        .ifFoundClick(new ClickOptions.Builder().setPauseAfterEnd(1.0).build())
+                        .ifFound(new ClickOptions.Builder().setPauseAfterEnd(1.0).build())
                         .ifNotFoundDo(
-                                () -> {
+                                actionResult -> {
                                     log.warn("Button not found - taking screenshot for debugging");
                                     // Could take screenshot or perform other debugging actions
                                 })
-                        .perform(action);
+                        .perform(action, objects);
 
         log.info("Advanced pattern completed: {}", result.isSuccess());
     }
@@ -173,12 +166,11 @@ public class SimpleWorkingExample {
 
             finalResult =
                     ConditionalActionChain.find(
-                                    objects,
                                     new PatternFindOptions.Builder().setSimilarity(0.7).build())
-                            .ifFoundClick(new ClickOptions.Builder().setPauseAfterEnd(0.5).build())
+                            .ifFound(new ClickOptions.Builder().setPauseAfterEnd(0.5).build())
                             .ifFoundLog("Successfully clicked on attempt " + attempt)
                             .ifNotFoundLog("Element not found on attempt " + attempt)
-                            .perform(action);
+                            .perform(action, objects);
 
             if (finalResult.isSuccess()) {
                 log.info("Click succeeded on attempt {}", attempt);
@@ -238,10 +230,10 @@ public class SimpleWorkingExample {
 
         // NEW WAY (with ConditionalActionChain):
         log.info("ConditionalActionChain approach:");
-        ConditionalActionChain.find(objects, new PatternFindOptions.Builder().build())
+        ConditionalActionChain.find(new PatternFindOptions.Builder().build())
                 .ifFoundClick()
                 .ifFoundLog("Clicked successfully")
                 .ifNotFoundLog("Button not found")
-                .perform(action);
+                .perform(action, objects);
     }
 }

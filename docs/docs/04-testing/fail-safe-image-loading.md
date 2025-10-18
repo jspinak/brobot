@@ -19,39 +19,46 @@ This approach is essential for GUI automation where:
 
 ## Implementation Details
 
-### Pattern Constructor Behavior
+### StateImage Pattern Loading Behavior
 
-When creating a Pattern with an image path:
+When creating a StateImage with pattern images:
 
 ```java
-Pattern pattern = new Pattern("button.png");
+import io.github.jspinak.brobot.model.state.StateImage;
+
+StateImage button = new StateImage.Builder()
+    .addPatterns("button.png")
+    .setName("Button")
+    .build();
 ```
 
-The constructor follows these rules:
+The pattern loading follows these rules:
 
 1. **In Mock Mode**: Image loading is skipped entirely
-   - `pattern.getImage()` returns `null`
-   - `pattern.getNameWithoutExtension()` returns `"button"`
-   - `pattern.getImgpath()` returns `"button.png"`
+   - Internal Pattern objects have null images
+   - Pattern names are extracted from filenames
    - No file system access occurs
+   - StateImage is created successfully
 
 2. **In Live Mode - Image Found**:
-   - Image is loaded into memory
-   - Pattern is fully functional
+   - Images are loaded into memory
+   - Patterns are fully functional
    - Debug log confirms successful loading
+   - StateImage contains valid Pattern objects
 
 3. **In Live Mode - Image Missing**:
    - **No exception is thrown**
    - Error is logged: `"Failed to load image: button.png. Pattern will have null image and find operations will fail."`
-   - `pattern.getImage()` returns `null`
-   - Pattern object is still created
-   - Find operations using this pattern will fail gracefully
+   - Internal Pattern objects have null images
+   - StateImage is still created successfully
+   - Find operations using this StateImage will fail gracefully
 
 ### Spring Initialization Handling
 
-During Spring context initialization, image loading is automatically deferred to avoid unnecessary failures:
+During Spring context initialization, image loading is automatically deferred to avoid unnecessary failures. Internally, Pattern objects detect when Spring is initializing and defer image loading:
 
 ```java
+// Internal Pattern implementation (for reference)
 if (isSpringContextInitializing()) {
     // Defer loading until Spring context is ready
     this.needsDelayedLoading = true;
@@ -60,7 +67,7 @@ if (isSpringContextInitializing()) {
 }
 ```
 
-Images are loaded lazily on first use after Spring initialization completes.
+Images are loaded lazily on first use after Spring initialization completes. This is handled automatically by Brobot - no user action required.
 
 ## Error Handling Strategy
 
@@ -75,17 +82,32 @@ Images are loaded lazily on first use after Spring initialization completes.
 ### Example Recovery Pattern
 
 ```java
-// Pattern with potentially missing image
-Pattern submitButton = new Pattern("submit.png");
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.state.StateImage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-// Find operation handles null image gracefully
+// StateImage with potentially missing image
+StateImage submitButton = new StateImage.Builder()
+    .addPatterns("submit.png")
+    .setName("Submit Button")
+    .build();
+
+// Find operation handles missing images gracefully
 ActionResult result = action.find(submitButton);
 
 if (!result.isSuccess()) {
     // Recovery logic
+    Logger logger = LoggerFactory.getLogger(getClass());
     logger.warn("Submit button not found, trying alternative approach");
-    // Try alternative pattern or fallback action
-    result = action.find(alternativeSubmitPattern);
+
+    // Try alternative pattern
+    StateImage alternativeSubmit = new StateImage.Builder()
+        .addPatterns("submit-alt.png")
+        .setName("Alternative Submit")
+        .build();
+    result = action.find(alternativeSubmit);
 }
 ```
 
@@ -115,26 +137,37 @@ if (!result.isSuccess()) {
 
 ### 1. Always Check ActionResults
 ```java
-ActionResult result = action.click(pattern);
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.state.StateImage;
+
+StateImage button = new StateImage.Builder()
+    .addPatterns("button.png")
+    .build();
+
+ActionResult result = action.click(button);
 if (!result.isSuccess()) {
     // Handle the failure appropriately
 }
 ```
 
 ### 2. Provide Fallback Patterns
-```java
-List<Pattern> submitVariations = Arrays.asList(
-    new Pattern("submit-button.png"),
-    new Pattern("submit-text.png"),
-    new Pattern("ok-button.png")
-);
 
-// Try each pattern until one succeeds
-for (Pattern p : submitVariations) {
-    if (action.find(p).isSuccess()) {
-        action.click(p);
-        break;
-    }
+StateImage supports multiple patterns natively - Brobot automatically tries each pattern until one succeeds:
+
+```java
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.state.StateImage;
+
+// StateImage with multiple pattern variations
+StateImage submitButton = new StateImage.Builder()
+    .addPatterns("submit-button.png", "submit-text.png", "ok-button.png")
+    .setName("Submit Button")
+    .build();
+
+// Brobot automatically tries all patterns
+ActionResult result = action.find(submitButton);
+if (result.isSuccess()) {
+    action.click(submitButton);
 }
 ```
 
@@ -193,23 +226,41 @@ brobot.mock=false
 
 ### Example Test
 ```java
-@Test
-void shouldHandleMissingImageGracefully() {
-    // Create pattern with non-existent image
-    Pattern pattern = new Pattern("non-existent.png");
+import static org.junit.jupiter.api.Assertions.*;
 
-    // Pattern creation succeeds
-    assertNotNull(pattern);
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
-    // But image is null
-    assertNull(pattern.getImage());
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
-    // And name is correctly parsed
-    assertEquals("non-existent", pattern.getNameWithoutExtension());
+@SpringBootTest
+public class FailSafeImageLoadingTest extends BrobotTestBase {
 
-    // Find operations fail gracefully
-    ActionResult result = action.find(pattern);
-    assertFalse(result.isSuccess());
+    @Autowired
+    private Action action;
+
+    @Test
+    void shouldHandleMissingImageGracefully() {
+        // Create StateImage with non-existent image
+        StateImage stateImage = new StateImage.Builder()
+            .addPatterns("non-existent.png")
+            .setName("Non-existent Image")
+            .build();
+
+        // StateImage creation succeeds
+        assertNotNull(stateImage);
+
+        // StateImage contains patterns (even with null images internally)
+        assertFalse(stateImage.getPatterns().isEmpty());
+
+        // Find operations fail gracefully (no exceptions thrown)
+        ActionResult result = action.find(stateImage);
+        assertFalse(result.isSuccess());
+    }
 }
 ```
 
@@ -222,3 +273,40 @@ The fail-safe image loading strategy ensures that Brobot automations are robust,
 - Maintain stability in production environments
 
 This approach aligns with the reality of GUI automation where image availability cannot always be guaranteed, and partial functionality is often better than complete failure.
+
+## Related Documentation
+
+### Testing & Mock Mode
+- **[Mock Mode Guide](mock-mode-guide.md)** - Testing without images in mock mode
+- **[Unit Testing Guide](unit-testing.md)** - Unit testing with BrobotTestBase
+- **[Integration Testing Guide](integration-testing.md)** - Full workflow testing
+- **[Testing Introduction](testing-intro.md)** - Testing overview and modern configuration
+- **[Profile-Based Testing](profile-based-testing.md)** - Test profiles and isolation
+- **[Test Utilities](test-utilities.md)** - BrobotTestBase and test helpers
+
+### Pattern Management
+- **[Pattern Creation Tools](../03-core-library/tools/pattern-creation-tools.md)** - Best tools for creating patterns
+- **[States Guide](../01-getting-started/states.md)** - StateImage and pattern organization
+- **[Pattern Capture Tool Guide](../03-core-library/tools/pattern-capture-tool-guide.md)** - Using Brobot's pattern capture tool
+- **[Capture Methods Comparison](../03-core-library/tools/capture-methods-comparison.md)** - Performance comparison
+
+### Error Handling & Debugging
+- **[Debugging Pattern Matching](debugging-pattern-matching.md)** - Comprehensive debugging guide with Best Match Capture
+- **[ActionResult Architecture](../03-core-library/architecture/actionresult-architecture.md)** - Understanding ActionResult for error handling
+- **[Image Find Debugging](../03-core-library/tools/image-find-debugging.md)** - Image finding debug system
+
+### Configuration
+- **[Properties Reference](../03-core-library/configuration/properties-reference.md)** - All Brobot properties including logging and mock mode
+- **[Logging Configuration](../07-logging/configuration.md)** - Setting up logging levels for image loading
+- **[Headless Configuration](../03-core-library/configuration/headless-configuration.md)** - Configuring headless detection for CI/CD
+- **[BrobotProperties Usage Guide](../03-core-library/configuration/brobot-properties-usage.md)** - Using properties in code
+
+### Core Concepts
+- **[Quick Start Guide](../01-getting-started/quick-start.md)** - Getting started with Brobot
+- **[Core Concepts](../01-getting-started/core-concepts.md)** - Fundamental Brobot concepts
+- **[Action Hierarchy](../01-getting-started/action-hierarchy.md)** - Using patterns with Actions
+- **[Pure Actions Quickstart](../01-getting-started/pure-actions-quickstart.md)** - Using Actions directly
+
+### Capture System
+- **[Modular Capture System](../03-core-library/capture/modular-capture-system.md)** - Understanding capture providers
+- **[DPI Resolution Guide](../03-core-library/capture/dpi-resolution-guide.md)** - Handling DPI scaling and resolution mismatches

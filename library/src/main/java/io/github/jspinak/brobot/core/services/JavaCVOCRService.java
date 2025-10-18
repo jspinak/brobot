@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
  * management - Consistent with JavaCV ecosystem - More OCR options (confidence scores, word boxes,
  * etc.)
  *
- * @since 2.0.0
+ * @since 1.1.0
  */
 @Component
 public class JavaCVOCRService {

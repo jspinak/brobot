@@ -8,9 +8,22 @@ description: Complete index of ActionConfig examples and patterns
 
 This page provides a comprehensive index of all ActionConfig examples, organized by use case and complexity level.
 
+> **New to ActionConfig?** Start with the [ActionConfig Overview](./01-overview.md) for conceptual foundation.
+
+## Prerequisites
+
+All examples in this index assume you have:
+- A Spring `@Component` class with `@Autowired Action action;`
+- StateImage objects initialized for your UI elements
+- Required imports (see [Migration Guide Setup](./12-migration-guide.md#setup-for-migration-examples) for complete example)
+
+For complete setup instructions, see:
+- **[Migration Guide Setup](./12-migration-guide.md#setup-for-migration-examples)** - Complete class structure and imports
+- **[Convenience Methods](./18-convenience-methods.md)** - Direct action methods
+
 ## Quick Start Examples
 
-### Convenience Methods (New in 2.1)
+### Convenience Methods (New in 1.1+)
 
 The simplest way to perform common actions:
 
@@ -50,13 +63,15 @@ ClickOptions click = new ClickOptions.Builder().build();
 
 // Right-click with pause
 ClickOptions rightClick = new ClickOptions.Builder()
-    .setClickType(ClickOptions.ClickType.RIGHT)
+    .setPressOptions(MousePressOptions.builder()
+        .setButton(MouseButton.RIGHT)
+        .build())
     .setPauseAfterEnd(0.5)
     .build();
 
 // Double-click
 ClickOptions doubleClick = new ClickOptions.Builder()
-    .setClickType(ClickOptions.ClickType.DOUBLE)
+    .setNumberOfClicks(2)
     .build();
 ```
 
@@ -64,41 +79,114 @@ ClickOptions doubleClick = new ClickOptions.Builder()
 ```java
 // Basic typing
 TypeOptions type = new TypeOptions.Builder()
-    .setText("Hello World")
+    .setTypeDelay(0.05)
+    .build();
+ObjectCollection text = new ObjectCollection.Builder()
+    .withStrings("Hello World")
     .build();
 
 // Typing with delay
 TypeOptions slowType = new TypeOptions.Builder()
-    .setText("Important text")
     .setTypeDelay(0.1)
     .build();
-
-// Clear and type
-TypeOptions clearAndType = new TypeOptions.Builder()
-    .setText("New text")
-    .setClearFirst(true)
+ObjectCollection importantText = new ObjectCollection.Builder()
+    .withStrings("Important text")
     .build();
+
+// Clear field then type (using keyboard shortcuts)
+ActionChainOptions clearAndType = new ActionChainOptions.Builder(
+    new KeyDownOptions.Builder().setKey("ctrl").build())
+    .then(new TypeOptions.Builder().build())  // Types "a"
+    .then(new KeyUpOptions.Builder().setKey("ctrl").build())
+    .then(new TypeOptions.Builder().build())  // Types new text
+    .build();
+// Execute with: ObjectCollection("a"), then ObjectCollection("New text")
 ```
 
 #### Find Examples
 ```java
 // Find first match
 PatternFindOptions findFirst = new PatternFindOptions.Builder()
-    .setStrategy(FindStrategy.FIRST)
+    .setStrategy(PatternFindOptions.Strategy.FIRST)
     .build();
 
 // Find best match with similarity
 PatternFindOptions findBest = new PatternFindOptions.Builder()
-    .setStrategy(FindStrategy.BEST)
+    .setStrategy(PatternFindOptions.Strategy.BEST)
     .setSimilarity(0.9)
     .build();
 
 // Find all matches
 PatternFindOptions findAll = new PatternFindOptions.Builder()
-    .setStrategy(FindStrategy.ALL)
+    .setStrategy(PatternFindOptions.Strategy.ALL)
     .setPauseBeforeBegin(1.0)
     .build();
 ```
+
+## Modern Conditional Workflows (Recommended)
+
+### ConditionalActionChain - The Modern Approach
+[View comprehensive examples](./15-conditional-chains-examples.md)
+
+For conditional workflows, use ConditionalActionChain instead of manual retry loops or complex ActionChainOptions:
+
+```java
+// Simple find and click with error handling
+ConditionalActionChain
+    .find(buttonImage)
+    .ifFoundClick()
+    .ifNotFoundLog("Button not found")
+    .perform(action, objectCollection);
+
+// Multi-step form filling with sequential composition
+ConditionalActionChain
+    .find(usernameField)
+    .ifFoundClick()
+    .ifFoundType("user@example.com")
+    .then(passwordField)  // Sequential: move to next element
+    .ifFoundClick()
+    .ifFoundType("password")
+    .then(submitButton)
+    .ifFoundClick()
+    .perform(action, objectCollection);
+
+// Retry pattern (much simpler than RepeatUntilConfig)
+ConditionalActionChain
+    .find(buttonImage)
+    .ifFoundClick()
+    .then(targetImage)
+    .ifNotFoundClick(buttonImage)  // Retry 1
+    .ifNotFoundClick(buttonImage)  // Retry 2
+    .ifNotFoundClick(buttonImage)  // Retry 3
+    .then(targetImage)
+    .ifFoundLog("Success!")
+    .perform(action, objectCollection);
+
+// Built-in keyboard shortcuts
+ConditionalActionChain
+    .find(editorField)
+    .ifFoundClick()
+    .pressCtrlA()      // Select all
+    .pressDelete()     // Clear
+    .type("New text")  // Type
+    .pressCtrlS()      // Save
+    .perform(action, objectCollection);
+
+// Scroll integration
+ConditionalActionChain
+    .find(targetElement)
+    .ifNotFoundScrollDown()
+    .ifNotFoundScrollDown()
+    .ifFoundClick()
+    .perform(action, objectCollection);
+```
+
+**Key Features**:
+- `then()` method for sequential action composition
+- Built-in keyboard shortcuts (`pressCtrlA()`, `pressCtrlS()`, `pressEnter()`, etc.)
+- Conditional execution (`ifFound*`, `ifNotFound*`)
+- Cleaner and more readable than ActionChainOptions for conditional logic
+- Integrated scrolling support
 
 ## Action Chaining Examples
 
@@ -128,11 +216,11 @@ ActionChainOptions formFill = new ActionChainOptions.Builder(
 // Find dialog, then find button within
 ActionChainOptions nestedFind = new ActionChainOptions.Builder(
     new PatternFindOptions.Builder()
-        .setStrategy(FindStrategy.FIRST)
+        .setStrategy(PatternFindOptions.Strategy.FIRST)
         .build())
     .setStrategy(ActionChainOptions.ChainingStrategy.NESTED)
     .then(new PatternFindOptions.Builder()
-        .setStrategy(FindStrategy.FIRST)
+        .setStrategy(PatternFindOptions.Strategy.FIRST)
         .build())
     .build();
 ```
@@ -161,23 +249,40 @@ actions.createChain()
 ### Click Until Examples
 [View detailed examples](./09-conditional-actions.md)
 
+> **Modern Approach**: For new code, consider using `ConditionalActionChain` (see above) instead of RepeatUntilConfig.
+> See [Conditional Chains Examples](./15-conditional-chains-examples.md#retry-pattern) for simpler alternatives.
+
 ```java
-// Click until image appears (max 10 clicks)
+// Option 1: Using ConditionalActionChain (Recommended for 1-5 retries)
+ConditionalActionChain
+    .find(button)
+    .ifFoundClick()
+    .then(target)
+    .ifNotFoundClick(button)  // Retry 1
+    .ifNotFoundClick(button)  // Retry 2
+    .ifNotFoundClick(button)  // Retry 3
+    .then(target)
+    .ifFoundLog("Target appeared!")
+    .perform(action, objectCollection);
+
+// Option 2: Using RepeatUntilConfig (For 10+ retries)
 public boolean clickUntilImageAppears(StateImage button, StateImage target) {
+    // RepeatUntilConfig for complex retry logic
     RepeatUntilConfig config = new RepeatUntilConfig.Builder()
         .setDoAction(new ClickOptions.Builder()
             .setPauseAfterEnd(0.5)
             .build())
         .setActionObjectCollection(button.asObjectCollection())
         .setUntilAction(new PatternFindOptions.Builder()
-            .setStrategy(FindStrategy.FIRST)
+            .setStrategy(PatternFindOptions.Strategy.FIRST)
             .setPauseBeforeBegin(2.0)
             .build())
         .setConditionObjectCollection(target.asObjectCollection())
         .setMaxActions(10)
         .build();
-    
-    return repeatUntilExecutor.execute(config);
+
+    // Execute via Action class
+    return action.perform(config, new ObjectCollection.Builder().build()).isSuccess();
 }
 ```
 
@@ -188,16 +293,17 @@ VanishOptions vanish = new VanishOptions.Builder()
     .setPauseBeforeBegin(1.0)
     .setTimeout(10.0)
     .build();
+action.perform(vanish, elementToVanish.asObjectCollection());
 
-// Wait with custom intervals
+// Wait with custom intervals (using ConditionalActionChain)
 public boolean waitForCondition(StateImage element, int maxAttempts) {
-    for (int i = 0; i < maxAttempts; i++) {
-        if (find(element)) {
-            return true;
-        }
-        pause(1.0);
+    // Use built-in retry mechanism
+    ConditionalActionChain chain = ConditionalActionChain.find(element);
+    for (int i = 0; i < maxAttempts - 1; i++) {
+        chain.ifNotFoundWait(1.0);  // Wait 1 second between attempts
     }
-    return false;
+    ActionResult result = chain.perform(action, new ObjectCollection.Builder().build());
+    return result.isSuccess();
 }
 ```
 
@@ -207,32 +313,46 @@ public boolean waitForCondition(StateImage element, int maxAttempts) {
 [View detailed examples](./10-form-automation.md)
 
 ```java
-// Complete registration form
-public boolean fillRegistrationForm(UserData data) {
-    return new ActionChainOptions.Builder(
-        // First name
-        new ClickOptions.Builder().build())
-        .then(new TypeOptions.Builder()
-            .setText(data.getFirstName())
-            .setClearFirst(true)
-            .build())
-        // Last name
-        .then(new ClickOptions.Builder().build())
-        .then(new TypeOptions.Builder()
-            .setText(data.getLastName())
-            .setClearFirst(true)
-            .build())
-        // Email
-        .then(new ClickOptions.Builder().build())
-        .then(new TypeOptions.Builder()
-            .setText(data.getEmail())
-            .setClearFirst(true)
-            .build())
-        // Submit
-        .then(new ClickOptions.Builder()
-            .setPauseAfterEnd(1.0)
-            .build())
+// Option 1: Using ConditionalActionChain (Recommended)
+public boolean fillRegistrationForm(String firstName, String lastName, String email) {
+    return ConditionalActionChain
+        .find(firstNameField)
+        .ifFoundClick()
+        .ifFoundClearAndType(firstName)  // Built-in clear and type
+        .then(lastNameField)
+        .ifFoundClick()
+        .ifFoundClearAndType(lastName)
+        .then(emailField)
+        .ifFoundClick()
+        .ifFoundClearAndType(email)
+        .then(submitButton)
+        .ifFoundClick()
+        .perform(action, new ObjectCollection.Builder().build())
+        .isSuccess();
+}
+
+// Option 2: Using ActionChainOptions (Traditional)
+public boolean fillRegistrationFormTraditional(String firstName, String lastName, String email) {
+    // Note: UserData is a placeholder class - create your own
+    ActionChainOptions chain = new ActionChainOptions.Builder(
+        new ClickOptions.Builder().build())  // Click first name field
+        .then(new TypeOptions.Builder().build())  // Type first name
+        .then(new ClickOptions.Builder().build())  // Click last name field
+        .then(new TypeOptions.Builder().build())  // Type last name
+        .then(new ClickOptions.Builder().build())  // Click email field
+        .then(new TypeOptions.Builder().build())  // Type email
+        .then(new ClickOptions.Builder().setPauseAfterEnd(1.0).build())  // Click submit
         .build();
+
+    // Execute with corresponding ObjectCollections
+    return chainExecutor.executeChain(chain, new ActionResult(),
+        firstNameField.asObjectCollection(),
+        new ObjectCollection.Builder().withStrings(firstName).build(),
+        lastNameField.asObjectCollection(),
+        new ObjectCollection.Builder().withStrings(lastName).build(),
+        emailField.asObjectCollection(),
+        new ObjectCollection.Builder().withStrings(email).build(),
+        submitButton.asObjectCollection()).isSuccess();
 }
 ```
 
@@ -240,22 +360,35 @@ public boolean fillRegistrationForm(UserData data) {
 [View detailed examples](./08-complex-workflows.md)
 
 ```java
-// Navigate through menu hierarchy
+// Navigate through menu hierarchy - Modern approach
 public boolean navigateToSettings() {
-    return new ActionChainOptions.Builder(
-        // Open menu
+    return ConditionalActionChain
+        .find(menuButton)
+        .ifFoundClick()
+        .then(settingsOption)
+        .ifFoundClick()
+        .perform(action, new ObjectCollection.Builder().build())
+        .isSuccess();
+}
+
+// Traditional ActionChainOptions approach
+public boolean navigateToSettingsTraditional() {
+    ActionChainOptions chain = new ActionChainOptions.Builder(
         new ClickOptions.Builder()
             .setPauseAfterEnd(0.5)
             .build())
-        // Find settings option
         .then(new PatternFindOptions.Builder()
-            .setStrategy(FindStrategy.FIRST)
+            .setStrategy(PatternFindOptions.Strategy.FIRST)
             .build())
-        // Click settings
         .then(new ClickOptions.Builder()
             .setPauseAfterEnd(0.5)
             .build())
         .build();
+
+    return chainExecutor.executeChain(chain, new ActionResult(),
+        menuButton.asObjectCollection(),
+        settingsOption.asObjectCollection(),
+        settingsOption.asObjectCollection()).isSuccess();
 }
 ```
 
@@ -264,25 +397,49 @@ public boolean navigateToSettings() {
 ### Pattern Library
 [View detailed examples](./11-reusable-patterns.md)
 
+> **Note**: `AutomationPattern` and `PatternContext` are example interfaces, not part of Brobot core.
+> Create your own pattern abstraction based on your project needs.
+
 ```java
-// Login pattern
-public class LoginPattern implements AutomationPattern {
-    @Override
-    public boolean execute(PatternContext context) {
-        return new ActionChainOptions.Builder(
-            // Username
-            new ClickOptions.Builder().build())
-            .then(new TypeOptions.Builder()
-                .setText(context.getParameter("username", String.class))
-                .build())
-            // Password
-            .then(new ClickOptions.Builder().build())
-            .then(new TypeOptions.Builder()
-                .setText(context.getParameter("password", String.class))
-                .build())
-            // Submit
-            .then(new ClickOptions.Builder().build())
+// Example: Login pattern as reusable component
+@Component
+public class LoginPattern {
+
+    @Autowired
+    private Action action;
+
+    // Modern approach with ConditionalActionChain
+    public boolean login(String username, String password) {
+        return ConditionalActionChain
+            .find(usernameField)
+            .ifFoundClick()
+            .ifFoundType(username)
+            .then(passwordField)
+            .ifFoundClick()
+            .ifFoundType(password)
+            .then(submitButton)
+            .ifFoundClick()
+            .perform(action, new ObjectCollection.Builder().build())
+            .isSuccess();
+    }
+
+    // Traditional approach with ActionChainOptions
+    public boolean loginTraditional(String username, String password) {
+        ActionChainOptions chain = new ActionChainOptions.Builder(
+            new ClickOptions.Builder().build())  // Click username
+            .then(new TypeOptions.Builder().build())  // Type username
+            .then(new ClickOptions.Builder().build())  // Click password
+            .then(new TypeOptions.Builder().build())  // Type password
+            .then(new ClickOptions.Builder().build())  // Click submit
             .build();
+
+        // Execute with corresponding data
+        return chainExecutor.executeChain(chain, new ActionResult(),
+            usernameField.asObjectCollection(),
+            new ObjectCollection.Builder().withStrings(username).build(),
+            passwordField.asObjectCollection(),
+            new ObjectCollection.Builder().withStrings(password).build(),
+            submitButton.asObjectCollection()).isSuccess();
     }
 }
 ```
@@ -293,16 +450,23 @@ public class LoginPattern implements AutomationPattern {
 ```java
 // Using DragOptions
 DragOptions drag = new DragOptions.Builder()
-    .setDragDelay(0.5)
+    .setDelayBetweenMouseDownAndMove(0.5)
+    .setDelayAfterDrag(0.5)
     .build();
+action.perform(drag, sourceElement.asObjectCollection(), targetElement.asObjectCollection());
 
-// Custom drag with chain
+// Custom drag with chain (for specialized control)
 ActionChainOptions customDrag = new ActionChainOptions.Builder(
-    new MouseMoveOptions.Builder().build())
-    .then(new MouseDownOptions.Builder().build())
-    .then(new MouseMoveOptions.Builder().build())
-    .then(new MouseUpOptions.Builder().build())
+    new MouseMoveOptions.Builder().build())  // Move to source
+    .then(new MouseDownOptions.Builder().build())  // Press mouse
+    .then(new MouseMoveOptions.Builder().build())  // Move to target
+    .then(new MouseUpOptions.Builder().build())  // Release mouse
     .build();
+chainExecutor.executeChain(customDrag, new ActionResult(),
+    sourceElement.asObjectCollection(),
+    sourceElement.asObjectCollection(),
+    targetElement.asObjectCollection(),
+    targetElement.asObjectCollection());
 ```
 
 ### Scrolling
@@ -312,18 +476,41 @@ ScrollOptions scrollDown = new ScrollOptions.Builder()
     .setDirection(ScrollOptions.Direction.DOWN)
     .setScrollSteps(5)
     .build();
+action.perform(scrollDown, new ObjectCollection.Builder().build());
 
-// Scroll until element visible
+// Scroll until element visible - Modern approach
 public boolean scrollToElement(StateImage element) {
+    return ConditionalActionChain
+        .find(element)
+        .ifNotFoundScrollDown()
+        .ifNotFoundScrollDown()
+        .ifNotFoundScrollDown()
+        .ifNotFoundScrollDown()
+        .ifNotFoundScrollDown()
+        .ifFoundClick()
+        .perform(action, new ObjectCollection.Builder().build())
+        .isSuccess();
+}
+
+// Traditional approach with manual loop
+public boolean scrollToElementTraditional(StateImage element) {
+    ScrollOptions scroll = new ScrollOptions.Builder()
+        .setDirection(ScrollOptions.Direction.DOWN)
+        .setScrollSteps(3)
+        .build();
+
     for (int i = 0; i < 10; i++) {
-        if (find(element)) return true;
-        
-        scroll(new ScrollOptions.Builder()
-            .setDirection(ScrollOptions.Direction.DOWN)
-            .setScrollSteps(3)
-            .build());
-        
-        pause(0.5);
+        ActionResult findResult = action.find(element);
+        if (findResult.isSuccess()) {
+            return true;
+        }
+        action.perform(scroll, new ObjectCollection.Builder().build());
+        try {
+            Thread.sleep(500);  // Wait between scrolls
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
+        }
     }
     return false;
 }
@@ -332,21 +519,37 @@ public boolean scrollToElement(StateImage element) {
 ## Keyboard Actions
 
 ### Shortcuts
+
 ```java
-// Ctrl+C copy
+// Modern approach: Built-in keyboard shortcuts in ConditionalActionChain
+ConditionalActionChain
+    .find(editorField)
+    .ifFoundClick()
+    .pressCtrlA()      // Select all (built-in)
+    .pressCtrlC()      // Copy (built-in)
+    .pressCtrlV()      // Paste (built-in)
+    .pressCtrlS()      // Save (built-in)
+    .perform(action, new ObjectCollection.Builder().build());
+
+// Traditional approach: Manual key combinations
 ActionChainOptions copy = new ActionChainOptions.Builder(
     new KeyDownOptions.Builder().setKey("ctrl").build())
-    .then(new TypeOptions.Builder().setText("c").build())
+    .then(new TypeOptions.Builder().build())  // Type "c"
     .then(new KeyUpOptions.Builder().setKey("ctrl").build())
     .build();
+chainExecutor.executeChain(copy, new ActionResult(),
+    new ObjectCollection.Builder().withStrings("c").build());
 
 // Select all and delete
 ActionChainOptions selectAllDelete = new ActionChainOptions.Builder(
     new KeyDownOptions.Builder().setKey("ctrl").build())
-    .then(new TypeOptions.Builder().setText("a").build())
+    .then(new TypeOptions.Builder().build())  // Type "a"
     .then(new KeyUpOptions.Builder().setKey("ctrl").build())
-    .then(new TypeOptions.Builder().setText("\b").build())
+    .then(new TypeOptions.Builder().build())  // Type backspace
     .build();
+chainExecutor.executeChain(selectAllDelete, new ActionResult(),
+    new ObjectCollection.Builder().withStrings("a").build(),
+    new ObjectCollection.Builder().withStrings("\b").build());
 ```
 
 ## Find Strategies
@@ -375,36 +578,72 @@ MotionFindOptions findMotion = new MotionFindOptions.Builder()
 
 ## Error Handling
 
+For comprehensive troubleshooting guidance, see:
+- **[Troubleshooting Action Chains](./troubleshooting-chains.md)** - Common issues and solutions
+- **[ActionResult Components](./17-actionresult-components.md)** - Understanding action results
+
 ### Retry Patterns
+
 ```java
-public boolean performWithRetry(ActionConfig action, 
-                               ObjectCollection target,
-                               int maxRetries) {
+// Modern approach: Built-in retry with ConditionalActionChain
+public boolean performWithRetry(StateImage target, int maxRetries) {
+    ConditionalActionChain chain = ConditionalActionChain.find(target).ifFoundClick();
+
+    // Add retries
+    for (int i = 0; i < maxRetries - 1; i++) {
+        chain.ifNotFoundClick(target);
+    }
+
+    return chain.perform(action, new ObjectCollection.Builder().build()).isSuccess();
+}
+
+// Traditional approach: Manual retry loop
+public boolean performWithRetryTraditional(ActionConfig actionConfig,
+                                          ObjectCollection target,
+                                          int maxRetries) {
     for (int i = 0; i < maxRetries; i++) {
-        ActionResult result = perform(action, target);
+        ActionResult result = action.perform(actionConfig, target);
         if (result.isSuccess()) {
             return true;
         }
-        
-        logger.warn("Attempt {} failed, retrying...", i + 1);
-        pause(1.0);
+
+        System.out.println("Attempt " + (i + 1) + " failed, retrying...");
+        try {
+            Thread.sleep(1000);  // Wait 1 second
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
+        }
     }
     return false;
 }
 ```
 
 ### Fallback Strategies
+
 ```java
-public boolean clickWithFallback(StateImage primary, 
-                                StateImage fallback) {
-    // Try primary target
-    if (click(primary)) {
+// Modern approach: ConditionalActionChain with fallback
+public boolean clickWithFallback(StateImage primary, StateImage fallback) {
+    return ConditionalActionChain
+        .find(primary)
+        .ifFoundClick()
+        .ifNotFoundLog("Primary not found, trying fallback")
+        .then(fallback)
+        .ifFoundClick()
+        .perform(action, new ObjectCollection.Builder().build())
+        .isSuccess();
+}
+
+// Traditional approach: Manual fallback logic
+public boolean clickWithFallbackTraditional(StateImage primary, StateImage fallback) {
+    ActionResult primaryResult = action.click(primary.asObjectCollection());
+    if (primaryResult.isSuccess()) {
         return true;
     }
-    
-    // Try fallback
-    logger.info("Primary target failed, trying fallback");
-    return click(fallback);
+
+    System.out.println("Primary target failed, trying fallback");
+    ActionResult fallbackResult = action.click(fallback.asObjectCollection());
+    return fallbackResult.isSuccess();
 }
 ```
 
@@ -414,27 +653,33 @@ public boolean clickWithFallback(StateImage primary,
 ```java
 // Process multiple items efficiently
 public void processItems(List<StateImage> items) {
-    ActionChainOptions.Builder chain = null;
-    
-    for (StateImage item : items) {
-        if (chain == null) {
-            chain = new ActionChainOptions.Builder(
-                new ClickOptions.Builder().build());
-        } else {
-            chain.then(new ClickOptions.Builder().build());
-        }
+    if (items.isEmpty()) {
+        return;
     }
-    
-    if (chain != null) {
-        executeChain(chain.build(), items);
+
+    // Build chain dynamically
+    ActionChainOptions.Builder chain = new ActionChainOptions.Builder(
+        new ClickOptions.Builder().build());
+
+    for (int i = 1; i < items.size(); i++) {
+        chain.then(new ClickOptions.Builder().build());
     }
+
+    // Execute with all items
+    ObjectCollection[] collections = items.stream()
+        .map(StateImage::asObjectCollection)
+        .toArray(ObjectCollection[]::new);
+
+    chainExecutor.executeChain(chain.build(), new ActionResult(), collections);
 }
 ```
 
 ## Migration Examples
 
 ### Before and After
-[View migration guide](./12-migration-guide.md)
+[View complete migration guide](./12-migration-guide.md) | [Quick migration reference](./02-migration-quick-reference.md)
+
+For more real-world migration scenarios, see [Migration Examples](./06-migration-examples.md).
 
 ```java
 // Before (ActionOptions) - DEPRECATED
@@ -444,14 +689,38 @@ ActionOptions old = new ActionOptions.Builder()
     .build();
 
 // After (ActionConfig)
-ClickOptions new = new ClickOptions.Builder()
+ClickOptions newClick = new ClickOptions.Builder()
     .setPauseAfterEnd(0.5)
     .build();
 ```
 
 ## Resources
 
-- [ActionConfig API Reference](./05-reference.md)
+### Core Documentation
+- **[ActionConfig Overview](./01-overview.md)** - Concepts and architecture introduction
+- **[Quick Migration Reference](./02-migration-quick-reference.md)** - Concise migration lookup table
+- **[Code Examples](./03-examples.md)** - Detailed examples for each ActionConfig class
+- **[ActionConfig API Reference](./05-reference.md)** - Complete API documentation
+
+### Migration & Workflows
+- **[Migration Examples](./06-migration-examples.md)** - Real-world migration scenarios
+- **[Complete Migration Guide](./12-migration-guide.md)** - Step-by-step migration strategy
+- **[Action Chaining](./07-action-chaining.md)** - Complex multi-step workflows
+- **[Complex Workflows](./08-complex-workflows.md)** - Navigation and workflow patterns
+
+### Conditional Actions & Modern Patterns
+- **[Conditional Actions](./09-conditional-actions.md)** - Click-until and repeat patterns
+- **[Conditional Action Chains Examples](./15-conditional-chains-examples.md)** - Sequential composition with then()
+- **[ConditionalActionWrapper](./16-conditional-action-wrapper.md)** - Spring-integrated conditional actions
+- **[Reusable Patterns](./11-reusable-patterns.md)** - Pattern library approaches
+
+### Alternatives & Helpers
+- **[Convenience Methods](./18-convenience-methods.md)** - Simpler API for common operations
+- **[Form Automation](./10-form-automation.md)** - Form filling patterns
+
+### Troubleshooting & Results
+- **[Troubleshooting Action Chains](./troubleshooting-chains.md)** - Common issues and solutions
+- **[ActionResult Components](./17-actionresult-components.md)** - Understanding action results
 
 ## Contributing Examples
 

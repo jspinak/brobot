@@ -4,7 +4,34 @@ sidebar_position: 2
 
 # Installation Guide
 
-This guide provides detailed installation instructions for the Brobot MCP Server on different operating systems.
+:::warning EXPERIMENTAL FEATURE
+
+**This installation guide is for an experimental feature.** While the software is functional, it is still under active development.
+
+**Important Notes**:
+- This is a proof-of-concept implementation
+- APIs and interfaces may change without notice
+- Limited testing has been performed
+- Configuration options may evolve
+- Community support only
+
+**By following these instructions, you acknowledge the experimental nature of this software.**
+
+:::
+
+This guide provides detailed installation instructions for the [Brobot MCP Server](https://github.com/jspinak/brobot-mcp-server) on different operating systems.
+
+## Prerequisites
+
+Before installing the MCP Server, ensure you understand:
+
+- **[Brobot Framework](../../01-getting-started/installation.md)**: The core automation library
+- **[States and Transitions](../../01-getting-started/states.md)**: How Brobot models applications
+- **[Core Concepts](../../01-getting-started/core-concepts.md)**: Brobot architecture overview
+
+:::tip INSTALLATION ORDER
+While not required, installing and understanding the [core Brobot framework](../../01-getting-started/installation.md) first will help you understand the MCP Server's capabilities.
+:::
 
 ## System Requirements
 
@@ -21,10 +48,10 @@ This guide provides detailed installation instructions for the Brobot MCP Server
 - **Display**: 1920x1080 or higher resolution
 
 ### Software Prerequisites
-- **Python**: 3.8 or higher
-- **Java**: JDK 11 or higher
+- **Python**: 3.8 or higher (3.11+ recommended)
+- **Java**: JDK 11 or higher (JDK 17 recommended for Docker)
 - **Git**: For cloning the repository
-- **Gradle**: 7.0+ (or use included wrapper)
+- **Gradle**: 7.0+ (system installation required - no wrapper included)
 
 ## Platform-Specific Installation
 
@@ -65,9 +92,13 @@ This guide provides detailed installation instructions for the Brobot MCP Server
 4. **Build Brobot CLI**
    ```powershell
    cd brobot-cli
-   .\gradlew.bat shadowJar
+   gradle shadowJar
    cd ..
    ```
+
+   :::note
+   The project does not include Gradle wrapper files. Ensure Gradle is installed system-wide.
+   :::
 
 ### macOS
 
@@ -100,7 +131,7 @@ This guide provides detailed installation instructions for the Brobot MCP Server
 3. **Build Brobot CLI**
    ```bash
    cd brobot-cli
-   ./gradlew shadowJar
+   gradle shadowJar
    cd ..
    ```
 
@@ -137,45 +168,76 @@ This guide provides detailed installation instructions for the Brobot MCP Server
 3. **Build Brobot CLI**
    ```bash
    cd brobot-cli
-   ./gradlew shadowJar
+   gradle shadowJar
    cd ..
    ```
 
 ## Docker Installation
 
-For a containerized setup:
+The repository includes production-ready Docker and Docker Compose configurations.
 
-1. **Create Dockerfile**
-   ```dockerfile
-   FROM python:3.11-slim
-   
-   # Install Java
-   RUN apt-get update && \
-       apt-get install -y openjdk-11-jdk && \
-       apt-get clean
-   
-   # Copy application
-   WORKDIR /app
-   COPY . /app/
-   
-   # Install Python dependencies
-   RUN pip install -e .
-   
-   # Build Java CLI
-   RUN cd brobot-cli && ./gradlew shadowJar
-   
-   # Expose port
-   EXPOSE 8000
-   
-   # Start server
-   CMD ["python", "-m", "mcp_server.main"]
+### Using Docker Compose (Recommended)
+
+1. **Basic Setup**
+   ```bash
+   # Clone the repository
+   git clone https://github.com/jspinak/brobot-mcp-server.git
+   cd brobot-mcp-server
+
+   # Start the server
+   docker-compose up -d
    ```
 
-2. **Build and Run**
+2. **Development Mode with Hot Reload**
+   ```bash
+   docker-compose --profile dev up brobot-mcp-dev
+   ```
+
+3. **With Optional Services**
+   ```bash
+   # With Redis caching
+   docker-compose --profile with-redis up -d
+
+   # With PostgreSQL
+   docker-compose --profile with-postgres up -d
+   ```
+
+4. **Check Status**
+   ```bash
+   docker-compose ps
+   docker-compose logs -f brobot-mcp-server
+   ```
+
+### Using Docker Directly
+
+1. **Build Image**
    ```bash
    docker build -t brobot-mcp-server .
-   docker run -p 8000:8000 brobot-mcp-server
    ```
+
+2. **Run Container**
+   ```bash
+   docker run -d \
+     -p 8000:8000 \
+     -e USE_MOCK_DATA=false \
+     -v $(pwd)/logs:/app/logs \
+     -v $(pwd)/data:/app/data \
+     --name brobot-mcp \
+     brobot-mcp-server
+   ```
+
+3. **View Logs**
+   ```bash
+   docker logs -f brobot-mcp
+   ```
+
+:::tip DOCKERFILE
+The repository includes a multi-stage Dockerfile that:
+- Builds the Java CLI with Gradle 8 + JDK 17
+- Uses Python 3.13 runtime with Java 17 JRE
+- Includes health checks and proper user permissions
+- See [`Dockerfile`](https://github.com/jspinak/brobot-mcp-server/blob/main/Dockerfile) for details
+:::
 
 ## Verifying Installation
 
@@ -215,55 +277,114 @@ java -jar brobot-cli/build/libs/brobot-cli.jar --version
 
 ## Installing the Python Client
 
-For Python applications:
+The Python client library is included in the repository but not yet published to PyPI.
+
+**Install from source:**
 
 ```bash
-pip install brobot-client
-```
-
-Or from source:
-
-```bash
+# From the brobot-mcp-server repository
 cd brobot_client
 pip install -e .
 ```
+
+**With development dependencies:**
+
+```bash
+cd brobot_client
+pip install -e ".[dev]"
+```
+
+**Verify installation:**
+
+```python
+from brobot_client import BrobotClient
+print("Client library installed successfully!")
+```
+
+:::info PACKAGE LOCATION
+The `brobot-client` package is located in the `brobot_client/` subdirectory of the MCP server repository.
+:::
 
 ## Configuration
 
 ### Basic Configuration
 
-Create a `.env` file in the project root:
+The repository includes a `.env.example` file with all configuration options. Copy and customize it:
+
+```bash
+cp .env.example .env
+```
+
+**Configuration options:**
 
 ```env
-# Server Settings
+# Server Configuration
 MCP_HOST=0.0.0.0
 MCP_PORT=8000
-
-# Brobot CLI
-USE_MOCK_DATA=false
-BROBOT_CLI_JAR=brobot-cli/build/libs/brobot-cli.jar
-
-# Logging
+MCP_RELOAD=true
 MCP_LOG_LEVEL=info
+
+# Brobot CLI Configuration
+BROBOT_CLI_JAR=brobot-cli/build/libs/brobot-cli.jar
+JAVA_EXECUTABLE=java
+CLI_TIMEOUT=30.0
+
+# Use mock data (set to false for real Brobot integration)
+USE_MOCK_DATA=true
+
+# API Configuration
+API_VERSION=v1
 ```
 
-### Advanced Configuration
+:::tip CONFIGURATION FILE
+The `.env.example` file includes sensible defaults. Start with mock mode (`USE_MOCK_DATA=true`) to test the API, then switch to CLI mode (`USE_MOCK_DATA=false`) for real automation.
+:::
 
-For production deployments:
+### Performance Tuning
+
+Adjust the CLI timeout for slower systems or complex automations:
 
 ```env
-# Performance
+# CLI timeout in seconds (default: 30.0)
 CLI_TIMEOUT=60.0
-WORKERS=4
-
-# Security (future)
-API_KEY_REQUIRED=true
-API_KEY=your-secret-key
-
-# Monitoring
-ENABLE_METRICS=true
-METRICS_PORT=9090
 ```
+
+:::info FUTURE FEATURES
+Authentication, metrics, and worker configuration are planned for future releases. The current implementation supports the configuration options listed in the Basic Configuration section above.
+:::
+
+## Platform-Specific Considerations
+
+### WSL (Windows Subsystem for Linux)
+
+GUI automation in WSL requires additional setup:
+
+```bash
+# Option 1: Use mock mode for testing (recommended)
+echo "USE_MOCK_DATA=true" >> .env
+
+# Option 2: Set up X server for GUI operations
+# Install X server on Windows (VcXsrv, X410, etc.)
+export DISPLAY=:0
+echo 'export DISPLAY=:0' >> ~/.bashrc
+```
+
+### Headless Servers
+
+For servers without displays:
+
+```bash
+# Option 1: Use mock mode
+USE_MOCK_DATA=true python -m mcp_server.main
+
+# Option 2: Install virtual display (Xvfb)
+sudo apt install xvfb
+xvfb-run python -m mcp_server.main
+```
+
+:::warning DISPLAY REQUIREMENT
+GUI automation requires a display server. For testing without a display, use mock mode (`USE_MOCK_DATA=true` in `.env`).
+:::
 
 ## Troubleshooting Installation
 
@@ -295,9 +416,15 @@ echo 'export JAVA_HOME=/usr/lib/jvm/java-11-openjdk' >> ~/.bashrc
 
 **Issue**: Gradle not found
 ```bash
-# Use the Gradle wrapper instead
-./gradlew shadowJar  # Unix
-gradlew.bat shadowJar  # Windows
+# Install Gradle system-wide (the project does not include wrapper files)
+# Ubuntu/Debian
+sudo apt install gradle
+
+# macOS
+brew install gradle
+
+# Windows
+winget install Gradle.Gradle
 ```
 
 ### Network Issues
@@ -316,15 +443,20 @@ MCP_PORT=8080 python -m mcp_server.main
 
 After successful installation:
 
-1. Read the [Configuration Guide](./configuration) for detailed setup options
-2. Follow the [Getting Started](./getting-started) tutorial
-3. Explore [API Examples](./examples) for integration patterns
+1. Read the [Configuration Guide](./configuration.md) for detailed setup options
+2. Follow the [Getting Started](./getting-started.md) tutorial
+3. Explore [API Examples](./examples.md) for integration patterns
+4. Review [API Reference](./api-reference.md) for endpoint documentation
 
 ## Getting Help
 
 If you encounter issues:
 
-1. Check the [Troubleshooting Guide](./troubleshooting)
+:::info COMMUNITY SUPPORT ONLY
+Support for this experimental feature is limited to community contributions. There are no guarantees of responses or fixes.
+:::
+
+1. Check the [Troubleshooting Guide](./troubleshooting.md)
 2. Search [GitHub Issues](https://github.com/jspinak/brobot-mcp-server/issues)
-3. Ask on [Discord](https://discord.gg/brobot)
-4. Create a new issue with installation logs
+3. Create a new issue with installation logs
+4. Review the main [Brobot documentation](../../01-getting-started/installation.md) for framework prerequisites

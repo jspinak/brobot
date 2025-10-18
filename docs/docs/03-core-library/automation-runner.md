@@ -31,12 +31,19 @@ The `AutomationRunner` is a robust wrapper for automation tasks that provides en
 ### Simple Example
 
 ```java
+import io.github.jspinak.brobot.automation.AutomationRunner;
+import io.github.jspinak.brobot.navigation.transition.StateNavigator;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Slf4j
 @Service
 public class MyAutomation {
-    
+
     @Autowired
     private AutomationRunner runner;
-    
+
     @Autowired
     private StateNavigator navigator;
     
@@ -59,6 +66,12 @@ public class MyAutomation {
 ### Spring Boot Application Example
 
 ```java
+import io.github.jspinak.brobot.automation.AutomationRunner;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
+
 @Slf4j
 @SpringBootApplication
 public class AutomationApplication {
@@ -106,11 +119,9 @@ brobot.automation.max-retries=3
 # Delay between retries in milliseconds (default: 1000)
 brobot.automation.retry-delay-ms=2000
 
-# Continue with remaining steps after failure (default: false)
+# Skip retry attempts on first failure (default: false)
+# When true, returns immediately on first failure without retrying
 brobot.automation.continue-on-failure=false
-
-# Overall timeout in seconds (default: 0 = no timeout)
-brobot.automation.timeout-seconds=300
 ```
 
 ## Advanced Usage
@@ -118,35 +129,61 @@ brobot.automation.timeout-seconds=300
 ### Custom Task with Context
 
 ```java
+import io.github.jspinak.brobot.automation.AutomationRunner;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+
+@Slf4j
 public class AdvancedAutomation {
-    
+
     @Autowired
     private AutomationRunner runner;
-    
+
     public void runWithContext() {
         // Define a complex task
         AutomationRunner.AutomationTask task = () -> {
             try {
                 // Step 1: Initialize
                 if (!initialize()) return false;
-                
+
                 // Step 2: Navigate
                 if (!navigateToTarget()) return false;
-                
+
                 // Step 3: Perform actions
                 if (!performActions()) return false;
-                
+
                 // Step 4: Verify results
                 return verifyResults();
-                
+
             } catch (Exception e) {
                 log.error("Task failed with exception", e);
                 throw e; // Let runner handle it
             }
         };
-        
+
         // Run with custom name for better logging
         boolean success = runner.run(task, "ComplexWorkflow");
+    }
+
+    // Helper methods - implement according to your automation needs
+    private boolean initialize() {
+        // Your initialization logic
+        return true;
+    }
+
+    private boolean navigateToTarget() {
+        // Your navigation logic
+        return true;
+    }
+
+    private boolean performActions() {
+        // Your action logic
+        return true;
+    }
+
+    private boolean verifyResults() {
+        // Your verification logic
+        return true;
     }
 }
 ```
@@ -154,12 +191,19 @@ public class AdvancedAutomation {
 ### Handling Different Failure Scenarios
 
 ```java
+import io.github.jspinak.brobot.automation.AutomationRunner;
+import io.github.jspinak.brobot.config.automation.AutomationConfig;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Slf4j
 @Service
 public class RobustAutomation {
-    
+
     @Autowired
     private AutomationRunner runner;
-    
+
     @Autowired
     private AutomationConfig config;
     
@@ -199,14 +243,22 @@ public class RobustAutomation {
 
 ### Scheduled Automation Service
 
+> **Note**: Requires `@EnableScheduling` annotation on your main application class or a configuration class.
+
 ```java
-@Service
+import io.github.jspinak.brobot.automation.AutomationRunner;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
 @Slf4j
+@Service
 public class ScheduledAutomationService {
-    
+
     @Autowired
     private AutomationRunner runner;
-    
+
     @Scheduled(fixedDelay = 60000) // Run every minute
     public void runScheduledAutomation() {
         log.info("Starting scheduled automation");
@@ -232,15 +284,20 @@ public class ScheduledAutomationService {
 
 ## Integration with StateNavigator
 
-The `AutomationRunner` works seamlessly with Brobot's `StateNavigator`:
+The `AutomationRunner` works seamlessly with Brobot's [`StateNavigator`](../../01-getting-started/pathfinding.md):
 
 ```java
+import io.github.jspinak.brobot.automation.AutomationRunner;
+import io.github.jspinak.brobot.navigation.transition.StateNavigator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 @Service
 public class NavigationAutomation {
-    
+
     @Autowired
     private AutomationRunner runner;
-    
+
     @Autowired
     private StateNavigator navigator;
     
@@ -264,31 +321,48 @@ public class NavigationAutomation {
 ### Using AutomationException
 
 ```java
+import io.github.jspinak.brobot.automation.AutomationRunner;
+import io.github.jspinak.brobot.exception.AutomationException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+
+@Slf4j
 public class ExceptionHandlingExample {
-    
+
     @Autowired
     private AutomationRunner runner;
-    
+
     public void handleExceptions() {
         try {
             // Configure to throw exceptions
             runner.getConfig().setThrowOnFailure(true);
-            
+
             boolean success = runner.run(() -> {
                 // This might throw AutomationException
                 return riskyOperation();
             });
-            
+
         } catch (AutomationException e) {
             // Handle structured exception
-            log.error("Automation failed in state: {}, operation: {}", 
+            log.error("Automation failed in state: {}, operation: {}",
                      e.getStateName(), e.getOperation());
-            
+
             if (e.isRecoverable()) {
                 // Try recovery
                 attemptRecovery();
             }
         }
+    }
+
+    // Helper methods - implement according to your needs
+    private boolean riskyOperation() throws Exception {
+        // Your risky automation logic
+        return true;
+    }
+
+    private void attemptRecovery() {
+        // Your recovery logic
+        log.info("Attempting recovery...");
     }
 }
 ```
@@ -360,24 +434,37 @@ INFO  User Login Test completed successfully
 
 You can integrate with monitoring systems:
 
+> **Note**: Requires Micrometer dependency (`io.micrometer:micrometer-core`) in your project.
+
 ```java
+import io.github.jspinak.brobot.automation.AutomationRunner;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 @Component
 public class MonitoredAutomation {
-    
+
     @Autowired
     private AutomationRunner runner;
-    
+
     @Autowired
-    private MeterRegistry meterRegistry; // Micrometer
-    
+    private MeterRegistry meterRegistry;
+
     public void runWithMetrics() {
         Timer.Sample sample = Timer.start(meterRegistry);
-        
-        boolean success = runner.run(this::automationTask);
-        
+
+        boolean success = runner.run(this::performAutomation);
+
         sample.stop(Timer.builder("automation.execution")
             .tag("success", String.valueOf(success))
             .register(meterRegistry));
+    }
+
+    private boolean performAutomation() {
+        // Your automation logic
+        return true;
     }
 }
 ```
@@ -432,6 +519,28 @@ public class NewAutomation {
    - Set `brobot.automation.log-stack-traces=false` for production
    - Adjust Spring Boot logging levels in `application.properties`
 
+## Related Documentation
+
+### Configuration
+- **[Properties Reference](./configuration/properties-reference.md#automation-runner)** - Complete list of `brobot.automation.*` configuration properties
+- **[Headless Configuration](./configuration/headless-configuration.md)** - Running automation in headless environments
+
+### Navigation & State Management
+- **[Pathfinding & Multi-State Activation](../../01-getting-started/pathfinding.md)** - How StateNavigator works with AutomationRunner
+- **[Quick Start Guide](../../01-getting-started/quick-start.md)** - Basic Spring Boot setup with automation
+
+### Testing & Reliability
+- **[Testing Introduction](../../04-testing/testing-intro.md)** - Testing strategies for automation
+- **[Integration Testing](../../04-testing/integration-testing.md)** - End-to-end workflow testing
+- **[CI/CD Testing](./testing/ci-cd-testing.md)** - Continuous integration best practices
+
+### Getting Started
+- **[AI Brobot Project Creation](../../01-getting-started/ai-brobot-project-creation.md)** - Complete project setup guide
+- **[Project File Structure](../../01-getting-started/file-structure.md)** - Organizing your automation project
+
+### Advanced Topics
+- **[AspectJ Usage Guide](./advanced/aspectj-usage-guide.md)** - Error recovery aspects and patterns
+
 ## Summary
 
 The `AutomationRunner` transforms brittle automation scripts into robust, production-ready applications. By providing automatic retry logic, graceful failure handling, and configuration-based behavior, it ensures your automation can handle real-world conditions without crashing your application.
@@ -442,5 +551,7 @@ Key takeaways:
 - **Configure behavior** through properties, not code
 - **Handle failures gracefully** with fallback strategies
 - **Monitor and log** for observability
+- **Retry is OFF by default** - set `brobot.automation.max-retries` to enable
+- **`continueOnFailure=true` disables retries** - use for fail-fast behavior
 
 With AutomationRunner, your automation becomes more reliable, maintainable, and production-ready.

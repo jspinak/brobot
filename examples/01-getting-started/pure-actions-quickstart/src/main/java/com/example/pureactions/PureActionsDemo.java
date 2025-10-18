@@ -12,7 +12,9 @@ import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
+import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
@@ -127,7 +129,9 @@ public class PureActionsDemo {
         // Right-click on target element
         action.perform(
                 new ClickOptions.Builder()
-                        .setClickType(ClickOptions.Type.RIGHT)
+                        .setPressOptions(MousePressOptions.builder()
+                                .setButton(MouseButton.RIGHT)
+                                .build())
                         .setPauseAfterEnd(0.5)
                         .build(),
                 new ObjectCollection.Builder().withImages(targetElement).build());
@@ -178,17 +182,23 @@ public class PureActionsDemo {
 
             // Work with each match
             for (Match match : allMatches) {
-                // Highlight each found instance
-                action.perform(ActionType.HIGHLIGHT, match.getRegion());
+                // Highlight each found instance with pause after
+                HighlightOptions highlightWithPause =
+                        new HighlightOptions.Builder()
+                                .setPauseAfterEnd(0.2) // 200ms pause after highlighting
+                                .build();
+                action.perform(
+                        highlightWithPause,
+                        new ObjectCollection.Builder().withRegions(match.getRegion()).build());
 
-                // Click each one with a pause
-                action.perform(ActionType.CLICK, match.getRegion());
-
-                try {
-                    Thread.sleep(500); // Brief pause between clicks
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
+                // Click with pause after (replaces Thread.sleep)
+                ClickOptions clickWithPause =
+                        new ClickOptions.Builder()
+                                .setPauseAfterEnd(0.3) // 300ms pause after clicking
+                                .build();
+                action.perform(
+                        clickWithPause,
+                        new ObjectCollection.Builder().withRegions(match.getRegion()).build());
             }
         }
     }

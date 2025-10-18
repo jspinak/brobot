@@ -6,11 +6,18 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Placeholder for Brobot StateRegion annotation. In a real project, this would come from the Brobot
- * library.
+ * Placeholder for Brobot StateRegion annotation.
+ *
+ * <p>This is a simplified placeholder for testing purposes. Marks a field as a state region
+ * (a clickable or hoverable area in this state).
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface StateRegion {
-    String name();
+    /**
+     * The name of the state region.
+     *
+     * @return region name
+     */
+    String name() default "";
 }

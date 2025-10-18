@@ -1,287 +1,274 @@
-# Advanced Illustration System Examples
+# Illustration Features in Brobot v1.1.0
 
-This project demonstrates Brobot's **Advanced Illustration System** - an intelligent, context-aware visual documentation system with performance optimization and quality-based filtering.
+This guide demonstrates the actual IllustrationController API available in v1.1.0.
 
-## Overview
+> 📘 **Also See**: [README_FUTURE_VISION.md](README_FUTURE_VISION.md) - A conceptual design for advanced illustration features that may be implemented in future versions. Note that those APIs do not currently exist.
 
-The advanced illustration system provides:
+## Available Illustration Features in v1.1.0
 
-- **Context-aware decisions** - Illustrate based on action history and system state
-- **Performance optimization** - Adaptive sampling, batching, and resource management
-- **Quality-based filtering** - Focus on meaningful, high-quality visualizations
-- **State-based priorities** - Always capture critical states and transitions
-- **Granular configuration** - Fine-tune for different environments and use cases
-
-## Project Structure
-
-```
-advanced-illustration-system/
-├── src/main/java/com/example/illustration/
-│   ├── AdvancedIllustrationApplication.java  # Spring Boot main
-│   ├── AdvancedIllustrationRunner.java       # Runs all examples
-│   ├── config/
-│   │   ├── BasicIllustrationConfig.java     # Basic configurations
-│   │   └── ContextAwareConfig.java          # Context-based filtering
-│   └── examples/
-│       ├── LoginWorkflowExample.java        # State-aware illustrations
-│       ├── PerformanceOptimizationExample.java # Performance strategies
-│       └── QualityFilteringExample.java     # Quality-based filtering
-├── src/main/resources/
-│   └── application.yml                       # Configuration
-├── images/                                   # Place test images here
-│   ├── authentication/
-│   ├── data/
-│   └── ui-elements/
-├── illustrations/                            # Generated output
-├── build.gradle
-└── settings.gradle
-```
-
-## Examples Demonstrated
-
-### 1. Login Workflow Example
-
-Shows state-aware illustration configuration for critical authentication flows:
+### 1. IllustrationController API
+The IllustrationController provides programmatic control over illustrations:
 
 ```java
-IllustrationConfig.builder()
-    // Always illustrate authentication states
-    .alwaysIllustrateState("LOGIN_STATE")
-    .alwaysIllustrateState("LOGIN_FAILURE")
+// Check if an action should be illustrated
+boolean shouldIllustrate = illustrationController.okToIllustrate(
+    actionConfig, objectCollection
+);
+
+// Manually create an illustration
+boolean illustrated = illustrationController.illustrateWhenAllowed(
+    actionResult, searchRegions, actionConfig, objectCollection
+);
+```
+
+### 2. Configuration via Properties
+Base configuration is done through `application.properties`:
+
+```properties
+# Enable/disable illustration for different action types
+brobot.illustration.draw-find=true
+brobot.illustration.draw-click=true
+brobot.illustration.draw-drag=true
+brobot.illustration.draw-move=true
+brobot.illustration.draw-highlight=true
+
+# Screenshot and history settings
+brobot.screenshot.save-snapshots=false
+brobot.screenshot.save-history=true
+brobot.screenshot.path=screenshots/
+brobot.screenshot.history-path=history/
+brobot.screenshot.filename=screen
+brobot.screenshot.history-filename=hist
+```
+
+### 3. IllustrationController Features
+- **okToIllustrate()** - Check if illustration should happen
+- **illustrateWhenAllowed()** - Create illustration with filtering
+- **Duplicate Prevention** - Automatically filters repeated actions
+- **Action Permissions** - Per-action type control via properties
+- **State Tracking** - Tracks last action to prevent duplicates
+
+### 4. What's NOT Available in v1.1.0
+- setConfig() method on IllustrationController
+- IllustrationConfig builder class
+- Adaptive sampling algorithms
+- Context-aware illustration filters
+- Quality-based filtering
+- BatchConfig or PerformanceMetrics
+- Dynamic runtime configuration changes
+
+## Working with IllustrationController
+
+### Basic Usage
+
+```java
+@Component
+@RequiredArgsConstructor
+public class MyAutomation {
+    private final Action action;
+    private final IllustrationController illustrationController;
     
-    // Context filter for authentication priority
-    .contextFilter("auth_priority", context -> {
-        // Critical: Always illustrate login attempts
-        if (context.hasActiveState("LOGIN_STATE")) {
-            return true;
+    public void performAction() {
+        ObjectCollection target = new ObjectCollection.Builder()
+            .withImages(myImage)
+            .build();
+        
+        // Check if illustration would happen
+        ClickOptions clickConfig = new ClickOptions.Builder().build();
+        if (illustrationController.okToIllustrate(clickConfig, target)) {
+            log.info("This action will be illustrated");
         }
         
-        // Reduce illustrations once logged in
-        if (context.hasActiveState("DASHBOARD_STATE")) {
-            // Only illustrate failures
-            return !context.getLastActionResult().isSuccess();
-        }
+        // Perform action (illustration happens automatically)
+        action.click(target);
+    }
+}
+```
+
+### Manual Illustration Control
+
+```java
+// Force illustration
+ClickOptions forceIllustrate = new ClickOptions.Builder()
+    .setIllustrate(ActionConfig.Illustrate.YES)
+    .build();
+
+// Prevent illustration
+ClickOptions noIllustrate = new ClickOptions.Builder()
+    .setIllustrate(ActionConfig.Illustrate.NO)
+    .build();
+```
+
+### Understanding Duplicate Filtering
+
+```java
+// First click will be illustrated
+action.click(button);  // ✓ Illustrated
+
+// Immediate repeat is filtered
+action.click(button);  // ✗ Not illustrated (duplicate)
+
+// Different target is illustrated
+action.click(otherButton);  // ✓ Illustrated
+```
+
+## Configuration Examples
+
+### Development Mode
+```properties
+# Full illustrations for debugging
+brobot.screenshot.save-history=true
+brobot.illustration.draw-find=true
+brobot.illustration.draw-click=true
+brobot.illustration.draw-drag=true
+brobot.illustration.draw-move=true
+brobot.illustration.draw-highlight=true
+```
+
+### Production Mode
+```properties
+# Minimal illustrations
+brobot.screenshot.save-history=true
+brobot.illustration.draw-find=false
+brobot.illustration.draw-click=true
+brobot.illustration.draw-drag=false
+brobot.illustration.draw-move=false
+brobot.illustration.draw-highlight=false
+```
+
+## Real Example: Login Workflow
+
+```java
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class LoginWorkflowExample {
+    
+    private final Action action;
+    private final StateManager stateManager;
+    
+    public void executeLogin(String username, String password) {
+        log.info("Executing login workflow");
         
-        return true;
-    })
-    .build();
-```
-
-Key concepts:
-- Critical states are always illustrated
-- Routine operations have reduced illustration frequency
-- Failures are prioritized for debugging
-
-### 2. Performance Optimization Example
-
-Demonstrates strategies for high-volume operations:
-
-**Batching Configuration:**
-```java
-.batchConfig(BatchConfig.builder()
-    .maxBatchSize(50)                      // Batch up to 50 illustrations
-    .flushInterval(Duration.ofSeconds(30)) // Flush every 30 seconds
-    .flushOnStateTransition(true)          // Flush when states change
-    .maxMemoryUsageMB(100)                 // Memory limit
-    .build())
-```
-
-**Adaptive Sampling:**
-```java
-.adaptiveSampling(true)
-.samplingRate(ActionType.MOVE, 0.1)   // Sample 10% of moves
-.samplingRate(ActionType.FIND, 0.5)   // Sample 50% of finds
-.samplingRate(ActionType.CLICK, 0.8)  // Sample 80% of clicks
-```
-
-**System-Aware Decisions:**
-```java
-.contextFilter("system_aware", context -> {
-    double cpuUsage = context.getSystemMetrics().getCpuUsage();
-    
-    // Reduce illustrations under high load
-    if (cpuUsage > 0.8) {
-        // Only critical actions
-        return context.getPriority() == IllustrationContext.Priority.CRITICAL;
+        // Navigate to login state
+        if (stateManager.goToState("LOGIN")) {
+            // These actions will be illustrated based on properties
+            ObjectCollection loginButton = new ObjectCollection.Builder()
+                .withImages(getLoginButton())
+                .build();
+                
+            if (action.click(loginButton).isSuccess()) {
+                // Type username
+                ObjectCollection usernameField = new ObjectCollection.Builder()
+                    .withImages(getUsernameField())
+                    .build();
+                    
+                action.click(usernameField);
+                action.type(new ObjectCollection.Builder()
+                    .withStrings(username)
+                    .build());
+                
+                // Type password
+                ObjectCollection passwordField = new ObjectCollection.Builder()
+                    .withImages(getPasswordField())
+                    .build();
+                    
+                action.click(passwordField);
+                action.type(new ObjectCollection.Builder()
+                    .withStrings(password)
+                    .build());
+                
+                // Submit
+                ObjectCollection submitButton = new ObjectCollection.Builder()
+                    .withImages(getSubmitButton())
+                    .build();
+                    
+                action.click(submitButton);
+            }
+        }
     }
-    
-    // Normal load - use success rate based sampling
-    return context.getRecentSuccessRate() < 0.9;
-})
+}
 ```
 
-### 3. Quality Filtering Example
+## Performance Considerations
 
-Shows quality-based filtering to focus on meaningful visualizations:
+Since v1.1.0 doesn't have dynamic illustration control:
 
-**Basic Quality Metrics:**
-```java
-.qualityThreshold(0.8) // Only illustrate >80% quality matches
-.qualityMetrics(QualityMetrics.builder()
-    .minSimilarity(0.75)      // Minimum image similarity
-    .minConfidence(0.6)       // Minimum match confidence
-    .useRegionSize(true)      // Consider region size
-    .build())
+1. **Development**: Enable all illustrations for debugging
+2. **Testing**: Enable only critical illustrations (clicks)
+3. **Production**: Disable most illustrations except errors
+
+## Directory Structure
+
+```
+project-root/
+├── history/              # Illustrated action history
+│   └── hist_*.png       # History screenshots
+├── screenshots/         # Regular screenshots
+│   └── screen_*.png     # Snapshot files
+└── src/
+    └── main/
+        └── resources/
+            └── application.properties
 ```
 
-**Custom Quality Calculation:**
+## Migration Guide
+
+If you need advanced illustration features:
+
+1. **Use screenshot capture**: Manually capture screenshots at critical points
+2. **Custom logging**: Add detailed logging for action tracking
+3. **External tools**: Use screen recording software for complex workflows
+4. **Wait for updates**: Advanced illustration APIs may be added in future versions
+
+## Alternative Approaches
+
+### 1. Manual Screenshot Capture
 ```java
-.customQualityCalculator(context -> {
-    double avgSimilarity = calculateAverageSimilarity(context);
-    
-    // Boost quality for important scenarios
-    if (context.isFirstExecution()) {
-        avgSimilarity *= 1.2; // Important for documentation
+// Capture screenshot at critical points
+@Value("${brobot.screenshot.path}")
+private String screenshotPath;
+
+public void captureCustomScreenshot(String name) {
+    // Implementation depends on platform
+    log.info("Capturing screenshot: {}", name);
+}
+```
+
+### 2. Action Logging Framework
+```java
+@Component
+@Aspect
+public class ActionLogger {
+    @Around("@annotation(LogAction)")
+    public Object logAction(ProceedingJoinPoint joinPoint) throws Throwable {
+        log.info("Action started: {}", joinPoint.getSignature().getName());
+        Object result = joinPoint.proceed();
+        log.info("Action completed: {}", result);
+        return result;
     }
+}
+```
+
+### 3. Test-Specific History
+```java
+@Test
+public void testWithHistory() {
+    // Enable history for this test
+    System.setProperty("brobot.screenshot.save-history", "true");
     
-    if (!context.getLastActionResult().isSuccess()) {
-        avgSimilarity *= 1.5; // Important for debugging
-    }
+    // Run test
+    // ...
     
-    // Reduce quality for noise
-    if (context.getRecentIllustrationCount() > 10) {
-        avgSimilarity *= 0.8; // Reduce frequent actions
-    }
-    
-    return Math.min(1.0, avgSimilarity);
-})
+    // Reset
+    System.clearProperty("brobot.screenshot.save-history");
+}
 ```
 
-## Running the Examples
+## Summary
 
-1. **In Mock Mode** (default):
-   ```bash
-   ./gradlew bootRun
-   ```
-   Runs with simulated UI interactions to demonstrate configuration behavior.
-
-2. **With Real UI**:
-   - Add screenshots to the `images/` directory
-   - Set `brobot.core.mock: false` in `application.yml`
-   - Run the application
-
-3. **View Output**:
-   - Check the `illustrations/` directory for generated visualizations
-   - Review console logs for illustration decisions
-
-## Configuration Strategies
-
-### 1. **Development Environment**
-- Enable all illustrations for debugging
-- No quality filtering
-- Detailed logging
-
-```java
-IllustrationConfig.builder()
-    .globalEnabled(true)
-    .qualityThreshold(0.0)
-    .maxIllustrationsPerMinute(Integer.MAX_VALUE)
-    .build()
-```
-
-### 2. **Testing Environment**
-- Focus on failures and first occurrences
-- Moderate quality filtering
-- Performance optimization
-
-```java
-IllustrationConfig.builder()
-    .contextFilter("test_mode", context -> 
-        context.isFirstExecution() || 
-        !context.getLastActionResult().isSuccess())
-    .qualityThreshold(0.7)
-    .adaptiveSampling(true)
-    .build()
-```
-
-### 3. **Production Environment**
-- Minimal illustrations for critical events
-- High quality threshold
-- Aggressive performance optimization
-
-```java
-IllustrationConfig.builder()
-    .contextFilter("production", context -> 
-        context.getPriority() == IllustrationContext.Priority.CRITICAL ||
-        context.getConsecutiveFailures() > 2)
-    .qualityThreshold(0.9)
-    .maxIllustrationsPerMinute(10)
-    .build()
-```
-
-## Performance Metrics
-
-The system provides detailed performance metrics:
-
-```java
-PerformanceMetrics.MetricsSnapshot metrics = 
-    performanceOptimizer.getPerformanceMetrics();
-
-// Available metrics:
-metrics.getIllustrationsPerMinute()    // Rate of illustration generation
-metrics.getSkipRate()                  // Percentage skipped by filters
-metrics.getHighQualityRate()           // Percentage meeting quality threshold
-metrics.getAverageProcessingTimeMs()   // Average time to generate
-metrics.getAverageMemoryUsageMB()      // Memory consumption
-metrics.getIllustrationsBatched()      // Number batched for efficiency
-```
-
-## Best Practices
-
-1. **Start Conservative**: Begin with default settings and adjust based on needs
-2. **Monitor Performance**: Use metrics to identify bottlenecks
-3. **Test Configurations**: Different environments need different settings
-4. **Use State Information**: Leverage state context for smarter decisions
-5. **Balance Coverage**: Ensure important events are captured without noise
-
-## Integration with ActionConfig
-
-The system works seamlessly with both legacy and new action configurations:
-
-```java
-// Legacy ActionOptions (deprecated)
-// The ActionOptions class has been deprecated.
-// Use ActionConfig with illustration settings instead:
-PatternFindOptions findOptions = new PatternFindOptions.Builder()
-    .setIllustrate(IllustrateMode.YES)
-    .build();
-
-// New ActionConfig
-PatternFindOptions findConfig = new PatternFindOptions.Builder()
-    .setIllustrate(ActionConfig.Illustrate.USE_GLOBAL)
-    .setSimilarity(0.8)
-    .build();
-
-// Both respect advanced configuration rules
-```
-
-## Troubleshooting
-
-### High Memory Usage
-- Reduce `maxBatchSize` in BatchConfig
-- Lower `maxInMemoryIllustrations`
-- Enable compression in BatchConfig
-
-### Missing Important Illustrations
-- Check quality threshold isn't too high
-- Verify context filters aren't too restrictive
-- Ensure critical states are in `alwaysIllustrateState`
-
-### Too Many Illustrations
-- Enable adaptive sampling
-- Increase quality threshold
-- Add rate limiting with `maxIllustrationsPerMinute`
-
-## Next Steps
-
-1. Run the examples to see different configurations in action
-2. Experiment with custom quality calculators
-3. Create context filters for your specific use cases
-4. Monitor performance metrics and adjust accordingly
-5. Integrate with your automation projects
-
-## Related Documentation
-
-- [Advanced Illustration System Guide](../../advanced-illustration-system.md)
-- [Action Configuration](../../../action-config/README.md)
-- [Performance Optimization](../../../../04-performance/optimization.md)
+The v1.1.0 illustration system is property-based and static. For dynamic illustration needs:
+- Use property files for different environments
+- Implement custom logging/screenshot solutions
+- Consider external recording tools
+- Design tests to work with static illustration settings

@@ -28,6 +28,12 @@ This happens when multiple configurations (test and production) define the same 
 Create isolated test configurations using Spring profiles:
 
 ```java
+import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+import org.springframework.context.annotation.Profile;
+
 @SpringBootConfiguration
 @EnableAutoConfiguration(exclude = {
     DataSourceAutoConfiguration.class,
@@ -41,22 +47,32 @@ public class IntegrationTestMinimalConfig {
 
 ### 2. Test Base Class
 
-Provide a common base class for integration tests:
+Provide a common base class for integration tests that extends BrobotTestBase:
 
 ```java
-public abstract class IntegrationTestBase {
-    
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import org.junit.jupiter.api.BeforeEach;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Base class for integration tests with Spring profiles.
+ * Extends BrobotTestBase which provides automatic mock mode setup.
+ */
+public abstract class IntegrationTestBase extends BrobotTestBase {
+
     protected final Logger log = LoggerFactory.getLogger(getClass());
-    
+
     @BeforeEach
+    @Override
     public void setupTest() {
-        // Ensure mock mode is enabled
-        MockModeManager.setMockMode(true);
-        System.setProperty("brobot.mock", "true");
-        System.setProperty("java.awt.headless", "true");
+        super.setupTest(); // BrobotTestBase handles MockModeManager setup
+        log.debug("Integration test setup complete");
     }
 }
 ```
+
+> **Note**: BrobotTestBase automatically configures mock mode, headless mode, and fast mock timings. You don't need to call `MockModeManager.setMockMode(true)` manually.
 
 ### 3. Profile Properties
 
@@ -67,9 +83,9 @@ Configure test-specific properties in `application-integration.properties`:
 spring.main.allow-bean-definition-overriding=true
 spring.main.lazy-initialization=false
 
-# Mock Mode Settings - SIMPLIFIED
+# Mock Mode Settings
 # Single master switch for mock mode
-brobot.core.mock=true
+brobot.mock=true
 # Probability of action success (0.0 to 1.0)
 brobot.mock.action.success.probability=1.0
 
@@ -92,6 +108,34 @@ logging.level.io.github.jspinak.brobot=DEBUG
 Create a configuration class that provides only the essential beans needed for your tests:
 
 ```java
+import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
+
+import java.awt.image.BufferedImage;
+
+import io.github.jspinak.brobot.actions.actionExecution.Action;
+import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.actions.composites.methods.find.ActionConfig;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.reports.ActionResult;
+import io.github.jspinak.brobot.services.ScreenCaptureService;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+/**
+ * Minimal test configuration with Spring profile isolation.
+ * Use @TestPropertySource to set brobot.mock=true instead of static blocks.
+ */
 @SpringBootConfiguration
 @EnableAutoConfiguration(exclude = {
     DataSourceAutoConfiguration.class,
@@ -99,14 +143,10 @@ Create a configuration class that provides only the essential beans needed for y
 })
 @Profile("integration-minimal")
 public class IntegrationTestMinimalConfig {
-    
-    static {
-        // Enable mock mode before Spring context loads
-        MockModeManager.setMockMode(true);
-        System.setProperty("java.awt.headless", "true");
-        System.setProperty("brobot.mock", "true");
-    }
-    
+
+    // Note: Mock mode is configured via @TestPropertySource in test classes,
+    // not in static blocks. BrobotTestBase handles MockModeManager initialization.
+
     @Bean
     @Primary
     public ScreenCaptureService screenCaptureService() {
@@ -115,30 +155,30 @@ public class IntegrationTestMinimalConfig {
         when(service.captureScreen()).thenReturn(mockImage);
         return service;
     }
-    
+
     @Bean
     @Primary
     public Action action() {
         // Configure mock Action for tests
         Action action = mock(Action.class);
-        
+
         ActionResult successResult = new ActionResult();
         successResult.setSuccess(true);
-        
+
         // Add default match for find operations
         Match mockMatch = new Match.Builder()
             .setRegion(new Region(100, 100, 50, 50))
             .setSimScore(0.95)
             .build();
         successResult.add(mockMatch);
-        
+
         // Configure mock responses
         doReturn(successResult).when(action)
-            .perform(any(ActionConfig.class), any(ObjectCollection[].class));
-        
+            .perform(any(ActionOptions.class), any(ObjectCollection[].class));
+
         return action;
     }
-    
+
     // Add other required beans...
 }
 ```
@@ -148,20 +188,30 @@ public class IntegrationTestMinimalConfig {
 Use the profile-based configuration in your test classes:
 
 ```java
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
+
+import io.github.jspinak.brobot.actions.actionExecution.Action;
+import io.github.jspinak.brobot.manageStates.StateService;
+
 @SpringBootTest(classes = IntegrationTestMinimalConfig.class)
 @ActiveProfiles("integration-minimal")
 @TestPropertySource(locations = "classpath:application-integration.properties")
 public class MyIntegrationTest extends IntegrationTestBase {
-    
+
     @Autowired
     private Action action;
-    
+
     @Autowired
     private StateService stateService;
-    
+
     @Test
     public void testWorkflow() {
         // Your test code here
+        // Mock mode is automatically enabled by BrobotTestBase
         // No bean conflicts!
     }
 }
@@ -172,6 +222,14 @@ public class MyIntegrationTest extends IntegrationTestBase {
 For test classes with `@Component` annotations (like state classes), import them explicitly:
 
 ```java
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.stereotype.Component;
+import org.springframework.test.context.ActiveProfiles;
+
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import lombok.Getter;
+
 @SpringBootTest(classes = IntegrationTestMinimalConfig.class)
 @Import({
     MyIntegrationTest.TestState.class,
@@ -179,11 +237,19 @@ For test classes with `@Component` annotations (like state classes), import them
 })
 @ActiveProfiles("integration-minimal")
 public class MyIntegrationTest extends IntegrationTestBase {
-    
+
     @Component
-    @State
+    @Getter
     public static class TestState {
-        // State definition
+        // Note: @State annotation is for state machine transitions.
+        // For simple test states, @Component is sufficient.
+        private final StateImage testElement;
+
+        public TestState() {
+            testElement = new StateImage.Builder()
+                .setName("TestElement")
+                .build();
+        }
     }
 }
 ```
@@ -286,14 +352,20 @@ SPRING_PROFILES_ACTIVE=integration-minimal ./gradlew test
 
 ### Mock Mode Not Enabled
 
-Ensure mock mode is set before Spring context loads:
+Ensure mock mode is configured via properties:
 
 ```java
-static {
-    MockModeManager.setMockMode(true);
-    System.setProperty("brobot.mock", "true");
+// In test class, use @TestPropertySource:
+@TestPropertySource(properties = {
+    "brobot.mock=true",
+    "java.awt.headless=true"
+})
+public class MyTest extends BrobotTestBase {
+    // BrobotTestBase automatically calls MockModeManager.setMockMode(true)
 }
 ```
+
+> **Note**: Avoid static blocks for mock mode initialization. Use `@TestPropertySource` or extend `BrobotTestBase` which handles initialization properly.
 
 ## Best Practices
 
@@ -320,7 +392,20 @@ To migrate existing tests to profile-based configuration:
 Here's a complete example of a test using profile-based configuration:
 
 ```java
-// Configuration
+// === Configuration Class ===
+import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
+
+import io.github.jspinak.brobot.actions.actionExecution.Action;
+import io.github.jspinak.brobot.manageStates.StateService;
+
+import static org.mockito.Mockito.mock;
+
 @SpringBootConfiguration
 @EnableAutoConfiguration(exclude = {
     DataSourceAutoConfiguration.class,
@@ -328,45 +413,60 @@ Here's a complete example of a test using profile-based configuration:
 })
 @Profile("integration-example")
 public class ExampleTestConfig {
-    
+
     @Bean
     @Primary
     public Action action() {
-        return new MockAction();
+        return mock(Action.class);
     }
-    
+
     @Bean
     public StateService stateService() {
         return mock(StateService.class);
     }
 }
 
-// Test class
+// === Test Class ===
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
+
+import io.github.jspinak.brobot.actions.actionExecution.Action;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.PatternFindOptions;
+import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.reports.ActionResult;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @SpringBootTest(classes = ExampleTestConfig.class)
 @ActiveProfiles("integration-example")
 @TestPropertySource(properties = {
-    "brobot.core.mock=true",
+    "brobot.mock=true",
     "logging.level.io.github.jspinak.brobot=DEBUG"
 })
-public class ExampleIntegrationTest {
-    
+public class ExampleIntegrationTest extends BrobotTestBase {
+
     @Autowired
     private Action action;
-    
+
     @Test
     public void testExample() {
         PatternFindOptions options = new PatternFindOptions.Builder()
             .setStrategy(PatternFindOptions.Strategy.BEST)
             .build();
-            
+
         StateImage image = new StateImage.Builder()
             .setName("TestImage")
             .build();
-            
+
         ObjectCollection objects = new ObjectCollection.Builder()
             .withImages(image)
             .build();
-            
+
         ActionResult result = action.perform(options, objects);
         assertTrue(result.isSuccess());
     }
@@ -383,3 +483,48 @@ Profile-based testing provides a robust, scalable solution for managing test con
 - Scale your test suite effectively
 
 This approach is particularly valuable for large projects with complex Spring configurations and multiple test scenarios.
+
+## Related Documentation
+
+### Testing Guides
+- **[Testing Introduction](./testing-intro.md)** - Overview of Brobot testing approaches
+- **[Unit Testing](./unit-testing.md)** - Unit testing patterns with BrobotTestBase
+- **[Integration Testing](./integration-testing.md)** - Integration test patterns with Spring
+- **[Test Utilities](./test-utilities.md)** - BrobotTestBase and testing utilities reference
+- **[Mock Mode Guide](./mock-mode-guide.md)** - Comprehensive guide to mock mode
+- **[Mock Mode Manager](./mock-mode-manager.md)** - Centralized mock mode management
+- **[Testing Strategy](./testing-strategy.md)** - Overall testing strategy and patterns
+
+### Mock Mode Documentation
+- **[Mock Stochasticity](./mock-stochasticity.md)** - Probabilistic mock behavior
+- **[Mock Mode Migration](./mock-mode-migration.md)** - Migrating to MockModeManager
+- **[ActionHistory Mock Snapshots](./actionhistory-mock-snapshots.md)** - Creating mock data
+- **[Action Recording](./action-recording.md)** - Recording actions for mocks
+- **[ActionHistory Integration Testing](./actionhistory-integration-testing.md)** - Testing with ActionHistory
+
+### Configuration Documentation
+- **[BrobotProperties Usage](../03-core-library/configuration/brobot-properties-usage.md)** - Complete configuration guide
+- **[Properties Reference](../03-core-library/configuration/properties-reference.md)** - All available properties
+- **[Auto-Configuration](../03-core-library/configuration/auto-configuration.md)** - Spring Boot auto-configuration
+- **[Headless Configuration](../03-core-library/configuration/headless-configuration.md)** - Headless mode setup
+
+### ActionConfig Documentation
+- **[ActionConfig Overview](../03-core-library/action-config/01-overview.md)** - Introduction to ActionConfig
+- **[ActionConfig Examples](../03-core-library/action-config/03-examples.md)** - Practical examples
+- **[ActionConfig Reference](../03-core-library/action-config/05-reference.md)** - Complete API reference
+- **[Action Chaining](../03-core-library/action-config/07-action-chaining.md)** - Chaining actions together
+- **[Convenience Methods](../03-core-library/action-config/18-convenience-methods.md)** - Simplified action methods
+
+### State Management
+- **[States Overview](../01-getting-started/states.md)** - Introduction to states
+- **[Transitions](../01-getting-started/transitions.md)** - State transitions
+- **[Annotations Guide](../03-core-library/guides/user-guides/annotations.md)** - @State and @Transition usage
+
+### Advanced Topics
+- **[Enhanced Mocking](./advanced/enhanced-mocking.md)** - Advanced mock scenarios
+- **[CI/CD Testing](./advanced/ci-cd-testing.md)** - Mock mode in CI/CD pipelines
+- **[Debugging Pattern Matching](./debugging-pattern-matching.md)** - Troubleshooting pattern matching
+
+### Getting Started
+- **[Quick Start](../01-getting-started/quick-start.md)** - Getting started with Brobot
+- **[AI Brobot Project Creation](../01-getting-started/ai-brobot-project-creation.md)** - Complete API reference and patterns

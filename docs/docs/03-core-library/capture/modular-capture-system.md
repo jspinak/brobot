@@ -9,64 +9,112 @@ keywords: [screen capture, robot, ffmpeg, sikulix, dpi, physical resolution]
 
 ## Overview
 
-Brobot's screen capture system is designed to be completely modular, allowing you to switch between different capture providers (Robot, FFmpeg, SikuliX) with just a single configuration property. This architecture provides maximum flexibility while maintaining a consistent API across all providers.
+Brobot's screen capture system is designed to be completely modular, allowing you to switch between different capture providers (JAVACV_FFMPEG, Robot, FFmpeg, SikuliX) with just a single configuration property. This architecture provides maximum flexibility while maintaining a consistent API across all providers.
+
+**Default Configuration**: Brobot uses **JAVACV_FFMPEG** as the default provider for 100% accurate physical resolution capture. No configuration needed for optimal pattern matching!
+
+> For comprehensive information on DPI scaling and resolution strategies, see the **[DPI and Resolution Guide](./dpi-resolution-guide.md)**.
 
 ## Key Features
 
 - **Property-Based Configuration**: Switch providers via `application.properties`
 - **Zero Code Changes**: Change capture tools without modifying code
 - **Automatic Fallback**: System selects best available provider
-- **DPI Scaling Support**: Automatic compensation for Windows scaling
+- **DPI Scaling Support**: Physical resolution capture with DPI disable strategy
 - **Unified Interface**: Same API regardless of provider
+- **100% Match Accuracy**: Default configuration provides pixel-perfect pattern matching
 
 ## Quick Start
 
 ### Basic Configuration
 
-The default configuration uses SikuliX with automatic DPI detection:
+The default configuration uses JAVACV_FFMPEG for optimal physical resolution capture:
 
 ```properties
 # Default settings in brobot-defaults.properties:
-brobot.capture.provider=SIKULIX   # SikuliX for maximum compatibility
-brobot.dpi.disable=false          # Keep DPI awareness enabled for detection
-brobot.dpi.resize-factor=auto     # Automatic DPI detection and compensation
+brobot.capture.provider=JAVACV_FFMPEG  # JavaCV FFmpeg for 100% pattern match accuracy
+brobot.dpi.disable=true                # Disable DPI awareness for physical resolution
+brobot.dpi.resize-factor=1.0           # No pattern scaling (1:1 pixel matching)
 ```
 
 **No configuration needed!** These defaults provide:
-- Automatic DPI scaling detection
-- Pattern resize compensation
-- Maximum compatibility with existing patterns
+- Physical resolution capture (1920×1080 on Full HD displays)
+- 100% pattern match accuracy (pixel-perfect matching)
+- No scaling artifacts or interpolation blur
+- Works with patterns from any source (SikuliX IDE, Snipping Tool, etc.)
 
 ### Available Providers
 
 | Provider | Property Value | Dependencies | Best For |
 |----------|---------------|--------------|----------|
-| SikuliX | `SIKULIX` | SikuliX library (included) | **Default** - Maximum compatibility |
-| Robot | `ROBOT` | None (built-in Java) | DPI scaling compensation |
-| FFmpeg | `FFMPEG` | JavaCV (included in Brobot) | True physical capture |
+| JAVACV_FFMPEG | `JAVACV_FFMPEG` | JavaCV (bundled) | **Default** - 100% accurate physical capture |
+| Robot | `ROBOT` | None (built-in Java) | Fast, dynamic DPI scaling |
+| FFmpeg | `FFMPEG` | External FFmpeg binary | Physical capture with external FFmpeg |
+| SikuliX | `SIKULIX` | SikuliX library (included) | Legacy compatibility (Java version dependent) |
 | Auto | `AUTO` | None | Automatic selection |
 
 ## Provider Details
 
-### SikuliX Provider (Default)
+### JAVACV_FFMPEG Provider (Default) ✅
 
-SikuliX is the default provider for maximum compatibility with existing patterns and workflows.
+JAVACV_FFMPEG is the default and recommended provider for maximum pattern matching accuracy.
 
 **Advantages:**
-- Proven compatibility with existing Brobot patterns
-- Automatic DPI handling with `resize-factor=auto`
-- Consistent behavior across Brobot versions
-- Well-tested pattern matching
+- **100% pattern match accuracy** - Pixel-perfect matching with no scaling artifacts
+- **Physical resolution capture** - Always captures at true hardware resolution (e.g., 1920×1080)
+- **No external dependencies** - JavaCV libraries bundled with Brobot
+- **Universal pattern compatibility** - Works with patterns from any source
+- **Fast performance** - Native capture with no runtime scaling overhead
+- **Cross-platform** - Windows, macOS, Linux support
+
+**Configuration:**
+```properties
+brobot.capture.provider=JAVACV_FFMPEG  # Default - no configuration needed
+brobot.dpi.disable=true                 # Physical resolution capture
+brobot.dpi.resize-factor=1.0            # No pattern scaling
+```
+
+**How It Works:**
+- Uses bundled JavaCV/FFmpeg libraries for native screen capture
+- Disables Java's DPI awareness to capture at physical resolution
+- No pattern scaling needed (1:1 pixel matching)
+- Platform-specific optimizations (gdigrab on Windows, avfoundation on macOS, x11grab on Linux)
+
+**When to Use:**
+- ✅ **Recommended for all new projects** - Best accuracy and performance
+- ✅ When you need 100% pattern match reliability
+- ✅ When using patterns from multiple sources
+- ✅ Production environments where accuracy is critical
+
+### SikuliX Provider
+
+SikuliX is a legacy provider maintained for backward compatibility.
+
+**Advantages:**
+- Compatibility with older Brobot projects
+- Works with existing SikuliX workflows
+- No additional configuration for basic usage
+
+**Disadvantages:**
+- ⚠️ **Java version dependent resolution behavior**
+- ⚠️ Lower pattern match accuracy (~77%) compared to physical capture
+- ⚠️ May require pattern scaling with `resize-factor=auto`
 
 **Configuration:**
 ```properties
 brobot.capture.provider=SIKULIX
-brobot.dpi.resize-factor=auto  # Automatic DPI recognition
+brobot.dpi.disable=false          # Enable DPI awareness
+brobot.dpi.resize-factor=auto     # Automatic pattern scaling
 ```
 
 **Resolution Behavior:**
 - Java 8: Captures at physical resolution
-- Java 21+: Captures at logical resolution, handled by auto resize-factor
+- Java 21+: Captures at logical resolution (requires resize-factor=auto for scaling)
+
+**When to Use:**
+- Migrating from older Brobot versions
+- Existing projects using SikuliX patterns with auto-scaling
+- Testing backward compatibility
 
 ### Robot Provider
 
@@ -92,48 +140,96 @@ The Robot provider automatically detects Windows DPI scaling and compensates:
 - 150% scaling: 1280x720 → 1920x1080
 - 200% scaling: 960x540 → 1920x1080
 
-### FFmpeg Provider
+### FFmpeg Provider (External)
 
-FFmpeg provides true physical resolution capture without any scaling, using the JavaCV library that's already included in Brobot.
+The FFmpeg provider uses an **external FFmpeg installation** for screen capture. This is different from JAVACV_FFMPEG, which uses bundled libraries.
 
 **Advantages:**
 - True physical resolution capture
 - Professional-grade quality
 - Platform-specific optimizations
 - No scaling artifacts
-- **No external installation required** (uses bundled JavaCV)
+- Can use latest FFmpeg features
+
+**Disadvantages:**
+- ❌ **Requires external FFmpeg installation** (not bundled)
+- ⚠️ Platform-specific setup required
+- ⚠️ Version compatibility considerations
 
 **Configuration:**
 ```properties
-brobot.capture.provider=FFMPEG
+brobot.capture.provider=FFMPEG  # Requires FFmpeg installed on system
 brobot.capture.ffmpeg.timeout=5
 brobot.capture.ffmpeg.format=png
 brobot.capture.ffmpeg.log-level=error
 ```
 
-**Platform-Specific Capture Methods (via JavaCV):**
-- Windows: Uses `gdigrab`
-- macOS: Uses `avfoundation`
-- Linux: Uses `x11grab`
+**Platform-Specific Capture Methods:**
+- Windows: Uses `gdigrab` (requires FFmpeg.exe in PATH)
+- macOS: Uses `avfoundation` (requires FFmpeg via Homebrew)
+- Linux: Uses `x11grab` (requires FFmpeg package)
+
+**When to Use:**
+- You already have FFmpeg installed for other purposes
+- You need specific FFmpeg features not in bundled JavaCV
+- **Otherwise, use JAVACV_FFMPEG instead** (no installation needed)
 
 
 ## Usage Examples
 
+### Required Imports
+
+```java
+// Core Java imports
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.Map;
+
+// Spring Framework imports
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import jakarta.annotation.PostConstruct;
+
+// Brobot imports
+import io.github.jspinak.brobot.capture.UnifiedCaptureService;
+import io.github.jspinak.brobot.capture.CaptureConfiguration;
+import io.github.jspinak.brobot.capture.provider.CaptureProvider;
+```
+
 ### Basic Screen Capture
 
 ```java
-@Autowired
-private UnifiedCaptureService captureService;
+import io.github.jspinak.brobot.capture.UnifiedCaptureService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
-// Capture full screen
-BufferedImage screen = captureService.captureScreen();
+@Service
+public class ScreenCaptureService {
 
-// Capture specific screen (multi-monitor)
-BufferedImage screen1 = captureService.captureScreen(1);
+    @Autowired
+    private UnifiedCaptureService captureService;
 
-// Capture region
-Rectangle region = new Rectangle(100, 100, 400, 300);
-BufferedImage regionCapture = captureService.captureRegion(region);
+    public BufferedImage captureFullScreen() throws IOException {
+        // Capture full screen
+        return captureService.captureScreen();
+    }
+
+    public BufferedImage captureMonitor(int screenId) throws IOException {
+        // Capture specific screen (multi-monitor)
+        return captureService.captureScreen(screenId);
+    }
+
+    public BufferedImage captureArea() throws IOException {
+        // Capture region
+        Rectangle region = new Rectangle(100, 100, 400, 300);
+        return captureService.captureRegion(region);
+    }
+}
 ```
 
 ### Runtime Provider Switching
@@ -176,9 +272,9 @@ Map<String, String> props = captureConfig.getAllCaptureProperties();
 # ==================================================
 # Main Capture Settings
 # ==================================================
-# Provider selection: AUTO, ROBOT, FFMPEG, SIKULIX
-# Default is SIKULIX for maximum compatibility
-brobot.capture.provider=SIKULIX
+# Provider selection: JAVACV_FFMPEG, AUTO, ROBOT, FFMPEG, SIKULIX
+# Default is JAVACV_FFMPEG for 100% accurate physical resolution capture
+brobot.capture.provider=JAVACV_FFMPEG
 
 # Prefer physical resolution captures
 brobot.capture.prefer-physical=true
@@ -220,15 +316,15 @@ brobot.capture.ffmpeg.log-level=error
 
 ```properties
 # application-dev.properties
-brobot.capture.provider=ROBOT
+brobot.capture.provider=JAVACV_FFMPEG  # Or use default
 brobot.capture.enable-logging=true
 
-# application-test.properties  
-brobot.capture.provider=AUTO
+# application-test.properties
+brobot.capture.provider=AUTO  # Flexible for CI/CD
 brobot.capture.fallback-enabled=true
 
 # application-prod.properties
-brobot.capture.provider=FFMPEG
+brobot.capture.provider=JAVACV_FFMPEG  # 100% accuracy
 brobot.capture.retry-count=5
 ```
 
@@ -273,26 +369,34 @@ brobot.capture.provider=CUSTOM
 
 When `AUTO` is configured, the selection order is:
 
-1. **Configured Provider** - If explicitly set and available
-2. **Robot** - Always available, preferred for physical resolution
-3. **FFmpeg** - If installed and available
-4. **SikuliX** - Fallback option
+1. **JAVACV_FFMPEG** - Preferred (100% accuracy, bundled)
+2. **Robot** - Fallback (always available, dynamic DPI)
+3. **FFmpeg** - If external FFmpeg is installed
+4. **SikuliX** - Legacy fallback option
+
+**Recommendation**: Use explicit `brobot.capture.provider=JAVACV_FFMPEG` instead of `AUTO` for predictable behavior.
 
 ### Handling DPI Scaling
 
 The system automatically handles DPI scaling in different ways:
 
-- **Robot Provider**: Detects and compensates via image scaling
-- **FFmpeg Provider**: Captures at true physical resolution
-- **SikuliX Provider**: Behavior varies by Java version
+- **JAVACV_FFMPEG Provider (Default)**: Captures at true physical resolution with DPI awareness disabled
+- **Robot Provider**: Detects and compensates via dynamic image scaling
+- **FFmpeg Provider**: Captures at true physical resolution (requires external FFmpeg)
+- **SikuliX Provider**: Behavior varies by Java version (8: physical, 21: logical)
+
+> **For detailed DPI handling strategies and troubleshooting**, see the **[DPI and Resolution Guide](./dpi-resolution-guide.md)**.
 
 ### Performance Considerations
 
-| Provider | Speed | Memory Usage | Quality |
-|----------|-------|--------------|---------|
-| Robot | Fast | Low | Good (with scaling) |
-| FFmpeg | Medium | Medium | Excellent |
-| SikuliX | Medium | Medium | Variable |
+| Provider | Speed | Memory Usage | Quality | Accuracy |
+|----------|-------|--------------|---------|----------|
+| JAVACV_FFMPEG | Fast | Low-Medium | Excellent | 100% |
+| Robot | Fast | Low | Excellent (with scaling) | 95%+ |
+| FFmpeg | Medium | Medium | Excellent | 100% |
+| SikuliX | Medium | Medium | Variable | 77% |
+
+**Recommendation**: JAVACV_FFMPEG provides the best balance of speed, quality, and accuracy.
 
 ## Troubleshooting
 
@@ -302,16 +406,33 @@ The system automatically handles DPI scaling in different ways:
 ```
 Error: Provider not available: FFMPEG
 ```
-**Solution:** Install FFmpeg or switch to ROBOT provider
+**Solution:**
+- If using external `FFMPEG`: Install FFmpeg binary on your system
+- **Recommended**: Switch to `JAVACV_FFMPEG` (no installation needed)
+- Alternative: Switch to `ROBOT` provider (always available)
 
 **Wrong Resolution Captured**
 ```
 Captured: 1536x864 (expected 1920x1080)
 ```
-**Solution:** Enable Robot scaling:
+**Diagnosis**: This indicates logical resolution capture (DPI scaling issue).
+
+**Solution 1 (Recommended)**: Use default JAVACV_FFMPEG provider:
 ```properties
-brobot.capture.robot.scale-to-physical=true
+brobot.capture.provider=JAVACV_FFMPEG
+brobot.dpi.disable=true
+brobot.dpi.resize-factor=1.0
 ```
+
+**Solution 2**: Enable Robot physical scaling:
+```properties
+brobot.capture.provider=ROBOT
+brobot.capture.robot.scale-to-physical=true
+brobot.capture.robot.expected-physical-width=1920
+brobot.capture.robot.expected-physical-height=1080
+```
+
+> See the **[DPI and Resolution Guide](./dpi-resolution-guide.md)** for comprehensive troubleshooting.
 
 **Capture Fails Intermittently**
 **Solution:** Enable retry logic:
@@ -391,9 +512,10 @@ BufferedImage img = captureService.captureRegion(bounds);
    - Track performance metrics
 
 5. **Choose Appropriate Provider**
-   - Development: `ROBOT` (no setup required)
-   - CI/CD: `AUTO` (flexible)
-   - Production: `FFMPEG` (if accuracy critical)
+   - **Recommended (Default)**: `JAVACV_FFMPEG` (100% accuracy, no setup)
+   - Development: `JAVACV_FFMPEG` or `ROBOT` (no setup required)
+   - CI/CD: `AUTO` (flexible) or `JAVACV_FFMPEG` (reliable)
+   - Production: `JAVACV_FFMPEG` (accuracy + performance) or `ROBOT` (fallback)
 
 ## API Reference
 
@@ -402,14 +524,21 @@ BufferedImage img = captureService.captureRegion(bounds);
 Primary service for all capture operations:
 
 ```java
-public interface UnifiedCaptureService {
-    BufferedImage captureScreen() throws IOException;
-    BufferedImage captureScreen(int screenId) throws IOException;
-    BufferedImage captureRegion(Rectangle region) throws IOException;
-    BufferedImage captureRegion(int screenId, Rectangle region) throws IOException;
-    void setProvider(String providerName);
-    CaptureProvider getActiveProvider();
-    String getProvidersInfo();
+@Service
+@Primary
+public class UnifiedCaptureService {
+    // Capture methods
+    public BufferedImage captureScreen() throws IOException;
+    public BufferedImage captureScreen(int screenId) throws IOException;
+    public BufferedImage captureRegion(Rectangle region) throws IOException;
+    public BufferedImage captureRegion(int screenId, Rectangle region) throws IOException;
+
+    // Provider management
+    public void setProvider(String providerName);
+    public CaptureProvider getActiveProvider();
+    public String getActiveProviderName();
+    public String getProvidersInfo();
+    public boolean isPhysicalResolution();
 }
 ```
 
@@ -418,16 +547,21 @@ public interface UnifiedCaptureService {
 Configuration and management helper:
 
 ```java
-public interface CaptureConfiguration {
-    void useRobot();
-    void useFFmpeg();
-    void useSikuliX();
-    void useAuto();
-    void setCaptureMode(CaptureMode mode);
-    String getCurrentProvider();
-    boolean isCapturingPhysicalResolution();
-    boolean validateConfiguration();
-    Map<String, String> getAllCaptureProperties();
+@Component
+public class CaptureConfiguration {
+    // Provider switching
+    public void useRobot();
+    public void useFFmpeg();
+    public void useSikuliX();
+    public void useAuto();
+    public void setCaptureMode(CaptureMode mode);
+
+    // Configuration inspection
+    public String getCurrentProvider();
+    public boolean isCapturingPhysicalResolution();
+    public boolean validateConfiguration();
+    public Map<String, String> getAllCaptureProperties();
+    public void printConfigurationReport();
 }
 ```
 
@@ -442,3 +576,28 @@ The modular capture system provides:
 - **Extensible**: Support for custom providers
 
 Simply set `brobot.capture.provider` in your properties file and let the system handle the rest!
+
+---
+
+## Related Documentation
+
+### Core Capture Documentation
+- **[Capture Quick Reference](./capture-quick-reference.md)** - Quick provider switching guide with decision tree and common scenarios
+- **[DPI and Resolution Guide](./dpi-resolution-guide.md)** - Comprehensive DPI scaling and resolution handling strategies
+- **[Capture Methods Comparison](../tools/capture-methods-comparison.md)** - Detailed performance benchmarks comparing all providers
+
+### Configuration
+- **[Configuration Properties Reference](../configuration/properties-reference.md)** - Complete reference for all Brobot configuration properties
+- **[Auto-Configuration](../configuration/auto-configuration.md)** - Spring Boot auto-configuration and integration details
+- **[Headless Configuration](../configuration/headless-configuration.md)** - Configuring Brobot for CI/CD and headless environments
+
+### Testing & CI/CD
+- **[Testing Introduction](../../04-testing/testing-intro.md)** - Overview of Brobot testing strategies and patterns
+- **[Mock Mode Guide](../../04-testing/mock-mode-guide.md)** - Testing without screen interaction using mock mode
+- **[Integration Testing](../../04-testing/integration-testing.md)** - Spring Boot integration testing with Brobot
+- **[CI/CD Testing Guide](../testing/ci-cd-testing.md)** - Testing Brobot applications in CI/CD pipelines
+
+### Getting Started
+- **[Introduction](../../01-getting-started/introduction.md)** - Brobot overview, why use Brobot, and core concepts
+- **[Installation](../../01-getting-started/installation.md)** - Adding Brobot dependencies to your project
+- **[Quick Start](../../01-getting-started/quick-start.md)** - Get started with Brobot quickly

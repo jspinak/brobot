@@ -8,6 +8,75 @@ description: Step-by-step guide for migrating from ActionOptions to ActionConfig
 
 This guide helps you migrate your existing Brobot automation code from the legacy `ActionOptions` API to the modern `ActionConfig` hierarchy. The migration improves type safety, API clarity, and maintainability.
 
+> **Quick Reference**: For a concise mapping table, see the [Quick Migration Reference](./02-migration-quick-reference.md).
+
+## Prerequisites
+
+Before migrating, familiarize yourself with:
+- **[ActionConfig Overview](./01-overview.md)** - Conceptual foundation of the new system
+- **[Migration Examples](./06-migration-examples.md)** - Additional real-world migration examples
+
+## Setup for Migration Examples
+
+All examples in this guide assume the following setup. Add these imports and autowired dependencies to your Spring component:
+
+```java
+// Core Brobot imports
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ConditionalActionChain;
+
+// ActionConfig classes
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.type.TypeOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
+
+// Composite actions
+import io.github.jspinak.brobot.action.ActionChainOptions;
+import io.github.jspinak.brobot.action.internal.execution.ActionChainExecutor;
+
+// Data types
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+
+// Supporting classes
+import io.github.jspinak.brobot.manageStates.mouse.MouseButton;
+
+// Spring
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+// Testing (for test examples)
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+@Component
+public class MyAutomation {
+
+    @Autowired
+    private Action action;
+
+    @Autowired
+    private ActionChainExecutor chainExecutor;
+
+    // Example StateImage objects used in examples
+    private StateImage buttonImage = new StateImage.Builder()
+        .setName("button")
+        .addPattern("button.png")
+        .build();
+
+    private StateImage targetImage = new StateImage.Builder()
+        .setName("target")
+        .addPattern("target.png")
+        .build();
+
+    // Your migration code here...
+}
+```
+
 ## Overview of Changes
 
 ### Old API (ActionOptions)
@@ -23,7 +92,7 @@ ActionOptions options = new ActionOptions.Builder()
 
 ### New API Options
 
-#### Option 1: Convenience Methods (Simplest - New in 2.1)
+#### Option 1: Convenience Methods (Simplest)
 ```java
 // Direct actions without configuration objects
 action.click(region);
@@ -39,10 +108,51 @@ ClickOptions clickOptions = new ClickOptions.Builder()
     .build();
 
 PatternFindOptions findOptions = new PatternFindOptions.Builder()
-    .setStrategy(FindStrategy.FIRST)
+    .setStrategy(PatternFindOptions.Strategy.FIRST)
     .setSimilarity(0.8)
     .build();
 ```
+
+#### Option 3: ConditionalActionChain (Modern Fluent API)
+```java
+// Modern conditional workflows
+ConditionalActionChain
+    .find(buttonImage)
+    .ifFoundClick()
+    .then(targetImage)
+    .ifFoundLog("Success!")
+    .perform(action);
+```
+
+## Choosing the Right Migration Path
+
+Use this decision tree to choose the appropriate API:
+
+```
+Need to migrate from ActionOptions?
+├─ Simple operations without config?
+│  └─ Path A: Convenience Methods (action.click(), action.type())
+│
+├─ Need conditional logic or retries?
+│  ├─ 1-5 retries, form automation, readable code?
+│  │  └─ Path C: ConditionalActionChain
+│  └─ 10+ retries, polling, custom conditions?
+│     └─ Path B: ActionChainOptions with setMaxRepetitions
+│
+└─ Complex multi-step workflows?
+   └─ Path B: ActionChainOptions (full control)
+```
+
+### Quick Recommendations by Use Case
+
+| Use Case | Recommended API | Documentation |
+|----------|----------------|---------------|
+| Simple click/type/find | Convenience Methods | [18-convenience-methods.md](./18-convenience-methods.md) |
+| Form filling | ConditionalActionChain | [09-conditional-actions.md](./09-conditional-actions.md) |
+| Click-until-appears (1-5 tries) | ConditionalActionChain | [15-conditional-chains-examples.md](./15-conditional-chains-examples.md) |
+| Click-until-appears (10+ tries) | ActionChainOptions | [09-conditional-actions.md](./09-conditional-actions.md) |
+| Wizard navigation | ActionChainOptions | [08-complex-workflows.md](./08-complex-workflows.md) |
+| Nested searches | ActionChainOptions | [07-action-chaining.md](./07-action-chaining.md) |
 
 ## Migration Paths
 
@@ -86,14 +196,57 @@ This is the simplest migration path and works for 80% of use cases. See [Conveni
 
 Use this path when you need fine-grained control or complex configurations.
 
+### Path C: Migrate to ConditionalActionChain (For Conditional Operations)
+
+For operations with retry logic, conditional branching, or form automation, use ConditionalActionChain:
+
+#### Before (ActionOptions with Manual Retry)
+```java
+// Click until image appears - manual retry loop
+int attempts = 0;
+while (attempts < 5) {
+    ActionOptions clickOpt = new ActionOptions.Builder()
+        .setAction(ActionType.CLICK)
+        .build();
+    action.perform(clickOpt, buttonImage);
+
+    ActionOptions findOpt = new ActionOptions.Builder()
+        .setAction(ActionType.FIND)
+        .build();
+
+    if (action.perform(findOpt, targetImage).isSuccess()) {
+        break;
+    }
+    attempts++;
+}
+```
+
+#### After (ConditionalActionChain)
+```java
+// Click until image appears - fluent and readable
+ConditionalActionChain
+    .find(buttonImage)
+    .ifFoundClick()
+    .then(targetImage)
+    .ifNotFoundClick(buttonImage)  // Retry 1
+    .ifNotFoundClick(buttonImage)  // Retry 2
+    .ifNotFoundClick(buttonImage)  // Retry 3
+    .then(targetImage)
+    .ifFoundLog("Target appeared!")
+    .ifNotFoundLog("Target did not appear after retries")
+    .perform(action);
+```
+
+See [Conditional Action Chains](./15-conditional-chains-examples.md) for comprehensive examples.
+
 ## Migration Steps
 
 ### Step 1: Identify Action Types
 
 Map your existing ActionOptions usage to the appropriate ActionConfig subclass:
 
-| ActionType (replaces ActionOptions.Action) | New Config Class |
-|---------------------------------------------|------------------|
+| ActionType (Old) | New Config Class |
+|------------------|------------------|
 | CLICK | ClickOptions |
 | TYPE | TypeOptions |
 | FIND | PatternFindOptions |
@@ -110,16 +263,16 @@ Map your existing ActionOptions usage to the appropriate ActionConfig subclass:
 
 ### Step 2: Update Find Strategies
 
-Replace ActionOptions.Find with FindStrategy enum:
+Replace ActionOptions.Find with PatternFindOptions.Strategy:
 
 ```java
-// Old
+// Old mapping
 ActionOptions.Find.FIRST → PatternFindOptions.Strategy.FIRST
 ActionOptions.Find.ALL → PatternFindOptions.Strategy.ALL
 ActionOptions.Find.BEST → PatternFindOptions.Strategy.BEST
 ActionOptions.Find.EACH → PatternFindOptions.Strategy.EACH
 
-// New
+// New usage
 PatternFindOptions options = new PatternFindOptions.Builder()
     .setStrategy(PatternFindOptions.Strategy.FIRST)
     .build();
@@ -134,7 +287,6 @@ Old:
 // DEPRECATED - ActionOptions class is deprecated
 ActionOptions clickOptions = new ActionOptions.Builder()
     .setAction(ActionType.CLICK)
-    .setClickType(ActionOptions.ClickType.LEFT)
     .setPauseAfterEnd(0.5)
     .build();
 
@@ -144,11 +296,21 @@ action.perform(clickOptions, objectCollection);
 New:
 ```java
 ClickOptions clickOptions = new ClickOptions.Builder()
-    .setClickType(ClickOptions.ClickType.LEFT)
     .setPauseAfterEnd(0.5)
     .build();
 
 action.perform(clickOptions, objectCollection);
+```
+
+**For Left/Right Click Configuration:**
+```java
+// Configure mouse button using MousePressOptions
+ClickOptions rightClick = new ClickOptions.Builder()
+    .setPressOptions(MousePressOptions.builder()
+        .setButton(MouseButton.RIGHT)
+        .build())
+    .setPauseAfterEnd(0.5)
+    .build();
 ```
 
 #### Type Actions
@@ -195,7 +357,7 @@ PatternFindOptions findOptions = new PatternFindOptions.Builder()
 
 ### Step 4: Update Composite Actions
 
-#### ClickUntil Pattern
+#### ClickUntil Pattern → ConditionalActionChain (Recommended)
 
 Old:
 ```java
@@ -203,20 +365,37 @@ ClickUntil clickUntil = new ClickUntil();
 clickUntil.clickAndFind(buttonImage, targetImage);
 ```
 
-New:
+New - Option 1: ConditionalActionChain (for 1-5 retries):
 ```java
-RepeatUntilConfig config = new RepeatUntilConfig.Builder()
-    .setDoAction(new ClickOptions.Builder().build())
-    .setActionObjectCollection(buttonImage.asObjectCollection())
-    .setUntilAction(new PatternFindOptions.Builder().build())
-    .setConditionObjectCollection(targetImage.asObjectCollection())
-    .setMaxActions(10)
-    .build();
-
-repeatUntilExecutor.execute(config);
+ConditionalActionChain
+    .find(buttonImage)
+    .ifFoundClick()
+    .then(targetImage)
+    .ifNotFoundClick(buttonImage)  // Retry 1
+    .ifNotFoundClick(buttonImage)  // Retry 2
+    .ifNotFoundClick(buttonImage)  // Retry 3
+    .then(targetImage)
+    .perform(action);
 ```
 
-#### Multiple Actions
+New - Option 2: ActionChainOptions (for 10+ retries):
+```java
+ActionChainOptions clickWithRetries = new ActionChainOptions.Builder(
+    new ClickOptions.Builder()
+        .setPauseAfterEnd(0.5)
+        .build())
+    .setMaxRepetitions(10)
+    .setStopCondition(result -> {
+        ActionResult checkResult = action.find(targetImage);
+        return checkResult.isSuccess();
+    })
+    .build();
+
+chainExecutor.executeChain(clickWithRetries, new ActionResult(),
+    buttonImage.asObjectCollection());
+```
+
+#### Multiple Actions → ActionChainOptions
 
 Old:
 ```java
@@ -237,30 +416,56 @@ chainExecutor.executeChain(chain, new ActionResult(),
     buttonCollection, textCollection);
 ```
 
+For more on action chaining, see [Action Chaining Guide](./07-action-chaining.md).
+
 ### Step 5: Update Test Code
 
 Old test:
 ```java
-@Test
-public void testClickAction() {
-    // DEPRECATED - ActionOptions class is deprecated
-    ActionOptions options = new ActionOptions.Builder()
-        .setAction(ActionType.CLICK)
-        .build();
-    
-    ActionResult result = action.perform(options, image);
-    assertTrue(result.isSuccess());
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+public class MyBrobotTest extends BrobotTestBase {
+
+    @Test
+    public void testClickAction() {
+        // DEPRECATED - ActionOptions class is deprecated
+        ActionOptions options = new ActionOptions.Builder()
+            .setAction(ActionType.CLICK)
+            .build();
+
+        StateImage image = new StateImage.Builder()
+            .setName("test-image")
+            .addPattern("test-image.png")
+            .build();
+
+        ActionResult result = action.perform(options, image.asObjectCollection());
+        assertTrue(result.isSuccess());
+    }
 }
 ```
 
 New test:
 ```java
-@Test
-public void testClickAction() {
-    ClickOptions options = new ClickOptions.Builder().build();
-    
-    ActionResult result = action.perform(options, image);
-    assertTrue(result.isSuccess());
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+public class MyBrobotTest extends BrobotTestBase {
+
+    @Test
+    public void testClickAction() {
+        ClickOptions options = new ClickOptions.Builder().build();
+
+        StateImage image = new StateImage.Builder()
+            .setName("test-image")
+            .addPattern("test-image.png")
+            .build();
+
+        ActionResult result = action.perform(options, image.asObjectCollection());
+        assertTrue(result.isSuccess());
+    }
 }
 ```
 
@@ -283,7 +488,18 @@ ActionOptions findOpt = new ActionOptions.Builder()
 ActionResult result = action.perform(findOpt, expectedResult);
 ```
 
-New:
+New - Option 1: ConditionalActionChain (Recommended):
+```java
+ActionResult result = ConditionalActionChain
+    .find(button)
+    .ifFoundClick()
+    .then(expectedResult)
+    .ifFoundLog("Success!")
+    .ifNotFoundLog("Verification failed")
+    .perform(action);
+```
+
+New - Option 2: ActionChainOptions:
 ```java
 ActionChainOptions chain = new ActionChainOptions.Builder(
     new ClickOptions.Builder().build())
@@ -305,7 +521,19 @@ action.perform(clickOptions, field2);
 action.perform(typeOptions, text2);
 ```
 
-New:
+New - Option 1: ConditionalActionChain (Recommended):
+```java
+ConditionalActionChain
+    .find(field1)
+    .ifFoundClick()
+    .ifFoundClearAndType("value1")
+    .then(field2)
+    .ifFoundClick()
+    .ifFoundClearAndType("value2")
+    .perform(action);
+```
+
+New - Option 2: ActionChainOptions:
 ```java
 ActionChainOptions formChain = new ActionChainOptions.Builder(
     new ClickOptions.Builder().build())
@@ -314,11 +542,20 @@ ActionChainOptions formChain = new ActionChainOptions.Builder(
     .then(new TypeOptions.Builder().build())
     .build();
 
+ObjectCollection text1Collection = new ObjectCollection.Builder()
+    .withStrings("value1")
+    .build();
+ObjectCollection text2Collection = new ObjectCollection.Builder()
+    .withStrings("value2")
+    .build();
+
 chainExecutor.executeChain(formChain, new ActionResult(),
-    field1, text1, field2, text2);
+    field1, text1Collection, field2, text2Collection);
 ```
 
-### Pattern 3: Conditional Actions
+For specialized form patterns, see [Form Automation Guide](./10-form-automation.md).
+
+### Pattern 3: Conditional Actions with Retry
 
 Old:
 ```java
@@ -333,35 +570,60 @@ while (attempts < 10) {
 }
 ```
 
-New:
+New - Option 1: ConditionalActionChain (for 1-5 retries):
 ```java
-RepeatUntilConfig config = new RepeatUntilConfig.Builder()
-    .setDoAction(new ClickOptions.Builder().build())
-    .setActionObjectCollection(button)
-    .setUntilAction(new PatternFindOptions.Builder().build())
-    .setConditionObjectCollection(target)
-    .setMaxActions(10)
+ConditionalActionChain
+    .find(button)
+    .ifFoundClick()
+    .then(target)
+    .ifNotFoundClick(button)  // Retry 1
+    .ifNotFoundClick(button)  // Retry 2
+    .ifNotFoundClick(button)  // Retry 3
+    .then(target)
+    .ifFoundLog("Target appeared!")
+    .perform(action);
+```
+
+New - Option 2: ActionChainOptions (for 10+ retries):
+```java
+ActionChainOptions clickWithRetries = new ActionChainOptions.Builder(
+    new ClickOptions.Builder()
+        .setPauseAfterEnd(0.5)
+        .build())
+    .setMaxRepetitions(10)
+    .setStopCondition(result -> {
+        ActionResult checkResult = action.find(target);
+        return checkResult.isSuccess();
+    })
     .build();
 
-repeatUntilExecutor.execute(config);
+chainExecutor.executeChain(clickWithRetries, new ActionResult(), button);
 ```
+
+For more conditional patterns, see [Conditional Actions Guide](./09-conditional-actions.md).
 
 ## Deprecated Classes to Replace
 
-| Deprecated Class | Replacement |
-|-----------------|-------------|
-| MultipleActionsObject | ActionChainOptions |
-| ActionResultCombo | ActionChainOptions |
-| SelectActionObject | Custom ActionChainOptions |
-| ClickUntil | RepeatUntilConfig |
-| ActionParameters | Not needed with ActionChainOptions |
+These classes were **completely removed in Brobot 1.1.0** with no backward compatibility:
+
+| Removed Class | Replacement | Notes |
+|--------------|-------------|-------|
+| MultipleActionsObject | ActionChainOptions or ConditionalActionChain | See Path B or Path C |
+| ActionResultCombo | ActionChainOptions | See Path B |
+| SelectActionObject | ConditionalActionChain | See Path C |
+| ClickUntil | ConditionalActionChain or ActionChainOptions | See Pattern 3 |
+| ActionParameters | Not needed | Use fluent builders |
+
+:::warning No Backward Compatibility
+Code using these classes will NOT compile in Brobot 1.1.0+. You must migrate to the new APIs.
+:::
 
 ## Backward Compatibility
 
-The framework maintains backward compatibility during migration:
+ActionOptions itself maintains backward compatibility during migration:
 
 ```java
-// Both old and new APIs work
+// Both old and new APIs work during transition
 public ActionResult perform(ActionOptions actionOptions, ObjectCollection objectCollection) {
     // Legacy implementation
 }
@@ -371,13 +633,15 @@ public ActionResult perform(ActionConfig actionConfig, ObjectCollection objectCo
 }
 ```
 
+However, the deprecated composite classes (MultipleActionsObject, etc.) were completely removed in 1.1.0.
+
 ## Migration Checklist
 
 - [ ] Identify all ActionOptions usage in your codebase
 - [ ] Create a migration plan by module/package
 - [ ] Update action configurations to use specific ActionConfig classes
-- [ ] Replace composite action patterns with ActionChainOptions
-- [ ] Update test cases to use new APIs
+- [ ] Replace composite action patterns with ActionChainOptions or ConditionalActionChain
+- [ ] Update test cases to use new APIs and extend BrobotTestBase
 - [ ] Run comprehensive tests after each module migration
 - [ ] Update documentation and comments
 - [ ] Remove deprecated imports once migration is complete
@@ -389,32 +653,46 @@ public ActionResult perform(ActionConfig actionConfig, ObjectCollection objectCo
 1. **Compilation errors after migration**
    - Ensure you're importing the correct ActionConfig subclasses
    - Check that builder methods match the new API
+   - **Note**: `ClickOptions.ClickType` doesn't exist - use `MousePressOptions` with `MouseButton`
 
 2. **Different behavior after migration**
    - Verify timing settings (pauseBeforeBegin, pauseAfterEnd)
-   - Check find strategy mappings
+   - Check find strategy mappings (must use `PatternFindOptions.Strategy`, not standalone `FindStrategy`)
 
 3. **Missing functionality**
    - Some edge cases might require custom ActionConfig implementations
+   - Consider using ConditionalActionChain for conditional logic
    - Contact support if critical functionality is missing
 
 ### Getting Help
 
 If you encounter issues during migration:
-1. Check the [API documentation](./05-reference.md)
-2. Review the [examples](./03-examples.md)
-3. Post questions in the community forum
-4. File issues on GitHub
+1. Check the [API Reference](./05-reference.md)
+2. Review the [Code Examples](./03-examples.md)
+3. See the [Quick Migration Reference](./02-migration-quick-reference.md) for fast lookup
+4. Consult the [Migration Examples](./06-migration-examples.md) for detailed patterns
+5. Post questions in the community forum
+6. File issues on GitHub
 
 ## Benefits After Migration
 
 - **Type Safety**: Compile-time checking for action-specific options
 - **Cleaner Code**: More readable and maintainable
+- **Modern APIs**: Access to ConditionalActionChain fluent syntax
 - **Better Performance**: Optimized action execution
 - **Future-Proof**: Ready for upcoming features
 - **Enhanced IDE Support**: Better autocomplete and documentation
 
 ## Next Steps
 
-- Review [ActionConfig API Reference](./05-reference.md)
-- Explore [Advanced Patterns](./11-reusable-patterns.md)
+### Related Guides
+- **[Action Chaining](./07-action-chaining.md)** - Understand action composition patterns
+- **[Conditional Actions](./09-conditional-actions.md)** - Learn retry and conditional patterns
+- **[Conditional Action Chains](./15-conditional-chains-examples.md)** - Modern fluent API examples
+- **[Complex Workflows](./08-complex-workflows.md)** - Multi-step automation patterns
+- **[Form Automation](./10-form-automation.md)** - Specialized form patterns
+
+### Reference Documentation
+- **[ActionConfig Overview](./01-overview.md)** - Conceptual foundation
+- **[ActionConfig API Reference](./05-reference.md)** - Complete API documentation
+- **[Advanced Patterns](./11-reusable-patterns.md)** - Reusable automation patterns

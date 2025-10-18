@@ -8,6 +8,26 @@ description: Learn how to chain multiple actions together using ActionChainOptio
 
 Action chaining is a powerful pattern in Brobot that allows you to compose multiple actions into complex workflows. The `ActionChainOptions` class provides a unified, type-safe way to chain actions together with different execution strategies.
 
+## Required Imports
+
+All examples in this guide assume the following imports:
+
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionChainOptions;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.type.TypeOptions;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.internal.execution.ActionChainExecutor;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+```
+
 ## Why Action Chaining?
 
 Traditional automation often requires executing multiple actions in sequence:
@@ -40,30 +60,74 @@ When you chain actions:
 3. The chain continues until all actions complete or one fails
 4. The final result contains the complete execution history
 
-## Simple Examples
+## Two Ways to Execute Chains
 
-### Sequential Actions
+Brobot provides two patterns for executing action chains:
 
-The most basic use case is executing actions in sequence:
+### 1. Implicit Chaining (Recommended for Most Cases)
+
+Use the `then()` method on any ActionConfig and execute with `action.perform()`:
+
+```java
+@Autowired
+private Action action;
+
+// Chain actions using then()
+PatternFindOptions findAndClick = new PatternFindOptions.Builder()
+    .setSimilarity(0.85)
+    .then(new ClickOptions.Builder()
+        .setPauseAfterEnd(0.5)
+        .build())
+    .build();
+
+// Execute - chain runs automatically
+ActionResult result = action.perform(findAndClick, buttonImage.asObjectCollection());
+```
+
+**Advantages**: Simpler, less boilerplate, no need to inject `ActionChainExecutor`.
+
+### 2. Explicit Chaining (For Advanced Scenarios)
+
+Use `ActionChainOptions` and `ActionChainExecutor` when you need fine control:
 
 ```java
 @Autowired
 private ActionChainExecutor chainExecutor;
 
-// Click a button, then type text
+// Explicit chain configuration
 ActionChainOptions chain = new ActionChainOptions.Builder(
     new ClickOptions.Builder().build())
+    .setStrategy(ActionChainOptions.ChainingStrategy.NESTED)
     .then(new TypeOptions.Builder()
         .setTypeDelay(0.1)
         .build())
     .build();
 
-// Execute with appropriate ObjectCollections
+// Execute with full control over parameters
 ActionResult result = chainExecutor.executeChain(chain, new ActionResult(),
     buttonImage.asObjectCollection(),
     new ObjectCollection.Builder().withStrings("Hello World").build()
 );
 ```
+
+**Advantages**: Explicit strategy control, access to intermediate results, custom execution logic.
+
+**When to Use**: Most users should start with implicit chaining. Use explicit chaining when you need custom strategy configuration or intermediate result access.
+
+## Simple Examples
+
+:::info Assumed Variables
+The following examples assume you have:
+- `StateImage buttonImage` - An initialized StateImage instance
+- `StateImage targetImage` - Another StateImage for verification
+- `@Autowired Action action` - Injected Brobot Action service
+
+See the [Production Examples](#production-examples) section for complete, compilable code.
+:::
+
+### Sequential Actions
+
+The most basic use case is executing actions in sequence.
 
 ### Click and Verify
 
@@ -117,32 +181,37 @@ ActionChainOptions confirmChain = new ActionChainOptions.Builder(
     .build();
 ```
 
-## Replacing Deprecated Patterns
+## Replacing Removed Patterns
 
-ActionChainOptions replaces several deprecated composite action patterns:
+ActionChainOptions replaces several composite action patterns that were removed in Brobot 1.1.0:
 
-### Instead of MultipleActionsObject
+### Instead of MultipleActionsObject (Removed in v1.1.0)
 
 ```java
-// Old way
-MultipleActionsObject mao = new MultipleActionsObject();
-mao.add(new ActionParameters(clickOptions, buttonCollection));
-mao.add(new ActionParameters(typeOptions, textCollection));
+// Old way (NO LONGER AVAILABLE)
+// MultipleActionsObject mao = new MultipleActionsObject();
+// mao.add(new ActionParameters(clickOptions, buttonCollection));
+// mao.add(new ActionParameters(typeOptions, textCollection));
 
 // New way
 ActionChainOptions chain = new ActionChainOptions.Builder(
     new ClickOptions.Builder().build())
     .then(new TypeOptions.Builder().build())
     .build();
+
+// Or simpler implicit chaining:
+ClickOptions clickThenType = new ClickOptions.Builder()
+    .then(new TypeOptions.Builder().build())
+    .build();
 ```
 
-### Instead of ActionResultCombo
+### Instead of ActionResultCombo (Removed in v1.1.0)
 
 ```java
-// Old way
-ActionResultCombo combo = new ActionResultCombo();
-combo.setActionOptions(clickOptions);
-combo.setResultOptions(findOptions);
+// Old way (NO LONGER AVAILABLE)
+// ActionResultCombo combo = new ActionResultCombo();
+// combo.setActionOptions(clickOptions);
+// combo.setResultOptions(findOptions);
 
 // New way
 ActionChainOptions chain = new ActionChainOptions.Builder(
@@ -150,6 +219,12 @@ ActionChainOptions chain = new ActionChainOptions.Builder(
     .then(new PatternFindOptions.Builder().build())
     .build();
 ```
+
+:::warning No Backward Compatibility
+These classes were **completely removed** with no compatibility layer. Code using `MultipleActionsObject`, `ActionResultCombo`, or `ActionParameters` will not compile in Brobot 1.1.0+.
+
+For migration guidance, see the [Migration Guide](./migration-guide).
+:::
 
 ## Critical Insight: Object Type Preservation in Chains
 
@@ -289,11 +364,25 @@ action.perform(chainedActions, everything);
 ### ✅ Correct Implementation
 
 ```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.type.TypeOptions;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+
 @Component
 public class LoginAutomation {
+    private static final Logger log = LoggerFactory.getLogger(LoginAutomation.class);
+
     @Autowired
     private Action action;
-    
+
     public boolean fillLoginForm(StateImage emailField, StateImage passwordField,
                                  String email, String password) {
         // Step 1: Find and click email field
@@ -304,60 +393,88 @@ public class LoginAutomation {
                 .setPauseAfterEnd(0.5)  // Wait for field to be active
                 .build())
             .build();
-        
+
         ObjectCollection emailFieldTarget = new ObjectCollection.Builder()
             .withImages(emailField)
             .build();
-        
+
         ActionResult emailClick = action.perform(findClickEmail, emailFieldTarget);
         if (!emailClick.isSuccess()) {
             log.error("Failed to find/click email field");
             return false;
         }
-        
+
         // Step 2: Type email
         TypeOptions typeEmail = new TypeOptions.Builder()
             .setPauseBeforeBegin(0.2)
             .setTypeDelay(0.05)  // Human-like typing speed
             .build();
-        
+
         ObjectCollection emailText = new ObjectCollection.Builder()
             .withStrings(email)
             .build();
-        
+
         action.perform(typeEmail, emailText);
-        
+
         // Step 3: Tab to password field (or find-click it)
-        action.perform(new TypeOptions.Builder().build(), 
+        action.perform(new TypeOptions.Builder().build(),
             new ObjectCollection.Builder().withStrings("\t").build());
-        
+
         // Step 4: Type password
         ObjectCollection passwordText = new ObjectCollection.Builder()
             .withStrings(password)
             .build();
-        
+
         action.perform(typeEmail, passwordText);
-        
+
         return true;
     }
 }
 ```
 
+**Note**: This example is fully compilable with the imports shown above.
+
 ### Alternative: Using State Transitions
 
-For complex forms, consider using state transitions instead of chained actions:
+For complex forms, consider using Brobot's state management system instead of chained actions:
 
 ```java
-@Transition(from = LoginFormState.class, to = FilledFormState.class)
-public class FillLoginFormTransition {
-    
-    public boolean execute() {
+@Component
+@TransitionSet(state = LoginFormState.class)
+public class LoginFormTransitions {
+
+    @Autowired
+    private Action action;
+
+    @OutgoingTransition(to = FilledFormState.class)
+    public boolean fillLoginForm() {
         // Each action is clear and separated
         // State management handles the flow
-        return fillEmailField() && fillPasswordField() && clickSubmit();
+        boolean emailFilled = fillEmailField();
+        boolean passwordFilled = fillPasswordField();
+        boolean submitted = clickSubmit();
+
+        return emailFilled && passwordFilled && submitted;
+    }
+
+    private boolean fillEmailField() {
+        // Implementation using action.perform()
+        return true;
+    }
+
+    private boolean fillPasswordField() {
+        // Implementation using action.perform()
+        return true;
+    }
+
+    private boolean clickSubmit() {
+        // Implementation using action.perform()
+        return true;
     }
 }
 ```
+
+For more on state transitions, see the [States in Brobot](../../01-getting-started/states.md) guide.
 
 ## Conditional Action Chaining
 
@@ -369,9 +486,32 @@ For more advanced conditional workflows with proper sequential composition, see 
 - Proper conditional execution logic
 - No explicit `wait()` methods (following model-based principles)
 
+## Production Examples
+
+For complete, production-quality examples of action chaining, see:
+- `library/src/main/java/io/github/jspinak/brobot/action/examples/ActionChainExamples.java`
+
+This file contains fully compilable examples including:
+- `fillLoginForm()` - Sequential action patterns
+- `clickAndVerify()` - Click and verify workflow
+- `findButtonInDialog()` - Nested search demonstrations
+- `findAndConfirm()` - Confirmation pattern examples
+- `complexWorkflow()` - Multi-step automation chains
+- `ChainPatterns` class - Reusable chain builders
+- `buildDynamicChain()` - Dynamic chain construction
+
+All examples follow best practices and include complete class context.
+
 ## Next Steps
 
+### Related Guides
 - Explore [Conditional Action Chains](./conditional-chains-examples) for advanced patterns
 - Learn about [Complex Workflows](./complex-workflows) for multi-step automation
 - Learn about [Conditional Actions](./conditional-actions) using RepeatUntilConfig
 - See [Form Automation](./form-automation) for practical examples
+- Build [Reusable Patterns](./reusable-patterns) for your automation library
+
+### Reference Documentation
+- Check [API Reference](./reference) for complete ActionConfig documentation
+- Review [Troubleshooting Chains](./troubleshooting-chains) if you encounter issues
+- See [ActionConfig Overview](./overview) for conceptual foundation

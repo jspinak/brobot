@@ -24,11 +24,13 @@ For advanced mock testing capabilities including scenario-based configurations a
 **Performance Features**:
 - Parallel test execution using available CPU cores
 - Shared Spring contexts via `OptimizedIntegrationTestBase`
-- Ultra-fast mock timings (0.005-0.015s per operation)
-- Smart JVM forking to prevent memory issues
+- Ultra-fast mock timings (0.005-0.04s per operation in test profile)
+- JVM forking (every 20 tests) to prevent memory issues
 - Test result caching for faster re-runs
 
 **Best for**: End-to-end workflow validation, reliability testing, CI/CD pipeline integration
+
+For comprehensive integration testing patterns with Spring Boot, see the [Integration Testing Guide](./integration-testing.md).
 
 ### Unit Testing
 **Purpose**: Test individual components with deterministic, reproducible results
@@ -40,6 +42,8 @@ For advanced mock testing capabilities including scenario-based configurations a
 
 **Best for**: Component validation, regression testing, development workflows
 
+For detailed unit testing patterns with BrobotTestBase, see the [Unit Testing Guide](./unit-testing.md).
+
 ### Action Recording
 **Purpose**: Visual validation and debugging of automation behavior
 
@@ -47,6 +51,8 @@ For advanced mock testing capabilities including scenario-based configurations a
 - **Interactive debugging** and development
 - **Screenshot-based validation** with real-time feedback
 - **Manual testing support** for complex scenarios
+
+> **💡 Visual Debugging**: Brobot's highlighting feature provides real-time visual feedback during automation. See the [Highlighting Feature Guide](/docs/core-library/guides/user-guides/highlighting-feature.md) for details on visual debugging and validation techniques.
 
 **Best for**: Development debugging, manual verification, complex scenario validation
 
@@ -64,8 +70,7 @@ Brobot now includes a clean test logging architecture that follows Single Respon
 
 ```properties
 # Core testing settings
-brobot.core.mock=true
-brobot.core.headless=false
+brobot.mock=true
 brobot.core.image-path=images/
 
 # Screenshot management
@@ -87,9 +92,8 @@ Or using YAML format:
 
 ```yaml
 brobot:
+  mock: true
   core:
-    mock: true
-    headless: false
     image-path: images/
   screenshot:
     path: screenshots/
@@ -106,21 +110,29 @@ brobot:
 
 ### Migration from Legacy API
 
-| Legacy (Deprecated) | Modern Equivalent |
-|--------------------|-----------------|
-| `BrobotSettings.mock` | `brobot.core.mock=true` |
-| `BrobotSettings.screenshotPath` | `brobot.screenshot.path` |
-| `BrobotSettings.screenshots` | Configure via properties |
-| `ActionOptions` | `ActionConfig` (e.g., `PatternFindOptions`) |
-| `MatchSnapshot` | `ActionResult` |
+For applications migrating from Brobot 1.0.x, the following APIs have been modernized:
+
+| Legacy (1.0.x) | Modern (1.1.0+) | Notes |
+|----------------|-----------------|-------|
+| Direct settings manipulation | `brobot.mock=true` | Use properties instead of code configuration |
+| Manual screenshot configuration | `brobot.screenshot.path` | Configure via properties |
+| `ActionOptions` classes | `ActionConfig` classes (e.g., `PatternFindOptions`, `ClickOptions`) | New fluent builder API |
+
+See [ActionOptions to ActionConfig Migration](../03-core-library/migration/actionoptions-to-actionconfig.md) for complete migration guide.
 
 ## Testing Workflow
 
 ### 1. Configuration Setup
 ```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
+import io.github.jspinak.brobot.actions.actionExecution.Action;
+import io.github.jspinak.brobot.manageStates.StateService;
+
 @SpringBootTest
 @TestPropertySource(properties = {
-    "brobot.core.mock=true",
+    "brobot.mock=true",
     "brobot.screenshot.path=src/test/resources/screenshots/"
 })
 class AutomationTest {
@@ -137,6 +149,14 @@ class AutomationTest {
 
 ### 2. Test Execution
 ```java
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import static org.junit.jupiter.api.Assertions.*;
+import io.github.jspinak.brobot.actions.actionExecution.Action;
+import io.github.jspinak.brobot.reports.ActionResult;
+import io.github.jspinak.brobot.actions.actionConfigs.PatternFindOptions;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+
 @Test
 void testAutomationFlow() {
     // Create action configuration
@@ -144,15 +164,15 @@ void testAutomationFlow() {
         .setStrategy(PatternFindOptions.Strategy.BEST)
         .setSimilarity(0.85)
         .build();
-    
+
     // Create state object
     StateImage loginButton = new StateImage.Builder()
         .addPattern("login_button")  // No .png extension needed
         .build();
-    
+
     // Execute automation with mock/real behavior based on configuration
     ActionResult result = action.perform(findOptions, loginButton);
-    
+
     // Modern assertion patterns
     assertTrue(result.isSuccess());
     assertFalse(result.isEmpty());
@@ -162,14 +182,32 @@ void testAutomationFlow() {
 
 ### 3. Result Validation
 ```java
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import java.util.Optional;
+import java.util.List;
+import io.github.jspinak.brobot.actions.actionExecution.Action;
+import io.github.jspinak.brobot.reports.ActionResult;
+import io.github.jspinak.brobot.actions.actionConfigs.PatternFindOptions;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+
 @Test
 void validateResults() {
     // Perform find action
     PatternFindOptions findOptions = new PatternFindOptions.Builder()
         .setStrategy(PatternFindOptions.Strategy.ALL)
         .build();
-    
-    StateImage buttonsImage = stateImageRepo.get("buttons");
+
+    // Create StateImage for testing
+    StateImage buttonsImage = new StateImage.Builder()
+        .addPattern("buttons")
+        .setName("buttons")
+        .build();
+
     ActionResult result = action.perform(findOptions, buttonsImage);
     
     // Test ActionResult properties
@@ -280,4 +318,41 @@ public class MyTest extends OptimizedIntegrationTestBase {
 }
 ```
 
-For detailed examples and advanced patterns, see the specific testing type documentation.  
+For detailed examples and advanced patterns, see the specific testing type documentation.
+
+## Related Documentation
+
+### Essential Testing Guides
+- **[Testing Strategy](./testing-strategy.md)** - Comprehensive testing strategy, tag-based organization, and best practices
+- **[Unit Testing](./unit-testing.md)** - Unit testing patterns with BrobotTestBase
+- **[Integration Testing](./integration-testing.md)** - Spring Boot integration testing patterns
+- **[Profile-Based Testing](./profile-based-testing.md)** - Test profiles and configuration isolation
+
+### Mock Mode & Testing
+- **[Mock Mode Guide](./mock-mode-guide.md)** - Comprehensive mock testing framework
+- **[Mock Mode Manager](./mock-mode-manager.md)** - Centralized mock configuration
+- **[Mock Stochasticity](./mock-stochasticity.md)** - Probabilistic testing patterns
+- **[ActionHistory Integration Testing](./actionhistory-integration-testing.md)** - Testing with action histories
+- **[ActionHistory Mock Snapshots](./actionhistory-mock-snapshots.md)** - Creating mock test data
+- **[Action Recording](./action-recording.md)** - Recording actions for test creation
+
+### Testing Utilities
+- **[Test Utilities](./test-utilities.md)** - BrobotTestBase and testing helper classes
+- **[Mat Testing Utilities](./mat-testing-utilities.md)** - OpenCV Mat testing utilities
+- **[Debugging Pattern Matching](./debugging-pattern-matching.md)** - Troubleshooting pattern matching
+
+### Configuration & Setup
+- **[BrobotProperties Usage](../03-core-library/configuration/brobot-properties-usage.md)** - Configuration guide
+- **[Properties Reference](../03-core-library/configuration/properties-reference.md)** - Complete properties documentation
+- **[Headless Configuration](../03-core-library/configuration/headless-configuration.md)** - Headless environment setup
+- **[Auto Configuration](../03-core-library/configuration/auto-configuration.md)** - Spring Boot auto-configuration
+
+### ActionConfig System
+- **[ActionConfig Overview](../03-core-library/action-config/01-overview.md)** - ActionConfig system introduction
+- **[ActionConfig Examples](../03-core-library/action-config/03-examples.md)** - Practical testing examples
+- **[ActionConfig Reference](../03-core-library/action-config/05-reference.md)** - Complete API reference
+- **[ActionOptions to ActionConfig Migration](../03-core-library/migration/actionoptions-to-actionconfig.md)** - Migration guide from 1.0.x
+
+### Advanced Testing Features
+- **[Enhanced Mock Testing System](./advanced/enhanced-mocking.md)** - Scenario-based mock testing
+- **[CI/CD Testing](./advanced/ci-cd-testing.md)** - Continuous integration patterns  

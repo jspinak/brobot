@@ -6,15 +6,24 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Placeholder for Brobot Transition annotation. In a real project, this would come from the Brobot
- * library.
+ * Placeholder for Brobot Transition annotation.
+ *
+ * <p>This is a simplified placeholder for testing purposes. Marks a class as a state transition.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Transition {
-    Class<?> from();
+    /**
+     * The source state for this transition.
+     *
+     * @return source state class
+     */
+    Class<?> from() default Object.class;
 
-    Class<?> to();
-
-    int priority() default 0;
+    /**
+     * The destination state for this transition.
+     *
+     * @return destination state class
+     */
+    Class<?> to() default Object.class;
 }

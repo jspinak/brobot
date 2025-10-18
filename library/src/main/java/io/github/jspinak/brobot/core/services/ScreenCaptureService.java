@@ -29,7 +29,7 @@ import io.github.jspinak.brobot.model.element.Region;
  *   <li>Thread-safe operations
  * </ul>
  *
- * @since 2.0.0
+ * @since 1.1.0
  */
 public interface ScreenCaptureService {
 

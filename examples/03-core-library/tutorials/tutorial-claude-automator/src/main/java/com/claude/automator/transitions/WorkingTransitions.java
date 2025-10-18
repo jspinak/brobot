@@ -34,7 +34,7 @@ public class WorkingTransitions {
      * processing and returns to the prompt.
      */
     @OutgoingTransition(
-            to = PromptState.class,
+            activate = {PromptState.class},
             pathCost = 1,
             description = "Navigate from Working to Prompt")
     public boolean toPrompt() {

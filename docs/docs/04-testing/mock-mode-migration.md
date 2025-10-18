@@ -23,16 +23,10 @@ Ensure your tests extend `BrobotTestBase`:
 
 **Before:**
 ```java
-// Note: BrobotProperties must be injected as a dependency
-@Autowired
-private BrobotProperties brobotProperties;
-
 public class MyTest {
     @BeforeEach
     public void setup() {
         System.setProperty("brobot.mock", "true");
-        // Mock mode is now configured via application.properties:
-// brobot.core.mock=true;
     }
 }
 ```
@@ -69,7 +63,11 @@ if (ExecutionEnvironment.getInstance().isMockMode()) {
 
 **After:**
 ```java
-import io.github.jspinak.brobot.config.MockModeManager;
+import io.github.jspinak.brobot.config.mock.MockModeManager;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
+
+@Autowired
+private BrobotProperties brobotProperties;
 
 if (brobotProperties.getCore().isMock()) {
     // mock logic
@@ -85,8 +83,6 @@ Update code that sets mock mode:
 // Multiple places to set
 System.setProperty("brobot.mock", "true");
 System.setProperty("brobot.mock.mode", "true");
-// Mock mode is now configured via application.properties:
-// brobot.core.mock=true;
 
 ExecutionEnvironment env = ExecutionEnvironment.builder()
     .mockMode(true)
@@ -109,13 +105,12 @@ MockModeManager.setMockMode(true);
 @SpringBootTest
 @TestPropertySource(properties = {
     "brobot.core.mock=true",
-    "brobot.core.mock=true"
+    "brobot.mock=true"
 })
 public class IntegrationTest {
     @BeforeEach
     public void setup() {
-        // Mock mode is now configured via application.properties:
-// brobot.core.mock=true;
+        // Additional manual mock setup
     }
 }
 ```
@@ -170,13 +165,11 @@ public abstract class CustomTestBase extends BrobotTestBase {
 @Test
 public void testWithConditionalMock() {
     boolean useMock = System.getenv("CI") != null;
-    
+
     if (useMock) {
         System.setProperty("brobot.mock", "true");
-        // Mock mode is now configured via application.properties:
-// brobot.core.mock=true;
     }
-    
+
     // Test logic
 }
 ```
@@ -202,19 +195,14 @@ public void testWithConditionalMock() {
 @Test
 public void testModeSwitch() {
     // Start with mock
-    // Mock mode is now configured via application.properties:
-// brobot.core.mock=true;
+    System.setProperty("brobot.mock", "true");
     // ... mock tests ...
-    
+
     // Switch to real
-    // Mock mode is now configured via application.properties:
-// brobot.core.mock=false;
     System.setProperty("brobot.mock", "false");
     // ... real tests ...
-    
+
     // Back to mock
-    // Mock mode is now configured via application.properties:
-// brobot.core.mock=true;
     System.setProperty("brobot.mock", "true");
 }
 ```
@@ -249,11 +237,11 @@ If you're experiencing issues after migration, use the debug logging:
 public void debugMockState() {
     // Log complete mock mode state
     MockModeManager.logMockModeState();
-    
+
     // This shows:
     // - System properties
     // - ExecutionEnvironment state
-    // - FrameworkSettings value
+    // - BrobotProperties configuration (via Spring)
 }
 ```
 
@@ -284,8 +272,8 @@ public class MyTest extends BrobotTestBase {
 // Debug the state
 MockModeManager.logMockModeState();
 
-// Ensure using MockModeManager everywhere
-if (brobotProperties.getCore().isMock()) { // Not brobotProperties.getCore().isMock()
+// Use Spring-managed property (preferred for Spring components)
+if (brobotProperties.getCore().isMock()) {
     // mock logic
 }
 ```
@@ -327,7 +315,7 @@ Changes to mock configuration only need updates in one place
 ## Checklist
 
 - [ ] All test classes extend `BrobotTestBase`
-- [ ] Replaced all `brobotProperties.getCore().isMock()` checks with `brobotProperties.getCore().isMock()`
+- [ ] Replaced all legacy mock checks (`ExecutionEnvironment.getInstance().isMockMode()`, `System.getProperty("brobot.mock")`) with `brobotProperties.getCore().isMock()`
 - [ ] Replaced all mock mode settings with `MockModeManager.setMockMode()`
 - [ ] Removed redundant system property settings
 - [ ] Verified tests pass in both local and CI environments
@@ -339,4 +327,30 @@ If you encounter issues during migration:
 1. Use `MockModeManager.logMockModeState()` to debug
 2. Check that `BrobotTestBase` is properly extended
 3. Ensure no legacy code is directly setting mock flags
-4. Refer to the [Mock Mode Manager](./mock-mode-manager.md) documentation
+4. Refer to the documentation below
+
+## See Also
+
+### Core Mock Mode Documentation
+- **[Mock Mode Guide](./mock-mode-guide.md)** - Comprehensive guide to using mock mode
+- **[Mock Mode Manager](./mock-mode-manager.md)** - Centralized mock mode management
+- **[Test Utilities](./test-utilities.md)** - BrobotTestBase and testing utilities
+
+### Testing Guides
+- **[Testing Introduction](./testing-intro.md)** - Overview of Brobot testing approaches
+- **[Unit Testing](./unit-testing.md)** - Unit testing patterns with BrobotTestBase
+- **[Integration Testing](./integration-testing.md)** - Integration test patterns with Spring
+- **[Profile-Based Testing](./profile-based-testing.md)** - Profile-specific mock configurations
+- **[Testing Strategy](./testing-strategy.md)** - Overall testing strategy
+
+### Configuration Guides
+- **[BrobotProperties Usage](../03-core-library/configuration/brobot-properties-usage.md)** - Configuring mock mode via properties
+- **[Properties Reference](../03-core-library/configuration/properties-reference.md)** - Complete property reference
+- **[Headless Configuration](../03-core-library/configuration/headless-configuration.md)** - Headless mode (often used with mock)
+
+### Advanced Mock Features
+- **[Mock Stochasticity](./mock-stochasticity.md)** - Probabilistic mock behavior
+- **[Enhanced Mocking](./advanced/enhanced-mocking.md)** - Advanced mock scenarios
+- **[CI/CD Testing](./advanced/ci-cd-testing.md)** - Mock mode in CI/CD pipelines
+- **[ActionHistory Mock Snapshots](./actionhistory-mock-snapshots.md)** - Creating mock data
+- **[ActionHistory Integration Testing](./actionhistory-integration-testing.md)** - Testing with action histories

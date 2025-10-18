@@ -1,3 +1,9 @@
+---
+sidebar_position: 2
+title: Usage Guide
+description: Complete guide to using Brobot logging with ActionConfig, sessions, and programmatic logging
+---
+
 # Logging Usage Guide
 
 ## Transparent Logging - Zero Code Changes Required
@@ -31,18 +37,58 @@ action.click(loginButton);
 ### Controlling Logging via Configuration
 ```properties
 # Enable action logging (in application.properties)
-brobot.logging.categories.actions=INFO
+# Use standard Spring Boot logging properties
+logging.level.io.github.jspinak.brobot.action=INFO
 
 # Or disable it completely
-# brobot.logging.categories.actions=OFF
+# logging.level.io.github.jspinak.brobot.action=OFF
 
 # Or get more details
-# brobot.logging.categories.actions=DEBUG
+# logging.level.io.github.jspinak.brobot.action=DEBUG
+
+# Control other Brobot packages
+# logging.level.io.github.jspinak.brobot.statemanagement=INFO
+# logging.level.io.github.jspinak.brobot.matching=WARN
 ```
 
 ## ActionConfig Custom Logging
 
 Brobot provides built-in logging methods for all ActionConfig subclasses (PatternFindOptions, ClickOptions, TypeOptions, etc.) allowing you to add custom log messages at key points in the action lifecycle.
+
+### Complete Example Template
+
+All code examples in this guide assume a Spring component with standard Brobot imports:
+
+```java
+package com.example.automation;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import io.github.jspinak.brobot.actions.actionExecution.Action;
+import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.actions.composites.methods.find.PatternFindOptions;
+import io.github.jspinak.brobot.actions.composites.methods.click.ClickOptions;
+import io.github.jspinak.brobot.actions.composites.methods.type.TypeOptions;
+import io.github.jspinak.brobot.actions.composites.methods.drag.DragOptions;
+import io.github.jspinak.brobot.reports.ActionResult;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.logging.correlation.ActionSessionManager;
+
+@Component
+public class MyAutomation {
+
+    @Autowired
+    private Action action;
+
+    @Autowired
+    private ActionSessionManager sessionManager;
+
+    // Your automation methods here
+    // StateImage objects typically come from @State classes
+}
+```
+
+> **Note**: StateImage objects (like `submitButton`, `usernameField`) are typically defined in `@State` classes. See the [States Guide](../01-getting-started/states.md) for details on creating state objects.
 
 ### Available Logging Methods
 
@@ -305,76 +351,9 @@ sessionManager.endSession();
        .build();
    ```
 
-## Enhanced Action Logging Service
+## Session Management for Correlated Actions
 
-Brobot provides an `ActionLoggingService` that wraps the standard Action class with automatic logging, session management, and formatted output.
-
-### Using ActionLoggingService
-
-```java
-@Autowired
-private ActionLoggingService actionLogger;
-
-// Simple usage - automatic logging of attempts and results
-actionLogger.click(submitButton);  // Logs: → CLICK submitButton
-                                   // Logs: ✓ CLICK submitButton | loc:(100,200) | sim:0.95 | 25ms
-```
-
-### Session Management
-
-Track related actions with session correlation:
-
-```java
-// Start a session for related actions
-actionLogger.startSession("User Registration");
-
-// All subsequent actions are tracked within this session
-actionLogger.find(registrationForm);
-actionLogger.type(emailField, "user@example.com");
-actionLogger.type(passwordField, "password");
-actionLogger.click(submitButton);
-
-// End the session with summary
-actionLogger.endSession();
-// Logs: === Completed Task: User Registration | Session: a1b2c3d4 | Total Actions: 4 ===
-```
-
-### Automatic Session Management
-
-```java
-// Execute with automatic session lifecycle management
-actionLogger.executeWithSession("Login Flow", () -> {
-    actionLogger.find(loginPage);
-    actionLogger.type(usernameField, username);
-    actionLogger.type(passwordField, password);
-    actionLogger.click(loginButton);
-}); // Session automatically ended even if exception occurs
-```
-
-### Formatted Action Output
-
-The service provides consistent, concise formatting:
-- **Success**: `✓ CLICK saveButton | loc:(520,380) | sim:0.92 | 45ms`
-- **Failure**: `✗ FIND submitButton | NOT FOUND | 1500ms`
-- **Attempt**: `→ TYPE[user@example.com] emailField`
-
-### Integration with ActionConfig Logging
-
-ActionLoggingService works seamlessly with ActionConfig custom logging:
-
-```java
-PatternFindOptions options = new PatternFindOptions.Builder()
-    .withBeforeActionLog("Searching for save button...")
-    .withSuccessLog("Save button found!")
-    .build();
-
-// Both custom and automatic logging will occur
-actionLogger.find(options, saveButton);
-// Logs: Searching for save button...
-// Logs: → FIND saveButton
-// Logs: ✓ FIND saveButton | loc:(100,50) | sim:0.95 | 30ms
-// Logs: Save button found!
-```
+Use `ActionSessionManager` to track related actions within a logical workflow. Sessions automatically add correlation IDs to all logs, making it easy to trace complete workflows in production.
 
 ## Programmatic Logging
 
@@ -412,9 +391,14 @@ logger.builder(LogCategory.ACTIONS)
 
 ### Event-Based Logging
 ```java
+import io.github.jspinak.brobot.logging.events.ActionEvent;
+import io.github.jspinak.brobot.logging.BrobotLogger;
+import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+import java.time.Duration;
+
 // Log action events
 ActionEvent event = ActionEvent.builder()
-    .type("CLICK")
+    .actionType("CLICK")
     .target("submitButton")
     .success(true)
     .duration(Duration.ofMillis(25))
@@ -448,8 +432,12 @@ correlation.endSession();
 
 ### ActionEvent
 ```java
+import io.github.jspinak.brobot.logging.events.ActionEvent;
+import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+import java.time.Duration;
+
 ActionEvent event = ActionEvent.builder()
-    .type("FIND")
+    .actionType("FIND")
     .target("loginButton")
     .success(true)
     .duration(Duration.ofMillis(50))
@@ -508,12 +496,19 @@ logger.logPerformance(event);
 Check log levels before expensive operations:
 
 ```java
-if (logger.shouldLog(LogCategory.MATCHING, LogLevel.DEBUG)) {
+import io.github.jspinak.brobot.logging.BrobotLogger;
+import io.github.jspinak.brobot.logging.LogCategory;
+import io.github.jspinak.brobot.logging.LogLevel;
+
+// Check if logging is enabled before expensive operations
+if (logger.isLoggingEnabled(LogCategory.MATCHING, LogLevel.DEBUG)) {
     // Expensive operation only when DEBUG is enabled
     String details = generateDetailedReport();
     logger.debug(LogCategory.MATCHING, details);
 }
 ```
+
+> **Note**: `isLoggingEnabled()` currently delegates to SLF4J/Logback for level checking based on `logging.level.*` properties.
 
 ## Best Practices
 
@@ -559,6 +554,11 @@ logger.error(LogCategory.ACTIONS, "Processing failed");
 
 ### 4. Use Structured Events
 ```java
+import io.github.jspinak.brobot.logging.events.ActionEvent;
+import io.github.jspinak.brobot.logging.BrobotLogger;
+import io.github.jspinak.brobot.logging.LogCategory;
+import java.time.Duration;
+
 // Good - structured event with metadata
 ActionEvent event = ActionEvent.success("CLICK", "button", Duration.ofMillis(50));
 logger.logAction(event);
@@ -566,3 +566,43 @@ logger.logAction(event);
 // Less ideal - plain text
 logger.info(LogCategory.ACTIONS, "Clicked button in 50ms");
 ```
+
+## Related Documentation
+
+### Logging System Components
+- **[Logging Overview](./index.md)** - Comprehensive introduction to Brobot's transparent, configuration-driven logging system with key concepts
+- **[Logging Configuration Guide](./configuration.md)** - Configuration properties, presets, and programmatic setup for all logging features
+- **[Output Formats](./output-formats.md)** - Detailed guide to SIMPLE, STRUCTURED, and JSON output formats with visual symbols and examples
+- **[Logging Performance Guide](./performance.md)** - Performance impact analysis, optimization strategies, and production configurations
+
+### ActionConfig and Logging
+- **[ActionConfig Overview](../03-core-library/action-config/01-overview.md)** - Understanding ActionConfig hierarchy and builder patterns for implementing logging methods
+- **[ActionConfig Examples](../03-core-library/action-config/03-examples.md)** - Practical examples demonstrating custom logging with withBeforeActionLog(), withSuccessLog(), and withFailureLog()
+- **[ActionConfig API Reference](../03-core-library/action-config/05-reference.md)** - Complete reference for all ActionConfig methods including custom logging methods
+- **[Convenience Methods](../03-core-library/action-config/18-convenience-methods.md)** - Simpler API patterns with automatic logging that don't require custom messages
+- **[Action Chaining](../03-core-library/action-config/07-action-chaining.md)** - Chaining patterns and logging across multiple actions with then()
+- **[ActionResult Components](../03-core-library/action-config/17-actionresult-components.md)** - Understanding ActionResult structure to extract logged action data
+
+### State Management and Logging
+- **[States Guide](../01-getting-started/states.md)** - @State annotation and StateImage definition with logging integration in state workflows
+- **[Transitions Guide](../01-getting-started/transitions.md)** - @Transition annotations with logging examples in @IncomingTransition and @OutgoingTransition methods
+
+### Configuration and Properties
+- **[BrobotProperties Usage Guide](../03-core-library/configuration/brobot-properties-usage.md)** - How to access and configure logging properties programmatically in your code
+- **[Properties Reference](../03-core-library/configuration/properties-reference.md)** - Complete reference for all brobot.logging.*, logging.level.*, and related properties
+- **[Headless Configuration](../03-core-library/configuration/headless-configuration.md)** - Logging configuration for headless and CI/CD environments
+
+### Testing with Logging
+- **[Mock Mode Guide](../04-testing/mock-mode-guide.md)** - Testing with logging enabled in mock mode with optimized timing (0.01-0.04 seconds)
+- **[Testing Introduction](../04-testing/testing-intro.md)** - Testing best practices with logging enabled and expected performance
+- **[Profile-Based Testing](../04-testing/profile-based-testing.md)** - Configuring different logging levels and formats per test profile
+
+### Getting Started
+- **[Quick Start Guide](../01-getting-started/quick-start.md)** - Getting started with Brobot and logging in basic automation
+- **[Installation Guide](../01-getting-started/installation.md)** - Installing Brobot with required logging dependencies
+- **[AI Brobot Project Creation](../01-getting-started/ai-brobot-project-creation.md)** - Comprehensive project setup guide with logging best practices
+
+### External References
+- **[Spring Boot Logging Documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.logging)** - Official Spring Boot logging configuration reference
+- **[SLF4J Documentation](https://www.slf4j.org/manual.html)** - SLF4J logging facade used by Brobot
+- **[Logback Documentation](https://logback.qos.ch/manual/)** - Logback configuration and appender reference

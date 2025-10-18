@@ -4,6 +4,26 @@ sidebar_position: 5
 
 # AI Integration Examples
 
+:::danger INCOMPLETE CODE EXAMPLES - FOR ILLUSTRATION ONLY
+
+**These examples are incomplete and will not run as-is.** They demonstrate conceptual integration patterns but contain:
+
+**Critical Issues**:
+- **Incomplete implementations**: Many functions are stubs with `pass` statements
+- **Deprecated APIs**: Some examples use outdated library versions (OpenAI <1.0, LangChain <1.0)
+- **Undefined functions**: Placeholder functions (ai_process_instruction, ai_verify_state, etc.) are not implemented
+- **Missing error handling**: Production code requires additional validation and error handling
+
+**Only 1 of 6 major examples is complete enough to run** (AutoGPT Plugin). All others require significant modifications.
+
+**Use these examples ONLY as starting points for your own implementations.** Refer to:
+- [Installation Guide](./installation.md) for setup instructions
+- [Getting Started](./getting-started.md) for basic usage patterns
+- [Configuration Guide](./configuration.md) for server configuration
+- [API Reference](./api-reference.md) for accurate method signatures
+
+:::
+
 Learn how to integrate popular AI services and frameworks with the Brobot MCP Server.
 
 ## OpenAI GPT Integration
@@ -11,37 +31,43 @@ Learn how to integrate popular AI services and frameworks with the Brobot MCP Se
 ### Basic GPT-4 Integration
 
 ```python
-import openai
+from openai import OpenAI
 from brobot_client import BrobotClient
 import json
 
-# Initialize clients
-openai.api_key = "your-api-key"
+# Initialize clients (requires openai>=1.0.0)
+client = OpenAI(api_key="your-api-key")
 brobot = BrobotClient()
 
 def execute_natural_language_command(instruction: str):
-    """Execute a natural language command using GPT-4."""
-    
+    """Execute a natural language command using GPT-4.
+
+    NOTE: This is an incomplete example. Production code needs:
+    - JSON validation and error handling
+    - Rate limiting and retry logic
+    - Proper action parameter validation
+    """
+
     # Get current screen state
     observation = brobot.get_observation()
     active_states = [s.name for s in observation.active_states]
-    
+
     # Create prompt for GPT-4
     prompt = f"""
     Current application state: {active_states}
     User instruction: {instruction}
-    
+
     Available actions:
     - click(image_pattern) - Click on UI element
     - type_text(text) - Type text
     - wait_for_state(state_name) - Wait for state
-    
+
     Respond with a JSON array of actions to execute.
-    Example: [{"action": "click", "params": {"pattern": "login_btn.png"}}]
+    Example: [{{"action": "click", "params": {{"pattern": "login_btn.png"}}}}]
     """
-    
+
     # Get GPT-4 response
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4",
         messages=[
             {"role": "system", "content": "You are a UI automation assistant."},
@@ -49,10 +75,10 @@ def execute_natural_language_command(instruction: str):
         ],
         temperature=0.3
     )
-    
+
     # Parse and execute actions
     actions = json.loads(response.choices[0].message.content)
-    
+
     for action in actions:
         if action["action"] == "click":
             brobot.click(action["params"]["pattern"])
@@ -123,38 +149,44 @@ anthropic = Anthropic(api_key="your-api-key")
 brobot = BrobotClient()
 
 class ClaudeAutomationAgent:
-    """Agent that uses Claude to control applications."""
-    
+    """Agent that uses Claude to control applications.
+
+    NOTE: This is an incomplete example. The _execute_plan method
+    needs to parse Claude's response and execute actions.
+    """
+
     def __init__(self):
         self.conversation = []
-        
+
     async def process_task(self, task: str):
         """Process a high-level task using Claude."""
-        
+
         # Get current state
         obs = brobot.get_observation()
-        
+
         # Build context
         context = f"""
         Task: {task}
         Current screen: {obs.active_states}
         Available actions: click, type, drag, wait
-        
+
         Plan and execute the steps needed to complete this task.
         """
-        
+
         response = anthropic.messages.create(
-            model="claude-3-opus",
+            model="claude-3-5-sonnet-20241022",  # Use latest model
             messages=[{"role": "user", "content": context}],
             max_tokens=1000
         )
-        
-        # Execute Claude's plan
+
+        # Execute Claude's plan (INCOMPLETE - needs implementation)
         await self._execute_plan(response.content)
-    
+
     async def _execute_plan(self, plan: str):
-        """Parse and execute Claude's plan."""
-        # Implementation depends on Claude's response format
+        """Parse and execute Claude's plan.
+
+        TODO: Implement plan parsing and action execution.
+        """
         pass
 
 # Usage
@@ -186,8 +218,9 @@ def create_interactive_assistant():
             self.messages.append({"role": "user", "content": enhanced_input})
             
             response = anthropic.messages.create(
-                model="claude-3-sonnet",
-                messages=self.messages
+                model="claude-3-5-sonnet-20241022",
+                messages=self.messages,
+                max_tokens=1024
             )
             
             self.messages.append({"role": "assistant", "content": response.content})
@@ -207,106 +240,98 @@ print(session.chat("Now change the theme to dark mode"))
 ### Brobot as LangChain Tool
 
 ```python
-from langchain.agents import initialize_agent, Tool
-from langchain.llms import OpenAI
+from langchain_core.tools import tool
+from langchain_openai import ChatOpenAI
+from langgraph.prebuilt import create_react_agent
 from brobot_client import BrobotClient
 
-# Create Brobot tools for LangChain
-def create_brobot_tools():
-    client = BrobotClient()
-    
-    def observe_screen(query: str = "") -> str:
-        """Observe current screen state."""
-        obs = client.get_observation()
-        states = [f"{s.name} ({s.confidence:.0%})" for s in obs.active_states]
-        return f"Active states: {', '.join(states)}"
-    
-    def click_element(pattern: str) -> str:
-        """Click on a UI element."""
-        try:
-            result = client.click(pattern)
-            return f"Clicked {pattern} successfully"
-        except Exception as e:
-            return f"Failed to click {pattern}: {str(e)}"
-    
-    def type_text(text: str) -> str:
-        """Type text in current field."""
-        result = client.type_text(text)
-        return f"Typed '{text}'"
-    
-    return [
-        Tool(
-            name="ObserveScreen",
-            func=observe_screen,
-            description="Get current screen state and active UI elements"
-        ),
-        Tool(
-            name="Click",
-            func=click_element,
-            description="Click on UI element by image pattern name"
-        ),
-        Tool(
-            name="Type",
-            func=type_text,
-            description="Type text into current field"
-        )
-    ]
+# NOTE: This example uses LangChain 1.0+ and LangGraph.
+# For older LangChain versions, see deprecated initialize_agent() API.
 
-# Create agent
-llm = OpenAI(temperature=0)
-tools = create_brobot_tools()
-agent = initialize_agent(tools, llm, agent="zero-shot-react-description", verbose=True)
+# Create Brobot tools for LangChain
+client = BrobotClient()
+
+@tool
+def observe_screen(query: str = "") -> str:
+    """Observe current screen state and active UI elements."""
+    obs = client.get_observation()
+    states = [f"{s.name} ({s.confidence:.0%})" for s in obs.active_states]
+    return f"Active states: {', '.join(states)}"
+
+@tool
+def click_element(pattern: str) -> str:
+    """Click on UI element by image pattern name."""
+    try:
+        result = client.click(pattern)
+        return f"Clicked {pattern} successfully"
+    except Exception as e:
+        return f"Failed to click {pattern}: {str(e)}"
+
+@tool
+def type_text_tool(text: str) -> str:
+    """Type text into current field."""
+    result = client.type_text(text)
+    return f"Typed '{text}'"
+
+# Create agent with LangGraph
+llm = ChatOpenAI(temperature=0, model="gpt-4")
+tools = [observe_screen, click_element, type_text_tool]
+agent_executor = create_react_agent(llm, tools)
 
 # Use agent
-agent.run("Log into the application with username 'demo@example.com'")
+for chunk in agent_executor.stream(
+    {"messages": [("human", "Log into the application with username 'demo@example.com'")]}
+):
+    print(chunk)
+    print("----")
 ```
 
 ### Custom LangChain Chain
 
 ```python
-from langchain.chains import LLMChain
-from langchain.prompts import PromptTemplate
-from langchain.memory import ConversationBufferMemory
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_openai import ChatOpenAI
 
 class BrobotAutomationChain:
-    """Custom chain for complex automations."""
-    
+    """Custom chain for complex automations.
+
+    NOTE: This is an incomplete example. The execute_task method
+    has stub implementations that need to be completed.
+    """
+
     def __init__(self):
         self.brobot = BrobotClient()
-        self.memory = ConversationBufferMemory()
-        
-        self.planner_prompt = PromptTemplate(
-            input_variables=["task", "current_state"],
-            template="""
-            Task: {task}
-            Current State: {current_state}
-            
-            Create a step-by-step plan to complete this task.
-            Format: numbered list of actions
-            """
-        )
-        
-        self.planner = LLMChain(
-            llm=OpenAI(temperature=0.3),
-            prompt=self.planner_prompt,
-            memory=self.memory
-        )
-    
+
+        # Create prompt template
+        self.planner_prompt = ChatPromptTemplate.from_messages([
+            ("system", "You are an automation planning assistant."),
+            ("human", """Task: {task}
+Current State: {current_state}
+
+Create a step-by-step plan to complete this task.
+Format: numbered list of actions""")
+        ])
+
+        # Create chain with LCEL (LangChain Expression Language)
+        llm = ChatOpenAI(temperature=0.3, model="gpt-4")
+        self.planner = self.planner_prompt | llm | StrOutputParser()
+
     def execute_task(self, task: str):
         # Get current state
         obs = self.brobot.get_observation()
         current_state = obs.get_most_confident_state().name
-        
+
         # Generate plan
-        plan = self.planner.run(task=task, current_state=current_state)
-        
-        # Execute plan steps
+        plan = self.planner.invoke({"task": task, "current_state": current_state})
+
+        # Execute plan steps (INCOMPLETE - needs implementation)
         for step in plan.split('\n'):
             if 'click' in step.lower():
-                # Extract pattern and click
+                # TODO: Extract pattern from step and click
                 pass
             elif 'type' in step.lower():
-                # Extract text and type
+                # TODO: Extract text from step and type
                 pass
 
 # Usage
@@ -393,41 +418,67 @@ class AutomationCoordinator:
         return results
 
 class ObserverAgent:
-    """Specialized in understanding UI state."""
-    
+    """Specialized in understanding UI state.
+
+    NOTE: This is an incomplete example. Methods _identify_screen,
+    _find_actionable_elements, and _identify_navigation are not implemented.
+    """
+
     async def analyze(self, brobot: BrobotClient) -> Dict:
         obs = brobot.get_observation()
-        
-        # Use AI to analyze screenshot and states
+
+        # Use AI to analyze screenshot and states (INCOMPLETE)
         analysis = {
             "current_screen": self._identify_screen(obs),
             "available_actions": self._find_actionable_elements(obs),
             "navigation_options": self._identify_navigation(obs)
         }
-        
+
         return analysis
 
+    def _identify_screen(self, obs) -> str:
+        """TODO: Implement screen identification."""
+        pass
+
+    def _find_actionable_elements(self, obs) -> list:
+        """TODO: Implement actionable element detection."""
+        pass
+
+    def _identify_navigation(self, obs) -> list:
+        """TODO: Implement navigation option detection."""
+        pass
+
 class PlannerAgent:
-    """Creates execution plans."""
-    
+    """Creates execution plans.
+
+    NOTE: This is a stub implementation.
+    """
+
     async def create_plan(self, task: str, state: Dict) -> List[Dict]:
-        # Use AI to create step-by-step plan
+        """TODO: Use AI to create step-by-step plan."""
         pass
 
 class ExecutorAgent:
-    """Executes plans reliably."""
-    
+    """Executes plans reliably.
+
+    NOTE: This is an incomplete example. _execute_step is not implemented.
+    """
+
     async def execute(self, plan: List[Dict], brobot: BrobotClient):
         results = []
         for step in plan:
             result = await self._execute_step(step, brobot)
             results.append(result)
-            
+
             if not result["success"]:
                 # Handle failures
                 break
-        
+
         return results
+
+    async def _execute_step(self, step: Dict, brobot: BrobotClient) -> Dict:
+        """TODO: Implement step execution."""
+        pass
 ```
 
 ## Best Practices
@@ -436,30 +487,34 @@ class ExecutorAgent:
 
 ```python
 def safe_automation(instruction: str):
-    """Automation with comprehensive error handling."""
+    """Automation with comprehensive error handling.
+
+    NOTE: This is an incomplete example. Functions ai_process_instruction,
+    execute_action, ai_plan_recovery, and ai_should_retry are not defined.
+    """
     max_retries = 3
-    
+
     for attempt in range(max_retries):
         try:
             # Get current state
             obs = brobot.get_observation()
-            
-            # AI processes instruction
+
+            # AI processes instruction (PLACEHOLDER - not implemented)
             actions = ai_process_instruction(instruction, obs)
-            
+
             # Execute with validation
             for action in actions:
-                result = execute_action(action)
+                result = execute_action(action)  # PLACEHOLDER - not implemented
                 if not result.success:
-                    # AI decides how to recover
+                    # AI decides how to recover (PLACEHOLDER - not implemented)
                     recovery = ai_plan_recovery(action, result.error)
                     execute_action(recovery)
-            
+
             return True
-            
+
         except Exception as e:
             if attempt < max_retries - 1:
-                # Let AI decide if we should retry
+                # Let AI decide if we should retry (PLACEHOLDER - not implemented)
                 should_retry = ai_should_retry(e, attempt)
                 if not should_retry:
                     break
@@ -470,26 +525,32 @@ def safe_automation(instruction: str):
 ### 2. State Verification
 
 ```python
+import time
+
 def verify_state_transition(expected_state: str, timeout: float = 10):
-    """Verify state transitions with AI assistance."""
+    """Verify state transitions with AI assistance.
+
+    NOTE: This is an incomplete example. Functions ai_verify_state,
+    ai_suggest_correction, and execute_action are not defined.
+    """
     start_time = time.time()
-    
+
     while time.time() - start_time < timeout:
         obs = brobot.get_observation()
-        
-        # AI verifies if we're in expected state
+
+        # AI verifies if we're in expected state (PLACEHOLDER - not implemented)
         is_correct = ai_verify_state(obs, expected_state)
-        
+
         if is_correct:
             return True
-        
-        # AI suggests corrective action
+
+        # AI suggests corrective action (PLACEHOLDER - not implemented)
         correction = ai_suggest_correction(obs, expected_state)
         if correction:
-            execute_action(correction)
-        
+            execute_action(correction)  # PLACEHOLDER - not implemented
+
         time.sleep(1)
-    
+
     return False
 ```
 
@@ -497,8 +558,11 @@ def verify_state_transition(expected_state: str, timeout: float = 10):
 
 ```python
 class ContextAwareAutomation:
-    """Maintains context across automation sessions."""
-    
+    """Maintains context across automation sessions.
+
+    NOTE: This is an incomplete example. Function ai_execute is not defined.
+    """
+
     def __init__(self):
         self.context = {
             "application": None,
@@ -506,7 +570,7 @@ class ContextAwareAutomation:
             "task_history": [],
             "state_history": []
         }
-        
+
     def execute_with_context(self, task: str):
         # Add current context to AI prompt
         enhanced_task = f"""
@@ -514,9 +578,9 @@ class ContextAwareAutomation:
         Application: {self.context['application']}
         Previous tasks: {self.context['task_history'][-5:]}
         """
-        
-        result = ai_execute(enhanced_task)
-        
+
+        result = ai_execute(enhanced_task)  # PLACEHOLDER - not implemented
+
         # Update context
         self.context['task_history'].append(task)
         return result
@@ -529,18 +593,23 @@ class ContextAwareAutomation:
 ```python
 from functools import lru_cache
 import hashlib
+import json
 
 class CachedAIAutomation:
-    """Cache AI decisions for repeated scenarios."""
-    
+    """Cache AI decisions for repeated scenarios.
+
+    NOTE: This is an incomplete example. ai_model.decide and
+    execute_decision functions are not defined.
+    """
+
     @lru_cache(maxsize=100)
     def get_ai_decision(self, state_hash: str, task: str):
         """Cache AI decisions based on state and task."""
-        return ai_model.decide(state_hash, task)
-    
+        return ai_model.decide(state_hash, task)  # PLACEHOLDER - not implemented
+
     def execute_task(self, task: str):
         obs = brobot.get_observation()
-        
+
         # Create hash of current state
         state_data = {
             "states": [s.name for s in obs.active_states],
@@ -549,42 +618,55 @@ class CachedAIAutomation:
         state_hash = hashlib.md5(
             json.dumps(state_data, sort_keys=True).encode()
         ).hexdigest()
-        
+
         # Get cached or new decision
         decision = self.get_ai_decision(state_hash, task)
-        
-        # Execute decision
+
+        # Execute decision (PLACEHOLDER - not implemented)
         return execute_decision(decision)
 ```
 
 ### Parallel Processing
 
 ```python
+import asyncio
+
 async def parallel_ui_analysis():
-    """Analyze UI using multiple AI models in parallel."""
-    
+    """Analyze UI using multiple AI models in parallel.
+
+    NOTE: This is an incomplete example. Functions gpt_analyze_ui,
+    claude_analyze_ui, local_model_analyze, and combine_ai_insights
+    are not defined.
+    """
+
     async def gpt_analysis():
-        return await gpt_analyze_ui(brobot.get_observation())
-    
+        return await gpt_analyze_ui(brobot.get_observation())  # PLACEHOLDER
+
     async def claude_analysis():
-        return await claude_analyze_ui(brobot.get_observation())
-    
+        return await claude_analyze_ui(brobot.get_observation())  # PLACEHOLDER
+
     async def local_model_analysis():
-        return await local_model_analyze(brobot.get_observation())
-    
+        return await local_model_analyze(brobot.get_observation())  # PLACEHOLDER
+
     # Run all analyses in parallel
     results = await asyncio.gather(
         gpt_analysis(),
         claude_analysis(),
         local_model_analysis()
     )
-    
-    # Combine insights
+
+    # Combine insights (PLACEHOLDER - not implemented)
     return combine_ai_insights(results)
 ```
 
 ## Next Steps
 
-- Explore the [API Reference](./api-reference) for detailed endpoint information
-- Read [Troubleshooting](./troubleshooting) for common issues
-- Join our [Discord](https://discord.gg/brobot) for community support
+After reviewing these conceptual examples:
+
+- 📖 Read the [API Reference](./api-reference.md) for accurate endpoint documentation
+- 🚀 Follow the [Getting Started](./getting-started.md) guide for working examples
+- ⚙️ Review [Configuration](./configuration.md) for server setup
+- 🐛 Check [Troubleshooting](./troubleshooting.md) for common issues
+- 💬 Report issues on [GitHub](https://github.com/jspinak/brobot-mcp-server/issues)
+
+**Remember**: These examples are incomplete. Use them as starting points and refer to the API Reference for accurate method signatures.

@@ -25,7 +25,7 @@ package io.github.jspinak.brobot.core.services;
  *   <li>Thread-safe operations
  * </ul>
  *
- * @since 2.0.0
+ * @since 1.1.0
  */
 public interface KeyboardController {
 

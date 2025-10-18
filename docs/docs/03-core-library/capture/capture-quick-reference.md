@@ -13,11 +13,11 @@ keywords: [capture, configuration, robot, ffmpeg, javacv]
 
 ```properties
 # application.properties
-# Default is already SIKULIX, but you can change it:
-brobot.capture.provider=SIKULIX  # Default (or ROBOT, FFMPEG, AUTO)
+# Default is already JAVACV_FFMPEG, but you can change it:
+brobot.capture.provider=JAVACV_FFMPEG  # Default (or SIKULIX, ROBOT, FFMPEG, AUTO)
 
-# DPI auto-detection is enabled by default:
-brobot.dpi.resize-factor=auto
+# DPI manual scaling (default is 1.0, or use 'auto' for auto-detection):
+brobot.dpi.resize-factor=1.0
 ```
 
 ### Method 2: Command Line
@@ -41,21 +41,23 @@ config.useSikuliX();  // Switch to SikuliX
 
 | Provider | Dependencies | Resolution | Performance | Setup | Default |
 |----------|-------------|------------|-------------|-------|---------|
-| **SikuliX** | SikuliX (included) | Auto-handled | Good | None | ✅ Yes |
-| **Robot** | None | Physical* | Fast | None | No |
-| **FFmpeg** | JavaCV (included) | Physical | Good | None | No |
+| **JAVACV_FFMPEG** | JavaCV (included) | Physical | Good | None | ✅ Yes |
+| **SikuliX** | SikuliX (included) | Java 21: Logical / Java 8: Physical | Good | None | No |
+| **Robot** | None | Configurable (Physical or Logical) | Fast | Configure scaling | No |
+| **FFMPEG** | External FFmpeg | Physical | Good | Install FFmpeg | No |
 
-*Robot scales logical to physical when DPI scaling detected  
-**SikuliX uses auto resize-factor for DPI handling**
+*Robot captures at logical resolution by default, physical when `scale-to-physical=true`
+**SikuliX resolution depends on Java version (21: logical, 8: physical)**
+***JAVACV_FFMPEG uses bundled JavaCV library for native capture***
 
 ## Essential Properties
 
 ```properties
-# Choose provider (SIKULIX is default, or ROBOT, FFMPEG, AUTO)
-brobot.capture.provider=SIKULIX
+# Choose provider (JAVACV_FFMPEG is default, or SIKULIX, ROBOT, FFMPEG, AUTO)
+brobot.capture.provider=JAVACV_FFMPEG
 
-# DPI auto-detection (enabled by default)
-brobot.dpi.resize-factor=auto
+# DPI scaling (default is 1.0 - no scaling, or use 'auto' for auto-detection)
+brobot.dpi.resize-factor=1.0
 
 # Robot: Enable physical resolution scaling
 brobot.capture.robot.scale-to-physical=true
@@ -73,6 +75,18 @@ brobot.capture.fallback-enabled=true
 ```
 
 ## Usage Examples
+
+> **Prerequisites:** All examples assume a Spring Boot application with Brobot dependencies. Add these imports to your class:
+> ```java
+> import org.springframework.beans.factory.annotation.Autowired;
+> import org.springframework.stereotype.Component;
+> import io.github.jspinak.brobot.capture.*;
+> import java.awt.Rectangle;
+> import java.awt.image.BufferedImage;
+> import java.io.IOException;
+> ```
+>
+> For complete runnable examples with full class context, see the [Modular Capture System Guide](./modular-capture-system.md).
 
 ### Basic Capture
 
@@ -106,10 +120,10 @@ config.printConfigurationReport();
 ### Scenario 1: Development Machine
 
 ```properties
-# Use default SikuliX with auto DPI
+# Use default JAVACV_FFMPEG for reliable physical resolution capture
 # (No configuration needed - these are defaults)
-brobot.capture.provider=SIKULIX
-brobot.dpi.resize-factor=auto
+brobot.capture.provider=JAVACV_FFMPEG
+brobot.dpi.resize-factor=1.0
 ```
 
 ### Scenario 2: CI/CD Pipeline
@@ -123,8 +137,8 @@ brobot.capture.fallback-enabled=true
 ### Scenario 3: Production Server
 
 ```properties
-# Use FFmpeg for accuracy
-brobot.capture.provider=FFMPEG
+# Use JAVACV_FFMPEG for reliability (no external dependencies)
+brobot.capture.provider=JAVACV_FFMPEG
 brobot.capture.retry-count=5
 ```
 
@@ -151,32 +165,32 @@ brobot.capture.robot.expected-physical-width=1920
 ```
 Which provider should I use?
 
-┌─ Want maximum compatibility?
-│  └─ Yes → SikuliX (default, with auto DPI)
-│  └─ No ↓
-│
-├─ Need true physical capture?
-│  └─ Yes → FFmpeg (JavaCV)
-│  └─ No ↓
-│
-├─ Want manual DPI control?
-│  └─ Yes → Robot (with scaling settings)
+┌─ Need reliable physical resolution capture?
+│  └─ Yes → JAVACV_FFMPEG (default, bundled JavaCV)
 │  └─ No ↓
 │
 ├─ Need fastest performance?
-│  └─ Yes → Robot
+│  └─ Yes → Robot (with manual DPI configuration)
 │  └─ No ↓
 │
-└─ Unsure? → Stay with SikuliX (default)
+├─ Using Java 8 and need backward compatibility?
+│  └─ Yes → SikuliX (physical on Java 8)
+│  └─ No ↓
+│
+├─ Have external FFmpeg installed?
+│  └─ Yes → FFMPEG (external FFmpeg binary)
+│  └─ No ↓
+│
+└─ Unsure? → Stay with JAVACV_FFMPEG (default)
 ```
 
 ## Key Points
 
-✅ **No code changes needed** when switching providers  
-✅ **FFmpeg uses JavaCV** (already included in Brobot)  
-✅ **Robot handles DPI scaling** automatically  
-✅ **Properties control everything**  
-✅ **Automatic fallback** for robustness  
+✅ **No code changes needed** when switching providers
+✅ **JAVACV_FFMPEG bundled** (JavaCV included in Brobot)
+✅ **Physical resolution by default** for accurate pattern matching
+✅ **Properties control everything**
+✅ **Automatic fallback** for robustness
 
 ## Default Setup
 
@@ -184,8 +198,31 @@ No configuration needed! Brobot defaults to:
 
 ```properties
 # These are already set in brobot-defaults.properties:
-brobot.capture.provider=SIKULIX
-brobot.dpi.resize-factor=auto
+brobot.capture.provider=JAVACV_FFMPEG
+brobot.dpi.resize-factor=1.0
 ```
 
-Your application automatically uses SikuliX with automatic DPI recognition.
+Your application automatically uses JAVACV_FFMPEG with physical resolution capture for optimal pattern matching accuracy.
+
+---
+
+## Related Documentation
+
+### Core Capture Documentation
+- **[DPI and Resolution Guide](./dpi-resolution-guide.md)** - Comprehensive guide to handling DPI scaling and resolution issues
+- **[Capture Methods Comparison](../tools/capture-methods-comparison.md)** - Detailed performance study comparing all capture providers
+- **[Modular Capture System Guide](./modular-capture-system.md)** - Complete examples with class context and imports
+
+### Configuration
+- **[Configuration Properties Reference](../configuration/properties-reference.md)** - Complete reference for all Brobot configuration properties
+- **[Configuration Note](../guides/finding-objects/configuration-note.md)** - Configuration best practices
+
+### Testing & Deployment
+- **[CI/CD Testing Guide](../testing/ci-cd-testing.md)** - Testing Brobot applications in CI/CD pipelines
+- **[Mock Mode Guide](../../04-testing/mock-mode-guide.md)** - Testing without GUI using mock mode
+
+### Technical Deep Dives
+- **[SikuliX Physical Capture Analysis](../../../sikuli-physical-capture-analysis.md)** - Analysis of SikuliX's capture behavior and Java version differences
+
+### Troubleshooting
+- **[Action Config Troubleshooting](../action-config/troubleshooting-chains.md)** - Debugging action chains and configuration issues

@@ -4,14 +4,42 @@ sidebar_position: 4
 
 # ActionResult Architecture
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Architecture Evolution](#architecture-evolution)
+- [Core Components](#core-components)
+  - [1. MatchCollection](#1-matchcollection)
+  - [2. TimingData](#2-timingdata)
+  - [3. TextExtractionResult](#3-textextractionresult)
+  - [4. StateTracker](#4-statetracker)
+  - [5. RegionManager](#5-regionmanager)
+  - [6. MovementTracker](#6-movementtracker)
+  - [7. ActionAnalysis](#7-actionanalysis)
+  - [8. ExecutionHistory](#8-executionhistory)
+  - [9. ActionMetrics](#9-actionmetrics)
+- [Support Components](#support-components)
+- [Design Patterns](#design-patterns)
+- [Integration Points](#integration-points)
+- [Performance Characteristics](#performance-characteristics)
+- [Extension Points](#extension-points)
+- [Migration Guide](#migration-guide)
+- [Testing Strategy](#testing-strategy)
+- [Security Considerations](#security-considerations)
+- [Future Enhancements](#future-enhancements)
+- [Best Practices](#best-practices)
+- [Component Reference](#component-reference)
+
 ## Overview
 
-ActionResult serves as the universal return type for all actions in the Brobot framework, encapsulating comprehensive information generated during action execution. Version 2.0 introduces a component-based architecture that transforms the original 1113-line monolithic class into a well-structured system of focused, single-responsibility components.
+ActionResult serves as the universal return type for all actions in the Brobot framework, encapsulating comprehensive information generated during action execution. Version 2.0 introduces a component-based architecture that transforms the original monolithic design into a well-structured system of focused, single-responsibility components.
+
+**Related Documentation**: [ActionResult Components Quick Reference](../action-config/17-actionresult-components.md) | [Migration Guide](../migration/actionresult-refactoring.md) | [ActionConfig Overview](../action-config/01-overview.md)
 
 ## Architecture Evolution
 
-### Legacy Architecture (v1.x)
-The original ActionResult was a monolithic class handling 30+ responsibilities:
+### Legacy Architecture
+The original ActionResult was a monolithic design handling 30+ responsibilities:
 - Match collection management
 - Text extraction and aggregation
 - Timing and duration tracking
@@ -36,10 +64,10 @@ The refactored architecture delegates responsibilities to specialized components
 │  Core Fields:                                                    │
 │  - actionDescription: String                                     │
 │  - success: boolean                                              │
-│  - actionConfig: ActionConfig                                    │
+│  - actionConfig: ActionConfig (see ActionConfig Overview)       │
 │  - outputText: String                                           │
 ├─────────────────────────────────────────────────────────────────┤
-│  Component Delegates:                                            │
+│  Component Delegates (9 specialized components):                │
 │  ┌──────────────────┐  ┌──────────────────┐                    │
 │  │ MatchCollection   │  │ TimingData       │                    │
 │  │ - matches         │  │ - startTime      │                    │
@@ -64,26 +92,35 @@ The refactored architecture delegates responsibilities to specialized components
 │  │ - masks           │  │ - lifecycle      │                    │
 │  │ - customAnalysis  │  │ - timeline       │                    │
 │  └──────────────────┘  └──────────────────┘                    │
+│  ┌──────────────────┐                                           │
+│  │ ActionMetrics     │  Performance & efficiency tracking       │
+│  │ - executionTimes  │                                           │
+│  │ - phaseMetrics    │                                           │
+│  │ - efficiencyScore │                                           │
+│  └──────────────────┘                                           │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ## Core Components
 
+> **Note**: Code examples in this document show class structures and method signatures for architectural understanding. For complete implementations, see the `io.github.jspinak.brobot.action.result` package in the Brobot source code.
+
 ### 1. MatchCollection
+**Package**: `io.github.jspinak.brobot.action.result`
 **Responsibility**: Manages all match-related operations
 
 ```java
 public class MatchCollection {
-    private List<Match> matches;
-    private List<Match> initialMatches;
-    private int maxMatches;
-    
+    private List<Match> matches;           // Current matches after filtering/sorting
+    private List<Match> initialMatches;    // Original unmodified matches for history
+    private int maxMatches;                 // Limit to prevent memory issues
+
     // Key operations
-    public void add(Match... matches);
-    public void sort(SortStrategy strategy);
-    public Optional<Match> getBest();
-    public MatchCollection filter(Predicate<Match> predicate);
-    public MatchStatistics getStatistics();
+    public void add(Match... matches);     // Add matches with automatic max enforcement
+    public void sort(SortStrategy strategy); // Sort by score, size, or distance
+    public Optional<Match> getBest();      // Get highest-scoring match
+    public MatchCollection filter(Predicate<Match> predicate); // Filter with custom logic
+    public MatchStatistics getStatistics(); // Delegate to statistics component
 }
 ```
 
@@ -95,20 +132,21 @@ public class MatchCollection {
 - Automatic max match enforcement
 
 ### 2. TimingData
+**Package**: `io.github.jspinak.brobot.action.result`
 **Responsibility**: Handles all timing and duration tracking
 
 ```java
 public class TimingData {
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-    private Duration totalDuration;
-    private List<TimeSegment> segments;
-    
+    private LocalDateTime startTime;         // Timestamp when action started
+    private LocalDateTime endTime;           // Timestamp when action completed
+    private Duration totalDuration;          // Calculated total duration
+    private List<TimeSegment> segments;      // Phase-level timing breakdown
+
     // Key operations
-    public void start();
-    public void stop();
-    public Duration getElapsed();
-    public void addSegment(String name, Duration duration);
+    public void start();                     // Mark action start, record timestamp
+    public void stop();                      // Mark action end, calculate duration
+    public Duration getElapsed();            // Get time elapsed since start
+    public void addSegment(String name, Duration duration); // Track phase timing
 }
 ```
 
@@ -119,6 +157,7 @@ public class TimingData {
 - Human-readable formatting
 
 ### 3. TextExtractionResult
+**Package**: `io.github.jspinak.brobot.action.result`
 **Responsibility**: Manages text extraction and OCR results
 
 ```java
@@ -141,18 +180,19 @@ public class TextExtractionResult {
 - Multiple text source merging
 
 ### 4. StateTracker
+**Package**: `io.github.jspinak.brobot.action.result`
 **Responsibility**: Tracks state information during execution
 
 ```java
 public class StateTracker {
-    private Set<String> activeStates;
-    private Map<String, List<Match>> stateMatches;
-    private Map<String, Integer> stateActivationCounts;
-    
+    private Set<String> activeStates;                           // Currently active states
+    private Map<String, List<Match>> stateMatches;              // Matches grouped by state
+    private Map<String, Integer> stateActivationCounts;         // Frequency tracking
+
     // Key operations
-    public void recordActiveState(String stateName);
-    public void recordStateMatch(String stateName, Match match);
-    public Optional<String> getMostActiveState();
+    public void recordActiveState(String stateName);            // Mark state as active
+    public void recordStateMatch(String stateName, Match match); // Associate match with state
+    public Optional<String> getMostActiveState();               // Get most frequent state
 }
 ```
 
@@ -163,6 +203,7 @@ public class StateTracker {
 - State activity analysis
 
 ### 5. RegionManager
+**Package**: `io.github.jspinak.brobot.action.result`
 **Responsibility**: Manages region definitions and operations
 
 ```java
@@ -185,6 +226,7 @@ public class RegionManager {
 - Primary region access
 
 ### 6. MovementTracker
+**Package**: `io.github.jspinak.brobot.action.result`
 **Responsibility**: Tracks drag and movement operations
 
 ```java
@@ -206,6 +248,7 @@ public class MovementTracker {
 - Bounding box computation
 
 ### 7. ActionAnalysis
+**Package**: `io.github.jspinak.brobot.action.result`
 **Responsibility**: Manages analysis data and results
 
 ```java
@@ -228,13 +271,14 @@ public class ActionAnalysis {
 - Type-safe retrieval
 
 ### 8. ExecutionHistory
+**Package**: `io.github.jspinak.brobot.action.result`
 **Responsibility**: Tracks action execution history
 
 ```java
 public class ExecutionHistory {
     private List<ActionRecord> records;
     private ActionLifecycle lifecycle;
-    
+
     // Key operations
     public void recordStep(ActionRecord record);
     public List<ActionRecord> getSuccessfulSteps();
@@ -248,6 +292,29 @@ public class ExecutionHistory {
 - Success/failure analysis
 - Timeline visualization
 - Duration tracking
+
+### 9. ActionMetrics
+**Package**: `io.github.jspinak.brobot.action.result`
+**Responsibility**: Tracks performance metrics and efficiency scores
+
+```java
+public class ActionMetrics {
+    private List<Duration> executionTimes;
+    private Map<String, Duration> phaseMetrics;
+
+    // Key operations
+    public void recordExecutionTime(Duration duration);
+    public void recordPhase(String phaseName, Duration duration);
+    public double getEfficiencyScore();
+    public String formatPerformance();
+}
+```
+
+**Features**:
+- Execution time tracking
+- Phase-level performance metrics
+- Efficiency score calculation
+- Performance summary formatting
 
 ## Support Components
 
@@ -299,6 +366,102 @@ Components like RegionManager and StateTracker act as repositories for their res
 
 ## Integration Points
 
+For complete information on Action classes, see the [Action Hierarchy](../../01-getting-started/action-hierarchy.md) documentation.
+
+### Real-World Example: Login Flow Automation
+
+Here's a complete example showing how ActionResult components work together in a real automation scenario:
+
+```java
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+/**
+ * Demonstrates ActionResult component usage in a login automation workflow.
+ * Shows how components track matches, timing, state, and provide detailed results.
+ */
+@Component
+public class LoginAutomation {
+
+    @Autowired
+    private Action action;
+
+    public ActionResult performLogin(String username, String password) {
+        // Use builder for clean construction
+        ActionResult result = new ActionResultBuilder()
+            .withDescription("Login workflow execution")
+            .build();
+
+        // Step 1: Find and click username field
+        PatternFindOptions findOptions = PatternFindOptions.forPreciseSearch();
+        ActionResult usernameResult = action.find(findOptions, getUsernameField());
+
+        if (usernameResult.isSuccess()) {
+            // Components automatically tracked:
+            // - MatchCollection: Stores found username field match
+            // - TimingData: Records find operation duration
+            // - StateTracker: Records "LoginScreen" as active state
+
+            result.add(usernameResult.getMatchList());
+            action.type(username);
+
+            // Step 2: Find and fill password field
+            ActionResult passwordResult = action.find(findOptions, getPasswordField());
+
+            if (passwordResult.isSuccess()) {
+                result.add(passwordResult.getMatchList());
+                action.type(password);
+
+                // Step 3: Click login button
+                ClickOptions clickOptions = new ClickOptions.Builder()
+                    .setNumberOfClicks(1)
+                    .build();
+
+                ActionResult loginResult = action.click(clickOptions, getLoginButton());
+
+                // Aggregate results
+                result.add(loginResult.getMatchList());
+                result.setSuccess(true);
+
+                // Access component data for analysis
+                System.out.println("Total matches found: " + result.getMatchCount());
+                System.out.println("Execution time: " + result.getExecutionTimeMs() + "ms");
+                System.out.println("Active states: " + result.getActiveStates());
+
+                // ExecutionHistory tracks all steps
+                // TimingData provides breakdown by operation
+                // StateTracker confirms successful state transitions
+            } else {
+                result.setSuccess(false);
+                System.err.println("Password field not found");
+            }
+        } else {
+            result.setSuccess(false);
+            System.err.println("Username field not found");
+        }
+
+        return result;
+    }
+
+    private ObjectCollection getUsernameField() { /* ... */ return null; }
+    private ObjectCollection getPasswordField() { /* ... */ return null; }
+    private ObjectCollection getLoginButton() { /* ... */ return null; }
+}
+```
+
+**What This Example Demonstrates**:
+- **ActionResultBuilder**: Clean construction with fluent API
+- **MatchCollection**: Aggregates matches from multiple find operations
+- **TimingData**: Automatically tracks total execution time
+- **StateTracker**: Monitors state transitions (LoginScreen → LoggedIn)
+- **ExecutionHistory**: Records each step for debugging
+- **Component Facade**: Simple API hides component complexity
+
 ### With Action Classes
 ```java
 public class Click {
@@ -321,17 +484,20 @@ String stateSummary = result.getStateTracker().format();
 ```
 
 ### With Testing Framework
+
+For comprehensive testing guidance, see [Testing Overview](../../04-testing/testing-intro.md) and [Testing Strategy](../../04-testing/testing-strategy.md).
+
 ```java
 // Fine-grained assertions on components
-assertThat(result.getMatchCollection().size()).isEqualTo(3);
-assertThat(result.getTimingData().getExecutionTimeMs()).isLessThan(1000);
-assertThat(result.getStateTracker().isStateActive("LoginScreen")).isTrue();
+assertThat(result.getMatchCount()).isEqualTo(3);
+assertThat(result.getExecutionTimeMs()).isLessThan(1000);
+assertThat(result.getActiveStates()).contains("LoginScreen");
 ```
 
 ## Performance Characteristics
 
 ### Memory Efficiency
-- **Lazy Initialization**: Components created on demand
+- **Eager Initialization**: Components initialized at construction for consistent state
 - **Shared References**: No unnecessary copying
 - **Bounded Collections**: MaxMatches enforcement
 
@@ -374,6 +540,8 @@ public class GameMatchStatistics extends MatchStatistics {
 
 ## Migration Guide
 
+For complete migration details and examples, see the [ActionResult Refactoring Migration Guide](../migration/actionresult-refactoring.md).
+
 ### For API Consumers
 **No changes required!** The facade maintains complete backward compatibility:
 
@@ -402,12 +570,14 @@ ActionResult result = ActionResultBuilder.successWith(matches)
 ```
 
 ### For Framework Extenders
-Access components directly for advanced operations:
+Components are accessed through the facade's public API methods:
 
 ```java
-// Direct component access
-MatchCollection matches = result.getMatchCollection();
-MatchStatistics stats = matches.getStatistics();
+// Access component data through facade methods
+List<Match> matches = result.getMatchList();
+long executionTime = result.getExecutionTimeMs();
+Set<String> activeStates = result.getActiveStates();
+MatchStatistics stats = result.getMatchStatistics();
 double confidence = stats.getConfidence();
 ```
 
@@ -504,18 +674,18 @@ public void benchmarkMatchSorting() {
 
 | Component | Lines | Responsibility | Key Methods |
 |-----------|-------|---------------|-------------|
-| MatchCollection | 280 | Match management | add(), sort(), filter(), getBest() |
-| TimingData | 150 | Timing tracking | start(), stop(), getElapsed() |
-| MatchStatistics | 200 | Statistical analysis | getMedian(), getConfidence() |
-| TextExtractionResult | 120 | Text management | addText(), getCombinedText() |
-| StateTracker | 160 | State tracking | recordActiveState(), getMostActiveState() |
-| RegionManager | 180 | Region management | defineRegion(), getUnion() |
-| MovementTracker | 140 | Movement tracking | recordMovement(), getTotalDistance() |
-| ActionAnalysis | 140 | Analysis data | addSceneAnalysis(), addCustomAnalysis() |
-| ActionMetrics | 200 | Performance metrics | recordExecutionTime(), getEfficiencyScore() |
-| ExecutionHistory | 180 | Execution tracking | recordStep(), getSuccessRate() |
-| MatchFilter | 260 | Filtering utilities | byMinScore(), nearLocation() |
-| ActionResultBuilder | 400 | Result construction | withMatches(), build() |
+| MatchCollection | 369 | Match management | add(), sort(), filter(), getBest() |
+| TimingData | 231 | Timing tracking | start(), stop(), getElapsed() |
+| MatchStatistics | 294 | Statistical analysis | getMedian(), getConfidence() |
+| TextExtractionResult | 219 | Text management | addText(), getCombinedText() |
+| StateTracker | 230 | State tracking | recordActiveState(), getMostActiveState() |
+| RegionManager | 266 | Region management | defineRegion(), getUnion() |
+| MovementTracker | 265 | Movement tracking | recordMovement(), getTotalDistance() |
+| ActionAnalysis | 230 | Analysis data | addSceneAnalysis(), addCustomAnalysis() |
+| ActionMetrics | 302 | Performance metrics | recordExecutionTime(), getEfficiencyScore() |
+| ExecutionHistory | 291 | Execution tracking | recordStep(), getSuccessRate() |
+| MatchFilter | 332 | Filtering utilities | byMinScore(), nearLocation() |
+| ActionResultBuilder | 424 | Result construction | withMatches(), build() |
 
 ## Conclusion
 

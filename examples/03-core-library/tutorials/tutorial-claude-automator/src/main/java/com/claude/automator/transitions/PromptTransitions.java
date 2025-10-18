@@ -31,7 +31,7 @@ public class PromptTransitions {
 
     /** Navigate from Prompt to Working by submitting a command. */
     @OutgoingTransition(
-            to = WorkingState.class,
+            activate = {WorkingState.class},
             pathCost = 1,
             description = "Navigate from Prompt to Working")
     public boolean toWorking() {

@@ -29,7 +29,7 @@ These are independent settings:
 
 ### What Mock Mode Does
 
-When mock mode is enabled (via `brobot.core.mock=true` property or `MockModeManager.setMockMode(true)`):
+When mock mode is enabled (via `brobot.mock=true` or `brobot.core.mock=true` property, or programmatically with `MockModeManager.setMockMode(true)`):
 
 1. **No screen capture** - Brobot doesn't capture actual screens
 2. **No real pattern matching** - Image patterns aren't matched against real screens
@@ -66,6 +66,12 @@ brobot.headless.debug=false  # Enable for headless detection debugging
 ```
 
 **Note**: The `brobot.headless` property must be explicitly set. Auto-detection has been removed due to reliability issues on Windows systems.
+
+**Property System Clarification**: Brobot supports two property forms for mock mode:
+- `brobot.mock=true` - Simplified system property (managed by MockModeManager)
+- `brobot.core.mock=true` - Spring Boot configuration property (mapped to BrobotProperties)
+
+Both forms are valid and synchronized automatically. Use whichever fits your configuration style.
 
 #### Programmatic Configuration
 
@@ -113,26 +119,43 @@ There are two approaches to configure state probabilities:
 Configure probabilities directly in state classes:
 
 ```java
+package com.yourapp.states;
+
+import io.github.jspinak.brobot.annotations.State;
+import io.github.jspinak.brobot.config.core.BrobotProperties;
+import io.github.jspinak.brobot.datastructures.state.stateobject.StateImage;
+import io.github.jspinak.brobot.tools.testing.mock.state.MockStateManagement;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+
 @State(initial = true)
+@Component
 @Getter
 @Slf4j
 public class LoginState {
-    
+
     @Autowired(required = false)
     private MockStateManagement mockStateManagement;
-    
+
+    @Autowired
+    private BrobotProperties brobotProperties;
+
     // Define mock probability for this state
     private static final int MOCK_PROBABILITY = 100;
-    
+
     private final StateImage loginButton;
-    
+
     public LoginState() {
         loginButton = new StateImage.Builder()
             .addPatterns("login-button")
             .setName("LoginButton")
             .build();
     }
-    
+
     @PostConstruct
     public void configureMockProbability() {
         if (brobotProperties.getCore().isMock() && mockStateManagement != null) {
@@ -339,13 +362,20 @@ public void testErrorRecovery() {
 ### Pattern 3: State Verification
 
 ```java
+@Autowired
+private InitialStates initialStates;
+
+@Autowired
+private StateService stateService;
+
 @Test
 public void verifyStateConfiguration() {
-    // Verify initial states
-    var initialStates = stateService.getInitialStates();
-    assertEquals(1, initialStates.size());
-    assertEquals("Login", initialStates.get(0).getName());
-    
+    // Verify initial states are registered
+    assertTrue(initialStates.hasRegisteredInitialStates());
+    var initialStateNames = initialStates.getRegisteredInitialStates();
+    assertEquals(1, initialStateNames.size());
+    assertEquals("Login", initialStateNames.get(0));
+
     // Verify all states registered
     assertTrue(stateService.getAllStates().stream()
         .anyMatch(s -> s.getName().equals("Dashboard")));
@@ -401,23 +431,34 @@ mockStateManagement.setStateProbabilities(100, "StateName");
 
 ### Issue: Transitions Not Working
 
-**Solution**: Check state registration and transition definitions. Use the unified transition format:
+**Solution**: Check state registration and transition definitions. Use the correct transition format:
 
 ```java
-@TransitionSet(state = TargetState.class)
+@TransitionSet(state = SourceState.class)  // Source state for these transitions
 @Component
-public class TargetStateTransitions {
-    
-    @FromTransition(from = SourceState.class, priority = 1)
-    public boolean fromSource() {
+@RequiredArgsConstructor
+public class SourceStateTransitions {
+
+    private final SourceState sourceState;
+    private final Action action;
+    private final BrobotProperties brobotProperties;
+
+    /**
+     * Navigate FROM SourceState TO TargetState
+     */
+    @OutgoingTransition(activate = {TargetState.class}, pathCost = 1)
+    public boolean toTargetState() {
         if (brobotProperties.getCore().isMock()) return true;
         return action.click(sourceState.getButton()).isSuccess();
     }
-    
+
+    /**
+     * Verify arrival AT SourceState
+     */
     @IncomingTransition
     public boolean verifyArrival() {
         if (brobotProperties.getCore().isMock()) return true;
-        return action.find(targetState.getElement()).isSuccess();
+        return action.find(sourceState.getElement()).isSuccess();
     }
 }
 ```
@@ -558,3 +599,36 @@ Use the enhanced mock infrastructure for:
 - **Color matching** validation
 - **Headless environment** compatibility
 - **Fast CI/CD** pipeline execution
+
+## See Also
+
+### Essential Testing Documentation
+- [Testing Introduction](testing-intro.md) - Overview of Brobot testing approaches
+- [Mock Mode Manager](mock-mode-manager.md) - Centralized mock mode management
+- [Test Utilities](test-utilities.md) - BrobotTestBase and testing utilities
+- [Unit Testing](unit-testing.md) - Unit testing patterns and best practices
+- [Integration Testing](integration-testing.md) - Integration testing guide
+- [Profile-Based Testing](profile-based-testing.md) - Spring profiles for testing
+- [Mat Testing Utilities](mat-testing-utilities.md) - OpenCV Mat testing utilities
+
+### Mock Mode Ecosystem
+- [Mock Stochasticity](mock-stochasticity.md) - Probabilistic testing and state probabilities
+- [Mock Mode Migration](mock-mode-migration.md) - Migrating to MockModeManager
+- [ActionHistory Mock Snapshots](actionhistory-mock-snapshots.md) - Creating mock data with ActionHistory
+- [ActionHistory Integration Testing](actionhistory-integration-testing.md) - Testing with action histories
+- [Testing Strategy](testing-strategy.md) - Overall testing strategy
+
+### State and Transition Documentation
+- [States](../01-getting-started/states.md) - Introduction to Brobot states
+- [Transitions](../01-getting-started/transitions.md) - State transition fundamentals
+- [Initial States Configuration](../03-core-library/configuration/initial-states.md) - Configuring initial states
+
+### Configuration
+- [BrobotProperties Usage](../03-core-library/configuration/brobot-properties-usage.md) - Configuration guide
+- [Properties Reference](../03-core-library/configuration/properties-reference.md) - All available properties
+- [Headless Configuration](../03-core-library/configuration/headless-configuration.md) - Headless environment setup
+
+### Tutorials
+- [Mock Results Tutorial](../02-tutorials/tutorial-basics/mock-results.md) - Working with mock results
+- [Tutorial Basics - States](../02-tutorials/tutorial-basics/states.md) - State basics tutorial
+- [Tutorial Basics - Transitions](../02-tutorials/tutorial-basics/transitions.md) - Transition basics tutorial

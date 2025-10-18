@@ -59,8 +59,7 @@ class DocumentationExamplesTest {
         action.perform(typeOptions, new ObjectCollection.Builder().withStrings("testpass").build());
 
         // Click login button
-        ClickOptions clickOptions =
-                new ClickOptions.Builder().setClickType(ClickOptions.Type.LEFT).build();
+        ClickOptions clickOptions = new ClickOptions.Builder().build();
         ActionResult loginResult = action.perform(clickOptions, loginButton);
 
         // Assert

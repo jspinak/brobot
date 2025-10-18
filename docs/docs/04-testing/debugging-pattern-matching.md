@@ -65,6 +65,132 @@ Enable image saving only when:
 
 Remember to disable after debugging to avoid disk space issues.
 
+## Programmatic Control in Tests
+
+While most debugging features are configured via properties, `BestMatchCapture` can be controlled programmatically in tests for fine-grained control.
+
+### Enabling in Test Classes
+
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.internal.find.scene.BestMatchCapture;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+
+@SpringBootTest
+public class PatternMatchingDebugTest extends BrobotTestBase {
+
+    @Autowired
+    private BestMatchCapture bestMatchCapture;
+
+    @Autowired
+    private Action action;
+
+    @BeforeEach
+    void enableDebugCapture() {
+        // Enable best match capture for debugging
+        bestMatchCapture.setCaptureEnabled(true);
+    }
+
+    @Test
+    void testPatternMatching() {
+        // Assume stateImage is defined elsewhere (e.g., @Autowired State class)
+        // When pattern matching fails, best match will be captured
+        // and saved to history/best-matches/ directory
+        ActionResult result = action.find(stateImage);
+
+        // Check captured files if match failed
+        if (!result.isSuccess()) {
+            // Images saved as: history/best-matches/YYYYMMDD-HHmmss_pattern_simXXX_*.png
+        }
+    }
+
+    @AfterEach
+    void disableDebugCapture() {
+        // Clean up: disable after each test
+        bestMatchCapture.setCaptureEnabled(false);
+    }
+}
+```
+
+### Selective Debugging
+
+Enable capture for specific test methods only:
+
+```java
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.state.StateImage;
+
+@Test
+void debugProblematicPattern() {
+    // Assume problematicPattern is defined elsewhere
+    // Enable only for this test
+    bestMatchCapture.setCaptureEnabled(true);
+
+    try {
+        ActionResult result = action.find(problematicPattern);
+        // Capture will be saved if match fails
+
+        // Analyze results...
+        if (!result.isSuccess()) {
+            // Check history/best-matches/ for captured images
+        }
+    } finally {
+        // Always disable in finally block
+        bestMatchCapture.setCaptureEnabled(false);
+    }
+}
+```
+
+### Test Profile Configuration
+
+For `ImageDebugConfig` features, use test profiles:
+
+```properties
+# src/test/resources/application-debug.properties
+brobot.debug.image.enabled=true
+brobot.debug.image.save-screenshots=true
+brobot.debug.image.save-patterns=true
+brobot.debug.image.save-comparisons=true
+```
+
+Then activate in test:
+
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+
+@SpringBootTest
+@ActiveProfiles("debug")
+public class VisualDebugTest extends BrobotTestBase {
+
+    @Autowired
+    private Action action;
+
+    // ImageFindDebugger will be automatically enabled
+    // Debug images will be saved to debug/image-finding/
+
+    @Test
+    void testWithVisualDebugging() {
+        // Assume stateImage is defined elsewhere
+        // All pattern matching will save debug visualizations
+        ActionResult result = action.find(stateImage);
+    }
+}
+```
+
+**Design Note**: `BestMatchCapture` provides programmatic control because it's designed for runtime debugging in tests. `ImageDebugConfig` is configuration-only by design, meant to be enabled via Spring profiles or properties files.
+
 ## Best Match Capture
 
 The Best Match Capture feature helps debug pattern matching failures by capturing and saving the region that best matches your pattern, even when it doesn't meet the similarity threshold.
@@ -83,13 +209,13 @@ When enabled, the Best Match Capture system:
 Add these properties to your `application.properties`:
 
 ```properties
-# Enable best match capture
+# Enable best match capture (default: false)
 brobot.debug.capture-best-match=true
 
 # Only capture when match is below this threshold (default: 0.95)
 brobot.debug.capture-threshold=0.95
 
-# Directory to save captured images (relative to project root)
+# Directory to save captured images (default: history/best-matches)
 brobot.debug.capture-directory=history/best-matches
 
 # Also save the pattern image for comparison (default: true)
@@ -111,13 +237,21 @@ history/best-matches/
 └── 20250810-143025_submit-button_sim062_pattern.png
 ```
 
-### Console Output
+### Logging Output
 
-When a best match is captured, you'll see console messages like:
+Best Match Capture uses SLF4J DEBUG-level logging. To see capture messages, enable DEBUG logging:
+
+```properties
+# Enable DEBUG logging for best match capture
+logging.level.io.github.jspinak.brobot.action.internal.find.scene.BestMatchCapture=DEBUG
 ```
-[BEST_MATCH] Captured best match for 'claude-prompt-1' with similarity 0.453 saved to: history/best-matches/20250810-143022_claude-prompt-1_sim453_match.png
-[BEST_MATCH] Pattern image saved to: history/best-matches/20250810-143022_claude-prompt-1_sim453_pattern.png
+
+When a best match is captured, you'll see log messages like:
 ```
+DEBUG BestMatchCapture - Best match captured - Pattern: claude-prompt-1, Location: (100, 200), Size: 50x30, Similarity: 0.453
+```
+
+**Note**: File save operations happen silently. Check the `history/best-matches/` directory for captured images.
 
 ### Use Cases
 
@@ -149,18 +283,18 @@ When analyzing captured images:
 
 ## Progressive Similarity Testing
 
-In addition to best match capture, Brobot automatically performs progressive similarity testing when patterns fail. This tests the pattern at decreasing thresholds to find the minimum similarity at which it would match.
+Brobot can perform progressive similarity testing when patterns fail, testing at decreasing thresholds (0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3) to find the minimum similarity at which a pattern would match.
 
-### Console Output
+### Configuration
 
+Enable diagnostic logging to see similarity analysis:
+
+```properties
+# Enable diagnostic logging for similarity testing
+logging.level.io.github.jspinak.brobot.tools.logging.DiagnosticLogger=DEBUG
 ```
-[SIMILARITY DEBUG] Testing pattern 'claude-prompt-1'
-[SIMILARITY DEBUG] Original MinSimilarity: 0.7
-[SIMILARITY ANALYSIS]
-  Threshold 0.5: FOUND with score 0.523
-```
 
-This tells you exactly what similarity threshold would be needed for the pattern to match.
+**Note**: Progressive similarity testing uses Brobot's structured logging system (BrobotLogger) rather than console output. The testing helps identify what similarity threshold would be needed for pattern matching to succeed.
 
 ## Debug Image Saving
 
@@ -175,29 +309,45 @@ debug_images/
 
 ## Image Analysis
 
-Brobot provides automatic image content analysis to detect common issues:
+Brobot provides automatic image content analysis to detect common issues like black screens or invalid captures. This analysis is performed internally and logged via Brobot's structured logging system.
 
-```
-[IMAGE ANALYSIS]
-  Pattern: 293x83 type=ARGB bytes=97KB
-  Pattern content: 5.2% black, 0.3% white, avg RGB=(45,45,48)
-  Scene: 1920x1080 type=RGB bytes=8MB
-  Scene content: 92.1% black, 0.1% white, avg RGB=(12,12,12)
-  WARNING: Scene is mostly BLACK - possible capture failure!
-```
+### Configuration
 
-## Verbosity Levels
-
-Control the amount of debug information with verbosity settings:
+Enable diagnostic logging to see image analysis:
 
 ```properties
-# Set to VERBOSE for maximum debug information
+# Enable diagnostic logging for image analysis
+logging.level.io.github.jspinak.brobot.tools.logging.DiagnosticLogger=DEBUG
+logging.level.io.github.jspinak.brobot.action.internal.find.scene.ScenePatternMatcher=DEBUG
+```
+
+Image analysis examines:
+- Image dimensions and type (RGB vs ARGB)
+- Pixel content distribution (% black, % white)
+- Average RGB values
+- Potential capture failures (mostly black screens)
+
+**Note**: Analysis results are logged to Brobot's structured logging system for diagnostic purposes.
+
+## Logging Configuration
+
+Control the amount of debug information with logging settings:
+
+```properties
+# Brobot verbosity level (QUIET, NORMAL, VERBOSE)
 brobot.logging.verbosity=VERBOSE
 brobot.console.actions.level=VERBOSE
 
-# Enable specific debug logging
+# Enable specific debug logging for debugging features
+logging.level.io.github.jspinak.brobot.action.internal.find.scene.BestMatchCapture=DEBUG
+logging.level.io.github.jspinak.brobot.action.internal.find.scene.ScenePatternMatcher=DEBUG
+logging.level.io.github.jspinak.brobot.tools.logging.DiagnosticLogger=DEBUG
+
+# Enable all find operation logging
 logging.level.io.github.jspinak.brobot.action.internal.find=DEBUG
 ```
+
+**Note**: Brobot uses SLF4J for logging. The default implementation is Logback, configured via `logback.xml` or `logback-spring.xml`.
 
 ## Troubleshooting Common Issues
 
@@ -238,3 +388,49 @@ logging.level.io.github.jspinak.brobot.action.internal.find=DEBUG
 3. **Clean up periodically**: Delete old captures to save disk space
 4. **Use meaningful pattern names**: Makes captured files easier to identify
 5. **Adjust thresholds based on captures**: Use actual similarity scores to set appropriate thresholds
+6. **Use programmatic control in tests**: Enable `BestMatchCapture` selectively with `setCaptureEnabled()`
+7. **Configure logging appropriately**: Enable DEBUG logging only when needed for specific debugging tasks
+
+## Related Documentation
+
+### Testing & Debugging
+- **[Testing Introduction](testing-intro.md)** - Overview of Brobot testing capabilities
+- **[Unit Testing Guide](unit-testing.md)** - Unit testing with static screenshots
+- **[Integration Testing Guide](integration-testing.md)** - Full workflow simulation with mock execution
+- **[Mock Mode Guide](mock-mode-guide.md)** - Testing without GUI using mock mode
+- **[Profile-Based Testing](profile-based-testing.md)** - Using Spring profiles for test configuration
+- **[Test Utilities](test-utilities.md)** - BrobotTestBase and test data factories
+- **[Mat Testing Utilities](mat-testing-utilities.md)** - Safe OpenCV Mat operations for tests
+- **[Testing Strategy](testing-strategy.md)** - Comprehensive testing strategy
+
+### Configuration
+- **[Properties Reference](../03-core-library/configuration/properties-reference.md)** - Complete reference for all Brobot configuration properties
+- **[Auto-Configuration Guide](../03-core-library/configuration/auto-configuration.md)** - Spring Boot auto-configuration setup
+- **[Action Config Factory](../03-core-library/guides/configuration/action-config-factory.md)** - Factory patterns for creating action configurations
+
+### Pattern Matching
+- **[Capture Quick Reference](../03-core-library/capture/capture-quick-reference.md)** - Screen capture provider setup
+- **[DPI Resolution Guide](../03-core-library/capture/dpi-resolution-guide.md)** - Handling DPI scaling and resolution issues
+- **[Modular Capture System](../03-core-library/capture/modular-capture-system.md)** - Complete capture provider guide
+- **[Pattern Creation Tools](../03-core-library/tools/pattern-creation-tools.md)** - Best tools for creating patterns
+- **[Pattern Capture Tool Guide](../03-core-library/tools/pattern-capture-tool-guide.md)** - Using Brobot's pattern capture tool
+- **[Capture Methods Comparison](../03-core-library/tools/capture-methods-comparison.md)** - Performance comparison of capture providers
+
+### Core Concepts
+- **[ActionConfig Overview](../03-core-library/action-config/01-overview.md)** - Modern ActionConfig API for pattern matching
+- **[ActionConfig Examples](../03-core-library/action-config/03-examples.md)** - Practical pattern matching examples
+- **[ActionConfig Reference](../03-core-library/action-config/05-reference.md)** - Complete API reference including PatternFindOptions
+- **[Search Regions and Fixed Locations](../03-core-library/guides/user-guides/search-regions-and-fixed-locations.md)** - Optimizing pattern searches with regions
+- **[Declarative Region Definition](../03-core-library/guides/user-guides/declarative-region-definition.md)** - Defining search regions relative to other objects
+- **[Screen Adaptive Regions](../03-core-library/guides/user-guides/screen-adaptive-regions.md)** - Resolution-independent region definitions
+
+### Getting Started
+- **[Quick Start Guide](../01-getting-started/quick-start.md)** - Getting started with Brobot pattern matching
+- **[Installation Guide](../01-getting-started/installation.md)** - Platform setup including dependencies
+- **[States Guide](../01-getting-started/states.md)** - Understanding StateImage and pattern organization
+- **[Core Concepts](../01-getting-started/core-concepts.md)** - Fundamental Brobot concepts
+
+### Other Testing
+- **[Mock Stochasticity](mock-stochasticity.md)** - Probabilistic behavior in mock mode
+- **[Mock Mode Migration](mock-mode-migration.md)** - Migrating to modern mock mode architecture
+- **[Fail-Safe Image Loading](fail-safe-image-loading.md)** - Robust image loading strategies

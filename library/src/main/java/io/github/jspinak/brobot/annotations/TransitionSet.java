@@ -44,7 +44,7 @@ import org.springframework.stereotype.Component;
  * }
  * }</pre>
  *
- * @since 1.2.0
+ * @since 1.1.0
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

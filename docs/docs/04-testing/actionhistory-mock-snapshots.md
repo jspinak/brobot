@@ -7,7 +7,7 @@ title: 'ActionHistory and Mock Snapshots'
 
 ## Overview
 
-ActionHistory is a critical component for mock mode testing in Brobot. It provides historical data about pattern matches and actions, enabling realistic simulation of GUI interactions without actual screen access. This is **required** for patterns to be "found" in mock mode.
+ActionHistory is a critical component for mock mode testing in Brobot. It provides historical data about pattern matches and actions, enabling realistic simulation of GUI interactions without actual screen access. While **highly recommended** for patterns to be reliably "found" in mock mode, Brobot provides a fallback mechanism that generates default matches (at location 100,100 with 50x50 size and 95% similarity) when ActionHistory is not configured.
 
 ## Key Concepts
 
@@ -19,15 +19,15 @@ ActionHistory stores a collection of `ActionRecord` objects that represent past 
 - Success/failure status
 - Execution duration
 
-### Why ActionHistory is Required in Mock Mode
+### Why ActionHistory is Highly Recommended in Mock Mode
 
 In mock mode, Brobot doesn't perform real pattern matching. Instead, it uses ActionHistory to:
-1. Determine if a pattern should be "found"
-2. Provide realistic match locations and scores
-3. Simulate timing and performance characteristics
-4. Enable deterministic or probabilistic testing
+1. Determine if a pattern should be "found" based on realistic success rates
+2. Provide realistic match locations and scores from historical data
+3. Simulate timing and performance characteristics accurately
+4. Enable deterministic or probabilistic testing with configurable success rates
 
-**Important**: Without ActionHistory, patterns will never be found in mock mode, causing all find operations to fail.
+**Important**: While Brobot provides a fallback mechanism that generates default matches without ActionHistory, these fallback matches have fixed properties (location 100,100, size 50x50, 95% similarity) which may not reflect your actual UI behavior. For realistic testing, always configure ActionHistory with appropriate success rates and match locations.
 
 ## New Builder Integration (v1.0.0+)
 
@@ -36,10 +36,6 @@ Starting with Brobot v1.0.0, ActionHistory can be configured directly in the Sta
 ### Basic Usage
 
 ```java
-// Note: BrobotProperties must be injected as a dependency
-@Autowired
-private BrobotProperties brobotProperties;
-
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.tools.testing.mock.history.MockActionHistoryFactory;
@@ -60,6 +56,9 @@ The StateImage.Builder class provides three methods for setting ActionHistory:
 #### 1. Direct ActionHistory
 
 ```java
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.history.ActionHistory;
+
 ActionHistory history = createCustomHistory();
 StateImage image = new StateImage.Builder()
     .addPatterns("pattern.png")
@@ -70,6 +69,9 @@ StateImage image = new StateImage.Builder()
 #### 2. Supplier Function (Lazy Initialization)
 
 ```java
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.history.ActionHistory;
+
 StateImage image = new StateImage.Builder()
     .addPatterns("pattern.png")
     .withActionHistory(() -> createComplexHistory())
@@ -79,6 +81,9 @@ StateImage image = new StateImage.Builder()
 #### 3. Single ActionRecord
 
 ```java
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.history.ActionRecord;
+
 ActionRecord record = createSingleRecord();
 StateImage image = new StateImage.Builder()
     .addPatterns("pattern.png")
@@ -93,7 +98,12 @@ The `MockActionHistoryBuilder` provides a fluent API for creating custom ActionH
 ### Basic Configuration
 
 ```java
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.history.ActionHistory;
 import io.github.jspinak.brobot.tools.testing.mock.history.MockActionHistoryBuilder;
+
+// Assume region is defined elsewhere
+Region region = new Region(100, 200, 80, 30);
 
 ActionHistory history = MockActionHistoryBuilder.builder()
     .successRate(0.95)           // 95% success rate
@@ -112,6 +122,12 @@ ActionHistory history = MockActionHistoryBuilder.builder()
 MockActionHistoryBuilder provides preset methods for common scenarios:
 
 ```java
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.history.ActionHistory;
+import io.github.jspinak.brobot.tools.testing.mock.history.MockActionHistoryBuilder;
+
+Region region = new Region(100, 200, 80, 30);
+
 // Always found (100% success)
 ActionHistory reliable = MockActionHistoryBuilder.Presets.alwaysFound(region);
 
@@ -132,7 +148,15 @@ The `MockActionHistoryFactory` provides factory methods for common UI patterns a
 ### UI Pattern Methods
 
 ```java
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.history.ActionHistory;
 import io.github.jspinak.brobot.tools.testing.mock.history.MockActionHistoryFactory;
+
+Region buttonRegion = new Region(100, 200, 80, 30);
+Region fieldRegion = new Region(150, 300, 200, 25);
+Region loaderRegion = new Region(400, 500, 50, 50);
+Region menuRegion = new Region(10, 10, 150, 30);
+Region dialogRegion = new Region(300, 200, 400, 300);
 
 // Reliable button (98% success, quick response)
 ActionHistory button = MockActionHistoryFactory.reliableButton(buttonRegion);
@@ -154,6 +178,8 @@ ActionHistory dialog = MockActionHistoryFactory.modalDialog(dialogRegion);
 
 ```java
 import io.github.jspinak.brobot.model.element.Positions;
+import io.github.jspinak.brobot.model.history.ActionHistory;
+import io.github.jspinak.brobot.tools.testing.mock.history.MockActionHistoryFactory;
 
 // Element at specific screen position
 ActionHistory centerElement = MockActionHistoryFactory.forScreenPosition(
@@ -163,23 +189,17 @@ ActionHistory centerElement = MockActionHistoryFactory.forScreenPosition(
 ActionHistory lowerLeft = MockActionHistoryFactory.lowerLeftElement(200, 80);
 ```
 
-### Custom Configuration
-
-```java
-// Use custom configuration with lambda
-ActionHistory custom = MockActionHistoryFactory.withConfig(config -> 
-    config.successRate(0.85)
-          .recordCount(15)
-          .matchRegion(new Region(100, 100, 50, 50))
-          .minDuration(20)
-          .maxDuration(80));
-```
-
 ### Caching for Performance
 
 ```java
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.history.ActionHistory;
+import io.github.jspinak.brobot.tools.testing.mock.history.MockActionHistoryFactory;
+
+Region buttonRegion = new Region(100, 200, 80, 30);
+
 // Cache frequently used histories
-ActionHistory cached = MockActionHistoryFactory.cached("main-button", 
+ActionHistory cached = MockActionHistoryFactory.cached("main-button",
     () -> MockActionHistoryFactory.reliableButton(buttonRegion));
 
 // Clear cache between test suites
@@ -188,10 +208,16 @@ MockActionHistoryFactory.clearCache();
 
 ## Complete Example: Claude Automator
 
-Here's a real-world example showing how to use the new ActionHistory features in a state class:
+Here's a real-world example showing how to use the new ActionHistory features in a state class. This example demonstrates:
+- Using `@State` annotation for Spring component scanning
+- Screen percentage-based regions for resolution independence
+- Multiple pattern variants for robust matching
+- Integrated ActionHistory configuration for mock mode support
 
 ```java
 package com.claude.automator.states;
+
+import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.annotations.State;
 import io.github.jspinak.brobot.model.element.Region;
@@ -199,18 +225,24 @@ import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.tools.testing.mock.history.MockActionHistoryFactory;
 import lombok.Getter;
 
+/**
+ * State representing the Claude prompt interface.
+ * Demonstrates best practices for ActionHistory integration.
+ */
+@Component
 @State(initial = true)
 @Getter
 public class PromptState {
-    
+
     private final StateImage claudePrompt;
-    
+
     public PromptState() {
         // Define search region for lower-left quarter of screen
+        // Using percentage-based region for resolution independence
         Region lowerLeftQuarter = Region.builder()
-            .withScreenPercentage(0.0, 0.5, 0.5, 0.5)
+            .withScreenPercentage(0.0, 0.5, 0.5, 0.5)  // x=0%, y=50%, w=50%, h=50%
             .build();
-        
+
         // Create StateImage with integrated ActionHistory for mock mode
         claudePrompt = new StateImage.Builder()
             .addPatterns("prompt/claude-prompt-1.png",
@@ -219,7 +251,8 @@ public class PromptState {
             .setName("ClaudePrompt")
             .setSearchRegionForAllPatterns(lowerLeftQuarter)
             .setFixedForAllPatterns(true)
-            // ActionHistory is required for mock mode finds
+            // ActionHistory highly recommended for realistic mock mode behavior
+            // Without this, mock mode uses fallback with fixed location (100,100)
             .withActionHistory(MockActionHistoryFactory.lowerLeftElement(293, 83))
             .build();
     }
@@ -388,7 +421,21 @@ ActionHistory neverFound = MockActionHistoryBuilder.Presets.neverFound();
 
 ## Related Documentation
 
-- [Mock Mode Guide](./mock-mode-guide.md) - Complete mock mode reference
-- [Integration Testing](./integration-testing.md) - Testing strategies
-- [Profile-Based Architecture](./profile-based-architecture.md) - Test profile configuration
-- [StateImage API](../03-core-library/guides/search-regions-and-fixed-locations.md) - StateImage builder reference
+### Testing Guides
+- **[Mock Mode Guide](./mock-mode-guide.md)** - Complete mock mode reference and configuration
+- **[Integration Testing](./integration-testing.md)** - Testing strategies and best practices
+- **[Unit Testing](./unit-testing.md)** - Unit testing patterns with Brobot
+- **[Profile-Based Testing](./profile-based-testing.md)** - Test profile configuration and management
+- **[Debugging Pattern Matching](./debugging-pattern-matching.md)** - Troubleshooting pattern matching issues
+- **[Test Utilities](./test-utilities.md)** - Available testing utilities and helpers
+
+### Core API References
+- **[States in Brobot](../../01-getting-started/states.md)** - Understanding @State annotation and state management
+- **[StateImage API](../03-core-library/guides/user-guides/search-regions-and-fixed-locations.md)** - StateImage builder reference and search regions
+- **[ActionRecord](../03-core-library/action-config/action-record.md)** - ActionRecord structure and usage (if exists)
+
+### Testing Infrastructure
+- **[BrobotTestBase](./test-utilities.md#brobottestbase)** - Base class for Brobot tests with mock mode support
+- **[TestUtil Classes](./test-utilities.md#testutil-classes)** - Utility classes for test setup and validation
+- **[Mocking Guide](./mock-mode-guide.md#mocking-strategies)** - Advanced mocking strategies and patterns
+- **[Action Recording](./action-recording.md)** - Recording actions for test replay (if exists)

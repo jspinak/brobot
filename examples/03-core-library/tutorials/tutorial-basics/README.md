@@ -7,8 +7,8 @@ This tutorial introduces the fundamental concepts of Brobot through a simple thr
 The tutorial demonstrates:
 
 - **State Management** - Define application states with `@State` annotation
-- **Transitions** - Navigate between states with `@Transition` annotation
-- **StateObjects** - Work with images and regions
+- **Transitions** - Navigate between states with `@TransitionSet` and `@OutgoingTransition`
+- **StateImages** - Work with images using Builder pattern
 - **Actions** - Perform find, click, and text operations
 - **Mock Mode** - Test without a real UI
 
@@ -35,17 +35,20 @@ tutorial-basics/
 ├── src/main/java/com/example/basics/
 │   ├── TutorialBasicsApplication.java    # Spring Boot main
 │   ├── TutorialRunner.java               # Runs the tutorial
+│   ├── StateNames.java                   # State name constants
 │   ├── states/                           # State definitions
 │   │   ├── HomeState.java               # HOME state
 │   │   ├── WorldState.java              # WORLD state
 │   │   └── IslandState.java             # ISLAND state
 │   ├── transitions/                      # State transitions
-│   │   ├── HomeToWorldTransition.java
-│   │   ├── WorldToIslandTransition.java
-│   │   ├── IslandToWorldTransition.java
-│   │   └── WorldToHomeTransition.java
+│   │   ├── HomeTransitions.java         # HOME state transitions
+│   │   ├── WorldTransitions.java        # WORLD state transitions
+│   │   └── IslandTransitions.java       # ISLAND state transitions
 │   └── automation/                       # Demo automation
-│       └── BasicAutomation.java
+│       ├── BasicAutomation.java         # Main automation examples
+│       ├── GetNewIsland.java            # Island type detection
+│       ├── IslandRegion.java            # Declarative region demo
+│       └── SaveLabeledImages.java       # Image capture automation
 ├── src/main/resources/
 │   └── application.yml                   # Configuration
 ├── images/                               # Image patterns
@@ -63,128 +66,173 @@ tutorial-basics/
 Define states using the `@State` annotation:
 
 ```java
-@State(name = "HOME", initial = true)
+@State(initial = true)
 @Component
+@Getter
 public class HomeState {
-    
-    private final StateObject toWorldButton = StateObject.builder()
-        .name("ToWorldButton")
-        .stateImages(StateImage.builder()
-            .addPattern("to_world_button")
-            .fixed(true)  // Always same location
-            .addSnapshot(new MatchSnapshot(220, 600, 20, 20))
-            .build())
-        .build();
+
+    private final StateImage toWorldButton;
+
+    public HomeState() {
+        this.toWorldButton = new StateImage.Builder()
+            .addPatterns("toWorldButton")
+            .setName("ToWorldButton")
+            .build();
+    }
 }
 ```
 
 Key points:
 - `@State` annotation automatically registers the state
 - `initial = true` marks the starting state
-- StateObjects define UI elements in the state
-- Snapshots provide expected locations
+- Use `StateImage.Builder()` for creating UI element patterns
+- `@Getter` from Lombok provides getters automatically
 
-### 2. Transitions
+### 2. Transitions (v1.1.0+ Pattern)
 
-Define transitions using the `@Transition` annotation:
+Define transitions using `@TransitionSet` to group all transitions for a state:
 
 ```java
-@Transition(from = "HOME", to = "WORLD")
+@TransitionSet(state = HomeState.class, description = "Home state transitions")
 @Component
-public class HomeToWorldTransition {
-    
-    public boolean execute() {
-        // Click the "To World" button
-        ActionResult result = actions.click(
-            BrobotEntity.of(homeState.getToWorldButton())
-        );
-        
-        return result.isSuccess();
+@RequiredArgsConstructor
+@Slf4j
+public class HomeTransitions {
+
+    private final Action action;
+    private final HomeState homeState;
+
+    @OutgoingTransition(activate = {WorldState.class}, pathCost = 1,
+                        description = "Navigate to World state")
+    public boolean toWorld() {
+        log.info("Transitioning from Home to World");
+        return action.click(homeState.getToWorldButton()).isSuccess();
+    }
+
+    @IncomingTransition(description = "Verify arrival at Home")
+    public boolean verifyArrival() {
+        log.info("Verifying Home state");
+        return action.find(homeState.getToWorldButton()).isSuccess();
     }
 }
 ```
 
 Key points:
-- `@Transition` annotation automatically registers the transition
-- `execute()` method performs the transition
+- `@TransitionSet` groups all transitions for a state
+- `@OutgoingTransition` marks methods that navigate to other states
+- `@IncomingTransition` marks methods that verify state arrival
+- Use dependency injection for `Action` and state classes
 - Return `true` for success, `false` for failure
 
-### 3. StateObjects
+### 3. StateImages
 
-StateObjects represent UI elements:
+StateImages represent UI elements using Builder pattern:
 
 ```java
-// Image-based object
-StateObject button = StateObject.builder()
-    .name("Button")
-    .stateImages(StateImage.builder()
-        .addPattern("button_image")
-        .build())
+// Image-based pattern
+StateImage button = new StateImage.Builder()
+    .addPatterns("button_image")
+    .setName("Button")
     .build();
 
-// Region-based object
-StateObject textArea = StateObject.builder()
-    .name("TextArea")
-    .region(new Region(100, 100, 200, 50))
+// Multiple patterns for better matching
+StateImage loginButton = new StateImage.Builder()
+    .addPatterns("login_btn_1", "login_btn_2", "login_btn_3")
+    .setName("LoginButton")
     .build();
 
-// Combined object with OCR
-StateObject labeledField = StateObject.builder()
-    .name("LabeledField")
-    .stateImages(StateImage.builder()
-        .addPattern("field_label")
-        .build())
-    .region(new Region(300, 100, 200, 30))
-    .addSnapshot(new MatchSnapshot.Builder()
-        .setActionConfig(new TextFindOptions.Builder().build())
-        .addString("Expected Text")
-        .build())
+// With search region
+StateImage searchButton = new StateImage.Builder()
+    .addPatterns("search_icon")
+    .setSearchRegion(new SearchRegion(100, 100, 200, 200))
     .build();
 ```
 
-### 4. Actions
+### 4. Declarative Search Regions
 
-Perform actions using the Actions interface:
+Define search regions relative to other objects using `SearchRegionOnObject`:
 
 ```java
-// Find
-ActionResult findResult = actions.find(
-    BrobotEntity.of(stateObject)
-        .configure(new PatternFindOptions.Builder()
+StateImage captureRegion = new StateImage.Builder()
+    .setSearchRegionOnObject(
+        SearchRegionOnObject.builder()
+            .setTargetObjectName("searchButton")
+            .setAdjustments(
+                MatchAdjustmentOptions.builder()
+                    .setAddX(-50)
+                    .setAddY(-250)
+                    .setAbsoluteW(200)
+                    .setAbsoluteH(200)
+                    .build())
+            .build())
+    .build();
+```
+
+This creates a region relative to another object's position - powerful for dynamic UIs!
+
+### 5. Actions (v1.1.0+ API)
+
+Perform actions using the Action service with ActionConfig options:
+
+```java
+@Component
+@RequiredArgsConstructor
+public class MyAutomation {
+    private final Action action;
+
+    public void performActions(StateImage target) {
+        // Find with configuration
+        PatternFindOptions findOptions = new PatternFindOptions.Builder()
             .setSimilarity(0.8)
-            .build())
-);
+            .build();
+        ObjectCollection findTarget = new ObjectCollection.Builder()
+            .withImages(target)
+            .build();
+        ActionResult findResult = action.perform(findOptions, findTarget);
 
-// Click
-ActionResult clickResult = actions.click(
-    BrobotEntity.of(stateObject)
-        .configure(new ClickOptions.Builder()
+        // Click (convenience method)
+        ActionResult clickResult = action.click(target);
+
+        // Click with configuration
+        ClickOptions clickOptions = new ClickOptions.Builder()
             .setNumberOfClicks(2)
-            .build())
-);
-
-// Extract text
-ActionResult textResult = actions.text(
-    BrobotEntity.of(regionObject)
-        .configure(new TextFindOptions.Builder()
-            .setLanguage("eng")
-            .build())
-);
+            .build();
+        ObjectCollection clickTarget = new ObjectCollection.Builder()
+            .withImages(target)
+            .build();
+        action.perform(clickOptions, clickTarget);
+    }
+}
 ```
 
-### 5. State Navigation
+Key patterns:
+- Use specific `*Options.Builder()` classes (PatternFindOptions, ClickOptions, etc.)
+- Use `ObjectCollection.Builder()` to wrap targets
+- Use `action.perform(options, collection)` for full control
+- Use convenience methods `action.click(stateImage)`, `action.find(stateImage)` for simple cases
 
-Use StateManager for navigation:
+### 6. State Navigation
+
+Use StateNavigator for navigation:
 
 ```java
-// Go to a specific state
-boolean success = stateManager.goToState("WORLD");
+@Component
+@RequiredArgsConstructor
+public class NavigationExample {
+    private final StateNavigator stateNavigator;
 
-// Check current state
-String current = stateManager.getCurrentState();
+    public void navigateToWorld() {
+        // Navigate to a state by name
+        if (stateNavigator.openState("WORLD")) {
+            log.info("Successfully navigated to WORLD");
+        }
 
-// Check if transition is possible
-boolean canGo = stateManager.canTransitionTo("ISLAND");
+        // Navigate using state class
+        if (stateNavigator.openState(WorldState.class)) {
+            log.info("Successfully navigated using class");
+        }
+    }
+}
 ```
 
 ## Running the Tutorial
@@ -204,14 +252,14 @@ Mock mode simulates the UI without requiring a real application. Perfect for:
 
 1. Prepare your application with matching UI elements
 2. Add screenshots to the `images/` directories
-3. Set `brobot.core.mock: false` in `application.yml`
+3. Set `brobot.mock: false` in `application.yml`
 4. Run the tutorial
 
 ### 3. Adding Images
 
 Place images in the appropriate directories:
 - `images/home/` - HOME state UI elements
-- `images/world/` - WORLD state UI elements  
+- `images/world/` - WORLD state UI elements
 - `images/island/` - ISLAND state UI elements
 
 Image naming should match the patterns in state definitions.
@@ -225,7 +273,8 @@ Image naming should match the patterns in state definitions.
    - ISLAND → WORLD
    - WORLD → HOME
 3. **Island Exploration** - Demonstrates finding and text extraction
-4. **Error Recovery** - Shows handling of failed transitions
+4. **Declarative Regions** - Shows SearchRegionOnObject usage
+5. **Error Recovery** - Shows handling of failed transitions
 
 ## Configuration
 
@@ -233,19 +282,43 @@ Key settings in `application.yml`:
 
 ```yaml
 brobot:
-  core:
-    mock: true           # Use mock mode
-    verbose: true        # Detailed logging
-  
+  mock: true              # Use mock mode
+
+  logging:
+    verbosity: VERBOSE    # Detailed logging
+
   state:
-    auto-scan: true      # Find @State classes
-    
+    auto-scan: true       # Find @State classes
+
   transition:
-    max-attempts: 3      # Retry failed transitions
-    
-  mock:
-    success-probability: 0.9  # 90% success rate
+    max-attempts: 3       # Retry failed transitions
 ```
+
+## Brobot 1.1.0+ Patterns Used
+
+This tutorial demonstrates modern Brobot patterns:
+
+1. **@TransitionSet Pattern** - Groups transitions by state (replaces individual @Transition classes)
+2. **@OutgoingTransition** - Marks navigation methods with activation targets
+3. **@IncomingTransition** - Marks verification methods
+4. **StateImage.Builder()** - Modern pattern for creating state images
+5. **ActionConfig Builders** - PatternFindOptions, ClickOptions, etc.
+6. **ObjectCollection.Builder()** - Wraps action targets
+7. **Action.perform()** - Main action execution method
+8. **Convenience Methods** - action.click(), action.find() for simple cases
+9. **SearchRegionOnObject** - Declarative relative positioning
+
+## Migration from v1.0
+
+If you see older documentation patterns, here's how they map to v1.1.0+:
+
+| v1.0 Pattern | v1.1.0+ Pattern |
+|--------------|-----------------|
+| `@Transition(from, to)` | `@TransitionSet` + `@OutgoingTransition` |
+| `StateObject.builder()` | `StateImage.Builder()` |
+| `BrobotEntity.of()` | Direct `StateImage` usage |
+| `ActionOptions` | Specific `*Options.Builder()` classes |
+| Individual transition classes | Grouped in `*Transitions` classes |
 
 ## Next Steps
 
@@ -254,9 +327,9 @@ brobot:
 3. **Complex Transitions** - Add multi-step transitions
 4. **Real Application** - Connect to an actual UI
 5. **Advanced Features** - Explore:
-   - Cross-state dependencies
+   - Cross-state dependencies with SearchRegionOnObject
    - Conditional transitions
-   - Action chains
+   - ConditionalActionChain
    - Custom success criteria
 
 ## Troubleshooting
@@ -268,21 +341,23 @@ brobot:
 
 ### Transitions Failing
 - Check transition method returns boolean
-- Verify from/to states exist
+- Verify state classes are injected correctly
 - Look for action failures in logs
+- Ensure @OutgoingTransition specifies correct target states
 
 ### Mock Mode Issues
-- Adjust `success-probability` for testing failures
-- Check `generate-matches` is true for find operations
+- Check `brobot.mock: true` in application.yml
 - Review mock configuration settings
+- Ensure mock mode is enabled for testing
 
 ## Key Takeaways
 
-1. **Annotations simplify setup** - `@State` and `@Transition` handle registration
-2. **StateObjects are flexible** - Combine images, regions, and text
-3. **Actions are configurable** - Use specific option classes
-4. **Navigation is automatic** - StateManager finds shortest path
-5. **Mock mode enables testing** - Develop without real UI
+1. **@TransitionSet groups transitions** - One class per state's transitions
+2. **StateImage.Builder() is the pattern** - Use for all image-based elements
+3. **ActionConfig uses Builders** - PatternFindOptions, ClickOptions, etc.
+4. **SearchRegionOnObject is powerful** - Define regions relative to other objects
+5. **Navigation is automatic** - StateNavigator finds shortest path
+6. **Mock mode enables testing** - Develop without real UI
 
 ## Related Documentation
 

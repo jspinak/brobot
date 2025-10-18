@@ -28,7 +28,7 @@ import lombok.Data;
  * brobot.mock.action.success.probability=0.95
  * }</pre>
  *
- * @since 1.2.0
+ * @since 1.1.0
  */
 @Component
 @ConfigurationProperties(prefix = "brobot.mock")

@@ -18,7 +18,7 @@ import io.github.jspinak.brobot.model.state.StateObject;
  *   <li>Custom persistence solutions
  * </ul>
  *
- * @since 1.2.0
+ * @since 1.1.0
  */
 public interface PersistenceProvider {
 

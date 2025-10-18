@@ -8,6 +8,8 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
+import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.model.state.StateImage;
 
 import lombok.extern.slf4j.Slf4j;
@@ -46,8 +48,8 @@ public class SimpleAutomation {
 
         // 4. Click the found button (Note: Step numbering from documentation)
         if (findResult.isSuccess()) {
-            ClickOptions clickOptions =
-                    new ClickOptions.Builder().setClickType(ClickOptions.Type.LEFT).build();
+            // LEFT button is the default, so basic ClickOptions is sufficient
+            ClickOptions clickOptions = new ClickOptions.Builder().build();
 
             // Click on the same objects we found
             ActionResult clickResult = action.perform(clickOptions, objects);
@@ -179,9 +181,11 @@ public class SimpleAutomation {
                         .setSimilarity(0.85)
                         .build();
 
-        // Click operations
+        // Click operations - Double-click example
         ClickOptions click =
-                new ClickOptions.Builder().setClickType(ClickOptions.Type.DOUBLE_LEFT).build();
+                new ClickOptions.Builder()
+                        .setNumberOfClicks(2) // Double-click
+                        .build();
 
         log.info("Created type-safe configuration objects");
     }
@@ -204,7 +208,9 @@ public class SimpleAutomation {
         // Clicking with right click and pause
         ClickOptions clickOptions =
                 new ClickOptions.Builder()
-                        .setClickType(ClickOptions.Type.RIGHT)
+                        .setPressOptions(MousePressOptions.builder()
+                                .setButton(MouseButton.RIGHT)
+                                .build())
                         .setPauseAfterEnd(0.5)
                         .build();
 

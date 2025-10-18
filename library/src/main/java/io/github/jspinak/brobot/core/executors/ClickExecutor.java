@@ -22,7 +22,7 @@ import io.github.jspinak.brobot.model.element.Location;
  *   <li>Thread-safe operations
  * </ul>
  *
- * @since 2.0.0
+ * @since 1.1.0
  */
 @Component
 public class ClickExecutor {
