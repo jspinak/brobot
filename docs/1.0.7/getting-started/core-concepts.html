@@ -15,7 +15,7 @@
 <script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","G-6WY1S6ZWEY",{anonymize_ip:!0})</script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous"><link rel="stylesheet" href="/brobot/assets/css/styles.1b22d91f.css">
-<script src="/brobot/assets/js/runtime~main.1d1e15dc.js" defer="defer"></script>
+<script src="/brobot/assets/js/runtime~main.2d697d39.js" defer="defer"></script>
 <script src="/brobot/assets/js/main.9bd389ad.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -47,7 +47,7 @@
 <p>Brobot&#x27;s <strong>Path Traversal Model (§)</strong> then acts as an intelligent navigator. When you request to go to a target state, the framework automatically finds the most efficient path and executes the necessary transitions. If a transition fails, the framework dynamically recalculates a new path from its current position. This makes the automation resilient to unexpected errors.</p>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="state-management-knowing-where-you-are">State Management: Knowing Where You Are<a href="#state-management-knowing-where-you-are" class="hash-link" aria-label="Direct link to State Management: Knowing Where You Are" title="Direct link to State Management: Knowing Where You Are">​</a></h2>
 <p>To enable intelligent pathfinding, the framework must always have an accurate understanding of the GUI&#x27;s current condition. This is handled by the <strong>State Management System (M)</strong>.</p>
-<p>This system continuously observes the screen to determine which states are currently active. A crucial rule in Brobot&#x27;s state management is how states are deactivated: a state is <em>only</em> marked as inactive after a successful transition explicitly deactivates it. A state is not considered inactive simply because its defining images temporarily disappear. This design choice makes the system robust against fleeting visual glitches or slow-loading elements.</p>
+<p>This system continuously observes the screen to determine which states are currently active. A crucial rule in Brobot&#x27;s state management is how states are deactivated: a state is <em>only</em> marked as inactive after a successful transition explicitly deactivates it. A state is not considered inactive simply because its defining images temporarily disappear. Individual images can reliably signal a state&#x27;s existence but not its absence; therefore, Brobot relies on transitions to deactivate states.</p>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="state-finder-and-the-unknown-state">State Finder and the Unknown State<a href="#state-finder-and-the-unknown-state" class="hash-link" aria-label="Direct link to State Finder and the Unknown State" title="Direct link to State Finder and the Unknown State">​</a></h2>
 <p>In case Brobot gets lost and cannot find any of the active states, there is
 a State Finder that will search for active states. This is a costly operation
