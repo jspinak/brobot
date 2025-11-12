@@ -13,11 +13,6 @@ function HomepageHeader() {
       <div className="container">
         <div className={styles.heroContent}>
           <div className={styles.heroText}>
-            <div className={styles.heroHeader}>
-              <img src="img/brobot_logo/brobot-happy-text.svg" alt="Brobot Icon" className={styles.heroIcon} />
-              <h1 className={clsx('hero__title', styles.heroTitle)}>{siteConfig.title}</h1>
-            </div>
-            <p className={clsx('hero__subtitle', styles.heroSubtitle)}>{siteConfig.tagline}</p>
             <div className={styles.aiBox}>
               <h3>🎓 First Implementation of Model-Based GUI Automation</h3>
               <p>
@@ -38,15 +33,20 @@ function HomepageHeader() {
           </div>
           <div className={styles.heroVideos}>
             <div className={styles.videoItem}>
+              <div className={styles.heroHeader}>
+                <img src="img/brobot_logo/brobot-happy-text.svg" alt="Brobot Icon" className={styles.heroIcon} />
+                <h1 className={clsx('hero__title', styles.heroTitle)}>{siteConfig.title}</h1>
+              </div>
+              <p className={clsx('hero__subtitle', styles.heroSubtitle)}>{siteConfig.tagline}</p>
               <h3 className={styles.videoTitle}>Introduction to Brobot</h3>
               <div className={styles.videoWrapper}>
                 <div style={{padding:"56.25% 0 0 0", position:"relative"}}>
-                  <iframe 
-                    src="https://player.vimeo.com/video/1104575435?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" 
-                    frameBorder="0" 
-                    allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" 
-                    referrerPolicy="strict-origin-when-cross-origin" 
-                    style={{position:"absolute", top:0, left:0, width:"100%", height:"100%"}} 
+                  <iframe
+                    src="https://player.vimeo.com/video/1104575435?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"
+                    frameBorder="0"
+                    allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    style={{position:"absolute", top:0, left:0, width:"100%", height:"100%"}}
                     title="brobot-in-city"
                   />
                 </div>
