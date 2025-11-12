@@ -19,6 +19,13 @@ function HomepageHeader() {
             </div>
             <p className={clsx('hero__subtitle', styles.heroSubtitle)}>{siteConfig.tagline}</p>
             <div className={styles.aiBox}>
+              <h3>🎓 First Implementation of Model-Based GUI Automation</h3>
+              <p>
+                Based on research published in <a href="https://link.springer.com/article/10.1007/s10270-025-01319-9" target="_blank" rel="noopener noreferrer">Software and Systems Modeling</a>.
+                Looking for Python? Check out <a href="https://qontinui.io" target="_blank" rel="noopener noreferrer">Qontinui</a> - Python implementation with visual model builder.
+              </p>
+            </div>
+            <div className={styles.aiBox} style={{marginTop: '1rem'}}>
               <h3>AI-Assisted Project Creation</h3>
               <p>Let AI help you create your Brobot automation project quickly and easily.</p>
               <Link className={clsx("button button--primary button--sm", styles.aiButton)} to="/docs/getting-started/preparing-folder-for-ai-project-creation">

@@ -42,7 +42,7 @@ Brobot's **Path Traversal Model (§)** then acts as an intelligent navigator. Wh
 
 To enable intelligent pathfinding, the framework must always have an accurate understanding of the GUI's current condition. This is handled by the **State Management System (M)**.
 
-This system continuously observes the screen to determine which states are currently active. A crucial rule in Brobot's state management is how states are deactivated: a state is *only* marked as inactive after a successful transition explicitly deactivates it. A state is not considered inactive simply because its defining images temporarily disappear. This design choice makes the system robust against fleeting visual glitches or slow-loading elements.
+This system continuously observes the screen to determine which states are currently active. A crucial rule in Brobot's state management is how states are deactivated: a state is *only* marked as inactive after a successful transition explicitly deactivates it. A state is not considered inactive simply because its defining images temporarily disappear. Individual images can reliably signal a state's existence but not its absence; therefore, Brobot relies on transitions to deactivate states.
 
 ## State Finder and the Unknown State
 

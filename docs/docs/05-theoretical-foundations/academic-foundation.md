@@ -53,10 +53,14 @@ Model-based GUI automation addresses these challenges by fundamentally redefinin
 
 ## The Foundational Research
 
-The Brobot framework is based on the research paper:
+The Brobot framework is based on the research paper published in Software and Systems Modeling:
 
 > **"Model-based GUI Automation"**
 > *Joshua Spinak, 2025*
+> Software and Systems Modeling, Springer
+> [https://link.springer.com/article/10.1007/s10270-025-01319-9](https://link.springer.com/article/10.1007/s10270-025-01319-9)
+
+**Brobot is the first implementation of model-based GUI automation**, demonstrating the practical application of the theoretical framework presented in the paper.
 
 ### Research Contributions
 
@@ -94,7 +98,9 @@ If you use Brobot or its underlying concepts in academic work, please cite the f
   author={Spinak, Joshua},
   journal={Software and Systems Modeling},
   year={2025},
-  publisher={Springer}
+  publisher={Springer},
+  doi={10.1007/s10270-025-01319-9},
+  url={https://link.springer.com/article/10.1007/s10270-025-01319-9}
 }
 ```
 

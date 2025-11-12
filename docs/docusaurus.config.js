@@ -32,8 +32,10 @@ const config = {
       '@docusaurus/plugin-client-redirects',
       {
         redirects: [
-          // All live-automation pages are already in their correct locations
-          // No redirects needed
+          {
+            from: '/docs/tutorial-basics/live-automation',
+            to: '/docs/tutorials/tutorial-basics/live-automation',
+          },
         ],
       },
     ],
@@ -81,8 +83,8 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       announcementBar: {
-        id: 'doc_review',
-        content: '📚 Documentation for v1.1.0 is under active review and improvement. Code and JavaDocs are final. <a href="https://central.sonatype.com/artifact/io.github.jspinak/brobot/1.1.0">v1.1.0 now available on Maven Central!</a>',
+        id: 'v1_1_0_release',
+        content: '🎉 <a href="https://central.sonatype.com/artifact/io.github.jspinak/brobot/1.1.0">v1.1.0 now available on Maven Central!</a> • 📄 <a href="https://link.springer.com/article/10.1007/s10270-025-01319-9">Read the published paper in Software and Systems Modeling</a>',
         backgroundColor: '#fafbfc',
         textColor: '#091E42',
         isCloseable: true,

@@ -20,6 +20,8 @@ Before diving into these concepts, it helps to have:
 
 Model-based GUI automation addresses the limitations of traditional methods by redefining the problem. Instead of creating sequential scripts (the **process-based** approach), the developer builds an explicit model of the GUI environment itself. This approach is inspired by principles from robotics, human cognition, and graph theory.
 
+**Brobot is the first implementation of model-based GUI automation**, based on the theoretical framework published in [Software and Systems Modeling](https://link.springer.com/article/10.1007/s10270-025-01319-9). See [Academic Foundation](./academic-foundation.md) for the complete research background.
+
 ## Process-Based vs. Model-Based: A Fundamental Shift
 
 <!-- Paper Reference: Section 3.1, Section 4 - Challenges in Traditional GUI Automation -->

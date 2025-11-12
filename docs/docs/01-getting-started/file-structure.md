@@ -159,14 +159,16 @@ For larger projects, organize images by state:
 │   │   ├── 📁 java/
 │   │   │   └── 📁 com/example/automation/
 │   │   │       │
-│   │   │       ├── 📁 states/
+│   │   │       ├── 📁 menu/
 │   │   │       │   ├── ☕ MenuState.java
-│   │   │       │   ├── ☕ PricingState.java
-│   │   │       │   └── ☕ HomepageState.java
+│   │   │       │   └── ☕ MenuTransitions.java
 │   │   │       │
-│   │   │       ├── 📁 transitions/
-│   │   │       │   ├── ☕ MenuTransitions.java
-│   │   │       │   ├── ☕ PricingTransitions.java
+│   │   │       ├── 📁 pricing/
+│   │   │       │   ├── ☕ PricingState.java
+│   │   │       │   └── ☕ PricingTransitions.java
+│   │   │       │
+│   │   │       ├── 📁 homepage/
+│   │   │       │   ├── ☕ HomepageState.java
 │   │   │       │   └── ☕ HomepageTransitions.java
 │   │   │       │
 │   │   │       ├── 📁 runner/

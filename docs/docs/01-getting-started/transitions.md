@@ -81,7 +81,7 @@ Defines a transition FROM the current state TO other states:
 - **activate**: States to activate during this transition (required array of state classes)
 - **exit**: States to deactivate during this transition (optional array of state classes)
 - **staysVisible**: Whether the originating state remains visible after transition (default: false)
-- **pathCost**: Path-finding cost - LOWER costs are preferred when multiple paths exist (default: 1 as of v1.1.0)
+- **pathCost**: Path-finding cost - LOWER costs are preferred when multiple paths exist (default: 1)
 - **description**: Documentation for this transition
 
 ## World State Example
@@ -198,8 +198,7 @@ public class LoginTransitions {
 3. **Natural Organization**: File structure mirrors state structure (one transitions class per state)
 4. **Spring Integration**: Full dependency injection support (@TransitionSet includes @Component)
 5. **Type Safety**: Class-based state references prevent typos and enable IDE refactoring
-6. **Mock Mode Support**: Easy to add testing support with framework settings check
-7. **Cleaner Code**: Each transition class is self-contained with its state's navigation logic
+6. **Cleaner Code**: Each transition class is self-contained with its state's navigation logic
 
 ## The Formal Model (Under the Hood)
 
@@ -245,7 +244,7 @@ When a transition activates multiple states, **each activated state becomes a po
 //   Login → Dashboard → TargetState
 //   Login → Sidebar → TargetState
 //   Login → Menu → TargetState
-// Whichever path exists and is shortest will be used
+// Whichever path exists, has not failed, and has the lowest cost will be used
 ```
 
 ### Important Behavior: IncomingTransitions for All Activated States
@@ -254,18 +253,17 @@ When a transition activates multiple states, **each activated state becomes a po
 
 #### Execution Order:
 1. **OutgoingTransition** executes (leaving the source state)
-2. **Primary target state's IncomingTransition** executes (first state in the `activate` array)
-3. **Each additional state's IncomingTransition** executes in sequence
-4. States are only marked as active if their IncomingTransition succeeds
+2. **Each state's IncomingTransition** executes in sequence
+3. States are only marked as active if their IncomingTransition succeeds
 
-### Example: Dashboard with Multiple Panels
+### Example: Login to Dashboard with Multiple Panels
 
 ```java
 // Transition that activates multiple UI panels
 @TransitionSet(state = LoginState.class)
 @RequiredArgsConstructor
 @Slf4j
-public class DashboardTransitions {
+public class LoginTransitions {
 
     private final Action action;
     private final LoginState loginState;
@@ -393,7 +391,7 @@ public class MenuTransitions {
 
 Brobot uses a cost-based pathfinding system to automatically select the best path between states. Understanding path costs is essential for predictable navigation.
 
-### Default Path Costs (v1.1.0+)
+### Default Path Costs
 
 - **States**: Default pathCost = 1
 - **Transitions**: Default pathCost = 1
@@ -403,26 +401,20 @@ Brobot uses a cost-based pathfinding system to automatically select the best pat
 
 ```java
 @State  // Default state pathCost = 1
-public class HomePage { }
+public class HomePageState { }
 
 @State(pathCost = 5)  // Expensive state
-public class SlowLoadingPage { }
+public class SlowLoadingPageState { }
 
 @TransitionSet(state = HomePage.class)
-public class HomeTransitions {
+public class HomePageTransitions {
 
-    @OutgoingTransition(to = Settings.class)  // Default pathCost = 1
+    @OutgoingTransition(to = SlowLoadingPageState.class)  # default = 1
     public boolean normalRoute() { ... }
-
-    @OutgoingTransition(to = Settings.class, pathCost = 0)  // Free transition
-    public boolean keyboardShortcut() { ... }
-
-    @OutgoingTransition(to = Settings.class, pathCost = 10)  // Expensive fallback
-    public boolean slowRoute() { ... }
 }
 ```
 
-When multiple paths exist, Brobot automatically selects the path with the **lowest total cost**.
+A path from HomePage to SlowLoadingPage would have a cost of 1 (HomePage state cost) + 1 (transition cost from HomePage to SlowLoadingPage) + 5 (SlowLoadingPage state cost) = 7. When multiple paths exist, Brobot automatically selects the path with the **lowest total cost**.
 
 ### Learn More
 
@@ -469,23 +461,9 @@ public class MainPageTransitions {
 
 **Result**: The pathfinder will only ever discover and use the `refresh()` transition. The `nextPage()` transition is invisible to pathfinding.
 
-### Solutions
+### Solution
 
-**1. Use Different Destination States**
-```java
-@OutgoingTransition(activate = {MainPageState.class}, pathCost = 2)
-public boolean refresh() {
-    return action.click(mainPageState.getRefreshButton()).isSuccess();
-}
-
-@OutgoingTransition(activate = {MainPagePage2State.class}, pathCost = 3)
-public boolean nextPage() {
-    // Now pathfinder can discover this as a different destination
-    return action.click(mainPageState.getNextPageButton()).isSuccess();
-}
-```
-
-**2. Combine Multiple UI Elements in One Transition (Recommended)**
+**Combine Multiple UI Elements in One Transition (Recommended)**
 ```java
 @OutgoingTransition(activate = {PreviousState.class}, pathCost = 0)
 public boolean closeDialog() {
@@ -496,18 +474,6 @@ public boolean closeDialog() {
                        dialogState.getXButton())
             .build();
     return action.click(closeButtons).isSuccess();
-}
-```
-
-**3. Make Them Helper Methods (Not Transitions)**
-```java
-// Not @OutgoingTransition - just regular helper methods
-public boolean refresh() {
-    return action.click(mainPageState.getRefreshButton()).isSuccess();
-}
-
-public boolean nextPage() {
-    return action.click(mainPageState.getNextPageButton()).isSuccess();
 }
 ```
 

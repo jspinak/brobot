@@ -236,7 +236,7 @@ public class QuickScript {
 ## Next Steps
 
 1. **Explore the Examples**: Check out the [LoginAutomationExample](https://github.com/jspinak/brobot/tree/main/examples/LoginAutomationExample.java) for a complete working example
-2. **Read the Migration Guide**: If upgrading from Brobot 1.x, see the [Migration Guide](../03-core-library/migration/upgrading-to-latest.md)
+2. **Read the Migration Guide**: If upgrading from Brobot 1.0.x, see the [Migration Guide](../03-core-library/migration/upgrading-to-latest.md)
 3. **Learn State Management**: Deep dive into [States](states.md) and [Transitions](transitions.md)
 4. **Advanced Features**: Explore [color-based finding](../03-core-library/finding-objects/using-color.md), [motion detection](../03-core-library/finding-objects/movement.md), and [screen-adaptive regions](../03-core-library/user-guides/screen-adaptive-regions.md) for resolution-independent automation
 
