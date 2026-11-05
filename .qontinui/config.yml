@@ -1,0 +1,9 @@
+# .qontinui/config.yml — qontinui PR-merge policy (edit to override dashboard settings)
+version: 1
+framework: generic
+merge:
+  confidence_threshold: 0.95
+  escalate_paths:
+  - '**/*'
+  auto_merge_categories: []
+tenant: 6e00ba36-342e-4afd-b674-b34b559f85ce
